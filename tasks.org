@@ -1,1 +1,22 @@
 * Tasks
+** TODO Review SMC papers
+DEADLINE: <2024-04-21 dim.>
+** TODO Set up meeting with the PIR group
+DEADLINE: <2024-04-15 lun.>
+Check with Romain, but in principle 16h on 22/04.
+** TODO Follow up on notes from meeting with Morgane Leprince
+These notes are in my white notebook.
+*** TODO Email Solene
+*** TODO Phone Amelie
+*** TODO Update Mme Leprince
+DEADLINE: <2024-05-01 mer.>
+** TODO Investigate hardware platforms
+*** https://www.cnx-software.com/2024/04/08/adlink-osm-imx93-osm-size-l-module-nxp-i-mx-93-soc/
+** TODO Prendre rendez-vous chez le coiffeur
+** TODO Prendre rendez-vous chez le medecin
+** TODO Sign up to ShareAmi
+** TODO Continue application for free public transport [1/2]
+*** DONE Find ID photo
+*** TODO Scan ID photo
+** TODO Arrange Thesis Committee Meeting
+DEADLINE: <2024-04-19 ven.>

@@ -1,11 +1,13 @@
 # -*- mode: org -*-
 # -*- coding: utf-8 -*-
-#+STARTUP: overview indent inlineimages logdrawer
-#+TITLE:       Journal
+#+STARTUP: overview indent inlineimages logdrawer hidestars
+#+TITLE:       Research Journal
 #+AUTHOR:      Thomas Rushton
 #+LANGUAGE:    en
-#+TAGS: LIG(L) HOME(H) Europe(E) Blog(B) noexport(n) Stats(S)
-#+TAGS: Epistemology(E) Vulgarization(V) Teaching(T) R(R) OrgMode(O) Python(P)
+#+TAGS: LIG(L) HOME(H) Europe(E) Blog(B) noexport(n) Stats(S) MEETING(M)
+#+TAGS: Epistemology(E) Vulgarization(V) Teaching(T) REPRES(R)
+#+TAGS: [ PROGRAMMING : R(r) PYTHON(p) JULIA(j) FAUST(f) ]
+#+TAGS: [ TOOLS : ORGMODE(o) GIT(g) ]
 #+EXPORT_SELECT_TAGS: Blog
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
@@ -97,10 +99,6 @@ shortcuts. This can be changed from the Options menu.
     give a try to =<r=, =<R=, =<RR=, =<g=, =<p=, =<P=, =<m= ...
   - Some of these templates are not specific to babel: e.g., =<h=, =<l=,
     =<L=, =<c=, =<e=, ...
-
-  - Autechre
-  - Coupe de cheveux
-  - Docteur
 * 2024
 ** 2024-04 avril
 *** 2024-04-08 lundi
@@ -112,3 +110,79 @@ shortcuts. This can be changed from the Options menu.
 Entered on [2024-04-08 lun. 15:14]
   
   [[file:~/org/journal.org::-*- mode: org -*-]]
+
+*** 2024-04-09 mardi
+**** RR-MOOC: Working With Others                                 :REPRES:
+***** Not straightforward
+***** Creating a print-ready document from a computational document requires a well-set-up environment and some work.
+***** *How to convince colleagues to adopt a new system/set of tools?*
+****** If they're keen, teach them, but be prepared to provide tech-support.
+****** If they're positive, but unable, delegate: perhaps colleagues edit the text, but leave the code and figures to you.
+****** If they're unwilling, keep two documents: one computational, one /classical/.
+***** *How to share with others?*
+****** R: RPubs... but AWS links are ephemeral.
+****** Dropbox? Longevity and access are the issues there.
+****** GitHub/GitLab/etc.: better, but what if the repo history is embarrassing/compromising in some way (e.g. unkind comments about reviewers), or there are ethical issues around data or copyright?
+****** Companion website: RunMyCode, personal site...
+****** Open archive: HAL (article), Figshare/Zenodo (code/figures)
+
+Entered on [2024-04-09 mar. 11:06]
+**** Why does this always end up with a link attached?           :ORGMODE:
+Anyway, I just want to see what happens if I type some stuff without
+making everything a list.
+
+What about this?
+
+And =this verbatim bit=?
+
+Entered on [2024-04-09 mar. 14:17]
+  
+  [[file:~/org/journal.org::*Open archive: HAL (article), Figshare/Zenodo (code/figures)][Open archive: HAL (article), Figshare/Zenodo (code/figures)]]
+**** Comparison of Tools                                          :REPRES:
+
+I like OrgMode, but maybe it's not the only game in town.
+It depends on the type of document you want to create:
+***** For teaching material, Jupyter might be a better bet.
+****** Easy to use & fully dynamic document.
+***** Blog/journal/lab-notebook: OrgMode.
+****** Chronological or semantic organisation; searchable by tags.
+******* =C-c /= (=M-x org-sparse-tree=) to filter by (regex) tag, todos, etc.
+***** Reproducible article: OrgMode!
+
+Entered on [2024-04-09 mar. 14:51]
+**** Answer: because of the capture template.                    :ORGMODE:
+I can change that, and add more capture templates that target other files.
+Entered on [2024-04-09 mar. 16:10]
+  
+  [[file:~/org/journal.org::*Why does this always end up with a link attached?][Why does this always end up with a link attached?]]
+*** 2024-04-12 vendredi
+**** What is a replicable data analysis?                          :REPRES:
+In traditional data analysis we focus on the results, with a
+methodological summary of how they were achieved.
+
+In a replicable data analysis the methodological summary is replaced
+by the whole code used for calculations performed.
+
+Requires more effort, but:
+***** easier to redo;
+***** easier to modify;
+***** easier to inspect and verify
+
+Entered on [2024-04-12 ven. 17:16]
+*** 2024-04-15 lundi
+**** R plotting in org-babel is temperamental           :REPRES:R:ORGMODE:
+Not sure why, but stuff like this just refuses to produce a file and
+display it:
+#+begin_example
+#+begin_src R :file cars.png :results file graphics
+plot(cars)
+#+end_src
+#+end_example
+What's daft is I'm quite sure this exact syntax was working fine as
+recently as last week.
+Remove ~graphics~ and R opens and displays a figure (in a separate
+window), but it isn't saved so obviously nothing appears in the .org
+file.
+Good job I'm not planning to use R, but doesn't entirely inspire
+confidence.
+Entered on [2024-04-15 lun. 11:08]
