@@ -6,7 +6,7 @@
 #+LANGUAGE:    en
 #+TAGS: LIG(L) HOME(H) Europe(E) Blog(B) noexport(n) Stats(S) MEETING(M)
 #+TAGS: Epistemology(E) Vulgarization(V) Teaching(T) REPRES(R)
-#+TAGS: [ PROGRAMMING : R(r) PYTHON(p) JULIA(j) FAUST(f) ]
+#+TAGS: [ PROGRAMMING : R(r) PYTHON(p) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : ORGMODE(o) GIT(g) ]
 #+EXPORT_SELECT_TAGS: Blog
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
@@ -15,6 +15,7 @@
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+COLUMNS: %25ITEM %TODO %3PRIORITY %TAGS
 #+SEQ_TODO: TODO(t!) STARTED(s!) WAITING(w@) APPT(a!) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
+#+SEQ_TODO: UNREAD(u) | READ(r)
 
 * 2018
 ** 2018-02 March
@@ -170,19 +171,20 @@ Requires more effort, but:
 
 Entered on [2024-04-12 ven. 17:16]
 *** 2024-04-15 lundi
-**** R plotting in org-babel is temperamental           :REPRES:R:ORGMODE:
-Not sure why, but stuff like this just refuses to produce a file and
-display it:
-#+begin_example
-#+begin_src R :file cars.png :results file graphics
-plot(cars)
-#+end_src
-#+end_example
-What's daft is I'm quite sure this exact syntax was working fine as
-recently as last week.
-Remove ~graphics~ and R opens and displays a figure (in a separate
-window), but it isn't saved so obviously nothing appears in the .org
-file.
-Good job I'm not planning to use R, but doesn't entirely inspire
-confidence.
-Entered on [2024-04-15 lun. 11:08]
+**** R
+**** It turns out R /is/ saving plots...                  :REPRES:R:ORGMODE:
+But it's not putting them in the same directory as the open .org file.
+When the R process starts, it asks for a working directory; this
+doesn't happen if exporting, e.g. =C-c C-e h o=, i.e. R just picks the
+directory it fancies. Nice.
+Entered on [2024-04-15 lun. 16:43]
+  
+  [[file:~/org/journal.org::*R plotting in org-babel is temperamental][R plotting in org-babel is temperamental]]
+*** 2024-04-16 mardi
+**** UNREAD Artifical Intelligent and Home Music Listening: An Overview and Future Directions :ML:SMC:REVIEW:
+:PROPERTIES:
+:PAPERNUMBER: 16
+:END:
+***** Summary
+***** Notes
+Entered on [2024-04-16 mar. 11:20]

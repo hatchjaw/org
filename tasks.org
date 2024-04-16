@@ -1,22 +1,39 @@
+# Don't add a timestamp for TODO state
+#+SEQ_TODO: TODO(t) STARTED(s!) WAITING(w@) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
+
 * Tasks
-** TODO Review SMC papers
-DEADLINE: <2024-04-21 dim.>
-** TODO Set up meeting with the PIR group
-DEADLINE: <2024-04-15 lun.>
-Check with Romain, but in principle 16h on 22/04.
 ** TODO Follow up on notes from meeting with Morgane Leprince
 These notes are in my white notebook.
 *** TODO Email Solene
 *** TODO Phone Amelie
 *** TODO Update Mme Leprince
 DEADLINE: <2024-05-01 mer.>
+* PhD
+** TODO [#A] Arrange Thesis Committee Meeting [1/3]
+*** DONE Set up Doodle
+DEADLINE: <2024-04-16 mar.>
+- State "DONE"       from "TODO"       [2024-04-16 mar. 10:59]
+*** TODO Prepare documentation[0/3]
+[[http://edinfomaths.universite-lyon.fr/en/thesis/thesis-follow][Instructions]]
+**** TODO Updated CV
+**** TODO Progress report
+2 pages summarising research work and prospects for year ahead
+**** TODO All scientific work produced
+*** TODO Prepare presentation
 ** TODO Investigate hardware platforms
-*** https://www.cnx-software.com/2024/04/08/adlink-osm-imx93-osm-size-l-module-nxp-i-mx-93-soc/
+- [[https://www.cnx-software.com/2024/04/08/adlink-osm-imx93-osm-size-l-module-nxp-i-mx-93-soc/][ADLINK OSM-IMX93]]
+* Supervision
+** DONE Set up meeting with the PIR group
+DEADLINE: <2024-04-15 lun.>
+Check with Romain, but in principle 16h on 22/04.
+* Reviews
+** TODO Review SMC papers
+DEADLINE: <2024-04-21 dim.>
+* Français
+** TODO Sign up to ShareAmi
+* Personal
 ** TODO Prendre rendez-vous chez le coiffeur
 ** TODO Prendre rendez-vous chez le medecin
-** TODO Sign up to ShareAmi
 ** TODO Continue application for free public transport [1/2]
 *** DONE Find ID photo
 *** TODO Scan ID photo
-** TODO Arrange Thesis Committee Meeting
-DEADLINE: <2024-04-19 ven.>
