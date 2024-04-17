@@ -2,6 +2,7 @@
 #+SEQ_TODO: TODO(t) STARTED(s!) WAITING(w@) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
 
 * Tasks
+** TODO Set up OrgRoam
 ** TODO Follow up on notes from meeting with Morgane Leprince
 These notes are in my white notebook.
 *** TODO Email Solene
@@ -34,6 +35,8 @@ DEADLINE: <2024-04-21 dim.>
 * Personal
 ** TODO Prendre rendez-vous chez le coiffeur
 ** TODO Prendre rendez-vous chez le medecin
-** TODO Continue application for free public transport [1/2]
+** DONE Continue application for free public transport [2/2]
+- State "DONE"       from "TODO"       [2024-04-17 mer. 14:00]
 *** DONE Find ID photo
-*** TODO Scan ID photo
+*** DONE Scan ID photo
+- State "DONE"       from "TODO"       [2024-04-17 mer. 14:00]
