@@ -13,13 +13,16 @@ These notes are in my white notebook.
 *** TODO Update Mme Leprince
 DEADLINE: <2024-05-01 mer.>
 * PhD
-** TODO [#A] Arrange Thesis Committee Meeting [1/4]
+** TODO [#A] Arrange Thesis Committee Meeting [2/5]
 *** DONE Set up Doodle
 DEADLINE: <2024-04-16 mar.>
 - State "DONE"       from "TODO"       [2024-04-16 mar. 10:59]
-*** WAITING Get Doodle Responses
+*** DONE Get Doodle Responses
+- State "DONE"       from "WAITING"    [2024-04-19 ven. 17:32]
 - State "WAITING"    from "TODO"       [2024-04-17 mer. 15:17] \\
   Awaiting responses from Tanguy and Leo
+*** TODO Confirm date
+DEADLINE: <2024-04-22 lun.>
 *** TODO Prepare documentation[0/3]
 [[http://edinfomaths.universite-lyon.fr/en/thesis/thesis-follow][Instructions]]
 **** TODO Updated CV
@@ -40,6 +43,11 @@ DEADLINE: <2024-04-21 dim.>
 ** TODO Sign up to ShareAmi
 * Personal
 ** TODO Prendre rendez-vous chez le coiffeur
+DEADLINE: <2024-05-20 lun. .+1m>
+:PROPERTIES:
+:LAST_REPEAT: [2024-04-20 sam. 16:31]
+:END:
+- State "DONE"       from "TODO"       [2024-04-20 sam. 16:31]
 ** TODO Prendre rendez-vous chez le medecin
 ** DONE Continue application for free public transport [2/2]
 - State "DONE"       from "TODO"       [2024-04-17 mer. 14:00]

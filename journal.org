@@ -182,22 +182,38 @@ Entered on [2024-04-15 lun. 16:43]
   
   [[file:~/org/journal.org::*R plotting in org-babel is temperamental][R plotting in org-babel is temperamental]]
 *** 2024-04-16 mardi
-**** READ SMC24: (16) Artificial Intelligence and Home Music Listening: An Overview and Future Directions :ML:SMC:REVIEW:
+**** REVIEWED SMC24: (16) Artificial Intelligence and Home Music Listening: An Overview and Future Directions :ML:SMC:REVIEW:
 ***** Summary
-Authors present a systematic review of literature on AI and assistive
-audio technologies. The title doesn't entirely reveal their intent
-however; rather than focusing on "Home Music Listening", their
-exploration of the selected literature is more concerned with
-assistive technologies, such as the use of vibrotactile stimuli for
-hearing impaired individuals' appreciation of music. Ultimately, the
-connection to artificial intelligence is quite tenuous; the authors'
-analysis is unclear, bordering on incoherence. Were it not for the
-presence of a couple of typographical errors, the repetitive nature of
-the argumentation in parts might lead me to suggest that that an LLM
-had been involved in the production of the text.
+The authors introduce a systematic review of literature on AI and the
+home music listening experience, taking the entirely reasonable
+opening stance that such a review is warranted by the increasing
+volume of published research in this domain over the past decade.
+
+The title chosen doesn't entirely reveal the authors' intent however;
+rather than focusing on "Home Music Listening", their exploration of
+the selected literature seems more concerned with assistive
+technologies, e.g. vibrotactile feedback. Ultimately, the connection to
+artificial intelligence is quite tenuous — it is not made clear how AI
+features in research on assistive technologies, nor how these
+technologies necessarily assist with "home listening" in particular.
+
+One is left with the suspicion that the initial literature search,
+using the keywords "HCI," "AI," and "music", employed those keywords
+independently, rather than honing in on their intersection. The
+resulting text is largely well-composed (albeit not quite of scholarly
+tone at times), but its argumentation is unclear, meandering, and
+repetitive.
+
 ***** Notes
-- This really is a hot mess.
-- 
+- Use of "I" rather than "we" (Page 2, line 36)
+- Repetition of "Convolutional Neural Networks" (3, 53-68)
+- "We conducted a This resulted in..." (4, 8-9)
+- Near-verbatim repetition of "seamless integration into users' daily
+  lives" in successive paragraphs (6, 86-104)
+- Use of "music enthusiasts," "showcasing," and "seamless integration"
+  read rather like advertising copy.
+***** Proofreading
+ 
 Entered on [2024-04-16 mar. 11:20]
 **** Presentation: Craig Webb             :PHYSICALMODELLING:PRESENTATION:
 - /NEMUS/ project
@@ -354,7 +370,9 @@ important concepts, I cannot recommend this paper for acceptance.
 Entered on [2024-04-17 mer. 11:30]
 **** READ SMC24: (130) Multiple Rendering Factors in Audio Augmented Reality: an Exploratory Study in an Indoor Environment :SPATIALAUDIO:SMC:REVIEW:
 ***** Summary
-Authors evaluate an audio augmented reality system...
+Authors evaluate an audio augmented reality system
+
+I submit an evaluation of weak reject.
 ***** Notes
 - Why use AirPdos if they have an unbypassable adaptive EQ?
 - Procedure poorly-described. Did participants hear the reference
