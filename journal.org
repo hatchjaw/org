@@ -17,7 +17,7 @@
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+COLUMNS: %25ITEM %TODO %3PRIORITY %TAGS
 #+SEQ_TODO: TODO(t) STARTED(s!) WAITING(w@) APPT(a!) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
-#+SEQ_TODO: UNREAD(u) | READ(r)
+#+SEQ_TODO: UNREAD(u) | READ(r) | REVIEWED(v)
 
 * 2018
 ** 2018-02 March
@@ -243,61 +243,113 @@ Entered on [2024-04-16 mar. 15:56]
 **** Interesting article on a DIY GPS receiver        :INSPO:DIY:HARDWARE:
 [[https://axleos.com/building-a-gps-receiver-part-1-hearing-whispers/]]
 Entered on [2024-04-17 mer. 10:28]
-**** READ SMC24: (126) Real-time Phychoacoustic Frequency Masking Compensation for Audio Signals with Overlapping Spectra :SMC:REVIEW:
+**** REVIEWED SMC24: (126) Real-time Phychoacoustic Frequency Masking Compensation for Audio Signals with Overlapping Spectra :SMC:REVIEW:
 ***** Summary
-The authors of this paper describe a system for psychoacoustic
-frequency masking compensation, implemented as a Matlab prototype and
-then as a real-time VST plugin. 
-The plugin was evaluated via a small user study...
+The authors of this paper describe a system for
+psychoacoustically-informed frequency masking compensation,
+implemented as a real-time VST plugin. The plugin was evaluated via a
+small user study.
+
+Though a rather concise account of their work and its background, the
+authors include pertinent references to literature on psychoacoustics
+and automatic mixing. Indeed, the novelty in the authors' proposed
+solution lies in its basis in psychoacoustic research, something
+seemingly lacking in much of the state of the art.
+
+The decision not to expose the full parameter space of their algorithm
+to the end user is a sensible one, and results in a user interface
+with an air of approachability. More detail on the "empirical" basis
+behind some of the hard-coding decisions would have been appreciated,
+however.
+
+The usefulness of the proposed algorithm cannot be demonstrated beyond
+doubt with such a small sample-size, but the results for
+intelligibility are a positive indication and suggest that the plugin
+could stand up to a more demanding evaluation. Overall, despite the
+brevity of the paper, this is nicely-executed work and could be of
+interest to the community, so I cautiously recommend it for acceptance.
 ***** Notes
+- Shouldn't the plugin be called /TheUnmasker/?
 - The abstract lacks detail. No description of the evaluation is
   given, for example.
   + I expect the authors mean to be more confident than to say that
-    their plugin "is thought" to handle the intended use-case.
-- Shouldn't it be called /TheUnmasker/?
+    their plugin "is thought" to handle the intended use-case; "is
+    intended," or "seeks" perhaps?
 - Source code unavailable for either the Matlab prototype or the VST
-  plugin. No Linux build is provided, despite this being quite
-  straightforward via JUCE. No supplementary audio/video examples are
-  provided. These are missed opportunities to say the least.
+  plugin. No Linux build is provided. No supplementary audio/video
+  examples are offered.
 - The caption for figure 4 gives far too little detail; ideally, if
   accepted, authors should expand on this.
 - No reference is given for the Intervention Limiting Function
-  described in section 3.2, which is another missed opportunity.
+  described in section 3.2.
 ***** Proofreading
 Some non-idiomatic usage, but mostly well-written.
 + Page 2, line 6-7: "...that uses a 32 bands
   fixed-frequencies..." -> "...that uses a 32-band, fixed-frequency..."
 + 2, 35: "...32 bands filterbank..." -> "...32-band filterbank..."
 + 2, 61: "...1024-points 50%-overlap..." -> "...1024-point, 50%-overlap..."
-+ 3, 3: Text refers to /atan/ function, but equation (3) uses $\tanh$
++ 3, 3: Text refers to /atan/ function, but equation (3) uses $\tanh$.
++ 4, 35: ''reference'' -> ``reference''
++ 4, 36-39: The latter part of this sentence is bordering on
+  nonsensical and would benefit from a gentle rewrite.
 Entered on [2024-04-17 mer. 11:13]
-**** READ SMC24: (70) Three-Dimensional VBAP and Ambisonics in Spat: Implementation and Perceptual Evaluation in a Concert Setting :SPATIALAUDIO:SMC:REVIEW:
+**** REVIEWED SMC24: (70) Three-Dimensional VBAP and Ambisonics in Spat: Implementation and Perceptual Evaluation in a Concert Setting :SPATIALAUDIO:SMC:REVIEW:
 ***** Summary
-Authors compare VBAP and Ambisonics in an acoustically unoptimised
-space, playing multichannel classical recordings, and recordings of
-John Chowning's /Phoné/, /Stria/, etc. (with moving sources) to groups of
-expert and non-expert listeners.
-Authors report a modest preference for VBAP for "spatial clarity,"
-whereas ambisonics fairs better for "envelopment," though they concede
-that these differences could be explained by the influence of room
-acoustics.
+The authors of this paper compare VBAP and Ambisonics in an
+acoustically unoptimised space, playing multichannel classical
+recordings, and recordings of John Chowning's /Phoné/, /Stria/, etc. (with
+moving sources) to groups of expert and non-expert
+listeners. Subjective analysis focuses on listeners' assessments of
+selected sonic characteristics for the two spatialisation approaches;
+a modest preference for VBAP is reported for "spatial clarity,"
+whereas ambisonics fares better for "envelopment," though the authors
+concede that these differences could be explained by the influence of
+room acoustics.
+
 Clearer results emerge in the form of /rating consistency/, with
 expert listeners exhibiting greater consistency than their non-expert
-counterparts; but this wasn't the focus of the authors' research.
-Attempting to establish the point of this paper is rather vexing.
+counterparts, but this wasn't the focus of the authors'
+research. Indeed, the argumentation on display isn't always entirely
+coherent and the text loses sight of the stated purpose of the study
+at hand.
+
+Ultimately the results of this study do not appear to satisfy the
+stated aim of "optimizing spatial audio workflows and enhancing
+immersive auditory experiences". The reader is offered little by way
+of indication of how the results might inform future spatial audio
+research, for example in selecting the spatialisation algorithm most
+appropriate to the source material or audience.
+
+The work is a good fit for this year's theme, but for the above
+reasons, plus an absence of bibliographical references for certain
+important concepts, I cannot recommend this paper for acceptance.
 ***** Notes
-- It's a bit incoherent; what is this actually about?
-- References incomplete, e.g. [6]
-  + Explanation not given of the evaluation metrics from [6]
-- Poor explanation that negative scores stand in favour of VBAP and
-  positive in favour of Ambisonics.
-- Chowning's /Phoné/, etc. described as "Contemporary" works, despite
+- There's a troubling lack of references or footnotes for some
+  seemingly key ideas and tools, e.g.:
+  + no reference is given for the Spat system itself;
+  + the immersion-related research from which the properties of
+    'Presence' and 'Envelopment' are taken (section 2.4);
+  + a link to the source for the VBAP Max/MSP patch;
+  + the subjective evaluation studies on panning methods that don't
+    give details of spatialisation (section 3);
+  + the ITU-R BS.1284 guidelines (this is reference [6], but that is
+    not made clear);
+  + G*Power software.
+- Bibliography entries [4] and [6] are incomplete; [6] is one of the
+  paper's key references, so this is an issue.
+  + Explanation is not given of the evaluation metrics from [6], which
+    are integral to the analysis given in the paper.
+- It could be more clearly explained that negative CMOS values stand
+  in favour of VBAP with positive values in favour of Ambisonics.
+- Chowning's compositions are described as "Contemporary" works, despite
   being over forty years old.
-- "Classical" pieces not described; what era? Instrumentation?
-- Rating consistency, demonstrated better by expert listeners than
-  non-experts comes across as the more interesting finding than
-  reported quality of the spatialisation techniques.
+- The "classical" pieces are not described; what era? What style?
+- The terms "LFE", "ACN", the various ambisonics decoding options, and
+  "sweet spot" are not explained.
+- Figures 4 and 5 do little to help the reader, particularly with such
+  brief captions.
 ***** Proofreading
+- Affiliation superscripts don't match institutions.
 
 Entered on [2024-04-17 mer. 11:30]
 **** READ SMC24: (130) Multiple Rendering Factors in Audio Augmented Reality: an Exploratory Study in an Indoor Environment :SPATIALAUDIO:SMC:REVIEW:
