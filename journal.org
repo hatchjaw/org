@@ -8,6 +8,8 @@
 #+TAGS: HARDWARE(h) INSPO(i) DIY(d) TEACHING(t) REPRES(R) REVIEW(v)
 #+TAGS: [ PROGRAMMING : R(r) PYTHON(p) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ]
+#+TAGS: [ AUDIO : SYNTHESIS(s) PHYSICALMODELLING(m) SPATIALAUDIO(p) ]
+#+TAGS: [ HARDWARE : RPI(p) TEENSY(t) ]
 #+EXPORT_SELECT_TAGS: Blog
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
@@ -61,7 +63,7 @@ shortcuts. This can be changed from the Options menu.
   - =M-Enter= new item/section
   - =C-c a= agenda (try the =L= option)
   - =C-c C-a= attach files
-  - =C-c C-d= set a deadl1ine (use =S-arrows= to navigate in the dates)
+  - =C-c C-d= set a deadline (use =S-arrows= to navigate in the dates)
   - =A-arrows= move subtree (add shift for the whole subtree)
 ***** Org-mode Babel (for literate programming)
   - =<s + tab= template for source bloc. You can easily adapt it to get
@@ -180,9 +182,22 @@ Entered on [2024-04-15 lun. 16:43]
   
   [[file:~/org/journal.org::*R plotting in org-babel is temperamental][R plotting in org-babel is temperamental]]
 *** 2024-04-16 mardi
-**** UNREAD SMC24: (16) Artifical Intelligent and Home Music Listening: An Overview and Future Directions :ML:SMC:REVIEW:
+**** READ SMC24: (16) Artificial Intelligence and Home Music Listening: An Overview and Future Directions :ML:SMC:REVIEW:
 ***** Summary
+Authors present a systematic review of literature on AI and assistive
+audio technologies. The title doesn't entirely reveal their intent
+however; rather than focusing on "Home Music Listening", their
+exploration of the selected literature is more concerned with
+assistive technologies, such as the use of vibrotactile stimuli for
+hearing impaired individuals' appreciation of music. Ultimately, the
+connection to artificial intelligence is quite tenuous; the authors'
+analysis is unclear, bordering on incoherence. Were it not for the
+presence of a couple of typographical errors, the repetitive nature of
+the argumentation in parts might lead me to suggest that that an LLM
+had been involved in the production of the text.
 ***** Notes
+- This really is a hot mess.
+- 
 Entered on [2024-04-16 mar. 11:20]
 **** Presentation: Craig Webb             :PHYSICALMODELLING:PRESENTATION:
 - /NEMUS/ project
@@ -228,20 +243,86 @@ Entered on [2024-04-16 mar. 15:56]
 **** Interesting article on a DIY GPS receiver        :INSPO:DIY:HARDWARE:
 [[https://axleos.com/building-a-gps-receiver-part-1-hearing-whispers/]]
 Entered on [2024-04-17 mer. 10:28]
-**** READ SMC24: (126) Real-time Phychoacoustic Frequency Masking Compensation for Audio Signals with Overlaping Spectra :SMC:REVIEW:
+**** READ SMC24: (126) Real-time Phychoacoustic Frequency Masking Compensation for Audio Signals with Overlapping Spectra :SMC:REVIEW:
 ***** Summary
-Authors describe a VST plugin for psychoacoustic frequency masking
-compensation.
+The authors of this paper describe a system for psychoacoustic
+frequency masking compensation, implemented as a Matlab prototype and
+then as a real-time VST plugin. 
+The plugin was evaluated via a small user study...
 ***** Notes
+- The abstract lacks detail. No description of the evaluation is
+  given, for example.
+  + I expect the authors mean to be more confident than to say that
+    their plugin "is thought" to handle the intended use-case.
 - Shouldn't it be called /TheUnmasker/?
-- Source code not available. No Linux build. No audio/video examples.
+- Source code unavailable for either the Matlab prototype or the VST
+  plugin. No Linux build is provided, despite this being quite
+  straightforward via JUCE. No supplementary audio/video examples are
+  provided. These are missed opportunities to say the least.
+- The caption for figure 4 gives far too little detail; ideally, if
+  accepted, authors should expand on this.
+- No reference is given for the Intervention Limiting Function
+  described in section 3.2, which is another missed opportunity.
 ***** Proofreading
-  
+Some non-idiomatic usage, but mostly well-written.
++ Page 2, line 6-7: "...that uses a 32 bands
+  fixed-frequencies..." -> "...that uses a 32-band, fixed-frequency..."
++ 2, 35: "...32 bands filterbank..." -> "...32-band filterbank..."
++ 2, 61: "...1024-points 50%-overlap..." -> "...1024-point, 50%-overlap..."
++ 3, 3: Text refers to /atan/ function, but equation (3) uses $\tanh$
 Entered on [2024-04-17 mer. 11:13]
-**** UNREAD SMC24: (70) Three-Dimensional VBAP and Ambisonics in Spat: Implementation and Perceptual Evaluation in a Concerte Setting :SMC:REVIEW:
+**** READ SMC24: (70) Three-Dimensional VBAP and Ambisonics in Spat: Implementation and Perceptual Evaluation in a Concert Setting :SPATIALAUDIO:SMC:REVIEW:
 ***** Summary
+Authors compare VBAP and Ambisonics in an acoustically unoptimised
+space, playing multichannel classical recordings, and recordings of
+John Chowning's /Phoné/, /Stria/, etc. (with moving sources) to groups of
+expert and non-expert listeners.
+Authors report a modest preference for VBAP for "spatial clarity,"
+whereas ambisonics fairs better for "envelopment," though they concede
+that these differences could be explained by the influence of room
+acoustics.
+Clearer results emerge in the form of /rating consistency/, with
+expert listeners exhibiting greater consistency than their non-expert
+counterparts; but this wasn't the focus of the authors' research.
+Attempting to establish the point of this paper is rather vexing.
 ***** Notes
 - It's a bit incoherent; what is this actually about?
 - References incomplete, e.g. [6]
+  + Explanation not given of the evaluation metrics from [6]
+- Poor explanation that negative scores stand in favour of VBAP and
+  positive in favour of Ambisonics.
+- Chowning's /Phoné/, etc. described as "Contemporary" works, despite
+  being over forty years old.
+- "Classical" pieces not described; what era? Instrumentation?
+- Rating consistency, demonstrated better by expert listeners than
+  non-experts comes across as the more interesting finding than
+  reported quality of the spatialisation techniques.
 ***** Proofreading
+
 Entered on [2024-04-17 mer. 11:30]
+**** READ SMC24: (130) Multiple Rendering Factors in Audio Augmented Reality: an Exploratory Study in an Indoor Environment :SPATIALAUDIO:SMC:REVIEW:
+***** Summary
+Authors evaluate an audio augmented reality system...
+***** Notes
+- Why use AirPdos if they have an unbypassable adaptive EQ?
+- Procedure poorly-described. Did participants hear the reference
+  sound without AirPods, then put them in/on and listen to the virtual
+  stimulus?
+- So we have a SDN reverb, customised HRTFs derived from still images
+  of participants' heads (was this clearly explained?), headphone EQ
+  compensation... too many variables.
+***** Proofreading
+
+Entered on [2024-04-17 mer. 17:33]
+*** 2024-04-18 jeudi
+**** READ SMC24: (37) Mobile Loundspeakers as an Alter Ego :REVIEW:SPATIALAUDIO:SMC:
+***** Summary
+Authors present an audio spatialisation system based on mobile
+loudspeakers. Speakers are mounted to motorised platforms and can be
+driven, quite literally, via remote-control around the listening
+environment. With a focus on concert applications, a notation for
+positioning the mobile speakers, in tandem with conventional musical
+notation, is described. 
+***** Notes
+***** Proofreading
+Entered on [2024-04-18 jeu. 16:10]
