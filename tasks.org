@@ -13,7 +13,7 @@ These notes are in my white notebook.
 *** TODO Update Mme Leprince
 DEADLINE: <2024-05-01 mer.>
 * PhD
-** TODO [#A] Arrange Thesis Committee Meeting [2/5]
+** TODO [#A] Arrange Thesis Committee Meeting [3/5]
 *** DONE Set up Doodle
 DEADLINE: <2024-04-16 mar.>
 - State "DONE"       from "TODO"       [2024-04-16 mar. 10:59]
@@ -21,11 +21,13 @@ DEADLINE: <2024-04-16 mar.>
 - State "DONE"       from "WAITING"    [2024-04-19 ven. 17:32]
 - State "WAITING"    from "TODO"       [2024-04-17 mer. 15:17] \\
   Awaiting responses from Tanguy and Leo
-*** TODO Confirm date
+*** DONE Confirm date
 DEADLINE: <2024-04-22 lun.>
+- State "DONE"       from "TODO"       [2024-04-22 lun. 10:05]
 *** TODO Prepare documentation[0/3]
+DEADLINE: <2024-05-13 lun.>
 [[http://edinfomaths.universite-lyon.fr/en/thesis/thesis-follow][Instructions]]
-**** TODO Updated CV
+**** TODO Update CV
 **** TODO Progress report
 2 pages summarising research work and prospects for year ahead
 **** TODO All scientific work produced
@@ -37,8 +39,9 @@ DEADLINE: <2024-04-22 lun.>
 DEADLINE: <2024-04-15 lun.>
 Check with Romain, but in principle 16h on 22/04.
 * Reviews
-** TODO Review SMC papers
+** DONE Review SMC papers
 DEADLINE: <2024-04-21 dim.>
+- State "DONE"       from "TODO"       [2024-04-22 lun. 10:06]
 * Français
 ** TODO Sign up to ShareAmi
 * Personal

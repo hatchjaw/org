@@ -154,10 +154,12 @@ It depends on the type of document you want to create:
 
 Entered on [2024-04-09 mar. 14:51]
 **** Answer: because of the capture template.                    :ORGMODE:
-I can change that, and add more capture templates that target other files.
+I can change that, and add more capture templates that target other
+files.
+
 Entered on [2024-04-09 mar. 16:10]
   
-  [[file:~/org/journal.org::*Why does this always end up with a link attached?][Why does this always end up with a link attached?]]
+[[file:~/org/journal.org::*Why does this always end up with a link attached?][Why does this always end up with a link attached?]]
 *** 2024-04-12 vendredi
 **** What is a replicable data analysis?                          :REPRES:
 In traditional data analysis we focus on the results, with a
@@ -178,6 +180,7 @@ But it's not putting them in the same directory as the open .org file.
 When the R process starts, it asks for a working directory; this
 doesn't happen if exporting, e.g. =C-c C-e h o=, i.e. R just picks the
 directory it fancies. Nice.
+
 Entered on [2024-04-15 lun. 16:43]
   
   [[file:~/org/journal.org::*R plotting in org-babel is temperamental][R plotting in org-babel is temperamental]]
@@ -216,9 +219,7 @@ repetitive.
  
 Entered on [2024-04-16 mar. 11:20]
 **** Presentation: Craig Webb             :PHYSICALMODELLING:PRESENTATION:
-- /NEMUS/ project
-  Numerical Restoration of Historical Music
-  Instruments
+- /NEMUS/ project Numerical Restoration of Historical Music Instruments
   ERC-funded. PI: Michele Ducchesci (sp.)
 - Specifically looking at the harpsichord
   Ancient examples; can't withstand the forces subjected to them if
