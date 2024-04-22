@@ -192,9 +192,9 @@ volume of published research in this domain over the past decade.
 The title chosen doesn't entirely reveal the authors' intent however;
 rather than focusing on "Home Music Listening", their exploration of
 the selected literature seems more concerned with assistive
-technologies, e.g. vibrotactile feedback. Ultimately, the connection to
-artificial intelligence is quite tenuous — it is not made clear how AI
-features in research on assistive technologies, nor how these
+technologies, e.g. vibrotactile feedback. Ultimately, the connection
+to artificial intelligence is quite tenuous — it is not made clear how
+AI features in research on assistive technologies, nor how these
 technologies necessarily assist with "home listening" in particular.
 
 One is left with the suspicion that the initial literature search,
@@ -283,7 +283,8 @@ doubt with such a small sample-size, but the results for
 intelligibility are a positive indication and suggest that the plugin
 could stand up to a more demanding evaluation. Overall, despite the
 brevity of the paper, this is nicely-executed work and could be of
-interest to the community, so I cautiously recommend it for acceptance.
+interest to the community, so I cautiously recommend it for
+acceptance.
 ***** Notes
 - Shouldn't the plugin be called /TheUnmasker/?
 - The abstract lacks detail. No description of the evaluation is
@@ -300,10 +301,11 @@ interest to the community, so I cautiously recommend it for acceptance.
   described in section 3.2.
 ***** Proofreading
 Some non-idiomatic usage, but mostly well-written.
-+ Page 2, line 6-7: "...that uses a 32 bands
-  fixed-frequencies..." -> "...that uses a 32-band, fixed-frequency..."
++ Page 2, line 6-7: "...that uses a 32 bands fixed-frequencies..." ->
+  "...that uses a 32-band, fixed-frequency..."
 + 2, 35: "...32 bands filterbank..." -> "...32-band filterbank..."
-+ 2, 61: "...1024-points 50%-overlap..." -> "...1024-point, 50%-overlap..."
++ 2, 61: "...1024-points 50%-overlap..." -> "...1024-point,
+  50%-overlap..."
 + 3, 3: Text refers to /atan/ function, but equation (3) uses $\tanh$.
 + 4, 35: ''reference'' -> ``reference''
 + 4, 36-39: The latter part of this sentence is bordering on
@@ -322,8 +324,8 @@ whereas ambisonics fares better for "envelopment," though the authors
 concede that these differences could be explained by the influence of
 room acoustics.
 
-Clearer results emerge in the form of /rating consistency/, with
-expert listeners exhibiting greater consistency than their non-expert
+Clearer results emerge in the form of /rating consistency/, with expert
+listeners exhibiting greater consistency than their non-expert
 counterparts, but this wasn't the focus of the authors'
 research. Indeed, the argumentation on display isn't always entirely
 coherent and the text loses sight of the stated purpose of the study
@@ -357,8 +359,8 @@ important concepts, I cannot recommend this paper for acceptance.
     are integral to the analysis given in the paper.
 - It could be more clearly explained that negative CMOS values stand
   in favour of VBAP with positive values in favour of Ambisonics.
-- Chowning's compositions are described as "Contemporary" works, despite
-  being over forty years old.
+- Chowning's compositions are described as "Contemporary" works,
+  despite being over forty years old.
 - The "classical" pieces are not described; what era? What style?
 - The terms "LFE", "ACN", the various ambisonics decoding options, and
   "sweet spot" are not explained.
@@ -370,29 +372,97 @@ important concepts, I cannot recommend this paper for acceptance.
 Entered on [2024-04-17 mer. 11:30]
 **** READ SMC24: (130) Multiple Rendering Factors in Audio Augmented Reality: an Exploratory Study in an Indoor Environment :SPATIALAUDIO:SMC:REVIEW:
 ***** Summary
-Authors evaluate an audio augmented reality system
+Authors present the evaluation, via a bespoke MUSHRA interface, of an
+audio augmented reality system comprising a scattered delay network
+reverb, customised HRTFs derived from still images, and headphone EQ
+compensation. This is an ambitious project, comprised of numerous
+components supported by theory, code (albeit not accessible to the
+reader) and a substantial trawl of the scholarly literature.
 
-I submit an evaluation of weak reject.
+The authors emphasise the purported user-friendliness of their
+evaluation interface (though figure 2 does not appear to support this
+claim). They concede, however, in their conclusion that the interface
+provided poor control over experimental conditions and may have
+influenced their results.
+
+Figure 4 and its caption do a very unsatisfactory job of presenting
+the results of the user study. At best we can conclude from the large
+interquartile ranges for almost all conditions, that users had a very
+hard time assessing the similarity of the virtual stimulus and the
+reference. This in turn points to flaws in methodology; the presence
+of too many variables, the ecological setting, and perhaps the
+adaptive EQ of the headphones (over which the authors had no control).
+
+Ultimately there is an ambiguity hanging over the purpose of this
+paper. The title, abstract, and introduction suggest that it is an
+evaluation of the AR auralisation framework: "The goal was to evaluate
+the impact of acoustic personalisation... on an AAR scenario." The
+beginning of section 4 states, however, that "The main purpose of the
+exploratory test was to assess the test procedure and the
+[MUSHRA]". Further, the reader is provided with either too little
+information about facets of the project (e.g. game engine
+implementation of the AAR framework) or left questioning their
+integrity (the bespoke MUSHRA interface).
+
+I submit an evaluation of reject, as, in the form submitted, this
+paper is not suitable for publication.
 ***** Notes
-- Why use AirPdos if they have an unbypassable adaptive EQ?
-- Procedure poorly-described. Did participants hear the reference
-  sound without AirPods, then put them in/on and listen to the virtual
-  stimulus?
-- So we have a SDN reverb, customised HRTFs derived from still images
-  of participants' heads (was this clearly explained?), headphone EQ
-  compensation... too many variables.
+- Why use AirPods if they have an unbypassable adaptive EQ?
+- Notation of equation (1), and explanation in the paragraph that
+  follows, appear inconsistent. E.g. $H^{-1}$ in the equation seems to
+  have been represented as $H^-1$; $\mathbf{D}(f)$ from the explanatory
+  paragraph does not appear in the equation.
+- Experimental procedure not clearly-described. Did participants hear
+  the reference sound without AirPods, then put them in/on and listen
+  to the virtual stimulus?
 ***** Proofreading
-
+- Acronyms should be expanded on first use, e.g. MUSHRA (Page 1, 54),
+  CIPIC (1, 13).
+  
 Entered on [2024-04-17 mer. 17:33]
 *** 2024-04-18 jeudi
-**** READ SMC24: (37) Mobile Loundspeakers as an Alter Ego :REVIEW:SPATIALAUDIO:SMC:
+**** REVIEWED SMC24: (37) Mobile Loundspeakers as an Alter Ego :REVIEW:SPATIALAUDIO:SMC:
 ***** Summary
-Authors present an audio spatialisation system based on mobile
+The authors present an audio spatialisation system based on mobile
 loudspeakers. Speakers are mounted to motorised platforms and can be
-driven, quite literally, via remote-control around the listening
-environment. With a focus on concert applications, a notation for
-positioning the mobile speakers, in tandem with conventional musical
-notation, is described. 
-***** Notes
-***** Proofreading
+driven via remote-control around the listening environment. With a
+focus on concert applications, a notation for positioning the mobile
+speakers, in tandem with conventional musical notation, is briefly
+described.
+
+This is an interesting idea, and a refreshing antidote to more
+commonly-encountered spatial audio research on sound field synthesis,
+etc., plus the authors connect their work to a history of moving
+physical sound sources in electroacoustic music. Further, the project
+represents a significant engineering challenge, one which could be of
+interest to the SMC community — though more detail on the technical
+underpinnings of the project would have been appreciated here.
+
+The thrust of the paper — the "alter ego" mentioned in the title and
+abstract — is not developed in a convincing manner, however. The
+visitor survey conducted did not ask audience members whether, for
+example, they viewed the moving speakers as an embodiment of the
+composer or performers; nor are the views of composer or performers of
+/Heldendämmerung/ given with regard to the success of the proposed
+system in this respect. The "interesting ... theatrical and
+choreographic interplay" described in the abstract, and the notion of
+the "mediating role" of the mobile speakers are not scrutinised in a
+meaningful way.
+
+Though a competently-written paper for the greater part, section 6
+(Conclusion) descends into bullet points and appears unfinished. 6.2
+in particular seems composed of incomplete fragments. For this and the
+above reasons, I recommend this paper for rejection.
+
+***** Notes/proofreading
+- Page 1, Line 32: "Chapter 2" -> "Section 2"
+- 2, 34-35: Mentions Stockhausen's fifth parameter without describing
+  the other four.
+- 4, 30: "...a number of vehicle driver..." -> "...a number of vehicle
+  drivers..."
+- Figure 10: "very good" doesn't work as an answer to the question
+  "have you perceived variable sound spaces?"
+  + The caption for this figure is incomplete.
+- 6, 41-44: As stated above, this paragraph (s. 6.2) seems unfinished.
+  
 Entered on [2024-04-18 jeu. 16:10]
