@@ -467,3 +467,87 @@ above reasons, I recommend this paper for rejection.
 - 6, 41-44: As stated above, this paragraph (s. 6.2) seems unfinished.
   
 Entered on [2024-04-18 jeu. 16:10]
+
+*** 2024-04-22 lundi
+**** Software-based clock sync                              :HARDWARE:PTP:
+Where do Teensy and RPi (circle) keep time?
++ Teensy: ~micros(void)~ in =delay.c= eteensy4/delay.c:76 Computes the
+  number of microseconds since startup. Appears to use clock cycles
+  (~ARM_DWT_CYCCNT~) as part of the computation.
+    
++ Circle: ~CTimer::GetClockTicks(void)~ in =timer.cpp=
+  circle/lib/timer.cpp:211 Reads directly from the ~ARM_SYSTIMER_CLO~
+  MMIO address, which provides the number of ticks of a 1 MHz counter.
+
+But how relevant are these measures of time? The specific clock we
+want to alter is the audio clock, not the main system clock (which,
+for Teensy at least, is fixed at 24 MHz), so maybe we need to measure
+time as represented by the audio clock... I'm really not sure about
+this.
+
+Entered on [2024-04-22 lun. 13:46]
+**** How to set up a decent literature review template?          :ORGMODE:
+
+Currently reading /Design Considerations for Software Only
+Implementations of the IEEE 1588 Precision Time Protocol/, but not
+clear on how to set up a nice capture such as used by Arnaud's
+ex-student, with =PROPERTIES:= at the top and a BibTeX entry at the
+bottom. [[https://github.com/yantar92/org-capture-ref][org-capture-ref]] maybe?
+
+Entered on [2024-04-22 lun. 14:15]
+*** 2024-04-23 mardi
+**** Thesis Defence: Razvan Paisa                           :PRESENTATION:
+/The musical touch — Exploring vibrotactile augmentation of music for CI users/
+
+(NB. the feed wasn't available for the first twenty-five minutes or so)
+
+- Amplitude perception of vibrotactile stimuli (at the hand?) is
+  highly personal.
+- Collaborative design with CI users on vibrotactile furniture,
+  elements etc. for augmented concerts.
+- Music for CI users is/can be an exhausting experience; concert
+  exposure limited to fifteen minutes, predicted. With vibrotactile
+  stimuli, users were keen to listen for much longer (like, twice as
+  long).
+
+***** Melodic contour identification
+- Ascending, descending, undulating and arching contours.
+- MCI training score improved modestly with vibrotactile device?...
+  
+***** Conclusions
+- Work is exploratory, perhaps appearing to lack rigour (the man's own
+  words!).
+- Highly 'ecological' research.
+- Plans to continue with the current approach.
+
+***** Discussion
+- Don't be afraid of Bayesian Analysis. Hanna's talk from DAFx '23.
+
+Entered on [2024-04-23 mar. 10:55]
+**** Looking for a way to read audio clock ticks         :HARDWARE:TEENSY:
+Reading the i.MX RT1060 manual, chapter 37-38, for some clues about
+how audio — synchronous audio interface (SAI), etc. — works on the
+Teensy.
+
+Specifically, whether, like the CPU, which increments a register,
+=ARM_DWT_CYCCNT=, with the number of clock cycles elapsed since startup,
+there's a way to read the number of cycles of the SAI1 clock.
+
+The plan is something like:
+- Read SAI1 clock ticks;
+- Convert from ticks (at ~11.28 MHz) to µs;
+- Compare with incoming PTP timestamps (in µs?) from the server;
+- Adjust the PLL as necessary to bring the SAI1 clock into line with
+  the server;
+  + That's /just/ a case of following the PTP spec — piece of cake;
+- Then we see how close a sync can be achieved, and how well the sync
+  can be encouraged to settle down;
+- How much of a problem is it if there's, e.g. (best case?) sub-sample
+  movement?
+  + OK, I'm getting ahead of myself;
+- Even if audio clocks are nicely aligned, what about the network?
+  + How much buffering required?
+  + How to instruct the I2S output to output buffer $n$ at timestamp
+    $t$? 
+
+Entered on [2024-04-23 mar. 18:19]
