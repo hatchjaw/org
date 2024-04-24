@@ -548,6 +548,18 @@ The plan is something like:
 - Even if audio clocks are nicely aligned, what about the network?
   + How much buffering required?
   + How to instruct the I2S output to output buffer $n$ at timestamp
-    $t$? 
+    $t$?
 
 Entered on [2024-04-23 mar. 18:19]
+*** 2024-04-24 mercredi
+**** Meeting with Romain — PhD committee                         :MEETING:
+- We need to spend money on equipment — soon — so we need to know what
+  to buy.
+- For the committee, talk about the state of the art, plan for the
+  next six months (well, a year, I think).
+- Maybe try an FPGA? Talk to Pierre about transferrable techniques
+  re. clocks.
+- Jens's book is too expensive. Buy a copy myself?
+- Talk to Pierre about ergonomics lady at Inria.
+  
+Entered on [2024-04-24 mer. 10:23]
