@@ -1,0 +1,39 @@
+:PROPERTIES:
+:ID:       aec14c89-caa7-4aea-8ead-faf98992a490
+:END:
+#+title: Orgmode pretty entities
+
+By default, Org pretty-prints sub/superscripts, greek letters, etc., e.g.
+
+#+begin_example
+thing-with_subscript
+#+end_example
+
+Which is displayed as:
+
+thing-with_subscript
+
+This gets kind of daft with multiple subscripts:
+
+#+begin_example
+thing-with_multiple_subscripts
+#+end_example
+
+thing-with_multiple_subscripts
+
+This behaviour can be toggled with =C-c C-x \
+(org-toggle-pretty-entities)=
+
+/NB. The following only works for export:/
+
+To enforce, on a per-file basis, the use of surrounding
+braces for sub/superscripts, use:
+
+#+begin_example
+#+OPTIONS: ^:{}
+#+end_example
+
+Which (I think) is the per-file equivalent of setting the
+=org-use-sub-superscripts= variable to ={}=.
+
+[[https://www.gnu.org/software/emacs/manual/html_node/org/Subscripts-and-Superscripts.html][Source]]
