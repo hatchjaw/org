@@ -563,3 +563,40 @@ Entered on [2024-04-23 mar. 18:19]
 - Talk to Pierre about ergonomics lady at Inria.
   
 Entered on [2024-04-24 mer. 10:23]
+*** 2024-04-29 lundi
+**** Setting the RPi audio clock with Circle                :HARDWARE:RPI:
+Essentially this happens in =circle/lib/gipoclock.cpp= The constructor
+to ~CSoundBaseDevice~ (=i2ssounddevice.cpp=) sets a member instance of
+~CGPIOClock~ (l. 102):
+
+#+begin_src cpp
+m_Clock (GPIOClockPCM, GPIOClockSourcePLLD)
+#+end_src
+
+And a little later (l. 130) in the body of the constructor, having
+calculated the appropriate clock divisors:
+
+#+begin_src cpp
+m_Clock.Start (nDivI, nDivF, nDivF > 0 ? 1 : 0);
+#+end_src
+
+Inside ~Start()~, two registers are written: ~nDivReg~ and
+~nCtlReg~. Skipping some delays and stuff, here's the gist:
+
+#+begin_src cpp
+unsigned nCtlReg = ARM_CM_BASE + (m_Clock * 8);
+unsigned nDivReg  = nCtlReg + 4;
+
+write32 (nDivReg, ARM_CM_PASSWD | CLK_DIV_DIVI (nDivI) | CLK_DIV_DIVF (nDivF));
+write32 (nCtlReg, ARM_CM_PASSWD | CLK_CTL_MASH (nMASH) | CLK_CTL_SRC (m_Source));
+write32 (nCtlReg, read32 (nCtlReg) | ARM_CM_PASSWD | CLK_CTL_ENAB);
+#+end_src
+
+I should try setting some arbitrary clock speeds and check (with the
+help of an oscilloscope), how accurately the audio clock is set, and
+roughly how fine the resolution is.
+
+What this doesn't tell me is whether it's possible to derive a
+timestamp from this clock.
+
+Entered on [2024-04-29 lun. 13:54]

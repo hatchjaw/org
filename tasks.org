@@ -3,6 +3,10 @@
 #+SEQ_TODO: TODO(t) STARTED(s!) WAITING(w@) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
 
 * Tasks
+** TODO Email Antoine re. PhD day
+DEADLINE: <2024-04-30 mar.>
+** TODO Review PAUC manuscript
+DEADLINE: <2024-05-27 lun.>
 ** TODO Message/email Matt Hamilton
 ** TODO Set up OrgRoam
 ** TODO Follow up on notes from meeting with Morgane Leprince
@@ -12,7 +16,6 @@ These notes are in my white notebook.
 *** TODO Phone Amelie
 *** TODO Update Mme Leprince
 DEADLINE: <2024-05-01 mer.>
-* PhD
 ** TODO [#A] Arrange Thesis Committee Meeting [3/5]
 *** DONE Set up Doodle
 DEADLINE: <2024-04-16 mar.>
@@ -34,17 +37,13 @@ DEADLINE: <2024-05-13 lun.>
 *** TODO Prepare presentation
 ** TODO Investigate hardware platforms
 - [[https://www.cnx-software.com/2024/04/08/adlink-osm-imx93-osm-size-l-module-nxp-i-mx-93-soc/][ADLINK OSM-IMX93]]
-* Supervision
 ** DONE Set up meeting with the PIR group
 DEADLINE: <2024-04-15 lun.>
 Check with Romain, but in principle 16h on 22/04.
-* Reviews
 ** DONE Review SMC papers
 DEADLINE: <2024-04-21 dim.>
 - State "DONE"       from "TODO"       [2024-04-22 lun. 10:06]
-* Français
 ** TODO Sign up to ShareAmi
-* Personal
 ** TODO Prendre rendez-vous chez le coiffeur
 DEADLINE: <2024-05-20 lun. .+1m>
 :PROPERTIES:
