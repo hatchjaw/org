@@ -600,3 +600,15 @@ What this doesn't tell me is whether it's possible to derive a
 timestamp from this clock.
 
 Entered on [2024-04-29 lun. 13:54]
+*** 2024-04-30 mardi
+**** Meeting with Pierre                                :MEETING:HARDWARE:
+- Vivado configures clocks for the ARM and FPGA (Tanguy/Maxime added
+  the latter?)
+- Audio clock comes out to 256*48000; basically the same principle as
+  Teensy.
+- I should try to find equivalent clock config software for the Pi.
+- Since Syfala just sets and forgets its clocks, there doesn't appear
+  to be anything transferrable in terms of dynamic clock updates, or
+  taking time(stamps) from a specific, PLL-dictated clock.
+
+Entered on [2024-04-30 mar. 14:25]

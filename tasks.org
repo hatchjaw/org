@@ -3,8 +3,8 @@
 #+SEQ_TODO: TODO(t) STARTED(s!) WAITING(w@) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
 
 * Tasks
-** TODO Email Antoine re. PhD day
-DEADLINE: <2024-04-30 mar.>
+** TODO Pay Agathe €40
+DEADLINE: <2024-05-01 mer.>
 ** TODO Review PAUC manuscript
 DEADLINE: <2024-05-27 lun.>
 ** TODO Message/email Matt Hamilton
@@ -35,6 +35,7 @@ DEADLINE: <2024-05-13 lun.>
 2 pages summarising research work and prospects for year ahead
 **** TODO All scientific work produced
 *** TODO Prepare presentation
+DEADLINE: <2024-05-26 dim.>
 ** TODO Investigate hardware platforms
 - [[https://www.cnx-software.com/2024/04/08/adlink-osm-imx93-osm-size-l-module-nxp-i-mx-93-soc/][ADLINK OSM-IMX93]]
 ** DONE Set up meeting with the PIR group
