@@ -3,6 +3,10 @@
 #+SEQ_TODO: TODO(t) STARTED(s!) WAITING(w@) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
 
 * Tasks
+** TODO Prepare PhD Day presentation
+DEADLINE: <2024-05-14 mar.>
+** TODO Prepare Emeraude Séminaire presentation
+DEADLINE: <2024-05-15 mer.>
 ** TODO [#B] Apply, again, for social security [0/5]
 I have a case number with Ameli:
 
@@ -31,7 +35,7 @@ DEADLINE: <2024-05-02 jeu.>
 - State "DONE"       from "TODO"       [2024-05-02 jeu. 17:01]
 *** TODO Update Mme Leprince
 DEADLINE: <2024-05-02 jeu.>
-** TODO [#A] Arrange Thesis Committee Meeting [3/5]
+** TODO [#A] Prepare for Thesis Committee Meeting [3/5]
 *** DONE Set up Doodle
 DEADLINE: <2024-04-16 mar.>
 - State "DONE"       from "TODO"       [2024-04-16 mar. 10:59]
@@ -42,7 +46,7 @@ DEADLINE: <2024-04-16 mar.>
 *** DONE Confirm date
 DEADLINE: <2024-04-22 lun.>
 - State "DONE"       from "TODO"       [2024-04-22 lun. 10:05]
-*** TODO Prepare documentation[0/3]
+*** TODO Prepare documentation [0/3]
 DEADLINE: <2024-05-13 lun.>
 [[http://edinfomaths.universite-lyon.fr/en/thesis/thesis-follow][Instructions]]
 **** TODO Update CV
