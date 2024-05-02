@@ -1,0 +1,16 @@
+:PROPERTIES:
+:ID:       0b9eb802-ab09-426b-96ea-3d5f177398a1
+:END:
+#+title: Orgmode and Reveal.js
+
+So there's [[https://github.com/yjwen/org-reveal][org-reveal]], which hasn't been updated in a couple of years,
+and there's [[https://github.com/emacsmirror/org-re-reveal][org-re-reveal]], which started as a fork of =org-reveal=,
+but has gone its own way. The latter has a [[https://oer.gitlab.io/org-re-reveal/][selection of sample
+presentations]].
+
+I would like to do some literate programming with Faust. Faust
+examples, that =C-c C-c= execute to produce a CSV in Emacs or an
+exported PDF, and use [[https://faustdoc.grame.fr/manual/deploying/][faust-web-component]] in a HTML export to display
+an inline, operational Faust snippet. *Aim to have this working in
+some form for the PhD day and Seminaire presentations*.
+

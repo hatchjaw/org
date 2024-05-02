@@ -12,12 +12,20 @@
 #+TAGS: [ HARDWARE : RPI(p) TEENSY(t) ]
 #+EXPORT_SELECT_TAGS: Blog
 #+OPTIONS:   H:3 num:0 toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
-#+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc html-style:nil
 #+EXPORT_SELECT_TAGS: export
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+COLUMNS: %25ITEM %TODO %3PRIORITY %TAGS
 #+SEQ_TODO: TODO(t) STARTED(s!) WAITING(w@) APPT(a!) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
 #+SEQ_TODO: UNREAD(u) | READ(r) | REVIEWED(v)
+
+# HTML Export styles/scripts for theme 'readtheorg'
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://www.pirilampo.org/styles/readtheorg/css/htmlize.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://www.pirilampo.org/styles/readtheorg/css/readtheorg.css"/>
+#+HTML_HEAD: <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+#+HTML_HEAD: <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="http://www.pirilampo.org/styles/lib/js/jquery.stickytableheaders.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="http://www.pirilampo.org/styles/readtheorg/js/readtheorg.js"></script>
 
 * 2018
 ** 2018-02 March
@@ -112,7 +120,7 @@ shortcuts. This can be changed from the Options menu.
   
 Entered on [2024-04-08 lun. 15:14]
   
-  [[file:~/org/journal.org::-*- mode: org -*-]]
+  [[file:~/org/journal.org]]
 
 *** 2024-04-09 mardi
 **** RR-MOOC: Working With Others                                 :REPRES:
@@ -175,6 +183,22 @@ Requires more effort, but:
 
 Entered on [2024-04-12 ven. 17:16]
 *** 2024-04-15 lundi
+**** R plotting in org-babel is temperamental           :REPRES:R:ORGMODE:
+Not sure why, but stuff like this just refuses to produce a file and
+display it:
+#+begin_example
+#+begin_src R :file cars.png :results file graphics
+plot(cars)
+#+end_src
+#+end_example
+What's daft is I'm quite sure this exact syntax was working fine as
+recently as last week.
+Remove ~graphics~ and R opens and displays a figure (in a separate
+window), but it isn't saved so obviously nothing appears in the .org
+file.
+Good job I'm not planning to use R, but doesn't entirely inspire
+confidence.
+Entered on [2024-04-15 lun. 11:08]
 **** It turns out R /is/ saving plots...                  :REPRES:R:ORGMODE:
 But it's not putting them in the same directory as the open .org file.
 When the R process starts, it asks for a working directory; this
@@ -612,3 +636,31 @@ Entered on [2024-04-29 lun. 13:54]
   taking time(stamps) from a specific, PLL-dictated clock.
 
 Entered on [2024-04-30 mar. 14:25]
+**** Feels like I'm doing a bad job of note-taking.              :ORGMODE:
+I should revisit the early notes from the MOOC, and that journal that
+Arnaud shared with me.
+
+Entered on [2024-04-30 mar. 17:00]
+** 2024-05 mai
+*** 2024-05-02 jeudi
+**** RPi: Broadcom GPIO Clocks                              :HARDWARE:RPI:
+From the [[https://datasheets.raspberrypi.com/bcm2835/bcm2835-peripherals.pdf][BCM2835 Peripherals]] manual (p. 105):
+
+#+begin_quote
+"[GPIOs] run from the peripherals clock sources and use clock
+generators with noise-shaping MASH dividers... The fractional divider
+operates by periodically dropping source clock pulses, therefore the
+output frequency will periodically switch between:
+
+\begin{equation*}
+\frac{\text{sourceFrequency}}{\text{DIVI}} \quad \text{and} \quad
+\frac{\text{sourceFrequency}}{\text{DIVI+1}}
+\end{equation*}
+#+end_quote
+
+So essentially what this is saying is, when a fractional divider is
+required, the GPIO clock in question will run at a *variable rate*,
+with an *average frequency* close to the target. This doesn't appear
+to bode well for deriving time from such a clock.
+
+Entered on [2024-05-02 jeu. 10:54]
