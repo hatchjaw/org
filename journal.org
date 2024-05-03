@@ -664,3 +664,37 @@ with an *average frequency* close to the target. This doesn't appear
 to bode well for deriving time from such a clock.
 
 Entered on [2024-05-02 jeu. 10:54]
+*** 2024-05-03 vendredi
+**** RPi 3 model B+: clocks, GPIO pins                      :HARDWARE:RPI:
+- GPIO pins are numbered — with HDMI port on the left, and ethernet at
+  the bottom — as follows:
+
+  | 1 | 2 |
+  | 3 | 4 |
+  | 5 | 6 |
+  | 8 | 7 |
+  |...|...|
+
+- Pin 12 is the PCM clock, i.e. the one set by Circle's
+  ~CI2SSoundBaseDevice~ constructor. This has a frequency of ~3.07 MHz
+  (oscilloscope reads 3.07212 MHz), which is approximately 64x the
+  target sampling rate.
+
+- Speaking of which $F_s$ is on pin 35; oscilloscope reports
+  48.0018-48.0019 kHz.
+
+- I think GPCLK2 (PLLD, pin 31?), which is used to generate the PCM
+  clock, is of too high a frequency (500 MHz) for the oscilloscope to
+  measure it.
+
+  + I do, however, see a weak clock signal on GPCLK0, pin 7 (~1.5
+    MHz).
+  
+Resources
+- [[https://pinout.xyz/][RPi GPIO pinout guide]]
+- [[https://datasheets.raspberrypi.com/bcm2835/bcm2835-peripherals.pdf][Broadcom BCM2835 ARM Peripherals [pdf]​]]
+  + [[https://elinux.org/BCM2835_datasheet_errata#p104_table][Relevant errata]]
+- [[https://abyz.me.uk/rpi/pigpio/][pigpio]]
+- [[https://github.com/arisena-com/rpi_src/tree/master][RPi I2S test app]]
+
+Entered on [2024-05-03 ven. 11:46]

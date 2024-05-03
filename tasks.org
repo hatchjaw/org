@@ -14,7 +14,7 @@ I have a case number with Ameli:
 
 I should quote that if I ever have to call them back.
 *** TODO Fill out updated form S 1106a
-*** TODO Get updated quittances de loyer from Foncia website
+*** TODO Get updated /quittances de loyer/ from Foncia website
 *** TODO Print all documents
 *** TODO Get envelope
 *** TODO Take to post office and send, with a suivi
@@ -26,6 +26,8 @@ DEADLINE: <2024-05-06 lun.>
 DEADLINE: <2024-05-27 lun.>
 ** TODO Message/email Matt Hamilton
 ** TODO Set up OrgRoam
+Hm, need to break this down. It's kind of set up but I don't know how
+best to use it, so I should read the docs.
 ** TODO Follow up on notes from meeting with Morgane Leprince
 These notes are in my white notebook.
 *** DONE Email Solene
@@ -33,8 +35,9 @@ These notes are in my white notebook.
 *** DONE Phone Amelie
 DEADLINE: <2024-05-02 jeu.>
 - State "DONE"       from "TODO"       [2024-05-02 jeu. 17:01]
-*** TODO Update Mme Leprince
+*** DONE Update Mme Leprince
 DEADLINE: <2024-05-02 jeu.>
+- State "DONE"       from "TODO"       [2024-05-03 ven. 09:50]
 ** TODO [#A] Prepare for Thesis Committee Meeting [3/5]
 *** DONE Set up Doodle
 DEADLINE: <2024-04-16 mar.>
