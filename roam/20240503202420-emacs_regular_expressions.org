@@ -1,0 +1,36 @@
+:PROPERTIES:
+:ID:       eb07abec-d294-4ef3-b32a-1eddacbf1e84
+:END:
+#+title: Emacs regular expressions
+
+Emacs has a macro ~rx~ for building regular expressions. E.g. to match
+a C block comment:
+
+#+begin_src emacs-lisp
+(rx "/*"
+    (* (| (not "*")
+          (: "*" (not "/"))))
+    (+ "*") "/")
+#+end_src
+
+#+RESULTS:
+: /\*\(?:[^*]\|\*[^/]\)*\*+/
+
+There's also an interface for testing expressions, =re-builder=.
+
+#+begin_src emacs-lisp :results silent
+(re-builder)
+(reb-change-syntax 'rx)
+#+end_src
+
+E.g. in =re-builder=, to match the words "for" and "also", verbatim:
+
+#+begin_src emacs-lisp :results silent
+'(| "for" "also")
+#+end_src
+
+which is equivalent to regex "(for|also)".
+
+Resources:
+- [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Rx-Notation.html][Rx notation]]
+- [[https://francismurillo.github.io/2017-03-30-Exploring-Emacs-rx-Macro/][Exploring the Rx macro]]

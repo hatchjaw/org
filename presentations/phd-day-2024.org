@@ -1,0 +1,32 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+
+#+TITLE: Duelling Signals: Differentiable DSP in Faust
+#+AUTHOR: Thomas Rushton
+
+#+OPTIONS: num:nil
+
+#+HTML_HEAD: <script src="https://cdn.jsdelivr.net/npm/@grame/faust-web-component@0.3.2/dist/faust-web-component.js" defer></script>
+
+* Differentiable Programming
+
+* Differentiable DSP
+
+* The Faust Programming Language
+
+#+begin_src faust :results html :exports results
+process = +;
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<faust-editor>
+<!--
+process = +;
+-->
+</faust-editor>
+#+end_export
+
+* How I made this presentation...
+
+** Literate programming is kind of cool, don't you think?
