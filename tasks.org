@@ -20,8 +20,9 @@ I should quote that if I ever have to call them back.
 *** TODO Take to post office and send, with a suivi
 ** TODO Read Razvan's Thesis
 The PDF is in ~/Documents
-** TODO Pay Agathe €40
+** DONE Pay Agathe €40
 DEADLINE: <2024-05-06 lun.>
+- State "DONE"       from "TODO"       [2024-05-06 lun. 09:43]
 ** TODO Review PAUC manuscript
 DEADLINE: <2024-05-27 lun.>
 ** TODO Message/email Matt Hamilton

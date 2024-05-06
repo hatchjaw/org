@@ -1,0 +1,22 @@
+:PROPERTIES:
+:ID:       194dad30-fe07-4327-9391-c0b6f934b3e1
+:END:
+#+title: Editing Org code blocks
+
+With cursor in a source block, hit =C-c ' (org-edit-special)= to edit
+the code in a separate buffer. How lovely.
+
+Using =org-edit-special= on =org= syntax returns headlines, source
+blocks, etc. comma-prepended so they won't disappear on export.
+
+#+begin_src org
+,* This is an org headline
+
+,#+begin_src emacs-lisp
+(message "This is some elisp")
+,#+end_src
+#+end_src
+
+Sources:
+- [[https://github.com/bzg/org-mode/blob/main/doc/org-guide.org#literal-examples][Org guide]]
+- [[https://www.danliden.com/posts/20220208-org-source.html][Blog post on Org in Org]]
