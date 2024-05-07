@@ -15,10 +15,13 @@
 
 * The Faust Programming Language
 
-Fasut is a domain-specific, functional programming language for
+Faust is a domain-specific, functional programming language for
 digital signal processing and audio synthesis.
 
-Here's a basic Faust program:
+** A basic Faust program
+
+- Two input signals — implicit
+- One output signal: the sum of the inputs
 
 #+begin_src faust :results html :exports both :tab svg :sizes 0,100
 process = +;
@@ -29,6 +32,45 @@ process = +;
 <faust-editor sizes="[0,100]" tab="svg">
 <!--
 process = +;
+-->
+</faust-editor>
+#+end_export
+
+** A basic Faust synthesiser...
+
+#+begin_src faust :results html :exports both :tab ui :sizes 0,100
+import("stdfaust.lib");
+process = sum(i, 10, os.osc(220*((i+1)^1.8)) : *(1/(i+1))) 
+    : *(en.ar(.025, 2.5, button("gate")))
+    : *(.5);
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<faust-editor sizes="[0,100]" tab="ui">
+<!--
+import("stdfaust.lib");
+process = sum(i, 10, os.osc(220*((i+1)^1.8)) : *(1/(i+1))) 
+    : *(en.ar(.025, 2.5, button("gate")))
+    : *(.5);
+-->
+</faust-editor>
+#+end_export
+
+** A recursive Faust program
+
+- One input
+- One output: the sum of the input and scaled, delayed copy of the output
+
+#+begin_src faust :results html :exports both :tab svg :sizes 0,100
+process = +~(@(10000) : *(.5));
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<faust-editor sizes="[0,100]" tab="svg">
+<!--
+process = +~(@(10000) : *(.5));
 -->
 </faust-editor>
 #+end_export

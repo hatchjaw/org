@@ -7,17 +7,24 @@
 DEADLINE: <2024-05-14 mar.>
 ** TODO Prepare Emeraude Séminaire presentation
 DEADLINE: <2024-05-15 mer.>
-** TODO [#B] Apply, again, for social security [0/5]
+** DONE [#B] Apply, again, for social security [5/5]
+- State "DONE"       from "TODO"       [2024-05-07 mar. 15:55]
 I have a case number with Ameli:
 
 *2024 0502 6443 39*
 
 I should quote that if I ever have to call them back.
-*** TODO Fill out updated form S 1106a
-*** TODO Get updated /quittances de loyer/ from Foncia website
-*** TODO Print all documents
-*** TODO Get envelope
-*** TODO Take to post office and send, with a suivi
+*** DONE Fill out updated form S 1106a
+- State "DONE"       from "TODO"       [2024-05-07 mar. 10:44]
+*** DONE Get updated /quittances de loyer/ from Foncia website
+- State "DONE"       from "TODO"       [2024-05-07 mar. 12:48]
+*** DONE Print all documents
+- State "DONE"       from "TODO"       [2024-05-07 mar. 12:48]
+*** DONE Get envelope
+- State "DONE"       from "TODO"       [2024-05-07 mar. 15:53]
+*** DONE Take to post office and send, with a suivi
+- State "DONE"       from "TODO"       [2024-05-07 mar. 15:54]
+NB, sent via INSA's outgoing post.
 ** TODO Read Razvan's Thesis
 The PDF is in ~/Documents
 ** DONE Pay Agathe €40
