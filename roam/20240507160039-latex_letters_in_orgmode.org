@@ -1,0 +1,10 @@
+:PROPERTIES:
+:ID:       9be0a938-d6ad-4606-b02e-d024d362bdbd
+:END:
+#+title: LaTeX letters in Orgmode
+
+[[https://www.miskatonic.org/2022/01/28/latex-letters-in-org/][Here]]'s a nice article on this topic, and [[file:~/org/personal/securite_sociale.org][here]]'s a letter I wrote using
+the approach described.
+
+One can also [[https://orgmode.org/worg/exporters/koma-letter-export.html][do this]] with the KOMA-Script =srclttr2= package, but it
+looks a bit more involved.
