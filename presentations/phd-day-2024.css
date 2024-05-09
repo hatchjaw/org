@@ -6,10 +6,10 @@ pre.src {
     height: 5em;
 }
 
-.synth::part(content) {
+.synth::part(content), .echo::part(content) {
     height: 10em;
 }
 
-.echo::part(content) {
+.dual-add-again::part(content) {
     height: 10em;
 }

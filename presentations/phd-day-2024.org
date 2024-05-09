@@ -129,10 +129,16 @@ process = +;
 $y = u + v$
 
 #+ATTR_REVEAL: :frag t
-$\frac{dy}{dx} = \frac{d}{dx}\left(u + v\right) = \frac{du}{dx} +
-\frac{dv}{dx}$
+Differentiate wrt. $x$:
+\[
+\frac{dy}{dx} = \frac{d}{dx}\left(u + v\right) = \frac{du}{dx} +
+\frac{dv}{dx}
+\]
 
 #+REVEAL: split
+
+- We can represent the addition and its derivative in parallel
+
 #+begin_src faust :results html :exports both :tab svg :sizes 0,100 :class dual-add
 process = +,+;
 #+end_src
@@ -142,6 +148,77 @@ process = +,+;
 <faust-editor sizes="[0,100]" tab="svg" class="dual-add">
 <!--
 process = +,+;
+-->
+</faust-editor>
+#+end_export
+
+#+ATTR_REVEAL: :frag t
+\begin{align*}
+\langle y, \frac{dy}{dx} \rangle
+&= \langle u, \frac{du}{dx} \rangle + \langle v, \frac{dv}{dx} \rangle \\
+&= \langle u + v, \frac{du}{dx} + \frac{dv}{dx} \rangle.
+\end{align*}
+
+#+ATTR_REVEAL: :frag t
+Dual number \rightarrow /dual signal/
+
+** /Where's the derivative?/
+
+#+REVEAL: split
+It's assumed that each derivative has been calculated elsewhere
+
+#+begin_src faust :results html :exports both :tab svg :sizes 0,100 :class dual-add-again
+x = hslider("x", 0, -1, 1, .1);
+u = _;
+v = x;
+dudx = 0;
+dvdx = 1;
+process = u,v,dudx,dvdx : +,+;
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<faust-editor sizes="[0,100]" tab="svg" class="dual-add-again">
+<!--
+x = hslider("x", 0, -1, 1, .1);
+u = _;
+v = x;
+dudx = 0;
+dvdx = 1;
+process = u,v,dudx,dvdx : +,+;
+-->
+</faust-editor>
+#+end_export
+
+** Making it /automatic/
+
+#+begin_src faust :results silent
+diffInput = _,0;
+diffSlider = hslider("x", 0, -1, 1, .1),1;
+#+end_src
+
+#+ATTR_REVEAL: :frag t
+#+begin_src faust :results silent
+diffAdd = route(4,4,(1,1),(2,3),(3,2),(4,4)) : +,+;
+#+end_src
+
+#+REVEAL: split
+
+#+begin_src faust :results html :exports both :tab svg :sizes 0,100 :class dual-add-again
+diffInput = _,0;
+diffSlider = hslider("x", 0, -1, 1, .1),1;
+diffAdd = route(4,4,(1,1),(2,3),(3,2),(4,4)) : +,+;
+process = diffInput,diffSlider : diffAdd;
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<faust-editor sizes="[0,100]" tab="svg" class="dual-add-again">
+<!--
+diffInput = _,0;
+diffSlider = hslider("x", 0, -1, 1, .1),1;
+diffAdd = route(4,4,(1,1),(2,3),(3,2),(4,4)) : +,+;
+process = diffInput,diffSlider : diffAdd;
 -->
 </faust-editor>
 #+end_export
