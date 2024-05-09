@@ -1,24 +1,47 @@
 # -*- coding: utf-8 -*-
 # -*- mode: org -*-
 
+# Run, from reveal.js directory, with `npm start -- --root=../
+
 #+TITLE: Duelling Signals: Differentiable DSP in Faust
 #+AUTHOR: Thomas Rushton
 
 #+OPTIONS: num:nil
 
 #+REVEAL_ROOT: ./reveal.js
-
-# #+HTML_HEAD: <script src="https://cdn.jsdelivr.net/npm/@grame/faust-web-component@0.3.2/dist/faust-web-component.js" defer></script>
-#+HTML_HEAD: <script src="faust-web-component.js" defer></script>
+#+REVEAL_THEME: white
+#+REVEAL_PLUGINS: (math highlight)
+#+REVEAL_HIGHLIGHT_CSS: stackoverflow-light
+# #+REVEAL_EXTRA_SCRIPTS: <script src="https://cdn.jsdelivr.net/npm/@grame/faust-web-component@0.3.2/dist/faust-web-component.js" defer></script>
+#+REVEAL_EXTRA_SCRIPTS: ("faust-web-component.js" "faust-stop-on-slidechanged.js")
+#+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
 
 * Differentiable Programming
 
+- Differentiate a program (analytically) with respect to its inputs
+  + Automatic differentiation
+- Compute the sensitivity of a program's outputs to changes in its inputs
+- Key to gradient-based optimisation problems
+- Native support in some languages, e.g. Swift
+- Support via libraries in Python, Julia, etc.
+
 * Differentiable DSP
+
+- Application of differentiable programming to audio tasks
+  + Source separation
+  + Timbre transfer
+  + Parameter estimation, etc.
+- Possible in Faust via the DawDreamer project
+  + Transpilation of Faust to Python
+  + AD via JAX
 
 * The Faust Programming Language
 
 Faust is a domain-specific, functional programming language for
 digital signal processing and audio synthesis.
+
+- Syntax describes a /circuit/ through which /signals/ propagate
+- (Almost) everything in Faust is a signal, or something that operates on signals
 
 ** A basic Faust program
 
@@ -38,13 +61,14 @@ process = +;
 </faust-editor>
 #+end_export
 
-** A basic Faust synthesiser...
+** A basic Faust synthesiser
 
 #+begin_src faust :results html :exports both :tab ui :sizes 0,100
 import("stdfaust.lib");
 process = sum(i, 10, os.osc(220*((i+1)^1.8)) : *(1/(i+1))) 
     : *(en.ar(.025, 2.5, button("gate")))
-    : *(.5);
+    : *(.5)
+    <: ;
 #+end_src
 
 #+RESULTS:
@@ -77,6 +101,17 @@ process = +~(@(10000) : *(.5));
 </faust-editor>
 #+end_export
 
+* DDSP in Faust
+
+* Outlook
+
+- More loss functions, optimisers, momentum, parameter normalisation...
+- Frequency-domain loss
+- Reverse mode...
+- Weight computation; real-time inference
+- To be developed further as a Google Summer of Code project
+
 * How I made this presentation...
 
 ** Literate programming is kind of cool, don't you think?
+
