@@ -2,14 +2,16 @@ pre.src {
     padding: 1em;
 }
 
-.add::part(content), .dual-add::part(content) {
+.add::part(content),
+.dual-add::part(content),
+.multivariate::part(content)
+{
     height: 5em;
 }
 
-.synth::part(content), .echo::part(content) {
-    height: 10em;
-}
-
-.dual-add-again::part(content) {
+.synth::part(content),
+.echo::part(content),
+.dual-add-again::part(content)
+{
     height: 10em;
 }
