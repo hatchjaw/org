@@ -1,0 +1,15 @@
+pre.src {
+    padding: 1em;
+}
+
+.add::part(content), .dual-add::part(content) {
+    height: 5em;
+}
+
+.synth::part(content) {
+    height: 10em;
+}
+
+.echo::part(content) {
+    height: 10em;
+}

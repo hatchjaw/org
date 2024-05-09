@@ -6,12 +6,16 @@
 #+TITLE: Duelling Signals: Differentiable DSP in Faust
 #+AUTHOR: Thomas Rushton
 
-#+OPTIONS: num:nil
+#+OPTIONS: num:nil toc:nil
 
 #+REVEAL_ROOT: ./reveal.js
-#+REVEAL_THEME: white
-#+REVEAL_PLUGINS: (math highlight)
-#+REVEAL_HIGHLIGHT_CSS: stackoverflow-light
+# #+REVEAL_THEME: white
+#+REVEAL_PLUGINS: (math)
+#+REVEAL_EXTRA_CSS: phd-day-2024.css
+#+REVEAL_MIN_SCALE: 1.0
+#+REVEAL_MAX_SCALE: 1.0
+# #+REVEAL_HIGHLIGHT_CSS: %r/plugin/highlight/monokai.css
+# #+REVEAL_HIGHLIGHT_CSS: %r/node_modules/highlight.js/styles/zenburn.css
 # #+REVEAL_EXTRA_SCRIPTS: <script src="https://cdn.jsdelivr.net/npm/@grame/faust-web-component@0.3.2/dist/faust-web-component.js" defer></script>
 #+REVEAL_EXTRA_SCRIPTS: ("faust-web-component.js" "faust-stop-on-slidechanged.js")
 #+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
@@ -20,7 +24,17 @@
 
 - Differentiate a program (analytically) with respect to its inputs
   + Automatic differentiation
-- Compute the sensitivity of a program's outputs to changes in its inputs
+- Compute the sensitivity of a program's outputs to changes in its
+  inputs
+  
+\begin{equation*}
+\frac{\partial y}{\partial\mathbf{x}} = \begin{bmatrix}\frac{\partial y}{\partial x_1} \\
+\vdots \\
+\frac{\partial y}{\partial x_N}\end{bmatrix}
+\end{equation*}
+
+#+REVEAL: split
+
 - Key to gradient-based optimisation problems
 - Native support in some languages, e.g. Swift
 - Support via libraries in Python, Julia, etc.
@@ -41,14 +55,15 @@ Faust is a domain-specific, functional programming language for
 digital signal processing and audio synthesis.
 
 - Syntax describes a /circuit/ through which /signals/ propagate
-- (Almost) everything in Faust is a signal, or something that operates on signals
+- (Almost) everything in Faust is a signal, or something that operates
+  on signals
 
 ** A basic Faust program
 
 - Two input signals — implicit
 - One output signal: the sum of the inputs
 
-#+begin_src faust :results html :exports both :tab svg :sizes 0,100
+#+begin_src faust :results html :exports both :tab svg :sizes 0,100 :class add
 process = +;
 #+end_src
 
@@ -63,12 +78,12 @@ process = +;
 
 ** A basic Faust synthesiser
 
-#+begin_src faust :results html :exports both :tab ui :sizes 0,100
+#+begin_src faust :results html :exports both :tab ui :sizes 0,100 :class synth
 import("stdfaust.lib");
 process = sum(i, 10, os.osc(220*((i+1)^1.8)) : *(1/(i+1))) 
     : *(en.ar(.025, 2.5, button("gate")))
     : *(.5)
-    <: ;
+    <: _,_;
 #+end_src
 
 #+RESULTS:
@@ -78,7 +93,8 @@ process = sum(i, 10, os.osc(220*((i+1)^1.8)) : *(1/(i+1)))
 import("stdfaust.lib");
 process = sum(i, 10, os.osc(220*((i+1)^1.8)) : *(1/(i+1))) 
     : *(en.ar(.025, 2.5, button("gate")))
-    : *(.5);
+    : *(.5)
+    <: _,_;
 -->
 </faust-editor>
 #+end_export
@@ -88,7 +104,7 @@ process = sum(i, 10, os.osc(220*((i+1)^1.8)) : *(1/(i+1)))
 - One input
 - One output: the sum of the input and scaled, delayed copy of the output
 
-#+begin_src faust :results html :exports both :tab svg :sizes 0,100
+#+begin_src faust :results html :exports both :tab svg :sizes 0,100 :class echo
 process = +~(@(10000) : *(.5));
 #+end_src
 
@@ -102,6 +118,33 @@ process = +~(@(10000) : *(.5));
 #+end_export
 
 * DDSP in Faust
+
+** A Differentiable Primitive
+
+#+begin_src faust :results silent
+process = +;
+#+end_src
+
+#+ATTR_REVEAL: :frag t
+$y = u + v$
+
+#+ATTR_REVEAL: :frag t
+$\frac{dy}{dx} = \frac{d}{dx}\left(u + v\right) = \frac{du}{dx} +
+\frac{dv}{dx}$
+
+#+REVEAL: split
+#+begin_src faust :results html :exports both :tab svg :sizes 0,100 :class dual-add
+process = +,+;
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<faust-editor sizes="[0,100]" tab="svg" class="dual-add">
+<!--
+process = +,+;
+-->
+</faust-editor>
+#+end_export
 
 * Outlook
 
