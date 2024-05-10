@@ -5,8 +5,9 @@
 #+AUTHOR: Thomas Rushton
 
 #+OPTIONS: num:nil toc:nil reveal_width:1200
+#+EXPORT_FILE_NAME: index
 
-#+REVEAL_ROOT: ./reveal.js
+#+REVEAL_ROOT: ../reveal.js
 # #+REVEAL_THEME: white
 #+REVEAL_PLUGINS: (math)
 #+REVEAL_EXTRA_CSS: phd-day-2024.css
@@ -38,7 +39,7 @@ From the reveal.js directory (=../reveal.js=), run:
 npm start -- --root=../
 #+end_src
 
-Then navigate to [[localhost:8000/phd-day-2024.html]].
+Then navigate to [[localhost:8000/phd-day-2024/]].
 
 * Differentiable Programming
 
@@ -74,9 +75,12 @@ Then navigate to [[localhost:8000/phd-day-2024.html]].
 Faust is a domain-specific, functional programming language for
 digital signal processing and audio synthesis.
 
+#+ATTR_REVEAL: :frag t
 - Syntax describes a /circuit/ through which /signals/ propagate
 - (Almost) everything in Faust is a signal, or something that operates
   on signals
+- Great for audio; less great for... doing your taxes 🤷
+- Only maniacs write audio code in Python
 
 ** A basic Faust program
 
@@ -130,7 +134,7 @@ process = +~(@(10000) : *(.5));
 
 #+RESULTS:
 #+begin_export html
-<faust-editor sizes="[0,100]" tab="svg">
+<faust-editor sizes="[0,100]" tab="svg" class="echo">
 <!--
 process = +~(@(10000) : *(.5));
 -->
@@ -179,6 +183,7 @@ process = +,+;
 &= \langle u + v, \frac{du}{dx} + \frac{dv}{dx} \rangle
 \end{align*}
 
+#+ATTR_REVEAL: :frag t
 Dual number \rightarrow */Dual signal/*
 
 ** /Where's the derivative?/
@@ -327,6 +332,55 @@ diffMul(nvars) = route(nIN,nOUT,
     } : *,par(i, nvars, *,* : +);
 #+end_src
 
+#+RESULTS:
+#+begin_export html
+<faust-editor sizes="[0,100]" tab="svg" class="gain-dc">
+<!--
+NVARS = 2;
+x1 = diffSlider(NVARS,1,.5,0,1,.1);
+x2 = diffSlider(NVARS,2,0,-1,1,.1);
+process = diffInput(NVARS),x1 : diffMul(NVARS),x2 : diffAdd(NVARS);
+
+diffInput(nvars) = _,par(i,nvars,0);
+
+diffSlider(nvars,I,init,lo,hi,step) = hslider("x%I",init,lo,hi,step),par(i,nvars,i==I-1);
+
+diffAdd(nvars) = route(nIN,nOUT,
+        (u,1),(v,2), // u + v
+        par(i,nvars,
+            (u+i+1,dx),(v+i+1,dx+1) // du/dx_i + dv/dx_i
+            with {
+                dx = 2*i+3; // Start of derivatives wrt ith var
+            }
+        )
+    ) with {
+        nIN = 2+2*nvars;
+        nOUT = nIN;
+        u = 1;
+        v = u+nvars+1;
+    } : +,par(i, nvars, +);
+
+diffMul(nvars) = route(nIN,nOUT,
+        (u,1),(v,2), // u * v
+        par(i,nvars,
+            (u,dx),(dvdx,dx+1),   // u * dv/dx_i
+            (dudx,dx+2),(v,dx+3)  // du/dx_i * v
+            with {
+                dx = 4*i+3; // Start of derivatives wrt ith var
+                dudx = u+i+1;
+                dvdx = v+i+1;
+            }
+        )
+    ) with {
+        nIN = 2+2*nvars;
+        nOUT = 2+4*nvars;
+        u = 1;
+        v = u+nvars+1;
+    } : *,par(i, nvars, *,* : +);
+-->
+</faust-editor>
+#+end_export
+
 ** Gradient Descent
 
 
@@ -339,7 +393,51 @@ diffMul(nvars) = route(nIN,nOUT,
 - Weight computation; real-time inference
 - To be developed further as a Google Summer of Code project
 
-* How I made this presentation...
+* How I made this presentation
 
-** Literate programming is kind of cool, don't you think?
+** Emacs
+#+REVEAL_HTML: <div style="float: left; width: 50%">
+Pro
+#+ATTR_REVEAL: :frag t
+- Infinitely customisable
+#+REVEAL_HTML: </div>
+#+REVEAL_HTML: <div style="float: right; width: 50%">
+Con
+#+ATTR_REVEAL: :frag t
+- Infinitely customisable
+#+REVEAL_HTML: </div>
+
+** Org Mode
+
+#+REVEAL_HTML: <div style="float: left; width: 50%">
+Pro
+#+ATTR_REVEAL: :frag t
+- It's just plain text
+#+REVEAL_HTML: </div>
+#+REVEAL_HTML: <div style="float: right; width: 50%">
+Con
+#+ATTR_REVEAL: :frag t
+- Like coding by telepathically controlling another person's fingers
+- =C-c C-e v v=?!
+#+REVEAL_HTML: </div>
+
+** =ob-faust= for Faust support in Org Babel
+
+- Emacs lisp is my new favourite language.
+
+#+begin_src emacs-lisp
+(rx "/*"
+    (* (| (not "*")
+          (: "*" (not "/"))))
+    (+ "*") "/")
+#+end_src
+
+#+RESULTS:
+: /\*\(?:[^*]\|\*[^/]\)*\*+/
+
+** Customised* =faust-web-component=
+
+- *More of a dirty hack, truth be told.
+- Finally, my years as a web developer prove vaguely useful.
+- ~<faust-editor>~ and Reveal.js don't get along perfectly well.
 

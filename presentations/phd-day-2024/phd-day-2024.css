@@ -1,12 +1,17 @@
-pre.src {
+.org-src-container > pre {
     padding: 1em;
+    width: 66.6%;
 }
 
 .add::part(content),
-.dual-add::part(content),
-.multivariate::part(content)
+.dual-add::part(content)
 {
     height: 5em;
+}
+
+.multivariate::part(content)
+{
+    height: 6.5em;
 }
 
 .synth::part(content),
@@ -18,5 +23,5 @@ pre.src {
 
 .gain-dc::part(content)
 {
-    height: 15em;
+    height: 17em;
 }

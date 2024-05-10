@@ -5,11 +5,11 @@
 #+AUTHOR:      Thomas Rushton
 #+LANGUAGE:    en
 #+TAGS: LIG(L) HOME(H) Blog(B) noexport(n) Stats(S) MEETING(M) PRESENTATION(p)
-#+TAGS: HARDWARE(h) INSPO(i) DIY(d) TEACHING(t) REPRES(R) REVIEW(v)
+#+TAGS: HARDWARE(h) INSPO(i) DIY(d) TEACHING(t) REPRES(R) REVIEW(v) GSoC(g)
 #+TAGS: [ PROGRAMMING : R(r) PYTHON(p) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ]
-#+TAGS: [ AUDIO : SYNTHESIS(s) PHYSICALMODELLING(m) SPATIALAUDIO(p) ]
-#+TAGS: [ HARDWARE : RPI(p) TEENSY(t) ]
+#+TAGS: [ AUDIO : SYNTHESIS(s) PHYSICALMODELLING(m) SPATIALAUDIO(P) ]
+#+TAGS: [ HARDWARE : RPI(R) TEENSY(t) ]
 #+EXPORT_SELECT_TAGS: Blog
 #+OPTIONS:   H:3 num:0 toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc html-style:nil
@@ -698,3 +698,21 @@ Resources
 - [[https://github.com/arisena-com/rpi_src/tree/master][RPi I2S test app]]
 
 Entered on [2024-05-03 ven. 11:46]
+*** 2024-05-10 vendredi
+**** Faust Package Manager                                    :FAUST:GSoC:
+Meeting with Shehab
+- Package managers: state of the art
+  + NMP
+  + Cargo
+  + etc.
+- Understand the theory: Yann to share papers
+- How will the Faust package manager work?
+  + Modular nature of the Faust language
+- Agree on the technology to underpin the system
+  + Produce a formal specification
+- Shehab to prepare a presentation on SoTA and ideas for Faust
+  + read about Faust's modularity
+    * ~environment~ constructs, etc.
+- Next meeting ** 2024-05-23 @ 14h
+
+Entered on [2024-05-10 ven. 14:59]
