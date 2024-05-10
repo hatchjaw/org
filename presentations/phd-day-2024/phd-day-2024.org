@@ -8,7 +8,7 @@
 #+EXPORT_FILE_NAME: index
 
 #+REVEAL_ROOT: ../reveal.js
-# #+REVEAL_THEME: white
+#+REVEAL_THEME: white
 #+REVEAL_PLUGINS: (math)
 #+REVEAL_EXTRA_CSS: phd-day-2024.css
 #+REVEAL_MIN_SCALE: 1.0
@@ -423,21 +423,19 @@ Con
 
 ** =ob-faust= for Faust support in Org Babel
 
-- Emacs lisp is my new favourite language.
-
-#+begin_src emacs-lisp
-(rx "/*"
-    (* (| (not "*")
-          (: "*" (not "/"))))
-    (+ "*") "/")
-#+end_src
-
-#+RESULTS:
-: /\*\(?:[^*]\|\*[^/]\)*\*+/
+#+ATTR_REVEAL: :frag (appear)
+- Emacs lisp is my new favourite language
+- Just kidding
 
 ** Customised* =faust-web-component=
 
-- *More of a dirty hack, truth be told.
-- Finally, my years as a web developer prove vaguely useful.
-- ~<faust-editor>~ and Reveal.js don't get along perfectly well.
+#+ATTR_REVEAL: :frag (appear)
+- *More of a dirty hack, truth be told
+- Finally, my years as a web developer prove vaguely useful
+- ~<faust-editor>~ and Reveal.js don't get along perfectly well
 
+#+REVEAL: split
+
+#+begin_quote
+Only maniacs write audio code in Python ---T.\nbsp{}Rushton, 2024
+#+end_quote
