@@ -15,3 +15,8 @@ pre.src {
 {
     height: 10em;
 }
+
+.gain-dc::part(content)
+{
+    height: 15em;
+}

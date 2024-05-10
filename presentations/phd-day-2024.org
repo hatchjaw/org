@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 # -*- mode: org -*-
 
-# Run, from reveal.js directory, with `npm start -- --root=../
-
 #+TITLE: Duelling Signals: Differentiable DSP in Faust
 #+AUTHOR: Thomas Rushton
 
-#+OPTIONS: num:nil toc:nil
+#+OPTIONS: num:nil toc:nil reveal_width:1200
 
 #+REVEAL_ROOT: ./reveal.js
 # #+REVEAL_THEME: white
@@ -19,6 +17,28 @@
 # #+REVEAL_EXTRA_SCRIPTS: <script src="https://cdn.jsdelivr.net/npm/@grame/faust-web-component@0.3.2/dist/faust-web-component.js" defer></script>
 #+REVEAL_EXTRA_SCRIPTS: ("faust-web-component.js" "faust-stop-on-slidechanged.js")
 #+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
+
+* About This Presentation                                          :noexport:
+
+This =org= file describes my presentation for the 2024 CITI lab PhD Day.
+
+** Dependencies
+
+- =org-re-reveal= ([[https://gitlab.com/oer/org-re-reveal/-/tree/main][gitlab]]), which enables export support from Org to [[https://revealjs.com/][Reveal.js]];
+- =faust-web-component.js=, which provides a customised version of the
+  ~<faust-editor>~ [[https://github.com/grame-cncm/faust-web-component][web component]] with support for specifying
+  attributes and styling the content area of the component;
+- =ob-faust= ([[https://github.com/hatchjaw/ob-faust][github]]), which adds (basic) support for Faust to Org Babel;
+
+** Running the Presentation
+
+From the reveal.js directory (=../reveal.js=), run:
+
+#+begin_src shell :noeval :exports code
+npm start -- --root=../
+#+end_src
+
+Then navigate to [[localhost:8000/phd-day-2024.html]].
 
 * Differentiable Programming
 
@@ -159,8 +179,7 @@ process = +,+;
 &= \langle u + v, \frac{du}{dx} + \frac{dv}{dx} \rangle
 \end{align*}
 
-#+ATTR_REVEAL: :frag t
-Dual number \rightarrow */dual signal/*
+Dual number \rightarrow */Dual signal/*
 
 ** /Where's the derivative?/
 
@@ -225,8 +244,6 @@ process = diffInput,diffSlider : diffAdd;
 
 ** Multivariate Problems
 
-#+REVEAL: split
-
 *** Variable gain and DC offset
 
 #+begin_src faust :results html :exports both :tab svg :sizes 0,100 :class multivariate
@@ -263,6 +280,56 @@ y' = \frac{\partial y}{\partial \mathbf{x}}
 &= \langle uv,u'v + v'u \rangle + \langle w,w' \rangle \\
 &= \langle uv + w,u'v + v'u + w'\rangle
 \end{align*}
+
+*** Implementation in Faust
+
+#+begin_src faust :results html :exports results :tab svg :sizes 0,100 :class gain-dc
+NVARS = 2;
+x1 = diffSlider(NVARS,1,.5,0,1,.1);
+x2 = diffSlider(NVARS,2,0,-1,1,.1);
+process = diffInput(NVARS),x1 : diffMul(NVARS),x2 : diffAdd(NVARS);
+
+diffInput(nvars) = _,par(i,nvars,0);
+
+diffSlider(nvars,I,init,lo,hi,step) = hslider("x%I",init,lo,hi,step),par(i,nvars,i==I-1);
+
+diffAdd(nvars) = route(nIN,nOUT,
+        (u,1),(v,2), // u + v
+        par(i,nvars,
+            (u+i+1,dx),(v+i+1,dx+1) // du/dx_i + dv/dx_i
+            with {
+                dx = 2*i+3; // Start of derivatives wrt ith var
+            }
+        )
+    ) with {
+        nIN = 2+2*nvars;
+        nOUT = nIN;
+        u = 1;
+        v = u+nvars+1;
+    } : +,par(i, nvars, +);
+
+diffMul(nvars) = route(nIN,nOUT,
+        (u,1),(v,2), // u * v
+        par(i,nvars,
+            (u,dx),(dvdx,dx+1),   // u * dv/dx_i
+            (dudx,dx+2),(v,dx+3)  // du/dx_i * v
+            with {
+                dx = 4*i+3; // Start of derivatives wrt ith var
+                dudx = u+i+1;
+                dvdx = v+i+1;
+            }
+        )
+    ) with {
+        nIN = 2+2*nvars;
+        nOUT = 2+4*nvars;
+        u = 1;
+        v = u+nvars+1;
+    } : *,par(i, nvars, *,* : +);
+#+end_src
+
+** Gradient Descent
+
+
 
 * Outlook
 
