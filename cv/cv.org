@@ -108,15 +108,6 @@ match what you have in =~/.local/share/fonts=.
 	Ligatures={Common}]{MinionPro-MediumCapt}
 #+end_src
 
-*** Bullets
-
-Don't show 'em.
-
-#+begin_src latex
-\renewcommand{\labelitemi}{~}
-\renewcommand{\labelitemii}{~}
-#+end_src
-
 ** Layout
 *** Paragraphs
 
@@ -130,7 +121,7 @@ Don't show 'em.
 #+begin_src latex
 \newcommand{\mytitle}{}
 
-\renewcommand{\mytitle}{\large\scheader\textsc\@author\\\footnotesize
+\renewcommand{\mytitle}{\Large\scheader\textsc\@author\\\footnotesize
   \href{https://team.inria.fr/emeraude/}{Emeraude Research Team, Inria}
   \\ CITI Laboratory, \\ 6 av. des Arts, \\ \vspace{-0.05in}
   69100 Villeurbanne, France}
@@ -164,6 +155,26 @@ Don't show 'em.
             \titlespacing{\section}{90pt}{10pt}{15pt}
 #+end_src
 
+*** Lists
+
+Don't show bullets
+
+#+begin_src latex
+\renewcommand{\labelitemi}{~}
+\renewcommand{\labelitemii}{~}
+#+end_src
+
+Reduce list spacing
+
+#+begin_src latex
+\let\saveditemize=\itemize%
+\let\savedenditemize=\enditemize%
+%% \makeatletter
+\renewenvironment{itemize}
+{\vspace{-.2cm}\footnotesize\saveditemize}
+{\savedenditemize\vspace{-.1cm}}
+#+end_src
+
 * Education
 
 MSc Sound and Music Computing, Aalborg University (Copenhagen), 2023
@@ -172,14 +183,26 @@ BMus Music Technology, The University of Edinburgh, 2009
 
 * Employment
 
-PhD Researcher, Inria, Villeurbanne, France, 2023-present.
+PhD Researcher, [[https://inria.fr][Inria]], Villeurbanne, France, 2023-present.
 - Member of the Emeraude Research Team, conducting research on a
   doctorate entitled /Enabling Distributed Spatial Audio/.
 
-Internship, Inria, Villeurbanne, France, 2022.
-- Member of the Emeraude Research Team, developing a
-  microcontroller-based networked audio client for distributed audio
-  spatialisation.
+Internship, [[https://inria.fr][Inria]], Villeurbanne, France, 2022.
+- Developing a microcontroller-based networked audio client for
+  distributed audio spatialisation. Work presented at 2022
+  [[https://paw.grame.fr/2022/#rushton-talk][Programmable Audio Workshop]].
+
+Web Developer, freelance, 2016-2022.
+- Full-stack web development, specialising in software licensing and
+  eCommerce. Clients including [[https://www.physicalaudio.co.uk][PhysicalAudio]] and
+  [[https://krotosaudio.com][Krotos]].
+
+Software Developer, [[https://sci-telligent.co.uk/][Sci-telligent]], Macclesfield, UK, 2014-2016.
+- Development of web applications for scientific and pharmaceutical
+  clients; contracted support for financial services clients.
+
+Print Output Developer, DST Output, Manchester, UK, 2012-2014.
+- Print output application development; business intelligence systems.
 
 * Publications
 
@@ -193,13 +216,7 @@ the 2023 Sound and Music Computing Conference (SMC-23)/.
 T. A. Rushton, P. R. Kantan, 2022, "[[https://seafile.zfn.uni-bremen.de/f/94b7758744164b4e9988/][A Real-time Embodied Sonification
 Model to Convey Temporal Asymmetry During Running]]", /Proceedings of
 the 7th Interactive Sonification Workshop (ISon)/.
-#+begin_export latex
-\footnotesize
-#+end_export
 - Winner: /Best Student Paper/
-#+begin_export latex
-\normalsize
-#+end_export
 
 T. A. Rushton, D. Overholt, 2022, "[[https://vbn.aau.dk/files/497197288/d20.pdf][The Springamajig: A Flexible
 Digital Musical Instrument]]", /19th Sound and Music Computing
