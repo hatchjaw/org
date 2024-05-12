@@ -25,11 +25,13 @@ This =org= file describes my presentation for the 2024 CITI lab PhD Day.
 
 ** Dependencies
 
-- =org-re-reveal= ([[https://gitlab.com/oer/org-re-reveal/-/tree/main][gitlab]]), which enables export support from Org to [[https://revealjs.com/][Reveal.js]];
+- =org-re-reveal= ([[https://gitlab.com/oer/org-re-reveal/-/tree/main][gitlab]]), which enables export support from Org to [[https://revealjs.com/][Reveal.js]].
 - =faust-web-component.js=, which provides a customised version of the
   ~<faust-editor>~ [[https://github.com/grame-cncm/faust-web-component][web component]] with support for specifying
-  attributes and styling the content area of the component;
-- =ob-faust= ([[https://github.com/hatchjaw/ob-faust][github]]), which adds (basic) support for Faust to Org Babel;
+  attributes and styling the content area of the component.
+- =ob-faust= ([[https://github.com/hatchjaw/ob-faust][github]]), which adds (basic) support for Faust to Org Babel.
+- Emacs =faust-mode=, modified slightly to fix syntax highlighting in
+  source blocks.
 
 ** Running the Presentation
 
@@ -101,6 +103,10 @@ process = +;
 #+end_export
 
 ** A basic Faust synthesiser
+
+- /Zero/ input signals
+- One output
+  + Well, two, because of the ~<: _,_~
 
 #+begin_src faust :results html :exports both :tab ui :sizes 0,100 :class synth
 import("stdfaust.lib");
@@ -189,7 +195,10 @@ Dual number \rightarrow */Dual signal/*
 ** /Where's the derivative?/
 
 #+REVEAL: split
+
 It's assumed that each derivative has been calculated elsewhere
+
+We need to define a derivative for /every/ primitive.
 
 #+begin_src faust :results html :exports both :tab svg :sizes 0,100 :class dual-add-again
 x = hslider("x", 0, -1, 1, .1);
@@ -383,7 +392,32 @@ diffMul(nvars) = route(nIN,nOUT,
 
 ** Gradient Descent
 
+- Run a ground truth algorithm in parallel with a /learnable/ one
+- Compare $y$ and $\hat{y}$ via a loss function
+  + L1-norm, time-domain
 
+\[
+\mathcal{L}(y,\hat{y}) = ||y-\hat{y}||
+\]
+
+#+REVEAL: split
+
+- Gradient found as the derivative of the loss function
+  wrt. $\mathbf{x}$ at time $t$
+- Scaled gradients subtracted from parameters to get $\mathbf{x}_{t+1}$
+
+\begin{align*}
+\mathbf{x}_{t+1} &= \mathbf{x}_t - \alpha\frac{\partial\mathcal{L}}{\partial \mathbf{x}_t} \\
+&= \mathbf{x}_t - \alpha\frac{\partial y}{\partial \mathbf{x}_t}\frac{y-\hat{y}}{|y-\hat{y}|}
+\end{align*}
+
+#+REVEAL: split
+
+
+
+#+begin_src faust
+diffVar(nvars,I,graph) = -~_ <: attach(graph),par(i,nvars,i+1==I);
+#+end_src
 
 * Outlook
 
@@ -416,12 +450,25 @@ Pro
 #+REVEAL_HTML: </div>
 #+REVEAL_HTML: <div style="float: right; width: 50%">
 Con
-#+ATTR_REVEAL: :frag t
+#+ATTR_REVEAL: :frag (appear)
 - Like coding by telepathically controlling another person's fingers
-- =C-c C-e v v=?!
+- ~C-c C-e v v~
 #+REVEAL_HTML: </div>
 
 ** =ob-faust= for Faust support in Org Babel
+
+#+ATTR_REVEAL: :frag t
+#+begin_src emacs-lisp :noeval
+(when (member "html" result-type)
+  (setq attributes
+	(concat
+	 (when-let ((sizes (cdr (assoc :sizes params))))
+	   (format " sizes=\"[%s]\"" sizes))
+	 (when-let ((tab (cdr (assoc :tab params))))
+	   (format " tab=%S" tab))
+	 (when-let ((class (cdr (assoc :class params))))
+	   (format " class=%S" class)))))
+#+end_src
 
 #+ATTR_REVEAL: :frag (appear)
 - Emacs lisp is my new favourite language
@@ -430,8 +477,8 @@ Con
 ** Customised* =faust-web-component=
 
 #+ATTR_REVEAL: :frag (appear)
-- *More of a dirty hack, truth be told
-- Finally, my years as a web developer prove vaguely useful
+- *Hacked to bits, truth be told
+- /Finally/, my years as a web developer prove vaguely useful
 - ~<faust-editor>~ and Reveal.js don't get along perfectly well
 
 #+REVEAL: split

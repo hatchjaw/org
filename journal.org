@@ -716,3 +716,32 @@ Meeting with Shehab
 - Next meeting ** 2024-05-23 @ 14h
 
 Entered on [2024-05-10 ven. 14:59]
+**** Amati++                                             :JUCE:GSoC:FAUST:
+First meeting with Tyler, Kamil, Stéphane and Grégoire.
+
+- Tyler wants to use the [[https://github.com/sudara/pamplejuce][PampleJUCE]] template
+- Stéphane suggests using the Faust/JUCE GUI builder
+  + Also mentions a bunch of things, that have already been written,
+    that could support the project
+- Tyler asks, /what hasn't already been written?/
+  + Editor improvements, says Grégoire
+  + CLAP support, says Stéphane
+- External editor support? Sooner rather than later?
+  + But why? Wouldn't it be nice for it to be self-contained like the
+    web IDE?
+  + Kamil says: yes, but as projects grow, the ability to edit in a
+    /real/ IDE, with keybindings etc. is desirable
+  + Grégoire asks about Language Server Protocol support...
+- Kamil suggests a feature-branch style approach to development and
+  code review
+- More straightforward to copy code from Amati to PampleJUCE template
+  than to fork Amati
+  + Kamil makes the case for the convenience of PampleJUCE: GitHub
+    actions, tests, etc.
+- Tyler to set up PampleJUCE template, copy from original Amati repo
+  + First task is just to get O.G. Amati running under the new template
+  + Credit Grégoire in the readme
+
+Next meeting ** 2024-05-24 18h CEST
+
+Entered on [2024-05-10 ven. 18:52]

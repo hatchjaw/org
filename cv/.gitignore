@@ -1,0 +1,6 @@
+*.sty
+*.tex
+*.pdf
+*.bbl
+*.html
+out/

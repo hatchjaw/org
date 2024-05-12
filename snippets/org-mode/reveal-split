@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Reveal split
+# key: spl
+# --
+#+REVEAL: split
