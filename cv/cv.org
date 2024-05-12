@@ -131,7 +131,7 @@ match what you have in =~/.local/share/fonts=.
 
 \renewcommand{\mytitle}{\Large\scheader\textsc\@author\\\footnotesize
   \href{https://team.inria.fr/emeraude/}{Emeraude Research Team, Inria}
-  \\ CITI Laboratory, \\ 6 av. des Arts, \\ \vspace{-0.05in}
+  \\ CITI Laboratory \\ 6 av. des Arts \\ \vspace{-0.05in}
   69100 Villeurbanne, France}
 
 \renewcommand*{\maketitle}{%
@@ -199,9 +199,9 @@ Reduce list spacing
 
 * Education
 
-MSc Sound and Music Computing, Aalborg University (Copenhagen), 2023
+MSc Sound and Music Computing, Aalborg University (Copenhagen), 2023.
 
-BMus Music Technology, The University of Edinburgh, 2009
+BMus Music Technology, The University of Edinburgh, 2009.
 
 * Employment
 
