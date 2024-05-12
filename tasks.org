@@ -36,7 +36,8 @@ DEADLINE: <2024-05-27 lun.>
 ** TODO Set up OrgRoam
 Hm, need to break this down. It's kind of set up but I don't know how
 best to use it, so I should read the docs.
-** TODO Follow up on notes from meeting with Morgane Leprince
+** DONE Follow up on notes from meeting with Morgane Leprince
+- State "DONE"       from "TODO"       [2024-05-12 dim. 18:49]
 These notes are in my white notebook.
 *** DONE Email Solene
 - State "DONE"       from "TODO"       [2024-04-19 ven. 09:07]
@@ -57,10 +58,11 @@ DEADLINE: <2024-04-16 mar.>
 *** DONE Confirm date
 DEADLINE: <2024-04-22 lun.>
 - State "DONE"       from "TODO"       [2024-04-22 lun. 10:05]
-*** TODO Prepare documentation [0/3]
+*** TODO Prepare documentation [1/3]
 DEADLINE: <2024-05-13 lun.>
 [[http://edinfomaths.universite-lyon.fr/en/thesis/thesis-follow][Instructions]]
-**** TODO Update CV
+**** DONE Update CV
+- State "DONE"       from "TODO"       [2024-05-12 dim. 18:49]
 **** TODO Progress report
 2 pages summarising research work and prospects for year ahead
 **** TODO All scientific work produced
