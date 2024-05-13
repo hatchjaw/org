@@ -10,10 +10,8 @@
 #+OPTIONS: toc:nil ':t ^:{} num:nil
 #+LATEX_CLASS: report
 #+BIBLIOGRAPHY: references.bib
-# #+PRINT_BIBLIOGRAPHY:
 #+CITE_EXPORT: biblatex
 #+LATEX_HEADER: \RequirePackage[]{report-style}
-# #+LATEX_HEADER: \addbibresource{../references.bib}
 
 * Latex Setup                                                      :noexport:
 :PROPERTIES:
@@ -46,6 +44,7 @@
 \RequirePackage{subfig} % Required for creating figures with multiple parts (subfigures)
 \RequirePackage{amsmath,amssymb,amsthm} % For including math equations, theorems, symbols, etc
 \RequirePackage{varioref} % More descriptive referencing
+%% \RequirePackage{inconsolata}
 #+end_src
 
 ** Typography
@@ -73,7 +72,6 @@
   doi=false,
   isbn=false
 }{biblatex}
-%% \RequirePackage{biblatex}
 #+end_src
 
 * Work Conducted
@@ -82,7 +80,10 @@ At the conclusion of my master's degree, I had developed a UDP
 multicast server for audio and control data, running on a
 general-purpose computer, and an accompanying microcontroller based
 client, running a distributed Wave Field Synthesis algorithm
-written in the [[https://faust.grame.fr/][Faust]] programming language.
+written in the [[https://faust.grame.fr/][Faust]] programming language. Though facing significant
+synchronicity challenges in the absence of an authoritative source of
+time, the system appeared, under experimentation, to produce
+perceptually plausible virtual sound sources.
 
 ** Exploration of Raspberry Pi as an Alternative Hardware Platform
 :PROPERTIES:
@@ -92,19 +93,20 @@ written in the [[https://faust.grame.fr/][Faust]] programming language.
 The implementation upon which my master's thesis was based used the
 [[https://www.pjrc.com/store/teensy41.html][Teensy 4.1]] microcontroller development board as its hardware
 platform. Teensy 4.1 is a powerful, low-cost device, features
-comprehensive library support for the creation of audio programs, and
-is available as a compilation target via Faust. Teensy is limited,
-however, in terms of on-board memory --- a crucial resource in audio
-algorithms, particluarly those involving many or long delay lines ---
-and its audio add-on is only capable of producing 16-bit audio output.
+comprehensive support for the creation of audio programs, and is
+available as a compilation target via a Faust architecture and the
+~faust2teensy~ utility. Teensy is limited, however, in terms of
+on-board memory --- a crucial resource in audio algorithms,
+particluarly those involving many or long delay lines --- and its
+audio add-on is only capable of producing 16-bit audio output.
 
 A platform not given serious consideration during work on my master's
 thesis is the Raspberry Pi. Though typically run as a single-board
 computer with a Linux operating system, it can be programmed to act as
 something more akin to a microcontroller board via the /bare-metal/
-development environment, [[https://circle-rpi.readthedocs.io/en/46.0/][Circle]]. This potentially facilitates the
-deployment of the Raspberry Pi as a high-quality, I^{2}S sound device
-suitable for use in timing-critical audio spatialisation applications.
+C++ development environment, [[https://circle-rpi.readthedocs.io/en/46.0/][Circle]]. This potentially facilitates the
+deployment of the Raspberry Pi, with its high-quality, I^{2}S sound
+output, in timing-critical audio spatialisation applications.
 
 Using the utility classes provided by Circle, I developed a
 proof-of-concept networked audio client, similar to the JackTrip
@@ -113,11 +115,30 @@ choice to use JackTrip, and thus unicast UDP transmission, was
 motivated by the fact that, at the time of writing, Circle does not
 offer functionality for configuring multicast network sockets.
 
+Limitations of this sort are inherent to the Circle environment, which
+also, unlike Teensy, does not offer standard library support. It has
+also proven to be somewhat /fragile/, responding unstably to attempts
+to perform diagnostic logging during audio processing for
+example. Given the computing power of the Raspberry Pi, however, its
+availability (something far from guaranteed amongst single-board
+computers and microcontrollers, particularly over the past few years)
+and the low-level control over its hardware permitted by Circle, I
+feel a solution based on this platform is worth pursuing.
+
 ** Account of Master's Research Submitted as Journal Article
+
+In November 2023, I was afforded the opportunity to submit a
+manuscript summary to the journal [[https://www.frontiersin.org/journals/virtual-reality][Frontiers in Virtual Reality]] based
+on the work I conducted for my master's thesis. I was subsequently
+invited to write an article, which I submitted on February 26^{th}. The
+current version of the article, pending the feedback of the review
+panel, is included with this file.
 
 * Next Steps
 
-I am in the process of establishing the viability of achieving 
+I am in the process of establishing the viability of achieving greater
+inter-client synchronicity than afforded by the 
+[cite:@correll_design_2005]
 
 * Other Activities
 
@@ -127,12 +148,13 @@ With my co-supervisor, Romain Michon, I have been assisting a group of
 fourth year computer science students at INSA Lyon with a /projet
 d'initiation à la recherche/ (PIR). For this project, the group have
 been working on producing a Faust architecture for the Circle
-environment (see [[#rpi]]). If successful, this work has the potential to
-be of use in supporting 
+environment. If successful, this work has the potential to be of great
+use in facilitating the compilation of audio spatialisation algorithms
+written in Faust for use on bare-metal Raspberry Pi.
 
 ** Google Summer of Code Mentorship
 
-I served as a contributor for last year's edition of [[https://summerofcode.withgoogle.com/][Google Summer of
+I served as a contributor for the 2023 edition of [[https://summerofcode.withgoogle.com/][Google Summer of
 Code]], working on a project entitled "[[https://github.com/grame-cncm/faust/pull/939][Automatic Differentiation in
 the Faust Compiler]]." Having subsequently developed this project
 further, writing an [[https://github.com/hatchjaw/faust-ddsp][exploratory automatic differentiation library]] in
@@ -149,7 +171,7 @@ entail weekly-meetings and support throughout the summer.
 - [[https://www.fun-mooc.fr/en/courses/reproducible-research-methodological-principles-transparent-scie/][Reproducible research: methodological principles for transparent
   science]], MOOC.
 
-** Reviewer
+** Reviews
 
 *** Conferences
 
@@ -160,8 +182,6 @@ entail weekly-meetings and support throughout the summer.
 *** Journals
 
 - [[https://link.springer.com/journal/779][Personal and Ubiquitous Computing]] (PAUC).
-
-* References
 
 #+PRINT_BIBLIOGRAPHY:
 
