@@ -1,0 +1,182 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+
+#+TITLE: Enabling Distributed Spatial Audio
+#+SUBTITLE: Thesis Committee: Year 1
+#+AUTHOR: Thomas Rushton
+#+DATE: May 2024
+
+#+EXPORT_FILE_NAME: out/report
+#+OPTIONS: toc:nil ':t ^:{} num:nil
+#+LATEX_CLASS: report
+#+BIBLIOGRAPHY: references.bib
+# #+PRINT_BIBLIOGRAPHY:
+#+CITE_EXPORT: biblatex
+#+LATEX_HEADER: \RequirePackage[]{report-style}
+# #+LATEX_HEADER: \addbibresource{../references.bib}
+
+* Latex Setup                                                      :noexport:
+:PROPERTIES:
+:HEADER-ARGS: :tangle out/report-style.sty :results silent
+:END:
+
+** Basics
+
+#+begin_src latex
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{report-style}[2024/05/13 v0.1 Bundling Report LaTeX style]
+#+end_src
+
+** Packages
+
+#+begin_src latex
+\RequirePackage{subfig}
+\RequirePackage[
+  subfig,
+  beramono,
+  eulermath,
+  pdfspacing
+]{classicthesis}
+\RequirePackage{arsclassica}
+\RequirePackage{hyperref}
+\RequirePackage[scale=0.95]{ebgaramond} % Probably not a good idea to override the font, but whatever.
+\RequirePackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\RequirePackage[utf8]{inputenc} % Required for including letters with accents
+\RequirePackage{enumitem} % Required for manipulating the whitespace between and within lists
+\RequirePackage{subfig} % Required for creating figures with multiple parts (subfigures)
+\RequirePackage{amsmath,amssymb,amsthm} % For including math equations, theorems, symbols, etc
+\RequirePackage{varioref} % More descriptive referencing
+#+end_src
+
+** Typography
+
+#+begin_src latex
+%% \linespread{1.5}
+\setkomafont{date}{\normalsize}
+#+end_src
+
+** Bibliography
+
+#+begin_src latex
+\PassOptionsToPackage{%
+  %backend=biber,bibencoding=utf8, %instead of bibtex
+%   backend=bibtex8,bibencoding=ascii,%
+  language=auto,
+  style=numeric-comp,
+  %style=authoryear-comp, % Author 1999, 2010
+  %bibstyle=authoryear,dashed=false, % dashed: substitute rep. author with ---
+  % sorting=nyt, % name, year, title
+  sorting=none,
+  maxbibnames=10, % default: 3, et al.
+  natbib=true, % natbib compatibility mode (\citep and \citet still work)
+  url=false,
+  doi=false,
+  isbn=false
+}{biblatex}
+%% \RequirePackage{biblatex}
+#+end_src
+
+* Work Conducted
+
+At the conclusion of my master's degree, I had developed a UDP
+multicast server for audio and control data, running on a
+general-purpose computer, and an accompanying microcontroller based
+client, running a distributed Wave Field Synthesis algorithm
+written in the [[https://faust.grame.fr/][Faust]] programming language.
+
+** Exploration of Raspberry Pi as an Alternative Hardware Platform
+:PROPERTIES:
+:CUSTOM_ID: rpi
+:END:
+
+The implementation upon which my master's thesis was based used the
+[[https://www.pjrc.com/store/teensy41.html][Teensy 4.1]] microcontroller development board as its hardware
+platform. Teensy 4.1 is a powerful, low-cost device, features
+comprehensive library support for the creation of audio programs, and
+is available as a compilation target via Faust. Teensy is limited,
+however, in terms of on-board memory --- a crucial resource in audio
+algorithms, particluarly those involving many or long delay lines ---
+and its audio add-on is only capable of producing 16-bit audio output.
+
+A platform not given serious consideration during work on my master's
+thesis is the Raspberry Pi. Though typically run as a single-board
+computer with a Linux operating system, it can be programmed to act as
+something more akin to a microcontroller board via the /bare-metal/
+development environment, [[https://circle-rpi.readthedocs.io/en/46.0/][Circle]]. This potentially facilitates the
+deployment of the Raspberry Pi as a high-quality, I^{2}S sound device
+suitable for use in timing-critical audio spatialisation applications.
+
+Using the utility classes provided by Circle, I developed a
+proof-of-concept networked audio client, similar to the JackTrip
+client described in [cite:@rushton_microcontroller-based_2023]. The
+choice to use JackTrip, and thus unicast UDP transmission, was
+motivated by the fact that, at the time of writing, Circle does not
+offer functionality for configuring multicast network sockets.
+
+** Account of Master's Research Submitted as Journal Article
+
+* Next Steps
+
+I am in the process of establishing the viability of achieving 
+
+* Other Activities
+
+** Co-supervision of PIR Project Group
+
+With my co-supervisor, Romain Michon, I have been assisting a group of
+fourth year computer science students at INSA Lyon with a /projet
+d'initiation à la recherche/ (PIR). For this project, the group have
+been working on producing a Faust architecture for the Circle
+environment (see [[#rpi]]). If successful, this work has the potential to
+be of use in supporting 
+
+** Google Summer of Code Mentorship
+
+I served as a contributor for last year's edition of [[https://summerofcode.withgoogle.com/][Google Summer of
+Code]], working on a project entitled "[[https://github.com/grame-cncm/faust/pull/939][Automatic Differentiation in
+the Faust Compiler]]." Having subsequently developed this project
+further, writing an [[https://github.com/hatchjaw/faust-ddsp][exploratory automatic differentiation library]] in
+the Faust language (directly, rather than focusing on its compiler),
+this year I will act as a project mentor, overseeing the work of a
+contributor in expanding upon the exploratory library. This will
+entail weekly-meetings and support throughout the summer.
+
+** Training
+
+- [[https://sites.google.com/site/rsdwinterschool/home][GDR RSD / ASF Winter School on Distributed Systems & Networks]],
+  5-9 February 2024, Le Pleynet.
+
+- [[https://www.fun-mooc.fr/en/courses/reproducible-research-methodological-principles-transparent-scie/][Reproducible research: methodological principles for transparent
+  science]], MOOC.
+
+** Reviewer
+
+*** Conferences
+
+- [[https://www.nime2024.org/][New Interfaces for Music Expression]] (NIME) 2024.
+
+- [[https://smcnetwork.org/smc2024/][Sound and Music Computing]] (SMC) 2024.
+
+*** Journals
+
+- [[https://link.springer.com/journal/779][Personal and Ubiquitous Computing]] (PAUC).
+
+* References
+
+#+PRINT_BIBLIOGRAPHY:
+
+* Emacs Setup                                                      :noexport:
+
+# Local Variables:
+# eval:   (add-to-list 'org-latex-classes '("report"
+# "\\documentclass[a4paper,oneside,
+# headinclude,footinclude,BCOR=5mm,
+# numbers=noenddot,cleardoublepage=empty,
+# tablecaptionabove]{scrartcl}
+# [NO-DEFAULT-PACKAGES]"
+# ("\\section{%s}" . "\\section*{%s}")
+# ("\\subsection{%s}" . "\\subsection*{%s}")
+# ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+# ("\\paragraph{%s}" . "\\paragraph*{%s}")
+# ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+# End:

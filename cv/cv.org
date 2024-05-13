@@ -16,6 +16,8 @@ Adapted from vitæ by [[https://github.com/kjhealy/kjh-vita/tree/master][Kieran 
 
 Tangle, then export.
 
+For the future, there are also some nice ideas [[https://titan-c.gitlab.io/org-cv/][here]].
+
 * Latex style                                                      :noexport:
 :PROPERTIES:
 :HEADER-ARGS: :tangle out/cv-style.sty :results silent

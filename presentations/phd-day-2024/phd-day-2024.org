@@ -46,7 +46,7 @@ Then navigate to [[localhost:8000/phd-day-2024/]].
 * Differentiable Programming
 
 - Differentiate a program (analytically) with respect to its inputs
-  + Automatic differentiation
+  + Automatic differentiation (AD)
 - Compute the sensitivity of a program's outputs to changes in its
   inputs
   
@@ -104,12 +104,12 @@ process = +;
 
 ** A basic Faust synthesiser
 
-- /Zero/ input signals; two outputs (because ~<: _,_~ )
+- /Zero/ input signals; two outputs (because ~<: _,_~
 
 #+begin_src faust :results html :exports both :tab ui :sizes 0,100 :class synth
 import("stdfaust.lib");
 process = sum(i, 10, os.osc(220*((i+1)^1.8)) : *(1/(i+1))) 
-    : *(en.ar(.025, 2.5, button("gate")))
+    : *(en.are(.025, 2.5, button("gate")))
     : *(.5)
     <: _,_;
 #+end_src
