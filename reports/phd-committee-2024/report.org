@@ -7,7 +7,7 @@
 #+DATE: May 2024
 
 #+EXPORT_FILE_NAME: out/report
-#+OPTIONS: toc:nil ':t ^:{} num:nil
+#+OPTIONS: toc:nil ':t ^:{} num:1
 #+LATEX_CLASS: report
 #+BIBLIOGRAPHY: references.bib
 #+CITE_EXPORT: biblatex
@@ -78,12 +78,13 @@
 
 At the conclusion of my master's degree, I had developed a UDP
 multicast server for audio and control data, running on a
-general-purpose computer, and an accompanying microcontroller based
-client, running a distributed Wave Field Synthesis algorithm
-written in the [[https://faust.grame.fr/][Faust]] programming language. Though facing significant
-synchronicity challenges in the absence of an authoritative source of
-time, the system appeared, under experimentation, to produce
-perceptually plausible virtual sound sources.
+general-purpose computer, and an accompanying ethernet network of
+microcontroller based clients, running a distributed Wave Field
+Synthesis algorithm written in the [[https://faust.grame.fr/][Faust]] programming language. Though
+facing significant synchronicity challenges in the absence of an
+authoritative source of time, the system gave the impression, under
+experimentation, of producing perceptually plausible virtual sound
+sources.
 
 ** Exploration of Raspberry Pi as an Alternative Hardware Platform
 :PROPERTIES:
@@ -92,13 +93,11 @@ perceptually plausible virtual sound sources.
 
 The implementation upon which my master's thesis was based used the
 [[https://www.pjrc.com/store/teensy41.html][Teensy 4.1]] microcontroller development board as its hardware
-platform. Teensy 4.1 is a powerful, low-cost device, features
-comprehensive support for the creation of audio programs, and is
-available as a compilation target via a Faust architecture and the
-~faust2teensy~ utility. Teensy is limited, however, in terms of
-on-board memory --- a crucial resource in audio algorithms,
-particluarly those involving many or long delay lines --- and its
-audio add-on is only capable of producing 16-bit audio output.
+platform. While compuationally powerful, low-cost, and supported as a
+Faust compilation target, teensy is limited in terms of on-board
+memory --- a crucial resource in audio algorithms, particularly those
+involving many or long delay lines --- and its audio add-on is only
+capable of producing 16-bit audio output.
 
 A platform not given serious consideration during work on my master's
 thesis is the Raspberry Pi. Though typically run as a single-board
@@ -116,9 +115,9 @@ motivated by the fact that, at the time of writing, Circle does not
 offer functionality for configuring multicast network sockets.
 
 Limitations of this sort are inherent to the Circle environment, which
-also, unlike Teensy, does not offer standard library support. It has
-also proven to be somewhat /fragile/, responding unstably to attempts
-to perform diagnostic logging during audio processing for
+also, unlike Teensy, does not offer C++ standard library support. It
+has also proven to be somewhat /fragile/, responding unstably to
+attempts to perform diagnostic logging during audio processing for
 example. Given the computing power of the Raspberry Pi, however, its
 availability (something far from guaranteed amongst single-board
 computers and microcontrollers, particularly over the past few years)
@@ -134,11 +133,67 @@ invited to write an article, which I submitted on February 26^{th}. The
 current version of the article, pending the feedback of the review
 panel, is included with this file.
 
-* Next Steps
+* Outlook & Prospects
+
+** In Pursuit of Sample-Synchronous Audio Output
 
 I am in the process of establishing the viability of achieving greater
-inter-client synchronicity than afforded by the 
-[cite:@correll_design_2005]
+inter-client synchronicity than exhibited by the system produced for
+my master's thesis. For that system, in the absence of a shared clock,
+asynchronicity is minimised via a combination a small audio buffer
+(and thus networked audio packet) size of 32 frames, an adaptive
+resampling algorithm at the client side, and a clock-adjustment
+strategy based on the rate of packet reception.
+
+Under such a strategy, the network itself becomes the shared clock,
+but with packets arriving on the order of every 726 \micro{}s, the resolution
+of that clock is far too coarse for reliable, accurate adjustments to
+be made. One possible approach to achieving clock-synchronicity
+between the server and all clients is to run one client as a USB audio
+device, thus becoming the /master clock/ for the system, and sharing
+its clock with the other clients over a hard link. One drawback to
+this approach is the need to run an additional cable in parallel with
+the ethernet cables linking the server and clients, making an already
+cable-heavy system less attractive from an accessibility
+point-of-view. Additionally, high-frequency clock signals would need
+to be amplified at intervals to maintain their integrity, further
+increasing the complexity of the system and increasing costs.
+
+State of the art networked audio systems typically use Precision Time
+Protocol (PTP) as a clock synchronisation mechanism. PTP in its most
+accurate form is underpinned by packet timestamping performed at the
+hardware level, something that affordable networking equipment does
+not provide. Software-only implementations of PTP are possible,
+however, and may support microsecond-order synchronisation
+[cite:@correll_design_2005]; in the short term, this is the approach
+that I wish to explore.
+
+** The Problem of Jitter
+
+Further complicating matters, though, is the influence of transmission
+jitter. For the Teensy-based system, reporting inter-packet intervals
+at the client side revealed high levels of jitter, with some packets
+taking as long as three times the expected interval to
+arrive. Conservative client-side buffering could compensate for this
+phenomenon, but ultimately, an investigation of the influence of
+unmanaged network switches, USB-C ethernet dongles, etc. on packet
+transmission will likely be necessary. It could be that compromises
+have to be made in terms of the /frugality/ of the proposed system to
+make it truly viable for high quality spatial audio
+applications. Recent Raspberry Pi versions support hardware
+timestamping, so a change of approach to costlier PTP-enabled switches
+may prove favourable.
+
+** Audio Spatialisation Algorithms
+
+Subsequent to drawing meaningful conclusions about client
+synchronicity, my wish is to return to the design of distributed audio
+spatialisation algorithms. The WFS algorithm demonstrated for my
+master's thesis is a relatively rudimentary one, and it does not
+extend to /focused/ virtual sources sources[cite:@ahrens_analytic_2012
+ch. 5.6] or the production of plane waves, for example. And though not
+as readily-parallelisable as WFS, ambisonics also represents an
+attractive target implementation.
 
 * Other Activities
 
@@ -161,7 +216,8 @@ further, writing an [[https://github.com/hatchjaw/faust-ddsp][exploratory automa
 the Faust language (directly, rather than focusing on its compiler),
 this year I will act as a project mentor, overseeing the work of a
 contributor in expanding upon the exploratory library. This will
-entail weekly-meetings and support throughout the summer.
+entail weekly-meetings and provision of support to the contributor
+throughout the summer.
 
 ** Training
 
