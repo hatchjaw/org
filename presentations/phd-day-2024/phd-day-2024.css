@@ -16,7 +16,8 @@
 
 .synth::part(content),
 .echo::part(content),
-.dual-add-again::part(content)
+.dual-add-again::part(content),
+.gain-dc-full::part(content)
 {
     height: 10em;
 }

@@ -49,7 +49,7 @@ DEADLINE: <2024-05-02 jeu.>
 *** DONE Update Mme Leprince
 DEADLINE: <2024-05-02 jeu.>
 - State "DONE"       from "TODO"       [2024-05-03 ven. 09:50]
-** TODO [#A] Prepare for Thesis Committee Meeting [3/5]
+** TODO [#A] Prepare for Thesis Committee Meeting [4/6]
 *** DONE Set up Doodle
 DEADLINE: <2024-04-16 mar.>
 - State "DONE"       from "TODO"       [2024-04-16 mar. 10:59]
@@ -60,14 +60,17 @@ DEADLINE: <2024-04-16 mar.>
 *** DONE Confirm date
 DEADLINE: <2024-04-22 lun.>
 - State "DONE"       from "TODO"       [2024-04-22 lun. 10:05]
-*** TODO Prepare documentation [1/3]
+*** DONE Prepare documentation [3/3]
 DEADLINE: <2024-05-13 lun.>
+- State "DONE"       from "TODO"       [2024-05-13 lun. 22:59]
 [[http://edinfomaths.universite-lyon.fr/en/thesis/thesis-follow][Instructions]]
 **** DONE Update CV
 - State "DONE"       from "TODO"       [2024-05-12 dim. 18:49]
-**** TODO Progress report
+**** DONE Progress report
+- State "DONE"       from "TODO"       [2024-05-13 lun. 22:58]
 2 pages summarising research work and prospects for year ahead
-**** TODO All scientific work produced
+**** DONE All scientific work produced
+- State "DONE"       from "TODO"       [2024-05-13 lun. 22:58]
 *** TODO Prepare presentation
 DEADLINE: <2024-05-26 dim.>
 *** TODO Update ADUM
