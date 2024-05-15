@@ -1,0 +1,36 @@
+.org-src-container > pre {
+    padding: 1em;
+    width: 66.6%;
+}
+
+.title-page > h2 {
+    color: #ededed;
+}
+
+.add::part(content),
+.dual-add::part(content)
+{
+    height: 5em;
+}
+
+.multivariate::part(content)
+{
+    height: 6.5em;
+}
+
+.gain-dc-full::part(content)
+{
+    height: 8em;
+}
+
+.synth::part(content),
+.echo::part(content),
+.dual-add-again::part(content)
+{
+    height: 10em;
+}
+
+.gain-dc::part(content)
+{
+    height: 17em;
+}

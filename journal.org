@@ -745,3 +745,70 @@ First meeting with Tyler, Kamil, Stéphane and Grégoire.
 Next meeting ** 2024-05-24 18h CEST
 
 Entered on [2024-05-10 ven. 18:52]
+*** 2024-05-14 mardi
+**** CITI PhD Day 2024                                      :PRESENTATION:
+***** Orégane Desrentes: Numerical Error in Floating Point Arithmetic: What You Should Look Out For
+- Floating point numbers are chaos
+- Subnormals are scary --- their inclusion in a computation can lead
+  to very significant arithmetic errors.
+- Overflow and underflow problems
+***** Thomas Lebron: Exploring the Impact on Privacy of Avatar Sythetic Data Solution
+- Anonymisation via synthetic data
+- Not just a case of /adding one/ to every data-point...
+- Trade-off of data quality vs privacy
+- Synthetic Data as an alternative to /Differential Privacy/?
+  + Why did we skip over this part so quickly?
+- Variational autoencoder: two neural networks working in combination
+  + Encoder and Decoder
+  + Classic diagram of a funnel in, and funnel out, like so: |>-<|
+- GANs\dots
+- *Avatar Method*: Project data in a smaller multimensional space,
+  identify k-nearest neighbours, generate 'avatar' in this space,
+  /project back/ to original space.
+  + I wonder how we assess how /realistic/ these avatars are.
+- Data Privacy Analysis
+  + Anonymeter, vs. attribute inference attack
+- Plenty of potential attacks on the avatar method (like any other
+  privacy scheme I guess), so need to tread carefully.
+***** Pierre Marza: Task-conditioned Adaptation of Visual Features in Multi-task Policy Learning
+- "Can we have a general vision model for robotics?"
+- Pre-training a vision model on diverse visual data with /masked autoencoder/
+***** Florian Rascoussier: Introduction to Routing Problem Diversity
+- Travelling Salesman Problem, Seven Bridges of Königsberg
+- Exact methods (branch-and-bound), heuristics (genetic algos),
+  metaheuristics (simulated annealing), hybrids (genentic + local
+  search)
+- Many, many, /many/ variations on routing problems; hard to know what
+  to tackle
+- How to define a routing problem...
+  + Constraints
+  + Objective functions: decide what needs to be optimised in the RP
+  + Decision variables: variables adjusted to optimise the objective
+    function
+  + /Meta-attributes/: attributes that change other attributes,
+    e.g. time-dependent decisions
+  + Resolution method: computational techniques used to solve the RP
+- /"Object-oriented-based RP definition"/ --- expand on this?
+- Objective functions: there are many, and papers aren't always clear
+  on what they've used..? Weird.
+
+Florian's slides were very nice; good typography, inverted
+text/background contrast for section-indicating slides.
+***** Alix Jeannerot: Optimization of Framed Slotted ALOHA Under Uncertainty
+- Random access (RA) protocols: devices have _same_ a priori
+  probability of being active and are independent of each other.
+- Sensor networks in industry
+  + /"Industry 4.0"/ is a new term for me, but I think I can glimpse
+    its meaning; interesting.
+- Frame model: devices choose time slots on which to transmit (all
+  have to know the time)
+- Frame Slotted ALOHA: one transmission per frame; no collisions
+- IoT networks are not homogeneous
+- Transmission slots chosen by probability distribution
+- Ah, we channel likelihood of collisions toward devices that are
+  active less of the time, and keep activation matrix slot dedicated
+  to high-activity devices.
+- Gradient /ascent/ to find stationary point (not maximum as such...)
+  + What happens as device activity changes?
+
+Entered on [2024-05-14 mar. 14:36]

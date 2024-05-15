@@ -2,7 +2,7 @@
 # -*- mode: org -*-
 
 #+TITLE: Duelling Signals: Differentiable DSP in Faust
-#+AUTHOR: Thomas Rushton --- Equipe Emeraude
+#+AUTHOR: Thomas Rushton --- Équipe Emeraude
 
 #+OPTIONS: num:nil toc:nil reveal_width:1200 ^:{}
 #+EXPORT_FILE_NAME: index
@@ -77,10 +77,13 @@ Then navigate to [[localhost:8000/phd-day-2024/]].
 Faust is a domain-specific, functional programming language for
 digital signal processing and audio synthesis.
 
-#+ATTR_REVEAL: :frag t
+#+ATTR_REVEAL: :frag (appear)
 - Syntax describes a /circuit/ through which /signals/ propagate
 - (Almost) everything in Faust is a signal, or something that operates
   on signals
+- Compiles to C++
+  #+ATTR_REVEAL: :frag t
+  + ...or Webassembly, or Rust, or Java...
 - Great for audio; less great for... doing your taxes 🤷
 - Only maniacs write audio code in Python
 
@@ -104,7 +107,7 @@ process = +;
 
 ** A basic Faust synthesiser
 
-- /Zero/ input signals; two outputs (because ~<: _,_~
+- /Zero/ input signals; two outputs (because ~<: _,_~ )
 
 #+begin_src faust :results html :exports both :tab ui :sizes 0,100 :class synth
 import("stdfaust.lib");
@@ -130,7 +133,9 @@ process = sum(i, 10, os.osc(220*((i+1)^1.8)) : *(1/(i+1)))
 ** A recursive Faust program
 
 - One input
-- One output: the sum of the input and scaled, delayed copy of the output
+  + The other input to ~+~ is taken from the recursive path
+- One output: the sum of the input and scaled, delayed copy of the
+  recursed output
 
 #+begin_src faust :results html :exports both :tab svg :sizes 0,100 :class echo
 process = +~(@(10000) : *(.5));
@@ -597,7 +602,9 @@ learnable = d.input,vars.var(1),vars.var(2)
 
 Makes use of Faust's /pattern-matching/ feature
 
-* More Examples...
+* Some Examples
+
+Time to switch to the Faust Web IDE...
 
 * Limitations
 
@@ -610,7 +617,7 @@ Makes use of Faust's /pattern-matching/ feature
 - Learning the length of a delay isn't easy
   + Derivative of a delay wrt. $\mathbf{x}$ contains a derivative
     wrt. time
-  + Important for some pretty ubiquitous audio effects (chorus, 
+  + Important for some pretty ubiquitous audio effects (chorus, etc.) 
 
 * Outlook
 
