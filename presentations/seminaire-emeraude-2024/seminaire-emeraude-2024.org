@@ -50,13 +50,14 @@ Then navigate to [[localhost:8000/seminaire-emeraude-2024/]].
 - Name: Thomas Albert Rushton
 - Born: Manchester, UK
 - BMus Music Technology, The University of Edinburgh, 2009
+- Life?...
   #+ATTR_REVEAL: :frag (appear)
   + Performing arts technician
   + Computer programmer, print industry
   + Musician, bicycle mechanic
   + Web application developer
-  + Contractor, full-stack troubleshooter
-  + Freelancer, web/eCommerce
+  + Contractor, "full-stack" troubleshooter
+  + Freelancer, web/software licensing
 - MSc Sound & Music Computing, Aalborg University (Copenhagen) 2023
 
 * ENABLING DISTRIBUTED SPATIAL AUDIO
@@ -67,15 +68,16 @@ Then navigate to [[localhost:8000/seminaire-emeraude-2024/]].
 
 * Wave Field Synthesis
 
-#+ATTR_HTML: :width 600px
+#+ATTR_HTML: :width 650px
 [[./images/wfs_1.png]]
 
+- Synthesise a wavefront via secondary point sources
 #+ATTR_REVEAL: :frag t
-Synthesise a wavefront via secondary point sources
+- /Holophony/
 
 * Motivation
 
-#+ATTR_HTML: :width 600px
+#+ATTR_HTML: :width 650px
 [[./images/wfs_4.png]]
 
 WFS systems are typically centralised
@@ -85,7 +87,7 @@ Lots of output channels --- costly
 
 #+REVEAL: split
 
-#+ATTR_HTML: :width 600px
+#+ATTR_HTML: :width 650px
 [[./images/wfs_5.png]]
 
 What if we could distribute the work?
@@ -115,7 +117,7 @@ Algorithms, and Systems/, 2011.
   #+ATTR_REVEAL: :frag t
   + Adding more entities /does not pose a bottleneck/ for the
     communication channel
-- Modularityqq
+- Modularity
   #+ATTR_REVEAL: :frag t
   + The performance of a given entity is /independent/ of that
     of other entities
@@ -131,7 +133,7 @@ Algorithms, and Systems/, 2011.
   #+ATTR_REVEAL: :frag t
   + Harder to update and troubleshoot
 - More potential points of failure
-- No authoritative source of time
+- Authoritative source of time not guaranteed
     
 * Networked Audio
 
@@ -147,31 +149,145 @@ their part of a signal processing task.
 
 #+ATTR_REVEAL: :frag (appear)
 - Audio over ethernet; OSC messages
-- Many Audio channels, and streams of control data, over one cable,
+- Many audio channels, and streams of control data, over one cable,
   bidirectionally
 - UDP --- /connectionless/, /one-to-many/ --- is the way to go
+- For synchronisation, PTP... but this may increase costs
 
 * The Microcontroller Platform
 
-* RQs
+#+ATTR_HTML: :width 500px
+[[./images/module.jpeg]]
+
+- Teensy 4.1
+- Support for ethernet and audio
+- Powerful, easily reprogrammable
+- ~€45
+- Faust support
+
+* Research Questions
+
+#+begin_quote
+How can a network of microcontrollers be used to create a distributed
+audio system suitable for managing scalable installations for spatial
+and immersive audio?
+#+end_quote
+
+#+ATTR_REVEAL: :frag t
+#+begin_quote
+How can such a system be created and configured such that it maintains
+inter-client synchronicity? What are the effects of loss of
+synchronicity on distributed spatialisation algorithms?
+#+end_quote
 
 * Prior Art
 
-* The Networked Audio System
+#+REVEAL: split
 
-* The WFS Controller
+#+ATTR_HTML: :width 600px
+[[./images/devonport-foss2019.png]]
 
-* System Overview
-
-* Challenges & Mitigations
-
-* Results
+Devonport & Foss, /The Distribution of Ambisonic and Point Source
+Rendering to Ethernet AVB Speakers/, 2019.
 
 #+REVEAL: split
 
+#+ATTR_HTML: :width 600px
+[[./images/belloch2021.png]]
+
+Belloch et al., /On the performance of a GPU-based SoC in a
+distributed spatial audio system,/ 2021.
+
+#+REVEAL: split
+
+T. A. Rushton, R. Michon, S. Letz, 2023, "[[https://inria.hal.science/hal-04169238/document][A Microcontroller-Based
+Network Client Towards Distributed Spatial Audio]]", /Proceedings of
+the 2023 Sound and Music Computing Conference (SMC-23)/.
+
+- JackTrip-based, unicast only
+
+* Multicast System Overview
+
+#+ATTR_HTML: :width 1000px
+[[./images/system_overview.jpg]]
+
+* Challenges & Mitigations
+
+** Jitter
+
+#+ATTR_REVEAL: :frag (appear)
+- /Fluctuations in the rate of transmission/
+- Clients write incoming audio data to a circular buffer
+  #+ATTR_HTML: :width 700px
+  [[./images/rw_delta.png]]
+#+ATTR_REVEAL: :frag (appear)
+- Aim to maintain a consistent read-write delta
+- /Delay-locked loop/
+- Fractional read-position increment
+- Interpolate to yield sample amplitude
+- /Adaptive resampling/
+
+** Clock Drift
+
+#+ATTR_REVEAL: :frag (appear)
+- /No two clocks are identical/
+- Compute ratio of packets received to packets sent
+- Use ratio to determine sampling rate
+- Adjust by setting Audio PLL
+  
+* Results
+
+#+ATTR_HTML: :width 550px
+[[./images/rtt_drift_32.png]]
+
+- Clients move relative to each other...
+- ...but remain within about one buffer's worth of samples
+
+#+REVEAL: split
+
+#+ATTR_HTML: :width 750px
+[[./images/wfs_6.png]]
+
+- Asynchronicity will result in irregular wavefronts
+- Rapid resampling adaptations will cause audible phasing
+
+#+REVEAL: split
+
+#+ATTR_HTML: :width 700px
+[[./images/subjective_2.png]]
+
+- A degree of irregularity may not completely undermine the holophonic
+  effect
+
 ** Conclusions
 
+#+REVEAL_HTML: <div style="float: left; width: 50%">
+#+ATTR_REVEAL: :frag (appear)
+- No appreciable timing improvement with multicast...
+  #+ATTR_REVEAL: :frag t
+  + Scalability improved, however
+- Extensibility restricted by limited memory
+#+REVEAL_HTML: </div>
+#+REVEAL_HTML: <div style="float: right; width: 50%">
+#+ATTR_REVEAL: :frag (appear)
+- Development of a multicast server for audio and control data
+- Evidence that the distributed WFS algorithm produces localisable sound
+#+REVEAL_HTML: </div>
+
 ** Outlook
+
+#+ATTR_REVEAL: :frag (appear)
+- Teensy lacks memory, and only handles 16-bit audio
+- Raspberry Pi can be run /bare-metal/; much more memory and higher
+  audio quality at comparable cost
+  #+ATTR_REVEAL: :frag (appear)
+  + No Faust support (yet) though
+  + No standard library, kind of /fragile/
+- Time still an issue
+  #+ATTR_REVEAL: :frag (appear)
+  + Share a clock signal?
+  + Implement software-only PTP?
+  + Jitter still a problem... investigate all causes
  
 * DIFFERENTIABLE DSP IN FAUST
 :PROPERTIES:
