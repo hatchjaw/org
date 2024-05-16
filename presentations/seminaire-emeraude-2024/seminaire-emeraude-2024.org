@@ -48,7 +48,7 @@ Then navigate to [[localhost:8000/seminaire-emeraude-2024/]].
 
 #+ATTR_REVEAL: :frag (appear)
 - Name: Thomas Albert Rushton
-- Born: Manchester, UK
+- Born: Manchester, UK, 1985
 - BMus Music Technology, The University of Edinburgh, 2009
 - Life?...
   #+ATTR_REVEAL: :frag (appear)
@@ -68,7 +68,7 @@ Then navigate to [[localhost:8000/seminaire-emeraude-2024/]].
 
 * Wave Field Synthesis
 
-#+ATTR_HTML: :width 650px
+#+ATTR_HTML: :width 750px
 [[./images/wfs_1.png]]
 
 - Synthesise a wavefront via secondary point sources
@@ -77,7 +77,7 @@ Then navigate to [[localhost:8000/seminaire-emeraude-2024/]].
 
 * Motivation
 
-#+ATTR_HTML: :width 650px
+#+ATTR_HTML: :width 750px
 [[./images/wfs_4.png]]
 
 WFS systems are typically centralised
@@ -87,7 +87,7 @@ Lots of output channels --- costly
 
 #+REVEAL: split
 
-#+ATTR_HTML: :width 650px
+#+ATTR_HTML: :width 750px
 [[./images/wfs_5.png]]
 
 What if we could distribute the work?
@@ -137,16 +137,6 @@ Algorithms, and Systems/, 2011.
     
 * Networked Audio
 
-#+REVEAL: split
-
-#+begin_quote
-In a distributed audio system, cooperating entities must be served
-with the audio and/or control data that they need in order to perform
-their part of a signal processing task.
-#+end_quote
-
-** How?
-
 #+ATTR_REVEAL: :frag (appear)
 - Audio over ethernet; OSC messages
 - Many audio channels, and streams of control data, over one cable,
@@ -154,7 +144,7 @@ their part of a signal processing task.
 - UDP --- /connectionless/, /one-to-many/ --- is the way to go
 - For synchronisation, PTP... but this may increase costs
 
-* The Microcontroller Platform
+* The Hardware Platform
 
 #+ATTR_HTML: :width 500px
 [[./images/module.jpeg]]
@@ -167,6 +157,7 @@ their part of a signal processing task.
 
 * Research Questions
 
+#+ATTR_REVEAL: :frag t
 #+begin_quote
 How can a network of microcontrollers be used to create a distributed
 audio system suitable for managing scalable installations for spatial
@@ -288,6 +279,7 @@ the 2023 Sound and Music Computing Conference (SMC-23)/.
   + Share a clock signal?
   + Implement software-only PTP?
   + Jitter still a problem... investigate all causes
+- Ambisonics; extensions to WFS
  
 * DIFFERENTIABLE DSP IN FAUST
 :PROPERTIES:

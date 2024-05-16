@@ -3,6 +3,9 @@
 #+SEQ_TODO: TODO(t) STARTED(s!) WAITING(w@) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
 
 * Tasks
+** TODO Contribute to la cagnotte pour Aurleien
+DEADLINE: <2024-05-19 dim.>
+  
 ** TODO Contact Anders re. GSoC
 DEADLINE: <2024-05-16 jeu.>
 ** TODO Prepare PhD Day presentation

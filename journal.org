@@ -11,7 +11,7 @@
 #+TAGS: [ AUDIO : SYNTHESIS(s) PHYSICALMODELLING(m) SPATIALAUDIO(P) ]
 #+TAGS: [ HARDWARE : RPI(R) TEENSY(t) ]
 #+EXPORT_SELECT_TAGS: Blog
-#+OPTIONS:   H:3 num:0 toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   H:3 num:0 toc:t \n:nil @:t ::t |:t ^:{} _:{} -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc html-style:nil
 #+EXPORT_SELECT_TAGS: export
 #+EXPORT_EXCLUDE_TAGS: noexport
@@ -812,3 +812,55 @@ text/background contrast for section-indicating slides.
   + What happens as device activity changes?
 
 Entered on [2024-05-14 mar. 14:36]
+*** 2024-05-15 mercredi
+**** Séminaire Emeraude: Maxime Popoff
+
+Contributions
+- Optimized Faust2FPGA compiler: /SyFaLa/
+- Analysis of characteristics of an audio DPS + optimized FPGA
+  implementation
+- Methodolgy for writing C++ audio DSP for HLS
+- ...
+
+Faust \rightarrow SyFaLa \rightarrow FPGA
+
+FPGA is configurable hardware, *configured* (programmed) using a
+hardware description language (HDL).
+
+- Parallelisation
+- Pipelining to maximise throughput with same resource usage
+- Low latency with high sampling rate
+- Lots of GPIOs, so lots of audio input/output (hard to program)
+
+HLS Methodologies
+- Many parameters to take into account
+- How to handle loops becomes an enormous conversation
+  + Fully sequential, fully unrolled, or some combination of
+    sequential and unrolled... respecting the limits of what can be
+    done in one cycle.
+  + Can't access 10 elements of a loop in one cycle for example...
+- Ah, loops are the only way to control pipeline/parallelisation.
+
+High channel counts
+- TDM: Time Division Multiplexing
+- Standard I^{2}S uses 4 pins: BCLK, WS, SD_TX, SD_RX
+  + If many codecs are used with duplicate I^{2}S tranceiver, they will
+    share clock and WS
+
+SyFaLa supports four audio codecs at present. 11 \micro{}s latency with
+Analog Devices ADAU1787.
+
+Entered on [2024-05-15 mer. 15:08]
+**** Sèminaire Emeraude: Orégane Desrentes
+
+This is about numerical precsion in floating point matrix
+multiplications (I think). It's a bit too clever for me.
+
+- There's an FP8 format, for machine learning
+- The only agreed thing is that it is an 8-bit format
+- Beyond that, all bets are off
+- One implementation (E5M2) is cut-FP16
+- Another (E4M3) is /exotic/: no =inf= or =nan=
+- Should it be done? 🤷 Easy to do in hardware, but "hard to organise"
+
+Entered on [2024-05-15 mer. 17:08]
