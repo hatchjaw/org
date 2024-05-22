@@ -1,4 +1,4 @@
-# -*- mode: org -*-
+# -*- Mode: org -*-
 # -*- coding: utf-8 -*-
 #+STARTUP: overview indent inlineimages logdrawer hidestars
 #+TITLE:       Research Journal
@@ -813,7 +813,7 @@ text/background contrast for section-indicating slides.
 
 Entered on [2024-05-14 mar. 14:36]
 *** 2024-05-15 mercredi
-**** Séminaire Emeraude: Maxime Popoff
+**** Séminaire Emeraude: Maxime Popoff                      :PRESENTATION:
 
 Contributions
 - Optimized Faust2FPGA compiler: /SyFaLa/
@@ -851,7 +851,7 @@ SyFaLa supports four audio codecs at present. 11 \micro{}s latency with
 Analog Devices ADAU1787.
 
 Entered on [2024-05-15 mer. 15:08]
-**** Sèminaire Emeraude: Orégane Desrentes
+**** Sèminaire Emeraude: Orégane Desrentes                  :PRESENTATION:
 
 This is about numerical precsion in floating point matrix
 multiplications (I think). It's a bit too clever for me.
@@ -864,3 +864,175 @@ multiplications (I think). It's a bit too clever for me.
 - Should it be done? 🤷 Easy to do in hardware, but "hard to organise"
 
 Entered on [2024-05-15 mer. 17:08]
+*** 2024-05-16 jeudi
+**** Séminaire Emeraude: Bastien Barbe                      :PRESENTATION:
+
+- We want to compute the activations of a neurnal network
+- Inference: weights and biases are constants (post-training)
+- Linear layers can be computed with /shift-and-add/ graphs during
+  inference
+  + costly multiplications replaced with additions
+  + E.g. 43X = (1X << 5) + 11X... integer linear programming,
+    composition of shifts and additions, as the name suggests...
+- We can combine graphs to generate multiple results, reusing
+  operations (I suppose this is going to be useful on FPGAs)
+
+- But we can't compute every combination with one add per layer, for
+  example; so this is a resource battle --- how many adds/shifts per
+  layer do we need to compute the weights/biases that we want?
+
+- What if we want to calculate another layer/dimension, i.e. change
+  the weights?
+- PhD subject: design a /reconfigurable accelerator/, more efficient
+  than an FPGA, more configurable than an ASIC
+
+Entered on [2024-05-16 jeu. 10:26]
+**** Séminaire Emeraude: Romain Michon                      :PRESENTATION:
+
+- PLASMA project is ongoing
+- Associate team with CCRMA
+- France/Stanford program; funding; apply for next year for me to
+  spend a couple of months at CCRMA; work with Nando
+- Jonas Höpner working on high-performance, low-SNR sigma-delta DAC
+  directly on FPGA for integration with SyFaLa.
+  + High sampling rate affords limited additional hardware to achieve
+    ideal filter
+- Frugal spatial audio project --- multichannel spatial audio on FPGAs
+  + WFS demonstrated; ambisonics to follow --- Rémi working on the
+    physical structure of this
+  + Jurek's work; audio over ethernet to FPGA
+- Auralisation is a target implementation. Immersive virtual acoustics
+  experiences using spatial audio techniques.
+  + Auralisation calls for large number of efficient convolutions
+  + Rémi also working on efficient convolutions on FPGA
+  + Chauvet cave project; acoustical model of the environment for
+    immersive reconstruction
+- Recent funding applications were unsuccessful; ERC, PRCI :'(
+- Next year, organising JIMs and LAC during last week of June 2025.
+  + Establish who's doing what; involvement of GRAME, for example
+
+Entered on [2024-05-16 jeu. 11:22]
+*** 2024-05-17 vendredi
+**** Séminaire Emeraude: Tanguy Risset: Mid/Long-term Research Projects :EMERAUDE:PRESENTATION:
+
+Projects
+- Holigrail: Florent 900k€, Bastient, Pierre, Romain
+- FAST: ends mid-2025 6k€
+- PLASMA: with CCRMA, ends 2024
+- Bosch: 5k€/year
+- Four ongoing PhDs
+  
+Projects we'd like to work on
+- AI and embedded sound systems
+  + GRAME, CIFRE grant, Benjamin to work on this
+- Arithmetic & Faust/SyFaLa
+  + Fluent interface between Faust & fixed-point, between SyFaLa and
+    Flopoco
+- Start-up project with Maxime
+  + Use SyFaLa in a startup. Is this possible?
+- Spatial audio with SyFaLa, Faust, and /Centrale/
+- Active acoustic control
+- /Faust Consortium/
+- /OnDemand/ in Faust
+  + New primitive that will take an expression and add a new input
+    which is a clock signal, so we can control when the computation
+    will take place.
+  + Permit downsampling; enable things that we can't do efficiently
+    at the moment, e.g. FFT.
+
+More planned projects
+- Collab with Ircam
+- Cifre grant with NanoXplore, French FPGA provider for satellites
+
+High-Risk High-Reward opportunities...
+- Syfala, HLS and compilation; investigate more?
+  + Other embedded platforms?
+- AI and sound (/music/?) synthesis
+
+Future
+- No desire to split the team (dark/light side)
+- Inria evaluation of theme 2026 "Architecture, languages and compilation"
+- Need a permanent engineer
+- HRDs for two undisclosed members...
+- New paths
+  + Compilation of audio?
+  + Hardware for democratised spatial audio?
+  + Frugal AI for embedded applications?
+  + ...
+
+Entered on [2024-05-17 ven. 10:54]
+*** 2024-05-21 mardi
+**** FaustNet --- DDSP                                        :GSoC:FAUST:
+- Goal: make all Faust programs differentiable
+- Tried at the signal stage of the compiler; limited success
+- Project rebooted in the Faust language itself
+- Advik to:
+  + update his fork of =faust-ddsp=
+  + read about Faust architectures
+  + understand Faust's pattern matching feature
+  + look for algorithms in the libraries for which to create
+    differentiable counterparts
+  + complete the set of differentiable primitives by filling the gaps
+    needed to complete the implementations in the previous item
+- Eventually:
+  + create an architecture file for the learning phase?
+  + real-time timbre transfer would be a cool implementation.
+
+Next meeting ** 2024-05-28 @ 16h
+  
+Entered on [2024-05-21 mar. 15:23]
+*** 2024-05-22 mercredi
+**** Faust in Cables.gl                                       :GSoC:FAUST:
+Participants: Stéphane, Tobias, Fay, Tommy
+
+Tobias's introduction: musician, electroacoustic composer, experienced
+with Cables.gl, as well as Max/MSP, Pd; Acedemy of Media Arts,
+Cologne; privy to the Faust in cables demo created by Kirell Benzi.
+
+Fay: creative coder -- shader art (inc. for NFTs), Clojure, Rust,
+functional programming, full-stack development; modular synths.
+
+Standalone Cables.gl in the works, says Tobias.
+
+Tobias to create Faust Team in Cables.
+
+Next meeting ** 2024-05-28 @ 17h
+
+Entered on [2024-05-22 mer. 11:12]
+**** READ Enhancement of cardiac and respiratory sounds for cellphone reproduction by means of digital sound processing methods :PAUC:REVIEW:
+:PROPERTIES:
+:AUTHORS:  Maria Belen Echenique, Eduardo J. Godoy, Rodrigo F. Càdiz, Marcelo E. Andia
+:END:
+
+Second revision of this paper. Previous notes in
+~/Documents/reviews/pauc23
+***** Summary
+(Taken from my notes on the first draft)
+
+In this submission, the authors make a case for smartphone-based
+tele-auscultation of cardiac and respiratory sounds, and identify that
+the use of smartphones could improve access to healthcare for
+remotely-situated populations, while potentially easing the burden on
+healthcare professionals for routine patient examinations. They
+observe that sounds indicative of pathology are predominately
+low-frequency in nature and suggest pitch-shifting recordings to bring
+these sounds into a frequency range suitable for reproduction on
+smartphone speakers, while maintaining clinical information.
+
+This is an interesting idea, and certainly assessing whether
+smartphones, equipped as they are with an array of sensors including
+and in addition to microphones, can be used as diagnostic devices is
+well worth exploring. So too is an investigation of the extent to
+which clinical information is preserved when auscultation recordings
+are processed, and a scheme for optimising these recordings for
+diagnostic purposes would be of great value.
+
+***** Notes
+This is another step in the right direction, though some of the
+changes introudce new problems.
+It would be nice to have links to some before-and-after audio
+examples, or, alternatively, some pre- and post-processing
+spectrograms.
+***** Proofreading
+
+Entered on [2024-05-22 mer. 11:19]

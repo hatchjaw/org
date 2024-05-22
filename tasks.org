@@ -3,15 +3,22 @@
 #+SEQ_TODO: TODO(t) STARTED(s!) WAITING(w@) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
 
 * Tasks
+** TODO Ask about working at CEI-2 during August
+DEADLINE: <2024-05-24 ven.>
+** TODO Arrange monthly Emeraude PhD meetings
+Talk to Orégane about the date
+DEADLINE: <2024-05-24 ven.>
 ** TODO Contribute to la cagnotte pour Aurleien
-DEADLINE: <2024-05-19 dim.>
-  
+[[https://www.lepotcommun.fr/pot/mvnte5iq][link]]
+DEADLINE: <2024-06-07 ven.>  
 ** TODO Contact Anders re. GSoC
-DEADLINE: <2024-05-16 jeu.>
-** TODO Prepare PhD Day presentation
+DEADLINE: <2024-05-22 mer.>
+** DONE Prepare PhD Day presentation
 DEADLINE: <2024-05-14 mar.>
-** TODO Prepare Emeraude Séminaire presentation
+- State "DONE"       from "TODO"       [2024-05-16 jeu. 10:19]
+** DONE Prepare Emeraude Séminaire presentation
 DEADLINE: <2024-05-15 mer.>
+- State "DONE"       from "TODO"       [2024-05-16 jeu. 10:19]
 ** DONE [#B] Apply, again, for social security [5/5]
 - State "DONE"       from "TODO"       [2024-05-07 mar. 15:55]
 I have a case number with Ameli:
