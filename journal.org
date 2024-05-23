@@ -1006,6 +1006,7 @@ Entered on [2024-05-22 mer. 11:12]
 
 Second revision of this paper. Previous notes in
 ~/Documents/reviews/pauc23
+
 ***** Summary
 (Taken from my notes on the first draft)
 
@@ -1027,12 +1028,143 @@ which clinical information is preserved when auscultation recordings
 are processed, and a scheme for optimising these recordings for
 diagnostic purposes would be of great value.
 
-***** Notes
+***** General notes
 This is another step in the right direction, though some of the
-changes introudce new problems.
-It would be nice to have links to some before-and-after audio
-examples, or, alternatively, some pre- and post-processing
-spectrograms.
+changes made for this revision introudce new problems, which I detail
+below.
+
+One critical piece of missing information at this point concerns the
+participants who contributed to the proprietary database. All we know
+is that they provided informed consent; please tell us how many
+participants there were, and provide some demographic information.
+
+Another thing I feel the reader is missing now is a clear sense of to
+what extent the pitch of the recorded samples was altered. It would be
+helpful to included a link to some before-and-after audio examples
+from the open source databases, or, alternatively, in the paper, a
+couple of figures containing pre- and post-processing spectrograms.
+
+I would urge you to be a little more circumspect when discribing the
+strength of your findings. Reference [25] describes a specificity of
+89% for traditional auscultation; your 70-80% describes preservation
+of clinical information, /not specificity/. Comparisons such as
+"...similar to the values reported in the literature" (page 11) are,
+as a result, potentially misleading.
+
+***** Detailed observations
+- Abstract, line 37: "against originals" \rightarrow "against original
+  recordings"
+  
+(Page, column, line)
+- 2, 2, 5: "...an estimated 7 billion users worldwide". The reference
+  to the number of devices that I found in the cited source was "El
+  número de dispositivos móviles a nivel global ya alcanzó los 7,9 mil
+  millones, más que personas hay en la Tierra."  I.e. that's the
+  number of devices in existence, not the number of users.
+- 2, 2, 27/28: "...coughs, allergies, and sneezes". The cited source
+  is concerned with cough sensing, not sneezes, and /one/ participant
+  exhibited a cough caused by an allergy --- the study does not aim to
+  detect allergies per se.
+- 3, 1, 10: Section 1 is very long; the paragraph beginning "Modern
+  auscultation involves using..." has the feel of a new subsection;
+  consider adding a new heading here.
+- 3, 1, 42/43: As above; the text shifts to focus on ways in which
+  sound can be described, which in turn suggests a new subsection.
+- 3, 1, 42/43: "Sound is intricately defined by three primary physical
+  parameters". The cited source actually describes five parameters in
+  total, adding "harmony," and "dissonance" (which would perhaps
+  better bundled under /degree of harmonicity/). It would be
+  preferable to say "Sound /can be/ intricately defined..."
+- 3, 2, 6-9: You have "pitch can be used" twice in rapid
+  succession. Also, you don't make it clear how pitch can be used as a
+  timbral identifier; my guess is you're referring to the way the
+  authors of reference [28] use "pitch" to describe /unpitched/ sounds
+  like rhonchus, which have a low dominant frequency, but resemble
+  snoring (i.e. they're inharmonic).
+- 3, 2, 48-50: A frequency response may /exhibit/ attenuation, but it
+  doesn't /do/ the attenuation itself. It might be better to emphasise
+  something interesting alluded to in reference [31], i.e. that mobile
+  phone speakers have typically been optimised for communication, not
+  a flat frequency response across the audible range.
+- 4, 1, 24-26: As I noted for the previous revision, pitch shifting
+  algorithms can shift down as well as up, so prefer something like
+  "These algorithms can allow/facilitate pitch changes across a wide
+  frequency range without..."
+- Fig. 3: I may be wrong about what is deemed the anterior and
+  posterior projections of the lungs, but the right pannel shows what
+  looks like the back (posterior) of the torso and the left panel the
+  front (anterior).
+- 7, 2, 2-5: The target readership does not need to be told what an
+  FFT is.
+- Table 1, Table 2: Please indicate, in their respective captions,
+  which database(s) each table refers to.
+- Table 5: "Murmers represent abnormal ones" --- Not all of the
+  pathologies are murmers. Why not use "Normal"/"Pathological" instead?
+- 10, 1, 40: "they did hold clinical information to the ears of
+  physicians" --- Is this strictly what you mean? Presumably 100% of
+  the processed sounds held clinical information, but 73.3% were rated
+  as maintaining the clinical information represented by their
+  unprocessed counterparts.
+- 11, 2, 48/49: remove "and perception" (headphones don't perceive).
+  
 ***** Proofreading
+The writing is much improved over the initial submission; most of my
+comments refer to relatively minor matters.
+
+Some of the following may come across as nitpicking on my part, but my
+aim is to suggest more comfortable wording where possible.
+
+- 3, 2, 53...: "there are sereval ways to improve these sounds to allow
+  them to be played on a smartphone" \rightarrow "there are ways to optimise
+  these sounds for reproduciton on a smartphone"
+- 4, 1, 2/3: "a method that allows for the change in the pitch" \rightarrow "a
+  technique that permits the alteration of the pitch"
+- 6, 2, 45: "This is done" \rightarrow "This was done"
+- 7, 1, 8-10: There's no need to supply mathematical notatation for
+  maximum attack and release times.
+- 7, 1, 41-42: "the recordings" \rightarrow "recordings" or "audio recordings"
+  (you're referring to what the algorithm is designed to do in
+  general)
+- 7, 1, 42: "maintaining a subjective quality" \rightarrow "maintaining their
+  subjective quality"
+- 7, 2, 31-32: "SoundTouch is an audio processing library open source"
+  \rightarrow "SoundTouch is an open source audio processing library"
+- 7, 2, 34-35: "indepenent" \rightarrow "independently"
+- Table 1: "Tracheal sound" \rightarrow "Tracheal breath sound"
+- 10, 1, 40: "e.g." \rightarrow "i.e."
+- 11, 1, 51-53 + 11, 2, 1-6: This sentence is very long, and difficult
+  to follow. At the very least, try adding a comma after "for them"
+  and "pathological lung sounds". (As stated above, you may be best
+  advised to reword this sentence altogether.)
+- 12, 1, 38: "...to compare, in future studies, the diagnostic..."
+- References: Fine for the most part; [36] features some bonus
+  quotation marks, e.g. /Shelvock"/ and /"2012"/
 
 Entered on [2024-05-22 mer. 11:19]
+*** 2024-05-23 jeudi
+**** Investigating time, DMA, and GPIO in Circle            :HARDWARE:RPI:
+- ~CI2SSoundBaseDevice~ is supported by underlying TX and RX
+  ~CDMASoundBuffers~ instances
+  + These are in turn supported by the interrupt system, specifically
+    by its ~ConnectIRQ~ method
+  + So this doesn't rely on the lone FIQ handler...
+- I want to look into whether I can use ~CGPIOPin~ or ~CGPIOPinFIQ~,
+  in combination with the ~CGPIOManager~, to trigger an interrupt on
+  each (rising) edge of the I^{2}S clock, and use that as a timer...
+  + ...without that interfering with any other functionality that's
+    reliant on that clock.
+
+Circle samples to run/investigate:
+- 01-gpiosimple
+- 04-timer
+- 11-gipoclock
+  + Features a function, implemented in assembly, that returns the
+    run time in \micro{}s
+- 18-ntptime
+- 30-gpiofiq
+- 40-irqlatecency
+  + Features use of buffered screen output
+
+Then I should contact Rene Stange.
+
+Entered on [2024-05-23 jeu. 11:05]
