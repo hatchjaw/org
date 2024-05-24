@@ -4,15 +4,16 @@
 
 * Tasks
 ** TODO Ask about working at CEI-2 during August
-DEADLINE: <2024-05-24 ven.>
+DEADLINE: <2024-06-28 ven.>
 ** TODO Arrange monthly Emeraude PhD meetings
-Talk to Orégane about the date
 DEADLINE: <2024-05-24 ven.>
-** TODO Contribute to la cagnotte pour Aurleien
+Talk to Orégane about the date
+** DONE Contribute to la cagnotte pour Aurleien
+- State "DONE"       from "TODO"       [2024-05-24 ven. 11:00]
 [[https://www.lepotcommun.fr/pot/mvnte5iq][link]]
-DEADLINE: <2024-06-07 ven.>  
+DEADLINE: <2024-05-31 ven.>  
 ** TODO Contact Anders re. GSoC
-DEADLINE: <2024-05-22 mer.>
+DEADLINE: <2024-05-31 ven.>
 ** DONE Prepare PhD Day presentation
 DEADLINE: <2024-05-14 mar.>
 - State "DONE"       from "TODO"       [2024-05-16 jeu. 10:19]
@@ -95,12 +96,12 @@ DEADLINE: <2024-04-21 dim.>
 - State "DONE"       from "TODO"       [2024-04-22 lun. 10:06]
 ** TODO Sign up to ShareAmi
 ** TODO Prendre rendez-vous chez le coiffeur
-DEADLINE: <2024-05-20 lun. .+1m>
+DEADLINE: <2024-05-24 ven. .+1m>
 :PROPERTIES:
 :LAST_REPEAT: [2024-04-20 sam. 16:31]
 :END:
 - State "DONE"       from "TODO"       [2024-04-20 sam. 16:31]
-** TODO Prendre rendez-vous chez le medecin
+** TODO Prendre rendez-vous chez le médecin
 ** DONE Continue application for free public transport [2/2]
 - State "DONE"       from "TODO"       [2024-04-17 mer. 14:00]
 *** DONE Find ID photo
