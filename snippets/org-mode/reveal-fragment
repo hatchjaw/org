@@ -2,4 +2,4 @@
 # name: org-re-reveal fragment
 # key: frag
 # --
-#+ATTR_REVEAL: :frag t
+#+ATTR_REVEAL: :frag 
