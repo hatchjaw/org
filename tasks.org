@@ -60,7 +60,7 @@ DEADLINE: <2024-05-02 jeu.>
 *** DONE Update Mme Leprince
 DEADLINE: <2024-05-02 jeu.>
 - State "DONE"       from "TODO"       [2024-05-03 ven. 09:50]
-** TODO [#A] Prepare for Thesis Committee Meeting [4/6]
+** TODO [#A] Prepare for Thesis Committee Meeting [5/6]
 *** DONE Set up Doodle
 DEADLINE: <2024-04-16 mar.>
 - State "DONE"       from "TODO"       [2024-04-16 mar. 10:59]
@@ -82,8 +82,9 @@ DEADLINE: <2024-05-13 lun.>
 2 pages summarising research work and prospects for year ahead
 **** DONE All scientific work produced
 - State "DONE"       from "TODO"       [2024-05-13 lun. 22:58]
-*** TODO Prepare presentation
+*** DONE Prepare presentation
 DEADLINE: <2024-05-26 dim.>
+- State "DONE"       from "TODO"       [2024-05-26 dim. 23:24]
 *** TODO Update ADUM
 See email from Doctorat (30/04/24)
 ** TODO Investigate hardware platforms

@@ -274,7 +274,7 @@ Difficult to develop and test
 Certain fundamental assumptions of digital audio can no longer be
 taken for granted
 #+ATTR_REVEAL: :frag t
-Even with a shared clock, how do we synchronise interrupts?
+E.g. even with a shared clock, how do we synchronise interrupts?
   
 * Outlook
 :PROPERTIES:
@@ -298,7 +298,7 @@ Even with a shared clock, how do we synchronise interrupts?
 - Make progress with software PTP...
 - ...Or pursure clock sharing
 
-** Next Steps
+** Then...
 
 #+ATTR_REVEAL: :frag (appear)
 - Improve software systems
@@ -307,4 +307,8 @@ Even with a shared clock, how do we synchronise interrupts?
   + Optimise reproducibility, accessibility
 - Explore extensions to WFS
 - Parallelisability of ambisonics
-  
+
+* Thank you
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
