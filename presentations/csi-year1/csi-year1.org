@@ -1,0 +1,130 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+
+#+TITLE: Enabling Distributed Spatial Audio
+#+SUBTITLE: Thesis Committee --- Year 1
+#+AUTHOR: Thomas Rushton
+
+#+OPTIONS: num:nil toc:1 ^:{} ':t
+#+OPTIONS: reveal_width:1200 reveal_height:800 reveal_slide_number:c/t
+#+EXPORT_FILE_NAME: index
+#+REVEAL_ROOT: ../reveal.js
+#+REVEAL_THEME: white
+#+REVEAL_TRANS: slide
+#+REVEAL_PLUGINS: (math)
+#+REVEAL_EXTRA_CSS: style.css
+#+REVEAL_MIN_SCALE: 1.0
+#+REVEAL_MAX_SCALE: 1.0
+#+REVEAL_EXTRA_OPTIONS: hash: true, fragmentInURL: true
+#+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
+#+REVEAL_TITLE_SLIDE_BACKGROUND: #141414
+#+REVEAL_TITLE_SLIDE_EXTRA_ATTR: class="title-slide"
+
+* About This Presentation                                          :noexport:
+
+This =org= file describes my presentation for my first year /Comité de
+Suivi Individuel/.
+
+** Dependencies
+
+- =org-re-reveal= ([[https://gitlab.com/oer/org-re-reveal/-/tree/main][gitlab]]), which enables export support from Org to [[https://revealjs.com/][Reveal.js]].
+
+** Running the Presentation
+
+From the reveal.js directory (=../reveal.js=), run:
+
+#+begin_src shell :noeval :exports code
+npm start -- --root=../
+#+end_src
+
+Then navigate to [[localhost:8000/csi-year1/]].
+
+
+# * Contents
+# :PROPERTIES:
+# :UNNUMBERED: notoc
+# :REVEAL_EXTRA_ATTR: class="contents contents1"
+# :END:
+# #+REVEAL_TOC: headlines 1
+
+* About Me
+
+#+ATTR_REVEAL: :frag (appear)
+- Name: Thomas Albert Rushton
+- Born: Manchester, UK, 1985
+- BMus Music Technology, The University of Edinburgh, 2009
+- Employment
+  #+ATTR_REVEAL: :frag (appear)
+  + Performing arts technician
+  + Computer programmer, print industry
+  + Musician, bicycle mechanic
+  + Web application developer
+  + Contractor, "full-stack" troubleshooter
+  + Freelancer, web/software licensing
+- MSc Sound & Music Computing, Aalborg University (Copenhagen) 2023
+  #+ATTR_REVEAL: :frag (appear)
+  + Internship, Inria/Emeraude, 2022
+
+* Distributed Spatial Audio
+:PROPERTIES:
+:reveal_background: #141414
+:reveal_extra_attr: class="title-slide"
+:END:
+
+** Wave Field Synthesis
+
+#+ATTR_HTML: :width 750px
+[[./images/wfs_1.png]]
+
+- Synthesise a wavefront via secondary point sources
+#+ATTR_REVEAL: :frag t
+- /Holophony/
+
+** Motivation
+
+#+ATTR_HTML: :width 750px
+[[./images/wfs_4.png]]
+
+WFS systems are typically centralised
+
+#+ATTR_REVEAL: :frag (appear)
+Lots of output channels --- costly
+
+#+REVEAL: split
+
+#+ATTR_HTML: :width 750px
+[[./images/wfs_5.png]]
+
+What if we could distribute the work?
+
+#+ATTR_REVEAL: :frag t
+/Synchronicity/ will be important
+
+
+* Prior Work
+:PROPERTIES:
+:reveal_background: #141414
+:reveal_extra_attr: class="title-slide"
+:END:
+
+** First Iteration
+
+** Second Iteration
+
+* Challenges
+:PROPERTIES:
+:reveal_background: #141414
+:reveal_extra_attr: class="title-slide"
+:END:
+
+** Potential Solutions
+:PROPERTIES:
+:reveal_background: #141414
+:reveal_extra_attr: class="title-slide"
+:END:
+
+* Outlook
+:PROPERTIES:
+:reveal_background: #141414
+:reveal_extra_attr: class="title-slide"
+:END:
