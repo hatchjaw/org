@@ -86,6 +86,9 @@ Lots of output channels --- costly
 
 [[./images/wfs3.svg]]
 
+WFS is /parallelisable/
+
+#+ATTR_REVEAL: :frag t
 What if we could distribute the work?
 
 #+ATTR_REVEAL: :frag t
@@ -100,17 +103,16 @@ cooperate to solve a problem that cannot be individually solved."
 #+begin_export html
 <small>
 #+end_export
-Kshemkalyani & Singhal, /Distributed Computing: Principles,
-Algorithms, and Systems/, 2011.
+Kshemkalyani & Singhal, 2011, /Distributed Computing: Principles,
+Algorithms, and Systems/.
 #+begin_export html
 </small>
 #+end_export
 
 #+ATTR_REVEAL: :frag (appear)
-- Scalabale, modular
-- Entities act independently
-- Incrementally extensible
-- Reduced cost-per-channel
+- Scalabale, with no performance penalty
+- Modular: entities act independently
+- Reduced cost-per-channel; incrementally extensible
 - Improved accessibility
 
 ** Requirements
@@ -148,9 +150,13 @@ Algorithms, and Systems/, 2011.
 - Audio server: JackTrip
   #+ATTR_REVEAL: :frag (appear)
   + Unicast only
-  + Not truly cross-platform
+  + Based on JACK: not truly cross-platform
 
-#+ATTR_REVEAL: :frag t
+#+REVEAL: split
+
+#+ATTR_HTML: :width 750px
+[[./images/paw.jpg]]
+
 T. A. Rushton, R. Michon, S. Letz, 2023, "A Microcontroller-Based
 Network Client Towards Distributed Spatial Audio", /Proceedings of
 the 2023 Sound and Music Computing Conference (SMC-23)/.
@@ -216,7 +222,10 @@ Clients /experience/ clock drift and jitter differently
 #+ATTR_REVEAL: :frag t
 Relative inter-client temporal movement may cause audible phasing
 
-#+ATTR_REVEAL: :frag t
+#+REVEAL: split
+#+ATTR_HTML: :width 750px
+[[./images/subjective.png]]
+
 Perhaps not sufficient to completely undermine the holophonic effect
 
 
@@ -247,9 +256,10 @@ Protocol for Networked Measurement and Control Systems/.
 
 [[./images/conditioning2.svg]]
 
+Audio and system clocks derived from the same crystal oscillator, but
+distinct
+
 #+ATTR_REVEAL: :frag (appear)
-- Audio and system clocks derived from the same crystal oscillator,
-  but distinct
 - Is it possible to count ticks of the server's audio clock?
 - If so, can this be done in cross-platform fashion?
 - For a software PTP implementation, how do we cope with the chaos of
@@ -289,11 +299,11 @@ E.g. even with a shared clock, how do we synchronise interrupts?
   #+ATTR_REVEAL: :frag (appear)
   + Bare-metal Raspberry Pi --- Circle
   + Better audio quality
-  + More memory; longer jitter buffer
+  + More memory; longer jitter buffer; improved scalability
   + Can its clock be adjusted on the fly?
   + Can it be run as an audio interface?
   + Availability less of an issue; old models may suffice
-  + No multicast (yet)
+  + No UDP multicast (yet)
   + No =faust2circle= (yet)
 - Make progress with software PTP...
 - ...Or pursure clock sharing
