@@ -88,11 +88,10 @@ Lots of output channels --- costly
 
 WFS is /parallelisable/
 
-#+ATTR_REVEAL: :frag t
 What if we could distribute the work?
 
 #+ATTR_REVEAL: :frag t
-/Synchronicity/ will be important
+/Timing/ will be important
 
 ** A Distributed Alternative
 
@@ -113,7 +112,7 @@ Algorithms, and Systems/.
 - Scalabale, with no performance penalty
 - Modular: entities act independently
 - Reduced cost-per-channel; incrementally extensible
-- Improved accessibility
+- *Improved accessibility*
 
 ** Requirements
 
@@ -129,7 +128,7 @@ Algorithms, and Systems/.
   + AVB/AES67 --- suites of technical standards
 - A collection of recipients for that data
   #+ATTR_REVEAL: :frag (appear)
-  + Low-cost computing platform
+  + Low-cost, programmable computing platform
   + Support for audio and ethernet
 - An authoritative source of time
   #+ATTR_REVEAL: :frag (appear)
@@ -146,7 +145,7 @@ Algorithms, and Systems/.
 
 #+ATTR_REVEAL: :frag (appear)
 - Based on the /Teensy 4.1/ microcontroller development board
-- Served by standalone software
+- Served by standalone control software
 - Audio server: JackTrip
   #+ATTR_REVEAL: :frag (appear)
   + Unicast only
@@ -205,12 +204,14 @@ Clock drift compensation via PLL adjustments
 
 Clients synchronised to ~500 \micro{}s, dependent on:
 #+ATTR_REVEAL: :frag (appear)
-- Sampling rate
+- Sampling rate \rightarrow sample period
 - Buffer size
+  #+ATTR_REVEAL: :frag t
+  + Dictates channel count, jitter sensitivity
 - Jitter buffer r/w delta
 
 #+ATTR_REVEAL: :frag t
-Assuming $c =$ 343 m/s, up to 17 cm propagation discrepancy
+Assuming $c =$ 343 m/s, up to ~17 cm propagation discrepancy
 
 #+ATTR_REVEAL: :frag t
 [[./images/wfs4.svg]]
@@ -264,8 +265,6 @@ distinct
 - If so, can this be done in cross-platform fashion?
 - For a software PTP implementation, how do we cope with the chaos of
   the network?
-
-#+REVEAL: split
 
 ** Clock Sharing
 

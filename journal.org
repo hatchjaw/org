@@ -1170,3 +1170,58 @@ Circle samples to run/investigate:
 Then I should contact Rene Stange.
 
 Entered on [2024-05-23 jeu. 11:05]
+*** 2024-05-27 lundi
+**** Comité de Suivi Individuel                                  :MEETING:
+First year thesis follow-up.
+
+Present:
+ - Leonardo Cardoso (MARACAS)
+ - Jens Ahrens (Chalmers, Sweden, remote)
+ - Romain Michon
+ - Tanguy Risset
+
+Format:
+- 20 min presentation
+- 20 min questions with full panel
+- 10 min with candidate and external panel members
+- 10 min with external and internal panel members
+
+Presentation went reasonably well; "accessible," said Jens. As Leo
+later remarked, I should've made better reference to the state of the
+art. Leaving things light on this front was a calculated decision on
+my part, albeit based on the fact that I didn't have a good hold on
+Belloch et al. and Devonport & Foss during my talk at the Emeraude
+seminar.
+
+The weakest part of my contribution was when Jens asked about
+perceptual evaluation and I couldn't think of much beyond further
+assessment of subjects' ability to localise virtual sound sources. He
+recommended I read Hagen Wierstorf's 2014 PhD thesis /"Perceptual
+assessment of sound field synthesis"/, and added that localisability
+alone doesn't give the full picture.
+
+Jens also mentioned the /Sphere/ in Las Vegas, and the 167,000-speaker
+(!) WFS/beam-forming system created by [[https://holoplot.com/][Holoplot]]. He also suggested I
+secure access, at some point, to a centralised system, tweaked
+to simulate jitter, against which to compare my distributed system.
+
+Leo suggested meeting with Cyrille Morin (MARACAS) to discuss clock
+conditioning/sharing; he also mentioned Jean-Michel Friedt, who Tanguy
+later emailed about a meeting (set for 11/06 @ 10h). He offered the
+opinion that in terms of the time I have, I'm far from badly placed in
+terms of progress, but that I should get my doctoral training out of
+the way asap!
+
+*Think about types of (perceptual) evaluation*
+
+*Remember the "academic component"*
+Keep on top of the literature hunt, and SoTA. Come up for air every
+once in a while and /read/.
+
+Theses that I should read:
+- Hagen Wierstorf
+- Marije Baalman
+- Edwin Verheijen
+- Peter Vogel
+
+Entered on [2024-05-27 lun. 16:45]
