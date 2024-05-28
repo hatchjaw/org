@@ -1225,3 +1225,51 @@ Theses that I should read:
 - Peter Vogel
 
 Entered on [2024-05-27 lun. 16:45]
+*** 2024-05-28 mardi
+**** JackTrip client issues              :NETWORKEDAUDIO:AUDIO:RPI:TEENSY:
+Both of the following are broken:
+- The Circle-based JackTrip client
+- The Teensy-based JackTrip client
+
+I'm getting garbage at the client side. Different kinds of garbage!
+Sending a sine wave (441 Hz, I guess... I'm tricking JackTrip into
+thinking that Teensy is running at 48 kHz), I get the following for
+Teensy:
+
+[[./images/20240528/osc_teensy.jpg]]
+
+And this for Circle:
+
+[[./images/20240528/osc_circle.jpg]]
+
+Circle output looks a bit more sane. Since I thought I hadn't touched
+the Circle-based client since some time in December, and I probably
+haven't touched =jacktrip-teensy= since early 2023, this is most
+likely either due to:
+
+- Some kind of change in how JackTrip operates
+  + I think previously I was running v1.9
+- Some difference in how I'm running JackTrip, and audio in general
+  + I'm using Pipewire now, for instance, and at 48 kHz, which I
+    wasn't previously
+
+Nonetheless, the latest version of JackTrip (2.3.0) behaves pretty
+badly, crashing whenever a client disconnects:
+
+#+begin_example
+Fatal glibc error: malloc.c:2599 (sysmalloc): assertion failed:
+    (old_top == initial_top (av) && old_size == 0) ||
+    ((unsigned long) (old_size) >= MINSIZE &&
+        prev_inuse (old_top) &&
+        ((unsigned long) old_end & (pagesize - 1)) == 0)
+#+end_example
+
+But this might be because I'm running the cmake build that I made
+locally instead of whatever's available via =pacman=. I actually can't
+remember; need to take better notes.
+
+***** Update
+Uninstalling my home-rolled JackTrip and installing the =pacman=
+version instead (v2.2.5-1) yields precisely the same results.
+
+Entered on [2024-05-28 mar. 20:18]
