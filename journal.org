@@ -8,7 +8,7 @@
 #+TAGS: HARDWARE(h) INSPO(i) DIY(d) TEACHING(t) REPRES(R) REVIEW(v) GSoC(g)
 #+TAGS: [ PROGRAMMING : R(r) PYTHON(p) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ]
-#+TAGS: [ AUDIO : SYNTHESIS(s) PHYSICALMODELLING(m) SPATIALAUDIO(P) ]
+#+TAGS: [ AUDIO : SYNTHESIS(s) PHYSICALMODELLING(m) SPATIALAUDIO(P) NETWORKEDAUDIO(N) ]
 #+TAGS: [ HARDWARE : RPI(R) TEENSY(t) ]
 #+EXPORT_SELECT_TAGS: Blog
 #+OPTIONS:   H:3 num:0 toc:t \n:nil @:t ::t |:t ^:{} _:{} -:t f:t *:t <:t
@@ -1248,7 +1248,9 @@ haven't touched =jacktrip-teensy= since early 2023, this is most
 likely either due to:
 
 - Some kind of change in how JackTrip operates
-  + I think previously I was running v1.9
+  + I think previously I was running v1.9 [correction: that was the
+    version of JACK; I must've been running something like JackTrip
+    v1.6]
 - Some difference in how I'm running JackTrip, and audio in general
   + I'm using Pipewire now, for instance, and at 48 kHz, which I
     wasn't previously
@@ -1272,4 +1274,78 @@ remember; need to take better notes.
 Uninstalling my home-rolled JackTrip and installing the =pacman=
 version instead (v2.2.5-1) yields precisely the same results.
 
+***** Next step
+Send a ramp; use wireshark to isolate the problem to either JackTrip
+or the clients.
+
 Entered on [2024-05-28 mar. 20:18]
+
+*** 2024-05-29 mercredi
+**** JackTrip/Pipewire weirdness               :LINUXAUDIO:NETWORKEDAUDIO:
+My JackTrip clients may not be broken after all.
+
+Although reporting the desired buffer size, etc...
+
+#+begin_example
+---------------------------------------------------------
+The Sampling Rate is: 44100
+---------------------------------------------------------
+The Audio Buffer Size is: 32 samples
+                      or: 128 bytes
+---------------------------------------------------------
+The Number of Channels is: 2
+---------------------------------------------------------
+#+end_example
+
+It looks like JackTrip is only sending a packet once every 1.1 ms or
+so.
+
+This is borne out by the stats reported by Teensy:
+
+#+begin_example
+        |   Total   |   Last Timestamp    | Last SeqNum | TS delta min/mean/max     | SN delta min/mean/max
+receive |     53846 | 1716969888129614    |       53845 | 10982/11610.3750/12170 µs | 1/1.0000/1
+   send |    861511 | 1716969888066353    |        9533 | 670/725.3398/782 µs       | 1/1.0000/1
+  delta |   -807665 |            63261 µs |      -21224
+  ratio | 0.0625018
+#+end_example
+
+That send/receive ratio of ~0.0625, i.e. 1/16, the mean timestamp
+delta (11.6 ms), and the fact that sequence numbers are consecutive,
+are indicative of JackTrip operating as if the buffer size is 512
+samples.
+
+Is this a problem with the interaction between Pipewire and JackTrip?
+
+***** Let's try to reinstall JACK.
+
+This might be as simple as:
+
+#+begin_src shell :noeval
+sudo pacman -Syu jack2
+#+end_src
+
+#+begin_example
+...
+looking for conflicting packages...
+:: jack2-1.9.22-1 and pipewire-jack-1:1.0.5-1 are in conflict (jack). Remove pipewire-jack? [y/N] y
+...
+:: Processing package changes...
+(1/1) removing pipewire-jack                                    [###################################] 100%
+(1/1) installing jack2                                          [###################################] 100%
+Optional dependencies for jack2
+    a2jmidid: for ALSA MIDI to JACK MIDI bridging [installed]
+    libffado: for firewire support using FFADO
+    jack-example-tools: for official JACK example-clients and tools
+    jack2-dbus: for dbus integration
+    jack2-docs: for developer documentation
+    realtime-privileges: for realtime privileges
+...
+#+end_example
+
+And indeed it is:
+
+[[./images/20240529/osc_teensy.jpg]]
+
+Entered on [2024-05-29 mer. 09:56]
+ 
