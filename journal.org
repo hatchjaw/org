@@ -1343,9 +1343,9 @@ Optional dependencies for jack2
 ...
 #+end_example
 
-And indeed it is:
+And indeed it is (1: Teensy; 2: Circle):
 
-[[./images/20240529/osc_teensy.jpg]]
+[[./images/20240529/osc_teensy_circle.jpg]]
 
 Entered on [2024-05-29 mer. 09:56]
  
