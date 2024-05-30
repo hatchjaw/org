@@ -1,0 +1,28 @@
+:PROPERTIES:
+:ID:       a57bef3d-cd5a-4726-8f9e-7941720f60ee
+:END:
+#+title: PATH trouble in fish
+
+=fish= isn't POSIX compatible so it can't handle =/etc/profile= and
+the contents of =/etc/profile.d/=. Consequently we don't benefit from
+any of the =PATH= additions set by those files, some of which might be
+quite important.
+
+=zsh= manages this mess with =/etc/zsh/zprofile=, which contains:
+
+#+begin_src shell
+emulate sh -c 'source /etc/profile'
+#+end_src
+
+To do similar for =fish= isn't entirely straightforward. There are a
+bunch of ways to proceed (Oh My Fish? No thanks), and this is the one
+I've elected:
+
+- Install =fisher= plugin [[https://github.com/jorgebucaran/replay.fish][replay.fish]]
+- Add =replay source /etc/profile= to =config.fish=
+
+OK, that wasn't so bad.
+
+I still have /no idea/ how =/usr/bin/(site|vendor|core)_perl= are
+making their way into =PATH=, even for =fish=, and frankly I give up.
+

@@ -1347,5 +1347,100 @@ And indeed it is (1: Teensy; 2: Circle):
 
 [[./images/20240529/osc_teensy_circle.jpg]]
 
+***** Let's switch back to Pipewire
+
+I have a feeling that the buffer size for =pipewire-jack= is
+configured separately from the =clock.quantum= setting accessed via
+=pw-metadata=.
+
+#+begin_src shell :noeval
+sudo pacman -Syu pipewire-jack
+#+end_src
+
+Copying =/usr/share/pipewire/jack.conf= to
+=~/.config/pipewire/jack.conf=, and setting =jack.properties= to the
+following, both clients work with pipewire-jack:
+
+#+begin_example
+jack.properties = {
+     node.latency       = 32/48000
+     node.rate          = 1/48000
+     node.quantum       = 32/48000
+     ...
+#+end_example
+
 Entered on [2024-05-29 mer. 09:56]
- 
+
+*** 2024-05-30 jeudi
+**** RPi clock adjustments                                  :HARDWARE:RPI:
+I have verified that the Pi's I^{2}S PCM clock can be adjusted
+on-the-fly.
+
+I did so in Circle by inheriting from ~CTask~ and copying the clock
+setup from the ~CI2SSoundBaseDevice~ constructor into the ~Run~
+method, with a few modifications:
+
+#+begin_src c++ :noeval
+class CClockTask : public CTask
+{
+public:
+    CClockTask() : m_Clock(GPIOClockPCM, GPIOClockSourcePLLD) {}
+
+    ~CClockTask(void) override = default;
+
+    void Run(void) override {
+        unsigned nSampleRate{SAMPLE_RATE};
+        unsigned nClockFreq =
+                CMachineInfo::Get ()->GetGPIOClockSourceRate (GPIOClockSourcePLLD);
+        CBcmRandomNumberGenerator rand;
+
+        while (true)
+        {
+            CScheduler::Get()->MsSleep(5000);
+
+            nSampleRate += (rand.GetNumber() % 1000 - 500);
+
+            if (8000 <= nSampleRate && nSampleRate <= 192000) {
+	        return;
+	    }
+
+            unsigned nDivI = nClockFreq / (32*2) / nSampleRate;
+            unsigned nTemp = nClockFreq / (32*2) % nSampleRate;
+            unsigned nDivF = (nTemp * 4096 + nSampleRate/2) / nSampleRate;
+            assert (nDivF <= 4096);
+            if (nDivF > 4095)
+            {
+                nDivI++;
+                nDivF = 0;
+            }
+
+            CLogger::Get()->Write("clocktask", LogDebug, "Setting Fs: %u, DivI: %u, DivF: %u",
+                                  nSampleRate, nDivI, nDivF);
+
+            m_Clock.Start (nDivI, nDivF, nDivF > 0 ? 1 : 0);
+        }
+    }
+
+private:
+    CGPIOClock m_Clock;
+};
+#+end_src
+
+I ran this task by calling ~m_pClockTask = new CClockTask();~ in
+~CJackTripClient::Initialize~.
+
+So, jumps of up to \pm500 Hz at least are possible. The resolution with
+which modifications can be effected is not clear; all adjustments made
+by the code above are by integer values; further experimentation
+required.
+
+NB. Oscilloscope reported 1-2 Hz higher than the target specified by
+the program.
+
+[[./images/20240530/circle_log.jpg]]
+
+[[./images/20240530/circle_osc.jpg]]
+
+Entered on [2024-05-30 jeu. 11:32]
+  
+  [[file:~/org/journal.org::*RPi 3 model B+: clocks, GPIO pins][RPi 3 model B+: clocks, GPIO pins]]

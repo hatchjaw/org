@@ -43,8 +43,10 @@ The PDF is in ~/Documents
 ** DONE Pay Agathe €40
 DEADLINE: <2024-05-06 lun.>
 - State "DONE"       from "TODO"       [2024-05-06 lun. 09:43]
-** TODO Review PAUC manuscript
+** DONE Review PAUC manuscript
 DEADLINE: <2024-05-27 lun.>
+- State "DONE"       from "TODO"       [2024-05-29 mer. 16:49]
+  Actually submitted on ** 2024-05-24
 ** TODO Message/email Matt Hamilton
 ** TODO Set up OrgRoam
 Hm, need to break this down. It's kind of set up but I don't know how
