@@ -1369,6 +1369,8 @@ jack.properties = {
      ...
 #+end_example
 
+NB. With this pw-jack config applied, JackTrip no longer crashes.
+
 Entered on [2024-05-29 mer. 09:56]
 
 *** 2024-05-30 jeudi
@@ -1429,7 +1431,7 @@ private:
 I ran this task by calling ~m_pClockTask = new CClockTask();~ in
 ~CJackTripClient::Initialize~.
 
-So, jumps of up to \pm500 Hz at least are possible. The resolution with
+So, jumps of up to at least \pm500 Hz are possible. The resolution with
 which modifications can be effected is not clear; all adjustments made
 by the code above are by integer values; further experimentation
 required.
@@ -1444,3 +1446,232 @@ the program.
 Entered on [2024-05-30 jeu. 11:32]
   
   [[file:~/org/journal.org::*RPi 3 model B+: clocks, GPIO pins][RPi 3 model B+: clocks, GPIO pins]]
+**** Circle/RPi system clock, realtime                      :HARDWARE:RPI:
+- It [[https://github.com/rsta2/circle/blob/master/doc/realtime.txt][turns out]] Circle is running the processor of the Pi (v3) at 600
+  MHz
+- That's the same speed as Teensy runs its NXP CPU
+  + The Pi obviously has a lot more memory
+  + 1 GB on the 3 B+
+
+From the documentation for the ~CCPUThrottle~ class (which can be
+employed to run the CPU faster):
+
+#+begin_src c++ :noeval
+/// \warning CCPUThrottle cannot be used together with code doing I2C or SPI transfers.\n
+///	     Because clock rate changes to the CPU clock may also effect the CORE clock,\n
+///	     this could result in a changing transfer speed.
+#+end_src
+
+Perhaps what that really means is if one changes the CPU clock, one
+just has to make commensurate adjustments to the CORE clock. Might not
+be a problem if we never use I2C.
+
+Entered on [2024-05-30 jeu. 13:44]
+**** Michele Pagani: Applying Programming Language Theory to Automatic Differentiation :DDSP:PRESENTATION:
+ - Gives example of a simple function of arithmetic operations, with
+   gradient computed by ~jax.grad()~
+
+ Questions/assumptions:
+ - Is the transformation correct?
+ - What assumptions have been made?
+ - What primitives are supported? Recursion? Branching conditions?
+   etc.
+
+Desirable:
+
+#+begin_example
+grad(let y = G in H) -> let y' = grad(G) in grad(H)
+#+end_example
+
+\[
+\partial(h \circ g)(x) = \partial{}h(g(x)) \cdot \partial{}g(x)
+\]
+
+- Forward & backward propagation modes
+\[
+J_{\overrightarrow{x}}(k \circ h \circ g) = J_{h(g(\overrightarrow{x}))}(k) \cdot
+J_{g(\overrightarrow{x})}(h) \cdot J_{\overrightarrow{x}}(g)
+\]
+- First and second terms are backward mode; second and third are
+  forward mode
+- Same result, different performance
+  + Backward better when inputs outnumber outputs
+  + Vice versa for forward mode
+    * Backward probably better for audio problems then
+    * Michele suggested that it doesn't matter on the order of
+      magnitude of parameters:outputs that we're dealing with in
+      Faust, audo problems in general
+    * I think running ineffecient forward mode is ultimately not
+      sufficiently /frugal/, nor as computationally elegant as
+      Yann/Stéphane would likely prefer
+
+***** Some resources on reverse-mode AD:
+
+#+begin_src bibtex :noeval
+@article{wengert_simple_1964,
+	title = {A simple automatic derivative evaluation program},
+	volume = {7},
+	issn = {0001-0782},
+	url = {https://dl.acm.org/doi/10.1145/355586.364791},
+	doi = {10.1145/355586.364791},
+	number = {8},
+	urldate = {2024-05-31},
+	journal = {Communications of the ACM},
+	author = {Wengert, R. E.},
+	month = aug,
+	year = {1964},
+	pages = {463--464},
+}
+
+@article{radul_you_2023,
+	title = {You {Only} {Linearize} {Once}: {Tangents} {Transpose} to {Gradients}},
+	volume = {7},
+	shorttitle = {You {Only} {Linearize} {Once}},
+	url = {https://dl.acm.org/doi/10.1145/3571236},
+	doi = {10.1145/3571236},
+	number = {POPL},
+	urldate = {2024-05-31},
+	journal = {Proceedings of the ACM on Programming Languages},
+	author = {Radul, Alexey and Paszke, Adam and Frostig, Roy and Johnson, Matthew J. and Maclaurin, Dougal},
+	month = jan,
+	year = {2023},
+	keywords = {automatic differentiation, decomposition, partial evaluation, transpose},
+	pages = {43:1246--43:1274},
+}
+
+@article{pearlmutter_reverse-mode_2008,
+	title = {Reverse-mode {AD} in a functional framework: {Lambda} the ultimate backpropagator},
+	volume = {30},
+	issn = {0164-0925},
+	shorttitle = {Reverse-mode {AD} in a functional framework},
+	url = {https://dl.acm.org/doi/10.1145/1330017.1330018},
+	doi = {10.1145/1330017.1330018},
+	number = {2},
+	urldate = {2024-05-31},
+	journal = {ACM Transactions on Programming Languages and Systems},
+	author = {Pearlmutter, Barak A. and Siskind, Jeffrey Mark},
+	month = mar,
+	year = {2008},
+	keywords = {Closures, derivatives, forward-mode AD, higher-order AD, higher-order functional languages, Jacobian, program transformation, reflection},
+	pages = {7:1--7:36},
+}
+
+@article{brunel_backpropagation_2020,
+	title = {Backpropagation in the simply typed lambda-calculus with linear negation},
+	volume = {4},
+	issn = {2475-1421},
+	url = {https://dl.acm.org/doi/10.1145/3371132},
+	doi = {10.1145/3371132},
+	language = {en},
+	number = {POPL},
+	urldate = {2024-05-31},
+	journal = {Proceedings of the ACM on Programming Languages},
+	author = {Brunel, Aloïs and Mazza, Damiano and Pagani, Michele},
+	month = jan,
+	year = {2020},
+	pages = {1--27},
+}
+
+@article{smeding_efficient_2023,
+	title = {Efficient {Dual}-{Numbers} {Reverse} {AD} via {Well}-{Known} {Program} {Transformations}},
+	volume = {7},
+	url = {https://dl.acm.org/doi/10.1145/3571247},
+	doi = {10.1145/3571247},
+	number = {POPL},
+	urldate = {2024-05-31},
+	journal = {Proceedings of the ACM on Programming Languages},
+	author = {Smeding, Tom J. and Vákár, Matthijs I. L.},
+	month = jan,
+	year = {2023},
+	keywords = {automatic differentiation, functional programming, source transformation},
+	pages = {54:1573--54:1600},
+}
+
+@article{wang_demystifying_2019,
+	title = {Demystifying differentiable programming: shift/reset the penultimate backpropagator},
+	volume = {3},
+	issn = {2475-1421},
+	shorttitle = {Demystifying differentiable programming},
+	url = {https://dl.acm.org/doi/10.1145/3341700},
+	doi = {10.1145/3341700},
+	language = {en},
+	number = {ICFP},
+	urldate = {2024-05-31},
+	journal = {Proceedings of the ACM on Programming Languages},
+	author = {Wang, Fei and Zheng, Daniel and Decker, James and Wu, Xilun and Essertel, Grégory M. and Rompf, Tiark},
+	month = jul,
+	year = {2019},
+	pages = {1--31},
+}
+
+@article{vakar_reverse_2021,
+	title = {Reverse {AD} at {Higher} {Types}: {Pure}, {Principled} and {Denotationally} {Correct}},
+	shorttitle = {Reverse {AD} at {Higher} {Types}},
+	url = {http://arxiv.org/abs/2007.05283},
+	doi = {10.48550/arXiv.2007.05283},
+	urldate = {2024-05-31},
+	publisher = {arXiv},
+	author = {Vákár, Matthijs},
+	month = jan,
+	year = {2021},
+	note = {arXiv:2007.05283 [cs]},
+	keywords = {Computer Science - Programming Languages},
+}
+
+@inproceedings{kerjean_partial_2024,
+	title = {\${\textbackslash}partial\$ is for {Dialectica}},
+	url = {https://inria.hal.science/hal-04583978},
+	language = {en},
+	urldate = {2024-05-31},
+	author = {Kerjean, Marie and Pédrot, Pierre-Marie},
+	month = jul,
+	year = {2024},
+}
+#+end_src
+
+Also to be found in my Zotero.
+
+- Forward and reverse mode are extremes; one could combine them; not
+  much literature on this.
+
+- [[https://github.com/IBM/probzelus][ProbZelus]] is "a synchronous probabilistic programming language," a
+  DSL, with AD support; could be a useful reference. [[https://zelus.di.ens.fr/][Zélus]] itself is
+  developed by the PARKAS team at Inria Paris.
+ 
+Entered on [2024-05-31 ven. 10:19]
+*** 2024-05-31 vendredi
+**** Superivision Meeting with Romain                            :MEETING:
+- Develop a comprehensive plan of experiments to be conducted with RPi
+  and Teensy in order to establish our candidate hardware platform.
+  + I have until September, realistically, to carry out the
+    experiments, at which point we need to order equipment.
+- 24/32-bit output from Teensy may not be so far out of reach, with a
+  custom audio shield designed by Maxime, for example.
+  + RAM however, is still an issue.
+
+- Maybe don't submit to IFC on =faust-ddsp=; rather save for something
+  with more "academic value" in the spring.
+  + Otherwise, submit something, but leave enough left over for SMC,
+    etc. next year.
+  + Romain and I to discuss this with Stéphane. 
+
+- Prepare some slides for the meeting with Jean-Michel Friedt (11/06 @
+  10h).
+  + 10 minutes-ish; focus on technical problem.
+
+Entered on [2024-05-31 ven. 10:20]
+** 2024-06 juin
+*** 2024-06-02 dimanche
+**** Hardware Investigations                         :HARDWARE:RPI:TEENSY:
+This non-comprehensive list should guide my investigations over the
+next couple of months:
+
+- Can =faust2circle= be made to work?
+- How well does [[https://github.com/smuehlst/circle-stdlib][circle-stdlib]] work?
+- How can we produce 24/32-bit audio with Teensy?
+- Can clock ticks be derived from the audio subsystem via Pipewire (or
+  JACK)?
+- Can clock ticks be derived from GPIO on Circle, or Teensy for that
+  matter?
+
+Entered on [2024-06-02 dim. 14:53]

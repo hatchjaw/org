@@ -3,10 +3,14 @@
 #+SEQ_TODO: TODO(t) STARTED(s!) WAITING(w@) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
 
 * Tasks
+** TODO Prepare slides for meeting with Jean-Michel Friedt
+DEADLINE: <2024-06-10 lun.>
+  10 minutes' worth; focus on technical details and requirements.
+  [[file:~/org/journal.org::*Superivision Meeting with Romain][Superivision Meeting with Romain]]
 ** TODO Ask about working at CEI-2 during August
 DEADLINE: <2024-06-28 ven.>
 ** TODO Arrange monthly Emeraude PhD meetings
-DEADLINE: <2024-05-24 ven.>
+DEADLINE: <2024-06-05 mer.>
 Talk to Orégane about the date
 ** DONE Contribute to la cagnotte pour Aurleien
 - State "DONE"       from "TODO"       [2024-05-24 ven. 11:00]
@@ -20,7 +24,7 @@ DEADLINE: <2024-05-14 mar.>
 ** DONE Prepare Emeraude Séminaire presentation
 DEADLINE: <2024-05-15 mer.>
 - State "DONE"       from "TODO"       [2024-05-16 jeu. 10:19]
-** DONE [#B] Apply, again, for social security [5/5]
+** DONE [#B] Apply, again, for social security [6/7]
 - State "DONE"       from "TODO"       [2024-05-07 mar. 15:55]
 I have a case number with Ameli:
 
@@ -38,6 +42,14 @@ I should quote that if I ever have to call them back.
 *** DONE Take to post office and send, with a suivi
 - State "DONE"       from "TODO"       [2024-05-07 mar. 15:54]
 NB, sent via INSA's outgoing post.
+*** DONE Call Ameli; check whether they've received my dossier
+- State "DONE"       from "TODO"       [2024-05-31 ven. 17:23]
+  They have, which is good. Except they received what they have on May
+  15th, which is, according to La Poste, two days prior to the arrival
+  of my second dossier. So did they receive (or finally begin to
+  process) the first one after a delay of over two months?
+*** WAITING Receive some kind of update via post?...
+- State "WAITING"    from "TODO"       [2024-05-31 ven. 17:24]
 ** TODO Read Razvan's Thesis
 The PDF is in ~/Documents
 ** DONE Pay Agathe €40
@@ -88,6 +100,7 @@ DEADLINE: <2024-05-13 lun.>
 DEADLINE: <2024-05-26 dim.>
 - State "DONE"       from "TODO"       [2024-05-26 dim. 23:24]
 *** TODO Update ADUM
+DEADLINE: <2024-06-14 ven.>
 See email from Doctorat (30/04/24)
 ** TODO Investigate hardware platforms
 - [[https://www.cnx-software.com/2024/04/08/adlink-osm-imx93-osm-size-l-module-nxp-i-mx-93-soc/][ADLINK OSM-IMX93]]
@@ -99,7 +112,7 @@ DEADLINE: <2024-04-21 dim.>
 - State "DONE"       from "TODO"       [2024-04-22 lun. 10:06]
 ** TODO Sign up to ShareAmi
 ** TODO Prendre rendez-vous chez le coiffeur
-DEADLINE: <2024-05-24 ven. .+1m>
+DEADLINE: <2024-06-05 mer. .+1m>
 :PROPERTIES:
 :LAST_REPEAT: [2024-04-20 sam. 16:31]
 :END:
