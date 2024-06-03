@@ -22,7 +22,8 @@
 
 * À propos de cette présentation                                   :noexport:
 
-Ce fichier =org= décrit ma
+Ce fichier =org= décrit une présentation pour mon cours de français à
+INSA Lyon. (Mon français est mauvais ; ne m'en voulez pas.)
 
 ** Dépendences
 

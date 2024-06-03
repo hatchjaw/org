@@ -3,6 +3,10 @@
 #+SEQ_TODO: TODO(t) STARTED(s!) WAITING(w@) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
 
 * Tasks
+** TODO [#B] Start French Language MOOC
+** TODO [#C] Start Ethics/Integrity MOOC
+** TODO [#A] Finish Reproducible Research MOOC
+DEADLINE: <2024-06-07 ven.>
 ** TODO Prepare slides for meeting with Jean-Michel Friedt
 DEADLINE: <2024-06-10 lun.>
   10 minutes' worth; focus on technical details and requirements.
