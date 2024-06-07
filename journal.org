@@ -4,12 +4,12 @@
 #+TITLE:       Research Journal
 #+AUTHOR:      Thomas Rushton
 #+LANGUAGE:    en
-#+TAGS: noexport(n) MEETING(m) PRESENTATION(p) BLOG(b)
+#+TAGS: noexport(n) MEETING(m) PRESENTATION(p) BLOG(b) TRAINING(T)
 #+TAGS: INSPO(i) DIY(d) TEACHING(t) REPRES(R) REVIEW(v) GSoC(G)
 #+TAGS: [ PROGRAMMING : R(r) PYTHON(P) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ]
 #+TAGS: [ AUDIO : SYNTHESIS(s) PHYSMOD(y) SPATIALAUDIO(S) NETWORKEDAUDIO(N) ]
-#+TAGS: [ HARDWARE : RPI(R) TEENSY(t) ]
+#+TAGS: [ HARDWARE : RPI(R) TEENSY(e) ]
 #+EXPORT_SELECT_TAGS: BLOG
 #+OPTIONS:   H:3 num:0 toc:t \n:nil @:t ::t |:t ^:{} _:{} -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc html-style:nil
@@ -123,7 +123,7 @@ Entered on [2024-04-08 lun. 15:14]
   [[file:~/org/journal.org]]
 
 *** 2024-04-09 mardi
-**** RR-MOOC: Working With Others                                 :REPRES:
+**** RR-MOOC: Working With Others                        :TRAINING:REPRES:
 ***** Not straightforward
 ***** Creating a print-ready document from a computational document requires a well-set-up environment and some work.
 ***** *How to convince colleagues to adopt a new system/set of tools?*
@@ -149,7 +149,7 @@ And =this verbatim bit=?
 Entered on [2024-04-09 mar. 14:17]
   
   [[file:~/org/journal.org::*Open archive: HAL (article), Figshare/Zenodo (code/figures)][Open archive: HAL (article), Figshare/Zenodo (code/figures)]]
-**** Comparison of Tools                                          :REPRES:
+**** Comparison of Tools                                 :TRAINING:REPRES:
 
 I like OrgMode, but maybe it's not the only game in town.
 It depends on the type of document you want to create:
@@ -1755,7 +1755,7 @@ Entered on [2024-06-04 mar. 16:59]
 
 Entered on [2024-06-05 mer. 10:00]
 *** 2024-06-06 jeudi
-**** L'enfer des données                                          :REPRES
+**** RR-MOOC: L'enfer des données                                 :REPRES:
 Two new problems emerge when we use "real" data:
 - Data comes in a variety of types (text, numbers, images...);
   + Data is rarely /heterogeneous/.
@@ -1843,3 +1843,76 @@ some minor modifications to shorten/simplify any outrageous sentences
 and that might appease reviewer 1.
   
 Entered on [2024-06-07 ven. 11:37]
+**** RR-MOOC: L'enfer du logiciel                        :TRAINING:REPRES:
+***** Scaling up
+Code developed to illustrate a simple example may not scale well as
+complexity increases; even a solid computational document may not give
+a good overview of the information that it seeks to convey.
+
+Org-Mode documents may be capable of giving a better overview (in
+Emacs, with sections folded/unfolded by heading), but ultimately the
+linear organisation of the information in the file makes it difficult
+to digest in one go. This problem is only exacerbated by the
+employment of mulitple languages within one such document.
+
+Using a /workflow engine/ may help abstract away some of this
+undesired complexity, allowing branching and parallel or distributed
+execution, encouraging reusability, etc. But one inevitably loses the
+/narrative/ inherent to a computational document/notebook. Existing
+workflow engines include Galaxy, Kepler, Taverna, Pegasus, Collective
+Knowledge, and VisTrails, complex tools developed for specific
+research communities. Lighter alternatives include makefiles, dask,
+drake, swift, snakemake... and the hybrid (prototype) SOS-notebook.
+***** Costly computations
+Another issue is that of costly, long-running computations. Certain
+solutions exist for linking, e.g., JupyterHub to supercomputers, but
+these are works-in-progress. Including calculation checkpoints can be
+helpful, and specifying these may come more naturally in a
+workflow-based structure. There is a large investment, however,
+inherent to adopting a workflow strategy; start with notebooks and
+consider moving to a more sophisticated tool as and when a problem
+demands it.
+***** Complex environments
+What dependencies do our dependencies have? Distribution-specific
+Python libraries are the tip of the iceberg. Thanks to the multitude
+of package managers on different platforms/OSs, replicating an
+environment may be tantamount to impossible. And then there are all
+the assumptions one may have made about the software upon which a
+project depends (think JACK/Pipewire, GNOME's network manager,
+etc.). It will likely be necessary to create a /controlled
+environment/.
+
+This could be a virtual machine, a container, etc. One can either try
+to capture all the sofware, files and dependencies on an existing
+system (with CDE, ReproZip), or start with a pristine enviroment and
+describe all the necessary files and dependencies (with Docker,
+Singularity, Guix/Nix).
+***** The test of time
+Inconsistencies in behaviour between versions of software and
+libraries may give rise to annoyance at best, and outright chaos at
+worst. Example given of division in python giving fundamentally
+different results between v2 and v3, matplotlib default appearance
+changing. Worse example given of numbers returned by /FreeSurfer/
+software (cortical thickness measurements) differing between execution
+on Mac and PC due to different third-party dependencies (libc
+versions?).
+
+We can fall victim to /rapid development/. Bugs may be rapidly
+addressed, but others may be introduced equally as quickly; features
+may change. Rapid development is driven by continuous integration, and
+some suggest implementing CI in reproducible research is the way to
+go. Tools like Popper encourgae this, but are themselves subject to
+the vagaries of rapid development. An alternative is to take the
+slackware approach and only use /very/ stable, old software, only code
+written in C, reinventing the wheel, etc.
+
+Then there's archiving and distributing one's research. GitHub and
+GitLab... are they stable, open? Who owns them and might pull the
+plug? Google Code, for example, was closed with little
+warning. /Software Heritage/ (Roberto di Cosmo) is a noteworthy
+alternative (aimed at archiving all the software produced by
+humanity), as is HAL (Hyper Archive en Ligne). What migth become of
+Dockerhub, the Nix repository, etc. in the years to come? Even a
+container itself, its operability in 10 years, 20, 30...
+
+Entered on [2024-06-07 ven. 16:59]
