@@ -4,13 +4,13 @@
 #+TITLE:       Research Journal
 #+AUTHOR:      Thomas Rushton
 #+LANGUAGE:    en
-#+TAGS: LIG(L) HOME(H) Blog(B) noexport(n) Stats(S) MEETING(M) PRESENTATION(p)
-#+TAGS: HARDWARE(h) INSPO(i) DIY(d) TEACHING(t) REPRES(R) REVIEW(v) GSoC(g)
-#+TAGS: [ PROGRAMMING : R(r) PYTHON(p) JULIA(j) FAUST(f) CPP(c) ]
+#+TAGS: noexport(n) MEETING(m) PRESENTATION(p) BLOG(b)
+#+TAGS: INSPO(i) DIY(d) TEACHING(t) REPRES(R) REVIEW(v) GSoC(G)
+#+TAGS: [ PROGRAMMING : R(r) PYTHON(P) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ]
-#+TAGS: [ AUDIO : SYNTHESIS(s) PHYSICALMODELLING(m) SPATIALAUDIO(P) NETWORKEDAUDIO(N) ]
+#+TAGS: [ AUDIO : SYNTHESIS(s) PHYSMOD(y) SPATIALAUDIO(S) NETWORKEDAUDIO(N) ]
 #+TAGS: [ HARDWARE : RPI(R) TEENSY(t) ]
-#+EXPORT_SELECT_TAGS: Blog
+#+EXPORT_SELECT_TAGS: BLOG
 #+OPTIONS:   H:3 num:0 toc:t \n:nil @:t ::t |:t ^:{} _:{} -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc html-style:nil
 #+EXPORT_SELECT_TAGS: export
@@ -242,7 +242,7 @@ repetitive.
 ***** Proofreading
  
 Entered on [2024-04-16 mar. 11:20]
-**** Presentation: Craig Webb             :PHYSICALMODELLING:PRESENTATION:
+**** Presentation: Craig Webb             :PHYSMOD:PRESENTATION:
 - /NEMUS/ project Numerical Restoration of Historical Music Instruments
   ERC-funded. PI: Michele Ducchesci (sp.)
 - Specifically looking at the harpsichord
@@ -1666,6 +1666,7 @@ Entered on [2024-05-31 ven. 10:20]
 This non-comprehensive list should guide my investigations over the
 next couple of months:
 
+***** TODO Add to this list
 - Can =faust2circle= be made to work?
 - How well does [[https://github.com/smuehlst/circle-stdlib][circle-stdlib]] work?
 - How can we produce 24/32-bit audio with Teensy?
@@ -1673,5 +1674,172 @@ next couple of months:
   JACK)?
 - Can clock ticks be derived from GPIO on Circle, or Teensy for that
   matter?
-
 Entered on [2024-06-02 dim. 14:53]
+*** 2024-06-04 mardi
+**** GSoC: Mentor Welcome Talk                                      :GSoC:
+- "[Have] a chat with contributors 2-4 times a week".
+  + Not a problem with Advik; Tyler also pretty engaged.
+  + *TODO Check in with Fay and Shehab tomorrow.*
+- Encourage contributors to ask questions; but encourage them to guide
+  the answer-finding process.
+- Host a "GSoC Welcome Meet" with all contributors & mentors.
+  + 2-3 across the coding period.
+  + One soon; get people engaged with the idea of continuing in the
+    community.
+- Collect regular status reports (meeting notes suffice?).
+- Track milestones, adjust tasks/deadlines.
+  + Keep an eye on proposal timelines for the above.
+  + If the plan changes, ideally this should be driven by the
+    contributor.
+- MIDTERM EVALUATION: DON'T MISS THE DEADLINE, July 12th.
+  + Establish, with Stéphane, the /primary mentor/ for each project.
+- When to fail a project\dots
+  + Contributors should never be surprised that their project fails.
+  + Signs that a project should be failed:
+    * Contributor not communicating;
+    * Quality of work is poor & not improving;
+    * Contributor not adjusting based on feedback;
+    * Contributor not dedicating enough time to their project.
+  + But remember that they don't have to hit all their proposal
+    milestones; plus they're new/young and their work likely won't be
+    perfect.
+- If scope is wrong...
+  + Easier to descope than it is to scope up...
+    * Fay's project might suffer from the latter...
+
+Entered on [2024-06-04 mar. 16:59]
+*** 2024-06-05 mercredi
+**** Jonas Höpner: A 5th Order Sigma-Delta DAC on an FPGA   :PRESENTATION:
+- Sigma-Delta: low-bit, high-sample-rate DAC, using oversampling
+- Moves noise into high frequency bands
+- "Corrects" quantisation error via feeback loops
+
+- Oversampling means quantisation noise, which resides in the
+  baseband, is distributed over a wider baseband, improving the SNR.
+- But doubling the sample rate only yields a 3 dB improvement in SRN.
+- ...via PCM, which does no noise-sharing;
+- but Sigma-Delta does, achieving 9 dB for 1st order, 15 dB for
+  second...
+- Orders of magnitude improvement in required F_{s}; MHz instead of GHz.
+- But this assumes ideal filterns, no other source of noise, etc.
+
+- Sigma-Delta filters come in various architectures;
+- Different combinations of feedback/feedforward components and
+  coefficients, integrators/resonators...
+  + Coefficients provided by MATLAB sigma-delta toolbox.
+
+- Not a lot of state-of-the-art in this area.
+- Bachelors thesis from 1999; filtering for radar systems
+  (FPGA-based?)
+- FPGA-based sigma-delta DAC, 2003, for audio. 140 dB SNR.
+  + Actual results, not simulation.
+- Rewrite of the previous (2004), in VHDL, but results
+  simulation-only.
+- 2008, 1-bit and 5-bit DAC, VHDL-based, implementation results
+  "comparable" to simulations (140 dB SNR).
+- Something from 2009 too.
+- (OK, so there's a bit of material out there)
+
+- Approaches/Results
+- Floating-point, after MATLAB simulations... but too heavy on FPGA
+- 5th order CIFB Sigma-Delta DAC - cascade-of-integrators, feedback
+  form — fixed-point.
+- Available oversampling rate ~520 for 48 kHz.
+- Simulation suggests ~115 dB SNR
+  + Oscilloscope not accurate enough to measure this...
+
+- Outlook
+- Interpolation filter for upsampling (how does this work without one?!).
+  + (I think he's duplicating samples rather than zero-stuffing.)
+- Fixed-point optimisations; use FloPoCo.
+
+Entered on [2024-06-05 mer. 10:00]
+*** 2024-06-06 jeudi
+**** L'enfer des données                                          :REPRES
+Two new problems emerge when we use "real" data:
+- Data comes in a variety of types (text, numbers, images...);
+  + Data is rarely /heterogeneous/.
+- Data occupies a lot of memory.
+
+Numbers stored as text take up more space than numbers stored in
+binary form; so, we may wish to use a binary format to store all of
+our data; this also removes the overhead of converting from text to
+binary format during computation.
+
+Some traits of text format are attractive, however. Metadata, for
+example, is vital for reproducible research. Text formats are
+(somewhat) universal, i.e. they can be read on different machines,
+architectures, operating systems, without issue. Binary formats may
+fall victim to endianness mismatches between architectures.
+
+Our ideal binary format should:
+- let us work with sizeable data of various types/natures;
+- allow us to specify metatada;
+- specify its endianness.
+
+Two main formats exist: *FITS* and *HDF5*.
+
+FITS:
+- /Flexible Image Transport System/;
+- c. 1981
+- One or more segments, named /header and data units/ (HDUs);
+- Header contains key-value metadata pairs;
+- Data in the form of binary arrays with 1-999 dimensions, or
+  two-dimensional tables in text or binary format;
+- Support in C, Python, R, Julia...
+
+HDF5:
+- /Hierarchical Data Format/;
+- More recent than FITS;
+- Internal structure less rigid than FITS, analogous to filesystem
+  tree structure;
+- Directories — "Groups" — can be interlinked (like symlinks?)
+- Metadata can be added at any point in the tree;
+- Support in C, but more complex than FITS;
+  + Navigable/viewable with /HDFView/;
+- Support in Python (=h5py=), R, Julia...
+
+In either case, where to store the data? Not in GitHib/Lab. Research
+institutes may offer file storage services. Other options include
+/Zenodo/ (CERN) and /figshare/ (private); upload and share.
+
+Entered on [2024-06-06 jeu. 14:07]
+*** 2024-06-07 vendredi
+**** Meeting with Romain: Frontiers Article Revisions            :MEETING:
+My Frontiers review forum says the following:
+#+begin_quote
+You are pending to respond to Reviewer 1 and/or resubmit a new version
+of your manuscript.
+
+Reviewer 2 endorsed publication of this manuscript.
+#+end_quote
+***** Reviewer 1
+- Re-emphasise purpose of article; state it earlier;
+  + Check \sect1.5 for current "first place where objective is stated";
+- Be less pedagogical; (1)
+  + Less repetition of content from SoTA/references;
+    * Leave it a bit more to the reader to follow those threads;
+  + Go less hard with the literature review; (2)
+  + Spend less time on explaining the difference between transport
+    layer protocols;
+- Conclusion: more future work, follow-up opportunities & open
+  questions; less repetition of the abstract/intro.
+***** Reviewer 2
+- (1) Reviewer 2 disagrees.
+- Add more SoTA in terms of SPAT, WFSCollider, etc.
+- Revisit perceptual evaluation (Verheijen); remember Jens's comments
+  from the CSI;
+- State some specific applications of the technology:
+  + Think I've already emphasised institutions, exhibition spaces,
+    concert spaces, individual researchers/artists;
+  + A good one to emphasise is /auralisation/;
+    * Virtual acoustics, calling for the computation of many
+      convolutions; not just a good application of distributed spatial
+      audio, but also a way to distribute the convolutions.
+- (2) Separate literature review? See comments.
+
+Reduce the thing in length (it's close to the 12,000-word limit), make
+some minor modifications to shorten/simplify any outrageous sentences
+and that might appease reviewer 1.
+  
+Entered on [2024-06-07 ven. 11:37]

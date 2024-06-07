@@ -2,128 +2,105 @@
 # C-c C-t to change sequence
 #+SEQ_TODO: TODO(t) STARTED(s!) WAITING(w@) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
 
-* Tasks
-** TODO [#B] Start French Language MOOC
-** TODO [#C] Start Ethics/Integrity MOOC
-** TODO [#A] Finish Reproducible Research MOOC
+* TODO [#B] Start French Language MOOC
+
+* TODO [#C] Start Ethics/Integrity MOOC
+
+* TODO [#A] Finish Reproducible Research MOOC
 DEADLINE: <2024-06-07 ven.>
-** TODO Prepare slides for meeting with Jean-Michel Friedt
+
+* TODO Prepare slides for meeting with Jean-Michel Friedt
 DEADLINE: <2024-06-10 lun.>
   10 minutes' worth; focus on technical details and requirements.
   [[file:~/org/journal.org::*Superivision Meeting with Romain][Superivision Meeting with Romain]]
-** TODO Ask about working at CEI-2 during August
+
+* TODO Ask about working at CEI-2 during August
 DEADLINE: <2024-06-28 ven.>
-** TODO Arrange monthly Emeraude PhD meetings
+
+* TODO Arrange monthly Emeraude PhD meetings
 DEADLINE: <2024-06-05 mer.>
 Talk to Orégane about the date
-** DONE Contribute to la cagnotte pour Aurleien
-- State "DONE"       from "TODO"       [2024-05-24 ven. 11:00]
-[[https://www.lepotcommun.fr/pot/mvnte5iq][link]]
-DEADLINE: <2024-05-31 ven.>  
-** TODO Contact Anders re. GSoC
+
+* TODO Contact Anders re. GSoC
 DEADLINE: <2024-05-31 ven.>
-** DONE Prepare PhD Day presentation
-DEADLINE: <2024-05-14 mar.>
-- State "DONE"       from "TODO"       [2024-05-16 jeu. 10:19]
-** DONE Prepare Emeraude Séminaire presentation
-DEADLINE: <2024-05-15 mer.>
-- State "DONE"       from "TODO"       [2024-05-16 jeu. 10:19]
-** DONE [#B] Apply, again, for social security [6/7]
+
+* DONE [#B] Apply, again, for social security [6/7]
 - State "DONE"       from "TODO"       [2024-05-07 mar. 15:55]
 I have a case number with Ameli:
 
 *2024 0502 6443 39*
 
 I should quote that if I ever have to call them back.
-*** DONE Fill out updated form S 1106a
+** DONE Fill out updated form S 1106a
 - State "DONE"       from "TODO"       [2024-05-07 mar. 10:44]
-*** DONE Get updated /quittances de loyer/ from Foncia website
+** DONE Get updated /quittances de loyer/ from Foncia website
 - State "DONE"       from "TODO"       [2024-05-07 mar. 12:48]
-*** DONE Print all documents
+** DONE Print all documents
 - State "DONE"       from "TODO"       [2024-05-07 mar. 12:48]
-*** DONE Get envelope
+** DONE Get envelope
 - State "DONE"       from "TODO"       [2024-05-07 mar. 15:53]
-*** DONE Take to post office and send, with a suivi
+** DONE Take to post office and send, with a suivi
 - State "DONE"       from "TODO"       [2024-05-07 mar. 15:54]
 NB, sent via INSA's outgoing post.
-*** DONE Call Ameli; check whether they've received my dossier
+** DONE Call Ameli; check whether they've received my dossier
 - State "DONE"       from "TODO"       [2024-05-31 ven. 17:23]
   They have, which is good. Except they received what they have on May
   15th, which is, according to La Poste, two days prior to the arrival
   of my second dossier. So did they receive (or finally begin to
   process) the first one after a delay of over two months?
-*** WAITING Receive some kind of update via post?...
+** WAITING Receive some kind of update via post?...
 - State "WAITING"    from "TODO"       [2024-05-31 ven. 17:24]
-** TODO Read Razvan's Thesis
+
+* TODO Read Razvan's Thesis
 The PDF is in ~/Documents
-** DONE Pay Agathe €40
-DEADLINE: <2024-05-06 lun.>
-- State "DONE"       from "TODO"       [2024-05-06 lun. 09:43]
-** DONE Review PAUC manuscript
-DEADLINE: <2024-05-27 lun.>
-- State "DONE"       from "TODO"       [2024-05-29 mer. 16:49]
-  Actually submitted on ** 2024-05-24
-** TODO Message/email Matt Hamilton
-** TODO Set up OrgRoam
+
+* TODO Message/email Matt Hamilton
+
+* TODO Set up OrgRoam
 Hm, need to break this down. It's kind of set up but I don't know how
 best to use it, so I should read the docs.
-** DONE Follow up on notes from meeting with Morgane Leprince
-- State "DONE"       from "TODO"       [2024-05-12 dim. 18:49]
-These notes are in my white notebook.
-*** DONE Email Solene
-- State "DONE"       from "TODO"       [2024-04-19 ven. 09:07]
-*** DONE Phone Amelie
-DEADLINE: <2024-05-02 jeu.>
-- State "DONE"       from "TODO"       [2024-05-02 jeu. 17:01]
-*** DONE Update Mme Leprince
-DEADLINE: <2024-05-02 jeu.>
-- State "DONE"       from "TODO"       [2024-05-03 ven. 09:50]
-** TODO [#A] Prepare for Thesis Committee Meeting [5/6]
-*** DONE Set up Doodle
+
+* TODO [#A] Prepare for Thesis Committee Meeting [6/6]
+** DONE Set up Doodle
 DEADLINE: <2024-04-16 mar.>
 - State "DONE"       from "TODO"       [2024-04-16 mar. 10:59]
-*** DONE Get Doodle Responses
+** DONE Get Doodle Responses
 - State "DONE"       from "WAITING"    [2024-04-19 ven. 17:32]
 - State "WAITING"    from "TODO"       [2024-04-17 mer. 15:17] \\
   Awaiting responses from Tanguy and Leo
-*** DONE Confirm date
+** DONE Confirm date
 DEADLINE: <2024-04-22 lun.>
 - State "DONE"       from "TODO"       [2024-04-22 lun. 10:05]
-*** DONE Prepare documentation [3/3]
+** DONE Prepare documentation [3/3]
 DEADLINE: <2024-05-13 lun.>
 - State "DONE"       from "TODO"       [2024-05-13 lun. 22:59]
 [[http://edinfomaths.universite-lyon.fr/en/thesis/thesis-follow][Instructions]]
-**** DONE Update CV
+*** DONE Update CV
 - State "DONE"       from "TODO"       [2024-05-12 dim. 18:49]
-**** DONE Progress report
+*** DONE Progress report
 - State "DONE"       from "TODO"       [2024-05-13 lun. 22:58]
 2 pages summarising research work and prospects for year ahead
-**** DONE All scientific work produced
+*** DONE All scientific work produced
 - State "DONE"       from "TODO"       [2024-05-13 lun. 22:58]
-*** DONE Prepare presentation
+** DONE Prepare presentation
 DEADLINE: <2024-05-26 dim.>
 - State "DONE"       from "TODO"       [2024-05-26 dim. 23:24]
-*** TODO Update ADUM
+** DONE Update ADUM
 DEADLINE: <2024-06-14 ven.>
+- State "DONE"       from "TODO"       [2024-06-06 jeu. 13:37]
 See email from Doctorat (30/04/24)
-** TODO Investigate hardware platforms
+
+* TODO Investigate hardware platforms
 - [[https://www.cnx-software.com/2024/04/08/adlink-osm-imx93-osm-size-l-module-nxp-i-mx-93-soc/][ADLINK OSM-IMX93]]
-** DONE Set up meeting with the PIR group
-DEADLINE: <2024-04-15 lun.>
-Check with Romain, but in principle 16h on 22/04.
-** DONE Review SMC papers
-DEADLINE: <2024-04-21 dim.>
-- State "DONE"       from "TODO"       [2024-04-22 lun. 10:06]
-** TODO Sign up to ShareAmi
-** TODO Prendre rendez-vous chez le coiffeur
-DEADLINE: <2024-06-05 mer. .+1m>
+  
+* TODO Sign up to ShareAmi
+
+* TODO Prendre rendez-vous chez le coiffeur
+DEADLINE: <2024-07-06 sam. .+1m>
 :PROPERTIES:
-:LAST_REPEAT: [2024-04-20 sam. 16:31]
+:LAST_REPEAT: [2024-06-06 jeu. 13:37]
 :END:
+- State "DONE"       from "TODO"       [2024-06-06 jeu. 13:37]
 - State "DONE"       from "TODO"       [2024-04-20 sam. 16:31]
-** TODO Prendre rendez-vous chez le médecin
-** DONE Continue application for free public transport [2/2]
-- State "DONE"       from "TODO"       [2024-04-17 mer. 14:00]
-*** DONE Find ID photo
-*** DONE Scan ID photo
-- State "DONE"       from "TODO"       [2024-04-17 mer. 14:00]
+  
+* TODO Prendre rendez-vous chez le médecin
