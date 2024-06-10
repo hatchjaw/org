@@ -1916,3 +1916,41 @@ Dockerhub, the Nix repository, etc. in the years to come? Even a
 container itself, its operability in 10 years, 20, 30...
 
 Entered on [2024-06-07 ven. 16:59]
+*** 2024-06-10 lundi
+**** RR-MOOC: L'enfer du calcul                          :TRAINING:REPRES:
+Floating-point rounding errors are another nice problem. (Orégane
+is well abreast of this.)
+
+#+begin_example
+round(round(a + b) + c) != round(a + round(b + c))
+#+end_example
+
+For a reproducible calculation, the order of operations must be
+preserved. Sounds simple enough\dots but a compiler (or interpreter too, I
+suppose) may change the order for efficiency's sake, according to
+rules that are likely not made explicit to the programmer.
+
+To address this issue:
+- Insist that the compiler respects the order of operations specified
+  in code; possible in Fortran (2003) (what about C? Maybe not);
+- Specify the precise version of the compiler used and the options
+  provided to it.
+
+Parallel computation is another source of variation in the order of
+operations; results produced will be affected by number of
+processors/cores. How best to mitigate for this kind of error is an
+open topic of research.
+
+A calculation is not just whatever definition resides in code; it is
+the hardware, the the language, the compiler, the data\dots To wit, the
+platform. The platform defines how the software is interpreted,
+e.g. how integers are represented, how errors are managed, etc.
+
+Other hellish calculations: those involving (pseudo-)random
+numbers. The default seed to a PRNG is often a timestamp, so one must
+be sure not to permit this default behaviour. Same seed, same
+algorithm: same sequence of random numbers\dots Except, maybe not with
+floating point numbers (and it's not a good idea to use ~==~ as a
+comparator for floats).
+
+Entered on [2024-06-10 lun. 10:39]
