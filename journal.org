@@ -1393,7 +1393,7 @@ public:
     void Run(void) override {
         unsigned nSampleRate{SAMPLE_RATE};
         unsigned nClockFreq =
-                CMachineInfo::Get ()->GetGPIOClockSourceRate (GPIOClockSourcePLLD);
+                CMachineInfo::Get ()->GetGPIOClockSourceRate (GPIOClockSourcePLLD); // 500 MHz
         CBcmRandomNumberGenerator rand;
 
         while (true)
@@ -1406,9 +1406,9 @@ public:
 	        return;
 	    }
 
-            unsigned nDivI = nClockFreq / (32*2) / nSampleRate;
-            unsigned nTemp = nClockFreq / (32*2) % nSampleRate;
-            unsigned nDivF = (nTemp * 4096 + nSampleRate/2) / nSampleRate;
+            unsigned nDivI = nClockFreq / (32*2) / nSampleRate; // 162(.76...)
+            unsigned nTemp = nClockFreq / (32*2) % nSampleRate; // 36500
+            unsigned nDivF = (nTemp * 4096 + nSampleRate/2) / nSampleRate; // 3115(.166...)
             assert (nDivF <= 4096);
             if (nDivF > 4095)
             {
@@ -1419,6 +1419,7 @@ public:
             CLogger::Get()->Write("clocktask", LogDebug, "Setting Fs: %u, DivI: %u, DivF: %u",
                                   nSampleRate, nDivI, nDivF);
 
+	    // max,avg,min: src/DIVI, src/(DIVI + DIFF / 4096), src/(DIVI + 1)
             m_Clock.Start (nDivI, nDivF, nDivF > 0 ? 1 : 0);
         }
     }
@@ -1662,7 +1663,7 @@ Entered on [2024-05-31 ven. 10:19]
 Entered on [2024-05-31 ven. 10:20]
 ** 2024-06 juin
 *** 2024-06-02 dimanche
-**** Hardware Investigations                         :HARDWARE:RPI:TEENSY:
+**** Hardware Investigations/Questions               :HARDWARE:RPI:TEENSY:
 This non-comprehensive list should guide my investigations over the
 next couple of months:
 
@@ -1674,6 +1675,9 @@ next couple of months:
   JACK)?
 - Can clock ticks be derived from GPIO on Circle, or Teensy for that
   matter?
+- Can we exploit the Pi's multicore capabilities in a bare-metal
+  scenario (i.e. with audio ops on one core, networking on another)?
+  
 Entered on [2024-06-02 dim. 14:53]
 *** 2024-06-04 mardi
 **** GSoC: Mentor Welcome Talk                                      :GSoC:
@@ -1954,3 +1958,141 @@ floating point numbers (and it's not a good idea to use ~==~ as a
 comparator for floats).
 
 Entered on [2024-06-10 lun. 10:39]
+**** More about audio clock adjustments              :HARDWARE:RPI:TEENSY:
+It looks like Teensy's NXP chip permits more accurate adjustments of
+its SAI1 clock, than the Pi's Broadcom chip does for its I^{2}S clock.
+
+***** NXP MIMXRT1062xxxxB
+The NXP chip starts by multiplying the source oscillator frequency,
+then applies divisors, i.e.:
+
+#+begin_example
+  CLK_SRC * PLL4 / SAI1_CLK_PRED / SAI1_CLK_PODF
+= CLK_SRC * (DIV + NUM/DENOM) / SAI1_CLK_PRED / SAI1_CLK_PODF
+#+end_example
+
+E.g.:
+
+#+begin_example
+  24'000'000 * (28 + 2240/10000) / 4 / 15
+= 11'289'600
+= 256 * 44100
+#+end_example
+
+Or:
+
+#+begin_example
+  24'000'000 * (30 + 7200/10000) / 4 / 15
+= 12'288'000
+= 256 * 48000
+#+end_example
+
+Changing =NUM= and =DENOM= to 7201 and 10001 respectively yields an
+output F_{s} of 48000.044..., or a resolution of about 1/23 Hz --- though
+perhaps there are other permutations of the registers above to achieve
+finer adjustments.
+
+***** Broadcom BCM2835
+The Broadcom chip just takes a source oscillator at 500 MHz and just
+applies a divisor --- albeit with the potential for a 0th-3rd order \Sigma\Delta
+noise-shaping (MASH) divider. The resulting clock as an /average/
+frequency described thus:
+
+#+begin_example
+source / (DIVI + DIVF/4096)
+#+end_example
+
+E.g.:
+
+#+begin_example
+  500'000'000 / (162 + 3115/4096)
+= 3'071'998.464...
+= 64 * 47999.976...
+#+end_example
+
+Setting =DIVF= to 3114 results in a sampling rate of 48000.048..., so
+resolution here (it will be different at, e.g. \sim44100) is around
+1/14 Hz.
+
+***** Observations
+- Teensy can produce very good integer audio clock
+  frequencies... which is nice and everything, but clock drift renders
+  that a novelty at best.
+- That being said, with that 1/23 Hz resolution, say the clock
+  authority was actually running at 48000.022 Hz, then we're within
+  0.5 ppm.
+- For the Pi, and a clock authority that's running at 48000.012 Hz, we
+  have about 0.75 ppm.
+- Let's make a conservative estimate of 1 ppm, that means for each
+  second we're drifting by 1 \micro{}s, so with T_{s} @ 48 kHz \approx 21 \micro{}s, we're
+  dealing with about 21 seconds to drift by one sample.
+- According to [[https://endruntechnologies.com/pdf/PTP-1588.pdf][this non-authoritative source]], PTP sync messages are
+  typically transmitted once every two seconds, so, fine, we only
+  drift by a couple of microseconds at worst between syncs.
+  + And as conditioning improves that'll decrease.
+- But... in a software-only implementation, jitter complicates matters
+  immensely. As I recall, round trip times are on the order of 1.5 ms,
+  and packet reception intervals for 32 frames, with an average
+  expected arrival interval of 726 \micro{}s, could be greater than 2 ms.
+- Perhaps dedicating a core of the Pi to synchronisation would help
+  matters.
+
+I would like to re-run my drift results for =jacktrip-teensy=, and see
+whether I can replicate them.
+
+Entered on [2024-06-10 lun. 16:49]
+**** Faust DDSP: Reverse mode & neural networks               :DDSP:FAUST:
+***** Reverse mode
+So Prof. Pagani's references are useful, if a bit heavy on computer
+science theory for me to understand entirely. There's [[https://rufflewind.com/2016-12-30/reverse-mode-automatic-differentiation][this guide to
+reverse mode]], however, and I think I have a sense of how it might be
+implemented in Faust. There may be a way to create a /tape/ with a
+~rec~ block; alternatively, it'd be necessary to dig back into the box
+stage of the compiler and build one there. Or perhaps one of the other
+approaches (e.g. that in /You Only Linearize Once/ (Radul et
+al., 2023) would work.
+
+***** Neural networks
+Magenta's DDSP implementation is based on (reverse mode) autodiff, via
+TensorFlow's ~tf.GradientTape()~, but what's being differentiated
+isn't just simple primitives; rather, as far as I can tell, it's a
+neural network of various layers, which encompass the underlying
+primitives. I think the purpose of the neural network, and its layered
+structure, is to prevent overfitting, i.e. for the naive examples in
+=faust-ddsp=, there's extreme overfitting due to the fact that there's
+one deterministic source of training data. As I read in one of the
+TensorFlow [[https://www.tensorflow.org/tutorials/keras/overfit_and_underfit][examples]]:
+
+#+begin_quote
+...[D]eep learning models tend to be good at fitting to the training
+data, but the real challenge is generalization, not fitting.
+#+end_quote
+
+Julius Smith's [[https://faustcloud.grame.fr/doc/examples/index.html#dnn][Faust DNN example]] gives us the structure of an
+autoencoder (which is what =magenta/ddsp= is based on), but without the
+dot products described in [[https://www.coursera.org/lecture/neural-networks-deep-learning/computing-a-neural-networks-output-tyAGh][this Coursera video]].
+
+I think we need to experiment with creating some basic neural network
+layers, probably dense ones to begin with. Then there's convolutional
+layers to consider, regularization, activation... in its /training/
+notebook example, =magenta/ddsp= uses an autoencoder-based model with
+inputs for loudness and f_{0}, a decoder consisting of an =RnnFcDecoder=
+with 256 dimensions, a Gated Recurrent Unit (GRU) layer, 1 /fully
+connected/ (FC) layer per stack, a leaky ReLU activation
+function... this is fundamentally built upon the following class:
+
+#+begin_src python
+@gin.register
+class Fc(tf.keras.Sequential):
+  """Makes a Dense -> LayerNorm -> Leaky ReLU layer."""
+
+  def __init__(self, ch=128, nonlinearity='leaky_relu', **kwargs):
+    layers = [
+        tfkl.Dense(ch),
+        tfkl.LayerNormalization(),
+        tfkl.Activation(get_nonlinearity(nonlinearity)),
+    ]
+    super().__init__(layers, **kwargs)
+#+end_src
+
+Entered on [2024-06-10 lun. 18:30]

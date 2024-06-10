@@ -7,7 +7,7 @@
 * TODO [#C] Start Ethics/Integrity MOOC
 
 * TODO [#A] Finish Reproducible Research MOOC
-DEADLINE: <2024-06-07 ven.>
+DEADLINE: <2024-06-16 dim.>
 
 * TODO Prepare slides for meeting with Jean-Michel Friedt
 DEADLINE: <2024-06-10 lun.>
