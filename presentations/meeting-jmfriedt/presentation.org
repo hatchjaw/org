@@ -93,19 +93,6 @@ What if we could distribute the work?
 
 ** A Distributed Alternative
 
-#+begin_quote
-"A distributed system is a collection of independent entities that
-cooperate to solve a problem that cannot be individually solved."
-#+end_quote
-#+begin_export html
-<small>
-#+end_export
-Kshemkalyani & Singhal, 2011, /Distributed Computing: Principles,
-Algorithms, and Systems/.
-#+begin_export html
-</small>
-#+end_export
-
 #+ATTR_REVEAL: :frag (appear)
 - Scalabale, with no performance penalty
 - Modular: entities act independently
@@ -117,22 +104,9 @@ Algorithms, and Systems/.
 
 #+ATTR_REVEAL: :frag (appear)
 - A source of audio and control data
-  #+ATTR_REVEAL: :frag (appear)
-  + General purpose computer
-  + Standalone software/audio plugin
 - A means of transmission
-  #+ATTR_REVEAL: :frag (appear)
-  + Ethernet is the standard for multichannel audio
-  + UDP --- basis for OSC, RTP, PTP
-  + AVB/AES67 --- suites of technical standards
 - A collection of recipients for that data
-  #+ATTR_REVEAL: :frag (appear)
-  + Low-cost, programmable computing platform
-  + Support for audio and ethernet
 - An authoritative source of time
-  #+ATTR_REVEAL: :frag (appear)
-  + PTP... but enabled hardware increases costs
-  + Possible as a software implementation?
 
 * State of the Art
 :PROPERTIES:
