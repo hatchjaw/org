@@ -2,7 +2,7 @@
 # -*- mode: org -*-
 
 #+TITLE: Enabling Distributed Spatial Audio
-#+AUTHOR: Thomas Rushton
+#+AUTHOR: Thomas Rushton, INSA/Inria/Emeraude
 
 #+OPTIONS: num:nil toc:1 ^:{} ':t
 #+OPTIONS: reveal_width:1200 reveal_height:800 reveal_slide_number:c/t
@@ -37,25 +37,6 @@ npm start -- --root=../
 #+end_src
 
 Then navigate to [[localhost:8000/meeting-jmfriedt/]].
-
-
-* About Me
-
-#+ATTR_REVEAL: :frag (appear)
-- Name: Thomas Albert Rushton
-- Born: Manchester, UK, 1985
-- BMus Music Technology, The University of Edinburgh, 2009
-- Employment
-  #+ATTR_REVEAL: :frag (appear)
-  + Performing arts technician
-  + Musician, music teacher
-  + Computer programmer, print industry
-  + Web application developer
-  + Contractor, Freelancer
-- MSc Sound & Music Computing, Aalborg University (Copenhagen) 2023
-  #+ATTR_REVEAL: :frag (appear)
-  + Internship, Inria, 2022
-- Doctoral Student, Inria/INSA, 2023-/present/
     
 * Distributed Spatial Audio
 :PROPERTIES:
@@ -78,13 +59,30 @@ Aim: synthesise a wavefront via secondary point sources
 WFS systems are typically centralised, /in situ/ installations
 
 #+ATTR_REVEAL: :frag t
-Lots of output channels --- costly
-#+ATTR_REVEAL: :frag t
-€150-250/channel
+Lots of output channels --- costly, exclusive
+
+** IRCAM, Paris
+
+[[./images/ircam1.png]] [[./images/ircam2.png]]
+
+Espace de Projection, 339 loudspeakers
+
+** TU Berlin
+
+[[./images/tu-berlin.webp]]
+
+WellenFeld H 104, 2700 loudspeakers
+
+** "The Sphere", Las Vegas
+
+[[./images/sphere1.jpg]] [[./images/sphere2.jpg]]
+
+167,000 loudspeakers
 
 #+REVEAL: split
 
 [[./images/wfs3.svg]]
+
 
 WFS is /parallelisable/
 
@@ -111,6 +109,7 @@ Algorithms, and Systems/.
 #+ATTR_REVEAL: :frag (appear)
 - Scalabale, with no performance penalty
 - Modular: entities act independently
+  + More overall computing power available
 - Reduced cost-per-channel; incrementally extensible
 - *Improved accessibility*
 
@@ -134,6 +133,28 @@ Algorithms, and Systems/.
   #+ATTR_REVEAL: :frag (appear)
   + PTP... but enabled hardware increases costs
   + Possible as a software implementation?
+
+* State of the Art
+:PROPERTIES:
+:reveal_background: #141414
+:reveal_extra_attr: class="title-slide"
+:END:
+
+** Distributed ambisonics
+
+#+ATTR_HTML: :width 600px
+[[./images/devonport-foss2019.png]]
+
+Devonport & Foss, /The Distribution of Ambisonic and Point Source
+Rendering to Ethernet AVB Speakers/, 2019.
+
+** Distributed WFS
+
+#+ATTR_HTML: :width 600px
+[[./images/belloch2021.png]]
+
+Belloch et al., /On the performance of a GPU-based SoC in a
+distributed spatial audio system,/ 2021.
 
 * Prior Work
 :PROPERTIES:
@@ -195,7 +216,7 @@ Neither prior system featured a truly authoritative source of time
 Time inferred from the rate of network transmission
 
 #+ATTR_REVEAL: :frag t
-Jitter compensation via a /delay-locked loop/
+Jitter compensation via a /delay-locked loop/ and adaptive resampling
 
 #+ATTR_REVEAL: :frag t
 Clock drift compensation via PLL adjustments
@@ -205,7 +226,7 @@ Clock drift compensation via PLL adjustments
 Clients synchronised to ~500 \micro{}s, dependent on:
 #+ATTR_REVEAL: :frag (appear)
 - Sampling rate \rightarrow sample period
-- Buffer size
+- Buffer size, packet size
   #+ATTR_REVEAL: :frag t
   + Dictates channel count, jitter sensitivity
 - Jitter buffer r/w delta
@@ -223,14 +244,7 @@ Clients /experience/ clock drift and jitter differently
 #+ATTR_REVEAL: :frag t
 Relative inter-client temporal movement may cause audible phasing
 
-#+REVEAL: split
-#+ATTR_HTML: :width 750px
-[[./images/subjective.png]]
-
-Perhaps not sufficient to completely undermine the holophonic effect
-
-
-** Potential Solutions
+* Potential Solutions
 :PROPERTIES:
 :reveal_background: #141414
 :reveal_extra_attr: class="title-slide"
@@ -263,61 +277,45 @@ distinct
 #+ATTR_REVEAL: :frag (appear)
 - Is it possible to count ticks of the server's audio clock?
 - If so, can this be done in cross-platform fashion?
-- For a software PTP implementation, how do we cope with the chaos of
-  the network?
+- For a software PTP implementation, how big a problem is jitter?
 
 ** Clock Sharing
 
+#+ATTR_HTML: :width 550px
 [[./images/sharing.svg]]
 
 #+ATTR_REVEAL: :frag (appear)
-- Audio timing governed by a device whose audio clock we can access, and share with all clients
-- Demands an extra cable per client
-- Amplification of the clock signal
+- Audio timing governed by a device whose audio clock we can access
+  and share
+- Demands an extra cable per client, amplification of the clock signal
+- Synchronisation of audio playback not guaranteed
 
-** Other Challenges
+** Candidate platforms
 
-#+ATTR_REVEAL: :frag t
-Difficult to develop and test
-#+ATTR_REVEAL: :frag t
-Certain fundamental assumptions of digital audio can no longer be
-taken for granted
-#+ATTR_REVEAL: :frag t
-E.g. even with a shared clock, how do we synchronise interrupts?
+** Teensy 4.1
+
+#+ATTR_HTML: :width 400px
+[[./images/teensy.jpg]]
+
+#+ATTR_REVEAL: :frag (appear)
+- Powerful processor; limited memory, limited scalability
+- Adjustable audio clock
+  + In an ideal software PTP setup, < 0.5 ppm drift
+- Accepts external clock; can be run as USB audio interface
+- Audio shield only capable of 16-bit output
+
+** Raspberry Pi
+
+#+ATTR_REVEAL: :frag (appear)
+- Operable as a /bare metal/ device
+- Much more memory, (limited) multicore support
+- 24 and 32-bit audio supported
+- Clock also adjustable, < 0.75 ppm drift
+- No support at present for running as audio interface; no UDP multicast
   
-* Outlook
-:PROPERTIES:
-:reveal_background: #141414
-:reveal_extra_attr: class="title-slide"
-:END:
-
-** Establish Authoritative Source of Time
-
-#+ATTR_REVEAL: :frag (appear)
-- Identify candidate hardware platform
-  #+ATTR_REVEAL: :frag (appear)
-  + Bare-metal Raspberry Pi --- Circle
-  + Better audio quality
-  + More memory; longer jitter buffer; improved scalability
-  + Can its clock be adjusted on the fly?
-  + Can it be run as an audio interface?
-  + Availability less of an issue; old models may suffice
-  + No UDP multicast (yet)
-  + No =faust2circle= (yet)
-- Make progress with software PTP...
-- ...Or pursure clock sharing
-
-** Then...
-
-#+ATTR_REVEAL: :frag (appear)
-- Improve software systems
-  + Integrity of server and client implementations
-  + Documentation, installation, workflow
-  + Optimise reproducibility, accessibility
-- Explore extensions to WFS
-- Parallelisability of ambisonics
-
 * Thank you
 :PROPERTIES:
 :UNNUMBERED: notoc
+:reveal_background: #141414
+:reveal_extra_attr: class="title-slide"
 :END:
