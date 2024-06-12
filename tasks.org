@@ -9,8 +9,9 @@
 * TODO [#A] Finish Reproducible Research MOOC
 DEADLINE: <2024-06-16 dim.>
 
-* TODO Prepare slides for meeting with Jean-Michel Friedt
+* DONE Prepare slides for meeting with Jean-Michel Friedt
 DEADLINE: <2024-06-10 lun.>
+- State "DONE"       from "TODO"       [2024-06-11 mar. 16:43]
   10 minutes' worth; focus on technical details and requirements.
   [[file:~/org/journal.org::*Superivision Meeting with Romain][Superivision Meeting with Romain]]
 
@@ -104,3 +105,6 @@ DEADLINE: <2024-07-06 sam. .+1m>
 - State "DONE"       from "TODO"       [2024-04-20 sam. 16:31]
   
 * TODO Prendre rendez-vous chez le médecin
+* Tasks
+** TODO [#A] Revise Frontiers paper
+DEADLINE: <2024-06-20 jeu.>

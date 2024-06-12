@@ -2096,3 +2096,39 @@ class Fc(tf.keras.Sequential):
 #+end_src
 
 Entered on [2024-06-10 lun. 18:30]
+*** 2024-06-12 mercredi
+**** Meeting: Jean-Michel Friedt                                 :MEETING:
+(Actually took place yesterday.)
+
+Present: Jean-Michel Friedt, Romain, Tanguy, me.
+
+Opened with a 10-15 mintue presentation of the distributed spatial
+audio problem space, state of the art, prior work, outstanding
+challenges, etc.
+
+- J-M mentioned the RPi CM4, whose ethernet PHY supports hardware PTP;
+  + shared a [[http://jmfriedt.free.fr/glmf_ptp_eng.pdf][paper]] with us: "Network synchronization of computers for
+    timestamping under GNU/Linux : NTP, PTP and GPS on Raspberry Pi
+    Compute Module 4".
+- He uses an open source system called [[https://ohwr.org/project/white-rabbit/-/wikis/home][White Rabbit]], which offers
+  sub-nanosecond synchronization with the help of GPS;
+  + this is way beyond what we need, both in terms of precision and
+    cost.
+- Many/most "university grade" 10 GB switches support hardware PTP,
+  but not their consumer grade couterparts;
+- Mentioned oven-controlled oscillators;
+- Mentioned Gaël Matten, and Vibiscus, noise reduction technology,
+  with clock and payload in the same signal;
+  + this isn't AoE, however.
+- *Maybe bare-metal isn't necessary*
+  + J-M uses Linux, with a performance-tuned kernel;
+  + I should try a Linux-based approach and see what we get in terms
+    of synchronicity;
+  + J-M was circumspect/wary of a bare-metal PTP implementation.
+- Does the RPi 5 support PTP like the CM4? Only [[https://www.canuckaudiomart.com/forum/viewtopic.php?t=66865][anecdotal suggestions]]
+  that this is the case;
+- How much does a 32-port PTP switch cost? Less than a grand?
+- Tanguy suggests developing something with hardware PTP support if
+  it's provided, with software as a fallback.
+
+Entered on [2024-06-12 mer. 10:10]
