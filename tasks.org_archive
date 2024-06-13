@@ -114,3 +114,54 @@ DEADLINE: <2024-05-02 jeu.>
 DEADLINE: <2024-05-02 jeu.>
 - State "DONE"       from "TODO"       [2024-05-03 ven. 09:50]
 
+
+* DONE Prepare slides for meeting with Jean-Michel Friedt
+DEADLINE: <2024-06-10 lun.>
+:PROPERTIES:
+:ARCHIVE_TIME: 2024-06-12 mer. 10:54
+:ARCHIVE_FILE: ~/org/tasks.org
+:ARCHIVE_CATEGORY: tasks
+:ARCHIVE_TODO: DONE
+:END:
+- State "DONE"       from "TODO"       [2024-06-11 mar. 16:43]
+  10 minutes' worth; focus on technical details and requirements.
+  [[file:~/org/journal.org::*Superivision Meeting with Romain][Superivision Meeting with Romain]]
+
+
+* DONE [#A] Prepare for Thesis Committee Meeting [6/6]
+:PROPERTIES:
+:ARCHIVE_TIME: 2024-06-12 mer. 10:55
+:ARCHIVE_FILE: ~/org/tasks.org
+:ARCHIVE_CATEGORY: tasks
+:ARCHIVE_TODO: DONE
+:END:
+- State "DONE"       from "TODO"       [2024-06-12 mer. 10:55]
+** DONE Set up Doodle
+DEADLINE: <2024-04-16 mar.>
+- State "DONE"       from "TODO"       [2024-04-16 mar. 10:59]
+** DONE Get Doodle Responses
+- State "DONE"       from "WAITING"    [2024-04-19 ven. 17:32]
+- State "WAITING"    from "TODO"       [2024-04-17 mer. 15:17] \\
+  Awaiting responses from Tanguy and Leo
+** DONE Confirm date
+DEADLINE: <2024-04-22 lun.>
+- State "DONE"       from "TODO"       [2024-04-22 lun. 10:05]
+** DONE Prepare documentation [3/3]
+DEADLINE: <2024-05-13 lun.>
+- State "DONE"       from "TODO"       [2024-05-13 lun. 22:59]
+[[http://edinfomaths.universite-lyon.fr/en/thesis/thesis-follow][Instructions]]
+*** DONE Update CV
+- State "DONE"       from "TODO"       [2024-05-12 dim. 18:49]
+*** DONE Progress report
+- State "DONE"       from "TODO"       [2024-05-13 lun. 22:58]
+2 pages summarising research work and prospects for year ahead
+*** DONE All scientific work produced
+- State "DONE"       from "TODO"       [2024-05-13 lun. 22:58]
+** DONE Prepare presentation
+DEADLINE: <2024-05-26 dim.>
+- State "DONE"       from "TODO"       [2024-05-26 dim. 23:24]
+** DONE Update ADUM
+DEADLINE: <2024-06-14 ven.>
+- State "DONE"       from "TODO"       [2024-06-06 jeu. 13:37]
+See email from Doctorat (30/04/24)
+

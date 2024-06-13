@@ -1371,6 +1371,11 @@ jack.properties = {
 
 NB. With this pw-jack config applied, JackTrip no longer crashes.
 
+NB. 32 frames is a bit too tight for my work machine (Dell
+Precision 5570).
+
+Pipewire-JACK documentation: [[https://gitlab.freedesktop.org/pipewire/pipewire/-/wikis/Config-JACK][here]]
+
 Entered on [2024-05-29 mer. 09:56]
 
 *** 2024-05-30 jeudi
@@ -2122,6 +2127,7 @@ challenges, etc.
   + this isn't AoE, however.
 - *Maybe bare-metal isn't necessary*
   + J-M uses Linux, with a performance-tuned kernel;
+  + Default interrupt frequency is quite low (250 Hz for Debian?);
   + I should try a Linux-based approach and see what we get in terms
     of synchronicity;
   + J-M was circumspect/wary of a bare-metal PTP implementation.
@@ -2132,3 +2138,22 @@ challenges, etc.
   it's provided, with software as a fallback.
 
 Entered on [2024-06-12 mer. 10:10]
+*** 2024-06-13 jeudi
+**** "Lerp Smoothing Is Broken"
+Fun/interesting [[https://youtu.be/LSNQuFEDOyQ?si=HZkWxfaahJqe7tfX][talk]] by Freya Holmér.
+
+Takeaways:
+- My previous approach(es) to parameter smoothing have probably been
+  sampling-rate-dependent.
+- I should use exponential decay, a parameter-update rule like...
+  #+begin_example
+a = b+(a-b)*exp(-decay*dt)
+  #+end_example
+- Or maybe the one-pole filter approach from Faust's =si.smooth= is
+  already doing this (I think I ported that to C++ at one point).
+- What a gorgeous presentation she gave; typographically
+  easy-on-the-eye, and with excellent interactive widgets. At one
+  stage there's the suggestion that this was a web-based affair. Looks
+  a little like reveal.js, but much nicer.
+
+Entered on [2024-06-13 jeu. 15:35]

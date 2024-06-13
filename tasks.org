@@ -1,102 +1,70 @@
 # Don't add a timestamp for TODO state
-# C-c C-t to change sequence
 #+SEQ_TODO: TODO(t) STARTED(s!) WAITING(w@) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
+# =C-c C-t= to change sequence
 
-* TODO [#B] Start French Language MOOC
+* Tasks
 
-* TODO [#C] Start Ethics/Integrity MOOC
+** TODO [#B] Start French Language MOOC
 
-* TODO [#A] Finish Reproducible Research MOOC
-DEADLINE: <2024-06-16 dim.>
+** TODO [#C] Start Ethics/Integrity MOOC
 
-* DONE Prepare slides for meeting with Jean-Michel Friedt
-DEADLINE: <2024-06-10 lun.>
-- State "DONE"       from "TODO"       [2024-06-11 mar. 16:43]
-  10 minutes' worth; focus on technical details and requirements.
-  [[file:~/org/journal.org::*Superivision Meeting with Romain][Superivision Meeting with Romain]]
+** TODO [#A] Finish Reproducible Research MOOC
+DEADLINE: <2024-06-14 ven.>
 
-* TODO Ask about working at CEI-2 during August
+** TODO Ask about working at CEI-2 during August
 DEADLINE: <2024-06-28 ven.>
 
-* TODO Arrange monthly Emeraude PhD meetings
+** TODO Arrange monthly Emeraude PhD meetings
 DEADLINE: <2024-06-05 mer.>
 Talk to Orégane about the date
 
-* TODO Contact Anders re. GSoC
+** TODO Contact Anders re. GSoC
 DEADLINE: <2024-05-31 ven.>
 
-* DONE [#B] Apply, again, for social security [6/7]
+** WAITING [#B] Apply, again, for social security [6/7]
+- State "WAITING"    from "DONE"       [2024-06-12 mer. 11:04] \\
+  Waiting for an update by post.
 - State "DONE"       from "TODO"       [2024-05-07 mar. 15:55]
 I have a case number with Ameli:
 
 *2024 0502 6443 39*
 
 I should quote that if I ever have to call them back.
-** DONE Fill out updated form S 1106a
+*** DONE Fill out updated form S 1106a
 - State "DONE"       from "TODO"       [2024-05-07 mar. 10:44]
-** DONE Get updated /quittances de loyer/ from Foncia website
+*** DONE Get updated /quittances de loyer/ from Foncia website
 - State "DONE"       from "TODO"       [2024-05-07 mar. 12:48]
-** DONE Print all documents
+*** DONE Print all documents
 - State "DONE"       from "TODO"       [2024-05-07 mar. 12:48]
-** DONE Get envelope
+*** DONE Get envelope
 - State "DONE"       from "TODO"       [2024-05-07 mar. 15:53]
-** DONE Take to post office and send, with a suivi
+*** DONE Take to post office and send, with a suivi
 - State "DONE"       from "TODO"       [2024-05-07 mar. 15:54]
 NB, sent via INSA's outgoing post.
-** DONE Call Ameli; check whether they've received my dossier
+*** DONE Call Ameli; check whether they've received my dossier
 - State "DONE"       from "TODO"       [2024-05-31 ven. 17:23]
   They have, which is good. Except they received what they have on May
   15th, which is, according to La Poste, two days prior to the arrival
   of my second dossier. So did they receive (or finally begin to
   process) the first one after a delay of over two months?
-** WAITING Receive some kind of update via post?...
+*** WAITING Receive some kind of update via post?...
 - State "WAITING"    from "TODO"       [2024-05-31 ven. 17:24]
 
-* TODO Read Razvan's Thesis
+** TODO Read Razvan's Thesis
 The PDF is in ~/Documents
 
-* TODO Message/email Matt Hamilton
+** TODO Message/email Matt Hamilton
 
-* TODO Set up OrgRoam
+** TODO Set up OrgRoam
 Hm, need to break this down. It's kind of set up but I don't know how
 best to use it, so I should read the docs.
 
-* TODO [#A] Prepare for Thesis Committee Meeting [6/6]
-** DONE Set up Doodle
-DEADLINE: <2024-04-16 mar.>
-- State "DONE"       from "TODO"       [2024-04-16 mar. 10:59]
-** DONE Get Doodle Responses
-- State "DONE"       from "WAITING"    [2024-04-19 ven. 17:32]
-- State "WAITING"    from "TODO"       [2024-04-17 mer. 15:17] \\
-  Awaiting responses from Tanguy and Leo
-** DONE Confirm date
-DEADLINE: <2024-04-22 lun.>
-- State "DONE"       from "TODO"       [2024-04-22 lun. 10:05]
-** DONE Prepare documentation [3/3]
-DEADLINE: <2024-05-13 lun.>
-- State "DONE"       from "TODO"       [2024-05-13 lun. 22:59]
-[[http://edinfomaths.universite-lyon.fr/en/thesis/thesis-follow][Instructions]]
-*** DONE Update CV
-- State "DONE"       from "TODO"       [2024-05-12 dim. 18:49]
-*** DONE Progress report
-- State "DONE"       from "TODO"       [2024-05-13 lun. 22:58]
-2 pages summarising research work and prospects for year ahead
-*** DONE All scientific work produced
-- State "DONE"       from "TODO"       [2024-05-13 lun. 22:58]
-** DONE Prepare presentation
-DEADLINE: <2024-05-26 dim.>
-- State "DONE"       from "TODO"       [2024-05-26 dim. 23:24]
-** DONE Update ADUM
-DEADLINE: <2024-06-14 ven.>
-- State "DONE"       from "TODO"       [2024-06-06 jeu. 13:37]
-See email from Doctorat (30/04/24)
-
-* TODO Investigate hardware platforms
+** TODO Investigate hardware platforms
 - [[https://www.cnx-software.com/2024/04/08/adlink-osm-imx93-osm-size-l-module-nxp-i-mx-93-soc/][ADLINK OSM-IMX93]]
   
-* TODO Sign up to ShareAmi
+** TODO Sign up to ShareAmi
 
-* TODO Prendre rendez-vous chez le coiffeur
+** TODO Prendre rendez-vous chez le coiffeur
 DEADLINE: <2024-07-06 sam. .+1m>
 :PROPERTIES:
 :LAST_REPEAT: [2024-06-06 jeu. 13:37]
@@ -104,7 +72,7 @@ DEADLINE: <2024-07-06 sam. .+1m>
 - State "DONE"       from "TODO"       [2024-06-06 jeu. 13:37]
 - State "DONE"       from "TODO"       [2024-04-20 sam. 16:31]
   
-* TODO Prendre rendez-vous chez le médecin
-* Tasks
+** TODO Prendre rendez-vous chez le médecin
+
 ** TODO [#A] Revise Frontiers paper
 DEADLINE: <2024-06-20 jeu.>
