@@ -21,7 +21,7 @@ Talk to Orégane about the date
 ** TODO Contact Anders re. GSoC
 DEADLINE: <2024-05-31 ven.>
 
-** WAITING [#B] Apply, again, for social security [6/7]
+** WAITING [#B] Apply, again, for social security [6/9]
 - State "WAITING"    from "DONE"       [2024-06-12 mer. 11:04] \\
   Waiting for an update by post.
 - State "DONE"       from "TODO"       [2024-05-07 mar. 15:55]
@@ -48,7 +48,9 @@ NB, sent via INSA's outgoing post.
   of my second dossier. So did they receive (or finally begin to
   process) the first one after a delay of over two months?
 *** WAITING Receive some kind of update via post?...
-- State "WAITING"    from "TODO"       [2024-05-31 ven. 17:24]
+*** TODO Call Ameli again; ask for timescale
+DEADLINE: <2024-07-01 lun.>
+*** WAITING Update Mme Le Prince re. Ameli
 
 ** TODO Read Razvan's Thesis
 The PDF is in ~/Documents

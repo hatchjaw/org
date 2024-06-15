@@ -2156,4 +2156,48 @@ a = b+(a-b)*exp(-decay*dt)
   stage there's the suggestion that this was a web-based affair. Looks
   a little like reveal.js, but much nicer.
 
+Here's a little demo:
+
+#+begin_src python :results file link :var figdir="./images/20240613" :exports both
+import matplotlib.pyplot as plt
+import os
+import numpy as np
+import math
+
+if not os.path.isdir(figdir):
+    os.makedirs(figdir)
+
+def expDecay(a, b, decay, dt):
+    return b + (a - b) * math.exp(-decay * dt)
+    
+figfile = f'{figdir}/lerp.png'
+N = 1000
+decay = 1.5e3
+Ts = 1/48000
+
+a = np.zeros(N)
+b = np.ones(N)
+b[int(N/2):] = 0
+b[int(3*N/4):] = np.linspace(0, 2/3, int(N/4))
+
+for xx in range(1, N):
+    a[xx] = expDecay(a[xx-1], b[xx], decay, Ts)
+
+x = np.linspace(0, N-1, N)
+
+plt.figure(figsize=(6, 2.5))
+plt.plot(x, b)
+plt.plot(x, a)
+plt.tight_layout()
+
+plt.savefig(figfile)
+return figfile
+#+end_src
+
+#+RESULTS:
+[[file:./images/20240613/lerp.png]]
+
+(Irritating that the above doesn't find matplotlib, etc. installed via
+pacman. I had to use pip.)
+
 Entered on [2024-06-13 jeu. 15:35]
