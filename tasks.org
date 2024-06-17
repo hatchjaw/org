@@ -3,6 +3,10 @@
 # =C-c C-t= to change sequence
 
 * Tasks
+
+** TODO Prepare PhD meeting presentation
+DEADLINE: <2024-07-01 lun.>
+
 ** TODO Read Papers
 *** TODO Wierstorf thesis
 *** TODO Ritsch: AOO
@@ -19,10 +23,6 @@ DEADLINE: <2024-06-14 ven.>
 
 ** TODO Ask about working at CEI-2 during August
 DEADLINE: <2024-06-28 ven.>
-
-** TODO Arrange monthly Emeraude PhD meetings
-DEADLINE: <2024-06-17 lun.>
-Talk to Orégane about the date
 
 ** TODO Contact Anders re. GSoC
 DEADLINE: <2024-05-31 ven.>
