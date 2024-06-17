@@ -1845,6 +1845,7 @@ Reviewer 2 endorsed publication of this manuscript.
     * Virtual acoustics, calling for the computation of many
       convolutions; not just a good application of distributed spatial
       audio, but also a way to distribute the convolutions.
+- Less emphasis on HOA in \sect1/SoTA.
 - (2) Separate literature review? See comments.
 
 Reduce the thing in length (it's close to the 12,000-word limit), make
@@ -2201,3 +2202,25 @@ return figfile
 pacman. I had to use pip.)
 
 Entered on [2024-06-13 jeu. 15:35]
+*** 2024-06-15 samedi
+**** RPi: crystal oscillator tuning                         :HARDWARE:RPI:
+It emerges that Jean-Michel's method involved making direct hardware
+modifications to the CM4, attaching a varicap to the crystal
+oscillator (XO), essentially, to modify its frequency.
+
+- JM suggests using a Direct Digital Synthesiser (DDS) as the clock
+  source.
+  + [[https://fr.aliexpress.com/item/32810411866.html]]
+- Projects like [[https://raspberrypi.stackexchange.com/questions/74482/switch-out-the-x1-oscillator-on-a-rpi-2-3][this one]], which similarly involve swapping out the XO
+  for an external (and more reliable) clock source by surgical means,
+  are useful for reference (or just to disprove the viability of the
+  approach).
+  + Impressive clock stability achieved there, with NTP alone,
+    apparently.
+- Do we even have the equipment (do I even have the ability) for
+  precision soldering such as this requires?
+- Isn't this all just beyond the realms of accessibility?
+
+Entered on [2024-06-15 sam. 21:11]
+  
+  [[file:~/org/journal.org::*Meeting: Jean-Michel Friedt][Meeting: Jean-Michel Friedt]]

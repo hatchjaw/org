@@ -3,6 +3,12 @@
 # =C-c C-t= to change sequence
 
 * Tasks
+** TODO Read Papers
+*** TODO Wierstorf thesis
+*** TODO Ritsch: AOO
+*** TODO Carôt: latency-optimized soundcards
+*** TODO Meier et al.: The JamBerry
+DEADLINE: <2024-06-23 dim.>
 
 ** TODO [#B] Start French Language MOOC
 
@@ -15,13 +21,13 @@ DEADLINE: <2024-06-14 ven.>
 DEADLINE: <2024-06-28 ven.>
 
 ** TODO Arrange monthly Emeraude PhD meetings
-DEADLINE: <2024-06-05 mer.>
+DEADLINE: <2024-06-17 lun.>
 Talk to Orégane about the date
 
 ** TODO Contact Anders re. GSoC
 DEADLINE: <2024-05-31 ven.>
 
-** WAITING [#B] Apply, again, for social security [6/9]
+** WAITING [#B] Apply, again, for social security [7/9]
 - State "WAITING"    from "DONE"       [2024-06-12 mer. 11:04] \\
   Waiting for an update by post.
 - State "DONE"       from "TODO"       [2024-05-07 mar. 15:55]
@@ -47,9 +53,13 @@ NB, sent via INSA's outgoing post.
   15th, which is, according to La Poste, two days prior to the arrival
   of my second dossier. So did they receive (or finally begin to
   process) the first one after a delay of over two months?
-*** WAITING Receive some kind of update via post?...
-*** TODO Call Ameli again; ask for timescale
-DEADLINE: <2024-07-01 lun.>
+*** DONE Receive some kind of update via post?...
+- State "DONE"       from "WAITING"    [2024-06-17 lun. 09:22]
+*** TODO Call Ameli again
+DEADLINE: <2024-06-18 mar.>
+- Update sex;
+- Ask whether I can upload the /Déclaration sur l'Honneur de
+  Filiation/ rather than posting it.
 *** WAITING Update Mme Le Prince re. Ameli
 
 ** TODO Read Razvan's Thesis
