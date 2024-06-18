@@ -2224,3 +2224,22 @@ oscillator (XO), essentially, to modify its frequency.
 Entered on [2024-06-15 sam. 21:11]
   
   [[file:~/org/journal.org::*Meeting: Jean-Michel Friedt][Meeting: Jean-Michel Friedt]]
+*** 2024-06-18 mardi
+**** Frontiers article revisions
+Just working on the revisions of late.
+I need to remember to state the potential uses of the system, with one
+or two supporting references for auralisation and archaeoacoustics,
+and an accompanying mention of the benefits of distributed computing
+with regard to convolution-heavy algorithms.
+
+Entered on [2024-06-18 mar. 18:05]
+**** Meeting: Christof Ressi                                     :MEETING:
+Christof maintains the Audio Over OSC (AOO) project.
+
+***** Questions
+- Has AOO been implemented on any embedded platforms?
+- Has it been employed in any spatial audio applications?
+- If so, beyond employing a DLL, have any synchonisation mechanisms
+  been attempted?
+  
+Entered on [2024-06-18 mar. 18:08]
