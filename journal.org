@@ -2241,5 +2241,48 @@ Christof maintains the Audio Over OSC (AOO) project.
 - Has it been employed in any spatial audio applications?
 - If so, beyond employing a DLL, have any synchonisation mechanisms
   been attempted?
+
+***** Meeting
+- AOO originated with Winfried Ritsch's work on /message based audio
+  systems/
+- Christof began working on AOO (v2) in 2020
+- Development has been slow, but approaching a stable release
+- Projects already using the alpha version
+- Not much literature out there on AOO; maybe a paper next year
+  + [[https://lac.linuxaudio.org/2014/papers/36.pdf][Winfried Ritsch's paper]] (LAC 2014)
+  + [[https://www.soundingfuture.com/en/article/aoo-low-latency-peer-peer-audio-streaming-and-messaging][Article in Sounding Future]] (2024)
+- AOO designed for flexibility, multiple usecases, spatial audio
+  entirely possible
+- different codecs supported
+  + Raw PCM (for LAN)
+  + Opus (WAN,low bandwidth)
+  + Soon: [[https://qoaformat.org/][QOA]] ("Quite OK Audio" Format) — Fast, Lossy compression
+- Running on ESP32
+  + Code: [[https://git.iem.at/ressi/esp32_aoo_test]]
+- The second "O" in AOO is a bit of a lie...
+  + control data is OSC, but audio transmitted as binary data
+  + BUT messages can be embedded in the audio stream at
+    sample-accurate position
+    * This entails a variable packet size!
+    * AOO fragments packets itself, respecting the MTU of the
+      transmission medium
+    * Host audio system & network stream are separated (via
+      intermediate buffer? Need to investigate)
+- AOO implements packet-control mechanisms, such as re-send
+- [[https://sonobus.net/][SonoBus]] project uses AOO's C++ API
+- No multicast model; like JackTrip, AOO is pseudo-connectionful, and
+  thread-based; peer-to-peer model
+  + Connectionless is on the roadmap (maybe)
+- No sync-focused implementations to speak of yet
+  + BUT users have requested timestamps embedded in the audio stream,
+    so this functionality is already available
+  + Look for ~kAooEventStreamTime~; =aoo_events.h= and
+    =aoo_receive.cpp=
+
+***** Other resources
+- [[https://drive.google.com/drive/folders/1Q2DRcb0xTf_doTtv3dRSVqFm9iltPXwG][Recent presentation on AOO]]
+- [[https://medias.ircam.fr/x68e59d_audio-over-osc][Ircam presentation]]
+- [[http://christofressi.com/][Christof's personal site]]
+- [[https://git.iem.at/cm/aoo][AOO gitlab]]
   
 Entered on [2024-06-18 mar. 18:08]
