@@ -1851,6 +1851,11 @@ Reviewer 2 endorsed publication of this manuscript.
 Reduce the thing in length (it's close to the 12,000-word limit), make
 some minor modifications to shorten/simplify any outrageous sentences
 and that might appease reviewer 1.
+***** Remaining points to address
+- Reduce emphasis on perceptual evaluation?
+- Less repetition in Conclusion
+- Move system overview to beginning of Method
+- Buffer paragraph at beginning of Background
   
 Entered on [2024-06-07 ven. 11:37]
 **** RR-MOOC: L'enfer du logiciel                        :TRAINING:REPRES:
@@ -2277,10 +2282,11 @@ Christof maintains the Audio Over OSC (AOO) project.
   + BUT users have requested timestamps embedded in the audio stream,
     so this functionality is already available
   + Look for ~kAooEventStreamTime~; =aoo_events.h= and
-    =aoo_receive.cpp=
+    =aoo_receive.cpp= in the codebase
 
 ***** Other resources
-- [[https://drive.google.com/drive/folders/1Q2DRcb0xTf_doTtv3dRSVqFm9iltPXwG][Recent presentation on AOO]]
+- [[https://drive.google.com/drive/folders/1Q2DRcb0xTf_doTtv3dRSVqFm9iltPXwG][Recent presentation on AOO]] + Pd patches
+  + [[https://docs.google.com/presentation/d/188OlFnJTD2fEn2gdGAmfI7w7UTVNmCRc80KIkUrTbsQ/edit?usp=sharing][slides]] imported into Google slides.
 - [[https://medias.ircam.fr/x68e59d_audio-over-osc][Ircam presentation]]
 - [[http://christofressi.com/][Christof's personal site]]
 - [[https://git.iem.at/cm/aoo][AOO gitlab]]

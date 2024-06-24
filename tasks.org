@@ -3,7 +3,8 @@
 # =C-c C-t= to change sequence
 
 * Tasks
-
+** TODO Ask Maxime again about practicalities of using his DAC with Teensy or the Pi
+DEADLINE: <2024-07-12 ven.>
 ** TODO Prepare PhD meeting presentation
 DEADLINE: <2024-07-01 lun.>
 

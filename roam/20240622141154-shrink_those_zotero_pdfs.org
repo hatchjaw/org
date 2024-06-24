@@ -1,0 +1,18 @@
+:PROPERTIES:
+:ID:       1ca67cd6-631c-495e-a395-4a670191fc13
+:END:
+#+title: Shrink those Zotero PDFs
+
+Sometimes a PDF (even one without a huge number of pages) is huge, and
+monopolises my Zotero free-plan quota. /Sometimes/ (I'm looking at
+you, Perry Cook) the offending PDF contains a bunch of outrageously
+high-res images. Ghostscript can be employed to address this issue:
+
+#+begin_src shell :results none :exports code
+gs -sDEVICE=pdfwrite -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=out.pdf in.pdf
+#+end_src
+
+Instead of =/ebook=, try =/preprint= for something higher-fidelity, or
+=/screen= for something more aggressive, compression-wise.
+
+[[https://askubuntu.com/questions/113544/how-can-i-reduce-the-file-size-of-a-scanned-pdf-file][Source]]
