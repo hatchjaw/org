@@ -16,7 +16,7 @@
 #+EXPORT_SELECT_TAGS: export
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+COLUMNS: %25ITEM %TODO %3PRIORITY %TAGS
-#+SEQ_TODO: TODO(t) STARTED(s!) WAITING(w@) APPT(a!) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
+#+SEQ_TODO: TODO(t) STARTED(s!) WAITING(w@) APPT(a!) | DONE(d!) CANCELLED(x!) DEFERRED(f!)
 #+SEQ_TODO: UNREAD(u) | READ(r) | REVIEWED(v)
 
 # HTML Export styles/scripts for theme 'readtheorg'
@@ -1852,10 +1852,30 @@ Reduce the thing in length (it's close to the 12,000-word limit), make
 some minor modifications to shorten/simplify any outrageous sentences
 and that might appease reviewer 1.
 ***** Remaining points to address
-- Reduce emphasis on perceptual evaluation?
-- Less repetition in Conclusion
-- Move system overview to beginning of Method
-- Buffer paragraph at beginning of Background
+****** CANCELLED Reduce emphasis on perceptual evaluation?
+:LOGBOOK:
+- State "CANCELLED"  from "TODO"       [2024-06-25 mar. 11:47]
+:END:
+****** DONE Less repetition in Conclusion
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2024-06-25 mar. 16:34]
+:END:
+****** CANCELLED Move system overview to beginning of Method
+:LOGBOOK:
+- State "CANCELLED"  from "TODO"       [2024-06-24 lun. 17:48]
+:END:
+****** CANCELLED Buffer paragraph at beginning of Background
+:LOGBOOK:
+- State "CANCELLED"  from "TODO"       [2024-06-25 mar. 11:33]
+:END:
+****** DONE UPDATE WORDCOUNT
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2024-06-25 mar. 16:34]
+:END:
+****** DONE UPLOAD NEW FIGURE
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2024-06-26 mer. 16:55]
+:END:
   
 Entered on [2024-06-07 ven. 11:37]
 **** RR-MOOC: L'enfer du logiciel                        :TRAINING:REPRES:
@@ -2292,3 +2312,10 @@ Christof maintains the Audio Over OSC (AOO) project.
 - [[https://git.iem.at/cm/aoo][AOO gitlab]]
   
 Entered on [2024-06-18 mar. 18:08]
+
+*** 2024-06-26 mercredi
+**** Just a little progress report
+- Frontiers article revised and submitted
+- I need to document the supporting code repositories
+  
+Entered on [2024-06-26 mer. 16:52]

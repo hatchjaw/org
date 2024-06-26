@@ -13,22 +13,19 @@ DEADLINE: <2024-07-01 lun.>
 *** TODO Ritsch: AOO
 *** TODO Carôt: latency-optimized soundcards
 *** TODO Meier et al.: The JamBerry
-DEADLINE: <2024-06-23 dim.>
+DEADLINE: <2024-06-30 dim.>
 
 ** TODO [#B] Start French Language MOOC
 
 ** TODO [#C] Start Ethics/Integrity MOOC
 
 ** TODO [#A] Finish Reproducible Research MOOC
-DEADLINE: <2024-06-14 ven.>
+DEADLINE: <2024-06-28 ven.>
 
 ** TODO Ask about working at CEI-2 during August
 DEADLINE: <2024-06-28 ven.>
 
-** TODO Contact Anders re. GSoC
-DEADLINE: <2024-05-31 ven.>
-
-** WAITING [#B] Apply, again, for social security [7/9]
+** WAITING [#B] Apply, again, for social security [9/9]
 - State "WAITING"    from "DONE"       [2024-06-12 mer. 11:04] \\
   Waiting for an update by post.
 - State "DONE"       from "TODO"       [2024-05-07 mar. 15:55]
@@ -56,13 +53,15 @@ NB, sent via INSA's outgoing post.
   process) the first one after a delay of over two months?
 *** DONE Receive some kind of update via post?...
 - State "DONE"       from "WAITING"    [2024-06-17 lun. 09:22]
-*** TODO Call Ameli again
-DEADLINE: <2024-06-18 mar.>
+*** DONE Call Ameli again
+DEADLINE: [2024-06-18 mar.]
+- State "DONE"       from "TODO"       [2024-06-18 mar. 13:46]
 - Update sex;
 - Ask whether I can upload the /Déclaration sur l'Honneur de
   Filiation/ rather than posting it.
-*** WAITING Update Mme Le Prince re. Ameli
+*** DONE Update Mme Le Prince re. Ameli
 
+- State "DONE"       from "WAITING"    [2024-06-25 mar. 16:33]
 ** TODO Read Razvan's Thesis
 The PDF is in ~/Documents
 
@@ -87,5 +86,6 @@ DEADLINE: <2024-07-06 sam. .+1m>
   
 ** TODO Prendre rendez-vous chez le médecin
 
-** TODO [#A] Revise Frontiers paper
-DEADLINE: <2024-06-20 jeu.>
+** DONE [#A] Revise Frontiers article
+DEADLINE: <2024-06-27 jeu.>
+- State "DONE"       from "TODO"       [2024-06-26 mer. 16:52]
