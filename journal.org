@@ -2319,3 +2319,43 @@ Entered on [2024-06-18 mar. 18:08]
 - I need to document the supporting code repositories
   
 Entered on [2024-06-26 mer. 16:52]
+*** 2024-06-27 jeudi
+**** Latest on faust-ddsp                                :DDSP:GSoC:FAUST:
+- Advik has created a frequency-domain loss function that sort of works.
+  + His commit-message style is bad, however: "spectral loss works" is
+    neither informative nor completely true.
+    * I guess it's better than "tada".
+- It's only stable and free from local minima between ~200-1200 Hz.
+- He hasn't used a norm of any kind, and has yet to provide a
+  compelling rationale for this.
+- He's going to investigate momentum; I suggested parameter
+  normalisation too.
+- He also has a w.i.p. neuron, but it doesn't compile.
+  
+Entered on [2024-06-27 jeu. 11:07]
+**** Amati++ issues                                            :JUCE:GSoC:
+Submitted two issues to Tyler's AmatiPP repo:
+- Entering Faust code for an oscillator with frequency and gain
+  controls, the frequency control appears to be labouring under some
+  expectation that its value will be normalised. I.e. this works...
+  #+begin_src faust
+import("stdfaust.lib");
+freq = hslider("freq", .5, 0, 1, .01);
+gain = hslider("gain", .5, 0, 1, .01);
+process = os.osc(freq*20000),gain : *;
+  #+end_src
+  ...but this doesn't:
+  #+begin_src faust
+import("stdfaust.lib");
+freq = hslider("freq", 440, 20, 20000, .01);
+gain = hslider("gain", .5, 0, 1, .01);
+process = os.osc(freq),gain : *;
+  #+end_src
+  Specifically, the latter produces a subsonic frequency, until the
+  slider is moved, at which point it becomes supersonic (or too high
+  in frequency for my rubbish écouteurs to reproduce).
+- For the plugin build, after clicking /Compile/, upon navigating back
+  to the /Editor/ tab, the editor is unresponsive. Closing the plugin
+  interface and reopening it restores it to operation (until the next
+  compilation).
+Entered on [2024-06-27 jeu. 11:40]
