@@ -8,7 +8,7 @@ DEADLINE: <2024-07-05 ven.>
 ** TODO Ask Maxime again about practicalities of using his DAC with Teensy or the Pi
 DEADLINE: <2024-07-12 ven.>
 ** TODO Prepare PhD meeting presentation
-DEADLINE: <2024-07-01 lun.>
+DEADLINE: <2024-07-08 lun.>
 
 ** TODO Read Papers
 *** TODO Wierstorf thesis
@@ -25,7 +25,7 @@ DEADLINE: <2024-06-30 dim.>
 DEADLINE: <2024-06-28 ven.>
 
 ** TODO Ask about working at CEI-2 during August
-DEADLINE: <2024-06-28 ven.>
+DEADLINE: <2024-07-01 lun.>
 
 ** WAITING [#B] Apply, again, for social security [9/9]
 - State "WAITING"    from "DONE"       [2024-06-12 mer. 11:04] \\
@@ -62,6 +62,7 @@ DEADLINE: [2024-06-18 mar.]
 - Ask whether I can upload the /Déclaration sur l'Honneur de
   Filiation/ rather than posting it.
 *** DONE Update Mme Le Prince re. Ameli
+*** WAITING Receive another update via post...
 
 - State "DONE"       from "WAITING"    [2024-06-25 mar. 16:33]
 ** TODO Read Razvan's Thesis

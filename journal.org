@@ -2359,3 +2359,28 @@ process = os.osc(freq),gain : *;
   interface and reopening it restores it to operation (until the next
   compilation).
 Entered on [2024-06-27 jeu. 11:40]
+*** 2024-06-28 vendredi
+** 2024-07 juillet
+*** 2024-07-01 lundi
+**** Documenting NetJUCE
+- Why did I assign sixteen channels to a track hosting the plugin?
+  + Because, for sync tests, each of the eight clients returns two
+    channels to the multicast group.
+- The console app is broken.
+  + Seems to default to a buffer size of 512 frames, and setting
+    ~AudioDeviceSetup::bufferSize~ to 64 doesn't appear to take effect.
+    * That's because I'm trying to set
+      ~AudioDeviceSetup::outputDeviceName~ to =system=, which doesn't
+      exist on my current machine.
+  + Half (or more) of the time it crashes, with =free(): invalid
+    pointer=.
+- Moving the call to ~AudioAppComponent::setAudioChannels~ back to the
+  beginning of the ~MainComponent~ constructor appears to have got it
+  sort of working, besides a failure to respect the target 44.1 kHz
+  sample rate.
+  + That's pipewire-related
+  + To remedy:
+    #+begin_src shell :results output :exports both
+pw-metadata -n settings 0 clock.force-rate 44100 
+    #+end_src
+Entered on [2024-07-01 lun. 11:47]
