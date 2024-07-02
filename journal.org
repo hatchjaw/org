@@ -9,7 +9,7 @@
 #+TAGS: [ PROGRAMMING : R(r) PYTHON(P) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ]
 #+TAGS: [ AUDIO : SYNTHESIS(s) PHYSMOD(y) SPATIALAUDIO(S) NETWORKEDAUDIO(N) ]
-#+TAGS: [ HARDWARE : RPI(R) TEENSY(e) ]
+#+TAGS: [ HARDWARE : RPI(R) TEENSY(Y) ]
 #+EXPORT_SELECT_TAGS: BLOG
 #+OPTIONS:   H:3 num:0 toc:t \n:nil @:t ::t |:t ^:{} _:{} -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc html-style:nil
@@ -2362,7 +2362,7 @@ Entered on [2024-06-27 jeu. 11:40]
 *** 2024-06-28 vendredi
 ** 2024-07 juillet
 *** 2024-07-01 lundi
-**** Documenting NetJUCE
+**** Documenting NetJUCE                                  :NETWORKEDAUDIO:
 - Why did I assign sixteen channels to a track hosting the plugin?
   + Because, for sync tests, each of the eight clients returns two
     channels to the multicast group.
@@ -2378,9 +2378,62 @@ Entered on [2024-06-27 jeu. 11:40]
   beginning of the ~MainComponent~ constructor appears to have got it
   sort of working, besides a failure to respect the target 44.1 kHz
   sample rate.
-  + That's pipewire-related
-  + To remedy:
+  + That's pipewire-related. To remedy:
     #+begin_src shell :results output :exports both
 pw-metadata -n settings 0 clock.force-rate 44100 
     #+end_src
 Entered on [2024-07-01 lun. 11:47]
+*** 2024-07-02 mardi
+**** Emeraude: Stagières SyFaLa                             :PRESENTATION:
+***** Rémi Jeunehomme: Real Time Auralization on FPGAs
+- 1D-convolution between input signal and an FIR (i.e. the
+  room/space).
+- Time-domain: $O(N)$ complexity.
+- Freq-domain: $O(\log{}K)$ complexity, with $K$ FFT length, but risk of time
+  aliasing.
+- Overlap-Add (OLA): partial, overlapping outputs, summed to produce
+  output; memory intensive.
+- Overlap-Save (OLS): /inputs/ overlap instead; no need to store and
+  sum partial outputs.
+- IR convolution can be uniform or non-uniform.
+- Uniform, in freq-domain, implies that block size equals FFT size...
+- (Time|Frequency)-domain Uniformly Partitioned Overlap Save
+  ((T|F)UPOLS)
+- What'll fit on the Zybo?
+- Hardware optimisations: loop pipelining, unrolling...
+- Bursts: merging DDR access requests, which must be contiguous.
+- Trade-offs regarding whether it'll fit; depending on fixed vs
+  floating point, algorithm may use more DSP or more LUT, etc.
+***** Benjamin Quiédeville: C++ Optimisation in the Context of High-Level Synthesis on FPGA
+- Understand how HLS performs different optimisations
+- Test cases: NLMS and FDTD algorithms
+- FPGA, 125 MHz clock, 48 kHz Fs, 20.8 \micro{}s min latency (2604 cycles)
+- NLMS — Normalised Least Mean Square filter; used for noise
+  reduction, filter matching etc.
+  + /Covered this in SMSA; gradient descent, (Wiener filter?).../
+  + Not much to optimise here... there's a running sum that doesn't
+    need to be recomputed in its entirety each time, just subtract
+    oldest sample and add newest.
+- FDTD plate reverb
+  + 100x84 grid, really low resource usage (<20 %) on FPGA, but
+    terrible latency (130x realtime).
+  + /Partitioning/ the grid, computed in batches, leads to much higher
+    resource usage (~200-400 %), but significant reductions in
+    latency... still, far (2-4x) in excess of realtime.
+  + ...And partitioning may lead to an unstable simulation, if
+    partition edges aren't handled carefully...
+  + Benjamin to try a smaller grid, perhaps a simpler model (e.g. 2D
+    wave).
+Entered on [2024-07-02 mar. 14:05]
+**** Documenting netjuce-teensy                    :NETWORKEDAUDIO:TEENSY:
+Whether to use truncation or interpolation (or no resampling) should
+be a config-level decision, or a matter of the high-level API of the
+client. More maintable would be to make it either a constructor
+parameter or a property with a setter\dots The former is complicated by
+how many parameters there already are (IPs, port numbers). Maybe
+passing some kind of config struct into a ~setConfig~ function would
+be a decent way to go.
+
+Entered on [2024-07-02 mar. 14:10]
+  
+  [[file:~/org/journal.org::*Documenting NetJUCE][Documenting NetJUCE]]

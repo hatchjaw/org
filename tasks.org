@@ -3,6 +3,8 @@
 # =C-c C-t= to change sequence
 
 * Tasks
+** TODO [#A] Submit IFC article
+DEADLINE: <2024-07-12 ven.>
 ** TODO Check entry requirements for US
 DEADLINE: <2024-07-05 ven.>
 ** TODO Ask Maxime again about practicalities of using his DAC with Teensy or the Pi
@@ -15,17 +17,17 @@ DEADLINE: <2024-07-08 lun.>
 *** TODO Ritsch: AOO
 *** TODO Carôt: latency-optimized soundcards
 *** TODO Meier et al.: The JamBerry
-DEADLINE: <2024-06-30 dim.>
+DEADLINE: <2024-07-07 dim.>
 
 ** TODO [#B] Start French Language MOOC
 
 ** TODO [#C] Start Ethics/Integrity MOOC
 
 ** TODO [#A] Finish Reproducible Research MOOC
-DEADLINE: <2024-06-28 ven.>
+DEADLINE: <2024-07-07 dim.>
 
 ** TODO Ask about working at CEI-2 during August
-DEADLINE: <2024-07-01 lun.>
+DEADLINE: <2024-07-05 ven.>
 
 ** WAITING [#B] Apply, again, for social security [9/9]
 - State "WAITING"    from "DONE"       [2024-06-12 mer. 11:04] \\
