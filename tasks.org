@@ -3,6 +3,8 @@
 # =C-c C-t= to change sequence
 
 * Tasks
+** TODO [#A] Send Romain weekly update
+DEADLINE: <2024-07-12 ven. ++1w>
 ** TODO [#A] Submit IFC article
 DEADLINE: <2024-07-12 ven.>
 ** TODO Check entry requirements for US
@@ -13,11 +15,11 @@ DEADLINE: <2024-07-12 ven.>
 DEADLINE: <2024-07-08 lun.>
 
 ** TODO Read Papers
+DEADLINE: <2024-07-07 dim.>
 *** TODO Wierstorf thesis
 *** TODO Ritsch: AOO
 *** TODO Carôt: latency-optimized soundcards
 *** TODO Meier et al.: The JamBerry
-DEADLINE: <2024-07-07 dim.>
 
 ** TODO [#B] Start French Language MOOC
 

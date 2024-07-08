@@ -2437,3 +2437,50 @@ be a decent way to go.
 Entered on [2024-07-02 mar. 14:10]
   
   [[file:~/org/journal.org::*Documenting NetJUCE][Documenting NetJUCE]]
+*** 2024-07-05 vendredi
+**** More =netjuce-teensy= documentation           :NETWORKEDAUDIO:TEENSY:
+- Switched to a dedicated ~ClientSettings~ object, backed up by
+  compiler flags for setting options like debug and resampling modes.
+  + Fine to set ~WAIT_FOR_SERIAL~ that way too.
+- Current setup doesn't like to run at 32 frames. Resorted to 64.
+  + Remember the example of AOO, and separating the timing of audio
+    and networking operations.
+- Had some distortion problems testing with AudioPluginHost, Amati++,
+  and PHYSICAL EDUCATION. Thought it was resampling dodginess; can't
+  say for sure, because I wasn't running the rw-delta visualiser, but
+  I'm confident that it was just a matter of the transmitted signal
+  being too hot.
+- Anyway, now to actually document the thing...
+Entered on [2024-07-05 ven. 18:36]
+  
+  [[file:~/org/journal.org::*Documenting netjuce-teensy][Documenting netjuce-teensy]]
+*** 2024-07-08 lundi
+**** More =netjuce-teensy= documentation           :NETWORKEDAUDIO:TEENSY:
+- Consolidated more settings into ~ClientSettings~ struct.
+- Tried clock adjustments every two seconds; seems to mitigate large
+  adjustments. Still, sometimes there's a lot of jitter and resulting
+  adjustments reciprocate around an average sampling rate but fail to
+  converge on that average.
+  + Added a build flag to enable/disable clock adjustments.
+- A mysterious error occurs if using =platform-teensy= >4.17.0. Here's
+  the damage:
+
+#+begin_example
+CrashReport:
+  A problem occurred at (system time) 19:56:43
+  Code was executing from address 0x0
+  CFSR: 401
+        (IACCVIOL) Instruction Access Violation
+        (IMPRECISERR) Data bus error but address not related to instruction
+  Temperature inside the chip was 61.91 °C
+  Startup CPU clock speed is 600MHz
+#+end_example
+
+- OK, turns out this was because I wasn't returning anything from
+  ~bool NetJUCEClient::begin()~.
+- NB. Teensy 5.0.0 was [[https://github.com/platformio/platform-teensy/releases/tag/v5.0.0][released]] in February 2024, but platformio pulls
+  the previous version, 4.18.0, as the latest stable version.
+  
+Tomorrow: send response to Frontiers reviewer 2.
+
+Entered on [2024-07-08 lun. 18:35]
