@@ -8,14 +8,15 @@ DEADLINE: <2024-07-12 ven. ++1w>
 ** TODO [#A] Submit IFC article
 DEADLINE: <2024-07-12 ven.>
 ** TODO Check entry requirements for US
-DEADLINE: <2024-07-05 ven.>
+DEADLINE: <2024-07-12 ven.>
 ** TODO Ask Maxime again about practicalities of using his DAC with Teensy or the Pi
 DEADLINE: <2024-07-12 ven.>
-** TODO Prepare PhD meeting presentation
-DEADLINE: <2024-07-08 lun.>
+** DONE Prepare PhD meeting presentation
+DEADLINE: <2024-07-09 mar.>
 
+- State "DONE"       from "TODO"       [2024-07-10 mer. 13:32]
 ** TODO Read Papers
-DEADLINE: <2024-07-07 dim.>
+DEADLINE: <2024-07-14 dim.>
 *** TODO Wierstorf thesis
 *** TODO Ritsch: AOO
 *** TODO Carôt: latency-optimized soundcards
@@ -26,10 +27,10 @@ DEADLINE: <2024-07-07 dim.>
 ** TODO [#C] Start Ethics/Integrity MOOC
 
 ** TODO [#A] Finish Reproducible Research MOOC
-DEADLINE: <2024-07-07 dim.>
+DEADLINE: <2024-07-14 dim.>
 
 ** TODO Ask about working at CEI-2 during August
-DEADLINE: <2024-07-05 ven.>
+DEADLINE: <2024-07-12 ven.>
 
 ** WAITING [#B] Apply, again, for social security [9/9]
 - State "WAITING"    from "DONE"       [2024-06-12 mer. 11:04] \\
