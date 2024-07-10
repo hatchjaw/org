@@ -2510,6 +2510,21 @@ Entered on [2024-07-09 mar. 11:09]
 Reported my progress since Peyrusse. Orégane suggested putting a
 corrected version of my master's thesis on Arxiv.
 
+Orégane presented on accuracy of floating point calculations,
+specifically the idea of rounding to the nearest available floating
+point value. /Faithful/ vs. /correct/ rounding (the former potentially
+giving rise to non-monotonic output for certain (linear?) functions),
+piecewise linear approximation to functions, etc. Accuracy is
+guaranteed for correct, but most implementations use faithful (because
+it's quicker?) and that means rounding is architecture-specific.
+
+Bastien mentioned some PhD training he'd done and spoke at greater
+length about how the arithmetic problem of his thesis has become
+something more like an optimisation problem; one of /[[https://en.wikipedia.org/wiki/Constraint_programming][constraint
+programming]]/. Christine Solnon, who is joining Emeraude from the
+autumn, will be a useful person to have on the team, and for Bastien
+to discuss this with.
+
 Bastien and Orégane suggested I should write the IFC paper.
 
 Bastien to share slides from the teaching /formation/ that he did.
