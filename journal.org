@@ -2530,3 +2530,16 @@ Bastien and Orégane suggested I should write the IFC paper.
 Bastien to share slides from the teaching /formation/ that he did.
 
 Entered on [2024-07-10 mer. 13:29]
+*** 2024-07-11 jeudi
+**** GSoC Meetings                                                  :GSoC:
+- Shehab has a working PoC of the package publishing mechanism;
+  + A node/express web app; user submits URL of package, authenticates
+    with GitHub, and a branch is automatically created in the registry
+    repo.
+- Advik wants to know if it's possible to read a CSV file in Faust;
+  + I'm quite sure the answer is no;
+  + Unless one were to do something awful with the ~soundfile~
+    primitive;
+  + Better to embed the Faust compiler, and read CSV in C++.
+  
+Entered on [2024-07-11 jeu. 17:51]
