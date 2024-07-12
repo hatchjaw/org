@@ -1,0 +1,157 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+
+#+TITLE: Differentiable DSP in Faust
+#+AUTHOR: Thomas Rushton
+
+#+EXPORT_FILE_NAME: out/ifc24
+#+OPTIONS: toc:nil ':t ^:{} num:1
+#+LATEX_COMPILER: latexmk
+#+LATEX_CLASS: ifc24
+#+BIBLIOGRAPHY: IFC-24.bib
+#+CITE_EXPORT: biblatex
+#+LATEX_HEADER: \RequirePackage[]{ifc24-style}
+
+#+begin_abstract
+This is the template file for the proceedings of the third \F{}
+International Conference (IFC-24).
+This template has been derived from IFC-20 templates and aims at producing
+conference proceedings in electronic form.
+The format is essentially the one used for ICASSP conferences. Please use
+either this \LaTeX{} or the accompanying Word formats when preparing your
+submission. 
+#+end_abstract
+
+* Latex Setup                                                      :noexport:
+:PROPERTIES:
+:HEADER-ARGS: :tangle out/ifc24-style.sty :results silent
+:END:
+
+Remember to tangle =C-c C-v t= before exporting.
+
+** Basics
+
+#+begin_src latex
+\ProvidesPackage{ifc24-style}[2024/07/12 v0.1 Bundling IFC24 LaTeX style]
+#+end_src
+
+** Title and Authors
+
+Title is taken from the title attribute.
+
+#+begin_src latex
+%% \def\papertitle{International Faust Conference 2024 -- Paper Template}
+\def\paperauthorA{Thomas Albert Rushton}
+#+end_src
+
+Authors' affiliations have to be set below.
+
+** Packages
+#+begin_src latex
+\usepackage{IFC-24}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{euscript}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{ifpdf}
+
+\usepackage{color}
+\usepackage{listings}
+\definecolor{mygrey}{rgb}{0.96,0.96,0.96}
+\lstset{
+  tabsize=4,
+  basicstyle=\ttfamily,
+  backgroundcolor=\color{mygrey},
+  captionpos=b,
+  breaklines=true
+}
+
+\usepackage[english]{babel}
+\usepackage{caption}
+\usepackage{subfig, color}
+
+\setcounter{page}{1}
+\ninept
+
+\usepackage{times}
+% Saves a lot of ouptut space in PDF... after conversion with the distiller
+% Delete if you cannot get PS fonts working on your system.
+#+end_src
+
+** LaTeX vs PDFLaTeX
+
+#+begin_src latex
+% pdf-tex settings: detect automatically if run by latex or pdflatex
+\newif\ifpdf
+\ifx\pdfoutput\relax
+\else
+   \ifcase\pdfoutput
+      \pdffalse
+   \else
+      \pdftrue
+\fi
+
+\ifpdf % compiling with pdflatex
+  \usepackage[pdftex,
+    pdftitle={\papertitle},
+    pdfauthor={\paperauthorA, \paperauthorB, \paperauthorC, \paperauthorD},
+    colorlinks=false, % links are activated as colror boxes instead of color text
+    bookmarksnumbered, % use section numbers with bookmarks
+    pdfstartview=XYZ % start with zoom=100% instead of full screen; especially useful if working with a big screen :-)
+  ]{hyperref}
+  \pdfcompresslevel=9
+  \usepackage[pdftex]{graphicx}
+  \usepackage[figure,table]{hypcap}
+\else % compiling with latex
+  \usepackage[dvips]{epsfig,graphicx}
+  \usepackage[dvips,
+    colorlinks=false, % no color links
+    bookmarksnumbered, % use section numbers with bookmarks
+    pdfstartview=XYZ % start with zoom=100% instead of full screen
+  ]{hyperref}
+  % hyperrefs are active in the pdf file after conversion
+  \usepackage[figure,table]{hypcap}
+\fi
+#+end_src
+
+** Macros
+#+begin_src latex
+% Special Macros
+\newcommand{\F}{\textsc{Faust}}
+#+end_src
+
+** Don't think we need to do the title this way\dots
+#+begin_src latex
+%% \title{\papertitle}
+#+end_src
+
+** Author affiliations
+
+#+begin_src latex
+%-------------SINGLE-AUTHOR HEADER STARTS (uncomment below if your paper has a single author)-----------------------
+\affiliation{
+\paperauthorA \,\sthanks{This work was supported by the XYZ Foundation}}
+{\href{https://inria.fr}{Inria} \\ Villeurbanne, France\\
+{\tt \href{mailto:thomas.rushton@inria.fr}{thomas.rushton@inria.fr}}
+}
+%-----------------------------------SINGLE-AUTHOR HEADER ENDS------------------------------------------------------
+#+end_src
+
+* Introduction
+
+This template can be found on the conference website.
+
+#+PRINT_BIBLIOGRAPHY:
+
+* Emacs Setup                                                      :noexport:
+
+# Local Variables:
+# eval:   (add-to-list 'org-latex-classes '("ifc24"
+# "\\documentclass[twoside,a4paper]{article}
+# [NO-DEFAULT-PACKAGES]"
+# ("\\section{%s}" . "\\section*{%s}")
+# ("\\subsection{%s}" . "\\subsection*{%s}")
+# ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+# ("\\paragraph{%s}" . "\\paragraph*{%s}")
+# ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+# End:

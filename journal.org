@@ -2543,3 +2543,14 @@ Entered on [2024-07-10 mer. 13:29]
   + Better to embed the Faust compiler, and read CSV in C++.
   
 Entered on [2024-07-11 jeu. 17:51]
+*** 2024-07-12 vendredi
+**** Meeting with Romain                                         :MEETING:
+- Don't spend too long on the IFC paper;
+  + But do submit something; a short, demo-like affair.
+- Re. sync; making a more costly, PTP-based system, may be fine if
+  such a system affords greater computational power and number of
+  output channels than a centralised alternative;
+  + Some accessibility lost, but much gained if a distributed system
+    can do something that a centralised one --- even a very powerful
+    one --- cannot.
+Entered on [2024-07-12 ven. 15:44]

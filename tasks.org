@@ -4,9 +4,13 @@
 
 * Tasks
 ** TODO [#A] Send Romain weekly update
-DEADLINE: <2024-07-12 ven. ++1w>
+DEADLINE: <2024-07-19 ven. ++1w>
+:PROPERTIES:
+:LAST_REPEAT: [2024-07-12 ven. 18:12]
+:END:
+- State "DONE"       from "TODO"       [2024-07-12 ven. 18:12]
 ** TODO [#A] Submit IFC article
-DEADLINE: <2024-07-12 ven.>
+DEADLINE: <2024-07-15 lun.>
 ** TODO Check entry requirements for US
 DEADLINE: <2024-07-12 ven.>
 ** TODO Ask Maxime again about practicalities of using his DAC with Teensy or the Pi
