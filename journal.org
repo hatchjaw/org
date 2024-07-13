@@ -2554,3 +2554,63 @@ Entered on [2024-07-11 jeu. 17:51]
     can do something that a centralised one --- even a very powerful
     one --- cannot.
 Entered on [2024-07-12 ven. 15:44]
+*** 2024-07-13 samedi
+**** Faust Autodiff: loss function improvements               :DDSP:FAUST:
+Watching the Coursera video, [[https://www.coursera.org/lecture/neural-networks-deep-learning/derivatives-with-a-computation-graph-0VSHe][Derivatives with a Computation Graph]], I
+realised that differentiating the graph end-to-end automatically
+entails differentiating the loss function automatically. Thus far,
+we've been doing this symbolically.
+
+For target output \(y\), predicted output \(\hat{y}\) and L1 norm
+(absolute error) loss function, \(\mathcal{L}(y, \hat{y}) = ||y -
+\hat{y}||\):
+
+\begin{equation*}
+\frac{\partial\mathcal{L}}{\partial \mathbf{x}} =
+\frac{\partial y}{\partial \mathbf{x}}\frac{y - \hat{y}}{|y - \hat{y}|},
+\end{equation*}
+
+since:
+
+\begin{equation*}
+\frac{\partial}{\partial u}|u| = \frac{u}{|u|}.
+\end{equation*}
+
+This can be implemented quite nicely in Faust, within the
+differentiable environment, using the differentiable ~abs~ primitive:
+
+#+begin_src faust
+lossL1(learningRate, y, yHat) = error,par(i,vars.N,_)
+    : diff(abs) // This computes both the loss and gradients
+    : _,scaleGrads
+with {
+    error = yHat,y : -;
+    scaleGrads = par(i, vars.N, _,learningRate : *);
+};
+#+end_src
+
+Generalising, including a windowing function time-domain smoothing,
+and adding meters so loss and gradients become visible in the UI, an
+L2 norm loss function can be implemented too:
+
+#+begin_src faust
+losses = environment {
+    L1 = lossFunction(diff(abs));
+    L2 = lossFunction((diff(_),diff(2) : diff(^)));
+} with {
+    lossFunction(function, windowSize, learningRate, y, yHat) = error,par(i,vars.N,_)
+        : window
+        : function 
+        : meter 
+        : _,scaleGrads
+    with {
+        window = par(i, vars.N+1, ba.slidingMean(windowSize));
+        error = yHat,y : -;
+        meter = (_ <: attach(hbargraph("[100]loss",0.,.05))),
+            par(i, vars.N, _ <: attach(hbargraph("[101]gradient %i",-.5,.5)));
+        scaleGrads = par(i, vars.N, _,learningRate : *);
+    };
+};
+#+end_src
+
+Entered on [2024-07-13 sam. 11:43]

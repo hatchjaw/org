@@ -2,14 +2,14 @@
 # -*- mode: org -*-
 
 #+TITLE: Differentiable DSP in Faust
-#+AUTHOR: Thomas Rushton
+# #+AUTHOR: Thomas Rushton
 
 #+EXPORT_FILE_NAME: out/ifc24
 #+OPTIONS: toc:nil ':t ^:{} num:1
-#+LATEX_COMPILER: latexmk
+# #+LATEX_COMPILER: latexmk
 #+LATEX_CLASS: ifc24
 #+BIBLIOGRAPHY: IFC-24.bib
-#+CITE_EXPORT: biblatex
+#+CITE_EXPORT: bibtex
 #+LATEX_HEADER: \RequirePackage[]{ifc24-style}
 
 #+begin_abstract
@@ -35,12 +35,12 @@ Remember to tangle =C-c C-v t= before exporting.
 \ProvidesPackage{ifc24-style}[2024/07/12 v0.1 Bundling IFC24 LaTeX style]
 #+end_src
 
-** Title and Authors
+** Author(s)
 
 Title is taken from the title attribute.
 
 #+begin_src latex
-%% \def\papertitle{International Faust Conference 2024 -- Paper Template}
+%% \def\papertitle{Differentiable DSP in Faust}
 \def\paperauthorA{Thomas Albert Rushton}
 #+end_src
 
@@ -120,27 +120,32 @@ Authors' affiliations have to be set below.
 \newcommand{\F}{\textsc{Faust}}
 #+end_src
 
-** Don't think we need to do the title this way\dots
-#+begin_src latex
-%% \title{\papertitle}
-#+end_src
-
 ** Author affiliations
 
+Single author affiliation:
+
 #+begin_src latex
-%-------------SINGLE-AUTHOR HEADER STARTS (uncomment below if your paper has a single author)-----------------------
-\affiliation{
-\paperauthorA \,\sthanks{This work was supported by the XYZ Foundation}}
+\affiliation{\paperauthorA}
 {\href{https://inria.fr}{Inria} \\ Villeurbanne, France\\
 {\tt \href{mailto:thomas.rushton@inria.fr}{thomas.rushton@inria.fr}}
 }
-%-----------------------------------SINGLE-AUTHOR HEADER ENDS------------------------------------------------------
+#+end_src
+
+** Bibliography
+
+#+begin_src latex
+\bibliographystyle{IEEEbib}
 #+end_src
 
 * Introduction
 
 This template can be found on the conference website.
 
+Here's a ref: [cite:@Smith2012]
+
+#+begin_export latex
+\nocite{*}
+#+end_export
 #+PRINT_BIBLIOGRAPHY:
 
 * Emacs Setup                                                      :noexport:

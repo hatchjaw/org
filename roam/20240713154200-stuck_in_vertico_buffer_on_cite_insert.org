@@ -1,0 +1,11 @@
+:PROPERTIES:
+:ID:       47de2dd2-2f09-419c-a3c5-7394b912dec0
+:END:
+#+title: Stuck in vertico buffer on cite insert
+
+So, you've entered =C-c C-x @= in a valiant attempt to add a citation
+to your org document. Now you find that "empty input exits", except
+you can't provide an empty input because vertico has helpfully listed
+all of your bibliograhy entries. Solution: hit =M-Ret=.
+
+[[https://stackoverflow.com/questions/70111206/emacs-org-cite-stuck-in-helm-buffer][Source]]
