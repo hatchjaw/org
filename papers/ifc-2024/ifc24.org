@@ -5,7 +5,7 @@
 # #+AUTHOR: Thomas Rushton
 
 #+EXPORT_FILE_NAME: out/ifc24
-#+OPTIONS: toc:nil ':t ^:{} num:1
+#+OPTIONS: toc:nil ':t ^:{} num:3
 # #+LATEX_COMPILER: latexmk
 #+LATEX_CLASS: ifc24
 #+BIBLIOGRAPHY: IFC-24.bib
@@ -19,7 +19,14 @@ This template has been derived from IFC-20 templates and aims at producing
 conference proceedings in electronic form.
 The format is essentially the one used for ICASSP conferences. Please use
 either this \LaTeX{} or the accompanying Word formats when preparing your
-submission. 
+submission.
+
+Using the ~environment~ expression and pattern matching abstraction,
+it is possible to write \F{} code that is differentiable end-to-end,
+facilitating the computation and propagation of gradients, and in turn
+supporting the creation of parameter optimisation
+algorithms. Differentiable programming in Faust could serve as a
+platform for a \F{}-native approach to machine learning problems.
 #+end_abstract
 
 * Latex Setup                                                      :noexport:
@@ -74,8 +81,9 @@ Authors' affiliations have to be set below.
 \ninept
 
 \usepackage{times}
-% Saves a lot of ouptut space in PDF... after conversion with the distiller
-% Delete if you cannot get PS fonts working on your system.
+\usepackage{inconsolata}
+
+\usepackage[inkscapelatex=false]{svg}
 #+end_src
 
 ** LaTeX vs PDFLaTeX
@@ -137,14 +145,154 @@ Single author affiliation:
 \bibliographystyle{IEEEbib}
 #+end_src
 
-* Introduction
+* Adding Image Attributes                                          :noexport:
+
+You've generated some image output from a source block; now you want
+to add attributes like ~#+CAPTION:~, etc. There are a few approaches,
+none of which is perfectly lovely. To suggest a couple:
+
+- Generate an image result, then add attributes between the source
+  block or ~CALL~ statement and the results.
+#+begin_example
+#+begin_src
+...
+#+end_src
+#+CAPTION: A delightful caption
+#+ATTR_LATEX: :width .5\linewidth
+#+RESULTS:...
+#+end_example
+
+- Use [[https://orgmode.org/manual/Evaluating-Code-Blocks.html#How-to-evaluate-source-code-1][inline call]] syntax
+#+begin_example
+#+NAME: faust_code
+#+begin_src faust
+...
+#+end_src
+
+#+ATTR_LATEX: :width .75\linewidth
+call_faust_code()[:results svg file :file image.svg :output-dir images
+:exports results]
+#+end_example
+
+The latter doesn't provide a preview, but less manual intervention is
+necessary.
+
+One more thing: for regular source blocks, ~output-dir:~ and ~file:~
+are combined into ~file:~ to produce =<outputdir>/<file>=. For
+~#+CALL:~ this isn't the case; best to just use ~file:
+<outputdir>/<file>~.
+
+* More potentially useful syntax                                   :noexport:
+
+This is a link to section [[*Conclusion]]
 
 This template can be found on the conference website.
 
 Here's a ref: [cite:@Smith2012]
 
+Here's some code:
+
+#+begin_src faust
+  process = _;
+#+end_src
+
+And some inline code ~process = !;~
+
+And floating code?
+
+#+CAPTION: this code should float, because it has a caption
+#+begin_src faust
+process = 1;
+#+end_src
+
+* Introduction
+
+Differentiable programming is "a programming paradigm in which complex
+computer programs\dots can be differentiated end-to-end automically"
+
+[Differentiable programming] may be supported by operator overloading...
+
+There is a sense in which the block-diagram algebra of \F{} lends the
+language intuitively to the problem of automatic differentiation. As
+we will see, the language itself presents certain limitations in this
+respect, but nonetheless we can achieve a great deal\dots
+
+* Differentiable Programming in Faust
+
+The possibility of writing differentiable code in any programming
+language is contingent on the availability of derivative expressions
+for the primitive operations in that language.
+
+** Defining a Differentiable Primitive
+
+As a basic example, consider the addition primitive; in \F{} one can
+write:
+
+#+NAME: faust_add
+#+begin_src faust
+  process = +;
+#+end_src
+
+which yields the block diagram:
+
+#+CALL: faust_add() :results svg file :file images/add.svg :exports results
+#+ATTR_LATEX: :width .5\linewidth
+#+RESULTS:
+[[file:add.svg]]
+
+This signal processor, \(f\), takes two input signals, \(u\) and \(v\), and
+produces one output signal, \(y\):
+
+\begin{equation}
+y = f(u, v) = u + v.
+\end{equation}
+
+Now, imagine that \(y\) is dependent on some variable \(x\), and that
+we wish to know how sensitive \(y\) is to changes in \(x\). We can
+produce an analytic expression for this sensitivity by differentiating
+\(y\) with respect to \(x\):
+
+\begin{equation}
+\frac{dy}{dx} = \frac{d}{dx}(u + v) = \frac{du}{dx} + \frac{dv}{dx}.
+\end{equation}
+
+The addition rule of differentiation states that the derivative of an
+addition is another addition, albeit one whose operands are the
+derivatives of the operands to the original addition with respect to
+the variable of interest. In \F{} we could express this as follows:
+
+#+begin_src faust :results svg file :file images/dualadd.svg :exports both
+  process = +,+;
+#+end_src
+#+ATTR_LATEX: :width .5\linewidth
+#+RESULTS:
+[[file:images/dualadd.svg]]
+
+That being the case, we would be describing, in parallel, the /primal/
+output signal \(y\), and its /tangent/ \(\frac{dy}{dx}\), which we
+could in turn represent as follows:
+
+#+NAME: eq:dualadd
+\begin{align}
+\langle y, \frac{dy}{dx} \rangle
+&= \langle u, \frac{du}{dx} \rangle + \langle v, \frac{dv}{dx} \rangle \nonumber \\
+&= \langle u + v, \frac{du}{dx} + \frac{dv}{dx} \rangle.
+\end{align}
+
+This is a /dual number/ representation, or, more accurately since \F{}
+deals exclusively with signals, a /dual signal/ representation. Having
+acces to the primal and tangent signals in parallel in this manner
+lays the foundation for forward mode automatic differentiation in the
+\F{} language.
+
+
+
+* Conclusion
+
+Don't know yet; working on it.
+
 #+begin_export latex
-\nocite{*}
+%%\nocite{*}
 #+end_export
 #+PRINT_BIBLIOGRAPHY:
 
@@ -159,4 +307,7 @@ Here's a ref: [cite:@Smith2012]
 # ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
 # ("\\paragraph{%s}" . "\\paragraph*{%s}")
 # ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+# eval:   (setq org-latex-pdf-process '("latexmk -f -pdf -%latex \
+# -interaction=nonstopmode -shell-escape -output-directory=%o %f"))
+# eval:   (setq org-latex-src-block-backend 'listings)
 # End:
