@@ -83,6 +83,7 @@ Authors' affiliations have to be set below.
 \usepackage{times}
 \usepackage{inconsolata}
 
+\usepackage{microtype}
 \usepackage[inkscapelatex=false]{svg}
 #+end_src
 
@@ -239,26 +240,29 @@ which yields the block diagram:
 #+RESULTS:
 [[file:add.svg]]
 
-This signal processor, \(f\), takes two input signals, \(u\) and \(v\), and
+This signal processor takes two input signals, \(u\) and \(v\), and
 produces one output signal, \(y\):
 
 \begin{equation}
-y = f(u, v) = u + v.
+y = u + v.
 \end{equation}
+Note that \F{}'s addition primitive has no special knowledge of its
+arguments, their history, provenance, etc., it just consumes them and
+returns their sum. In \F{}'s /algebra/, the addition of two signals is
+simply well-defined.
 
-Now, imagine that \(y\) is dependent on some variable \(x\), and that
-we wish to know how sensitive \(y\) is to changes in \(x\). We can
+Suppose that \(y\) is dependent on some variable \(x\), and that we
+wish to know how sensitive \(y\) is to changes in \(x\). We can
 produce an analytic expression for this sensitivity by differentiating
-\(y\) with respect to \(x\):
+\(y\) with respect to \(x\). The addition rule of differentiation
+states that the derivative of an addition is another addition, albeit
+one whose operands are the derivatives of the operands to the original
+addition with respect to the variable of interest:
 
 \begin{equation}
 \frac{dy}{dx} = \frac{d}{dx}(u + v) = \frac{du}{dx} + \frac{dv}{dx}.
 \end{equation}
-
-The addition rule of differentiation states that the derivative of an
-addition is another addition, albeit one whose operands are the
-derivatives of the operands to the original addition with respect to
-the variable of interest. In \F{} we could express this as follows:
+In \F{} we could express this as follows:
 
 #+begin_src faust :results svg file :file images/dualadd.svg :exports both
  process = +,+;
@@ -266,9 +270,8 @@ the variable of interest. In \F{} we could express this as follows:
 #+ATTR_LATEX: :width .5\linewidth
 #+RESULTS:
 [[file:images/dualadd.svg]]
-
-That being the case, we would be describing a differentiable addition
-primitive consisting, in parallel, of the /primal/ output signal
+That being the case, we would be describing a /differentiable addition
+primitive/ consisting, in parallel, of the /primal/ output signal
 \(y\), and its /tangent/ \(\frac{dy}{dx}\). This could in turn be
 described as follows:
 
@@ -280,18 +283,24 @@ described as follows:
 \end{align}
 
 This is a /dual number/ representation, or, more accurately since \F{}
-deals exclusively with signals, a /dual signal/ representation.  Having
-acces to the primal and tangent signals in parallel in this manner
-lays the foundation for forward mode automatic differentiation in the
-\F{} language. [But this wording is bad and I should improve it.]
+deals exclusively with signals, a /dual signal/ representation.
+Having acces to the primal and tangent signals in parallel in this
+manner lays the foundation for forward mode automatic differentiation
+in the \F{} language. [But this wording is bad and I should improve
+it.]
 
 *** Supplying the Derivatives
 
 Just as the addition primitive has no knowledge of the provenance of
-its input signals, nor does its differentiable counterpart.
+its input signals, nor does its differentiable counterpart. To have
+the differentiable addition primitive behave as it should, it is
+necessary to supplement \F{}'s algebra with the following rule:
 
-\dots
-
+#+begin_quote
+Supply \(u\) and \(v\), and \(\frac{du}{dx}\) and \(\frac{dv}{dx}\) to
+the differentiable addition primitive, in that order, and it should
+return \(y\) and \(\frac{dy}{dx}\) (in that order).
+#+end_quote
 For \(u\) we use an arbitrary input signal, which we can represent
 with a wire, ~_~.  \(x\) is the variable of interest; \F's analogy
 to a variable is a slider, so one is created and assigned to \(v\).
@@ -319,19 +328,19 @@ constant signal of value \(1\).
 The above takes a symbolic approach to differentiating the
 program. This is fine for a basic example, but for more complex
 algorithms, composed of many primitives, manually defining derivatives
-symbolically in this way will quickly become unwieldy. To generalise,
-we can define a differentiable input, and a differentiable slider:
+symbolically in this way will quickly become unwieldy. To generalise a
+little, we can define a differentiable input, and a differentiable
+slider:
 
 #+begin_src faust
  diffInput = _,0;
  diffSlider = hslider("x", 0, -1, 1, .1),1;
 #+end_src
-
-Simply applying the differentiable addition primitive ~+,+~ to these
-new primitives will not yield a program whose structure matches that
-described in equation [[eq:dualadd]], however, as inputs to the adder will
-arrive out of order. This can be remedied with \F{}'s ~route~
-primitive:
+Simply applying the differentiable addition primitive to these new
+primitives will not yield a program whose structure matches that
+described in equation [[eq:dualadd]], however, as inputs to the addition
+primitive will arrive out of order. This can be remedied with \F{}'s
+~route~ primitive:
 
 #+begin_src faust
  diffAdd = route(4, 4,
@@ -355,8 +364,9 @@ Now we can write:
 
 The outputs of the program are the same as before, but, by composing
 primitives with well-defined derivatives, the derivative of the entire
-program has been found /automatically/; to be precise, this is an
-implementation of /forward-mode automatic differentiation/ in \F{}.
+program has been found /automatically/; to be precise, this is a
+rudimentary implementation of /forward-mode automatic differentiation/
+in \F{}.
 
 ** Multivariate Differentiable Primitives
 
@@ -364,19 +374,21 @@ What if a program has more than one variable? Consider the following
 (non-differentiable) example consisting of a DC offset and a gain
 control:
 
+#+CAPTION: A \F{} program that applies gain and DC offset parameters
+#+CAPTION: to an input signal.
+#+NAME: lst:gain-dc
 #+begin_src faust
 x1 = hslider("gain", .5, 0, 1, .1);
 x2 = hslider("dc", 0, -1, 1, .1);
 process = _,x1 : *,x2 : +;
 #+end_src
-
-This can be described as:
+which can be notated thus:
 
 #+NAME: eq:gain-dc
 \begin{equation}
 y = uv + w, \quad v = x_1, \quad w = x_2.
 \end{equation}
-\(u\) will again be an arbitrary input signal, for which we have no
+Once again \(u\) is an arbitrary input signal, for which we have no
 analytic expression. Now, rather than being a lone ordinary derivative
 \(\frac{dy}{dx}\), the derivative of \(y\) --- \(y'\) --- is a matrix
 of partial derivatives:
@@ -393,7 +405,7 @@ signal, so the resulting /Jacobian/ matrix is of dimension \(2 \times
 1\). Returning to dual signal representation and applying the chain,
 product and addition rules of differentiation, we have:
 
-#+NAME: eq:
+#+NAME: eq:dualgaindc
 \begin{align}
 \langle y,y' \rangle &=
 \langle u,u' \rangle \langle v,v' \rangle + \langle w,w' \rangle \nonumber \\
@@ -402,95 +414,110 @@ product and addition rules of differentiation, we have:
 \end{align}
 
 To implement the above in \F{} calls for the creation of multivariate
-differentiable primitives. A general differentiable multiplication
-primitive, for example, could be defined as follows:
+differentiable primitives. One approach to achieving this would be to
+implement ~diffInput~, ~diffSlider~, and ~diffAdd~ as functions, each
+taking as a parameter ~NVARS~, the number of variables in the program,
+and thus partial derivatives that they should produce. Using \F{}'s
+~environment~ expression, however it is possible to approach the
+problem in a more general, and syntactically succinct fashion.
+
+*** A Differentiable Environment
+
+First, we can define a function for collecting, counting, and
+retrieving variables and their partial derivatives:
 
 #+begin_src faust
-diffMul(nvars) = route(nIN, nOUT,
-    // u * v
-    (u, 1), (v, 2),
-    par(i, nvars,
-        // u * dv/dx_i
-        (u, dx), (dvdx, dx+1),
-        // du/dx_i * v
-        (dudx, dx+2), (v, dx+3)
-        with {
-            // Start of derivatives wrt x_i
-            dx = 4*i+3;
-            dudx = u+i+1;
-            dvdx = v+i+1;
+vars(V) = environment {
+    // Count the variables.
+    N = outputs(V);
+    // Retrieve a variable by index i.
+    var(i) = ba.take(i, V),pds(N, i)
+    with {
+        // Compute partial derivatives of
+        // variable x_i.
+        pds(N, i) = par(j, N, i-1==j);
+    };
+};
+#+end_src
+~vars~ receives a list of variables, expressed via parallel
+composition, e.g. ~X = vars((gain,dc));~, where ~gain~ and ~dc~ are
+defined as ~hslider~ instances.
+
+Next, we can define a function that takes the variable environment
+produced by ~vars~ as its sole argument, and returns a /differentiable
+environment/, containing a collection of multivariate differentiable
+primitives. As a further improvement, we can use \F{}'s pattern
+matching syntax to improve the nomenclature of the differentiable
+primitives; instead of using ~diffAdd~, for example, the
+differentiable addition primitive can be named ~diff(+)~:
+
+#+NAME: lst:diffenv
+#+CAPTION: Extract from the definition of a \F{} environment for
+#+CAPTION: differentiable programming
+#+begin_src faust
+env(vars) = environment {
+    // Differentiable addition primitive
+    diff(+) = diffAdd with {
+        diffadd = route(nIN, nOUT,
+            (u, 1), (v, 2), // u + v
+            par(i, vars.N,
+                // du/dx_i + dv/dx_i
+                (u+i+1, dx), (v+i+1, dx+1)
+                with {
+                    // Start of derivatives
+                    // wrt x_i
+                    dx = 2*i+3;
+                }
+            )
+        ) with {
+            nIN = 2+2*vars.N;
+            nOUT = nIN;
+            u = 1;
+            v = u+vars.N+1;
         }
-    )
-) with {
-    nIN = 2+2*nvars;
-    nOUT = 2+4*nvars;
-    u = 1;
-    v = u+nvars+1;
-} : *,par(i, nvars, *,* : +);
+        : +,par(i, vars.N, +);
+    };
+  
+    // ...definitions of other
+    // differentiable primitives...
+};
 #+end_src
 
-As before, the primal signal output is the 
+As before [when?], the primal signal output of the differentiable
+addition primitive is the sum of the primal inputs, \(u+v\); now,
+however, the differentiable primitive produces ~vars.N~ tangent
+outputs, each corresponding to a derivative with respect to \(x_{i}\). As
+before, the ~route~ primitive ensures that incoming signals are
+delivered to the parallel additions in the correct order.
 
-As with ~diffAdd~, use of the ~route~ primitive ensures that incoming
-primal and tangent signals reach the appropriate operators.
+Encapsulating [[lst:diffenv]] as a library in a file named =diff.lib=, we
+can use ~vars~ and ~env~ to write a differentiable version of the
+program in listing [[lst:gain-dc]]:
 
+#+CAPTION: Differentiable counterpart to the \F{} program described in
+#+CAPTION: listing [[lst:gain-dc]].
+#+NAME: lst:gain-dc-diff
+#+begin_src faust :results file svg :file images/gain-dc.svg :exports both
+df = library("diff.lib");
 
+X = df.vars((gain,dc)) with {
+    gain = hslider("gain", .5, 0, 1, .01);
+    dc = hslider("dc", 0, -1, 1, .01);
+};
 
-#+begin_src faust
-NVARS = 2;
-x1 = diffSlider(NVARS, 1, .5, 0, 1, .1);
-x2 = diffSlider(NVARS, 2, 0, -1, 1, .1);
-process = diffInput(NVARS),x1 : diffMul(NVARS),x2 : diffAdd(NVARS);
+d = df.env(X);
+
+process = d.input,X.var(1)
+    : d.diff(*),X.var(2)
+    : d.diff(+);
 #+end_src
-
-#+begin_src faust :results file svg :file images/gain-dc.svg :exports results
-diffInput(nvars) = _,par(i,nvars,0);
-
-diffSlider(nvars,I,init,lo,hi,step) = hslider("x%I",init,lo,hi,step),par(i,nvars,i==I-1);
-
-diffAdd(nvars) = route(nIN,nOUT,
-    (u,1),(v,2), // u + v
-    par(i,nvars,
-	(u+i+1,dx),(v+i+1,dx+1) // du/dx_i + dv/dx_i
-	with {
-	    dx = 2*i+3; // Start of derivatives wrt ith var
-	}
-    )
-) with {
-    nIN = 2+2*nvars;
-    nOUT = nIN;
-    u = 1;
-    v = u+nvars+1;
-} : +,par(i, nvars, +);
-
-diffMul(nvars) = route(nIN,nOUT,
-    (u,1),(v,2), // u * v
-    par(i,nvars,
-	(u,dx),(dvdx,dx+1),   // u * dv/dx_i
-	(dudx,dx+2),(v,dx+3)  // du/dx_i * v
-	with {
-	    dx = 4*i+3; // Start of derivatives wrt ith var
-	    dudx = u+i+1;
-	    dvdx = v+i+1;
-	}
-    )
-) with {
-    nIN = 2+2*nvars;
-    nOUT = 2+4*nvars;
-    u = 1;
-    v = u+nvars+1;
-} : *,par(i, nvars, *,* : +);
-
-NVARS = 2;
-x1 = diffSlider(NVARS,1,.5,0,1,.1);
-x2 = diffSlider(NVARS,2,0,-1,1,.1);
-process = diffInput(NVARS),x1 : diffMul(NVARS),x2 : diffAdd(NVARS);
-#+end_src
-
-#+RESULTS:
+#+NAME: fig:gain-dc
+#+ATTR_LATEX: :float multicolumn :placement [ht!]
+#+CAPTION: Block diagram of the differentiable \F{} program described in
+#+CAPTION: listing [[lst:gain-dc-diff]].
+#+RESULTS: lst:gain-dc-diff
 [[file:images/gain-dc.svg]]
-
-
+See figure [[fig:gain-dc]] for the block diagram 
 
 * Conclusion
 

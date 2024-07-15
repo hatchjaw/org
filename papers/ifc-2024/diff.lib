@@ -1,0 +1,70 @@
+import("stdfaust.lib");
+
+vars(V) = environment {
+    // Count the variables.
+    N = outputs(V);
+    // Retrieve a variable by index i.
+    var(i) = ba.take(i, V),pds(N, i)
+    with {
+        // Compute partial derivatives of
+        // variable x_i.
+        pds(N, i) = par(j, N, i-1==j);
+    };
+};
+
+env(vars) = environment {
+    // Differentiable input.
+    input = _,par(i, vars.N, 0);
+
+    // Differentiable identity function (wire).
+    // Returns nvars+1 parallel identity functions.
+    diff(_) = par(i, vars.N+1, _);
+  
+    // Differentiable addition primitive
+    diff(+) = diffAdd
+    with {
+        diffAdd = route(nIN, nOUT,
+            (1, 1), (v, 2), // u + v
+            par(i, vars.N,
+                // du/dx_i + dv/dx_i
+                (1+i+1, dx), (v+i+1, dx+1)
+                with {
+                    // Start of derivatives
+                    // wrt x_i
+                    dx = 2*i+3;
+                }
+            )
+        ) with {
+            nIN = 2+2*vars.N;
+            nOUT = nIN;
+            // u = 1;
+            v = 1+vars.N+1;
+        }
+        : +,par(i, vars.N, +);
+    };
+
+    // Differentiable multiplication primitive.
+    // <u, u'> * <v, v'> = <u*v, u'*v + u*v'>
+    diff(*) = diffMul
+    with {
+        diffMul = route(nIN, nOUT,
+            (1, 1), (v, 2), // u * v
+            par(i, vars.N,
+                (1, dx), (dvdx, dx+1),   // u * dv/dx_i
+                (dudx, dx+2), (v, dx+3)  // du/dx_i * v
+                with {
+                    dx = 4*i+3; // Start of derivatives wrt x_i
+                    dudx = 1+i+1;
+                    dvdx = v+i+1;
+                }
+            )
+        )
+        with {
+            nIN = 2+2*vars.N;
+            nOUT = 2+4*vars.N;
+            // u = 1;
+            v = 1+vars.N+1;
+        }
+        : *,par(i, vars.N, *,* : +);
+    };    
+};
