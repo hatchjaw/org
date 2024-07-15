@@ -25,7 +25,7 @@ Using the ~environment~ expression and pattern matching abstraction,
 it is possible to write \F{} code that is differentiable end-to-end,
 facilitating the computation and propagation of gradients, and in turn
 supporting the creation of parameter optimisation
-algorithms. Differentiable programming in Faust could serve as a
+algorithms. Differentiable programming in \F{} could serve as a
 platform for a \F{}-native approach to machine learning problems.
 #+end_abstract
 
@@ -177,9 +177,9 @@ call_faust_code()[:results svg file :file image.svg :output-dir images
 The latter doesn't provide a preview, but less manual intervention is
 necessary.
 
-One more thing: for regular source blocks, ~output-dir:~ and ~file:~
-are combined into ~file:~ to produce =<outputdir>/<file>=. For
-~#+CALL:~ this isn't the case; best to just use ~file:
+One more thing: for regular source blocks, ~:output-dir~ and ~:file~
+are combined into ~:file~ to produce =<outputdir>/<file>=. For
+~#+CALL:~ this isn't the case; best to just use ~:file
 <outputdir>/<file>~.
 
 * More potentially useful syntax                                   :noexport:
@@ -230,9 +230,8 @@ write:
 
 #+NAME: faust_add
 #+begin_src faust
-  process = +;
+ process = +;
 #+end_src
-
 which yields the block diagram:
 
 #+CALL: faust_add() :results svg file :file images/add.svg :exports results
@@ -262,15 +261,16 @@ derivatives of the operands to the original addition with respect to
 the variable of interest. In \F{} we could express this as follows:
 
 #+begin_src faust :results svg file :file images/dualadd.svg :exports both
-  process = +,+;
+ process = +,+;
 #+end_src
 #+ATTR_LATEX: :width .5\linewidth
 #+RESULTS:
 [[file:images/dualadd.svg]]
 
-That being the case, we would be describing, in parallel, the /primal/
-output signal \(y\), and its /tangent/ \(\frac{dy}{dx}\), which we
-could in turn represent as follows:
+That being the case, we would be describing a differentiable addition
+primitive consisting, in parallel, of the /primal/ output signal
+\(y\), and its /tangent/ \(\frac{dy}{dx}\). This could in turn be
+described as follows:
 
 #+NAME: eq:dualadd
 \begin{align}
@@ -280,10 +280,215 @@ could in turn represent as follows:
 \end{align}
 
 This is a /dual number/ representation, or, more accurately since \F{}
-deals exclusively with signals, a /dual signal/ representation. Having
+deals exclusively with signals, a /dual signal/ representation.  Having
 acces to the primal and tangent signals in parallel in this manner
 lays the foundation for forward mode automatic differentiation in the
-\F{} language.
+\F{} language. [But this wording is bad and I should improve it.]
+
+*** Supplying the Derivatives
+
+Just as the addition primitive has no knowledge of the provenance of
+its input signals, nor does its differentiable counterpart.
+
+\dots
+
+For \(u\) we use an arbitrary input signal, which we can represent
+with a wire, ~_~.  \(x\) is the variable of interest; \F's analogy
+to a variable is a slider, so one is created and assigned to \(v\).
+\(u\) and \(x\) have no direct relationship, so \(\frac{du}{dx} = 0\).
+\(v\) /is/ \(x\), so \(\frac{dv}{dx} = 1\).
+
+#+NAME: lst:dc-symbolic
+#+begin_src faust :results file svg :file images/dc.svg :exports both
+ x = hslider("x", 0, -1, 1, .1);
+ u = _;
+ v = x;
+ dudx = 0;
+ dvdx = 1;
+ process = u,v,dudx,dvdx : +,+;
+#+end_src
+
+#+RESULTS: lst:dc-symbolic
+[[file:images/dc.svg]]
+
+The primal output signal of this program is the result of an
+expression describing an input signal with a DC offset \(x\) applied;
+the tangent output, the derivative with respect to \(x\), is a
+constant signal of value \(1\).
+
+The above takes a symbolic approach to differentiating the
+program. This is fine for a basic example, but for more complex
+algorithms, composed of many primitives, manually defining derivatives
+symbolically in this way will quickly become unwieldy. To generalise,
+we can define a differentiable input, and a differentiable slider:
+
+#+begin_src faust
+ diffInput = _,0;
+ diffSlider = hslider("x", 0, -1, 1, .1),1;
+#+end_src
+
+Simply applying the differentiable addition primitive ~+,+~ to these
+new primitives will not yield a program whose structure matches that
+described in equation [[eq:dualadd]], however, as inputs to the adder will
+arrive out of order. This can be remedied with \F{}'s ~route~
+primitive:
+
+#+begin_src faust
+ diffAdd = route(4, 4,
+     (1, 1), (2, 3), (3, 2), (4, 4)) : +,+;
+#+end_src
+Now we can write:
+
+#+begin_src faust
+  process = diffInput,diffSlider : diffAdd;
+#+end_src
+
+#+begin_src faust :results file svg :file images/dcauto.svg :exports results
+ diffInput = _,0;
+ diffSlider = hslider("x", 0, -1, 1, .1),1;
+ diffAdd = route(4, 4, (1, 1), (2, 3), (3, 2), (4, 4)) : +,+;
+ process = diffInput,diffSlider : diffAdd;						 
+#+end_src
+
+#+RESULTS:
+[[file:images/dcauto.svg]]
+
+The outputs of the program are the same as before, but, by composing
+primitives with well-defined derivatives, the derivative of the entire
+program has been found /automatically/; to be precise, this is an
+implementation of /forward-mode automatic differentiation/ in \F{}.
+
+** Multivariate Differentiable Primitives
+
+What if a program has more than one variable? Consider the following
+(non-differentiable) example consisting of a DC offset and a gain
+control:
+
+#+begin_src faust
+x1 = hslider("gain", .5, 0, 1, .1);
+x2 = hslider("dc", 0, -1, 1, .1);
+process = _,x1 : *,x2 : +;
+#+end_src
+
+This can be described as:
+
+#+NAME: eq:gain-dc
+\begin{equation}
+y = uv + w, \quad v = x_1, \quad w = x_2.
+\end{equation}
+\(u\) will again be an arbitrary input signal, for which we have no
+analytic expression. Now, rather than being a lone ordinary derivative
+\(\frac{dy}{dx}\), the derivative of \(y\) --- \(y'\) --- is a matrix
+of partial derivatives:
+
+#+NAME: eq:partial-derivatives
+\begin{equation}
+y' = \frac{\partial y}{\partial \mathbf{x}}
+= \begin{bmatrix}\frac{\partial y}{\partial x_1} \\
+\frac{\partial y}{\partial x_2}\end{bmatrix}.
+\end{equation}
+
+Our algorithm takes two parameter inputs, and produces one output
+signal, so the resulting /Jacobian/ matrix is of dimension \(2 \times
+1\). Returning to dual signal representation and applying the chain,
+product and addition rules of differentiation, we have:
+
+#+NAME: eq:
+\begin{align}
+\langle y,y' \rangle &=
+\langle u,u' \rangle \langle v,v' \rangle + \langle w,w' \rangle \nonumber \\
+&= \langle uv,u'v + v'u \rangle + \langle w,w' \rangle \nonumber \\
+&= \langle uv + w,u'v + v'u + w'\rangle,
+\end{align}
+
+To implement the above in \F{} calls for the creation of multivariate
+differentiable primitives. A general differentiable multiplication
+primitive, for example, could be defined as follows:
+
+#+begin_src faust
+diffMul(nvars) = route(nIN, nOUT,
+    // u * v
+    (u, 1), (v, 2),
+    par(i, nvars,
+        // u * dv/dx_i
+        (u, dx), (dvdx, dx+1),
+        // du/dx_i * v
+        (dudx, dx+2), (v, dx+3)
+        with {
+            // Start of derivatives wrt x_i
+            dx = 4*i+3;
+            dudx = u+i+1;
+            dvdx = v+i+1;
+        }
+    )
+) with {
+    nIN = 2+2*nvars;
+    nOUT = 2+4*nvars;
+    u = 1;
+    v = u+nvars+1;
+} : *,par(i, nvars, *,* : +);
+#+end_src
+
+As before, the primal signal output is the 
+
+As with ~diffAdd~, use of the ~route~ primitive ensures that incoming
+primal and tangent signals reach the appropriate operators.
+
+
+
+#+begin_src faust
+NVARS = 2;
+x1 = diffSlider(NVARS, 1, .5, 0, 1, .1);
+x2 = diffSlider(NVARS, 2, 0, -1, 1, .1);
+process = diffInput(NVARS),x1 : diffMul(NVARS),x2 : diffAdd(NVARS);
+#+end_src
+
+#+begin_src faust :results file svg :file images/gain-dc.svg :exports results
+diffInput(nvars) = _,par(i,nvars,0);
+
+diffSlider(nvars,I,init,lo,hi,step) = hslider("x%I",init,lo,hi,step),par(i,nvars,i==I-1);
+
+diffAdd(nvars) = route(nIN,nOUT,
+    (u,1),(v,2), // u + v
+    par(i,nvars,
+	(u+i+1,dx),(v+i+1,dx+1) // du/dx_i + dv/dx_i
+	with {
+	    dx = 2*i+3; // Start of derivatives wrt ith var
+	}
+    )
+) with {
+    nIN = 2+2*nvars;
+    nOUT = nIN;
+    u = 1;
+    v = u+nvars+1;
+} : +,par(i, nvars, +);
+
+diffMul(nvars) = route(nIN,nOUT,
+    (u,1),(v,2), // u * v
+    par(i,nvars,
+	(u,dx),(dvdx,dx+1),   // u * dv/dx_i
+	(dudx,dx+2),(v,dx+3)  // du/dx_i * v
+	with {
+	    dx = 4*i+3; // Start of derivatives wrt ith var
+	    dudx = u+i+1;
+	    dvdx = v+i+1;
+	}
+    )
+) with {
+    nIN = 2+2*nvars;
+    nOUT = 2+4*nvars;
+    u = 1;
+    v = u+nvars+1;
+} : *,par(i, nvars, *,* : +);
+
+NVARS = 2;
+x1 = diffSlider(NVARS,1,.5,0,1,.1);
+x2 = diffSlider(NVARS,2,0,-1,1,.1);
+process = diffInput(NVARS),x1 : diffMul(NVARS),x2 : diffAdd(NVARS);
+#+end_src
+
+#+RESULTS:
+[[file:images/gain-dc.svg]]
 
 
 
@@ -298,6 +503,12 @@ Don't know yet; working on it.
 
 * Emacs Setup                                                      :noexport:
 
+- Set up =ifc24= document class.
+- Add =-shell-escape= flag to latex process, so =svg= works.
+- Use =listings= package for exported source blocks.
+- Add custom =ifc24-style= package to =org-latex-packages-alist= so
+  equation previews work.
+
 # Local Variables:
 # eval:   (add-to-list 'org-latex-classes '("ifc24"
 # "\\documentclass[twoside,a4paper]{article}
@@ -310,4 +521,6 @@ Don't know yet; working on it.
 # eval:   (setq org-latex-pdf-process '("latexmk -f -pdf -%latex \
 # -interaction=nonstopmode -shell-escape -output-directory=%o %f"))
 # eval:   (setq org-latex-src-block-backend 'listings)
+# eval:   (setq org-latex-packages-alist '())
+# eval:   (add-to-list 'org-latex-packages-alist '("" "./out/ifc24-style" t))
 # End:
