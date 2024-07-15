@@ -35,9 +35,10 @@ DEADLINE: <2024-07-14 dim.>
 ** TODO [#A] Finish Reproducible Research MOOC
 DEADLINE: <2024-07-14 dim.>
 
-** TODO Ask about working at CEI-2 during August
+** DONE Ask about working at CEI-2 during August
 DEADLINE: <2024-07-12 ven.>
 
+- State "DONE"       from "TODO"       [2024-07-15 lun. 18:29]
 ** WAITING [#B] Apply, again, for social security [9/9]
 - State "WAITING"    from "DONE"       [2024-06-12 mer. 11:04] \\
   Waiting for an update by post.

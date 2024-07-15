@@ -338,7 +338,7 @@ slider:
 #+end_src
 Simply applying the differentiable addition primitive to these new
 primitives will not yield a program whose structure matches that
-described in equation [[eq:dualadd]], however, as inputs to the addition
+described in equation ([[eq:dualadd]]), however, as inputs to the addition
 primitive will arrive out of order. This can be remedied with \F{}'s
 ~route~ primitive:
 
@@ -393,7 +393,7 @@ analytic expression. Now, rather than being a lone ordinary derivative
 \(\frac{dy}{dx}\), the derivative of \(y\) --- \(y'\) --- is a matrix
 of partial derivatives:
 
-#+NAME: eq:partial-derivatives
+#+NAME: eq:pds
 \begin{equation}
 y' = \frac{\partial y}{\partial \mathbf{x}}
 = \begin{bmatrix}\frac{\partial y}{\partial x_1} \\
@@ -448,15 +448,15 @@ produced by ~vars~ as its sole argument, and returns a /differentiable
 environment/, containing a collection of multivariate differentiable
 primitives. As a further improvement, we can use \F{}'s pattern
 matching syntax to improve the nomenclature of the differentiable
-primitives; instead of using ~diffAdd~, for example, the
+primitives; instead of exposing the name ~diffAdd~, for example, the
 differentiable addition primitive can be named ~diff(+)~:
 
 #+NAME: lst:diffenv
 #+CAPTION: Extract from the definition of a \F{} environment for
-#+CAPTION: differentiable programming
+#+CAPTION: differentiable programming.
 #+begin_src faust
 env(vars) = environment {
-    // Differentiable addition primitive
+    // Differentiable addition primitive.
     diff(+) = diffAdd with {
         diffadd = route(nIN, nOUT,
             (u, 1), (v, 2), // u + v
@@ -483,12 +483,12 @@ env(vars) = environment {
 };
 #+end_src
 
-As before [when?], the primal signal output of the differentiable
-addition primitive is the sum of the primal inputs, \(u+v\); now,
-however, the differentiable primitive produces ~vars.N~ tangent
-outputs, each corresponding to a derivative with respect to \(x_{i}\). As
-before, the ~route~ primitive ensures that incoming signals are
-delivered to the parallel additions in the correct order.
+As before, the primal signal output of the differentiable addition
+primitive is the sum of the primal inputs, \(u+v\); now, however, the
+differentiable primitive produces ~vars.N~ tangent outputs, each
+corresponding to a derivative with respect to \(x_{i}\). As before, the
+~route~ primitive ensures that incoming signals are delivered to the
+parallel additions in the correct order.
 
 Encapsulating [[lst:diffenv]] as a library in a file named =diff.lib=, we
 can use ~vars~ and ~env~ to write a differentiable version of the
@@ -513,11 +513,17 @@ process = d.input,X.var(1)
 #+end_src
 #+NAME: fig:gain-dc
 #+ATTR_LATEX: :float multicolumn :placement [ht!]
-#+CAPTION: Block diagram of the differentiable \F{} program described in
-#+CAPTION: listing [[lst:gain-dc-diff]].
+#+CAPTION: Block diagram of a differentiable \F{} program consisting
+#+CAPTION: of differentiable gain and DC parameters applied to an
+#+CAPTION: input signal
+#+CAPTION: (see listing [[lst:gain-dc-diff]]).
 #+RESULTS: lst:gain-dc-diff
 [[file:images/gain-dc.svg]]
-See figure [[fig:gain-dc]] for the block diagram 
+See figure [[fig:gain-dc]] for the block diagram of this program.
+
+** Parameter Optimisation
+
+
 
 * Conclusion
 
