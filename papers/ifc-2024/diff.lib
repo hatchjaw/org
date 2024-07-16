@@ -1,5 +1,29 @@
 import("stdfaust.lib");
 
+backprop(target, estimate, lossFunction) = (
+    route(nvars+nInputs, nvars+nInputs, 
+        par(n, nvars, (n+1, n+3)), (nvars+1, 1), (nvars+2, 2))
+    : vgroup("[0]Hidden", target),vgroup("[10]Estimated", estimate)
+    : route(2+nvars, 4+nvars,
+        // Route ground truth output to loss/gradient function and to output.
+        (1, 1), (1, nvars+3),
+        // Route learnable output to loss/gradient function and to output.
+        (2, 2), (2, nvars+4),
+        // Route gradients to loss/gradient function.
+        par(n, nvars, (n+3, n+3))
+    )
+    : vgroup("[2]Loss/gradient", lossFunction,_,_)
+    // Feed the gradients back.
+    ) ~ (!,si.bus(nvars))
+    // Block the gradients, post-recursion.
+    : _,si.block(nvars),_,_
+with {
+    nvars = inputs(estimate),inputs(target) : -;
+    nInputs = inputs(target),2 : *;
+};
+
+var(meter) = -~_ <: attach(meter);
+
 vars(V) = environment {
     // Count the variables.
     N = outputs(V);
@@ -13,9 +37,6 @@ vars(V) = environment {
 };
 
 env(vars) = environment {
-    // Differentiable input.
-    input = _,par(i, vars.N, 0);
-
     // Differentiable identity function (wire).
     // Returns nvars+1 parallel identity functions.
     diff(_) = par(i, vars.N+1, _);
@@ -66,5 +87,103 @@ env(vars) = environment {
             v = 1+vars.N+1;
         }
         : *,par(i, vars.N, *,* : +);
-    };    
+    };
+
+    // Differentiable exponentiation
+    // Takes two dual signals as input;
+    // Returns the first raised to the power of the second, and partial derivatives
+    // of the exponentiation.
+    // <u, u'> ^ <v, v'> = <u^v, u^{v-1}*(v*u' + ln(u)*u*v')>
+    diff(^) = diffPow
+    with {
+        diffPow = route(nIN,nOUT,
+            (u,1),(v,2),    // u^v
+            (u,3),(v,4),    // u^{v-1}
+            (u,5),          // u*ln(u)
+            (v,5+vars.N+1), // v
+            par(i,vars.N,(u+i+1,u+i+5),(v+i+1,v+i+5))
+        )
+        with {
+            nIN = 2+2*vars.N;
+            nOUT = 6+2*vars.N;
+            u = 1;
+            v = u+vars.N+1;
+        } : ^,pds
+        with {
+            pds = (_,-(1) : pow),                 // u^{v-1}
+                (_ <: _,log : *),                 // u*ln(u)
+                par(i,vars.N,_),_,par(i,vars.N,_) // du/dx,v,dvdx
+                : _,route(nIN,nOUT,
+                    par(i,vars.N,
+                        (dudx,dx),(v,dx+1),      // du/dx_i * v
+                        (ulnu,dx+2),(dvdx,dx+3)  // ln(u) * u * dv/dx_i
+                    with{
+                        dx = 4*i+1;
+                        dudx = ulnu+i+1;
+                        dvdx = v+i+1;
+                    })
+                )
+                with {
+                    nIN = 2+2*vars.N;
+                    nOUT = 4*vars.N;
+                    ulnu = 1;
+                    v = ulnu+vars.N+1;
+                }
+                : _,par(i,vars.N,*,* : +) // v*u' + ln(u)*u*v'
+                : route(1+vars.N,2*vars.N,par(i,vars.N,(1,2*i+1),(i+2,2*i+2)))
+                : par(i,vars.N,*);        // ...*u^{v-1}
+        };
+    };
+
+    diff(abs) = diffAbs
+    with {
+        diffAbs = route(vars.N+1, 3*vars.N+1, 
+            (1,1), par(i, vars.N, (1, 3*i+3), (1, 3*i+4), (i+2, 3*i+2))
+        ) : abs,par(i, vars.N, _,_,abs : _,safediv : *);
+    };
+
+    // A differentiable constant signal.
+    // Returns the signal, plus its partial derivatives wrt all variables, which
+    // are all zero.
+    // <x, x'> = <x, 0>
+    diff(x) = diffConst with{ diffConst = x,par(i, vars.N, 0); };
+
+    // Differentiable input.
+    input = _,par(i, vars.N, 0);
+
+    safediv = _,_,ma.EPSILON : _,max : /;
+
+    // Loss functions (with smoothing)
+    losses = environment {
+        // L1-norm loss ||\hat{y} - y||
+        L1 = lossFunction(diff(abs));
+        // Squared L2-norm loss ||\hat{y} - y||_2^2
+        L2 = lossFunction((diff(_),diff(2) : diff(^)));
+    } with {
+        lossFunction(function, windowSize, learningRate, y, yHat) = error,par(i,vars.N,_)
+            : window
+            : function
+            : meter
+            : _,scaleGrads
+        with {
+            window = par(i, vars.N+1, ba.slidingMean(windowSize));
+            error = yHat,y : -;
+            meter = (_ <: attach(hbargraph("[100]loss",0.,1.))),
+                par(i, vars.N, _ <: attach(hbargraph("[101]gradient %i",-1,1)));
+            scaleGrads = par(i, vars.N, _,learningRate : *);
+        };
+    };
+
+    // L1-norm loss (without smoothing)
+    lossL1(learningRate, y, yHat) = 
+        error,par(i,vars.N,_)
+        : diff(abs)
+        : meter
+        : _,scaleGrads
+    with {
+        error = yHat,y : -;
+        meter = (_ <: attach(hbargraph("[0]loss",0.,1.))),
+            par(i, vars.N, _ <: attach(hbargraph("[1]gradient %i",-1,1)));
+        scaleGrads = par(i, vars.N, _,learningRate : *);
+    };
 };
