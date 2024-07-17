@@ -2614,3 +2614,53 @@ losses = environment {
 #+end_src
 
 Entered on [2024-07-13 sam. 11:43]
+*** 2024-07-17 mercredi
+**** IFC Paper                                                :DDSP:FAUST:
+I've been working, since the weekend, on a paper for IFC24, on
+differentiable DSP in Faust. So far I've described the implementation,
+but I haven't written any of the other sections. Reasons I shouldn't
+spend much longer on it:
+- =faust-ddsp= is a side-project;
+- DDSP/ML in Faust is not what I'm paid to work on, and it'll likely
+  be the work of another PhD student from the autumn;
+- The work is a demo, if anything; I needn't go too hard on the
+  literature.
+
+The submission deadline has been pushed back to 26/07.
+
+Things to mention:
+- Ambiguity between symbolic and automatic differentiation;
+  + Particularly symbolic and forward-mode AD;
+- Difficulty of implementing reverse-mode AD in a functional language;
+  + Not impossible, however (cf. Pearlmutter and Siskind);
+- Use the term /chain rule/ at some point;
+- Applications of AD to audio problems;
+- Recursion, and why it makes sense to treat the derivative of the
+  body of a recursion as if it were forward in time;
+- Limitations of the current approach;
+  + Time-domain loss; difficulty of frequency-domain due to current
+    FFT implementation in Faust;
+  + Derivative of the ~@~ primitive; difficulty associated with
+    differentiating delay in general; asymmetric time derivative;
+    * Advantage of modelling delay as convolution with an impulse
+      response;
+  + Derivative expressions functions with poorly-defined or
+    discontinuous primals/tangets; ~floor~, ~ceil~, bitshifts, tables,
+    etc.
+  + Deterministic nature of input; lack of generality from parameter
+    optimisation to prediction;
+    * If input is periodic, a phase shift prevents optimisation; also
+      related to frequency-domain loss;
+    * Necessity to implement a neural network structure;
+  + SGD implemented; what about other optimisers, learning rate
+    schedulers, etc.?
+
+Entered on [2024-07-17 mer. 10:08]
+**** Teensy: Adjust the ARM PLL?                                  :TEENSY:
+The Teensy forum got me thinking that /maybe/ it'd be possible to
+adjust the main CPU clock in fine increments, but it looks like
+over/underclocking is only possible in 12 MHz increments.
+
+...[Add detail, links to posts etc.]
+
+Entered on [2024-07-17 mer. 14:56]

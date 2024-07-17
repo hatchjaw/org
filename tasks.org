@@ -12,7 +12,7 @@ DEADLINE: <2024-07-19 ven. ++1w>
 :END:
 - State "DONE"       from "TODO"       [2024-07-12 ven. 18:12]
 ** TODO [#A] Submit IFC article
-DEADLINE: <2024-07-15 lun.>
+DEADLINE: <2024-07-26 ven.>
 ** TODO Check entry requirements for US
 DEADLINE: <2024-07-12 ven.>
 ** TODO Ask Maxime again about practicalities of using his DAC with Teensy or the Pi
@@ -33,7 +33,7 @@ DEADLINE: <2024-07-14 dim.>
 ** TODO [#C] Start Ethics/Integrity MOOC
 
 ** TODO [#A] Finish Reproducible Research MOOC
-DEADLINE: <2024-07-14 dim.>
+DEADLINE: <2024-07-21 dim.>
 
 ** DONE Ask about working at CEI-2 during August
 DEADLINE: <2024-07-12 ven.>

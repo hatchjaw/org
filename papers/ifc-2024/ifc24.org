@@ -13,6 +13,8 @@
 #+LATEX_HEADER: \RequirePackage[]{ifc24-style}
 
 #+begin_abstract
+Differentiable programming is 
+
 Using the ~environment~ expression and pattern matching abstraction,
 it is possible to write \F{} code that is differentiable end-to-end,
 facilitating the computation and propagation of gradients, and in turn
@@ -200,6 +202,8 @@ process = 1;
 
 * Introduction
 
+
+
 Differentiable programming is "a programming paradigm in which complex
 computer programs\dots can be differentiated end-to-end automically"
 
@@ -209,6 +213,8 @@ There is a sense in which the block-diagram algebra of \F{} lends the
 language intuitively to the problem of automatic differentiation. As
 we will see, the language itself presents certain limitations in this
 respect, but nonetheless we can achieve a great deal\dots
+
+
 
 * Differentiable Programming in Faust
 
@@ -244,7 +250,7 @@ returns their sum. In \F{}'s /algebra/, the addition of two signals is
 simply well-defined.
 
 Suppose that \(y\) is dependent on some variable \(x\), and that we
-wish to know how sensitive \(y\) is to changes in \(x\). We can
+wish to know how sensitive \(y\) is to perturbations in \(x\). We can
 produce an analytic expression for this sensitivity by differentiating
 \(y\) with respect to \(x\). The addition rule of differentiation
 states that the derivative of an addition is another addition, albeit
@@ -548,8 +554,8 @@ time-domain L1-norm loss of the form:
 Our aim is to minimise the value returned by the loss function,
 i.e. to reach the point at which \(y\) and \(\hat{y}\) (and by
 extension \(\mathbf{x}\) and \(\mathbf{\hat{x}}\)) most closely
-approximate one-another. The sensitivity of \(\mathcal{L}\) to changes
-in \(\mathbf{\hat{x}}\) can again be found by automatic
+approximate one-another. The sensitivity of \(\mathcal{L}\) to
+perturbations in \(\mathbf{\hat{x}}\) can again be found by automatic
 differentiation, subject to the definition of a differentiable
 absolute value function in ~df.env~. The loss function can then be
 implemented as follows:
