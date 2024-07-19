@@ -2656,11 +2656,106 @@ Things to mention:
     schedulers, etc.?
 
 Entered on [2024-07-17 mer. 10:08]
-**** Teensy: Adjust the ARM PLL?                                  :TEENSY:
+**** Teensy: Adjust the ARM PLL? Stop/start audio?                :TEENSY:
 The Teensy forum got me thinking that /maybe/ it'd be possible to
 adjust the main CPU clock in fine increments, but it looks like
-over/underclocking is only possible in 12 MHz increments.
+over/underclocking is only possible in 12 MHz leaps.
 
-...[Add detail, links to posts etc.]
+And indeed, this doesn't affect the audio clock. Interestingly (and
+intuitively) though, halving the CPU/PLL1 speed results in an
+approximate doubling of CPU load:
+
+#+begin_example
+set_arm_clock 600000000
+result: 600000000
+Audio memory in use: 4 blocks; processor 2.881200 %
+set_arm_clock 300000000
+result: 300000000
+Audio memory in use: 4 blocks; processor 5.791800 %
+#+end_example
+
+***** The audio subsystem
+
+Audio /can/ be paused and restarted on demand, by updating the
+~CCM_ANALOG_PLL_AUDIO~ register. To pause/stop:
+
+#+begin_src c++
+CCM_ANALOG_PLL_AUDIO_CLR = CCM_ANALOG_PLL_AUDIO_ENABLE;
+#+end_src
+
+To start:
+
+#+begin_src c++
+CCM_ANALOG_PLL_AUDIO_SET = CCM_ANALOG_PLL_AUDIO_ENABLE;
+while (!(CCM_ANALOG_PLL_AUDIO & CCM_ANALOG_PLL_AUDIO_LOCK)) {};
+#+end_src
+
+Alternatively, ~SET/CLR~ can updated with
+~CCM_ANALOG_PLL_AUDIO_POWERDOWN~.
 
 Entered on [2024-07-17 mer. 14:56]
+
+*** 2024-07-19 vendredi
+**** Faust-DDSP: A differentiable neuron                 :FAUST:DDSP:GSoC:
+Advik's start on a fully-connected layer had something nagging at
+me. Turns out it's the absence of automatic-differentiability.
+
+I had a crack at it with =diff.lib=; the result:
+
+#+begin_src faust
+process = X : (Z : Y) ~ (!,si.bus(v.N));
+#+end_src
+
+So that's \(\mathbf{X}\), a vector of inputs (~hslider~s), going into
+\(\mathbf{Z}\), where
+
+\begin{equation}
+\mathbf{Z} = \mathbf{W}\mathbf{X} + b
+\end{equation}
+where \(\mathbf{W}\) is a vector of weights, and \(b\) is a bias.
+
+\(\mathbf{Y}\) is a sigmoid activation function:
+
+\begin{equation}
+\mathbf{Y} = \frac{1}{1 + \e^{-Z}}
+\end{equation}
+and that's implemented differentiably thus:
+
+#+begin_src faust
+activations = environment {
+    // 1 / (1 + e^{-u})
+    sigmoid = diff(0),diff(_)
+        : diff(-)
+        : diff(1),diff(exp),diff(1)
+        : diff(_),diff(+)
+        : diff(/);
+};
+#+end_src
+
+
+Entered on [2024-07-19 ven. 15:00]
+**** Teensy: Counting Audio interrupts                            :TEENSY:
+I duplicated ~AudioOutputI2S~, creating a class called ~OutputI2S~,
+and adding a ~volatile static uint64_t~ member called ~isrCounter~ and
+a method ~uint64_t getIsrCounter()~. The counter is incremented at
+each call to ~OutputI2S~. I added an ~elapsedMicros~ instance to
+=main.cpp=; in ~loop()~, every 1,000,000 \micro{}s, I call ~getIsrCounter~
+and print the result. I see, e.g.:
+
+#+begin_example
+...
+ISR Count: 2756
+ISR Count: 2756
+ISR Count: 2757
+...
+#+end_example
+
+So I'm getting two interrupts per audio buffer, at 32 frames. As per
+[[https://forum.pjrc.com/index.php?threads/setting-up-custom-i2s-communication.65229/#post-263104][Paul Stoffregen's post]] on setting up I2S, the DMA handles the buffer
+one half at a time, so this is to be expected. This sort of resolution
+isn't good enough. I need to ask on the forum whether it's possible to
+access the SAI1 master clock somehow.
+
+Entered on [2024-07-19 ven. 17:09]
+  
+  [[file:~/org/journal.org::*The audio subsystem][The audio subsystem]]
