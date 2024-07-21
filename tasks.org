@@ -6,10 +6,11 @@
 ** TODO Start work on Physical Audio webside updates
 DEADLINE: <2024-07-20 sam.>
 ** TODO [#A] Send Romain weekly update
-DEADLINE: <2024-07-19 ven. ++1w>
+DEADLINE: <2024-07-26 ven. ++1w>
 :PROPERTIES:
-:LAST_REPEAT: [2024-07-12 ven. 18:12]
+:LAST_REPEAT: [2024-07-21 dim. 13:36]
 :END:
+- State "DONE"       from "TODO"       [2024-07-21 dim. 13:36]
 - State "DONE"       from "TODO"       [2024-07-12 ven. 18:12]
 ** TODO [#A] Submit IFC article
 DEADLINE: <2024-07-26 ven.>

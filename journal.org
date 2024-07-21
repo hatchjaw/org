@@ -8,7 +8,7 @@
 #+TAGS: INSPO(i) DIY(d) TEACHING(t) REPRES(R) REVIEW(v) GSoC(G)
 #+TAGS: [ PROGRAMMING : R(r) PYTHON(P) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ]
-#+TAGS: [ AUDIO : SYNTHESIS(s) PHYSMOD(y) SPATIALAUDIO(S) NETWORKEDAUDIO(N) ]
+#+TAGS: [ AUDIO : SYNTHESIS(s) PHYSMOD(y) SPATIALAUDIO(S) NETWORKEDAUDIO(N) DDSP(D) ]
 #+TAGS: [ HARDWARE : RPI(R) TEENSY(Y) ]
 #+EXPORT_SELECT_TAGS: BLOG
 #+OPTIONS:   H:3 num:0 toc:t \n:nil @:t ::t |:t ^:{} _:{} -:t f:t *:t <:t
@@ -2759,3 +2759,44 @@ access the SAI1 master clock somehow.
 Entered on [2024-07-19 ven. 17:09]
   
   [[file:~/org/journal.org::*The audio subsystem][The audio subsystem]]
+*** 2024-07-21 dimanche
+**** Teensy supports IEEE 1588                                    :TEENSY:
+My post on the Teensy forum has yielded one response so far,
+encouraging me to look at a library called =teensy-ntp=, which I
+nearly dismissed out of hand (NTP too coarse, how to actually use this
+to condition hardware clocks, doesn't address my question about
+deriving time from SAI1) but it turns out this library uses IEEE 1588,
+which, it emerges, is supported by the iMX RT1060.
+
+I followed up with a couple of questions about how to actually use
+this functionality to meaningfully adjust SAI1, which is where most
+advice on PTP falls down, i.e. in terms of the practical aspects of
+conditioning a hardware clock in response to incoming timing
+information.
+
+Other observations:
+- Unmanaged switches should send PTP packets through without issue;
+- PTP can work on [[https://blog.meinbergglobal.com/2016/03/11/ptp-networks-without-timing-support/][networks with no timing support]];
+- Transparent PTP clocks (PTP-enabled switches) may be as much a
+  hindrance as a help (according to this [[https://www.reddit.com/r/networking/comments/1c2w77h/comment/kzfx5kn/][anecdotal report from
+  Reddit]]).
+
+Say we get PTP, and SAI1 sync, working on Teensy. Then there are the
+issues of audio fidelity and memory; perhaps we try to design a
+higher-quality codec for the Teensy, with some audio memory built
+in... Or we transfer what we've learnt about Teensy to the Pi.
+
+I don't think I ever state in the Frontiers paper that Teensy
+/doesn't/ support hardware timestamping, so I shouldn't have anything
+to worry about there.
+
+Resources:
+- My [[https://forum.pjrc.com/index.php?threads/precise-measurement-adjustment-of-sai1_clk_root.75483/][thread]] on the Teensy forum.
+- [[https://github.com/ddrown/teensy-ntp][teensy-ntp]], Dan Drown's [[https://forum.pjrc.com/index.php?threads/teensy-4-1-ntp-server.61581/][thread]] about it.
+- Dan Drown's [[https://github.com/ddrown/teensy41_ethernet][fork]] of ~NativeEthernet~ with IEEE 1588 support.
+- Fabian Renn-Giles' [[https://www.youtube.com/watch?v=8jHLusUVa2Y][talk]] from ADC21; mentions PID and linear
+  regression/least squares clock conversion algorithms.
+- §41 of the iMX RT1060 reference manual for info on ENET and IEEE
+  1588 support.
+
+Entered on [2024-07-21 dim. 13:07]
