@@ -2766,7 +2766,9 @@ encouraging me to look at a library called =teensy-ntp=, which I
 nearly dismissed out of hand (NTP too coarse, how to actually use this
 to condition hardware clocks, doesn't address my question about
 deriving time from SAI1) but it turns out this library uses IEEE 1588,
-which, it emerges, is supported by the iMX RT1060.
+which, it emerges, is supported by the iMX RT1060. =teensy-ntp= also
+implements a Proportional Integral Derivative (PID) controller (not
+dissimilar to a DLL) to omtimise synchronicity.
 
 I followed up with a couple of questions about how to actually use
 this functionality to meaningfully adjust SAI1, which is where most
@@ -2793,10 +2795,14 @@ to worry about there.
 Resources:
 - My [[https://forum.pjrc.com/index.php?threads/precise-measurement-adjustment-of-sai1_clk_root.75483/][thread]] on the Teensy forum.
 - [[https://github.com/ddrown/teensy-ntp][teensy-ntp]], Dan Drown's [[https://forum.pjrc.com/index.php?threads/teensy-4-1-ntp-server.61581/][thread]] about it.
+  + =teensy-ntp= also uses [[https://github.com/FabioBatSilva/ArduinoFake][ArduinoFake]] for tests/mocking.
 - Dan Drown's [[https://github.com/ddrown/teensy41_ethernet][fork]] of ~NativeEthernet~ with IEEE 1588 support.
 - Fabian Renn-Giles' [[https://www.youtube.com/watch?v=8jHLusUVa2Y][talk]] from ADC21; mentions PID and linear
   regression/least squares clock conversion algorithms.
 - §41 of the iMX RT1060 reference manual for info on ENET and IEEE
   1588 support.
+- Another Teensy [[https://forum.pjrc.com/index.php?threads/writing-directly-to-sgtl5000-codec-dacs.63243/#post-261684][forum post]], by J_Sanders, demonstrating generating
+  audio output without ~AudioStream~, setting an I2S TX buffer with
+  length 2.
 
 Entered on [2024-07-21 dim. 13:07]

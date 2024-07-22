@@ -3,6 +3,8 @@
 # =C-c C-t= to change sequence
 
 * Tasks
+** TODO [#B] Review PAUC manuscript
+DEADLINE: <2024-08-19 lun.>
 ** TODO Start work on Physical Audio webside updates
 DEADLINE: <2024-07-20 sam.>
 ** TODO [#A] Send Romain weekly update
