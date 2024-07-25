@@ -202,7 +202,8 @@ process = 1;
 
 * Introduction
 
-
+End-to-end differentiability is a desirable quality in the creation of
+computer programs that perform gradient-based optimization.
 
 Differentiable programming is "a programming paradigm in which complex
 computer programs\dots can be differentiated end-to-end automically"
@@ -215,36 +216,124 @@ language intuitively to the problem of automatic differentiation. As
 we will see, the language itself presents certain limitations in this
 respect, but nonetheless we can achieve a great deal\dots
 
-* Automatic Differentiation
+* Algorithmic Differentiation
 
 Computational approaches to differentiation are typically
 characterised as falling into one of three camps: /numerical/,
 /symbolic/, and /automatic/. Numerical differentiation produces
-numerical values for derivatives by approximation, and will be
-familiar to those acquainted with finite-difference time-domain audio
-synthesis methods [cite:@bilbao_numerical_2009]. Symbolic
-differentiation takes a computational expression and generates an
-accompanying expression for its derivative; this approach may resonate
-with users of MATLAB's Symbolic Math Toolbox
-[cite:@moler_symbolic_1997]. Automatic differentiation describes an
-arithmetic for generating both the output of an expression and its
-derivative; this is the arithmetic that underpins the current crop of
-Python libraries for machine learning [cite:@harrison_brief_2021].
+numerical values for derivatives via approximation by finite
+differences, and will be familiar to those acquainted with
+finite-difference time-domain audio synthesis methods
+[cite:@bilbao_numerical_2009]. Symbolic differentiation takes a
+computational expression and generates the corresponding expression
+for its derivative; this approach may resonate with users of MATLAB's
+Symbolic Math Toolbox [cite:@moler_symbolic_1997] or the Maple
+programming language[cite:@monagan_gradient_1993]. Automatic
+differentiation describes an arithmetic for accumulating both the
+numerical output of a computational expression and the numerical value
+of its derivative; it is an arithmetic of this kind that underpins the
+current crop of Python libraries for machine learning
+[cite:@harrison_brief_2021].
 
-Some ambiguity abounds with regard to how automatic and symbolic
-differentiation actually differ. This ambiguity may be ascribed to the
-former's nature as "partly symbolic and partly numerical"
-[cite:@harrison_brief_2021]. Unlike symbolic approaches, which produce
-/formulas/, automatic approaches produce numerical outputs
-[cite:@rall_arithmetic_1986] --- but they do so by implementing
-differentiation rules symbolically[fn:1] at the level (as we shall see) of
-the primitive operations of the programming language upon which they
-are based.
+A certain ambiguity abounds with regard to how automatic and symbolic
+differentiation relate to each other[cite:@laue_equivalence_2022], and
+partisan opinions have been expressed over which is more
+efficient[cite:@guenter_efcient_2007]. The ambiguity may be ascribed
+in part to the former's nature as "partly symbolic and partly
+numerical" [cite:@harrison_brief_2021], and perhaps also to the fact
+that programs composed symbolically may be differentiated
+automatically [cite:@villard_adrien_1999]. Dismissal of symbolic
+differentiation over the purported problem of "expression swell"
+[cite:@harrison_brief_2021; @baydin_automatic_2018] may be driven by
+implementation-specific assumptions and historical lack of available
+computational power. For our purposes, we shall defer to Rall, who,
+writing in the mid-1980's, before the waters were muddied by legions
+of machine learning researchers, observed (to paraphrase): /symbolic
+approaches produce formulas whereas automatic approaches produce
+numerical outputs/ [cite:@rall_arithmetic_1986]. The latter do so,
+however, by implementing differentiation rules, symbolically or
+manually, at the level, as we will see, of the primitive operations of
+the programming language upon which they are based.
 
+** Modes of Automatic Differentiation
+
+Forward/reverse/cross-country
 Forward mode computes both the value of the function and its partial
 derivatives in a forward pass; this entails 
 Reverse mode computes the primal value of the function under
-consideration in a forward pass, 
+consideration in a forward pass,
+
+** The Arithmetic of Differentiation
+
+The arithmetic of forward mode automatic differentiation can be
+derived by formulating differentiation in a manner similar to the
+complex numbers [cite:@rall_arithmetic_1986; @yu_dnad_2013]. Where
+complex arithmetic uses the imaginary unit \(i\) to designate the
+imaginary part of a complex number \(z = x + iy\), with \(i^{2} = -1\),
+differentiable arithmetic uses the /nilpotent
+symbol/[cite:@yu_dnad_2013] \(\varepsilon\):
+
+#+NAME: eq:nilpotent
+\begin{equation}
+U = u + \varepsilon{}u',
+\end{equation}
+where \(u' = \frac{du}{dx}\) is the derivative of \(u\) with respect
+to some variable \(x\)  and \(\varepsilon^{2}\) = 0.
+
+Using this arithmetic, the addition rule of differentiation emerges
+quite naturally as the sum of \(U\) and \(V = v + \varepsilon{}v'\):
+
+#+NAME: eq:addition-rule
+\begin{equation}
+(u + \varepsilon{}u') + (v + \varepsilon{}v') = u + v + \varepsilon(u' + v').
+\end{equation}
+Similarly, the product rule, via a simple polynomial expansion:
+
+#+NAME: eq:product-rule
+\begin{align}
+(u + \varepsilon{}u')(v + \varepsilon{}v') &= uv + u\varepsilon{}v' + v\varepsilon{}u' + \varepsilon^{2}u'v' \nonumber \\
+                   &= uv + \varepsilon(uv' + vu'),
+\end{align}
+the final term cancelling due to the presence of \(\varepsilon^{2}\).
+
+This arithmetic may be more conviently expressed, for computational
+purposes, as one of /ordered
+pairs/[cite:@rall_arithmetic_1986;@kalman_doubly_2002] or /dual
+numbers/
+[cite:@yu_dnad_2013;@sigal_automatic_2021;@revels_forward-mode_2016]:
+
+#+NAME: eq:dual
+\begin{equation}
+U = \langle u, u' \rangle.
+\end{equation}
+The addition and product rules now take the following forms:
+
+#+NAME: eq:addition-rule
+\begin{equation}
+U+V = \langle u, u' \rangle + \langle v, v' \rangle = \langle u + v, u' + v' \rangle,
+\end{equation}
+#+NAME: eq:product-rule
+\begin{equation}
+UV = \langle u, u' \rangle\langle v, v' \rangle = \langle uv, uv' + vu' \rangle.
+\end{equation}
+The first component of each dual number is the rule for evaluation of
+the operation; the second is the rule for differentiation
+[cite:@rall_arithmetic_1986]. These components may be referred to as
+the /primal/ and /tangent/ respectively
+[cite:@baydin_automatic_2018;@radul_you_2023]. In dual number
+differentiation arithmetic, an independent variable can be expressed
+as \(X = \langle x,\frac{dx}{dx} \rangle\), and a constant \(C = \langle c,\frac{dc}{dx}
+\rangle\). If we wish, for example, to compute the primal and tangent of a
+polynomial \((x + 1)(x - 2)\) at \(x = 2\), we set \(X = \langle 2,1 \rangle\) and
+appropriate values for the constants:
+
+#+NAME: eq:product-example
+\begin{equation}
+(\langle 2,1 \rangle + \langle 1,0 \rangle)(\langle 2,1 \rangle - \langle 2,0 \rangle) = \langle 3,1 \rangle\langle 0,1 \rangle = \langle 0,3 \rangle. \nonumber
+\end{equation}
+We find that our arithmetic produces the expected numerical results
+/automatically/ via composition of the fundamental operations
+described in equations ([[eq:addition-rule]]) and ([[eq:product-rule]]).
 
 * Differentiable Programming in Faust
 
@@ -690,14 +779,6 @@ with {
 - Use =listings= package for exported source blocks.
 - Add custom =ifc24-style= package to =org-latex-packages-alist= so
   equation previews work.
-
-* Footnotes                                                        :noexport:
-
-[fn:1] Or indeed /manually/; one could perhaps use a symbolic
-differentiation program to create an automatic differentiation system,
-but, like Wengert [cite:@wengert_simple_1964] and Revels et
-al. [cite:@revels_forward-mode_2016], we will defining our derivatives
-/by hand/ as it were.
 
 # Local Variables:
 # eval:   (add-to-list 'org-latex-classes '("ifc24"
