@@ -6,7 +6,6 @@
 
 #+EXPORT_FILE_NAME: out/ifc24
 #+OPTIONS: toc:nil ':t ^:{} num:3
-# #+LATEX_COMPILER: latexmk
 #+LATEX_CLASS: ifc24
 #+BIBLIOGRAPHY: IFC-24.bib
 #+CITE_EXPORT: bibtex
@@ -325,7 +324,7 @@ differentiation arithmetic, an independent variable can be expressed
 as \(X = \langle x,\frac{dx}{dx} \rangle\), and a constant \(C = \langle c,\frac{dc}{dx}
 \rangle\). If we wish, for example, to compute the primal and tangent of a
 polynomial \((x + 1)(x - 2)\) at \(x = 2\), we set \(X = \langle 2,1 \rangle\) and
-appropriate values for the constants:
+supply appropriate values for the constants:
 
 #+NAME: eq:product-example
 \begin{equation}
@@ -356,7 +355,6 @@ which yields the block diagram:
 #+ATTR_LATEX: :width .5\linewidth
 #+RESULTS:
 [[file:add.svg]]
-
 This signal processor takes two input signals, \(u\) and \(v\), and
 produces one output signal, \(y\):
 
@@ -365,21 +363,15 @@ y = u + v.
 \end{equation}
 Note that \F{}'s addition primitive has no special knowledge of its
 arguments, their history, provenance, etc., it just consumes them and
-returns their sum. In \F{}'s /algebra/, the addition of two signals is
+returns their sum. In \F{}'s arithmetic, the addition of two signals is
 simply well-defined.
 
 Suppose that \(y\) is dependent on some variable \(x\), and that we
 wish to know how sensitive \(y\) is to perturbations in \(x\). We can
 produce an analytic expression for this sensitivity by differentiating
-\(y\) with respect to \(x\). The addition rule of differentiation
-states that the derivative of an addition is another addition, albeit
-one whose operands are the derivatives of the operands to the original
-addition, with respect to the variable of interest:
-
-\begin{equation}
-\frac{dy}{dx} = \frac{d}{dx}(u + v) = \frac{du}{dx} + \frac{dv}{dx}.
-\end{equation}
-In \F{} we could express this as follows:
+\(y\) with respect to \(x\). Recall, from equation ([[eq:addition-rule]]),
+that a dual-number addition takes the form of two additions in
+parallel, which, in \F could be expressed like this:
 
 #+begin_src faust :results svg file :file images/dualadd.svg :exports both
 process = +,+;
@@ -388,40 +380,30 @@ process = +,+;
 #+RESULTS:
 [[file:images/dualadd.svg]]
 Such an expression could be said to describe a /differentiable
-addition primitive/ consisting, in parallel, of the /primal/ output
-signal \(y\), and its /tangent/ \(\frac{dy}{dx}\). This could in turn
-be represented as follows:
-
-#+NAME: eq:dualadd
-\begin{align}
-\langle y, \frac{dy}{dx} \rangle
-&= \langle u, \frac{du}{dx} \rangle + \langle v, \frac{dv}{dx} \rangle \nonumber \\
-&= \langle u + v, \frac{du}{dx} + \frac{dv}{dx} \rangle.
-\end{align}
-
-This is a /dual number/ representation, or, more accurately since \F{}
-deals exclusively with the propagation of signals, a /dual signal/
-representation. Having acces to the primal and tangent signals in
-parallel in this manner lays the foundation for writing differentiable
-code in the \F{} language.
+addition primitive/, taking dual-number inputs \(\langle u,u' \rangle\) and \(\langle
+v,v' \rangle\) and producing output \(\langle y,y' \rangle\).  Since \F{} deals
+exclusively with the propagation of signals, we shall refer to this as
+a /dual signal/ representation. Having acces to the primal and tangent
+signals in parallel in this manner lays the foundation for writing
+differentiable code in the \F{} language.
 
 *** Supplying the Derivatives
 
 Just as the addition primitive has no knowledge of the provenance of
 its input signals, nor does its differentiable counterpart. To have
 the differentiable addition primitive behave as it should, it is
-necessary to supplement \F{}'s algebra with the following rule:
+necessary to supplement \F{}'s arithmetic with the following rule:
 
 #+begin_quote
-Supply \(u\) and \(v\), and \(\frac{du}{dx}\) and \(\frac{dv}{dx}\) to
+Supply \(u\) and \(v\), and \(u'\) and \(v'\) to
 the differentiable addition primitive, in that order, and it should
-return \(y\) and \(\frac{dy}{dx}\) (in that order).
+return \(y\) and \(y'\) (in that order).
 #+end_quote
 For \(u\) we use an arbitrary input signal, which we can represent
 with \F{}'s identity function, ~_~. \(x\) is the variable of interest;
 \F's analogy to a variable is a slider, so one is created and assigned
 to \(v\). \(u\) and \(x\) have no direct relationship, so
-\(\frac{du}{dx} = 0\).  \(v\) /is/ \(x\), so \(\frac{dv}{dx} = 1\).
+\(u' = 0\).  \(v\) /is/ \(x\), so \(x' = 1\).
 
 #+NAME: lst:dc-symbolic
 #+CAPTION: Symbolic differentiation of a DC offset applied to an input
@@ -457,7 +439,7 @@ diffSlider = hslider("x", 0, -1, 1, .1),1;
 Simply applying the differentiable addition primitive to these new
 primitives will not satisfy the new rule upon which that primitive
 depends, however, nor yield a program whose structure matches that
-described in equation ([[eq:dualadd]]), as inputs to the addition
+described in equation ([[eq:addition-rule]]), as inputs to the addition
 primitive will arrive out of order. This can be remedied with \F{}'s
 ~route~ primitive:
 
