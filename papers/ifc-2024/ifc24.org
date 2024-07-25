@@ -207,14 +207,44 @@ process = 1;
 Differentiable programming is "a programming paradigm in which complex
 computer programs\dots can be differentiated end-to-end automically"
 
-[Differentiable programming] may be supported by operator overloading...
+[Differentiable programming] may be supported by operator overloading
+or source code transformation
 
 There is a sense in which the block-diagram algebra of \F{} lends the
 language intuitively to the problem of automatic differentiation. As
 we will see, the language itself presents certain limitations in this
 respect, but nonetheless we can achieve a great deal\dots
 
+* Automatic Differentiation
 
+Computational approaches to differentiation are typically
+characterised as falling into one of three camps: /numerical/,
+/symbolic/, and /automatic/. Numerical differentiation produces
+numerical values for derivatives by approximation, and will be
+familiar to those acquainted with finite-difference time-domain audio
+synthesis methods [cite:@bilbao_numerical_2009]. Symbolic
+differentiation takes a computational expression and generates an
+accompanying expression for its derivative; this approach may resonate
+with users of MATLAB's Symbolic Math Toolbox
+[cite:@moler_symbolic_1997]. Automatic differentiation describes an
+arithmetic for generating both the output of an expression and its
+derivative; this is the arithmetic that underpins the current crop of
+Python libraries for machine learning [cite:@harrison_brief_2021].
+
+Some ambiguity abounds with regard to how automatic and symbolic
+differentiation actually differ. This ambiguity may be ascribed to the
+former's nature as "partly symbolic and partly numerical"
+[cite:@harrison_brief_2021]. Unlike symbolic approaches, which produce
+/formulas/, automatic approaches produce numerical outputs
+[cite:@rall_arithmetic_1986] --- but they do so by implementing
+differentiation rules symbolically[fn:1] at the level (as we shall see) of
+the primitive operations of the programming language upon which they
+are based.
+
+Forward mode computes both the value of the function and its partial
+derivatives in a forward pass; this entails 
+Reverse mode computes the primal value of the function under
+consideration in a forward pass, 
 
 * Differentiable Programming in Faust
 
@@ -455,7 +485,7 @@ differentiable addition primitive can be named ~diff(+)~:
 
 #+NAME: lst:diff-env
 #+CAPTION: Extract from the definition of a \F{} environment for
-#+CAPTION: differentiable programming.
+#+caption: differentiable programming.
 #+begin_src faust
 env(vars) = environment {
   diff(+) = diffAdd with {
@@ -646,7 +676,7 @@ with {
 
 * Conclusion
 
-Don't know yet; working on it.
+\dots
 
 #+begin_export latex
 %%\nocite{*}
@@ -660,6 +690,14 @@ Don't know yet; working on it.
 - Use =listings= package for exported source blocks.
 - Add custom =ifc24-style= package to =org-latex-packages-alist= so
   equation previews work.
+
+* Footnotes                                                        :noexport:
+
+[fn:1] Or indeed /manually/; one could perhaps use a symbolic
+differentiation program to create an automatic differentiation system,
+but, like Wengert [cite:@wengert_simple_1964] and Revels et
+al. [cite:@revels_forward-mode_2016], we will defining our derivatives
+/by hand/ as it were.
 
 # Local Variables:
 # eval:   (add-to-list 'org-latex-classes '("ifc24"

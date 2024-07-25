@@ -2806,3 +2806,37 @@ Resources:
   length 2.
 
 Entered on [2024-07-21 dim. 13:07]
+*** 2024-07-24 mercredi
+**** Differentiable variables                                 :FAUST:DDSP:
+Working on a neuron implementation that uses =diff.lib=, I found that
+the approach for creating differentiable variables wasn't working. For
+a single neuron with multiple inputs, \(Z = WX + b\), \(W\) and \(X\)
+are vectors of length \(N\). The obvious way to proceed is:
+
+#+begin_src faust
+W = par(i, NINPUTS, df.var(hbargraph("w%j", -5, 5)) with {j = i+1;});
+X = par(i, NINPUTS, df.var(hbargraph("x%j", -5, 5)) with {j = i+1;});
+b = df.var(hbargraph("b", -5, 5));
+#+end_src
+
+Attempting to access these however, poses a problem.
+
+#+begin_src faust
+v = df.vars((W,X,b));
+process = v.var(1); // returns all of X, not x_1
+#+end_src
+
+~ba.take~ doesn't handle nested lists (parallel compositions)
+well. The solution:
+
+#+begin_src faust
+take(i, L) = _ <: L:sel with {
+    sel = par(j, i-1, !),_,par(j, outputs(L)-i, !); 
+};
+#+end_src
+
+This essentially returns /all/ differentiable variables, routing its
+incoming gradient to each of them, but it blocks output for all but
+the \(i\)th variable.
+
+Entered on [2024-07-24 mer. 09:36]
