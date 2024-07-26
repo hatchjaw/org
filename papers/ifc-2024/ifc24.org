@@ -334,6 +334,43 @@ We find that our arithmetic produces the expected numerical results
 /automatically/ via composition of the fundamental operations
 described in equations ([[eq:addition-rule]]) and ([[eq:product-rule]]).
 
+** Extending \F{}'s Arithmetic
+
+One quality generally possessed by automatic differentiation
+implementations is that of allowing the programmer to write
+differentiable programs with minimal changes to the syntax of their
+code. This is typically achieved either by source code transformation
+or operator overloading [cite:@yu_dnad_2013; @baydin_automatic_2018]
+--- neither of which is available in the \F language.[fn:1] We could
+take an approach similar to Wengert's 1964 demonstration of the
+composition of differentiable functions in Fortran
+[cite:@wengert_simple_1964] and define differentiable functions
+~diffAdd~, ~diffMul~, etc. each accepting and returning dual numbers;
+thanks to \F's pattern matching abstraction, however, we can go one
+better, achieving something akin to, albeit slightly more verbose
+than, operator overloading.
+
+
+Using pattern matching one could, for instance, create an arithmetic
+with the following property:
+
+#+begin_src faust :results file svg :file images/arithmetic.svg :exports both
+// recip(+) = -;
+recip(op) = 1,op : /;
+process = recip(sin),recip((_,2 : ^))
+  : recip(+);
+#+end_src
+#+ATTR_LATEX: :width 1\linewidth
+#+RESULTS:
+[[file:images/arithmetic.svg]]
+Wrapping our primitive operators in ~recip~ gives us automatic
+reciprocals without affecting the fundamental composability of the
+primitives. Note that if we were to insert something mischievous like
+~recip(+) = -;~ at the beginning of the above program, the final
+operation, rather than returning \(1/(x_{1} + x_{2})\) would be
+/overridden/, in a manner of speaking, returning \((x_{1} - x_{2})\)
+instead.
+
 * Differentiable Programming in Faust
 
 The possibility of writing differentiable code in any programming
@@ -342,7 +379,7 @@ for the primitive operations in that language.
 
 ** Defining a Differentiable Primitive
 
-As a basic example, consider the addition primitive; in \F{} one can
+As a basic example, consider the addition primitive; in \F one can
 write:
 
 #+NAME: faust_add
@@ -361,9 +398,9 @@ produces one output signal, \(y\):
 \begin{equation}
 y = u + v.
 \end{equation}
-Note that \F{}'s addition primitive has no special knowledge of its
+Note that \F's addition primitive has no special knowledge of its
 arguments, their history, provenance, etc., it just consumes them and
-returns their sum. In \F{}'s arithmetic, the addition of two signals is
+returns their sum. In \F's arithmetic, the addition of two signals is
 simply well-defined.
 
 Suppose that \(y\) is dependent on some variable \(x\), and that we
@@ -381,7 +418,7 @@ process = +,+;
 [[file:images/dualadd.svg]]
 Such an expression could be said to describe a /differentiable
 addition primitive/, taking dual-number inputs \(\langle u,u' \rangle\) and \(\langle
-v,v' \rangle\) and producing output \(\langle y,y' \rangle\).  Since \F{} deals
+v,v' \rangle\) and producing output \(\langle y,y' \rangle\).  Since \F deals
 exclusively with the propagation of signals, we shall refer to this as
 a /dual signal/ representation. Having acces to the primal and tangent
 signals in parallel in this manner lays the foundation for writing
@@ -401,7 +438,7 @@ return \(y\) and \(y'\) (in that order).
 #+end_quote
 For \(u\) we use an arbitrary input signal, which we can represent
 with \F{}'s identity function, ~_~. \(x\) is the variable of interest;
-\F's analogy to a variable is a slider, so one is created and assigned
+\F{}'s analogy to a variable is a slider, so one is created and assigned
 to \(v\). \(u\) and \(x\) have no direct relationship, so
 \(u' = 0\).  \(v\) /is/ \(x\), so \(x' = 1\).
 
@@ -761,6 +798,12 @@ with {
 - Use =listings= package for exported source blocks.
 - Add custom =ifc24-style= package to =org-latex-packages-alist= so
   equation previews work.
+
+* Footnotes
+
+[fn:1] Various transformations /are/ in fact possible at the level of
+the /F compiler. See section [[*Discussion]] for further exploration of
+this idea.
 
 # Local Variables:
 # eval:   (add-to-list 'org-latex-classes '("ifc24"

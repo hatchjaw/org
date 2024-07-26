@@ -36,7 +36,7 @@ DEADLINE: <2024-07-14 dim.>
 ** TODO [#C] Start Ethics/Integrity MOOC
 
 ** TODO [#A] Finish Reproducible Research MOOC
-DEADLINE: <2024-07-21 dim.>
+DEADLINE: <2024-07-28 dim.>
 
 ** DONE Ask about working at CEI-2 during August
 DEADLINE: <2024-07-12 ven.>
