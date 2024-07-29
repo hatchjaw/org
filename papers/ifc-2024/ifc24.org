@@ -12,7 +12,7 @@
 #+LATEX_HEADER: \RequirePackage[]{ifc24-style}
 
 #+begin_abstract
-Differentiable programming is 
+Differentiable programming is\dots
 
 Using the ~environment~ expression and pattern matching abstraction,
 it is possible to write \F{} code that is differentiable end-to-end,
@@ -182,7 +182,7 @@ This is a link to section [[*Conclusion]]
 
 This template can be found on the conference website.
 
-Here's a ref: [cite:@Smith2012]
+Here's a ref: [cite:@rall_arithmetic_1986]
 
 Here's some code:
 
@@ -201,14 +201,19 @@ process = 1;
 
 * Introduction
 
-End-to-end differentiability is a desirable quality in the creation of
-computer programs that perform gradient-based optimization.
+Differentiable programming is a programming paradigm whereby a
+computer program can be differentiated end-to-end
+[cite:@blondel_elements_2024]. The sensitivity of a differentiable
+program's outputs to perturbations of its inputs can be computed via
+automatic differentiation
+(autodiff) [cite:@rall_arithmetic_1986;@baydin_automatic_2018],
+producing a partial derivative with respect to each input
+parameter. End-to-end differentiability is a desirable quality in the
+creation of computer programs that perform gradient-based
+optimization.
 
-Differentiable programming is "a programming paradigm in which complex
-computer programs\dots can be differentiated end-to-end automically"
-
-[Differentiable programming] may be supported by operator overloading
-or source code transformation
+This paper introduces a /differentiation arithmetic/ to \F{},
+facilitating the creation of differentiable algorithms 
 
 There is a sense in which the block-diagram algebra of \F{} lends the
 language intuitively to the problem of automatic differentiation. As
@@ -217,6 +222,9 @@ respect, but nonetheless we can achieve a great deal\dots
 
 * Algorithmic Differentiation
 
+What does it entail to write differentiable code? As stated, the aim
+of differentiable programming is to compute the sensitivity of a
+program's outputs to purturbations to its inputs.
 Computational approaches to differentiation are typically
 characterised as falling into one of three camps: /numerical/,
 /symbolic/, and /automatic/. Numerical differentiation produces
@@ -264,13 +272,13 @@ consideration in a forward pass,
 
 ** The Arithmetic of Differentiation
 
-The arithmetic of forward mode automatic differentiation can be
-derived by formulating differentiation in a manner similar to the
-complex numbers [cite:@rall_arithmetic_1986; @yu_dnad_2013]. Where
-complex arithmetic uses the imaginary unit \(i\) to designate the
-imaginary part of a complex number \(z = x + iy\), with \(i^{2} = -1\),
-differentiable arithmetic uses the /nilpotent
-symbol/[cite:@yu_dnad_2013] \(\varepsilon\):
+The arithmetic of forward mode autodiff can be derived by formulating
+differentiation in a manner similar to the complex numbers
+[cite:@rall_arithmetic_1986; @yu_dnad_2013]. Where complex arithmetic
+uses the imaginary unit \(i\) to designate the imaginary part of a
+complex number \(z = x + iy\), with \(i^{2} = -1\), differentiable
+arithmetic uses the /nilpotent
+symbol/[cite:@yu_dnad_2013;@baydin_automatic_2018] \(\varepsilon\):
 
 #+NAME: eq:nilpotent
 \begin{equation}
@@ -350,28 +358,65 @@ thanks to \F's pattern matching abstraction, however, we can go one
 better, achieving something akin to, albeit slightly more verbose
 than, operator overloading.
 
+Pattern matching has been used extensively in the Faust libraries. The
+=basics.lib= library, for example, provides a function with a
+recursive pattern matching definition for taking an element from a
+list:
 
-Using pattern matching one could, for instance, create an arithmetic
-with the following property:
+#+begin_src faust :results none
+// Take the first element, the head;
+take(1, (head, rest)) = head;
+// Take the only element;
+take(1, head)         = head;
+// Take the n-1th element from the rest.
+take(n, (head, rest)) = take(n-1, rest);
+#+end_src
+
+The =physmodels.lib= library provides ~pm.chain~ for creating chains
+of bidirectional signal blocks [cite:@michon_faust_2018]. ~chain(A)~
+simply returns the signal block ~A~; ~chain(A:As)~ creates a recursive
+structure containing ~A~ and ~chain(As)~. Similarly, =wdmodels.lib=
+facilitates the creation of wave digital filter models via primitive
+elements, resistors, capacitors, etc. [cite:@roosenburg_wave_2021],
+whose behaviour is described with pattern matching syntax. Both
+libraries extend \F{}'s arithmetic with their own rules, with the aim
+of achievening a particular goal within the syntax provided by \F{}.
+
+If one's particular goal was to be able to compose reciprocal
+expressions, one could create an arithmetic of the following form,
+using pattern matichng to avoid division by zero:
 
 #+begin_src faust :results file svg :file images/arithmetic.svg :exports both
-// recip(+) = -;
+import("stdfaust.lib");
+recip(0) = recip(ma.EPSILON);
+recip(0.0) = recip(0);
 recip(op) = 1,op : /;
-process = recip(sin),recip((_,2 : ^))
-  : recip(+);
+process = recip(log(1)),recip((_,2 : ^))
+  : recip(-);
 #+end_src
 #+ATTR_LATEX: :width 1\linewidth
 #+RESULTS:
 [[file:images/arithmetic.svg]]
-Wrapping our primitive operators in ~recip~ gives us automatic
-reciprocals without affecting the fundamental composability of the
-primitives. Note that if we were to insert something mischievous like
-~recip(+) = -;~ at the beginning of the above program, the final
-operation, rather than returning \(1/(x_{1} + x_{2})\) would be
-/overridden/, in a manner of speaking, returning \((x_{1} - x_{2})\)
-instead.
+Wrapping our expressions in ~recip~ gives us automatic reciprocals
+without affecting the fundamental composability of \F{}'s
+primitives. Note that if we were to insert the expression ~recip(-) =
++;~ at the top of the program, the final operation, rather than
+returning \(1/(x_{1} - x_{2})\) would be /overridden/, in a manner of
+speaking, returning \((x_{1} + x_{2})\) instead. An approach along these
+lines will form the basis for the creation of differentiable \F{}n
+primitives.
 
 * Differentiable Programming in Faust
+
+We implement forward mode automatic differentition based on dual
+numbers/signals.
+
+Reverse propagation of signals /is/ possible in Faust via recursive
+composition (the ~~~ operator), and it is by way of nested recursions
+that the =physmodels.lib= library accomplishes simulated bidirectional
+wave propagation [cite:@michon_faust_2018]. The structures described
+by =physmodels.lib= are purely linear, however; for branching
+structures, the [fn:2]
 
 The possibility of writing differentiable code in any programming
 language is contingent on the availability of derivative expressions
@@ -379,7 +424,7 @@ for the primitive operations in that language.
 
 ** Defining a Differentiable Primitive
 
-As a basic example, consider the addition primitive; in \F one can
+As a basic example, consider the addition primitive; in \F{} one can
 write:
 
 #+NAME: faust_add
@@ -784,7 +829,7 @@ with {
 
 * Conclusion
 
-\dots
+** Acknowledgements
 
 #+begin_export latex
 %%\nocite{*}
@@ -800,6 +845,10 @@ with {
   equation previews work.
 
 * Footnotes
+
+[fn:2]  See [cite:@radul_you_2023], figure 1, for an illustration of
+the sort of structure that would be required in order to support
+reverse mode autodiff.
 
 [fn:1] Various transformations /are/ in fact possible at the level of
 the /F compiler. See section [[*Discussion]] for further exploration of

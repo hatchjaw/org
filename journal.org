@@ -2790,13 +2790,14 @@ in... Or we transfer what we've learnt about Teensy to the Pi.
 
 I don't think I ever state in the Frontiers paper that Teensy
 /doesn't/ support hardware timestamping, so I shouldn't have anything
-to worry about there.
+to worry about there 🤞
 
 Resources:
 - My [[https://forum.pjrc.com/index.php?threads/precise-measurement-adjustment-of-sai1_clk_root.75483/][thread]] on the Teensy forum.
 - [[https://github.com/ddrown/teensy-ntp][teensy-ntp]], Dan Drown's [[https://forum.pjrc.com/index.php?threads/teensy-4-1-ntp-server.61581/][thread]] about it.
   + =teensy-ntp= also uses [[https://github.com/FabioBatSilva/ArduinoFake][ArduinoFake]] for tests/mocking.
-- Dan Drown's [[https://github.com/ddrown/teensy41_ethernet][fork]] of ~NativeEthernet~ with IEEE 1588 support.
+- [[https://github.com/ddrown/teensy41_ethernet][teensy41_ethernet]], Dan Drown's fork of ~NativeEthernet~ with IEEE
+  1588 support.
 - Fabian Renn-Giles' [[https://www.youtube.com/watch?v=8jHLusUVa2Y][talk]] from ADC21; mentions PID and linear
   regression/least squares clock conversion algorithms.
 - §41 of the iMX RT1060 reference manual for info on ENET and IEEE
@@ -2840,3 +2841,86 @@ incoming gradient to each of them, but it blocks output for all but
 the \(i\)th variable.
 
 Entered on [2024-07-24 mer. 09:36]
+*** 2024-07-28 dimanche
+**** Teensy 1588 clock investigation                              :TEENSY:
+Investigating =teensy41_ethernet=.
+
+In =lwip_t41.c=, uses ~t41_low_level_init()~ to set
+~CCM_ANALOG_PLL_ENET~ register; see reference manual v3, p. 1112-3,
+§14.8.14. The main takeaway is ~CCM_ANALOG_PLL_ENET_DIV_SELECT~ can
+take one of four values, each relating to a frequency of the "ethernet
+reference clock"; 25 MHz (0), 50 MHz (1), 100 MHz (2), 125 MHz
+(3). =NativeEthernet=, =QNEthernet=, and =teensy41_ethernet= all set
+that value to 1, with the comment "Configure PLL6 for 50 MHz".
+
+Running the =lwip_1588_timer= example from =teensy41_ethernet= (with
+some modifications), I see the following serial output:
+
+#+begin_example
+Ethernet 1588 Timer Test
+------------------------
+
+PLL6 = 80202001 (should be 80202001)
+24987978 at 1000
+24999999 at 1000
+25000000 at 1000
+25000001 at 1000
+24999999 at 1000
+25000001 at 1000
+25000000 at 1000
+...
+#+end_example
+
+The first line prints the contents of the ~CCM_ANALOG_PLL_ENET~
+register; the last digit contains the ~...DIV_SELECT~ value.
+
+Anyway, roughly twenty-five million increments of the ~ENET_ATVR~
+Timer Value Register (see §41.3.10, IEEE 1588 functions) per second
+(1000 [ms] as derived from PLL1). So, either that timer isn't derived
+from PLL6, or setting ~CCM_ANALOG_PLL_ENET_DIV_SELECT(3)~ has no
+effect. Likely I've misunderstood, or I'm doing something wrong; I
+should ask on the forum.
+
+NB. The first reading is lower, presumably because of some delay
+between instantiating an instance of ~elapsedMillis~ and starting
+whatever clock ~ENET_ATVR~ is derived from.
+
+=teensy41_ethernet= features two other interesting examples:
+- =lwip_1588_input=, which uses GPS input (presumably 1 PPS) on pin 35
+  to trigger an interrupt that sets ~ENET_TCSR0~ (to itself...), the
+  Timer Control Status Register (§41.5.1.95). This register appears to
+  be able to respond to an input signal; presumably something like a 1
+  PPS input. I'll probably use it in ~TMODE~ /Output Compare -
+  software only/.
+- =etherraw=, which demonstrates setting up the ethernet interface
+  from scratch, establishing TX/RX buffers, etc. I ran it on two T41's
+  and they successfully exchanged ARP (Address Resolution Protocol)
+  packets.
+
+Entered on [2024-07-28 dim. 19:51]
+  
+  [[file:~/org/journal.org::*Teensy supports IEEE 1588][Teensy supports IEEE 1588]]
+*** 2024-07-29 lundi
+**** Meeting with Romain (CW31)                                  :MEETING:
+- Nando used PTP-enabled USB ethernet dongles to support one of his
+  projects.
+- Doesn't this act as a bridge for an internal ethernet PHY with
+  timestamping functionality?
+- Does the ethernet PHY of my work machine (Dell Precision 5570)
+  support this?
+  + Based on the output of ethtool, it seems not:
+#+begin_example
+❯ sudo ethtool -T enp4s0u2u4
+Time stamping parameters for enp4s0u2u4:
+Capabilities:
+        software-receive
+        software-system-clock
+PTP Hardware Clock: none
+Hardware Transmit Timestamp Modes: none
+Hardware Receive Filter Modes: none
+#+end_example
+- That being said, however, I would like to find out what the ethernet
+  chip is, but that's not readily apparent via [[https://dl.dell.com/content/manual8004583-precision-5570-setup-and-specifications.pdf][Precision 5570 Setup &
+  Spec.]]
+
+Entered on [2024-07-29 lun. 12:02]
