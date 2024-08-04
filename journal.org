@@ -1,3 +1,4 @@
+
 # -*- Mode: org -*-
 # -*- coding: utf-8 -*-
 #+STARTUP: overview indent inlineimages logdrawer hidestars
@@ -2924,3 +2925,33 @@ Hardware Receive Filter Modes: none
   Spec.]]
 
 Entered on [2024-07-29 lun. 12:02]
+** 2024-08 août
+*** 2024-08-02 vendredi
+**** The Hunt for a Functioning PTP Implementation                :TEENSY:
+Having run the =teensy41_ethernet= examples, I investigated Shawn
+Silverman's 1588 [[https://github.com/ssilverman/QNEthernet/tree/ieee1588-2][branch]] of QNEthernet; drew some general conclusions
+about how to set up the hardware ethernet timer. I downloaded the
+MCUXpresso IDE, and the SDK examples for the iMXRT10xx evaluation
+board, which includes a /PTP transfer/ example. While searching for an
+updated version of NXP's application note on implementing PTP, I found
+a paper by a quartet from Institute of Microelectronic Systems Leibniz
+University Hannover, /"Sub-Microsecond Time Synchronization for
+Network-Connected Microcontrollers"/, which details implementing PTP
+on Teensy 4.1 using a modified version of QNEthernet.
+
+So, there's a working PTP implementation for Teensy. Master and slave
+(I need to come up with better names for those) remain synchonised to
+as little as a few nanoseconds (direct ethernet connection) or several
+hundred (via an unmanaged switch). My job will be to interpret this
+ethernet clock sync to establish an audio clock sync, something that
+isn't demonstrated in =t41-ptp=.
+
+***** Resources
+- The Teensy Forum [[https://forum.pjrc.com/index.php?threads/ptp-ieee-1588-library.27467/#post-292475][thread]] that mentions the NXP /application note/ on
+  implementing IEEE 1588 V2.
+- The aforementioned [[https://www.nxp.com/docs/en/nxp/application-notes/AN12149.pdf][application note]]: "Implementing an IEEE 1588 V2
+  on i.MX RT Using PTPd, FreeRTOS, and lwIP TCP/IP stack".
+- NXP [[https://community.nxp.com/pwmxy87654/attachments/pwmxy87654/lpc/40504/1/lwIP%20TCPIP%20Stack%20and%20MCUXpresso%20SDK%20Integration%20Users%20Guide.pdf][documentation]] on their lwIP examples.
+- The Hannover [[https://www.repo.uni-hannover.de/bitstream/handle/123456789/16688/2024_IEEE_ICCE_Sub-Microsecond_PTP-accepted.pdf?sequence=1][paper]] and associated GitHub [[https://github.com/IMS-AS-LUH/t41-ptp][repository]].
+
+Entered on [2024-08-02 ven. 23:10]

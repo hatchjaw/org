@@ -270,6 +270,22 @@ derivatives in a forward pass; this entails
 Reverse mode computes the primal value of the function under
 consideration in a forward pass,
 
+#+begin_src faust :results file svg :file images/block.svg :exports both
+N = 5;
+S(j) = sum(i,N,((i+j) : sqrt)/N);
+process = (v0 <: _,_),v1 : v2,v3 : v4
+with {
+    v0 = S(0);
+    v1 = S(1);
+    v2 = _,S(2) : +;
+    v3 = +,S(3) : +;
+    v4 = +,S(4) : +;
+};
+#+end_src
+
+#+RESULTS:
+[[file:images/block.svg]]
+
 ** The Arithmetic of Differentiation
 
 The arithmetic of forward mode autodiff can be derived by formulating
