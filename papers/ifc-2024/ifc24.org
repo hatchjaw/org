@@ -10,6 +10,7 @@
 #+BIBLIOGRAPHY: IFC-24.bib
 #+CITE_EXPORT: bibtex
 #+LATEX_HEADER: \RequirePackage[]{ifc24-style}
+#+refproc: :abbreviate nil
 
 #+begin_abstract
 Differentiable programming is\dots
@@ -21,6 +22,14 @@ supporting the creation of parameter optimisation
 algorithms. Differentiable programming in \F{} could serve as a
 platform for a \F{}-native approach to machine learning problems.
 #+end_abstract
+
+* About                                                            :noexport:
+
+Org file describing a paper for the 2024 International Faust
+Conference.
+
+Uses =org-ref= for cross references (and it was a real bugger to set
+up), and =citar=/=org-cite= for citations.
 
 * Latex Setup                                                      :noexport:
 :PROPERTIES:
@@ -116,6 +125,17 @@ Authors' affiliations have to be set below.
 \fi
 #+end_src
 
+** Cleveref must be loaded last\dots
+
+...otherwise =hyperref= throws a wobbler and won't link equations, etc.
+
+#+begin_src latex
+\usepackage{cleveref}
+#+end_src
+
+Coupled with the ~#+refproc:~ directive above, =cleveref= will not
+abbreviate cross-reference names.
+
 ** Macros
 #+begin_src latex
 % Special Macros
@@ -178,16 +198,14 @@ are combined into ~:file~ to produce =<outputdir>/<file>=. For
 
 * More potentially useful syntax                                   :noexport:
 
-This is a link to section [[*Conclusion]]
+This is an =org-ref= cross-reference: [[cref:sec:intro]]
 
-This template can be found on the conference website.
-
-Here's a ref: [cite:@rall_arithmetic_1986]
+Here's an =org-cite= citation: [cite:@rallArithmetic1986]
 
 Here's some code:
 
 #+begin_src faust
-  process = _;
+process = _;
 #+end_src
 
 And some inline code ~process = !;~
@@ -200,17 +218,20 @@ process = 1;
 #+end_src
 
 * Introduction
+:PROPERTIES:
+:CUSTOM_ID: sec:intro
+:END:
+
 
 Differentiable programming is a programming paradigm whereby a
 computer program can be differentiated end-to-end
-[cite:@blondel_elements_2024]. The sensitivity of a differentiable
+[cite:@blondelElements2024]. The sensitivity of a differentiable
 program's outputs to perturbations of its inputs can be computed via
-automatic differentiation
-(autodiff) [cite:@rall_arithmetic_1986;@baydin_automatic_2018],
-producing a partial derivative with respect to each input
-parameter. End-to-end differentiability is a desirable quality in the
-creation of computer programs that perform gradient-based
-optimization.
+automatic differentiation (autodiff)
+[cite:@rallArithmetic1986;@baydinAutomatic2018;], producing a partial
+derivative with respect to each input parameter. End-to-end
+differentiability is a desirable quality in the creation of computer
+programs that perform gradient-based optimization.
 
 This paper introduces a /differentiation arithmetic/ to \F{},
 facilitating the creation of differentiable algorithms 
@@ -231,33 +252,33 @@ characterised as falling into one of three camps: /numerical/,
 numerical values for derivatives via approximation by finite
 differences, and will be familiar to those acquainted with
 finite-difference time-domain audio synthesis methods
-[cite:@bilbao_numerical_2009]. Symbolic differentiation takes a
+[cite:@bilbaoNumerical2009]. Symbolic differentiation takes a
 computational expression and generates the corresponding expression
 for its derivative; this approach may resonate with users of MATLAB's
-Symbolic Math Toolbox [cite:@moler_symbolic_1997] or the Maple
-programming language[cite:@monagan_gradient_1993]. Automatic
+Symbolic Math Toolbox [cite:@molerSymbolic1997] or the Maple
+programming language [cite:@monaganGRADIENT1993]. Automatic
 differentiation describes an arithmetic for accumulating both the
 numerical output of a computational expression and the numerical value
 of its derivative; it is an arithmetic of this kind that underpins the
 current crop of Python libraries for machine learning
-[cite:@harrison_brief_2021].
+[cite:@harrisonBrief2021].
 
 A certain ambiguity abounds with regard to how automatic and symbolic
-differentiation relate to each other[cite:@laue_equivalence_2022], and
+differentiation relate to each other[cite:@laueEquivalence2022], and
 partisan opinions have been expressed over which is more
-efficient[cite:@guenter_efcient_2007]. The ambiguity may be ascribed
+efficient[cite:@guenterEfficient2007]. The ambiguity may be ascribed
 in part to the former's nature as "partly symbolic and partly
-numerical" [cite:@harrison_brief_2021], and perhaps also to the fact
+numerical" [cite:@harrisonBrief2021], and perhaps also to the fact
 that programs composed symbolically may be differentiated
-automatically [cite:@villard_adrien_1999]. Dismissal of symbolic
+automatically [cite:@villardADrien1999]. Dismissal of symbolic
 differentiation over the purported problem of "expression swell"
-[cite:@harrison_brief_2021; @baydin_automatic_2018] may be driven by
+[cite:@harrisonBrief2021; @baydinAutomatic2018] may be driven by
 implementation-specific assumptions and historical lack of available
 computational power. For our purposes, we shall defer to Rall, who,
 writing in the mid-1980's, before the waters were muddied by legions
 of machine learning researchers, observed (to paraphrase): /symbolic
 approaches produce formulas whereas automatic approaches produce
-numerical outputs/ [cite:@rall_arithmetic_1986]. The latter do so,
+numerical outputs/ [cite:@rallArithmetic1986]. The latter do so,
 however, by implementing differentiation rules, symbolically or
 manually, at the level, as we will see, of the primitive operations of
 the programming language upon which they are based.
@@ -270,7 +291,7 @@ derivatives in a forward pass; this entails
 Reverse mode computes the primal value of the function under
 consideration in a forward pass,
 
-#+begin_src faust :results file svg :file images/block.svg :exports both
+#+begin_src faust :results file svg :file images/block.svg :exports results
 N = 5;
 S(j) = sum(i,N,((i+j) : sqrt)/N);
 process = (v0 <: _,_),v1 : v2,v3 : v4
@@ -290,11 +311,11 @@ with {
 
 The arithmetic of forward mode autodiff can be derived by formulating
 differentiation in a manner similar to the complex numbers
-[cite:@rall_arithmetic_1986; @yu_dnad_2013]. Where complex arithmetic
+[cite:@rallArithmetic1986;@yuDNAD2013]. Where complex arithmetic
 uses the imaginary unit \(i\) to designate the imaginary part of a
 complex number \(z = x + iy\), with \(i^{2} = -1\), differentiable
 arithmetic uses the /nilpotent
-symbol/[cite:@yu_dnad_2013;@baydin_automatic_2018] \(\varepsilon\):
+symbol/[cite:@yuDNAD2013;@baydinAutomatic2018] \(\varepsilon\):
 
 #+NAME: eq:nilpotent
 \begin{equation}
@@ -321,9 +342,8 @@ the final term cancelling due to the presence of \(\varepsilon^{2}\).
 
 This arithmetic may be more conviently expressed, for computational
 purposes, as one of /ordered
-pairs/[cite:@rall_arithmetic_1986;@kalman_doubly_2002] or /dual
-numbers/
-[cite:@yu_dnad_2013;@sigal_automatic_2021;@revels_forward-mode_2016]:
+pairs/[cite:@rallArithmetic1986;@kalmanDoubly2002] or /dual numbers/
+[cite:@yuDNAD2013;@sigalAutomatic2021;@revelsForwardMode2016]:
 
 #+NAME: eq:dual
 \begin{equation}
@@ -331,19 +351,15 @@ U = \langle u, u' \rangle.
 \end{equation}
 The addition and product rules now take the following forms:
 
-#+NAME: eq:addition-rule
-\begin{equation}
-U+V = \langle u, u' \rangle + \langle v, v' \rangle = \langle u + v, u' + v' \rangle,
-\end{equation}
-#+NAME: eq:product-rule
-\begin{equation}
-UV = \langle u, u' \rangle\langle v, v' \rangle = \langle uv, uv' + vu' \rangle.
-\end{equation}
+\begin{align}
+U+V &= \langle u, u' \rangle + \langle v, v' \rangle = \langle u + v, u' + v' \rangle, \label{eq:addition-rule-dual}\\
+UV &= \langle u, u' \rangle\langle v, v' \rangle = \langle uv, uv' + vu' \rangle. \label{eq:product-rule-dual}
+\end{align}
 The first component of each dual number is the rule for evaluation of
 the operation; the second is the rule for differentiation
-[cite:@rall_arithmetic_1986]. These components may be referred to as
-the /primal/ and /tangent/ respectively
-[cite:@baydin_automatic_2018;@radul_you_2023]. In dual number
+[cite:@rallArithmetic1986]. These components may be referred to as the
+/primal/ and /tangent/ respectively
+[cite:@baydinAutomatic2018;@radulYou2023]. In dual number
 differentiation arithmetic, an independent variable can be expressed
 as \(X = \langle x,\frac{dx}{dx} \rangle\), and a constant \(C = \langle c,\frac{dc}{dx}
 \rangle\). If we wish, for example, to compute the primal and tangent of a
@@ -356,7 +372,7 @@ supply appropriate values for the constants:
 \end{equation}
 We find that our arithmetic produces the expected numerical results
 /automatically/ via composition of the fundamental operations
-described in equations ([[eq:addition-rule]]) and ([[eq:product-rule]]).
+described in [[cref:eq:addition-rule-dual,eq:product-rule-dual]]
 
 ** Extending \F{}'s Arithmetic
 
@@ -364,11 +380,11 @@ One quality generally possessed by automatic differentiation
 implementations is that of allowing the programmer to write
 differentiable programs with minimal changes to the syntax of their
 code. This is typically achieved either by source code transformation
-or operator overloading [cite:@yu_dnad_2013; @baydin_automatic_2018]
+or operator overloading [cite:@yuDNAD2013;@baydinAutomatic2018]
 --- neither of which is available in the \F language.[fn:1] We could
 take an approach similar to Wengert's 1964 demonstration of the
 composition of differentiable functions in Fortran
-[cite:@wengert_simple_1964] and define differentiable functions
+[cite:@wengertSimple1964] and define differentiable functions
 ~diffAdd~, ~diffMul~, etc. each accepting and returning dual numbers;
 thanks to \F's pattern matching abstraction, however, we can go one
 better, achieving something akin to, albeit slightly more verbose
@@ -389,11 +405,11 @@ take(n, (head, rest)) = take(n-1, rest);
 #+end_src
 
 The =physmodels.lib= library provides ~pm.chain~ for creating chains
-of bidirectional signal blocks [cite:@michon_faust_2018]. ~chain(A)~
+of bidirectional signal blocks [cite:@michonFAUST2018]. ~chain(A)~
 simply returns the signal block ~A~; ~chain(A:As)~ creates a recursive
 structure containing ~A~ and ~chain(As)~. Similarly, =wdmodels.lib=
 facilitates the creation of wave digital filter models via primitive
-elements, resistors, capacitors, etc. [cite:@roosenburg_wave_2021],
+elements, resistors, capacitors, etc. [cite:@roosenburgWAVE2021],
 whose behaviour is described with pattern matching syntax. Both
 libraries extend \F{}'s arithmetic with their own rules, with the aim
 of achievening a particular goal within the syntax provided by \F{}.
@@ -430,7 +446,7 @@ numbers/signals.
 Reverse propagation of signals /is/ possible in Faust via recursive
 composition (the ~~~ operator), and it is by way of nested recursions
 that the =physmodels.lib= library accomplishes simulated bidirectional
-wave propagation [cite:@michon_faust_2018]. The structures described
+wave propagation [cite:@michonFAUST2018]. The structures described
 by =physmodels.lib= are purely linear, however; for branching
 structures, the [fn:2]
 
@@ -467,9 +483,9 @@ simply well-defined.
 Suppose that \(y\) is dependent on some variable \(x\), and that we
 wish to know how sensitive \(y\) is to perturbations in \(x\). We can
 produce an analytic expression for this sensitivity by differentiating
-\(y\) with respect to \(x\). Recall, from equation ([[eq:addition-rule]]),
+\(y\) with respect to \(x\). Recall, from [[cref:eq:addition-rule]],
 that a dual-number addition takes the form of two additions in
-parallel, which, in \F could be expressed like this:
+parallel, which, in \F{} could be expressed like this:
 
 #+begin_src faust :results svg file :file images/dualadd.svg :exports both
 process = +,+;
@@ -523,7 +539,7 @@ expression describing an input signal with a DC offset \(x\) applied;
 the tangent output, the derivative with respect to \(x\), is a
 constant signal of value \(1\).
 
-The program in listing 1 takes a symbolic approach to
+The program in [[cref:lst:dc-symbolic]] takes a symbolic approach to
 differentiation. This is fine for a basic example, but for more
 complex algorithms, composed of many primitives, manually defining
 derivatives symbolically in this way will quickly become unwieldy. To
@@ -537,7 +553,7 @@ diffSlider = hslider("x", 0, -1, 1, .1),1;
 Simply applying the differentiable addition primitive to these new
 primitives will not satisfy the new rule upon which that primitive
 depends, however, nor yield a program whose structure matches that
-described in equation ([[eq:addition-rule]]), as inputs to the addition
+described in [[cref:eq:addition-rule]], as inputs to the addition
 primitive will arrive out of order. This can be remedied with \F{}'s
 ~route~ primitive:
 
@@ -654,7 +670,7 @@ differentiable addition primitive can be named ~diff(+)~:
 
 #+NAME: lst:diff-env
 #+CAPTION: Extract from the definition of a \F{} environment for
-#+caption: differentiable programming.
+#+CAPTION: differentiable programming.
 #+begin_src faust
 env(vars) = environment {
   diff(+) = diffAdd with {
@@ -689,13 +705,13 @@ corresponding to a derivative with respect to \(x_{i}\). As before, the
 ~route~ primitive ensures that incoming signals are delivered to the
 parallel additions in the correct order.
 
-Encapsulating listings [[lst:var-env]] and [[lst:diff-env]] as a library in a
-file named =diff.lib=, we can use ~vars~ and ~env~ to write a
+Encapsulating [[cref:lst:var-env,lst:diff-env]] as a library in a file
+named =diff.lib=, we can use ~vars~ and ~env~ to write a
 differentiable version of the gain-plus-DC-offset program encountered
 earlier:
 
-#+CAPTION: Differentiable counterpart to the \F{} program described in
-#+CAPTION: listing [[lst:gain-dc]].
+#+CAPTION: Differentiable counterpart to the \F{} program described
+#+CAPTION: in [[cref:lst:gain-dc]].
 #+NAME: lst:gain-dc-diff
 #+begin_src faust :results file svg :file images/gain-dc.svg :exports both
 df = library("diff.lib");
@@ -715,11 +731,10 @@ process = d.input,X.var(1)
 #+ATTR_LATEX: :float multicolumn :placement [ht!]
 #+CAPTION: Block diagram of a differentiable \F{} program consisting
 #+CAPTION: of differentiable gain and DC parameters applied to an
-#+CAPTION: input signal
-#+CAPTION: (see listing [[lst:gain-dc-diff]]).
+#+CAPTION: input signal (see [[cref:lst:gain-dc-diff]]).
 #+RESULTS: lst:gain-dc-diff
 [[file:images/gain-dc.svg]]
-See figure [[fig:gain-dc]] for the block diagram of this program. Note
+See [[cref:fig:gain-dc]] for the block diagram of this program. Note
 that while the routing for each primitive --- particularly ~diff(*)~
 --- may be quite involved (and would only become more complex with the
 addition of further variables) the ~df~ library abstracts this away.
@@ -728,17 +743,17 @@ addition of further variables) the ~df~ library abstracts this away.
 
 Armed with the means to write end-to-end differentiable \F{} programs,
 it is possible, with a few modifications (and additions to
-=diff.lib=), to combine the code in listings [[lst:gain-dc]] and
-[[lst:gain-dc-diff]], to create a demonstrative parameter optimisation
-algorithm. An algorithm of this kind describes a target output,
-governed by parameters that are /hidden/ with respect to some
-/estimated/ output, which itself depends on parameters that we wish to
-optimise.
+=diff.lib=), to combine the code in
+[[cref:lst:gain-dc,lst:gain-dc-diff]], to create a demonstrative
+parameter optimisation algorithm. An algorithm of this kind describes
+a target output, governed by parameters that are /hidden/ with respect
+to some /estimated/ output, which itself depends on parameters that we
+wish to optimise.
 
-The algorithm in listing [[lst:gain-dc]] is dependent on hidden parameters
+The algorithm in [[cref:lst:gain-dc]] is dependent on hidden parameters
 \(\mathbf{x}\) and produces a ground truth output signal \(y\); we
 assign this algorithm to a variable named ~target~. Its differentiable
-equivalent in listing [[lst:gain-dc-diff]] is dependent on estimated
+equivalent in [[cref:lst:gain-dc-diff]] is dependent on estimated
 parameters \(\mathbf{\hat{x}}\) and produces the dual output signal,
 \(\langle \hat{y}, \hat{y}' \rangle\); we assign this to a variable named
 ~estimate~. The output signals produced by ~target~ and ~estimate~ can
@@ -787,14 +802,14 @@ at time \(t\):
 
 #+NAME: eq:gradient-descent
 \begin{equation}
-\mathbf{\hat{x}}_{t+1} &= \mathbf{\hat{x}}_t - \alpha\frac{\partial\mathcal{L}}{\partial \mathbf{\hat{x}}_t}
+\mathbf{\hat{x}}_{t+1} = \mathbf{\hat{x}}_t - \alpha\frac{\partial\mathcal{L}}{\partial \mathbf{\hat{x}}_t}
 \end{equation}
 In \F{}, this can be achieved via recursion, and by changing the
 definition of the variables delivered to ~df.env~. Since values will
 be updated automatically via gradient descent, the sliders used in
-listing [[lst:gain-dc-diff]] are no longer appropriate; instead, a
-bargraph instance can be used to display the value of each variable,
-with recursive subtractions accumulating the incoming gradients.
+[[cref:lst:gain-dc-diff]] are no longer appropriate; instead, a bargraph
+instance can be used to display the value of each variable, with
+recursive subtractions accumulating the incoming gradients.
 
 #+begin_src faust
 X = df.vars((gain,dc)) with {
@@ -811,8 +826,8 @@ gradients produced by the latter back to ~estimate~.
 
 #+NAME: lst:backprop
 #+CAPTION: Excerpt from a parameter optimisation algorithm. See
-#+CAPTION: listings [[lst:gain-dc]], [[lst:gain-dc-diff]] and
-#+CAPTION: [[lst:loss-function]] respectively for definitions of ~target~,
+#+CAPTION: [[cref:lst:gain-dc,lst:gain-dc-diff,lst:loss-function]]
+#+CAPTION: respectively for definitions of ~target~,
 #+CAPTION: ~estimate~, and ~d.lossL1~.
 #+begin_src faust
 process = no.noise <: (
@@ -836,6 +851,9 @@ with {
 [link to example files]
 
 * Discussion
+:PROPERTIES:
+:CUSTOM_ID: sec:discussion
+:END:
 ** Limitations
 
 - derivative of delay
@@ -843,14 +861,28 @@ with {
 - overfitting...
 - dimensionality; reverse mode
 
-* Conclusion
+[[Cref:sec:conclusion]]
 
+* Conclusion
+:PROPERTIES:
+:CUSTOM_ID: sec:conclusion
+:END:
 ** Acknowledgements
 
 #+begin_export latex
 %%\nocite{*}
 #+end_export
 #+PRINT_BIBLIOGRAPHY:
+
+* Footnotes
+
+[fn:2]  See [cite:@radulYou2023], figure 1, for an illustration of
+the sort of structure that would be required in order to support
+reverse mode autodiff.
+
+[fn:1] Various transformations /are/ in fact possible at the level of
+the \F{} compiler. See [[cref:sec:discussion]] for further exploration of
+this idea.
 
 * Emacs Setup                                                      :noexport:
 
@@ -859,16 +891,6 @@ with {
 - Use =listings= package for exported source blocks.
 - Add custom =ifc24-style= package to =org-latex-packages-alist= so
   equation previews work.
-
-* Footnotes
-
-[fn:2]  See [cite:@radul_you_2023], figure 1, for an illustration of
-the sort of structure that would be required in order to support
-reverse mode autodiff.
-
-[fn:1] Various transformations /are/ in fact possible at the level of
-the /F compiler. See section [[*Discussion]] for further exploration of
-this idea.
 
 # Local Variables:
 # eval:   (add-to-list 'org-latex-classes '("ifc24"

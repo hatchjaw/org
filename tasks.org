@@ -5,13 +5,15 @@
 * Tasks
 ** TODO [#B] Review PAUC manuscript
 DEADLINE: <2024-08-19 lun.>
-** TODO Start work on Physical Audio webside updates
+** DONE Start work on Physical Audio webside updates
 DEADLINE: <2024-07-20 sam.>
+- State "DONE"       from "TODO"       [2024-08-04 dim. 17:14]
 ** TODO [#A] Send Romain weekly update
-DEADLINE: <2024-07-26 ven. ++1w>
+DEADLINE: <2024-08-04 dim. ++1w>
 :PROPERTIES:
-:LAST_REPEAT: [2024-07-21 dim. 13:36]
+:LAST_REPEAT: [2024-08-04 dim. 17:14]
 :END:
+- State "DONE"       from "TODO"       [2024-08-04 dim. 17:14]
 - State "DONE"       from "TODO"       [2024-07-21 dim. 13:36]
 - State "DONE"       from "TODO"       [2024-07-12 ven. 18:12]
 ** TODO [#A] Submit IFC article
@@ -35,9 +37,10 @@ DEADLINE: <2024-07-14 dim.>
 
 ** TODO [#C] Start Ethics/Integrity MOOC
 
-** TODO [#A] Finish Reproducible Research MOOC
+** DONE [#A] Finish Reproducible Research MOOC
 DEADLINE: <2024-07-28 dim.>
 
+- State "DONE"       from "TODO"       [2024-08-04 dim. 17:14]
 ** DONE Ask about working at CEI-2 during August
 DEADLINE: <2024-07-12 ven.>
 
