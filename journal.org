@@ -3039,4 +3039,24 @@ In \cref{a-nice-section} things are rather nice.
 Entered on [2024-08-05 lun. 10:44]
   
   [[file:~/org/journal.org::*Citation and cross-reference hell][Citation and cross-reference hell]]
-  
+*** 2024-08-12 lundi
+**** Notes, note-taking, Emacs config                              :EMACS:
+Having recently installed =citar=, I am preparing to start using
+=denote=, and =citar-denote=, for literature review, reviewing papers,
+and general note-taking. My suspicion is that the monolithic journal
+may be good for a general overview, but, for detail, dedicated notes
+(with backlinks) may be the better, more-accessible approach. I'll
+give it a try and see how it goes.
+
+Why not =org-roam=? Gut-feeling, I suppose. [[https://github.com/org-roam/org-roam-ui][org-roam-ui]] may have been
+the tipping point; gorgeous as the visualisations of one's
+knowledge-base are, they're an indulgence (something I have enough of
+in my life as it is) and distraction (same). I find [[https://protesilaos.com/][Prot]]'s Emacs
+philosophy (e.g. delegating to =vertico=, =consult=, etc.) appealing
+in its frugality; much of my =init.el= is borrowed from his (albeit
+not tangled from an org file, as it should be, eventually).
+
+Let's see what happens. I can always switch to =org-roam= if things
+don't work out with =denote=.
+
+Entered on [2024-08-12 lun. 12:53]

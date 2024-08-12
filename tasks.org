@@ -5,11 +5,8 @@
 * Tasks
 ** TODO [#B] Review PAUC manuscript
 DEADLINE: <2024-08-19 lun.>
-** DONE Start work on Physical Audio webside updates
-DEADLINE: <2024-07-20 sam.>
-- State "DONE"       from "TODO"       [2024-08-04 dim. 17:14]
 ** TODO [#A] Send Romain weekly update
-DEADLINE: <2024-08-04 dim. ++1w>
+DEADLINE: <2024-08-16 ven. ++1w>
 :PROPERTIES:
 :LAST_REPEAT: [2024-08-04 dim. 17:14]
 :END:
@@ -17,17 +14,17 @@ DEADLINE: <2024-08-04 dim. ++1w>
 - State "DONE"       from "TODO"       [2024-07-21 dim. 13:36]
 - State "DONE"       from "TODO"       [2024-07-12 ven. 18:12]
 ** TODO [#A] Submit IFC article
-DEADLINE: <2024-07-26 ven.>
+DEADLINE: <2024-08-16 ven.>
 ** TODO Check entry requirements for US
-DEADLINE: <2024-07-12 ven.>
+DEADLINE: <2024-08-16 ven.>
 ** TODO Ask Maxime again about practicalities of using his DAC with Teensy or the Pi
-DEADLINE: <2024-07-12 ven.>
-** DONE Prepare PhD meeting presentation
-DEADLINE: <2024-07-09 mar.>
+DEADLINE: <2024-08-19 lun.>
+** TODO Prepare PhD meeting presentation
+DEADLINE: <2024-09-16 lun. ++1m>
 
 - State "DONE"       from "TODO"       [2024-07-10 mer. 13:32]
 ** TODO Read Papers
-DEADLINE: <2024-07-14 dim.>
+DEADLINE: <2024-08-18 dim.>
 *** TODO Wierstorf thesis
 *** TODO Ritsch: AOO
 *** TODO Carôt: latency-optimized soundcards
@@ -37,14 +34,6 @@ DEADLINE: <2024-07-14 dim.>
 
 ** TODO [#C] Start Ethics/Integrity MOOC
 
-** DONE [#A] Finish Reproducible Research MOOC
-DEADLINE: <2024-07-28 dim.>
-
-- State "DONE"       from "TODO"       [2024-08-04 dim. 17:14]
-** DONE Ask about working at CEI-2 during August
-DEADLINE: <2024-07-12 ven.>
-
-- State "DONE"       from "TODO"       [2024-07-15 lun. 18:29]
 ** WAITING [#B] Apply, again, for social security [9/9]
 - State "WAITING"    from "DONE"       [2024-06-12 mer. 11:04] \\
   Waiting for an update by post.
@@ -98,7 +87,7 @@ best to use it, so I should read the docs.
 ** TODO Sign up to ShareAmi
 
 ** TODO Prendre rendez-vous chez le coiffeur
-DEADLINE: <2024-07-06 sam. .+1m>
+DEADLINE: <2024-08-15 jeu. .+1m>
 :PROPERTIES:
 :LAST_REPEAT: [2024-06-06 jeu. 13:37]
 :END:
@@ -107,6 +96,3 @@ DEADLINE: <2024-07-06 sam. .+1m>
   
 ** TODO Prendre rendez-vous chez le médecin
 
-** DONE [#A] Revise Frontiers article
-DEADLINE: <2024-06-27 jeu.>
-- State "DONE"       from "TODO"       [2024-06-26 mer. 16:52]

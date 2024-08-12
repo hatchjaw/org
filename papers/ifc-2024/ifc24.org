@@ -372,7 +372,7 @@ supply appropriate values for the constants:
 \end{equation}
 We find that our arithmetic produces the expected numerical results
 /automatically/ via composition of the fundamental operations
-described in [[cref:eq:addition-rule-dual,eq:product-rule-dual]]
+described in [[cref:eq:addition-rule-dual,eq:product-rule-dual]].
 
 ** Extending \F{}'s Arithmetic
 
@@ -435,7 +435,7 @@ primitives. Note that if we were to insert the expression ~recip(-) =
 +;~ at the top of the program, the final operation, rather than
 returning \(1/(x_{1} - x_{2})\) would be /overridden/, in a manner of
 speaking, returning \((x_{1} + x_{2})\) instead. An approach along these
-lines will form the basis for the creation of differentiable \F{}n
+lines will form the basis for the creation of differentiable \F{}
 primitives.
 
 * Differentiable Programming in Faust
@@ -495,7 +495,7 @@ process = +,+;
 [[file:images/dualadd.svg]]
 Such an expression could be said to describe a /differentiable
 addition primitive/, taking dual-number inputs \(\langle u,u' \rangle\) and \(\langle
-v,v' \rangle\) and producing output \(\langle y,y' \rangle\).  Since \F deals
+v,v' \rangle\) and producing output \(\langle y,y' \rangle\).  Since \F{} deals
 exclusively with the propagation of signals, we shall refer to this as
 a /dual signal/ representation. Having acces to the primal and tangent
 signals in parallel in this manner lays the foundation for writing
@@ -883,6 +883,16 @@ reverse mode autodiff.
 [fn:1] Various transformations /are/ in fact possible at the level of
 the \F{} compiler. See [[cref:sec:discussion]] for further exploration of
 this idea.
+
+* HTML                                                             :noexport:
+
+
+#+BEGIN_SRC emacs-lisp :results silent
+(require 'org-ref-refproc) ;; this is not loaded by default!
+
+(let ((org-export-before-parsing-hook '(org-ref-refproc)))
+  (org-open-file (org-html-export-to-html)))
+#+END_SRC
 
 * Emacs Setup                                                      :noexport:
 
