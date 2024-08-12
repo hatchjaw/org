@@ -1,0 +1,7 @@
+#+title:      Sub-Microsecond Time Synchronization for Network-Connected Microcontrollers
+#+date:       [2024-08-12 lun. 13:35]
+#+filetags:   :bib:ptp:teensy:
+#+identifier: 20240812T133539
+#+reference:  schleusnerSubMicrosecond2024;williamsBEADS
+
+Some notes on the Teensy PTP paper\dots
