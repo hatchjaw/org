@@ -6,11 +6,11 @@
 #+latex_header: \usepackage{cleveref}
 #+latex_header: \usepackage[inkscapelatex=false]{svg}
 
-This note addresses the problem of forward mode [[denote:20240812T140652][Automatic
+This note addresses the problem of forward (or tangent) mode [[denote:20240812T140652][Automatic
 Differentiation]]. Consider a (\textsc{Faust}) program with a block
 diagram that looks like this:
 
-#+begin_src faust :results file svg :file "./20240812T142629--block-diagram__faust_autodiff.svg" :exports results
+#+begin_src faust :results file svg :file "20240812T142629--block-diagram__faust_autodiff.svg" :exports results
 N = 5;
 // Just create something that the compiler will bundle into an
 // abstraction in the block diagram.
@@ -26,12 +26,12 @@ with {
 #+end_src
 
 #+RESULTS:
-[[file:./20240812T142629--block-diagram__faust_autodiff.svg]]
+[[file:20240812T142629--block-diagram__faust_autodiff.svg]]
 
 This program consists of a number of what we will consider /primitive/
-operations, \(v_{n}\). The program features two input primitives each
-taking its value from a vector, \(\mathbf{x} = \begin{bmatrix}x_{1} &
-x_{2}\end{bmatrix}\), of input variables:
+operations, \(v_{n}\). The program features \(N = 2\) input primitives
+each taking its value from a vector, \(\mathbf{x} = \begin{bmatrix}x_{1}
+& x_{2}\end{bmatrix}\), of input variables:
 
 \begin{align}
 v_{0} &= x_{1}_{}, \label{eq:v0} \\
@@ -68,8 +68,7 @@ follows:
 \begin{equation}
 y = f(h(x_{1}), g(x_{1}, x_{2})).
 \end{equation}
-
-This expression describes the /forward primal trace/ of our program.
+This describes the /primal expression/ of our program.
 
 Symbolically, we can find the partial derivatives of \(y\) with
 respect to \(x_{1}\) and \(x_{2}\) using the chain rule:
@@ -162,24 +161,24 @@ derivative expression for \(v_{4}\):
 \end{bmatrix},
 \end{equation}
 and that, in effect, gives us an expression for
-\(\frac{\partial{}y}{\partial{}\mathbf{x}}\).
+\(\frac{\partial{}y}{\partial{}\mathbf{x}}\), a Jacobian matrix.
 
 The aim of automatic differentiation is not, however, to produce
 derivative expressions, but numerical outputs. To calculate the
-derivative of \(y\) with respect to, say, \(x_{1}\), we differentiate
-\(\mathbf{x}\) with respect to \(x_{1}\):
+derivative of \(y\) with respect to \(x_{i}\), we begin by differentiating
+\(\mathbf{x}\) with respect to \(x_{i}\):
 
 #+NAME: eq:partial-x1
 \begin{equation}
-\frac{\partial{}\mathbf{x}}{\partial{}x_{1}}
-= \begin{bmatrix}\frac{\partial{}x_{1}}{\partial{}x_{1}} & \frac{\partial{}x_{2}}{\partial{}x_{1}}\end{bmatrix}
-= \begin{bmatrix}1 & 0\end{bmatrix}.
+\frac{\partial{}\mathbf{x}}{\partial{}x_{i}}
+= \begin{bmatrix}\frac{\partial{}x_{1}}{\partial{}x_{i}} & \frac{\partial{}x_{2}}{\partial{}x_{i}}\end{bmatrix}.
 \end{equation}
 
-We then propagate this derivative vector through the graph, producing
-the /forward tangent trace/ of the program. On paper this looks like a
-vector product, and simply picks off the first element of the vector
-in [[cref:eq:dv4-dx]]:
+We then propagate this tangent vector through the graph, producing the
+/forward tangent output/ of the program. On paper this looks like a
+vector product (a /Jacobian vector product/ in fact
+[cite:@baydinAutomatic2018]), and simply extracts the first element of
+the vector in [[cref:eq:dv4-dx]]; for example:
 
 #+NAME: eq:vec-prod
 \begin{align}
@@ -211,7 +210,7 @@ v_{2} = sin(v_{0}), \quad v_{3} = v_{0} + v_{1}, \quad v_{4} = v_{2}v_{3},
 and substitute these into [[cref:eq:vec-prod]] (and the equivalent for
 \(x_{2}\)):
 
-#+NAME: eq:concrete-fwdn
+#+NAME: eq:concrete-fwd
 \begin{align}
 \frac{\partial{}y}{\partial{}x_{1}} &= \left(1\cdot\cos(v_{0})\cdot{}v_{3}\right) + \left(1\cdot1\cdot{}v_{2} + 0\cdot1\cdot{}v_{2}\right) \nonumber \\
 &= v_{3}\cos(v_{0}) + v_{2} \nonumber \\
@@ -223,3 +222,6 @@ and substitute these into [[cref:eq:vec-prod]] (and the equivalent for
 \end{align}
 which are exactly the results one would achieve with the symbolic
 expressions in [[cref:eq:symbolic-x1,eq:symbolic-x2]].
+
+Of course, this means that \(N\) passes are required to compute all of
+the partial derivatives of \(y\).

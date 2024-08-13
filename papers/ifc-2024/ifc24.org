@@ -915,5 +915,5 @@ this idea.
 # -interaction=nonstopmode -shell-escape -output-directory=%o %f"))
 # eval:   (setq org-latex-src-block-backend 'listings)
 # eval:   (setq org-latex-packages-alist '())
-# eval:   (add-to-list 'org-latex-packages-alist '("" "./out/ifc24-style" t))
+# eval:   (add-to-list 'org-latex-packages-alist `("" ,(expand-file-name "./out/ifc24-style") t))
 # End:

@@ -1,0 +1,115 @@
+#+title:      Reverse Mode Autodiff
+#+date:       [2024-08-13 mar. 11:51]
+#+filetags:   :autodiff:
+#+identifier: 20240813T115157
+#+latex_header: \usepackage{cancel}
+#+latex_header: \usepackage{cleveref}
+#+latex_header: \usepackage[inkscapelatex=false]{svg}
+
+This note is about reverse (or adjoint) mode [[denote:20240812T140652][Automatic
+Differentiation]]. Consider the (\textsc{Faust}) program described in
+[[denote:20240812T142629][Forward Mode Autodiff]], whose block diagram looks like this:
+
+[[file:20240812T142629--block-diagram__faust_autodiff.svg]]
+
+As in [[denote:20240812T142629][Forward Mode Autodiff]], we have an input vector \(\mathbf{x}\) of
+length \(N = 2\). This time, we group our primal primitives, \(v_{p,q}\),
+into layers \(p\), and identify them by their index, \(q\) within each
+layer:
+
+#+NAME: eq:primitives
+\begin{align*}
+v_{0} &= v_{0,0} = x_{1,} \\
+v_{1} &= v_{0,1} = x_{2}, \\
+v_{2} &= v_{1,0} = h(v_{0}) = h(x_{1}), \\
+v_{3} &= v_{1,1} = g(v_{0}, v_{1}) = g(x_{1}, x_{2}), \\
+v_{4} &= v_{2,0} = f(v_{2}, v_{3}) = f(h(x_{1}), g(x_{1}, x_{2}).
+\end{align*}
+As before, we have a single output, \(y = v_{4} = v_{2,0}\).
+
+The symbolic derivative of \(y\) with respect to \(x_{i}\) is:
+
+#+NAME: eq:symbolic
+\begin{equation}
+\frac{\partial{}y}{\partial{}x_{i}} = \frac{\partial{}h}{\partial{}x_{i}}\frac{\partial{}f}{\partial{}h} + \frac{\partial{}g}{\partial{}x_{i}}\frac{\partial{}f}{\partial{}g}.
+\end{equation}
+
+Whereas in forward mode the primal and tangent outputs of the program
+are computed in parallel during the forward pass, in reverse mode we
+complement the forward primal pass with a /reverse adjoint pass/;
+instead of computing the /sensitivity/ of each primitive with respect to
+its inputs, we compute the /influence/ of a given primitive on the
+output of the program (or the sensitivity of the output with respect
+to a given primitive):
+
+#+NAME: eq:adjoint
+\begin{equation}
+\bar{v}_{} = \frac{\partial{}y}{\partial{}v}.
+\end{equation}
+
+Rather than propagate successive tangent vectors forward through the
+computation graph, analogous to setting a seed value of \(1\) for
+\(x_{i}'\) [cite:@yuDNAD2013], we instead compute the adjoint of the
+program's output:
+
+#+NAME: eq:y-adjoint
+\begin{equation}
+\bar{v}_{2,0} = \bar{y} = \frac{\partial{}y}{\partial{}y} = 1,
+\end{equation}
+and propagate that backward though the graph. Adjoints for layer \(p =
+1\) are:
+
+#+NAME: eq:v1-adjoints
+\begin{align}
+\bar{v}_{1,0} &= \bar{v}_{2,0}\frac{\partial{}v_{2,0}}{\partial{}v_{1,0}} = \frac{\partial{}y}{\partial{}v_{2,0}}\frac{\partial{}v_{2,0}}{\partial{}v_{1,0}}, \\
+\bar{v}_{1,1} &= \bar{v}_{2,0}\frac{\partial{}v_{2,0}}{\partial{}v_{1,1}} = \frac{\partial{}y}{\partial{}v_{2,0}}\frac{\partial{}v_{2,0}}{\partial{}v_{1,1}}.
+\end{align}
+
+In general, the adjoint for primitive \(v_{p,q}\) is found by summing the
+derivativates of the \(M\) primitives in the \((p+1)\)^{th} layer:
+
+#+NAME: eq:general-adjoint
+\begin{equation}
+\bar{v}_{p,q} = \frac{\partial{}y}{\partial{}v_{p,q}} = \sum^{M-1}_{m=0}\frac{\partial{}y}{\partial{}v_{p+1,m}}\frac{\partial{}v_{p+1,m}}{\partial{}v_{p,q}}
+= \sum^{M-1}_{m=0}\bar{v}_{p+1,m}\frac{\partial{}v_{p+1,m}}{\partial{}v_{p,q}},
+\end{equation}
+so adjoints for the input layer, \(p = 0\), emerge as follows:
+
+#+NAME: eq:v0-adjoints
+\begin{align}
+\bar{v}_{0,0} &= \bar{v}_{1,0}
+  \frac{\partial{}v_{1,0}}{\partial{}v_{0,0}} +
+  \bar{v}_{1,1}
+  \frac{\partial{}v_{1,1}}{\partial{}v_{0,0}} \nonumber \\
+&= \bar{v}_{2,0}
+  \frac{\partial{}v_{2,0}}{\partial{}v_{1,0}}
+  \frac{\partial{}v_{1,0}}{\partial{}v_{0,0}} +
+  \bar{v}_{2,0}
+  \frac{\partial{}v_{2,0}}{\partial{}v_{1,1}}
+  \frac{\partial{}v_{1,1}}{\partial{}v_{0,0}} \nonumber \\
+&= \frac{\partial{}y}{\partial{}v_{2,0}}
+  \frac{\partial{}v_{2,0}}{\partial{}v_{1,0}}
+  \frac{\partial{}v_{1,0}}{\partial{}v_{0,0}} +
+  \frac{\partial{}y}{\partial{}v_{2,0}}
+  \frac{\partial{}v_{2,0}}{\partial{}v_{1,1}}
+  \frac{\partial{}v_{1,1}}{\partial{}v_{0,0}}, \\
+\bar{v}_{0,1} &= \bar{v}_{1,0}
+  \frac{\partial{}v_{1,0}}{\partial{}v_{0,1}} +
+  \bar{v}_{1,1}
+  \frac{\partial{}v_{1,1}}{\partial{}v_{0,1}} \nonumber \\
+&= \bar{v}_{2,0}
+  \frac{\partial{}v_{2,0}}{\partial{}v_{1,0}}
+  \frac{\partial{}v_{1,0}}{\partial{}v_{0,1}} +
+  \bar{v}_{2,0}
+  \frac{\partial{}v_{2,0}}{\partial{}v_{1,1}}
+  \frac{\partial{}v_{1,1}}{\partial{}v_{0,1}} \nonumber \\
+&= \cancel{
+    \frac{\partial{}y}{\partial{}v_{2,0}}
+    \frac{\partial{}v_{2,0}}{\partial{}v_{1,0}}
+    \frac{\partial{}v_{1,0}}{\partial{}v_{0,1}}
+  } +
+  \frac{\partial{}y}{\partial{}v_{2,0}}
+  \frac{\partial{}v_{2,0}}{\partial{}v_{1,1}}
+  \frac{\partial{}v_{1,1}}{\partial{}v_{0,1}}.
+\end{align}
+

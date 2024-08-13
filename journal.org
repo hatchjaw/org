@@ -3060,3 +3060,22 @@ Let's see what happens. I can always switch to =org-roam= if things
 don't work out with =denote=.
 
 Entered on [2024-08-12 lun. 12:53]
+**** Autodiff notes                                           :FAUST:DDSP:
+So, typing up notes on forward mode took all afternoon/evening. I
+guess it's more complicated, or harder to be precise about than I
+thought. Established a nice way of expressing the propagation of
+forward mode seed values as a sparse vector. OK, I'll write up reverse
+mode tomorrow.
+
+Entered on [2024-08-12 lun. 21:14]
+  
+[[denote:20240812T142629][Forward Mode Autodiff]]
+*** 2024-08-13 mardi
+**** Advik's latest DDSP work                            :GSoC:FAUST:DDSP:
+Rambling documentation and inextensible code characterise [[https://github.com/BitC3t/faust-ddsp/commit/89b4b4a8dd043f4a53215f0f90fe6330ac36722a][recent]]
+[[https://github.com/BitC3t/faust-ddsp/commit/4f037e8095e7a2114f08ffbd777b8a402a126373][commits]]. I spent over an hour trawling the readme and adding
+comments. We have a call this afternoon; hopefully an opportunity to
+encourage him to slow down, plan, and execute with a bit more
+direction.
+
+Entered on [2024-08-13 mar. 11:11]
