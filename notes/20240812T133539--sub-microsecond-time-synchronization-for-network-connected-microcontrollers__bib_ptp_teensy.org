@@ -4,4 +4,4 @@
 #+identifier: 20240812T133539
 #+reference:  schleusnerSubMicrosecond2024;williamsBEADS
 
-Some notes on the Teensy PTP paper\dots
+Some notes on the Teensy PTP paper...

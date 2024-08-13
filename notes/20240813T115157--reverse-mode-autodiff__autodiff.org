@@ -14,16 +14,16 @@ Differentiation]]. Consider the (\textsc{Faust}) program described in
 
 As in [[denote:20240812T142629][Forward Mode Autodiff]], we have an input vector \(\mathbf{x}\) of
 length \(N = 2\). This time, we group our primal primitives, \(v_{p,q}\),
-into layers \(p\), and identify them by their index, \(q\) within each
+into layers, \(p\), and identify them by their index, \(q\), within each
 layer:
 
 #+NAME: eq:primitives
 \begin{align*}
 v_{0} &= v_{0,0} = x_{1,} \\
 v_{1} &= v_{0,1} = x_{2}, \\
-v_{2} &= v_{1,0} = h(v_{0}) = h(x_{1}), \\
-v_{3} &= v_{1,1} = g(v_{0}, v_{1}) = g(x_{1}, x_{2}), \\
-v_{4} &= v_{2,0} = f(v_{2}, v_{3}) = f(h(x_{1}), g(x_{1}, x_{2}).
+v_{2} &= v_{1,0} = h(v_{0,0}) = h(x_{1}), \\
+v_{3} &= v_{1,1} = g(v_{0,0}, v_{0,1}) = g(x_{1}, x_{2}), \\
+v_{4} &= v_{2,0} = f(v_{1,0}, v_{1,1}) = f(h(x_{1}), g(x_{1}, x_{2}).
 \end{align*}
 As before, we have a single output, \(y = v_{4} = v_{2,0}\).
 
@@ -60,10 +60,9 @@ and propagate that backward though the graph. Adjoints for layer \(p =
 1\) are:
 
 #+NAME: eq:v1-adjoints
-\begin{align}
-\bar{v}_{1,0} &= \bar{v}_{2,0}\frac{\partial{}v_{2,0}}{\partial{}v_{1,0}} = \frac{\partial{}y}{\partial{}v_{2,0}}\frac{\partial{}v_{2,0}}{\partial{}v_{1,0}}, \\
-\bar{v}_{1,1} &= \bar{v}_{2,0}\frac{\partial{}v_{2,0}}{\partial{}v_{1,1}} = \frac{\partial{}y}{\partial{}v_{2,0}}\frac{\partial{}v_{2,0}}{\partial{}v_{1,1}}.
-\end{align}
+\begin{equation}
+\bar{v}_{1,q} &= \bar{v}_{2,0}\frac{\partial{}v_{2,0}}{\partial{}v_{1,q}} = \frac{\partial{}y}{\partial{}v_{2,0}}\frac{\partial{}v_{2,0}}{\partial{}v_{1,q}}.
+\end{equation}
 
 In general, the adjoint for primitive \(v_{p,q}\) is found by summing the
 derivativates of the \(M\) primitives in the \((p+1)\)^{th} layer:
@@ -75,41 +74,62 @@ derivativates of the \(M\) primitives in the \((p+1)\)^{th} layer:
 \end{equation}
 so adjoints for the input layer, \(p = 0\), emerge as follows:
 
-#+NAME: eq:v0-adjoints
+#+name: eq:v0-adjoint
 \begin{align}
-\bar{v}_{0,0} &= \bar{v}_{1,0}
-  \frac{\partial{}v_{1,0}}{\partial{}v_{0,0}} +
+\bar{v}_{0,q} &= \bar{v}_{1,0}
+  \frac{\partial{}v_{1,0}}{\partial{}v_{0,q}} +
   \bar{v}_{1,1}
-  \frac{\partial{}v_{1,1}}{\partial{}v_{0,0}} \nonumber \\
+  \frac{\partial{}v_{1,1}}{\partial{}v_{0,q}} \nonumber \\
 &= \bar{v}_{2,0}
   \frac{\partial{}v_{2,0}}{\partial{}v_{1,0}}
-  \frac{\partial{}v_{1,0}}{\partial{}v_{0,0}} +
+  \frac{\partial{}v_{1,0}}{\partial{}v_{0,q}} +
   \bar{v}_{2,0}
   \frac{\partial{}v_{2,0}}{\partial{}v_{1,1}}
-  \frac{\partial{}v_{1,1}}{\partial{}v_{0,0}} \nonumber \\
+  \frac{\partial{}v_{1,1}}{\partial{}v_{0,q}} \nonumber \\
 &= \frac{\partial{}y}{\partial{}v_{2,0}}
   \frac{\partial{}v_{2,0}}{\partial{}v_{1,0}}
-  \frac{\partial{}v_{1,0}}{\partial{}v_{0,0}} +
+  \frac{\partial{}v_{1,0}}{\partial{}v_{0,q}} +
   \frac{\partial{}y}{\partial{}v_{2,0}}
   \frac{\partial{}v_{2,0}}{\partial{}v_{1,1}}
-  \frac{\partial{}v_{1,1}}{\partial{}v_{0,0}}, \\
-\bar{v}_{0,1} &= \bar{v}_{1,0}
-  \frac{\partial{}v_{1,0}}{\partial{}v_{0,1}} +
-  \bar{v}_{1,1}
-  \frac{\partial{}v_{1,1}}{\partial{}v_{0,1}} \nonumber \\
-&= \bar{v}_{2,0}
-  \frac{\partial{}v_{2,0}}{\partial{}v_{1,0}}
-  \frac{\partial{}v_{1,0}}{\partial{}v_{0,1}} +
-  \bar{v}_{2,0}
-  \frac{\partial{}v_{2,0}}{\partial{}v_{1,1}}
-  \frac{\partial{}v_{1,1}}{\partial{}v_{0,1}} \nonumber \\
-&= \cancel{
-    \frac{\partial{}y}{\partial{}v_{2,0}}
-    \frac{\partial{}v_{2,0}}{\partial{}v_{1,0}}
-    \frac{\partial{}v_{1,0}}{\partial{}v_{0,1}}
-  } +
-  \frac{\partial{}y}{\partial{}v_{2,0}}
-  \frac{\partial{}v_{2,0}}{\partial{}v_{1,1}}
-  \frac{\partial{}v_{1,1}}{\partial{}v_{0,1}}.
+  \frac{\partial{}v_{1,1}}{\partial{}v_{0,q}},
 \end{align}
+giving us:
 
+#+NAME: eq:xi-adjoint
+\begin{equation}
+\bar{x}_{i} = \frac{\partial{}y}{\partial{}x_{i}} = \bar{v}_{0,i-1}.
+\end{equation}
+
+Expanding the terms above isn't really necessary, and
+[[cref:eq:v0-adjoint]] could end at the first line; we have definitions
+for \(\bar{v}_{1,0}\) and \(\bar{v}_{1,1}\) and these propagate
+backward through the graph without any need for them to be
+recomputed. In effect, though the graph may branch as adjoints
+propagate, we achieve both \(\frac{\partial{}y}{\partial{}x_{1}} =
+\bar{v}_{0,0}\) and \(\frac{\partial{}y}{\partial{}x_{2}} =
+\bar{v}_{0,1}\) in a single pass, unlike in tangent mode, where two
+passes are required.
+
+As with the [[denote:20240812T142629][Forward Mode]] example, let's assign some functions to
+\(v_{p,q}\) to verify our implementation:
+
+#+NAME: eq:concrete-funcs
+\begin{equation}
+v_{1,0} = \sin(v_{0,0}), \quad v_{1,1} = v_{0,0} + v_{0,1}, \quad v_{2,0} = v_{1,0}v_{1,1,}
+\end{equation}
+and substitute these into [[cref:eq:v0-adjoint]]:
+
+#+NAME: eq:concrete-rev
+\begin{align}
+\frac{\partial{}y}{\partial{}x_{1}} &= 1\cdot{}v_{1,1}\cdot\cos(v_{0,0}) + 1\cdot{}v_{1,0}\cdot1 \nonumber \\
+  &= (v_{0,0} + v_{0,1})\cos(v_{0,0}) + v_{1,0} \nonumber \\
+  &= (x_{1} + x_{2})\cos(x_{1}) + \sin(x_{1}), \\
+\frac{\partial{}y}{\partial{}x_{2}} &= 1\cdot{}v_{1,1}\cdot0 + 1\cdot{}v_{1,0}\cdot1 \nonumber \\
+  &= v_{1,0} \nonumber \\
+  &= sin(v_{0,0}) \nonumber \\
+  &= sin(x_{1}),
+\end{align}
+which are entirely the same results achieved via tangent mode.
+
+For reverse mode to work in practice, however, some knowledge of a
+program's structure, its composition in layers, is required...

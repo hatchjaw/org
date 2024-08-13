@@ -74,8 +74,10 @@ Symbolically, we can find the partial derivatives of \(y\) with
 respect to \(x_{1}\) and \(x_{2}\) using the chain rule:
 
 \begin{align}
-\frac{\partial{}y}{\partial{}x_{1}} &= \frac{\partial{}h}{\partial{}x_{1}}\frac{\partial{}f}{\partial{}h} + \frac{\partial{}g}{\partial{}x_{1}}\frac{\partial{}f}{\partial{}g}, \label{eq:symbolic-x1}\\
-\frac{\partial{}y}{\partial{}x_{2}} &= \cancel{\frac{\partial{}h}{\partial{}x_{2}}\frac{\partial{}f}{\partial{}h}} + \frac{\partial{}g}{\partial{}x_{2}}\frac{\partial{}f}{\partial{}g} \label{eq:symbolic-x2},
+\frac{\partial{}y}{\partial{}x_{1}} &= \frac{\partial{}h}{\partial{}x_{1}}\frac{\partial{}f}{\partial{}h} +
+  \frac{\partial{}g}{\partial{}x_{1}}\frac{\partial{}f}{\partial{}g}, \label{eq:symbolic-x1} \\
+\frac{\partial{}y}{\partial{}x_{2}} &= \cancel{\frac{\partial{}h}{\partial{}x_{2}}\frac{\partial{}f}{\partial{}h}} +
+  \frac{\partial{}g}{\partial{}x_{2}}\frac{\partial{}f}{\partial{}g} \label{eq:symbolic-x2},
 \end{align}
 the first term of [[cref:eq:symbolic-x2]] cancelling since \(h\) does not
 depend on \(x_{2}\).
@@ -108,8 +110,8 @@ By that token, the partial derivatives, or /tangents/ of primitive
 #+NAME: eq:dv2-dx
 \begin{equation}
 \frac{\partial{}v_{2}}{\partial{}\mathbf{x}} = \begin{bmatrix}
-\frac{\partial{}v_{0}}{\partial{}x_{1}}\cdot\frac{\partial{}v_{2}}{\partial{}v_{0}} \\
-\frac{\partial{}v_{0}}{\partial{}x_{2}}\cdot\frac{\partial{}v_{2}}{\partial{}v_{0}}
+  \frac{\partial{}v_{0}}{\partial{}x_{1}}\cdot\frac{\partial{}v_{2}}{\partial{}v_{0}} \\
+  \frac{\partial{}v_{0}}{\partial{}x_{2}}\cdot\frac{\partial{}v_{2}}{\partial{}v_{0}}
 \end{bmatrix},
 \end{equation}
 notwithstanding the fact that \(v_{0}\) (and by extension \(v_{2}\)) does
@@ -121,8 +123,8 @@ functions comes into play:
 #+NAME: eq:dv3-dx
 \begin{equation}
 \frac{\partial{}v_{3}}{\partial{}\mathbf{x}} = \begin{bmatrix}
-\frac{\partial{}v_{0}}{\partial{}x_{1}}\cdot\frac{\partial{}v_{3}}{\partial{}v_{0}} + \frac{\partial{}v_{1}}{\partial{}x_{1}}\cdot\frac{\partial{}v_{3}}{\partial{}v_{1}} \\
-\frac{\partial{}v_{0}}{\partial{}x_{2}}\cdot\frac{\partial{}v_{3}}{\partial{}v_{0}} + \frac{\partial{}v_{1}}{\partial{}x_{2}}\cdot\frac{\partial{}v_{3}}{\partial{}v_{1}}
+  \frac{\partial{}v_{0}}{\partial{}x_{1}}\cdot\frac{\partial{}v_{3}}{\partial{}v_{0}} + \frac{\partial{}v_{1}}{\partial{}x_{1}}\cdot\frac{\partial{}v_{3}}{\partial{}v_{1}} \\
+  \frac{\partial{}v_{0}}{\partial{}x_{2}}\cdot\frac{\partial{}v_{3}}{\partial{}v_{0}} + \frac{\partial{}v_{1}}{\partial{}x_{2}}\cdot\frac{\partial{}v_{3}}{\partial{}v_{1}}
 \end{bmatrix}.
 \end{equation}
 
@@ -205,7 +207,7 @@ To give an example, let's assign some actual functions to \(v_{n}\):
 
 #+NAME: eq:funcs
 \begin{equation}
-v_{2} = sin(v_{0}), \quad v_{3} = v_{0} + v_{1}, \quad v_{4} = v_{2}v_{3},
+v_{2} = \sin(v_{0}), \quad v_{3} = v_{0} + v_{1}, \quad v_{4} = v_{2}v_{3},
 \end{equation}
 and substitute these into [[cref:eq:vec-prod]] (and the equivalent for
 \(x_{2}\)):
@@ -213,12 +215,12 @@ and substitute these into [[cref:eq:vec-prod]] (and the equivalent for
 #+NAME: eq:concrete-fwd
 \begin{align}
 \frac{\partial{}y}{\partial{}x_{1}} &= \left(1\cdot\cos(v_{0})\cdot{}v_{3}\right) + \left(1\cdot1\cdot{}v_{2} + 0\cdot1\cdot{}v_{2}\right) \nonumber \\
-&= v_{3}\cos(v_{0}) + v_{2} \nonumber \\
-&= (x_{1} + x_{2})\cos(x_{1}) + \sin(x_{1}), \\
+  &= v_{3}\cos(v_{0}) + v_{2} \nonumber \\
+  &= (x_{1} + x_{2})\cos(x_{1}) + \sin(x_{1}), \\
 \frac{\partial{}y}{\partial{}x_{2}} & = \left(0\cdot\cos(v_{0})\cdot{}v_{3}\right) + \left(0\cdot1\cdot{}v_{2} + 1\cdot1\cdot{}v_{2}\right) \nonumber \\
-&= v_{2} \nonumber \\
-&= \sin(v_{0}) \nonumber \\
-&= \sin(x_{1}),
+  &= v_{2} \nonumber \\
+  &= \sin(v_{0}) \nonumber \\
+  &= \sin(x_{1}),
 \end{align}
 which are exactly the results one would achieve with the symbolic
 expressions in [[cref:eq:symbolic-x1,eq:symbolic-x2]].
