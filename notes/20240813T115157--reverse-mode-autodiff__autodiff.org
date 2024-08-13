@@ -7,10 +7,27 @@
 #+latex_header: \usepackage[inkscapelatex=false]{svg}
 
 This note is about reverse (or adjoint) mode [[denote:20240812T140652][Automatic
-Differentiation]]. Consider the (\textsc{Faust}) program described in
-[[denote:20240812T142629][Forward Mode Autodiff]], whose block diagram looks like this:
+Differentiation]]. Consider a similar (\textsc{Faust}) program to the
+one described in [[denote:20240812T142629][Forward Mode Autodiff]], whose block diagram looks like
+this:
 
-[[file:20240812T142629--block-diagram__faust_autodiff.svg]]
+#+begin_src faust :results file svg :file "20240813T115157--block-diagram__faust_autodiff.svg" :exports results
+N = 5;
+// Just create something that the compiler will bundle into an
+// abstraction in the block diagram.
+S(j) = sum(i,N,((i+j) : sqrt)/N);
+process = (v00 <: _,_),v01 : v10,v11 : v20
+with {
+    v00 = S(0);
+    v01 = S(1);
+    v10 = _,S(2) : +;
+    v11 = +,S(3) : +;
+    v20 = +,S(4) : +;
+};
+#+end_src
+
+#+RESULTS:
+[[file:20240813T115157--block-diagram__faust_autodiff.svg]]
 
 As in [[denote:20240812T142629][Forward Mode Autodiff]], we have an input vector \(\mathbf{x}\) of
 length \(N = 2\). This time, we group our primal primitives, \(v_{p,q}\),
@@ -19,13 +36,13 @@ layer:
 
 #+NAME: eq:primitives
 \begin{align*}
-v_{0} &= v_{0,0} = x_{1,} \\
-v_{1} &= v_{0,1} = x_{2}, \\
-v_{2} &= v_{1,0} = h(v_{0,0}) = h(x_{1}), \\
-v_{3} &= v_{1,1} = g(v_{0,0}, v_{0,1}) = g(x_{1}, x_{2}), \\
-v_{4} &= v_{2,0} = f(v_{1,0}, v_{1,1}) = f(h(x_{1}), g(x_{1}, x_{2}).
+v_{0,0} &= x_{1,} \\
+v_{0,1} &= x_{2}, \\
+v_{1,0} &= h(v_{0,0}) = h(x_{1}), \\
+v_{1,1} &= g(v_{0,0}, v_{0,1}) = g(x_{1}, x_{2}), \\
+v_{2,0} &= f(v_{1,0}, v_{1,1}) = f(h(x_{1}), g(x_{1}, x_{2}).
 \end{align*}
-As before, we have a single output, \(y = v_{4} = v_{2,0}\).
+As before, we have a single output, \(y = v_{2,0}\).
 
 The symbolic derivative of \(y\) with respect to \(x_{i}\) is:
 
@@ -126,10 +143,19 @@ and substitute these into [[cref:eq:v0-adjoint]]:
   &= (x_{1} + x_{2})\cos(x_{1}) + \sin(x_{1}), \\
 \frac{\partial{}y}{\partial{}x_{2}} &= 1\cdot{}v_{1,1}\cdot0 + 1\cdot{}v_{1,0}\cdot1 \nonumber \\
   &= v_{1,0} \nonumber \\
-  &= sin(v_{0,0}) \nonumber \\
-  &= sin(x_{1}),
+  &= \sin(v_{0,0}) \nonumber \\
+  &= \sin(x_{1}),
 \end{align}
 which are entirely the same results achieved via tangent mode.
 
 For reverse mode to work in practice, however, some knowledge of a
-program's structure, its composition in layers, is required...
+program's structure is required. Whether this is achived via a
+bookkeeping mechanism [cite:@baydinAutomatic2018] such as a /tape/
+[cite:@pearlmutterReversemode2008;@radulYou2023], or by organising the
+program into layers as we have here, a degree of complexity is
+introduced that tangent mode, with its more brute-force approach, does
+not.
+
+* References
+
+#+PRINT_BIBLIOGRAPHY:

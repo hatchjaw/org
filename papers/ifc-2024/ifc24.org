@@ -274,7 +274,7 @@ automatically [cite:@villardADrien1999]. Dismissal of symbolic
 differentiation over the purported problem of "expression swell"
 [cite:@harrisonBrief2021; @baydinAutomatic2018] may be driven by
 implementation-specific assumptions and historical lack of available
-computational power. For our purposes, we shall defer to Rall, who,
+computing power. For our purposes, we shall defer to Rall, who,
 writing in the mid-1980's, before the waters were muddied by legions
 of machine learning researchers, observed (to paraphrase): /symbolic
 approaches produce formulas whereas automatic approaches produce
@@ -285,13 +285,15 @@ the programming language upon which they are based.
 
 ** Modes of Automatic Differentiation
 
-Forward/reverse/cross-country
-Forward mode computes both the value of the function and its partial
-derivatives in a forward pass; this entails 
-Reverse mode computes the primal value of the function under
-consideration in a forward pass,
+Two main modes of automatic differentiation are typically made
+reference to in scholarly works on the topic: forward (or /tangent/)
+mode, and reverse (or /adjoint/) mode [cite:].[fn:3] Tangent and
+adjoint mode autodiff describe, in effect, two directions of
+derivative propagation through a computation graph; we will discuss
+both in the sections to follow. To begin with, consider a (\F{})
+program with the following computation graph:
 
-#+begin_src faust :results file svg :file images/block.svg :exports results
+#+begin_src faust :results file svg :file images/block1.svg :exports results
 N = 5;
 S(j) = sum(i,N,((i+j) : sqrt)/N);
 process = (v0 <: _,_),v1 : v2,v3 : v4
@@ -306,6 +308,62 @@ with {
 
 #+RESULTS:
 [[file:images/block.svg]]
+
+This program consists of a number of what we will consider /primitive/
+operations, \(v_{n}\). The program features \(N = 2\) input primitives
+each taking its value from a vector, \(\mathbf{x} = \begin{bmatrix}x_{1}
+& x_{2}\end{bmatrix}\), of input variables:
+
+\begin{align}
+v_{0} &= x_{1}_{}, \label{eq:v0} \\
+v_{1} &= x_{2}, \label{eq:v1}
+\end{align}
+and produces one output, \(y = v_{4}\), the output of the final
+primitive in the graph.
+
+\(v_{4}\) performs some primitive operation on two input signals, so it
+can be characterised as a function, \(f\):
+
+#+NAME: eq:prim1
+\begin{equation}
+v_{4} = f(v_{2}, v_{3}),
+\end{equation}
+which acts on the outputs of primitives \(v_{2}\) and \(v_{3}\), which can
+also be expressed as functions of their inputs:
+
+#+NAME: eq:prim2
+\begin{align}
+v_{3} &= g(v_{0}, v_{1}), \\
+v_{2} &= h(v_{0}).
+\end{align}
+
+Using the definitions in [[cref:eq:v0,eq:v1]], \(y\) can be defined as
+follows:
+
+#+NAME: eq:out-func
+\begin{equation}
+y = f(h(x_{1}), g(x_{1}, x_{2})).
+\end{equation}
+This describes the /primal expression/ of our program.
+
+Symbolically, we can find the partial derivative of \(y\) with respect
+to \(x_{i}\) using the chain rule:
+
+#+NAME: eq:symbolic
+\begin{equation}
+\frac{\partial{}y}{\partial{}x_{i}} = \frac{\partial{}h}{\partial{}x_{i}}\frac{\partial{}f}{\partial{}h} + \frac{\partial{}g}{\partial{}x_{i}}\frac{\partial{}f}{\partial{}g}.
+\end{equation}
+
+The symbolic approach is dependent on knowing the structure of the
+graph as a whole, however, and for an arbitrary program this is not
+practical. To differentiate the program --- or indeed any program with
+primitives whose derivatives are well-defined --- /automatically/, we
+apply the chain rule at the level of each primitive operation, passing
+the results forward or backward depending on the chosen autodiff mode.
+
+*** Forward mode
+
+
 
 ** The Arithmetic of Differentiation
 
@@ -875,6 +933,9 @@ with {
 #+PRINT_BIBLIOGRAPHY:
 
 * Footnotes
+[fn:3] A third mode --- /cross-country/ mode --- is a combination of
+the forward and reverse modes, and may be more efficient under certain
+circumstances [cite:@laueSimple2020]. 
 
 [fn:2]  See [cite:@radulYou2023], figure 1, for an illustration of
 the sort of structure that would be required in order to support

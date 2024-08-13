@@ -16,3 +16,8 @@ derivatives are propagated backwards, one per output. A combination of
 forward and backward modes --- so-called /cross-country mode/
 [cite:@laueSimple2020] --- may prove more efficient in certain
 contexts.
+
+* Autodiff-related topics
+
+- [[denote:20240813T191939][Differentiable Delay]]
+- [[denote:20240813T191958][Differentiable Recursion]]

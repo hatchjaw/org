@@ -1,0 +1,5 @@
+#+title:      Differentiable Delay
+#+date:       [2024-08-13 mar. 19:19]
+#+filetags:   :autodiff:ddsp:faust:
+#+identifier: 20240813T191939
+

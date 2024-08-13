@@ -104,8 +104,8 @@ to simplify, or take shortcuts, but to allow derivatives to emerge
 automatically (hence the name) via differentiation rules provided by
 each primitive.
 
-By that token, the partial derivatives, or /tangents/ of primitive
-\(v_{2}\) are:
+By that token, the partial derivatives, or /tangents/, of primitive
+\(v_{2}\) are, via the chain rule:
 
 #+NAME: eq:dv2-dx
 \begin{equation}
