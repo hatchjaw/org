@@ -3079,3 +3079,45 @@ encourage him to slow down, plan, and execute with a bit more
 direction.
 
 Entered on [2024-08-13 mar. 11:11]
+*** 2024-08-14 mercredi
+**** Autodiff, GSoC, Emacs
+- The call with Advik was awkward; he really doesn't want to
+  compromise on his approach. Told him I think he'd be better off
+  doing things the autodiff way; added that that was the last I'd say
+  on the matter. His documentation is not something I want to merge,
+  but I guess we'll see where we are in two weeks' time.
+- Finished writing up [[denote:20240813T115157][Reverse Mode Autodiff]]; got some decent material
+  for the IFC paper, if I can ever get around to finishing that.
+- Speaking of that paper, I got around the awkward problem of either
+  being able to generate LaTeX previews in Emacs, or being able to
+  export my Org file to PDF, but not both; ~#+LATEX_HEADER_EXTRA:~ to
+  the rescue (includes header in export, but not in preview
+  generation).
+- Got to [[file:tasks.org::*Review PAUC manuscript][review the PAUC
+  paper]] by Monday.
+
+Entered on [2024-08-14 mer. 11:12]
+**** Investigating =t41-ptp=                                  :PTP:TEENSY:
+- Bit of a heart-in-mouth moment when I tried to upload to some
+  Teensies and received a =tcgetattr= error via both =pio= and Arduino
+  IDE. Tried refreshing udev rules, but I'd just updated a load of
+  system packages and concluded (correctly) that the solution was to
+  reboot.
+- Main finding this afternoon is that the purported PPS output,
+  produced by the /master/ and /slave/ example implementations, isn't
+  produced.
+  + I attached a probe to Teensy pin 24, as indicated in the example
+    code (and the image in the github repo), but nothing doing.
+  + I basically tried /all/ of the pins, one by one for signs of life;
+    nothing.
+  + I also tried detaching the audio shield, in case that was
+    interfering with something. No difference made.
+  + I /also/ tried switching from the authors' ~L3PTP~ class to their
+    ~L2PTP~ implementation; not sure why both of these exist (I should
+    ask); anyway, no change.
+  + I guess this isn't essential, but I'd like to be on firm ground
+    before I proceed with attempts at PLL4 adjustment.
+- Better post about the =t41-ptp= repo in my Teensy forum thread, and
+  email the Hannover guys; fingers crossed they're not all on vacation.
+
+Entered on [2024-08-14 mer. 17:27]

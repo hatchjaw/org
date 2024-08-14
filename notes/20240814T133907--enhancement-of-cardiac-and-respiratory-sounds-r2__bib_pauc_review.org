@@ -1,0 +1,149 @@
+#+title:      Enhancement of cardiac and respiratory sounds R2
+#+date:       [2024-08-14 mer. 13:39]
+#+filetags:   :bib:pauc:review:
+#+identifier: 20240814T133907
+#+reference:  echeniqueEnhancement
+
+:PROPERTIES:
+:AUTHORS:  Maria Belen Echenique, Eduardo J. Godoy, Rodrigo F. Càdiz, Marcelo E. Andia
+:END:
+
+Second revision of this paper. Previous notes in
+~/Documents/reviews/pauc23
+
+* Summary
+(Taken from my notes on the first draft)
+
+In this submission, the authors make a case for smartphone-based
+tele-auscultation of cardiac and respiratory sounds, and identify that
+the use of smartphones could improve access to healthcare for
+remotely-situated populations, while potentially easing the burden on
+healthcare professionals for routine patient examinations. They
+observe that sounds indicative of pathology are predominately
+low-frequency in nature and suggest pitch-shifting recordings to bring
+these sounds into a frequency range suitable for reproduction on
+smartphone speakers, while maintaining clinical information.
+
+This is an interesting idea, and certainly assessing whether
+smartphones, equipped as they are with an array of sensors including
+and in addition to microphones, can be used as diagnostic devices is
+well worth exploring. So too is an investigation of the extent to
+which clinical information is preserved when auscultation recordings
+are processed, and a scheme for optimising these recordings for
+diagnostic purposes would be of great value.
+
+* General notes
+This is another step in the right direction, though a couple of the
+changes made for this revision introduce new problems, which I detail
+below.
+
+One critical piece of missing information at this point concerns the
+participants who contributed to the proprietary database. All we know
+is that they provided informed consent; please tell us how many
+participants there were, and provide some demographic information.
+
+Another thing I feel the reader could benefit from is a clear sense of
+to what extent the pitch of the recorded samples was altered. Perhaps
+a figure containing representitave example pre- and post-processing
+spectrograms.
+
+I would urge greater caution in describing the strength of the
+results. For traditional auscultation, reference [25] presents a
+specificity of 89%; the 70-80% demonstrated here describes
+preservation of clinical information, /not specificity/. Comparisons
+such as "...similar to the values reported in the literature"
+(page 11) are, as a result, potentially misleading.
+
+* Detailed observations
+- Abstract, line 37: "against originals" \rightarrow "against original
+  recordings"
+  
+(Page, column, line)
+- 2, 2, 5: "...an estimated 7 billion users worldwide". The reference
+  to the number of devices that I found in the cited source was "El
+  número de dispositivos móviles a nivel global ya alcanzó los 7,9 mil
+  millones, más que personas hay en la Tierra."  I.e. that's the
+  number of devices in existence, not the number of users.
+- 2, 2, 27/28: "...coughs, allergies, and sneezes". The cited source
+  is concerned with the sensing of coughs, not sneezes, and /one/
+  participant exhibited a cough caused by an allergy --- the study
+  does not aim to detect allergies per se.
+- 3, 1, 10: Section 1 is very long; the paragraph beginning "Modern
+  auscultation involves using..." has the feel of a new subsection;
+  consider adding a new heading here.
+- 3, 1, 42/43: As above; the text shifts to focus on ways in which
+  sound can be described, which in turn suggests a new subsection.
+- 3, 1, 42/43: "Sound is intricately defined by three primary physical
+  parameters". The cited source actually describes five parameters in
+  total, adding "harmony", and "dissonance" (which would perhaps
+  better bundled under /degree of harmonicity/). It would be
+  preferable to say "Sound /can be/ intricately defined...".
+- 3, 2, 6-9: "pitch can be used" appears twice in rapid
+  succession. Also, it is not made clear how pitch can be used as a
+  timbral identifier; perhaps this refers to the way the authors of
+  reference [28] use "pitch" to describe /unpitched/ sounds like
+  rhonchus, which have a low "dominant frequency" (or dominant
+  /formant region/ perhaps), but resemble snoring (i.e. they're
+  inharmonic).
+- 3, 2, 48-50: A frequency response may /exhibit/ attenuation, but it
+  doesn't /do/ the attenuation itself. It might be preferable to
+  emphasise, as stated in [31], that "[phone speaker] playback was
+  centered around the human vocal range" --- though [31] also states
+  that this has changed since the late 2010s (perhaps moreso for
+  high-end models).
+- 4, 1, 24-26: As I noted for the previous revision, pitch shifting
+  algorithms can shift down as well as up, so prefer something like
+  "These algorithms can [allow/facilitate/etc.] pitch changes across a
+  wide frequency range without..."
+- Fig. 3: I may be wrong about what is deemed the anterior and
+  posterior projections of the lungs, but the right panel shows what
+  looks like the back (posterior) of the torso and the left panel the
+  front (anterior).
+- 7, 2, 2-5: The target readership does not need an explanation of the
+  Fast Fourier Transform.
+- Table 1, Table 2: Please indicate, in their respective captions,
+  which database(s) each table refers to.
+- Table 5: "Murmurs represent abnormal ones" --- Not all of the
+  pathologies are murmurs. Why not use "Normal"/"Pathological"
+  instead?
+- 10, 1, 40: "they did hold clinical information to the ears of
+  physicians" --- Is this strictly what you mean? Presumably 100% of
+  the processed sounds /held/ clinical information, but 73.7% were
+  rated as /maintaining/ the clinical information represented by their
+  unprocessed counterparts. This sentence could be ended after the
+  word "positively".
+- 11, 2, 48/49: remove "and perception" (headphones don't perceive).
+  
+* Proofreading
+The writing is much improved over the initial submission; most of my
+comments refer to relatively minor matters. Some of the following may
+come across as nitpicking on my part, but my aim is to suggest more
+comfortable wording where possible.
+
+- 3, 2, 53...: "there are several ways to improve these sounds to
+  allow them to be played on a smartphone" \rightarrow "there are ways to
+  optimise these sounds for reproduction on a smartphone"
+- 4, 1, 2/3: "a method that allows for the change in the pitch" \rightarrow "a
+  technique that permits the alteration of the pitch"
+- 6, 2, 45: "This is done" \rightarrow "This was done"
+- 7, 1, 8-10: There is no need to supply mathematical notation for
+  maximum attack and release times (e.g. T_{A_{max}}).
+- 7, 1, 41-42: "the recordings" \rightarrow "recordings" or "audio recordings"
+  (you're referring to what the algorithm is designed to do in
+  general).
+- 7, 1, 42: "maintaining a subjective quality" \rightarrow "maintaining their
+  subjective quality"
+- 7, 2, 31-32: "SoundTouch is an audio processing library open source"
+  \rightarrow "SoundTouch is an open source audio processing library"
+- 7, 2, 34-35: "independent" \rightarrow "independently"
+- Table 1: "Tracheal sound" \rightarrow "Tracheal breath sound"
+- 10, 1, 40: "e.g." \rightarrow "i.e." (as stated above, however, this sentence
+  could be ended after "positively").
+- 11, 1, 51-53 + 11, 2, 1-6: This sentence is very long, and difficult
+  to follow. Try adding a comma after "for them" and "pathological
+  lung sounds".
+- 12, 1, 38: "...to compare, in future studies, the diagnostic..."
+- References: these look good for the most part; [36] features some
+  errant quotation marks, e.g. /Shelvock"/ and /"2012"/.
+
+Entered on [2024-05-22 mer. 11:19]

@@ -1,0 +1,12 @@
+#+title:      Enhancement of Cardiac and Respiratory Sounds R3
+#+date:       [2024-08-14 mer. 13:25]
+#+filetags:   :bib:pauc:review:
+#+identifier: 20240814T132531
+#+reference:  echeniqueEnhancement
+
+* Summary
+
+See [[denote:20240814T133907][Enhancement of cardiac and respiratory sounds R2]].
+
+* General notes
+

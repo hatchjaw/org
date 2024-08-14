@@ -14,7 +14,7 @@ DEADLINE: <2024-08-16 ven. ++1w>
 - State "DONE"       from "TODO"       [2024-07-21 dim. 13:36]
 - State "DONE"       from "TODO"       [2024-07-12 ven. 18:12]
 ** TODO [#A] Submit IFC article
-DEADLINE: <2024-08-16 ven.>
+DEADLINE: <2024-08-23 ven.>
 ** TODO Check entry requirements for US
 DEADLINE: <2024-08-16 ven.>
 ** TODO Ask Maxime again about practicalities of using his DAC with Teensy or the Pi
@@ -34,7 +34,7 @@ DEADLINE: <2024-08-18 dim.>
 
 ** TODO [#C] Start Ethics/Integrity MOOC
 
-** WAITING [#B] Apply, again, for social security [9/9]
+** WAITING [#B] Apply, again, for social security [10/10]
 - State "WAITING"    from "DONE"       [2024-06-12 mer. 11:04] \\
   Waiting for an update by post.
 - State "DONE"       from "TODO"       [2024-05-07 mar. 15:55]
@@ -69,9 +69,11 @@ DEADLINE: [2024-06-18 mar.]
 - Ask whether I can upload the /Déclaration sur l'Honneur de
   Filiation/ rather than posting it.
 *** DONE Update Mme Le Prince re. Ameli
-*** WAITING Receive another update via post...
+*** DONE Receive another update via post
+- State "DONE"       from "WAITING"    [2024-08-14 mer. 11:03]
+*** TODO Apply for Carte Vitale
+DEADLINE: <2024-08-16 ven.>
 
-- State "DONE"       from "WAITING"    [2024-06-25 mar. 16:33]
 ** TODO Read Razvan's Thesis
 The PDF is in ~/Documents
 
@@ -93,6 +95,4 @@ DEADLINE: <2024-08-15 jeu. .+1m>
 :END:
 - State "DONE"       from "TODO"       [2024-06-06 jeu. 13:37]
 - State "DONE"       from "TODO"       [2024-04-20 sam. 16:31]
-  
-** TODO Prendre rendez-vous chez le médecin
 

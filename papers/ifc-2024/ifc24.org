@@ -9,7 +9,7 @@
 #+LATEX_CLASS: ifc24
 #+BIBLIOGRAPHY: IFC-24.bib
 #+CITE_EXPORT: bibtex
-#+LATEX_HEADER: \RequirePackage[]{ifc24-style}
+#+LATEX_HEADER_EXTRA: \RequirePackage[]{./out/ifc24-style}
 #+refproc: :abbreviate nil
 
 #+begin_abstract
@@ -288,7 +288,7 @@ the programming language upon which they are based.
 Two main modes of automatic differentiation are typically made
 reference to in scholarly works on the topic: forward (or /tangent/)
 mode, and reverse (or /adjoint/) mode [cite:].[fn:3] Tangent and
-adjoint mode autodiff describe, in effect, two directions of
+adjoint mode automatic differentiation describe, in effect, two directions of
 derivative propagation through a computation graph; we will discuss
 both in the sections to follow. To begin with, consider a (\F{})
 program with the following computation graph:
@@ -359,7 +359,8 @@ graph as a whole, however, and for an arbitrary program this is not
 practical. To differentiate the program --- or indeed any program with
 primitives whose derivatives are well-defined --- /automatically/, we
 apply the chain rule at the level of each primitive operation, passing
-the results forward or backward depending on the chosen autodiff mode.
+the results forward or backward depending on the chosen automatic
+differentiation mode.
 
 *** Forward mode
 
@@ -367,12 +368,12 @@ the results forward or backward depending on the chosen autodiff mode.
 
 ** The Arithmetic of Differentiation
 
-The arithmetic of forward mode autodiff can be derived by formulating
-differentiation in a manner similar to the complex numbers
-[cite:@rallArithmetic1986;@yuDNAD2013]. Where complex arithmetic
-uses the imaginary unit \(i\) to designate the imaginary part of a
-complex number \(z = x + iy\), with \(i^{2} = -1\), differentiable
-arithmetic uses the /nilpotent
+The arithmetic of forward mode automatic differentiation can be
+derived by formulating differentiation in a manner similar to the
+complex numbers [cite:@rallArithmetic1986;@yuDNAD2013]. Where complex
+arithmetic uses the imaginary unit \(i\) to designate the imaginary
+part of a complex number \(z = x + iy\), with \(i^{2} = -1\),
+differentiable arithmetic uses the /nilpotent
 symbol/[cite:@yuDNAD2013;@baydinAutomatic2018] \(\varepsilon\):
 
 #+NAME: eq:nilpotent
@@ -463,11 +464,11 @@ take(n, (head, rest)) = take(n-1, rest);
 #+end_src
 
 The =physmodels.lib= library provides ~pm.chain~ for creating chains
-of bidirectional signal blocks [cite:@michonFAUST2018]. ~chain(A)~
+of bidirectional signal blocks [cite:@michonFaust2018]. ~chain(A)~
 simply returns the signal block ~A~; ~chain(A:As)~ creates a recursive
 structure containing ~A~ and ~chain(As)~. Similarly, =wdmodels.lib=
 facilitates the creation of wave digital filter models via primitive
-elements, resistors, capacitors, etc. [cite:@roosenburgWAVE2021],
+elements, resistors, capacitors, etc. [cite:@roosenburgWave2021],
 whose behaviour is described with pattern matching syntax. Both
 libraries extend \F{}'s arithmetic with their own rules, with the aim
 of achievening a particular goal within the syntax provided by \F{}.
@@ -498,13 +499,13 @@ primitives.
 
 * Differentiable Programming in Faust
 
-We implement forward mode automatic differentition based on dual
+We implement forward mode automatic differentiation based on dual
 numbers/signals.
 
 Reverse propagation of signals /is/ possible in Faust via recursive
 composition (the ~~~ operator), and it is by way of nested recursions
 that the =physmodels.lib= library accomplishes simulated bidirectional
-wave propagation [cite:@michonFAUST2018]. The structures described
+wave propagation [cite:@michonFaust2018]. The structures described
 by =physmodels.lib= are purely linear, however; for branching
 structures, the [fn:2]
 
@@ -939,29 +940,17 @@ circumstances [cite:@laueSimple2020].
 
 [fn:2]  See [cite:@radulYou2023], figure 1, for an illustration of
 the sort of structure that would be required in order to support
-reverse mode autodiff.
+reverse mode automatic differentiation.
 
 [fn:1] Various transformations /are/ in fact possible at the level of
 the \F{} compiler. See [[cref:sec:discussion]] for further exploration of
 this idea.
-
-* HTML                                                             :noexport:
-
-
-#+BEGIN_SRC emacs-lisp :results silent
-(require 'org-ref-refproc) ;; this is not loaded by default!
-
-(let ((org-export-before-parsing-hook '(org-ref-refproc)))
-  (org-open-file (org-html-export-to-html)))
-#+END_SRC
 
 * Emacs Setup                                                      :noexport:
 
 - Set up =ifc24= document class.
 - Add =-shell-escape= flag to latex process, so =svg= works.
 - Use =listings= package for exported source blocks.
-- Add custom =ifc24-style= package to =org-latex-packages-alist= so
-  equation previews work.
 
 # Local Variables:
 # eval:   (add-to-list 'org-latex-classes '("ifc24"
@@ -975,6 +964,4 @@ this idea.
 # eval:   (setq org-latex-pdf-process '("latexmk -f -pdf -%latex \
 # -interaction=nonstopmode -shell-escape -output-directory=%o %f"))
 # eval:   (setq org-latex-src-block-backend 'listings)
-# eval:   (setq org-latex-packages-alist '())
-# eval:   (add-to-list 'org-latex-packages-alist `("" ,(expand-file-name "./out/ifc24-style") t))
 # End:
