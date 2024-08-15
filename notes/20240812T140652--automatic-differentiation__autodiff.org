@@ -9,7 +9,7 @@ computer programming. It is the computational/mathematical backbone
 supporting contemporary approaches to machine learning and parameter
 optimisation via gradient descent.
 
-Autodiff has two main modes, [[denote:20240812T142629][forward mode]] and reverse mode. In forward
+Autodiff has two main modes, [[denote:20240812T142629][forward mode]] and [[denote:20240813T115157][reverse mode]]. In forward
 mode, derivatives are propagated from inputs to outputs through the
 computation graph, one per input variable; in reverse mode,
 derivatives are propagated backwards, one per output. A combination of

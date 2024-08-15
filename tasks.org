@@ -3,6 +3,8 @@
 # =C-c C-t= to change sequence
 
 * Tasks
+** TODO Read Yann's Widget Modulation paper
+DEADLINE: <2024-08-19 lun.>
 ** TODO [#B] Review PAUC manuscript
 DEADLINE: <2024-08-19 lun.>
 ** TODO [#A] Send Romain weekly update

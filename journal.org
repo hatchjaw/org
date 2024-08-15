@@ -3121,3 +3121,60 @@ Entered on [2024-08-14 mer. 11:12]
   email the Hannover guys; fingers crossed they're not all on vacation.
 
 Entered on [2024-08-14 mer. 17:27]
+*** 2024-08-15 jeudi
+**** Teensy PTP: Measuring PPS                                :TEENSY:PTP:
+It turns out I hadn't applied the correct settings on the
+oscilloscope. After a bit of experimentation I found the appropriate
+ones (the main thing was the trigger mode, which should be /Normal/).
+
+See [[denote:20240815T192111][Teensy PTP sync measurements]] for more details. No need to email
+the Hannover chaps (for now). Next job: see whether I can run the
+audio shield at the same time (pin conflicts could be an issue?),
+then (assuming no issues):
+
+- set up an audio 1 PPS signal in software, low-level (no Teensy Audio
+  Library);
+- run it on both teensies;
+- first up, just try to observe drift;
+  + scope probes attached post DAC? Or capture the I2S signal?
+  + might need to periodically (once per minute, relative to the PTP
+    clock?) restart the audio subsystem;
+  + that'd be a useful feasibility test for syncing audio interrupts;
+- then try to adjust PLL4 using a smiliar mechanism to that used to
+  condition the PTP clock
+  + that'd be time to borrow the PID controller code from =t41-ptp=.
+
+Entered on [2024-08-15 jeu. 18:53]
+**** Gradient-descent weirdness                               :FAUST:DDSP:
+Just having a bit of a weird time trying to set up non-audio gradient
+descent tests, e.g.
+
+#+begin_src faust :results none
+df = library("diff.lib");
+
+process = df.backprop(truth, estimate, d.losses.L2(1, 1e-4))
+with {
+    truth = hslider("x", .5, 0, 5, .01),2 : ^;
+    
+    d = df.env((df.var(hbargraph("\hat{x}", 0, 5))));
+
+    estimate = d.var(1) : d.diff(sin),d.diff(2) : d.diff(^);
+};
+#+end_src
+
+I.e. \(y = x^{2}\). Handful of issues:
+
+- Seems ~df.var~ doesn't like to start from zero.
+- \(\hat{x}\) tracks \(x\), but a little too high.
+- \(\hat{x}\) gets completely lost/stuck at ~1.5 once \(x\) exceeds
+  ~1.15.
+  + At that point, although loss is high, non-zero gradients aren't
+    produced.
+  + Same happens, more-or-less, for ~losses.L1~.
+
+Can a simple algorithm, with a constrained input domain, have
+a weird loss landscape? Likely I'm doing something daft... or Faust
+doesn't like doing non-audio things like this? I checked the compiled
+output and nothing looks untoward.
+
+Entered on [2024-08-15 jeu. 19:47]
