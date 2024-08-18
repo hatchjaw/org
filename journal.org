@@ -3178,3 +3178,47 @@ doesn't like doing non-audio things like this? I checked the compiled
 output and nothing looks untoward.
 
 Entered on [2024-08-15 jeu. 19:47]
+*** 2024-08-16 vendredi
+**** Reverse mode: gradient descent                           :FAUST:DDSP:
+I've been trying to implement gradient descent in reverse mode. This
+entails backpropagating through the loss function. It occurred to me,
+doesn't that subtraction in the loss function need to be
+differentiated too? If so, that would apply to forward mode. The
+forward mode examples /work/, so perhaps either:
+- the subtraction doesn't need to be differentiable, or;
+- the derivative resolves to something that doesn't affect the output.
+
+In any case, I'm going to leave that for a bit and work on PTP instead.
+
+Entered on [2024-08-16 ven. 13:24]
+**** Introducing audio to the PTP situation                   :PTP:TEENSY:
+Not a great day for work on my actual thesis topic, but:
+
+- It's possible to run the audio subsystem alongside the PTP clock.
+- I set up a rough 1 PPS impulse just by counting audio interrupts,
+  with a two-sample buffer, and setting the TX buffer's left channel
+  high (\(x[n] = (1<<15) - 1\)) for one sample.
+- Attaching a probe to Teensy pin 7, that gives me what looks to be a
+  3.3V pulse of 5ns duration.
+- Next step is to try to set a sample high when IRQ_ENET_TIMER
+  occurs. That'll be more difficult.
+
+Entered on [2024-08-16 ven. 17:44]
+  
+  [[file:~/org/journal.org::*Teensy PTP: Measuring PPS][Teensy PTP: Measuring PPS]]
+*** 2024-08-18 dimanche
+**** REVIEWED PAUC article review                                 :REVIEW:
+Finally got around to reading the latest revision of the
+cardiac/respiratory sound enhancement paper for Personal and
+Ubiquitous Computing. Apart from the beginning of the discussion, and
+a handful of typos, I think it's just about ready.
+
+Entered on [2024-08-18 dim. 16:01]
+**** Differentiable delay, recursion                                :DDSP:
+This was actually the morning's work, but in any case I found what
+feels like a solid enough mathematical rationale for the derivative of
+delay being the way it is. All my notes are on paper at the moment; I
+will transfer these (very soon, all being well) to my [[denote:20240813T191939][note]] on the
+subject.
+
+Entered on [2024-08-18 dim. 16:05]

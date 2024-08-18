@@ -5,8 +5,9 @@
 * Tasks
 ** TODO Read Yann's Widget Modulation paper
 DEADLINE: <2024-08-19 lun.>
-** TODO [#B] Review PAUC manuscript
+** DONE [#B] Review PAUC manuscript
 DEADLINE: <2024-08-19 lun.>
+- State "DONE"       from "TODO"       [2024-08-18 dim. 15:56]
 ** TODO [#A] Send Romain weekly update
 DEADLINE: <2024-08-16 ven. ++1w>
 :PROPERTIES:
@@ -80,10 +81,6 @@ DEADLINE: <2024-08-16 ven.>
 The PDF is in ~/Documents
 
 ** TODO Message/email Matt Hamilton
-
-** TODO Set up OrgRoam
-Hm, need to break this down. It's kind of set up but I don't know how
-best to use it, so I should read the docs.
 
 ** TODO Investigate hardware platforms
 - [[https://www.cnx-software.com/2024/04/08/adlink-osm-imx93-osm-size-l-module-nxp-i-mx-93-soc/][ADLINK OSM-IMX93]]

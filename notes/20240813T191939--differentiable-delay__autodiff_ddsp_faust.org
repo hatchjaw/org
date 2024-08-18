@@ -3,3 +3,131 @@
 #+filetags:   :autodiff:ddsp:faust:
 #+identifier: 20240813T191939
 
+The derivative of a function \(y = f(x)\) by some fixed delay \(k\) is
+the delayed derivative of that function.
+
+#+NAME: eq:deriv-fixed-delay
+\begin{align}
+y[n] &= x[n - k], \\
+\frac{d}{dx}y[n] &= \frac{d}{dx}f(x)[n] \\
+  &= f'(x)[n] \\
+  &= x'[n - k].
+\end{align}
+
+In this case that produces a constant signal of \(1\), delayed by
+\(k\) samples. The intuition here is that time has nothing to do with
+\(x\) itself, and that differentiation is time-invariant. That means
+the derivative of Faust's ~mem~ for example, is just another ~mem~.
+
+My original derivation of differentiable, variable delay in Faust was
+informed by a [[https://www.youtube.com/watch?v=pkL7cuy29XU][YouTube video]] on the derivative property of
+convolution. The principle, based on the fact that a delay can be
+modeled as the convolution of an input signal with a delayed impulse,
+is that the derivative of the convolution of two functions is the
+convolution of one of the functions with the derivative of the other,
+i.e. given:
+
+#+NAME: eq:conv
+\begin{equation}
+y(t) = x(t) \ast h(t),
+\end{equation}
+then:
+
+#+NAME: eq:conv-deriv
+\begin{align}
+y'(t) &= x'(t) \ast h(t), \\
+y'(t) &= x(t) \ast h'(t),
+\end{align}
+and (bonus):
+
+#+NAME: eq:conv-double-deriv
+\begin{equation}
+y''(t) = x'(t) \ast h'(t).
+\end{equation}
+
+This property is derived from the derivative property of the Fourier
+transform. Recapping the continuous Fourier transform for a moment,
+notation varies, naturally, but synthesising from McClellan, Schafer
+and Yoder, and [[https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/09%3A_Transform_Techniques_in_Physics/9.03%3A_Exponential_Fourier_Transform][LibreTexts Mathematics]]:
+
+#+NAME: eq:fourier
+\begin{equation}
+\mathcal{F}\left[x(t)\right] = X(j\omega) = \int^{\infty}_{-\infty}x(t)e^{-j\omega{}t}dt,
+\end{equation}
+
+And the inverse transform:
+
+#+NAME: eq:fourier-inv
+\begin{equation}
+\mathcal{F}^{-1}\left[X(j\omega)\right] = x(t) = \frac{1}{2\pi}\int^{\infty}_{-\infty}X(j\omega)e^{j\omega{}t}d\omega.
+\end{equation}
+
+#+begin_quote
+LibreTexts swaps the signs of the exponents for some reason.
+M, S & Y include the imaginary unit in the argument to \(X\).
+#+end_quote
+
+We also have this nice /time-domain-convolution is
+frequency-domain-multiplication/ rule:
+
+#+NAME: eq:conv-mult
+\begin{equation}
+\mathcal{F}[x(t) \ast h(t)] = \mathcal{F}[x(t)]\cdot\mathcal{F}[h(t)] = X(j\omega)H(j\omega).
+\end{equation}
+
+Anyway, then, leaning on Stack Exchange [[https://math.stackexchange.com/a/430885][for a moment]], we have the
+Fourier transform of a derivative, using the inverse transform. First
+we find the derivative of the inverse transform wrt. \(t\):
+
+#+NAME: eq:deriv-fourier-inv
+\begin{align}
+x'(t) &= \frac{d}{dt}\left(\frac{1}{2\pi}\int^{\infty}_{-\infty}X(j\omega)e^{j\omega{}t}d\omega\right) \\
+  &= \frac{1}{2\pi}\int^{\infty}_{-\infty}j\omega{}X(j\omega)e^{j\omega{}t}d\omega,
+\end{align}
+then:
+
+#+NAME: eq:transform-of-deriv
+\begin{equation}
+\mathcal{F}[x'(t)] = j\omega{}X(j\omega).
+\end{equation}
+
+#+begin_quote
+LibreTexts decribes it a little [[https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/09%3A_Transform_Techniques_in_Physics/9.05%3A_Properties_of_the_Fourier_Transform][differently]], but the same principle
+applies.
+#+end_quote
+
+As M, S & Y put it (for the \(k\)^{th} derivative):
+
+#+NAME: eq:fourier-deriv-msy
+\begin{equation}
+\frac{d^{k}}{dt^{k}}x(t) \quad \xleftrightarrow{\mathcal{F}} \quad (j\omega)^{k}X(j\omega).
+\end{equation}
+
+From [[eqref:eq:transform-of-deriv]], and deferring [[https://math.stackexchange.com/questions/177239/derivative-of-convolution][once again]] to Stack
+Exchange:
+
+#+NAME: eq:diff-conv
+\begin{align}
+\mathcal{F}\left[\frac{d}{dt}(x(t) \ast h(t))\right]
+  &= \mathcal{F}\left[\left(\frac{d}{dt}x(t)\right)\right]\cdot\mathcal{F}[h(t)] \\
+  &= \mathcal{F}[x(t)]\cdot\mathcal{F}\left[\left(\frac{d}{dt}h(t)\right)\right] \\
+  &= j\omega{}X(j\omega)H(j\omega)
+\end{align}
+
+Essentially:
+
+#+NAME: eq:diff-conv-oneline
+\begin{equation}
+\frac{d^{k}}{dt^{k}}(x(t) \ast h(t)) \quad \xleftrightarrow{\mathcal{F}} \quad (j\omega)^{k}X(j\omega)H(j\omega).
+\end{equation}
+
+Thus, for a convolution, it is only necessary to differentiate one of
+the functions involved. The obvious candidate is the source of the
+delay itself, i.e. the delayed impulse, \(h(t) = \delta(t - \tau)\). Being
+instantaneous, however, its derivative kind of cancels out. If we
+imagine that, in discrete time, a delay is more like convolution with
+a rectangular pulse of single sample duration, then, differentiating
+that, we retrieve a positive unit impulse at the 'beginning' of the
+delay, and a negative one at the 'end'.
+
+To be continued...

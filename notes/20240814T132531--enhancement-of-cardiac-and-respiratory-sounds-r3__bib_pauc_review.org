@@ -10,3 +10,54 @@ See [[denote:20240814T133907][Enhancement of cardiac and respiratory sounds R2]]
 
 * General notes
 
+The latest revision constitutes another significant improvement. The
+flow of the text is good, and argumentation is clear. My only concern
+regarding the broader structure of the article is the opening
+paragraph of section 4 (Discussion), which reads more like it would
+belong in the conclusion. Please consider moving most of that
+paragraph into the conclusion (or dispensing with it altogether), and
+replacing it with general comments on your results before you proceed
+to discuss those in detail.
+
+* Detailed observations
+
+(Page, column, line)
+- 4, 1, 1: "i.e. frequencies below 1000 Hz" is a problem:
+  - this purported frequency limit for the voiceband isn't mentioned
+    in reference [31];
+  - it this contradicts the preceding point, "...the speakers on
+    mobile phones may not be capable of reproducing low-frequency
+    waves accurately".
+  It would suffice to say that phone speaker technology has typically
+  been concerned with vocal intelligility, rather fidelity across the
+  audible range.
+- 6, 1, 35-39: I think I raised this with you a couple of revisions
+  ago; when you assert "To make the compression more efficient" it
+  sounds like you're referring to the efficiency of the algorithm,
+  when I think perhaps you mean something lyike "in order to reduce
+  the effort of bulk-processing the audio samples".
+- Tables 1 & 2: To be more specific about my previous recommendation,
+  please indicate in the caption for table 1 that this refers to the
+  /open source database/, and in the caption for table 2 that it refers
+  to recordings in your /proprietary database/.
+- 10, 1, 34-48: Instead of "(which corresponded to the [processed
+  sample/original one])" it would be clearer to say, e.g. "the second
+  sound (processed) is noticeably better" and "a respondent was unable
+  to listen to the breath sound in the second recording (original)" or
+  "...(unprocessed)".
+
+* Proofreading
+
+- 8, 1, 21-22: "...that allows to modify..." -> Try one of these instead:
+  + "...that allows [one/the user] to modify..."
+  + "...that [allows/permits] the modification of..."
+- 10, 1, 44/45: "corresponed" -> "corresponded" (see /Detailed
+  observations/).
+- 10, 1, 47: "...listen to breath sound..." -> "...listen to the
+  breath sound..."
+- 10, 2, 3/4: ''Other'' -> ``Other''
+- 11, 2, 48/49: "...the algorithm used maintain..." -> "...the
+  algorithms used maintain..." (or "...the algorithm used
+  maintains..." but I think you're referring to both algorithms employed)
+- 12, 2, 5-6: "...due to the time that takes a physician..." -> "...due to the
+  time that it takes a physician..."
