@@ -3222,3 +3222,28 @@ will transfer these (very soon, all being well) to my [[denote:20240813T191939][
 subject.
 
 Entered on [2024-08-18 dim. 16:05]
+**** Synchronised audio startup on two Teensies               :PTP:TEENSY:
+OK, this is a bit of an exaggeration, but essentially I've got two
+Teensies whose audio subsystems are resetting at /about the same
+time/, i.e. to within a few microseconds of each other (as little as
+something on the order of hundreds of nanoseconds).
+
+The setup:
+- Two Teensies connected directly via RJ45;
+- A program that uses ~IRQ_ENET_TIMER~ on ~TCSR1~ to get the timestamp
+  when the timer wraps around (I think);
+- Checks, during the interrupt whether ~seconds % 10 == 9~; if so,
+  and audio is on, switches audio off; if not, and audio is off,
+  switches audio on;
+- Sends an impulse on channel 1 every 88200 audio ISRs, i.e. 1 PPS;
+- Teensies connected to oscilloscope on pin 7; oscilloscope trigger
+  following clock authority;
+- Every 10 s, clock subscriber/follower resets to approximate parity
+  to the authority, then (in this case) drifts fast (right to left),
+  approx. 3 ppm.
+- "Approximate parity" is a bit of a stretch at this stage, as that
+  can be anything from sub-microsecond to up to 20 us.
+  
+It's a start. Much more to be done.
+
+Entered on [2024-08-18 dim. 20:14]
