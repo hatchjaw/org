@@ -1,0 +1,44 @@
+#+title:      Differentiation: The Chain Rule
+#+date:       [2024-08-19 lun. 09:50]
+#+filetags:   :autodiff:maths:
+#+identifier: 20240819T095042
+
+Let \(y = f(\mathbf{v})\) be a differentiable function of \(m\)
+independent variables; for each \(j \in 1,\dots,m\), let \(v_{j} =
+v_{j}(\mathbf{x})\) be a differentiable function of \(n\) independent
+variables:
+
+#+NAME: eq:diff-functions
+\begin{align}
+y &= f(\mathbf{v}) = f(v_{1}, v_{2}, \dots, v_{m}), \\
+v_{j} &= v_{j}(\mathbf{x}) = v_{j}(x_{1}, x_{2}, \dots, x_{n}),
+\end{align}
+
+then:
+
+#+NAME: eq:chain-rule
+\begin{equation}
+\frac{\partial{}y}{\partial{}x_{i}} &= \sum_{j=1}^{m}\frac{\partial{}y}{\partial{}v_{j}}\frac{\partial{}v_{j}}{\partial{}x_{x}}
+\end{equation}
+
+for any \(i \in 1,\dots,n\).
+
+To give an audio-relevant example, consider a gain control, \(x_{1}\), and
+a DC offset, \(x_{2}\), applied to an input signal, \(s_{in}\):
+
+#+NAME: eq:chainrule-example
+\begin{align}
+y &= f(\mathbf{v}) = f(v_{1}, v_{2}, v_{3}) = v_{1}(\mathbf{x})v_{2}(\mathbf{x}) + v_{3}(\mathbf{x}) \\
+ & v_{1}(\mathbf{x}) = s_{in},\, v_{2}(\mathbf{x}) = x_{1},\, v_{3}(\mathbf{x}) = x_{2} \\
+\frac{\partial{}y}{\partial{}x_{i}} &= \sum_{j=1}^{3}\frac{\partial{}y}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x_{i}} \\
+  &= \frac{\partial{}y}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x_{i}} + \frac{\partial{}y}{\partial{}v_{2}}\frac{\partial{}v_{2}}{\partial{}x_{i}} + \frac{\partial{}y}{\partial{}v_{3}}\frac{\partial{}v_{3}}{\partial{}x_{i}} \\
+i = 1, &= v_{2}\cdot{}0 + v_{1}\cdot{}1 + 1\cdot{}0 \\
+  &= v_{1} \\
+  &= s_{in}, \\
+i = 2, &= v_{2}\cdot{}0 + v_{1}\cdot{}0 + 1\cdot1 \\
+  &= 1
+\end{align}
+
+* Resources
+
+- [[https://math.libretexts.org/Bookshelves/Calculus/Calculus_(OpenStax)/14%3A_Differentiation_of_Functions_of_Several_Variables/14.05%3A_The_Chain_Rule_for_Multivariable_Functions][LibreTexts maths]] on the chain rule for multivariate functions

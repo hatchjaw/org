@@ -1,0 +1,109 @@
+#+title:      Derivative property of the Fourier transform
+#+date:       [2024-08-19 lun. 10:35]
+#+filetags:   :maths:
+#+identifier: 20240819T103529
+
+First, let's recap the (continuous) Fourier transform [fn:1] Notation
+varies, but synthesising from [cite:@mcclellanSignal2003] and
+[[https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/09%3A_Transform_Techniques_in_Physics/9.03%3A_Exponential_Fourier_Transform][LibreTexts Mathematics]]:
+
+#+NAME: eq:fourier
+\begin{equation}
+\mathcal{F}\left[x(t)\right] = X(j\omega) = \int^{\infty}_{-\infty}x(t)e^{-j\omega{}t}dt,
+\end{equation}
+
+And the inverse transform:
+
+#+NAME: eq:fourier-inv
+\begin{equation}
+\mathcal{F}^{-1}\left[X(j\omega)\right] = x(t) = \frac{1}{2\pi}\int^{\infty}_{-\infty}X(j\omega)e^{j\omega{}t}d\omega.
+\end{equation}
+
+#+begin_quote
+LibreTexts swaps the signs of the exponents for some reason.
+[cite:@mcclellanSignal2003] includes the imaginary unit in the
+argument to \(X\).
+#+end_quote
+
+Now let's take the Fourier transform of the derivative of \(y =
+f(v)\):
+
+#+NAME: eq:fourier-deriv1
+\begin{equation}
+\mathcal{F}\left[\frac{dy}{dv}\right] &= \int^{\infty}_{-\infty}\frac{dy}{dv}e^{-j\omega{}v}dv.
+\end{equation}
+
+This can be attacked with integration by parts, which is defined as
+follows:
+
+#+NAME: eq:int-by-parts
+\begin{equation}
+\int_{a}^{b}f\,dg = fg\Big|_{a}^{b} - \int_{a}^{b}g\,df,
+\end{equation}
+
+where \(dg = g'(v)dv\) and \(df = f'(v)dv\).
+
+Pluggin in:
+
+#+NAME: eq:the-parts
+\begin{align*}
+f &= e^{-j\omega{}v}, &&g = y, \\
+df &= -j\omega{}e^{-j\omega{}v}dv, &&dg = \frac{dy}{dv}dv.
+\end{align*}
+
+Now a solution to eqref:eq:fourier-deriv1 can be found:
+
+#+NAME: eq:fourier-deriv2
+\begin{align}
+\int^{\infty}_{-\infty}\frac{dy}{dv}e^{-j\omega{}v}dv &= ye^{-j\omega{}v}\Big|^{\infty}_{-\infty} - \int^{\infty}_{-\infty}-j\omega{}ye^{-j\omega{}v}\,dv \\
+  &= ye^{-j\omega{}v}\Big|^{\infty}_{-\infty} + j\omega\int^{\infty}_{-\infty}ye^{-j\omega{}v}\,dv.
+\end{align}
+
+The final integral is the Fourier transform of \(y\). If we assume
+that \(\lim_{v \rightarrow \pm \infty}y = f(v) = 0\),[fn:2] the surface term disappears,
+leaving us with:
+
+#+NAME: eq:fourier-deriv3
+\begin{align}
+&= j\omega\int^{\infty}_{-\infty}ye^{-j\omega{}v}\,dv \\
+&= j\omega{}Y(j\omega).
+\end{align}
+
+** Alternatively...
+
+Another approach ([[https://math.stackexchange.com/a/430885][courtesy]] of maths Stack Exchange), using the inverse
+transform:
+
+#+NAME: eq:deriv-via-inverse-transform
+\begin{align}
+\frac{dy}{dv} &= \frac{d}{dv}\left(\frac{1}{2\pi}\int^{\infty}_{-\infty}Y(j\omega)e^{j\omega{}v}dv\right) \\
+  &= \frac{1}{2\pi}\int^{\infty}_{-\infty}j\omega{}Y(j\omega)e^{j\omega{}v}dv,
+\end{align}
+
+which, thanks to eqref:eq:fourier-inv, gives us:
+
+#+NAME: eq:transform-of-deriv
+\begin{equation}
+\mathcal{F}\left[\frac{dy}{dv}\right] = j\omega{}Y(j\omega).
+\end{equation}
+
+** General case
+
+As [cite:@mcclellanSignal2003] puts it (for the \(k\)^{th} derivative):
+
+#+NAME: eq:fourier-deriv-msy
+\begin{equation}
+\frac{d^{k}}{dt^{k}}x(t) \quad \xleftrightarrow{\mathcal{F}} \quad (j\omega)^{k}X(j\omega).
+\end{equation}
+
+* Resources
+
+- [cite:@mcclellanSignal2003, \sect11-7]
+- LibreTexts Mathematics - [[https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/09%3A_Transform_Techniques_in_Physics/9.03%3A_Exponential_Fourier_Transform][Exponential Fourier Transform]]
+- Ibid. [[https://math.libretexts.org/Bookshelves/Differential_Equations/Introduction_to_Partial_Differential_Equations_(Herman)/09%3A_Transform_Techniques_in_Physics/9.05%3A_Properties_of_the_Fourier_Transform][Properties of the Fourier Transform]]
+- Ibid. [[https://math.libretexts.org/Bookshelves/Calculus/Calculus_3e_(Apex)/06%3A_Techniques_of_Integration/6.02%3A_Integration_by_Parts][Integration by Parts]]
+
+* Footnotes
+[fn:2] I'm not entirely sure why.
+
+[fn:1] which should be in a note of its own; that's a TODO. 

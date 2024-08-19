@@ -19,5 +19,6 @@ contexts.
 
 * Autodiff-related topics
 
+- [[denote:20240819T095042][The Chain Rule]]
 - [[denote:20240813T191939][Differentiable Delay]]
 - [[denote:20240813T191958][Differentiable Recursion]]
