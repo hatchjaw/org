@@ -1,10 +1,9 @@
-:PROPERTIES:
-:CUSTOM_ID: h:4d282945-0024-4fd7-a670-080c0377734e
-:END:
 #+title:      Differentiable Delay
 #+date:       [2024-08-13 mar. 19:19]
 #+filetags:   :autodiff:ddsp:faust:
 #+identifier: 20240813T191939
+
+* Fixed delay
 
 Let's consider the case of delaying a function \(f(v)\), \(v = v(x)\),
 by some fixed time \(\tau\):
@@ -14,15 +13,15 @@ by some fixed time \(\tau\):
 y = f(v) &= v(t - \tau).
 \end{align}
 
-The derivative of the above, via the [[denote:20240819T095042][The Chain Rule]], is:
+The derivative of the above, via the [[denote:20240819T095042][Chain Rule]], is:
 
 #+NAME: eq:diff-delay-1
 \begin{equation}
-\frac{dy}{\partial{}x} = \frac{dy}{dv}\frac{dv}{dx} \\
+\frac{dy}{dx} = \frac{dy}{dv}\frac{dv}{dx} \\
 \end{equation}
 
 But what is \(\frac{dy}{dv}\), i.e. the derivative of a delayed
-signal?  First, the impulse response the ideal delay system is a
+signal?  First, the impulse response of the ideal delay system is a
 time-shifted impulse:
 
 #+NAME: eq:ideal-delay-ir
@@ -105,9 +104,225 @@ diff(mem) = mem,par(i, N, mem);
 
 * Variable Delay
 
+This is where things get a little spicy. Consider a function of the
+following form:
 
+#+NAME: eq:variable-delay
+\begin{equation}
+y = f(\mathbf{v}) = v_{1}(t - v_{2}(t)), \quad v_{j}(\mathbf{x}) = v_{j}(x_{1}, x_{2}).
+\end{equation}
+
+It's derivative, via the chain rule, with respect to \(x_{i}\) is:
+
+#+NAME: eq:variable-delay-deriv
+\begin{equation}
+\frac{\partial{}y}{\partial{}x_{i}} = \frac{\partial{}y}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x_{i}} + \frac{\partial{}y}{\partial{}v_{2}}\frac{\partial{}v_{2}}{\partial{}x_{i}}.
+\end{equation}
+
+From eqref:eq:diff-delay we know that the first term reduces to
+\(\frac{\partial{}v_{1}}{\partial{}x_{i}} \ast h(t) = v_{1}'(t - v_{2}(t))\). We have nothing in
+particular to fear from \(\frac{\partial{}v_{2}}{\partial{}x_{i}} = v_{2}'\). Let's tackle the
+remaining term:
+
+#+NAME: eq:troublesome-term
+\begin{equation}
+\frac{\partial{}y}{\partial{}v_{2}} = \frac{\partial{}}{\partial{}v_{2}}v_{1}(t - v_{2}) = \frac{\partial{}}{\partial{}v_{2}}(v_{1}(t) \ast \delta(t - v_{2}(t))).
+\end{equation}
+
+Using the [[denote:20240819T103529][derivative]] and multiplication properties of the Fourier
+transform, we know we only have to differentiate one yof the functions
+in the convolution. Unfortunately, it's the delta function, because
+that's the only one with a dependence on \(v_{2}\). Nontheless, that
+gives us:
+
+#+NAME: eq:troublesome-2
+\begin{equation}
+\frac{\partial{}y}{\partial{}v_{2}} = v_{1}(t) \ast \frac{\partial{}}{\partial{}v_{2}}\delta(t - v_{2}(t)).
+\end{equation}
+
+To tackle /this/, we can use a symbolic integral: the convolution
+integral. In the general case of convolution with an impulse:
+
+#+NAME: eq:conv-integral
+\begin{equation}
+(f \ast \delta)(t) = \int^{\infty}_{-\infty}f(t)\delta(t)\,dt = f(0).
+\end{equation}
+
+In the case of convolution with the derivative of an impulse, we can
+use integration by parts:
+
+#+NAME: eq:conv-integral-diff
+\begin{align}
+(f \ast \delta')(t) &= \int^{\infty}_{-\infty}f(t)\delta'(t)\,dt \\
+  &= f(t)\delta(t)\Big|^{\infty}_{-\infty} - \int^{\infty}_{-\infty}f'(t)\delta(t)\,dt.
+\end{align}
+
+The surface term vanishes because the delta function is only nonzero
+for \(t = 0\), which leaves us with the following nifty definition:
+
+#+NAME: eq:conv-with-diff-delta
+\begin{equation}
+(f \ast \delta')(t) = -(f' \ast \delta)(t).
+\end{equation}
+
+Introducing a time-shift:
+
+#+NAME: eq:conv-with-diff-shift
+\begin{align}
+f(t) \ast \frac{d}{dk}\delta(t - k) &= -\frac{d}{dk}(f(t) \ast \delta(t - k)) \\
+  &= -\frac{d}{dk}f(t - k).
+\end{align}
+
+(Should the right hand side be \(\frac{d}{dt}\)?)
+
+Now we can build on eqref:eq:troublesome-2:
+
+#+NAME: eq:troublesome-cont
+\begin{align}
+\frac{\partial{}y}{\partial{}v_{2}} &= v_{1}(t) \ast \frac{\partial{}}{\partial{}v_{2}}\delta(t - v_{2}(t)) \\
+  &= -\frac{\partial{}}{\partial{}v_{2}}v_{1}(t - v_{2}(t)),
+\end{align}
+
+and the full expression for a differentiable, variable delay is:
+
+#+NAME: eq:diff-variable-delay
+\begin{align}
+\frac{\partial{}y}{\partial{}x_{i}} &= \frac{\partial{}}{\partial{}x_{1}}v_{1}(t - v_{2}(t)) -
+  \frac{\partial{}v_{2}(t)}{\partial{}x_{i}}\frac{\partial{}}{\partial{}v_{2}}v_{1}(t - v_{2}(t)) \\
+  &= v_{1}'(t - v_{2}(t)) - v_{2}'(t)\frac{\partial{}}{\partial{}v_{2}}v_{1}(t - v_{2}(t)).
+\end{align}
+
+But this isn't nice... should that be \(\frac{\partial{}}{\partial{}t}v_{1}\)? That's what
+we worked out last year, but my notes on the topic aren't convincing.
+
+** Intuition
+
+Let \(v_{1}(x_{1}, x_{2}) = \sin(x_{1}(t))\), and \(x_{1}(t) = 2\pi{}t\).
+
+#+begin_src python :session :results none :exports none
+import matplotlib.pyplot as plt
+import numpy as np
+plt.figure(figsize=(10,5))
+plt.grid()
+N = 1000
+t = np.linspace(0, 1, N, endpoint=False)
+v1 = np.tile(np.sin(2 * np.pi * t * 1), 2)
+plt.close()
+#+end_src
+
+- If delay \(v_{2}\) stays constant, \(v_{1}\) is reproduced at original
+  rate with fixed delay. E.g. constant delay of \(v_{2} = 0.1\):
+
+#+begin_src python :results file :session :var matplot_lib_filename=(org-babel-temp-file "figure" ".png") :exports results
+v2 = .1
+k = int(v2 * N)
+for n in np.arange(N):
+    y[n] = v1[n - k] if n - k >= 0 else 0
+plt.clf()
+plt.plot(t, v1[0:N], t, y)
+plt.tight_layout()
+plt.savefig(matplot_lib_filename)
+matplot_lib_filename
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-XFgGX6/figure1uUiV7.png]]
+
+- If \(v_{2}\) increases at the rate of increase of \(t\), \(v_{1}\) stays
+  static. E.g. \(v_{2} = t - 0.1\) introduced at \(t = 0.1\):
+
+#+begin_src python :results file :session :var matplot_lib_filename=(org-babel-temp-file "figure" ".png") :exports results
+v2 = np.concatenate((np.zeros(99).astype(int), np.arange(N-99)))
+y = np.zeros(N)
+for n in np.arange(N):
+    y[n] = v1[n - v2[n]]
+plt.clf()
+plt.plot(t, v1[0:N], t, y)
+plt.tight_layout()
+plt.savefig(matplot_lib_filename)
+matplot_lib_filename
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-XFgGX6/figureF9biOD.png]]
+
+- If \(v_{2}\) increases more slowly than the rate of increase of \(t\),
+  \(v_{1}\) will be slowed down.  E.g. delay of \(v_{2} = \frac{t -
+  0.1}{4}\) introduced at \(t = 0.1\):
+
+#+begin_src python :results file :session :var matplot_lib_filename=(org-babel-temp-file "figure" ".png") :exports results
+v2 = np.concatenate((np.zeros(99).astype(int), np.linspace(0, (N-100)/4, N-99)))
+y = np.zeros(N)
+for n in np.arange(N):
+    y[n] = v1[n - v2[n].astype(int)]
+plt.clf()
+plt.plot(t, v1[0:N], t, y)
+plt.tight_layout()
+plt.savefig(matplot_lib_filename)
+matplot_lib_filename
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-XFgGX6/figureEN2FJZ.png]]
+
+- If \(v_{2}\) increases faster than the rate of increase of \(t\),
+  \(v_{1}\) will /reverse/.  E.g. delay of \(v_{2} = 2(t - 0.4)\) introduced
+  at \(t = 0.4\):
+
+#+begin_src python :results file :session :var matplot_lib_filename=(org-babel-temp-file "figure" ".png") :exports results
+v2 = np.concatenate((np.zeros(399).astype(int), np.linspace(0, (N-400)*2, N-399)))
+y = np.zeros(N)
+for n in np.arange(N):
+    y[n] = v1[n - v2[n].astype(int)] if n - v2[n] >= 0 else 0
+plt.clf()
+plt.plot(t, v1[0:N], t, y)
+plt.tight_layout()
+plt.savefig(matplot_lib_filename)
+matplot_lib_filename
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-XFgGX6/figureo974ya.png]]
+
+- If \(v_{2}\) decreases, \(v_{1}\) speeds up. E.g. \(v_{2} = 0.1\) at \(t =
+  0.1\), decreasing until \(v = 0\) at \(t = 0.6\):
+
+#+begin_src python :results file :session :var matplot_lib_filename=(org-babel-temp-file "figure" ".png") :exports results
+v2 = np.concatenate((100*np.ones(99), np.linspace(100, 0, N-500), np.zeros(N-99-500)))
+for n in np.arange(N):
+    y[n] = v1[n - v2[n].astype(int)] if n - v2[n] >= 0 else 0
+plt.clf()
+plt.plot(t, v1[0:N], t, y)
+plt.tight_layout()
+plt.savefig(matplot_lib_filename)
+matplot_lib_filename
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-XFgGX6/figureR4tnSg.png]]
+
+- E.g. let \(v_{2}(x_{1}, x_{2}) = A\((1+sin(x_{2}(t))/2)\), \(x_{2}(t) = 2\pi{}tf_{m}\) and
+  \(f_{m} = 10, A = 200\):
+
+#+begin_src python :results file :session :var matplot_lib_filename=(org-babel-temp-file "figure" ".png") :exports results
+f0 = 10
+v2 = (200*(1 + np.sin(2 * np.pi * t * f0)))/2
+print(v2)
+for n in np.arange(N):
+    y[n] = v1[n - v2[n].astype(int)] if n - v2[n] >= 0 else 0
+plt.clf()
+plt.plot(t, v1[0:N], t, y)
+plt.tight_layout()
+plt.savefig(matplot_lib_filename)
+matplot_lib_filename
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-XFgGX6/figureGg9ard.png]]
 
 * Resources
 
 - [[https://www.youtube.com/watch?v=pkL7cuy29XU][YouTube video]]: Convolution & Derivatives
 - Maths Stack Exchange: [[https://math.stackexchange.com/questions/177239/derivative-of-convolution][Derivative of Convolution]]
+- [cite:@guthInformal2008] --- the delta function as a distribution
+- YouTube: [[https://www.youtube.com/watch?v=xH5i75pzAAI][Dirac Delta Derivative]]

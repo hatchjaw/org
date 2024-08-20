@@ -11,7 +11,7 @@ Differentiation]]. Consider a similar (\textsc{Faust}) program to the
 one described in [[denote:20240812T142629][Forward Mode Autodiff]], whose block diagram looks like
 this:
 
-#+begin_src faust :results file svg :file "20240813T115157--block-diagram__faust_autodiff.svg" :exports results
+#+begin_src faust :results file svg :file (org-babel-temp-file "faust-" ".svg") :exports results
 N = 5;
 // Just create something that the compiler will bundle into an
 // abstraction in the block diagram.
@@ -27,7 +27,7 @@ with {
 #+end_src
 
 #+RESULTS:
-[[file:20240813T115157--block-diagram__faust_autodiff.svg]]
+[[file:/tmp/babel-XFgGX6/faust-TBsaeP.svg]]
 
 As in [[denote:20240812T142629][Forward Mode Autodiff]], we have an input vector \(\mathbf{x}\) of
 length \(N = 2\). This time, we group our primal primitives, \(v_{p,q}\),
