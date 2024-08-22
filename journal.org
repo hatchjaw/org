@@ -9,7 +9,7 @@
 #+TAGS: [ PROGRAMMING : R(r) PYTHON(P) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ZOTERO(z) LATEX(l) ]
 #+TAGS: [ AUDIO : SYNTHESIS(s) PHYSMOD(y) SPATIALAUDIO(S) NETWORKEDAUDIO(N) DDSP(D) ]
-#+TAGS: [ HARDWARE : RPI(R) TEENSY(Y) ]
+#+TAGS: [ HARDWARE : RPI(R) TEENSY(Y) PTP ]
 #+EXPORT_SELECT_TAGS: BLOG
 #+OPTIONS:   H:3 num:0 toc:t \n:nil @:t ::t |:t ^:{} _:{} -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc html-style:nil
@@ -3247,3 +3247,32 @@ The setup:
 It's a start. Much more to be done.
 
 Entered on [2024-08-18 dim. 20:14]
+*** 2024-08-21 mercredi
+**** Teensy: PTP and PLL4                                     :PTP:TEENSY:
+Hard-coding a value for ~CCM_ANALOG_PLL_AUDIO_NUM~ for the clock
+follower, I've managed to reduce drift to something on the order of
+less than 1 ppm. It turns out that the values for that and
+~CCM_ANALOG_PLL_AUDIO_DENOM~ used in ~AudioOutputI2S::config_i2s~
+don't (need to) use the full depth of precision afforded by those
+registers.
+
+For the default 44.1 kHz sample rate,
+~CCM_ANALOG_PLL_AUDIO.DIV_SELECT~ should be 28 (assuming SAI1 divisors
+of /4 and /15); ~config_i2s~ uses ~denom = 10000~, and finds ~num =
+2240~. There's actually no need for the extra zero here; I'd assumed
+that these values needed to be on the order of \(1\times10^{4}\), but this
+isn't the case. The quotient, ~num/denom~ would be just as valid with
+values ~num = 224~ and ~denom = 1000~. Per §14.8.9-10 of the i.MX
+RT1060 reference manual (v3), that the corresponding registers offer
+30 bits of precision, i.e. a maximum value of:
+
+#+begin_src python :results output :exports both
+print(1 << 30)
+#+end_src
+
+#+RESULTS:
+: 1073741824
+
+i.e. enough precision to adjust ~SAI1_CLK_ROOT~ in parts per billion.
+
+Entered on [2024-08-21 mer. 13:06]
