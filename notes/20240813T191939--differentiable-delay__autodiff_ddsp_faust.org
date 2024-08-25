@@ -131,7 +131,7 @@ remaining term:
 \end{equation}
 
 Using the [[denote:20240819T103529][derivative]] and multiplication properties of the Fourier
-transform, we know we only have to differentiate one yof the functions
+transform, we know we only have to differentiate one of the functions
 in the convolution. Unfortunately, it's the delta function, because
 that's the only one with a dependence on \(v_{2}\). Nontheless, that
 gives us:

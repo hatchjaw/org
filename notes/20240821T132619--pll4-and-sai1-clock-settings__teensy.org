@@ -1,4 +1,4 @@
-#+title:      Teensy PLL4 and SAI1 clock frequency
+#+title:      PLL4 and SAI1 clock settings
 #+date:       [2024-08-21 mer. 13:26]
 #+filetags:   :teensy:
 #+identifier: 20240821T132619
@@ -175,12 +175,12 @@ FsMax = 66e6/1<<8
 : Fs <= 257,812 Hz
 
 \(F_{I}\) is found by dividing the frequency of ~PLL4_MAIN_CLK~
-(\(F_{M}\)) by the ~SAI1_CLK_PRED~ (\(D_{a}\)) and ~SAI1_CLK_PODF~
-(\(D_{b}\)) fields of the ~CCM_CS1CDR~ register:
+(\(F_{M}\)) by the ~SAI1_CLK_PRED~ (\(D_{I_{1}}\)) and ~SAI1_CLK_PODF~
+(\(D_{I_{2}}\)) fields of the ~CCM_CS1CDR~ register:
 
 #+NAME: eq:sai1-freq1
 \begin{equation}
-F_{I} = \frac{F_{M}}{D_{a}D_{b}}
+F_{I} = \frac{F_{M}}{D_{I_{1}}D_{I_{2}}}
 \end{equation}
 
 \(F_{M}\) is found by dividing \(F_{P}\), the frequency of PLL4, by
@@ -192,17 +192,23 @@ F_{M} = \frac{F_{P}}{D_{p}D_{A}}
 \end{equation}
 
 \(F_{P}\) is the result of the multiplying the 24 MHz clock source
-(\(F_{X}\)) by the PLL4 divider, \(D_{P}\), which is the sum of the /PLL
-loop divider/, the ~DIV_SELECT~ field of ~CCM_ANALOG_PLL_AUDIO~
-(\(D_{S}\)) with the quotient of the /PLL fractional loop divider/
-numerator (~CCM_ANALOG_PLL_AUDIO_NUM~, \(D_{N}\)) and denominator
-(~CCM_ANALOG_PLL_AUDIO_DENOM~, \(D_{D}\)) registers:
+(\(F_{X}\)) by the PLL4 divider, \(D_{P}\):
 
 #+NAME: eq:pll4-freq
-\begin{align}
-F_{P} &= F_{X}D_{P} \\
-  &= F_{X}\left(D_{S} + \frac{D_{N}}{D_{D}}\right)
-\end{align}
+\begin{equation}
+F_{P} &= F_{X}D_{P}
+\end{equation}
+
+\(D_{P}\) is, in turn, the sum of the /PLL loop divider/, the
+~DIV_SELECT~ field of ~CCM_ANALOG_PLL_AUDIO~ (\(D_{S}\)) with the
+quotient of the /PLL fractional loop divider/ numerator
+(~CCM_ANALOG_PLL_AUDIO_NUM~, \(D_{N}\)) and denominator
+(~CCM_ANALOG_PLL_AUDIO_DENOM~, \(D_{D}\)) registers:
+
+#+NAME: eq:pll4-divider
+\begin{equation}
+D_{P} = D_{S} + \frac{D_{N}}{D_{D}}
+\end{equation}
 
 The ~DIV_SELECT~ field has a valid range of \(27 \leq D_{S} \leq 54\), and
 \(|D_{N}| < D_{D}\), so \(D_{P}\) describes (in theory) a number in the
@@ -213,9 +219,15 @@ following range:
 \]
 with \(1 \leq D_{D} \leq 2^{30}\); effectively, \(26 < D_{P} < 55\). MCUXpresso Config
 Tools, and the reference manual (see §13.3.2.2 and §14.6.1.3.4),
-indicate, however, that the output frequency range for PLL4 is "from
-650 MHz to 1.3 GHz", plus Config Tools contradicts the manual and
-states that \(D_{N}\) must be a /positive/ 30 bit integer, so:
+indicate, however, that the output frequency range for PLL4 is:
+
+#+NAME: eq:pll4-range
+\begin{equation}
+650\,\text{MHz} \leq F_{P} \leq 1\,300\,\text{MHz},
+\end{equation}
+
+plus Config Tools contradicts the manual and states that \(D_{N}\) must
+be a /positive/ 30 bit integer, so:
 
 #+begin_src julia :session :results output :eval never-export :exports both
 DpMin = 650e6/24e6
@@ -230,16 +242,19 @@ DpMax = 1300e6/24e6
 \left(27 + \frac{1}{12}_{}\right) \leq D_{P} \leq \left(54 + \frac{1}_{}{6}\right).
 \]
 
-Setting extreme values for \(D_{x}\), we can find the minimal valid
-\(F_{s}\):
+Setting extreme (but valid) values for the divisors, we can find the
+minimal valid \(F_{s}\):
 
 #+begin_src julia :session :results output :eval never-export :exports both
+# Maximal values for POST_DIV_SELECT and AUDIO_DIV
 POST_DIV_SELECT = 4
 AUDIO_DIV = 4
 pll4Div = POST_DIV_SELECT * AUDIO_DIV
+# Maximal values for SAI1_CLK_PRED and SAI1_CLK_PODF
 SAI1_CLK_PRED = 8
 SAI1_CLK_PODF = 64
 sai1Div = SAI1_CLK_PRED * SAI1_CLK_PODF
+# See earlier listing for DpMin
 FsMin = (OSC_24M * DpMin)/(pll4Div*sai1Div*1<<8)
 @printf "%s Hz <= Fs <= %s Hz" cfmt("%'d", FsMin) cfmt("%'d", FsMax)
 #+end_src
@@ -247,9 +262,29 @@ FsMin = (OSC_24M * DpMin)/(pll4Div*sai1Div*1<<8)
 #+RESULTS:
 : 310 Hz <= Fs <= 257,812 Hz
 
+** General Expression for the Sample Rate
+
+Bringing all of the above together, the general expression for
+achieving target sample rate \(\bar{F}_{s}\) is:
+
+#+NAME: eq:general-fs
+\begin{align}
+\bar{F}_{s} &= \frac{F_{I}}{2^{8}} \nonumber \\
+  &= \frac{F_{M}}{2^{8}D_{I_{1}}D_{I_{2}}} \nonumber \\
+  &= \frac{F_{X}D_{P}}{2^{8}D_{p}D_{A}D_{I_{1}}D_{I_{2}}} \nonumber \\
+  &= \frac{24\times10^{6}}{2^{8}}\frac{D_{S}+\frac{D_{N}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}
+\end{align}
+
+This reckoning alone doesn't take into account certain constraints on
+the system, however, such as eqref:eq:pll4-range and the frequency at
+the input of \(D_{I_{2}}\) being less than 300 MHz. There are too many
+free variables to solve for any one of them, so an iterative approach
+is probably going to be necessary.
+
 * Setting a different audio sample rate
 
-Say we want to set a sample rate of 48 kHz. Our target \(F_{I}\) is:
+Say we want to set a sample rate of \(F_{s} = 48\,\text{kHz}\). Our
+target \({F_{I}}\), \(\bar{F}_{I}\), equals \(\bar{F}_{S}\cdot2^{8}\):
 
 #+begin_src julia :session :results output :exports both :eval never-export
 Fs = 48000
@@ -260,10 +295,108 @@ Fi = Fs * 1<<8
 #+RESULTS:
 : Target SAI1_CLK_ROOT: 12,288,000 Hz
 
-Options:
-- *(30+(72/100))/(1*1*4*15)
-- *(40+(96/100))/(2*1*5*8)
-- *(51+(2/10))/(2*1*5*10)
+Let's (strategically) ignore \(D_{p}\) and \(D_{A}\), which we'll leave set
+to 1. Via the following iterative code we can find a selection of
+register and field options:
+
+#+begin_src julia :session :results output :eval never-export :exports both
+let
+    # Adjustment to all figures so we can compare integer targets...
+    multiplier = OSC_24M/1<<8
+
+    @printf "Target sample rate:   %s Hz\n" cfmt("%'d", Fs)
+    @printf "Target SAI1_CLK_ROOT: %s Hz\n\n" cfmt("%'d", Fi)
+
+    for div in 27:54
+        num = 0           # Initial numerator
+        denom = 10        # Start with tenths
+        sai1Pre = 1       # Initial SAI1 pre-divider
+        sai1Post = 1      # and post-divider
+        
+        pllFreq = OSC_24M * (div + num / denom)
+
+        # Adjust first sai1 divider to get a valid input to the second
+        # divider
+        while pllFreq / sai1Pre > 300e6 && sai1Pre < 8
+            sai1Pre += 1
+        end
+
+        # Adjust second sai1 divider to get a value below the target
+        while multiplier * div / (sai1Pre * sai1Post) > Fs && sai1Post < 64
+            sai1Post += 1
+        end
+
+        # If there's more than one multiplier between us and success,
+        # try a different PRED/PODF combination.
+        while (Fs * sai1Pre * sai1Post - div * multiplier > multiplier
+               && sai1Pre < 8)
+            sai1Pre += 1
+            sai1Post = 1
+            while (multiplier * div / (sai1Pre * sai1Post) > Fs
+                   && sai1Post < 64)
+                sai1Post += 1
+            end
+        end
+
+        if Fs * sai1Pre * sai1Post - div * multiplier > multiplier
+            # There's no way of calculating a match with this div
+            continue
+        end
+
+        # Iterate num and denom up until a match with target is
+        # achieved...
+        while (multiplier * (div + (num / denom)) < Fs * sai1Pre * sai1Post
+               && denom <= 1000)
+            # Increment the numerator
+            num += 1
+
+            if num == denom && (div + 1) * multiplier < Fs * sai1Pre * sai1Post
+                # There's no way of calculating a match with this div
+                break
+            end
+
+            sai1Root = OSC_24M * (div + num / denom) / (sai1Pre * sai1Post)
+            if isinteger(sai1Root) && Fi == Int(sai1Root)
+                # Found a match
+                @printf "24 MHz * (%d + %d/%d)" div num denom
+                @printf "/(1 * 1 * %d * %d)" sai1Pre sai1Post
+                @printf " = %f\n" (24e6 * (div + num / denom) / (sai1Pre * sai1Post))
+                break
+            end
+
+            while (multiplier * (div + num / denom) > Fs * sai1Pre * sai1Post
+                   && sai1Pre < 8
+                   && denom <= 100)
+                denom *= 10
+                sai1Pre += 1
+                sai1Post = 1
+
+                pllFreq = OSC_24M * (div + num / denom)
+
+                while pllFreq / sai1Pre > 300e6 && sai1Pre < 8
+                    sai1Pre += 1
+                end
+
+                while multiplier * div / (sai1Pre * sai1Post) > Fs && sai1Post < 64
+                    sai1Post += 1
+                end
+            end
+        end
+    end
+end
+#+end_src
+
+#+RESULTS:
+: Target sample rate:   48,000 Hz
+: Target SAI1_CLK_ROOT: 12,288,000 Hz
+: 
+: 24 MHz * (28 + 16/100)/(1 * 1 * 5 * 11) = 12288000.000000
+: 24 MHz * (30 + 72/100)/(1 * 1 * 4 * 15) = 12288000.000000
+: 24 MHz * (38 + 40/100)/(1 * 1 * 5 * 15) = 12288000.000000
+: 24 MHz * (40 + 96/100)/(1 * 1 * 5 * 16) = 12288000.000000
+: 24 MHz * (46 + 8/100)/(1 * 1 * 6 * 15) = 12288000.000000
+: 24 MHz * (51 + 2/10)/(1 * 1 * 5 * 20) = 12288000.000000
+
 
 * Footnotes
 

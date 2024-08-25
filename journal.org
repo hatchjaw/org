@@ -3276,3 +3276,44 @@ print(1 << 30)
 i.e. enough precision to adjust ~SAI1_CLK_ROOT~ in parts per billion.
 
 Entered on [2024-08-21 mer. 13:06]
+*** 2024-08-23 vendredi
+**** GSoC Drawing to a Close                                        :GSoC:
+Final submissions are due on Monday (18:00 UTC). Evaluations are due
+on September 2nd.
+
+***** Shehab --- [[https://gist.github.com/shehab299/0e0b9810f3b21f3874d0509ea30eeb39][Package Manager]]
+Probably this year's best work. No concerns about the quality or
+scope, and he's on top of his final submission, though I'd like to see
+another draft. Yann seems happy with what Shehab has achieved.
+
+***** Fay --- [[https://github.com/FayCarsons/Cables-Faust-Plugin][Faust in Cables.gl]]
+Fay has already made her final submission. Stéphane isn't happy with
+how much she's actually done, and I agree. Apparent lack of ambition
+on her part; not a huge amount to show for three months' toil. It's
+/fine/, but for someone as smart and creative as she, there should be
+more to show; bit of an air of self-satisfaction to her, and
+insufficient drive. She has promised some more examples, which might
+cast a more favourable light upon things in the end.
+
+***** Tyler --- [[https://github.com/Orisu179/AmatiPP][Faust VST]]
+Tyler has a bad habit of not asking for help, and, it seems, for
+leaving things to the last minute. Plugin development can be a messy
+affair, but he's had three months with four mentors around (Kamil
+quietly vanished, to be fair) and what he's produced is buggy,
+unstable, and a bit scattershot frankly. He spent weeks with an audio
+config issue on his system that he thought was a problem with his
+code. Anyway, I hope he produces a submission in time for us to give
+feedback.
+
+***** Advik --- [[https://github.com/FloofCat/faust-ddsp/tree/main][Faust DDSP]]
+Advik is very bright, but inflexible, arrogant and frequently rude; I
+concede, however, that he may not be fully aware of how his behaviour
+comes across, and there's an extent to which I'm just salty because
+I've failed to convince him of how the chain rule and backpropagation
+should work in forward mode. Anyway, his documentation is garbage;
+haphazard, tonally bizarre, passive aggressive in places. I expect
+that I'll have to merge his work out of courtesy, but unless he has a
+complete change of personality I don't think I'm going to like the
+result.
+
+Entered on [2024-08-23 ven. 12:42]
