@@ -1,0 +1,69 @@
+#+title:      Differentiable FIR Filter
+#+date:       [2024-08-26 lun. 20:06]
+#+filetags:   :autodiff:ddsp:
+#+identifier: 20240826T200637
+
+Let's start with the general FIR filter, adapted from
+[cite:@mcclellanSignal2003]:
+
+#+NAME: eq:general-fir-1
+\begin{equation}
+y[n] = \sum_{k=0}^{M-1}x_{k}s[n-k]
+\end{equation}
+
+#+begin_quote
+Typically \(b_{k}\) is used for filter coefficients, and \(x\) for the
+input signal, but, for consistency's sake (with other autodiff
+examples), since \(\mathbf{x}\) is our parameter vector, \(x_{k}\) are
+our coefficients, and \(s\) the input signal.
+#+end_quote
+
+We can express \(y = y[n]\) as:
+
+#+NAME: eq:general-fir-2
+\begin{equation}
+y &= f(\mathbf{v}) = \sum_{k=1}^{M}v_{2k-1}v_{2k},
+\end{equation}
+
+with
+
+#+NAME: eq:vees
+\begin{align*}
+v_{2k-1}(\mathbf{x}) &= x_{k} \\
+v_{2k}(\mathbf{x}) &= s[n - (k - 1)].
+\end{align*}
+
+To differentiate, use the chain rule:
+
+#+NAME: eq:diff-fir
+\begin{align*}
+\frac{\partial{}y}{\partial{}x_{i}} &= \sum_{j=1}^{2M}\frac{\partial{}y}{\partial{}v_{j}}\frac{\partial{}v_{j}}{\partial{}x_{i}} \\
+  &= \frac{\partial{}y}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x_{i}} + \cdots + \frac{\partial{}y}{\partial{}v_{2M}}\frac{\partial{}v_{2M}}{\partial{}x_{i}} \\
+  &= v_{2i} \\
+  &= s[n - (i - 1)]
+\end{align*}
+
+To give a concrete example, let \(M = 2\):
+
+#+NAME: eq:fir-diff-example
+\begin{align*}
+y &= f(v_{1}, v_{2}, v_{3}, v_{4}) = v_{1}v_{2} + v_{3}v_{4}, && v_{1}(x_{1}, x_{2}) = x_{1} \\
+  & && v_{2}(x_{1}, x_{2}) = s[n] \\
+  & && v_{3}(x_{1}, x_{2}) = x_{2} \\
+  & && v_{4}(x_{1}, x_{2}) = s[n-1] \\
+\frac{\partial{}y}{\partial{}x_{1}} &= \frac{\partial{}y}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x_{1}} +
+  \frac{\partial{}y}{\partial{}v_{2}}\frac{\partial{}v_{2}}{\partial{}x_{1}} +
+  \frac{\partial{}y}{\partial{}v_{3}}\frac{\partial{}v_{3}}{\partial{}x_{1}} +
+  \frac{\partial{}y}{\partial{}v_{4}}\frac{\partial{}v_{4}}{\partial{}x_{1}} \\
+  &= v_{2}\cdot1 + v_{1}\cdot0 + v_{4}\cdot0 + v_{3}\cdot0 \\
+  &= v_{2} \\
+  &= s[n], \\
+\frac{\partial{}y}{\partial{}x_{2}} &= v_{2}\cdot0 + v_{1}\cdot0 + v_{4}\cdot1 + v_{3}\cdot0 \\
+  &= s[n - 1].
+\end{align*}
+
+Differentiating an FIR filter wrt. \(x_{i}\) has the effect of plucking
+out the \(i\)^{th} tap. A differentiable delay can be modelled as a
+differentiable filter bank.
+
+** TODO Add Faust code for differentiable delay/filter bank
