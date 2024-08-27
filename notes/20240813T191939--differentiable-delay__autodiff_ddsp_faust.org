@@ -290,7 +290,7 @@ matplot_lib_filename
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-25ewEB/figureN7VbO6.png]]
+[[file:/tmp/babel-25ewEB/figureihzfNN.png]]
 
 - If \(v_{2}\) increases at the rate of increase of \(t\), \(v_{1}\) stays
   static. E.g. \(v_{2} = t - 0.1\) introduced at \(t = 0.1\):

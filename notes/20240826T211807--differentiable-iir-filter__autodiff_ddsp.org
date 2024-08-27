@@ -3,3 +3,79 @@
 #+filetags:   :autodiff:ddsp:
 #+identifier: 20240826T211807
 
+The general IIR filter, adapted from [cite:@mcclellanSignal2003], is:
+
+#+NAME: eq:general-iir
+\begin{equation}
+y[n] = \sum_{l=1}^{N}a_{l}y[n - l] + \sum_{k=0}^{M-1}b_{k}x[n - k]
+\end{equation}
+
+#+begin_quote
+For \(N = 0\), or \(a_{l} = 0\), this reduces to the [[denote:20240826T200637][general FIR filter]].
+#+end_quote
+
+Let's take the case of an all-pole filter, which we can express as:
+
+#+NAME: eq:all-pole
+\begin{equation}
+y[n] = bx[n] + \sum_{l=1}^{N}a_{l}y[n - l]
+\end{equation}
+
+Next, let's adapt the notation to make it more autodiff-friendly, with
+filter coefficients \(\mathbf{x}\) and input signal \(s\):
+
+#+NAME: eq:all-pole-autodiff
+\begin{equation}
+y[n] = bs[n] + \sum_{l=1}^{N}x_{l}y[n - l]
+\end{equation}
+
+We can express \(y = y[n]\) as a function of a vector of independent
+variables \(\mathbf{v}\):
+
+#+NAME: eq:all-pole-2
+\begin{equation}
+y = f(\mathbf{v}) = bs[n] + \sum_{l=1}^{N}v_{2l-1}v_{2l},
+\end{equation}
+
+where \(v_{j}\) is a function of a vector of filter coefficients
+\(\mathbf{x}\):
+
+#+NAME: eq:vees
+\begin{align*}
+v_{2l-1}(\mathbf{x}) &= x_{l} \\
+v_{2l}(\mathbf{x}) &= y[n - l].
+\end{align*}
+
+To find the derivative of \(y\) with respect to a filter coefficient
+\(x_{i}\), use the [[denote:20240819T095042][chain rule]]:
+
+#+NAME: eq:diff-one-pole
+\begin{align}
+\frac{\partial{}y}{\partial{}x_{i}} &= \frac{\partial{}}{\partial{}x_{i}}bs[n] + \sum_{j=1}^{2N}\frac{\partial{}y}{\partial{}v_{j}}\frac{\partial{}v_{j}}{\partial{}x_{i}} \\
+  &= 0 + \sum_{j=1}^{N}\left(\frac{\partial{}y}{\partial{}v_{2j-1}}\frac{\partial{}v_{2j-1}}{\partial{}x_{i}} + \frac{\partial{}y}{\partial{}v_{2j}}\frac{\partial{}v_{2j}}{\partial{}x_{i}}\right) \\
+  &= \sum_{j=1}^{N}\left(v_{2j}\frac{\partial{}v_{2j-1}}{\partial{}x_{i}} + v_{2j-1}\frac{\partial{}v_{2j}}{\partial{}x_{i}}\right) \\
+  &= v_{2i} + \sum_{j=1}^{N}x_{j}\frac{\partial{}}{\partial{}x_{i}}y[n-j] \\
+  &= y[n - i] + \sum_{j=1}^{N}x_{j}\frac{\partial{}}{\partial{}x_{i}}y[n-j]
+\end{align}
+
+For example, let \(N = 2\):
+
+#+NAME: eq:concrete-iir-diff
+\begin{align*}
+y &= f(v_{1}, v_{2}, v_{3}, v_{4}) = bs[n] + v_{1}v_{2} + v_{3}v_{4}, &&v_{1}(x_{1}, x_{2}) = x_{1} \\
+  & &&v_{2}(x_{1}, x_{2}) = y[n-1] \\
+  & &&v_{3}(x_{1}, x_{2}) = x_{2} \\
+  & &&v_{4}(x_{1}, x_{2}) = y[n-2] \\
+\frac{\partial{}y}{\partial{}x_{1}} &= \frac{\partial{}y}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x_{1}} +
+  \frac{\partial{}y}{\partial{}v_{2}}\frac{\partial{}v_{2}}{\partial{}x_{1}} +
+  \frac{\partial{}y}{\partial{}v_{3}}\frac{\partial{}v_{3}}{\partial{}x_{1}} +
+  \frac{\partial{}y}{\partial{}v_{4}}\frac{\partial{}v_{4}}{\partial{}x_{1}} \\
+  &= v_{2}\cdot1 + v_{1}\frac{\partial{}y}{\partial{}x_{1}}[n-1] + v_{4}\cdot0 + v_{3}\frac{\partial{}y}{\partial{}x_{1}}[n-2] \\
+  &= y[n-1] + x_{1}\frac{\partial{}y}{\partial{}x_{1}}[n-1] + x_{2}\frac{\partial{}y}{\partial{}x_{1}}y[n-2], \\
+\frac{\partial{}y}{\partial{}x_{2}} &= v_{2}\cdot0 + v_{1}\frac{\partial{}y}{\partial{}x_{2}}[n-1] + v_{4}\cdot1 + v_{3}\frac{\partial{}y}{\partial{}x_{2}}[n-2] \\
+  &= x_{1}\frac{\partial{}y}{\partial{}x_{2}}[n-1] + y[n-2] + x_{2}\frac{\partial{}y}{\partial{}x_{2}}[n-2].
+\end{align*}
+
+Differentiating an all-pole filter wrt. a filter coefficient \(x_{i}\)
+has the effect of extracting the \(i\)^{th} tap, and exhibits the same
+recurrence relation as the undifferentiated (primal) filter.

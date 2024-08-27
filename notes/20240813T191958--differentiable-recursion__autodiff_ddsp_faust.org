@@ -3,3 +3,107 @@
 #+filetags:   :autodiff:ddsp:faust:
 #+identifier: 20240813T191958
 
+A [[denote:20240826T211807][Differentiable IIR Filter]] is the general case of a differentiable
+recursion. Here, let's hone in on a self-contained example.
+
+* Differentiable ramp
+
+A ramp can be defined recursively:
+
+#+NAME: eq:ramp
+\begin{equation}
+y[n] = x_{1} + x_{2}y[n-1]
+\end{equation}
+
+In Faust, this takes the following form:
+
+#+begin_src faust :results file svg :file (org-babel-temp-file "faust" ".svg") :exports both
+x1 = hslider("x1", 0, -1, 1, .001);
+x2 = hslider("x2", 0, -1, 1, .001);
+process = x1 : +~(_,x2 : *);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-25ewEB/faustco1njb.svg]]
+
+Iterating the recurrence relation, with \(x_{1} = x_{2} = 1\):
+
+#+NAME: eq:ramp-iter
+\begin{align*}
+y[0] &= 1, \\
+y[1] &= 1 + y[0] = 1 + 1 \\
+     &= 2, \\
+y[2] &= 1 + y[1] = 1 + 2 \\
+     &= 3, \\
+     &\vdots
+\end{align*}
+
+The change in \(y\) with respect to time is clearly a constant, 1, but
+its partial derivatives with respect to \(\mathbf{x}\) are going to
+have some interesting exponential/logarithmic qualities depending on
+the values of \(x_{1}\) and \(x_{2}\).
+
+We can express \(y = y[n]\) as a function of a vector of independent
+variables \(\mathbf{v}\), which are in turn functions of a vector of
+independent variables \(\mathbf{x}\):
+
+#+NAME: eq:vees
+\begin{align*}
+y = f(\mathbf{v}) = v_{1} + v_{2}v_{3}, \quad v_{1}(\mathbf{x}) &= x_{1} \\
+  v_{2}(\mathbf{x}) &= x_{2} \\
+  v_{3}(\mathbf{x}) &= y[n-1]
+\end{align*}
+
+Differentiating \(y\) with respect to variable \(x_{i}\):
+
+#+NAME: eq:diff-ramp
+\begin{align}
+\frac{\partial{}y}{\partial{}x_{i}} &= \frac{\partial{}y}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x_{i}} +
+  \frac{\partial{}y}{\partial{}v_{2}}\frac{\partial{}v_{2}}{\partial{}x_{i}} +
+  \frac{\partial{}y}{\partial{}v_{3}}\frac{\partial{}v_{3}}{\partial{}x_{i}} \nonumber \\
+  &= \frac{\partial{}v_{1}}{\partial{}x_{i}} + v_{3}\frac{\partial{}v_{2}}{\partial{}x_{i}} + v_{2}\frac{\partial{}v_{3}}{\partial{}x_{i}}.
+\end{align}
+
+And selecting specific values for \(i\):
+
+#+NAME: eq:diff-ramp-impl
+\begin{align*}
+\frac{\partial{}y}{\partial{}x_{1}} &= 1 + y[n-1]\cdot0 + x_{2}\frac{\partial{}y}{\partial{}x_{1}}[n-1] \\
+  &= 1 + x_{2}\frac{\partial{}y}{\partial{}x_{1}}[n-1], \\
+y'[0] &= 1 \\
+y'[1] &= 1 + x_{2}\cdot1 \\
+  &= 1 + x_{2 }\\
+y'[2] &= 1 + x_{2}(1 + x_{2}) \\
+  &= 1 + x_{2} + x_{2}^{2} \\
+  &\vdots \\
+\frac{\partial{}y}{\partial{}x_{2}} &= 0 + y[n-1]\cdot1 + x_{2}\frac{\partial{}y}{\partial{}x_{2}}[n-1] \\
+  &= y[n-1] + x_{2}\frac{\partial{}y}{\partial{}x_{2}}[n-1], \\
+y'[0] &= 0 \\
+y'[1] &= y[0] + x_{2}\cdot0 \\
+  &= y[0] \\
+y'[2] &= y[1] + x_{2}y[0] \\
+y'[3] &= y[2] + x_{2}(y[1] + x_{2}y{0}) \\
+   &\vdots
+\end{align*}
+
+And indeed we have expressions that exhibit recursive growth. Note,
+however, that \(\frac{\partial{}y}{\partial{}x_{1}}\) reduces to \(1\) when \(x_{2} = 0\),
+because \(y\) is simply equal to \(x_{1}\); similarly, \frac{\partial{}y}{\partial{}x_{2}}
+reduces to \(0\) when \(x_{1} = 0\).
+
+Here's a Faust program (based on ~diff.lib~) that demos the above:
+
+#+begin_src faust :results none
+df = library("diff.lib");
+
+d = df.env((x1,x2))
+with {
+    x1 = hslider("[0]x1", 0, -1, 1, .001);
+    x2 = hslider("[1]x2", 0, -1, 1, .001);
+};
+
+process = d.var(1) : d.diff(+) ~ (d.diff(_),d.var(2) : d.diff(*))
+    : (_ <: attach(hbargraph("[2]y", -10, 10))),
+	  (_ <: attach(hbargraph("dy/dx1", -10, 10))),
+	  (_ <: attach(hbargraph("dy/dx2", -10, 10)));
+#+end_src
