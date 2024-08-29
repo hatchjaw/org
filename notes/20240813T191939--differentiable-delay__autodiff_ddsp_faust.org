@@ -137,12 +137,12 @@ By the chain rule, we have:
   &= -\frac{\partial{}}{\partial{}u}v_{1}(u).
 \end{align}
 
-Disappointingly, it feels like we're back to where we started, and
-that's essentially the nature of the beast in this
-instance. Intuitively, the derivative of \(y\) wrt. \(v_{2}\) involves
-the sensitivity of \(v_{1}\) to changes in \(v_{2}\). There's no symbolic
-approach to this, and a numerical approximation is almost certainly
-required.
+Disappointingly, it feels like we're back to where we started (albeit
+having introduced a negative sign), and that's essentially the nature
+of the beast in this instance. Intuitively, the derivative of \(y\)
+wrt. \(v_{2}\) involves the sensitivity of \(v_{1}\) to changes in
+\(v_{2}\). There's no symbolic approach to this, and a numerical
+approximation is almost certainly required.
 
 Nevertheless, our complete expression for \(\frac{\partial{}y}{\partial{}x_{i}}\),
 expanding eqref:eq:variable-delay-deriv, is:

@@ -3317,3 +3317,58 @@ complete change of personality I don't think I'm going to like the
 result.
 
 Entered on [2024-08-23 ven. 12:42]
+
+*** 2024-08-28 mercredi
+**** GSoC, Autodiff notes, Teensy clocking              :GSoC:DDSP:TEENSY:
+- GSoC is just about over. I need to submit Advik's evaluation and,
+  eventually, merge his PR; he's keen, apparently, to continue
+  work. We'll probably meet with Tyler on Friday; he probably needs to
+  go back to basics if he wants to continue with Amati++.
+- Finished writing up my automatic differentiation [[denote:20240812T140652][notes]] for the time
+  being; I can turn my attention back to the IFC paper.
+- I finally have a little Julia program for computing the coarse clock
+  register settings for Teensy, given a target sample rate. See my
+  [[denote:20240821T132619][note]] on the topic.
+  
+Entered on [2024-08-28 mer. 15:32]
+**** Teensy: conditioning the audio clock                     :TEENSY:PTP:
+Tried using the ethernet clock drift figures to condition the audio
+clock, but I need to take a more sophisticated approach. I think
+what's required is a measure of all-time drift, derived from
+per-second drift; given an evolving average drift, it should be
+possible to find an appropriate value for the PLL4 divider numerator;
+a value that will probably vary wildly at first, then settle down and
+be subject only to very small adjustments.
+
+Additionally, whatever adjustments are required could, in a manner
+similar to the ethernet clock itself, be smoothed over a second using
+(audio) interrupts as an opportunity to make corrections in a gradual
+fashion. Then there's the matter of implementing a PID; more
+investigation/research required.
+
+Entered on [2024-08-28 mer. 21:13]
+*** 2024-08-29 jeudi
+**** Teensy Synced                                            :TEENSY:PTP:
+...with caveats/provisos. So, this is all over a direct ethernet
+connection; doesn't perform so well via an unmanaged switch.
+
+Anyway, I modified ~PTPBase~ such that it has a member ~nspsAdjust~,
+so what was formerly a variable local to ~PTPBase::updateController~
+is now accessible via a method ~PTPBase::getAdjust~. ~nspsAdjust~ is
+the proportional-integral nanoseconds-per-second adjustment that's
+delivered straight to the function that adjusts the 1588 timer. As a
+figure, it represents the number of nanoseconds by which the clock
+needs to be adjusted that second, so divide it by 10^{9} and you've got
+the proportion by which the audio sample rate needs to be adjusted,
+i.e.
+
+\[
+\bar{F}_{s} = F_{s} \cdot \left(1 + \frac{\text{Adjust}}{10^{9}}\right)
+\]
+
+From that, given otherwise fixed dividers, it's straightforward to
+calculate the PLL4 numerator.
+
+***** TODO Type up proper notes on nsps adjustment applied to PLL4
+
+Entered on [2024-08-29 jeu. 19:14]

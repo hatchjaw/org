@@ -39,9 +39,9 @@ y[2] &= 1 + y[1] = 1 + 2 \\
 \end{align*}
 
 The change in \(y\) with respect to time is clearly a constant, 1, but
-its partial derivatives with respect to \(\mathbf{x}\) are going to
-have some interesting exponential/logarithmic qualities depending on
-the values of \(x_{1}\) and \(x_{2}\).
+its partial derivatives with respect to \(\mathbf{x}\) will have some
+interesting exponential/logarithmic qualities depending on the values
+of \(x_{1}\) and \(x_{2}\).
 
 We can express \(y = y[n]\) as a function of a vector of independent
 variables \(\mathbf{v}\), which are in turn functions of a vector of
