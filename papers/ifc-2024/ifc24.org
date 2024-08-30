@@ -130,11 +130,11 @@ Authors' affiliations have to be set below.
 ...otherwise =hyperref= throws a wobbler and won't link equations, etc.
 
 #+begin_src latex
-\usepackage{cleveref}
+\usepackage[noabbrev]{cleveref}
 #+end_src
 
-Coupled with the ~#+refproc:~ directive above, =cleveref= will not
-abbreviate cross-reference names.
+Coupled with the ~#+refproc:~ directive above, =cleveref= should not
+abbreviate cross-reference names... maybe for HTML, but not for LaTeX.
 
 ** Macros
 #+begin_src latex
@@ -222,12 +222,11 @@ process = 1;
 :CUSTOM_ID: sec:intro
 :END:
 
-
 Differentiable programming is a programming paradigm whereby a
 computer program can be differentiated end-to-end
 [cite:@blondelElements2024]. The sensitivity of a differentiable
 program's outputs to perturbations of its inputs can be computed via
-automatic differentiation (autodiff)
+automatic differentiation (AD, autodiff)
 [cite:@rallArithmetic1986;@baydinAutomatic2018;], producing a partial
 derivative with respect to each input parameter. End-to-end
 differentiability is a desirable quality in the creation of computer
@@ -265,7 +264,7 @@ current crop of Python libraries for machine learning
 
 A certain ambiguity abounds with regard to how automatic and symbolic
 differentiation relate to each other[cite:@laueEquivalence2022], and
-partisan opinions have been expressed over which is more
+partisan views have been expressed over which is more
 efficient[cite:@guenterEfficient2007]. The ambiguity may be ascribed
 in part to the former's nature as "partly symbolic and partly
 numerical" [cite:@harrisonBrief2021], and perhaps also to the fact
@@ -279,9 +278,296 @@ writing in the mid-1980's, before the waters were muddied by legions
 of machine learning researchers, observed (to paraphrase): /symbolic
 approaches produce formulas whereas automatic approaches produce
 numerical outputs/ [cite:@rallArithmetic1986]. The latter do so,
-however, by implementing differentiation rules, symbolically or
-manually, at the level, as we will see, of the primitive operations of
-the programming language upon which they are based.
+however, by implementing differentiation rules, symbolically, at the
+level, as we will see, of the primitive operations of the programming
+language upon which they are based.
+
+** The Arithmetic of Automatic Differentiation
+
+Two main /modes/ of automatic differentiation are typically alluded to
+in scholarly works on the topic: forward (or /tangent/) mode, and
+reverse (or /adjoint/) mode [cite:]. These modes describe, in effect,
+two directions of derivative propagation through a computation graph;
+in tangent mode, derivatives propagate forward, from inputs to
+outputs; in adjoint mode, propagation occurs backwards, from outputs
+to inputs. What does it mean, however, for a derivative to propagate?
+And is that propagation numerical or symbolic? As we will see, the
+answer to the second question is /"both"/; the answer to the first is
+less concise, but, irrespective of the direction of propagation, it
+lies in the chain rule of differentiation.
+
+*** The Chain Rule
+
+Consider a function, \(y = f(\mathbf{v})\), of \(m\) independent
+variables; for each \(j \in 1, \dots, m\), let \(v_{j} = v_{j}(\mathbf{w})\) be a
+differentiable function of \(n\) independent variables:
+
+#+NAME: eq:diff-functions-1
+\begin{align}
+y &= f(\mathbf{v}) = f(v_{1}, v_{2}, \dots, v_{m}), \\
+v_{j} &= v_{j}(\mathbf{w}) = v_{j}(w_{1}, w_{2}, \dots, w_{n}).
+\end{align}
+
+The chain rule states that, for any \(k \in 1, \dots, n\), the derivative of
+\(y\) with respect to \(w_{k}\) is:
+
+#+NAME: eq:chain-rule-1
+\begin{equation}
+\frac{\partial{}y}{\partial{}w_{k}} = \sum_{j=1}^{m}\frac{\partial{}y}{\partial{}v_{j}}\frac{\partial{}v_{j}}{\partial{}w_{k}}
+\end{equation}
+
+We can also imagine a situaion in which \(w_{k} = w_{k}(\mathbf{x})\) is, in
+turn, a function of \(p\) independent variables:
+
+#+NAME: eq:diff-functions-2
+\begin{equation}
+w_{k} &= w_{k}(\mathbf{x}) = w_{k}(x_{1}, x_{2}, \dots, x_{p}),
+\end{equation}
+in which case, for any \(i \in 1, \dots, p\), the derivative of \(y\)
+with respect to \(x_{i}\) is:
+
+#+NAME: eq:chain-rule-2
+\begin{equation}
+\frac{\partial{}y}{\partial{}x_{i}} = \sum_{j=1}^{m}\frac{\partial{}y}{\partial{}v_{j}}\left(
+  \sum_{k=1}^{n}\frac{\partial{}v_{j}}{\partial{}w_{k}}\frac{\partial{}w_{k}}{\partial{}x_{i}}
+\right)
+\end{equation}
+
+To give an audio-relevant example, imagine the case of a gain control,
+\(x_{1}\), and a DC offset, \(x_{2}\), applied to an input signal,
+\(s\). With some knowledge of elementary calculus, we could observe
+that \(y = sx_{1} + x_{2}\) and find \(\frac{\partial{}y}{\partial{}x_{1}} = s\), and
+\(\frac{\partial{}y}{\partial{}x_{2}} = 1\). This entails having an overview of the
+expression as a whole, however, which works for this simple example,
+but for more complex audio processes may not be feasible. Using the
+chain rule, we can break our expression down into its fundamental,
+/primitive/ operations, and differentiate each separately:
+
+#+NAME: eq:chainrule-example
+\begin{align*}
+y &= f(v_{1}, v_{2}) = v_{1} + v_{2} \\
+  & v_{1}(w_{1}, w_{2}, w_{3}) = w_{1}w_{2},\quad v_{2}(w_{1}, w_{2}, w_{3}) = w_{3},\\
+  & w_{1}(x_{1}, x_{2}) = s_{}, \quad w_{2}(x_{1}, x_{2}) = x_{1}, \quad w_{3}(x_{1}, x_{2}) = x_{2},\\
+\frac{\partial{}y}{\partial{}x_{i}} &= \sum_{j=1}^{2}\frac{\partial{}y}{\partial{}v_{j}}\left(
+  \sum_{k=1}^{3}\frac{\partial{}v_{j}}{\partial{}w_{k}}\frac{\partial{}w_{k}}{\partial{}x_{i}}
+\right) \\
+  &= \frac{\partial{}y}{\partial{}v_{1}}\left(
+  \frac{\partial{}v_{1}}{\partial{}w_{1}}\frac{\partial{}w_{1}}{\partial{}x_{i}} +
+  \frac{\partial{}v_{1}}{\partial{}w_{2}}\frac{\partial{}w_{2}}{\partial{}x_{i}} +
+  \frac{\partial{}v_{1}}{\partial{}w_{3}}\frac{\partial{}w_{3}}{\partial{}x_{i}}
+\right) + \\
+  &\quad\,\,\frac{\partial{}y}{\partial{}v_{2}}\left(
+  \frac{\partial{}v_{2}}{\partial{}w_{1}}\frac{\partial{}w_{1}}{\partial{}x_{i}} +
+  \frac{\partial{}v_{2}}{\partial{}w_{2}}\frac{\partial{}w_{2}}{\partial{}x_{i}} +
+  \frac{\partial{}v_{2}}{\partial{}w_{3}}\frac{\partial{}w_{3}}{\partial{}x_{i}}
+\right), \\
+i = 1, &= 1\left(w_{2}\cdot0 + w_{1}\cdot1 + 0\cdot0\right) + 1\left(0\cdot0 + 0\cdot1 + 1\cdot0\right) \\
+  &= w_{1} \\
+  &= s, \\
+i = 2, &= 1\left(w_{2}\cdot0 + w_{1}\cdot0 + 0\cdot1\right) + 1\left(0\cdot0 + 0\cdot0 + 1\cdot1\right) \\
+  &= 1.
+\end{align*}
+The above may look awfully fussy on paper, but note that the correct
+solutions have been reached without us having to consider anything
+more complicated at any one time than the derivative of the product of
+a variable by a constant. The answers emerged /automatically/, in a
+sense; indeed the chain rule is the fundamental basis of automatic
+differentiation.
+
+*** Forward Mode Automatic Differentiation
+
+To approach forward mode, we can use an example \F{} program with the
+following block diagram:
+
+#+begin_src faust :results file svg :file (org-babel-temp-file "faust-" ".svg") :exports results
+N = 5;
+// Just create something that the compiler will bundle into an
+// abstraction in the block diagram.
+S(j) = sum(i,N,((i+j) : sqrt)/N);
+process = (v0 <: _,_),v1 : v2,v3 : v4
+with {
+    v0 = S(0);
+    v1 = S(1);
+    v2 = _,S(2) : +;
+    v3 = +,S(3) : +;
+    v4 = +,S(4) : +;
+};
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-25ewEB/faust-RhquEY.svg]]
+
+This program consists of a number of primitive operations \(v_{j}\). \(N
+= 2\) of these we will consider to be parameter primitives, each
+taking its value from a vector, \(\mathbf{x} = \begin{bmatrix}x_{1} &
+x_{2}\end{bmatrix}\), of input variables:
+
+\begin{align}
+v_{0} &= x_{1}_{}, \label{eq:v0} \\
+v_{1} &= x_{2}. \label{eq:v1}
+\end{align}
+
+These parameters are passed to two further primitives:
+
+#+NAME: eq:v2-v3
+\begin{align}
+v_{2} &= v_{2}(v_{0}), \\
+v_{3} &= v_{3}(v_{0}, v_{1}),
+\end{align}
+and the program produces one output signal, the output of the final
+primitive in the graph:
+
+#+NAME: eq:output
+\begin{equation}
+y = v_{4} = v_{4}(v_{2}, v_{3}).
+\end{equation}
+
+In forward mode autodiff, differentiating each primitive is a case of
+producing a vector of partial derivatives with respect to the
+parameter vector \(\mathbf{x}\). For example, the input primitive
+\(v_{0}\) returns as its derivative:
+
+#+NAME: eq:dv0-dx
+\begin{equation}
+\frac{\partial{}v_{0}}{\partial{}\mathbf{x}} = \begin{bmatrix}\frac{\partial{}v_{0}}{\partial{}x_{1}} \\ \frac{\partial{}v_{0}}{\partial{}x_{2}}\end{bmatrix}.
+\end{equation}
+
+Of course, per [[cref:eq:v0]], this simplifies to \(\begin{bmatrix}1 &
+0\end{bmatrix}^{T}\), but the point of automatic differentiation is not
+to simplify, or take shortcuts, but to allow derivatives to emerge
+automatically via differentiation rules provided by each primitive.
+
+By that token, stepping forward through the graph, the partial
+derivatives, or /tangents/, of primitive \(v_{2}\) are, via the chain
+rule:
+
+#+NAME: eq:dv2-dx
+\begin{equation}
+\frac{\partial{}v_{2}}{\partial{}\mathbf{x}} = \begin{bmatrix}
+  \frac{\partial{}v_{0}}{\partial{}x_{1}}\frac{\partial{}v_{2}}{\partial{}v_{0}} \\
+  \frac{\partial{}v_{0}}{\partial{}x_{2}}\frac{\partial{}v_{2}}{\partial{}v_{0}}
+\end{bmatrix},
+\end{equation}
+notwithstanding the fact that \(v_{0}\) (and by extension \(v_{2}\)) does
+not depend on \(x_{2}\).
+
+\(v_{3}\) is a multivariate primitive, so the chain rule for multivariate
+functions comes into play:
+
+#+NAME: eq:dv3-dx
+\begin{equation}
+\frac{\partial{}v_{3}}{\partial{}\mathbf{x}} = \begin{bmatrix}
+  \frac{\partial{}v_{0}}{\partial{}x_{1}}\frac{\partial{}v_{3}}{\partial{}v_{0}} + \frac{\partial{}v_{1}}{\partial{}x_{1}}\frac{\partial{}v_{3}}{\partial{}v_{1}} \\
+  \frac{\partial{}v_{0}}{\partial{}x_{2}}\frac{\partial{}v_{3}}{\partial{}v_{0}} + \frac{\partial{}v_{1}}{\partial{}x_{2}}\frac{\partial{}v_{3}}{\partial{}v_{1}}
+\end{bmatrix}.
+\end{equation}
+
+Combining and extending [[cref:eq:dv2-dx,eq:dv3-dx]] we can produce a
+derivative expression for \(v_{4}\):
+
+#+NAME: eq:dv4-dx
+\begin{equation}
+\frac{\partial{}v_{4}}{\partial{}\mathbf{x}} = \begin{bmatrix}
+  \left(
+    \frac{\partial{}v_{0}}{\partial{}x_{1}}
+    \frac{\partial{}v_{2}}{\partial{}v_{0}}
+    \frac{\partial{}v_{4}}{\partial{}v_{2}}
+  \right) +
+  \left(
+    \frac{\partial{}v_{0}}{\partial{}x_{1}}
+    \frac{\partial{}v_{3}}{\partial{}v_{0}}
+    \frac{\partial{}v_{4}}{\partial{}v_{3}} +
+    \frac{\partial{}v_{0}}{\partial{}x_{1}}
+    \frac{\partial{}v_{3}}{\partial{}v_{1}}
+    \frac{\partial{}v_{4}}{\partial{}v_{3}}
+  \right) \\
+  \left(
+    \frac{\partial{}v_{0}}{\partial{}x_{2}}
+    \frac{\partial{}v_{2}}{\partial{}v_{0}}
+    \frac{\partial{}v_{4}}{\partial{}v_{2}}
+  \right) +
+  \left(
+    \frac{\partial{}v_{0}}{\partial{}x_{2}}
+    \frac{\partial{}v_{3}}{\partial{}v_{0}}
+    \frac{\partial{}v_{4}}{\partial{}v_{3}} +
+    \frac{\partial{}v_{0}}{\partial{}x_{2}}
+    \frac{\partial{}v_{3}}{\partial{}v_{1}}
+    \frac{\partial{}v_{4}}{\partial{}v_{3}}
+  \right)
+\end{bmatrix},
+\end{equation}
+and that, in effect, gives us an expression for
+\(\frac{\partial{}y}{\partial{}\mathbf{x}}\), a Jacobian matrix.
+
+The aim of automatic differentiation is not, however, to produce
+derivative expressions, but numerical outputs. To calculate the
+derivative of \(y\) with respect to \(x_{i}\), we begin by differentiating
+\(\mathbf{x}\) with respect to \(x_{i}\):
+
+#+NAME: eq:partial-x1
+\begin{equation}
+\frac{\partial{}\mathbf{x}}{\partial{}x_{i}}
+= \begin{bmatrix}\frac{\partial{}x_{1}}{\partial{}x_{i}} & \frac{\partial{}x_{2}}{\partial{}x_{i}}\end{bmatrix}.
+\end{equation}
+
+We then propagate this tangent vector through the graph, producing the
+/forward tangent output/ of the program. On paper this looks like a
+vector product (a /Jacobian vector product/ in fact
+[cite:@baydinAutomatic2018]), and simply extracts the first element of
+the vector in [[cref:eq:dv4-dx]]; for example:
+
+#+NAME: eq:vec-prod
+\begin{align}
+\frac{\partial{}y}{\partial{}x_{1}} &= \frac{\partial{}\mathbf{x}}{\partial{}x_{1}}\frac{\partial{}y}{\partial{}\mathbf{x}} \nonumber \\
+&= \begin{bmatrix}1 & 0\end{bmatrix}\frac{\partial{}y}{\partial{}\mathbf{x}} \nonumber \\
+&= \left(
+    \frac{\partial{}v_{0}}{\partial{}x_{1}}
+    \frac{\partial{}v_{2}}{\partial{}v_{0}}
+    \frac{\partial{}v_{4}}{\partial{}v_{2}}
+  \right) +
+  \left(
+    \frac{\partial{}v_{0}}{\partial{}x_{1}}
+    \frac{\partial{}v_{3}}{\partial{}v_{0}}
+    \frac{\partial{}v_{4}}{\partial{}v_{3}} +
+    \frac{\partial{}v_{0}}{\partial{}x_{1}}
+    \frac{\partial{}v_{3}}{\partial{}v_{1}}
+    \frac{\partial{}v_{4}}{\partial{}v_{3}}
+  \right).
+\end{align}
+To compute \(\frac{\partial{}y}{\partial{}x_{2}}\), we find \(\frac{\partial{}\mathbf{x}}{\partial{}x_{2}}
+= \begin{bmatrix}0 & 1\end{bmatrix}\) and proceed as above.
+
+To give an example, let's assign some actual functions to \(v_{n}\):
+
+#+NAME: eq:funcs
+\begin{equation}
+v_{2} = \sin(v_{0}), \quad v_{3} = v_{0} + v_{1}, \quad v_{4} = v_{2}v_{3},
+\end{equation}
+and substitute these into [[cref:eq:vec-prod]] (and the equivalent for
+\(x_{2}\)):
+
+#+NAME: eq:concrete-fwd
+\begin{align}
+\frac{\partial{}y}{\partial{}x_{1}} &= \left(1\cdot\cos(v_{0})\cdot{}v_{3}\right) + \left(1\cdot1\cdot{}v_{2} + 0\cdot1\cdot{}v_{2}\right) \nonumber \\
+  &= v_{3}\cos(v_{0}) + v_{2} \nonumber \\
+  &= (x_{1} + x_{2})\cos(x_{1}) + \sin(x_{1}), \\
+\frac{\partial{}y}{\partial{}x_{2}} & = \left(0\cdot\cos(v_{0})\cdot{}v_{3}\right) + \left(0\cdot1\cdot{}v_{2} + 1\cdot1\cdot{}v_{2}\right) \nonumber \\
+  &= v_{2} \nonumber \\
+  &= \sin(v_{0}) \nonumber \\
+  &= \sin(x_{1}),
+\end{align}
+which are exactly the results one would achieve with the symbolic
+expressions in [[cref:eq:symbolic-x1,eq:symbolic-x2]].
+
+Of course, this means that \(N\) passes are required to compute all of
+the partial derivatives of \(y\).
+
+*** Reverse Mode Automatic Differentiation
+
+*** Dual Number Arithmetic
+
+
+
 
 ** Modes of Automatic Differentiation
 
@@ -475,7 +761,7 @@ of achievening a particular goal within the syntax provided by \F{}.
 
 If one's particular goal was to be able to compose reciprocal
 expressions, one could create an arithmetic of the following form,
-using pattern matichng to avoid division by zero:
+using pattern matching to avoid division by zero:
 
 #+begin_src faust :results file svg :file images/arithmetic.svg :exports both
 import("stdfaust.lib");

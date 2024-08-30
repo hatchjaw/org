@@ -3369,6 +3369,11 @@ i.e.
 From that, given otherwise fixed dividers, it's straightforward to
 calculate the PLL4 numerator.
 
+Take note: I tried delaying setting up the audio subsystem entirely
+until after the 1588 clock is established, but that seems
+unstable. Seems more reliable to start the audio subsystem during
+~setup()~, but leave PLL4 bypassed.
+
 ***** TODO Type up proper notes on nsps adjustment applied to PLL4
 
 Entered on [2024-08-29 jeu. 19:14]

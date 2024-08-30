@@ -179,9 +179,19 @@ In the specific case of convolution with an impulse:
 (f \ast \delta)(t) = \int^{\infty}_{-\infty}f(\tau)\delta(t - \tau)\,d\tau = f(t),
 \end{equation}
 
-(because, when \(\tau = t\), \(\delta(t - \tau) = \delta(0) = 1,\) and \(f(\tau) =
-f(t)\)) which demonstrates the /sifting/ property of convolution with
-the delta function.
+because, when \(\tau = t\), \(\delta(t - \tau) = \delta(0) = 1,\) and \(f(\tau) = f(t)\))
+which demonstrates the /sifting/ property of convolution with the
+delta function.
+
+And with a time-shifted impulse [cite:@peacockFourier2013;
+@wheelerDirac1997]:
+
+#+NAME: eq:conv-with-shifted-delta
+\begin{equation}
+f(t) \ast \delta(t - k) = \int^{\infty}_{-\infty}f(t - \tau)\delta(\tau - k)\,d\tau = f(t - k),
+\end{equation}
+
+because, when \(\tau = k\), \(f(t - \tau) = f(t - k)\).
 
 It's perfectly possible to convolve with the derivative of the delta
 function:
@@ -224,8 +234,7 @@ f(t) \ast \delta'(t - k) &= \int^{\infty}_{-\infty}f(t - \tau)\delta'(\tau - k)\
 
 #+begin_quote
 (One might expect the result to be negative, but apparently computing
-\(du\) entails applying the chain rule to \(u\); I'm not sure, due to
-the result that follows...)
+\(du\) entails applying the chain rule to \(u\).)
 #+end_quote
 
 So, applying the result of eqref:eq:conv-with-shifted-deriv-impulse to
