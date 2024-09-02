@@ -58,7 +58,7 @@ Authors' affiliations have to be set below.
 ** Packages
 #+begin_src latex
 \usepackage{IFC-24}
-\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools}
 \usepackage{euscript}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -370,9 +370,9 @@ i = 2, &= 1\left(w_{2}\cdot0 + w_{1}\cdot0 + 0\cdot1\right) + 1\left(0\cdot0 + 0
 The above may look awfully fussy on paper, but note that the correct
 solutions have been reached without us having to consider anything
 more complicated at any one time than the derivative of the product of
-a variable by a constant. The answers emerged /automatically/, in a
-sense; indeed the chain rule is the fundamental basis of automatic
-differentiation.
+a variable by a constant (e.g. \(\frac{\partial{}v_{1}}{\partial{}w_{2}}\)). The answers
+emerged /automatically/, in a sense; indeed the chain rule is the
+fundamental basis of automatic differentiation.
 
 *** Forward Mode Automatic Differentiation
 
@@ -393,7 +393,9 @@ with {
     v4 = +,S(4) : +;
 };
 #+end_src
-
+#+CAPTION: Block diagram of a \F{} program consisting of primitive
+#+CAPTION: operators, \(v_{j}\).
+#+NAME: fig:block-diag-forward-mode
 #+RESULTS:
 [[file:/tmp/babel-25ewEB/faust-RhquEY.svg]]
 
@@ -415,31 +417,32 @@ v_{2} &= v_{2}(v_{0}), \\
 v_{3} &= v_{3}(v_{0}, v_{1}),
 \end{align}
 and the program produces one output signal, the output of the final
-primitive in the graph:
+primitive in the graph, which we can refer to as the /primal/ output
+of the program:
 
 #+NAME: eq:output
 \begin{equation}
 y = v_{4} = v_{4}(v_{2}, v_{3}).
 \end{equation}
 
-In forward mode autodiff, differentiating each primitive is a case of
-producing a vector of partial derivatives with respect to the
-parameter vector \(\mathbf{x}\). For example, the input primitive
-\(v_{0}\) returns as its derivative:
+In forward mode, differentiating each primitive is a case of computing
+the sensitivity of each primitive to changes in the program's inputs,
+producing a /tangent/ vector of partial derivatives, each with respect
+to an element in the parameter vector \(\mathbf{x}\). For example, the
+input primitive \(v_{0}\) returns as its derivative:
 
 #+NAME: eq:dv0-dx
 \begin{equation}
 \frac{\partial{}v_{0}}{\partial{}\mathbf{x}} = \begin{bmatrix}\frac{\partial{}v_{0}}{\partial{}x_{1}} \\ \frac{\partial{}v_{0}}{\partial{}x_{2}}\end{bmatrix}.
 \end{equation}
 
-Of course, per [[cref:eq:v0]], this simplifies to \(\begin{bmatrix}1 &
-0\end{bmatrix}^{T}\), but the point of automatic differentiation is not
-to simplify, or take shortcuts, but to allow derivatives to emerge
+On paper, per [[cref:eq:v0]], this simplifies to \(\begin{bmatrix}1 &
+0\end{bmatrix}^{T}\), but in the context of automatic differentiation no
+such simplification takes place; rather, derivatives emerge
 automatically via differentiation rules provided by each primitive.
 
 By that token, stepping forward through the graph, the partial
-derivatives, or /tangents/, of primitive \(v_{2}\) are, via the chain
-rule:
+derivatives of primitive \(v_{2}\) are, via the chain rule:
 
 #+NAME: eq:dv2-dx
 \begin{equation}
@@ -497,12 +500,12 @@ derivative expression for \(v_{4}\):
 \end{bmatrix},
 \end{equation}
 and that, in effect, gives us an expression for
-\(\frac{\partial{}y}{\partial{}\mathbf{x}}\), a Jacobian matrix.
+\(\frac{\partial{}y}{\partial{}\mathbf{x}}\), a \(2\times1\) Jacobian matrix.
 
-The aim of automatic differentiation is not, however, to produce
-derivative expressions, but numerical outputs. To calculate the
-derivative of \(y\) with respect to \(x_{i}\), we begin by differentiating
-\(\mathbf{x}\) with respect to \(x_{i}\):
+The ultimate aim of automatic differentiation is not, however, to
+produce derivative expressions, but numerical outputs. To calculate
+the numerical value of the derivative of \(y\) with respect to \(x_{i}\),
+we begin by differentiating \(\mathbf{x}\) with respect to \(x_{i}\):
 
 #+NAME: eq:partial-x1
 \begin{equation}
@@ -535,9 +538,9 @@ the vector in [[cref:eq:dv4-dx]]; for example:
   \right).
 \end{align}
 To compute \(\frac{\partial{}y}{\partial{}x_{2}}\), we find \(\frac{\partial{}\mathbf{x}}{\partial{}x_{2}}
-= \begin{bmatrix}0 & 1\end{bmatrix}\) and proceed as above.
+= \begin{bmatrix}0 & 1\end{bmatrix}\) and proceed similarly.
 
-To give an example, let's assign some actual functions to \(v_{n}\):
+To give an example, let's assign some concrete functions to \(v_{n}\):
 
 #+NAME: eq:funcs
 \begin{equation}
@@ -553,114 +556,168 @@ and substitute these into [[cref:eq:vec-prod]] (and the equivalent for
   &= (x_{1} + x_{2})\cos(x_{1}) + \sin(x_{1}), \\
 \frac{\partial{}y}{\partial{}x_{2}} & = \left(0\cdot\cos(v_{0})\cdot{}v_{3}\right) + \left(0\cdot1\cdot{}v_{2} + 1\cdot1\cdot{}v_{2}\right) \nonumber \\
   &= v_{2} \nonumber \\
-  &= \sin(v_{0}) \nonumber \\
-  &= \sin(x_{1}),
+  &= \sin(x_{1}).
 \end{align}
-which are exactly the results one would achieve with the symbolic
-expressions in [[cref:eq:symbolic-x1,eq:symbolic-x2]].
 
-Of course, this means that \(N\) passes are required to compute all of
-the partial derivatives of \(y\).
+Of course, the above means that \(N\) passes are required to compute
+all of the partial derivatives of \(y\).
 
 *** Reverse Mode Automatic Differentiation
 
-*** Dual Number Arithmetic
+For reverse mode, consider a very similar \F{} program to the one
+described above:
 
-
-
-
-** Modes of Automatic Differentiation
-
-Two main modes of automatic differentiation are typically made
-reference to in scholarly works on the topic: forward (or /tangent/)
-mode, and reverse (or /adjoint/) mode [cite:].[fn:3] Tangent and
-adjoint mode automatic differentiation describe, in effect, two directions of
-derivative propagation through a computation graph; we will discuss
-both in the sections to follow. To begin with, consider a (\F{})
-program with the following computation graph:
-
-#+begin_src faust :results file svg :file images/block1.svg :exports results
+#+begin_src faust :results file svg :file (org-babel-temp-file "faust-" ".svg") :exports results
 N = 5;
+// Just create something that the compiler will bundle into an
+// abstraction in the block diagram.
 S(j) = sum(i,N,((i+j) : sqrt)/N);
-process = (v0 <: _,_),v1 : v2,v3 : v4
+process = (v00 <: _,_),v01 : v10,v11 : v20
 with {
-    v0 = S(0);
-    v1 = S(1);
-    v2 = _,S(2) : +;
-    v3 = +,S(3) : +;
-    v4 = +,S(4) : +;
+    v00 = S(0);
+    v01 = S(1);
+    v10 = _,S(2) : +;
+    v11 = +,S(3) : +;
+    v20 = +,S(4) : +;
 };
 #+end_src
-
+#+CAPTION: Block diagram of a \F{} program with primitives
+#+CAPTION: organised into layers in preparation for reverse mode
+#+CAPTION: automatic differentiation.
+#+NAME: fig:block-diag-reverse-mode
 #+RESULTS:
-[[file:images/block.svg]]
+[[file:/tmp/babel-25ewEB/faust-vN3e6l.svg]]
 
-This program consists of a number of what we will consider /primitive/
-operations, \(v_{n}\). The program features \(N = 2\) input primitives
-each taking its value from a vector, \(\mathbf{x} = \begin{bmatrix}x_{1}
-& x_{2}\end{bmatrix}\), of input variables:
+As with forward mode, we have an input vector \(\mathbf{x}\) of length
+\(N = 2\). This time, however, we group our primitives, \(v_{p,q}\), into
+layers, \(p\), and identify them by their index, \(q\), within each
+layer:
 
+
+#+NAME: eq:primitives
+\begin{align*}
+v_{0,0} &= x_{1,} \\
+v_{0,1} &= x_{2}, \\
+v_{1,0} &= v_{1,0}(v_{0,0}) = v_{1,0}(x_{1}), \\
+v_{1,1} &= v_{1,1}(v_{0,0}, v_{0,1}) = v_{1,1}(x_{1}, x_{2}), \\
+v_{2,0} &= v_{2,0}(v_{1,0}, v_{1,1}) = v_{2,0}(v_{1,0}(x_{1}), v_{1,1}(x_{1}, x_{2})).
+\end{align*}
+As before, we have a single output, \(y = v_{2,0}\).
+
+Whereas in forward mode the primal and tangent outputs of the program
+are computed in parallel during the forward pass, in reverse mode we
+complement the forward primal pass with a /reverse adjoint pass/;
+instead of computing the /sensitivity/ of each primitive with respect to
+its inputs, we compute the /influence/ of a given primitive on the
+output of the program (or the sensitivity of the output with respect
+to a given primitive):
+
+#+NAME: eq:adjoint
+\begin{equation}
+\bar{v_{}}_{j} = \frac{\partial{}y}{\partial{}v_{j}}.
+\end{equation}
+
+Rather than propagate successive tangent vectors forward through the
+computation graph, analogous to setting a seed value of \(1\) for
+\(x_{i}'\) [cite:@yuDNAD2013], we instead compute the adjoint of the
+program's output:
+
+#+NAME: eq:y-adjoint
+\begin{equation}
+\bar{v}_{2,0} = \bar{y} = \frac{\partial{}y}{\partial{}y} = 1,
+\end{equation}
+and propagate that backward though the graph. Adjoints for layer \(p =
+1\) are:
+
+#+NAME: eq:v1-adjoints
+\begin{equation}
+\bar{v}_{1,q} &= \bar{v}_{2,0}\frac{\partial{}v_{2,0}}{\partial{}v_{1,q}} = \frac{\partial{}y}{\partial{}v_{2,0}}\frac{\partial{}v_{2,0}}{\partial{}v_{1,q}}.
+\end{equation}
+
+In general, the adjoint for primitive \(v_{p,q}\) is found as the sum of
+the derivatives of the \(M\) primitives in the \((p+1)\)^{th} layer:
+
+#+NAME: eq:general-adjoint
 \begin{align}
-v_{0} &= x_{1}_{}, \label{eq:v0} \\
-v_{1} &= x_{2}, \label{eq:v1}
+\bar{v}_{p,q} &= \frac{\partial{}y}{\partial{}v_{p,q}} = \sum^{M-1}_{m=0}\frac{\partial{}y}{\partial{}v_{p+1,m}}\frac{\partial{}v_{p+1,m}}{\partial{}v_{p,q}} \\
+  &= \sum^{M-1}_{m=0}\bar{v}_{p+1,m}\frac{\partial{}v_{p+1,m}}{\partial{}v_{p,q}},
 \end{align}
-and produces one output, \(y = v_{4}\), the output of the final
-primitive in the graph.
+so adjoints for the input layer, \(p = 0\), emerge as follows:
 
-\(v_{4}\) performs some primitive operation on two input signals, so it
-can be characterised as a function, \(f\):
-
-#+NAME: eq:prim1
-\begin{equation}
-v_{4} = f(v_{2}, v_{3}),
-\end{equation}
-which acts on the outputs of primitives \(v_{2}\) and \(v_{3}\), which can
-also be expressed as functions of their inputs:
-
-#+NAME: eq:prim2
+#+name: eq:v0-adjoint
 \begin{align}
-v_{3} &= g(v_{0}, v_{1}), \\
-v_{2} &= h(v_{0}).
+\bar{v}_{0,q} &= \bar{v}_{1,0}
+  \frac{\partial{}v_{1,0}}{\partial{}v_{0,q}} +
+  \bar{v}_{1,1}
+  \frac{\partial{}v_{1,1}}{\partial{}v_{0,q}} \nonumber \\
+&= \bar{v}_{2,0}
+  \frac{\partial{}v_{2,0}}{\partial{}v_{1,0}}
+  \frac{\partial{}v_{1,0}}{\partial{}v_{0,q}} +
+  \bar{v}_{2,0}
+  \frac{\partial{}v_{2,0}}{\partial{}v_{1,1}}
+  \frac{\partial{}v_{1,1}}{\partial{}v_{0,q}} \nonumber \\
+&= \frac{\partial{}y}{\partial{}v_{2,0}}
+  \frac{\partial{}v_{2,0}}{\partial{}v_{1,0}}
+  \frac{\partial{}v_{1,0}}{\partial{}v_{0,q}} +
+  \frac{\partial{}y}{\partial{}v_{2,0}}
+  \frac{\partial{}v_{2,0}}{\partial{}v_{1,1}}
+  \frac{\partial{}v_{1,1}}{\partial{}v_{0,q}},
 \end{align}
+giving us:
 
-Using the definitions in [[cref:eq:v0,eq:v1]], \(y\) can be defined as
-follows:
-
-#+NAME: eq:out-func
+#+NAME: eq:xi-adjoint
 \begin{equation}
-y = f(h(x_{1}), g(x_{1}, x_{2})).
-\end{equation}
-This describes the /primal expression/ of our program.
-
-Symbolically, we can find the partial derivative of \(y\) with respect
-to \(x_{i}\) using the chain rule:
-
-#+NAME: eq:symbolic
-\begin{equation}
-\frac{\partial{}y}{\partial{}x_{i}} = \frac{\partial{}h}{\partial{}x_{i}}\frac{\partial{}f}{\partial{}h} + \frac{\partial{}g}{\partial{}x_{i}}\frac{\partial{}f}{\partial{}g}.
+\bar{x}_{i} = \frac{\partial{}y}{\partial{}x_{i}} = \bar{v}_{0,i-1}.
 \end{equation}
 
-The symbolic approach is dependent on knowing the structure of the
-graph as a whole, however, and for an arbitrary program this is not
-practical. To differentiate the program --- or indeed any program with
-primitives whose derivatives are well-defined --- /automatically/, we
-apply the chain rule at the level of each primitive operation, passing
-the results forward or backward depending on the chosen automatic
-differentiation mode.
+Expanding the terms above isn't really necessary, and
+[[cref:eq:v0-adjoint]] could end at the first line; we have definitions
+for \(\bar{v}_{1,0}\) and \(\bar{v}_{1,1}\) and these propagate
+backward through the graph without any need for them to be
+recomputed. In effect, though the graph may branch as adjoints
+propagate, we achieve both \(\frac{\partial{}y}{\partial{}x_{1}} =
+\bar{v}_{0,0}\) and \(\frac{\partial{}y}{\partial{}x_{2}} =
+\bar{v}_{0,1}\) in a single pass, unlike in tangent mode, where two
+passes are required.
 
-*** Forward mode
+As with the [[denote:20240812T142629][Forward Mode]] example, let's assign some functions to
+\(v_{p,q}\) to verify our implementation:
 
+#+NAME: eq:concrete-funcs
+\begin{equation}
+v_{1,0} = \sin(v_{0,0}), \quad v_{1,1} = v_{0,0} + v_{0,1}, \quad v_{2,0} = v_{1,0}v_{1,1,}
+\end{equation}
+and substitute these into [[cref:eq:v0-adjoint]]:
 
+#+NAME: eq:concrete-rev
+\begin{align}
+\frac{\partial{}y}{\partial{}x_{1}} &= 1\cdot{}v_{1,1}\cdot\cos(v_{0,0}) + 1\cdot{}v_{1,0}\cdot1 \nonumber \\
+  &= (v_{0,0} + v_{0,1})\cos(v_{0,0}) + v_{1,0} \nonumber \\
+  &= (x_{1} + x_{2})\cos(x_{1}) + \sin(x_{1}), \\
+\frac{\partial{}y}{\partial{}x_{2}} &= 1\cdot{}v_{1,1}\cdot0 + 1\cdot{}v_{1,0}\cdot1 \nonumber \\
+  &= v_{1,0} \nonumber \\
+  &= \sin(v_{0,0}) \nonumber \\
+  &= \sin(x_{1}),
+\end{align}
+which are entirely the same results achieved via tangent mode.
 
-** The Arithmetic of Differentiation
+For reverse mode to work in practice, however, some knowledge of a
+program's structure is required. Whether this is achived via a
+bookkeeping mechanism [cite:@baydinAutomatic2018] such as a /tape/
+[cite:@pearlmutterReversemode2008;@radulYou2023], or by organising the
+program into layers as we have here, a degree of complexity is
+introduced that tangent mode, with its more brute-force approach, does
+not.
 
-The arithmetic of forward mode automatic differentiation can be
-derived by formulating differentiation in a manner similar to the
-complex numbers [cite:@rallArithmetic1986;@yuDNAD2013]. Where complex
-arithmetic uses the imaginary unit \(i\) to designate the imaginary
-part of a complex number \(z = x + iy\), with \(i^{2} = -1\),
-differentiable arithmetic uses the /nilpotent
-symbol/[cite:@yuDNAD2013;@baydinAutomatic2018] \(\varepsilon\):
+*** Dual Number Arithmetic
+
+One interesting property of forward mode lies in the possibility of
+formulating differentiation in a manner similar to the complex numbers
+[cite:@rallArithmetic1986;@yuDNAD2013]. Where complex arithmetic uses
+the imaginary unit \(i\) to designate the imaginary part of a complex
+number \(z = x + iy\), with \(i^{2} = -1\), differentiable arithmetic
+uses the /nilpotent symbol/[cite:@yuDNAD2013;@baydinAutomatic2018]
+\(\varepsilon\):
 
 #+NAME: eq:nilpotent
 \begin{equation}
@@ -719,6 +776,16 @@ We find that our arithmetic produces the expected numerical results
 /automatically/ via composition of the fundamental operations
 described in [[cref:eq:addition-rule-dual,eq:product-rule-dual]].
 
+Differentiation arithmetic of this sort is a special case of a more
+general /gradient arithmetic/, which comes into effect when multiple
+variables are present, and thus multiple partial derivatives must be
+calculated:
+
+#+NAME: eq:dual-gradient
+\begin{equation}
+U = \langle u, \nabla{}u \rangle.
+\end{equation}
+
 ** Extending \F{}'s Arithmetic
 
 One quality generally possessed by automatic differentiation
@@ -726,12 +793,12 @@ implementations is that of allowing the programmer to write
 differentiable programs with minimal changes to the syntax of their
 code. This is typically achieved either by source code transformation
 or operator overloading [cite:@yuDNAD2013;@baydinAutomatic2018]
---- neither of which is available in the \F language.[fn:1] We could
+--- neither of which is available in the \F{} language.[fn:1] We could
 take an approach similar to Wengert's 1964 demonstration of the
 composition of differentiable functions in Fortran
 [cite:@wengertSimple1964] and define differentiable functions
 ~diffAdd~, ~diffMul~, etc. each accepting and returning dual numbers;
-thanks to \F's pattern matching abstraction, however, we can go one
+thanks to \F{}'s pattern matching abstraction, however, we can go one
 better, achieving something akin to, albeit slightly more verbose
 than, operator overloading.
 
@@ -820,9 +887,9 @@ produces one output signal, \(y\):
 \begin{equation}
 y = u + v.
 \end{equation}
-Note that \F's addition primitive has no special knowledge of its
+Note that \F{}'s addition primitive has no special knowledge of its
 arguments, their history, provenance, etc., it just consumes them and
-returns their sum. In \F's arithmetic, the addition of two signals is
+returns their sum. In \F{}'s arithmetic, the addition of two signals is
 simply well-defined.
 
 Suppose that \(y\) is dependent on some variable \(x\), and that we
@@ -830,7 +897,7 @@ wish to know how sensitive \(y\) is to perturbations in \(x\). We can
 produce an analytic expression for this sensitivity by differentiating
 \(y\) with respect to \(x\). Recall, from [[cref:eq:addition-rule]],
 that a dual-number addition takes the form of two additions in
-parallel, which, in \F{} could be expressed like this:
+parallel; in \F{}, that could be expressed as follows:
 
 #+begin_src faust :results svg file :file images/dualadd.svg :exports both
 process = +,+;
@@ -950,26 +1017,26 @@ y = uv + w, \quad v = x_1, \quad w = x_2.
 \end{equation}
 Once again \(u\) is an arbitrary input signal, for which we have no
 analytic expression. Now, rather than being a lone ordinary derivative
-\(\frac{dy}{dx}\), the derivative of \(y\) --- \(y'\) --- is a matrix
+\(\frac{dy}{dx}\), the sensitivity of \(y\) --- \(\nabla{}y\) --- is a matrix
 of partial derivatives:
 
 #+NAME: eq:pds
 \begin{equation}
-y' = \frac{\partial y}{\partial \mathbf{x}}
+\nabla{}y = \frac{\partial y}{\partial \mathbf{x}}
 = \begin{bmatrix}\frac{\partial y}{\partial x_1} \\
 \frac{\partial y}{\partial x_2}\end{bmatrix}.
 \end{equation}
 Our algorithm takes two parameter inputs, and produces one output
-signal, so the resulting /Jacobian/ matrix is of dimension \(2 \times
+signal, so the resulting Jacobian matrix is of dimension \(2 \times
 1\). Returning to dual signal representation and applying the chain,
 product and addition rules of differentiation, we have:
 
 #+NAME: eq:dual-gain-dc
 \begin{align}
-\langle y,y' \rangle &=
-\langle u,u' \rangle \langle v,v' \rangle + \langle w,w' \rangle \nonumber \\
-&= \langle uv,u'v + v'u \rangle + \langle w,w' \rangle \nonumber \\
-&= \langle uv + w,u'v + v'u + w'\rangle,
+\langle y,\nabla{}y \rangle &=
+\langle u,\nabla{}u \rangle \langle v,\nabla{}v \rangle + \langle w,\nabla{}w \rangle \nonumber \\
+&= \langle uv,\nabla{}uv + \nabla{}vu \rangle + \langle w,\nabla{}w \rangle \nonumber \\
+&= \langle uv + w,\nabla{}uv + \nabla{}vu + \nabla{}w\rangle,
 \end{align}
 
 To implement the above in \F{} calls for the creation of multivariate
@@ -1022,12 +1089,12 @@ env(vars) = environment {
     diffAdd = route(nIN, nOUT,
       (u, 1), (v, 2), // u + v
       par(i, vars.N,
-	// du/dx_i + dv/dx_i
-	(u+i+1, dx), (v+i+1, dx+1)
-	with {
-	  // Start of derivatives wrt x_i
-	  dx = 2*i+3;
-	}
+        // du/dx_i + dv/dx_i
+        (u+i+1, dx), (v+i+1, dx+1)
+        with {
+          // Start of derivatives wrt x_i
+          dx = 2*i+3;
+        }
       )
     ) with {
       nIN = 2+2*vars.N;
@@ -1079,10 +1146,11 @@ process = d.input,X.var(1)
 #+CAPTION: input signal (see [[cref:lst:gain-dc-diff]]).
 #+RESULTS: lst:gain-dc-diff
 [[file:images/gain-dc.svg]]
-See [[cref:fig:gain-dc]] for the block diagram of this program. Note
-that while the routing for each primitive --- particularly ~diff(*)~
---- may be quite involved (and would only become more complex with the
-addition of further variables) the ~df~ library abstracts this away.
+See [[cref:fig:gain-dc]] for the block diagram of this program. Note that
+while the routing for each primitive --- particularly ~diff(*)~ ---
+may be quite complex (and would only become more involved with the
+addition of further variables) the ~df~ library abstracts this
+complexity away.
 
 ** Parameter Optimisation via Gradient Descent
 
@@ -1100,7 +1168,7 @@ The algorithm in [[cref:lst:gain-dc]] is dependent on hidden parameters
 assign this algorithm to a variable named ~target~. Its differentiable
 equivalent in [[cref:lst:gain-dc-diff]] is dependent on estimated
 parameters \(\mathbf{\hat{x}}\) and produces the dual output signal,
-\(\langle \hat{y}, \hat{y}' \rangle\); we assign this to a variable named
+\(\langle \hat{y}, \nabla\hat{y} \rangle\); we assign this to a variable named
 ~estimate~. The output signals produced by ~target~ and ~estimate~ can
 now be compared by way of a loss function; to this end, we can employ
 time-domain L1-norm loss of the form:
@@ -1174,7 +1242,7 @@ gradients produced by the latter back to ~estimate~.
 #+CAPTION: [[cref:lst:gain-dc,lst:gain-dc-diff,lst:loss-function]]
 #+CAPTION: respectively for definitions of ~target~,
 #+CAPTION: ~estimate~, and ~d.lossL1~.
-#+begin_src faust
+#+begin_src faust :results none
 process = no.noise <: (
     route(nvars+nInputs, nvars+nInputs,
       // Route gradients to estimate.
@@ -1195,18 +1263,258 @@ with {
 
 [link to example files]
 
+** Differentiation of Audio-specific Primitives
+
+We have established that we can write differentiable counterparts to
+some of the fundamental primitive operators in \F{}'s arithmetic. But
+what about the more domain-specific operators of the language? Two
+particularly interesting examples are \F{}'s delay operators and
+recursive composition operation.
+
+*** Differentiable Delay
+
+What is the derivative of a delayed expression? To explore this idea,
+consider the case of delaying a function \(f(v)\), \(v = v(x)\), by
+some fixed time \(\tau\):
+
+#+NAME: eq:fixed-delay
+\begin{align}
+y = f(v) &= v(t - \tau).
+\end{align}
+
+The derivative of the above, via the chain rule, is:
+
+#+NAME: eq:diff-delay-1
+\begin{equation}
+\frac{dy}{dx} = \frac{dy}{dv}\frac{dv}{dx} \\
+\end{equation}
+
+But what is \(\frac{dy}{dv}\)? To proceed, recall that the impulse
+response of the ideal delay system is a time-shifted impulse:
+
+#+NAME: eq:ideal-delay-ir
+\begin{equation}
+h(t) = \delta(t - \tau),
+\end{equation}
+and we can represent cref:eq:fixed-delay as a convolution of \(v(t)\)
+and that impulse response:
+
+#+NAME: eq:conv
+\begin{equation}
+v(t - \tau) = v(t) \ast h(t).
+\end{equation}
+Next, we can use the convolution and differentiation properties of the
+Fourier transform [cite:@mcclellanSignal2003]:
+
+#+NAME: eq:fourier-properties
+\begin{align}
+x(t) \ast h(t) \quad&\xleftrightarrow{\mathcal{F}}\quad X(j\omega)H(j\omega), \\
+\frac{d}{dt}x(t) \quad&\xleftrightarrow{\mathcal{F}}\quad j\omega{}X(j\omega),
+\end{align}
+which, when combined, tell us that the Fourier transform of the
+derivative of a convolution takes the following form:
+
+#+NAME: eq:diff-conv
+\begin{align}
+\mathcal{F}\left[\frac{d}{dt}(x(t) \ast h(t))\right]
+  &= \mathcal{F}\left[\left(\frac{d}{dt}x(t)\right)\right]\cdot\mathcal{F}[h(t)] \\
+  &= \mathcal{F}[x(t)]\cdot\mathcal{F}\left[\left(\frac{d}{dt}h(t)\right)\right] \\
+  &= j\omega{}X(j\omega)H(j\omega),
+\end{align}
+and this tells us that, to differentiate a convolution, we only have
+to differentiate /one/ of the functions being convolved. Now we can
+solve cref:eq:diff-delay-1:
+
+#+NAME: eq:diff-delay
+\begin{align}
+\frac{dy}{dx} &= \frac{dv}{dx}\frac{d}{dv}(v(t) \ast h(t)) \nonumber \\
+  &= \frac{dv}{dx}\frac{d}{dv}(v(t)) \ast h(t) \nonumber \\
+  &= \frac{dv}{dx} \ast h(t) \nonumber \\
+  &= v'(t - \tau).
+\end{align}
+This proves that the ideal differentiator is a time-invariant system.
+
+Differentiable delay in discrete time, by some fixed time \(k\), can
+be represented with dual numbers:
+
+#+NAME: eq:diff-delay-dual
+\begin{equation}
+\langle v,\nabla{}v \rangle[n - k] = \langle v[n - k], \nabla{}v[n - k] \rangle
+\end{equation}
+and in Faust:
+
+#+begin_src faust :results none
+diff(mem) = mem,par(i, vars.N, mem);
+#+end_src
+
+*** Variable Delay
+
+A thornier matter is the case where the length of the delay is itself
+a differentiable parameter, e.g.:
+
+#+NAME: eq:variable-delay
+\begin{equation}
+y = f(\mathbf{v}) = v_{1}(t - v_{2}(t)), \quad v_{j}(\mathbf{x}) = v_{j}(x_{1}, x_{2}).
+\end{equation}
+
+It's derivative, via the chain rule, with respect to \(x_{i}\) is:
+
+#+NAME: eq:variable-delay-deriv
+\begin{equation}
+\frac{\partial{}y}{\partial{}x_{i}} = \frac{\partial{}y}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x_{i}} + \frac{\partial{}y}{\partial{}v_{2}}\frac{\partial{}v_{2}}{\partial{}x_{i}}.
+\end{equation}
+
+Courtesy of cref:eq:diff-delay we know that the first term reduces to
+\(\frac{\partial{}v_{1}}{\partial{}x_{i}} \ast h(t) = v_{1}'(t - v_{2}(t))\). We have nothing in
+particular to fear from \(\frac{\partial{}v_{2}}{\partial{}x_{i}} = v_{2}'\). Let's tackle the
+remaining term, \(\frac{\partial{}y}{\partial{}v_{2}}\).
+
+By the chain rule, we have:
+
+#+NAME: eq:chain-rule-dydv2
+\begin{align}
+\frac{\partial{}y}{\partial{}v_{2}} &= \frac{\partial{}y}{\partial{}u}\frac{\partial{}u}{\partial{}v_{2}}, \quad u = t - v_{2}(t) \nonumber \\
+  &= \frac{\partial{}}{\partial{}u}v_{1}(u)\frac{\partial{}}{\partial{}v_{2}}(t - v_{2}(t)) \nonumber \\
+  &= \frac{\partial{}}{\partial{}u}v_{1}(u)\cdot(-1) \nonumber \\
+  &= -\frac{\partial{}}{\partial{}u}v_{1}(u).
+\end{align}
+
+Disappointingly, it feels like we're back to where we started (albeit
+having introduced a negative sign), and that is essentially the nature
+of the beast in this instance. Nevertheless, our complete expression
+for \(\frac{\partial{}y}{\partial{}x_{i}}\), expanding cref:eq:variable-delay-deriv, is:
+
+#+NAME: eq:dydxi-via-chain-rule
+\begin{align}
+\frac{\partial{}y}{\partial{}x_{i}} &= 1\cdot{}v_{1}'(t - v_{2}(t)) - \frac{\partial{}}{\partial{}u}v_{1}(u)\cdot{}v_{2}'(t) \nonumber \\
+  &= v_{1}'(t - v_{2}(t)) - v_{2}'(t)\frac{\partial{}}{\partial{}u}v_{1}(u),
+\end{align}
+
+where \(u = t - v_{2}(t)\). In the general case, that of \F{}'s ~@~
+operator, we need an expression that will handle both fixed and
+variable delays, and, at the time of writing, this has entailed taking
+a numerical derivative of \(v_{1}\) with respect to time. This approach
+is able to support parameter optimisation for increasing delays, but,
+for reasons of causality, for /decreasing/ ones it is of limited use.
+
+*** Variable Delay as a Differentiable Filterbank
+
+Perhaps a better approach, in parameter optimisation scenarios
+involving variable-length delay lines, is to model the variable delay
+as a differentiable FIR filterbank. The general FIR filter, with
+coefficients \(x_{i}\) and input signal \(s\), can be described by the
+difference equation [cite:@mcclellanSignal2003]:
+
+#+NAME: eq:general-fir-1
+\begin{equation}
+y[n] = \sum_{k=0}^{M-1}x_{k}s[n-k]
+\end{equation}
+We can express \(y = y[n]\) as a function of a vector of independent
+variables \(\mathbf{v}\):
+
+#+NAME: eq:general-fir-2
+\begin{equation}
+y &= f(\mathbf{v}) = \sum_{k=1}^{M}v_{2k-1}v_{2k},
+\end{equation}
+where \(v_{j}\) is a function of a vector of filter coefficients
+\(\mathbf{x}\):
+
+#+NAME: eq:vees
+\begin{align*}
+v_{2k-1}(\mathbf{x}) &= x_{k} \\
+v_{2k}(\mathbf{x}) &= s[n - (k - 1)].
+\end{align*}
+To differentiate \(y\) with respect to a filter coefficient \(x_{i}\),
+use the [[denote:20240819T095042][chain rule]]:
+
+#+NAME: eq:diff-fir
+\begin{align*}
+\frac{\partial{}y}{\partial{}x_{i}} &= \sum_{j=1}^{2M}\frac{\partial{}y}{\partial{}v_{j}}\frac{\partial{}v_{j}}{\partial{}x_{i}} \\
+  &= \frac{\partial{}y}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x_{i}} + \cdots + \frac{\partial{}y}{\partial{}v_{2M}}\frac{\partial{}v_{2M}}{\partial{}x_{i}} \\
+  &= v_{2i} \\
+  &= s[n - (i - 1)].
+\end{align*}
+Thus differentiating the general FIR filter with respect to \(x_{i}\) has
+the effect of isolating the \((i-1)\)^{th} tap. Consequently, optimising
+against a (hidden) variable delay will have the effect of plucking out
+the closest filter tap.
+
+*** Differentiable Recursion
+
+Thus far it has not been necessary to define derivative expressions
+for any of \F{}'s /composition operations/; this is because for
+parallel and sequential types of composition we have encountered so
+far have no arithmetical impact on the signals they act upon, and thus
+no impact on derivative computation in forward mode. Of \F{}'s five
+composition operators, only merge composition, ~:>~, has such an
+effect, that of summation; consequently differentiable merge
+composition could be defined as something like the following:
+
+#+begin_src faust :results none
+diff((A,B)) = diff(A),diff(B);
+diff(A :> B) = diff(A) : diff(+) : diff(B);
+#+end_src
+assuming, however, that ~A~ consists of exactly two parallel
+signals.[fn:3]
+
+Cref:fig:block-diag-forward-mode demonstrates visually that split,
+parallel, and sequential composition do not alter the signals they act
+upon, and are thus analogous to application of the identity function,
+whose partial derivatives are in turn identity functions, i.e.:
+
+#+begin_src faust :results none
+diff(_) = par(i, vars.N+1, _);
+#+end_src
+For the case of recursive composition, this is perhaps not as clear;
+fortunately we can prove it to be so via the chain rule.
+
+A simple (and undifferentiated) \F{} program that produces a ramp of
+varying slope can be defined like so:
+
+#+begin_src faust :results none
+process = hslider("x", 0, -1, 1, .01) : +~_;
+#+end_src
+This can be notated, in discrete time, as:
+
+#+NAME: eq:ramp-1
+\begin{equation}
+y[n] = x[n] + y[n-1].
+\end{equation}
+As usual, we can express \(y = y[n]\) as a function of independent
+variables, \(v_{j}\), which are in turn functions of \(x\):
+
+#+NAME: eq:ramp-2
+\begin{equation}
+y = f(v_{1},v_{2}) = v_{1} + v_{2}, \quad v_{1}(x) = x, \quad v_{2}(x) = y[n - 1],
+\end{equation}
+and find find its derivative with respect to \(x\):
+
+#+NAME: eq:ramp-diff
+\begin{align}
+\frac{dy}{dx} &= \frac{dy}{dv_{1}}\frac{dv_{1}}{dx} + \frac{dy}{dv_{2}}\frac{dv_{2}}{dx} \nonumber \\
+  &= 1\cdot{}1 + 1\cdot\frac{dy}{dx}[n-1] \nonumber \\
+  &= 1 + \frac{dy}{dx}[n-1].
+\end{align}
+If the presence of the recurrence relation in the result seems
+surprising, recall that \(y = y[n]\), so \(\frac{dy}{dx} =
+\frac{dy}{dx}[n]\).
+
 * Discussion
 :PROPERTIES:
 :CUSTOM_ID: sec:discussion
 :END:
+
 ** Limitations
 
 - derivative of delay
 - deterministic input
 - overfitting...
 - dimensionality; reverse mode
+- pattern matching generalisation...
+- widget modulation
+- compiler-based transformations
 
-[[Cref:sec:conclusion]]
+# [[Cref:sec:conclusion]]
 
 * Conclusion
 :PROPERTIES:
@@ -1220,9 +1528,10 @@ with {
 #+PRINT_BIBLIOGRAPHY:
 
 * Footnotes
-[fn:3] A third mode --- /cross-country/ mode --- is a combination of
-the forward and reverse modes, and may be more efficient under certain
-circumstances [cite:@laueSimple2020]. 
+[fn:3] Alternatively, for the case where ~A~ consists of an arbitrary
+number of parallel signals, it could simply be the responsibility of
+the programmer to make appropriate use of the differentiable addition
+primitive instead of merge composition.
 
 [fn:2]  See [cite:@radulYou2023], figure 1, for an illustration of
 the sort of structure that would be required in order to support

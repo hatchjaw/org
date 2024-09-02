@@ -66,7 +66,7 @@ y &= f(v_{1}, v_{2}, v_{3}, v_{4}) = v_{1}v_{2} + v_{3}v_{4}, && v_{1}(x_{1}, x_
 \end{align*}
 
 Differentiating an FIR filter wrt. \(x_{i}\) has the effect of plucking
-out the \(i-1\)^{th} tap. A differentiable delay can be modelled as a
+out the \((i-1)\)^{th} tap. A differentiable delay can be modelled as a
 differentiable filter bank.
 
 ** TODO Add Faust code for differentiable delay/filter bank
