@@ -13,14 +13,19 @@
 #+refproc: :abbreviate nil
 
 #+begin_abstract
-Differentiable programming is\dots
+Differentiable Digital Signal Processing describes the application of
+differentiable programming, whereby a computer program may be
+differentiated end-to-end, to audio tasks.  and has garnered
+significant interest in recent years with the boom in machine learning
+research.
 
 Using the ~environment~ expression and pattern matching abstraction,
 it is possible to write \F{} code that is differentiable end-to-end,
 facilitating the computation and propagation of gradients, and in turn
 supporting the creation of parameter optimisation
 algorithms. Differentiable programming in \F{} could serve as a
-platform for a \F{}-native approach to machine learning problems.
+platform for a \F{}-native approach to machine learning problems in
+the audio domain.
 #+end_abstract
 
 * About                                                            :noexport:
@@ -230,21 +235,44 @@ automatic differentiation (AD, autodiff)
 [cite:@rallArithmetic1986;@baydinAutomatic2018;], producing a partial
 derivative with respect to each input parameter. End-to-end
 differentiability is a desirable quality in the creation of computer
-programs that perform gradient-based optimization.
+programs that perform gradient-based optimization, and differentiable
+programming via automatic differentiation is the foundation for
+contemporary approaches to machine learning [cite:@harrisonBrief2021].
 
-This paper introduces a /differentiation arithmetic/ to \F{},
-facilitating the creation of differentiable algorithms 
+Differentiable DSP (DDSP) is the application of differentiable
+programming to digital signal processing operations
+[cite:@hayesReview2023]. The acronym /DDSP/ was coined by Engel et
+al. [cite:@engelDifferentiable2020], who used it to refer to the
+specific case of combining differentiable signal processors with a
+neural network architecture, but in principle any DSP approach
+featuring recursive optimisation using gradients found as partial
+derivatives of a loss function fits this label
+[cite:@hayesReview2023], including work dating as far back as the late
+1980's [cite:@shynkAdaptive1989]. In addition to Engel et al.'s timbre
+transfer implementation via a differentiable spectral modelling
+synthesiser, DDSP has been applied to audio tasks such as source
+separation, filter optimisation, speech synthesis, and echo
+cancellation [cite:@casebeerAutoDSP2021] --- see
+[cite:@hayesReview2023] for a comprehensive review.
 
-There is a sense in which the block-diagram algebra of \F{} lends the
-language intuitively to the problem of automatic differentiation. As
-we will see, the language itself presents certain limitations in this
-respect, but nonetheless we can achieve a great deal\dots
+This paper introduces the concept of a /differentiation arithmetic/ to
+\F{}, facilitating the creation of differentiable audio algorithms in
+the \F{} language. Following a detailed description of the arithmetic
+of automatic differentiation, the development of an automatic
+differentiation framework in \F{} is described, and applied to a
+simple, but illustrative, parameter optimisation problem. There is a
+sense in which the block-diagram algebra of \F{} lends itself
+intuitively to the problem of automatic differentiation (in its
+forward mode at least), and the possibilty of writing differentiable
+code in an audio domain specific language paves the way for novel
+approaches to problems at the intersection of DSP and machine
+learning.
 
 * Algorithmic Differentiation
+:PROPERTIES:
+:CUSTOM_ID: sec:algorithmic-diff
+:END:
 
-What does it entail to write differentiable code? As stated, the aim
-of differentiable programming is to compute the sensitivity of a
-program's outputs to purturbations to its inputs.
 Computational approaches to differentiation are typically
 characterised as falling into one of three camps: /numerical/,
 /symbolic/, and /automatic/. Numerical differentiation produces
@@ -269,26 +297,29 @@ efficient[cite:@guenterEfficient2007]. The ambiguity may be ascribed
 in part to the former's nature as "partly symbolic and partly
 numerical" [cite:@harrisonBrief2021], and perhaps also to the fact
 that programs composed symbolically may be differentiated
-automatically [cite:@villardADrien1999]. Dismissal of symbolic
-differentiation over the purported problem of "expression swell"
-[cite:@harrisonBrief2021; @baydinAutomatic2018] may be driven by
-implementation-specific assumptions and historical lack of available
-computing power. For our purposes, we shall defer to Rall, who,
-writing in the mid-1980's, before the waters were muddied by legions
-of machine learning researchers, observed (to paraphrase): /symbolic
-approaches produce formulas whereas automatic approaches produce
-numerical outputs/ [cite:@rallArithmetic1986]. The latter do so,
-however, by implementing differentiation rules, symbolically, at the
-level, as we will see, of the primitive operations of the programming
-language upon which they are based.
+automatically [cite:@villardADrien1999].
+# Dismissal of symbolic
+# differentiation over the purported problem of /expression swell/
+# [cite:@harrisonBrief2021; @baydinAutomatic2018] may be driven by
+# certain implementation-specific assumptions or historical lack of
+# available computing power.
+For our purposes, we shall defer to Rall,
+who, writing in the mid-1980's, before the waters were muddied by
+legions of machine learning researchers, observed (to paraphrase):
+/symbolic approaches produce formulas whereas automatic approaches
+produce numerical outputs/ [cite:@rallArithmetic1986]. The latter do
+so, however, by implementing differentiation rules, symbolically, at
+the level, as we will see, of the primitive operations of the
+programming language upon which they are based.
 
 ** The Arithmetic of Automatic Differentiation
 
 Two main /modes/ of automatic differentiation are typically alluded to
 in scholarly works on the topic: forward (or /tangent/) mode, and
-reverse (or /adjoint/) mode [cite:]. These modes describe, in effect,
-two directions of derivative propagation through a computation graph;
-in tangent mode, derivatives propagate forward, from inputs to
+reverse (or /adjoint/) mode [cite:@blondelElements2024;
+@baydinAutomatic2018; @harrisonBrief2021]. These modes describe, in
+effect, two directions of derivative propagation through a computation
+graph; in tangent mode, derivatives propagate forward, from inputs to
 outputs; in adjoint mode, propagation occurs backwards, from outputs
 to inputs. What does it mean, however, for a derivative to propagate?
 And is that propagation numerical or symbolic? As we will see, the
@@ -950,14 +981,19 @@ process = diffAdd;
 [[file:images/dualaddroute.svg]]
 ~diffAdd~ now satisfies the rule, implementing
 cref:eq:addition-rule-dual, and describing a dual-signal
-differentiable addition primitive.
+differentiable addition primitive. As alluded to in
+cref:sec:algorithmic-diff, this primitive implements its
+differentiation rule symbolically, via appropriate signal routing, and
+will produce the correct numerical output automatically; it is
+self-contained, well-defined, and composable with other similarly
+well-defined primitives.
 
-Let's define some more differentiable primitives for ~diffAdd~ to act
-upon. For \(u\) we can use an arbitrary input signal, which we will
-describe with \F{}'s identity function, ~_~. Such a signal has no
-relationship with \(x\), so \(u' = 0\). To \(v\) we assign the
-variable \(x\); one possible analogy to a variable in \F{} is a
-slider, so that is what we shall use; \(v = x\), so \(v' = 1\).
+On that note, let's define some more differentiable primitives for
+~diffAdd~ to act upon. For \(u\) we can use an arbitrary input signal,
+which we will describe with \F{}'s identity function, ~_~. Such a
+signal has no relationship with \(x\), so \(u' = 0\). To \(v\) we
+assign the variable \(x\); one possible analogy to a variable in \F{}
+is a slider, so that is what we shall use; \(v = x\), so \(v' = 1\).
 
 #+begin_src faust :results none
 diffInput = _,0;
@@ -1259,12 +1295,13 @@ with {
 
 This delivery of gradients from the outputs of the program back to its
 inputs is commonly (and particularly in material from the field of
-machine learning) referred to as /backpropagation/ [cite:]. Whereas in
-reverse mode gradients arrive at the inputs as a result of passing
+machine learning) referred to as /backpropagation/
+[cite:@baydinAutomatic2018;@casebeerAutoDSP2021;@brunelBackpropagation2020]. Whereas
+in reverse mode gradients arrive at the inputs as a result of passing
 backwards through the graph, in forward mode something like the
 recursion described in ref:lst:backprop is required.
 
-[link to example files]
+[link to examples]
 
 ** Differentiation of Audio-specific Primitives
 
@@ -1423,12 +1460,12 @@ To differentiate \(y\) with respect to a filter coefficient \(x_{i}\),
 use the chain rule:
 
 #+NAME: eq:diff-fir
-\begin{align*}
-\frac{\partial{}y}{\partial{}x_{i}} &= \sum_{j=1}^{2M}\frac{\partial{}y}{\partial{}v_{j}}\frac{\partial{}v_{j}}{\partial{}x_{i}} \\
-  &= \frac{\partial{}y}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x_{i}} + \cdots + \frac{\partial{}y}{\partial{}v_{2M}}\frac{\partial{}v_{2M}}{\partial{}x_{i}} \\
-  &= v_{2i} \\
+\begin{align}
+\frac{\partial{}y}{\partial{}x_{i}} &= \sum_{j=1}^{2M}\frac{\partial{}y}{\partial{}v_{j}}\frac{\partial{}v_{j}}{\partial{}x_{i}} \nonumber \\
+  &= \frac{\partial{}y}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x_{i}} + \cdots + \frac{\partial{}y}{\partial{}v_{2M}}\frac{\partial{}v_{2M}}{\partial{}x_{i}} \nonumber \\
+  &= v_{2i} \nonumber \\
   &= s[n - (i - 1)].
-\end{align*}
+\end{align}
 Thus, differentiating the general FIR filter with respect to \(x_{i}\)
 has the effect of isolating the \((i-1)\)^{th} tap. Consequently,
 optimising against a (hidden) variable delay will have the effect of
@@ -1491,9 +1528,49 @@ and find find its derivative with respect to \(x\):
   &= 1\cdot{}1 + 1\cdot\frac{dy}{dx}[n-1] \nonumber \\
   &= 1 + \frac{dy}{dx}[n-1].
 \end{align}
-If the presence of the recurrence relation in the result seems
-surprising, recall that \(y = y[n]\), so \(\frac{dy}{dx} =
-\frac{dy}{dx}[n]\).
+Thus the derivative of a recursive circuit is itself recursive. If the
+presence of the recurrence relation in the result seems surprising,
+recall that \(y = y[n]\), so \(\frac{dy}{dx} = \frac{dy}{dx}[n]\).
+
+Expanding on the above, we can differentiate an all-pole filter with
+the following difference equation:
+
+#+NAME: eq:all-pole-autodiff
+\begin{equation}
+y[n] = s[n] + \sum_{l=1}^{N}x_{l}y[n - l]
+\end{equation}
+Once again, we can define \(y = y[n]\) as a function of a vector of
+independent variables \(\mathbf{v}\):
+
+#+NAME: eq:all-pole-2
+\begin{equation}
+y = f(\mathbf{v}) = s[n] + \sum_{l=1}^{N}v_{2l-1}v_{2l},
+\end{equation}
+where \(v_{j}\) is a function of a vector of filter coefficients
+\(\mathbf{x}\):
+
+#+NAME: eq:vees
+\begin{align*}
+v_{2l-1}(\mathbf{x}) &= x_{l} \\
+v_{2l}(\mathbf{x}) &= y[n - l].
+\end{align*}
+To find the derivative of \(y\) with respect to the \(i\)^{th} filter
+coefficient, we proceed in a similar manner to cref:eq:diff-fir:
+
+#+NAME: eq:diff-one-pole
+\begin{align}
+\frac{\partial{}y}{\partial{}x_{i}} &= \frac{\partial{}}{\partial{}x_{i}}s[n] + \sum_{j=1}^{2N}\frac{\partial{}y}{\partial{}v_{j}}\frac{\partial{}v_{j}}{\partial{}x_{i}} \nonumber \\
+  &= 0 + \sum_{j=1}^{N}\left(\frac{\partial{}y}{\partial{}v_{2j-1}}\frac{\partial{}v_{2j-1}}{\partial{}x_{i}} + \frac{\partial{}y}{\partial{}v_{2j}}\frac{\partial{}v_{2j}}{\partial{}x_{i}}\right) \nonumber \\
+  &= \sum_{j=1}^{N}\left(v_{2j}\frac{\partial{}v_{2j-1}}{\partial{}x_{i}} + v_{2j-1}\frac{\partial{}v_{2j}}{\partial{}x_{i}}\right) \nonumber \\
+  &= v_{2i} + \sum_{j=1}^{N}x_{j}\frac{\partial{}}{\partial{}x_{i}}y[n-j] \nonumber \\
+  &= y[n - i] + \sum_{j=1}^{N}x_{j}\frac{\partial{}}{\partial{}x_{i}}y[n-j].
+\end{align}
+Similar to the FIR filter, differentiating with respect to \(x_{i}\)
+extracts the \(i\)^{th} tap, plus weighted recursive derivatives
+numbering the length of the entire filter (see
+[cite:@shynkAdaptive1989] for a more exhaustive treatment of this
+topic).
+
 
 * Discussion
 :PROPERTIES:
@@ -1504,18 +1581,18 @@ surprising, recall that \(y = y[n]\), so \(\frac{dy}{dx} =
 
 - derivative of delay
 - deterministic input
+- time/freq-domain loss
 - overfitting...
 - dimensionality; reverse mode
 - pattern matching generalisation...
 - widget modulation
 - compiler-based transformations
 
-# [[Cref:sec:conclusion]]
-
 * Conclusion
 :PROPERTIES:
 :CUSTOM_ID: sec:conclusion
 :END:
+
 ** Acknowledgements
 
 #+begin_export latex
@@ -1528,10 +1605,6 @@ surprising, recall that \(y = y[n]\), so \(\frac{dy}{dx} =
 number of parallel signals, it could simply be the responsibility of
 the programmer to make appropriate use of the differentiable addition
 primitive instead of merge composition.
-
-[fn:2]  See [cite:@radulYou2023], figure 1, for an illustration of
-the sort of structure that would be required in order to support
-reverse mode automatic differentiation.
 
 [fn:1] Various transformations /are/ in fact possible at the level of
 the \F{} compiler. See [[cref:sec:discussion]] for further exploration of
