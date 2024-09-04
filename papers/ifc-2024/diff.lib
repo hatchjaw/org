@@ -1,8 +1,12 @@
 import("stdfaust.lib");
 
 backprop(target, estimate, lossFunction) = (
-    route(nvars+nInputs, nvars+nInputs, 
-        par(n, nvars, (n+1, n+3)), (nvars+1, 1), (nvars+2, 2))
+    route(nvars+nInputs, nvars+nInputs,
+        // Route gradients to estimate.
+        par(n, nvars, (n+1, n+1+nInputs)),
+        // Route input to target & estimate.
+        par(n, nInputs, (nvars+1+n, n+1))
+    )
     : vgroup("[0]Hidden", target),vgroup("[10]Estimated", estimate)
     : route(2+nvars, 4+nvars,
         // Route ground truth output to loss/gradient function and to output.

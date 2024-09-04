@@ -251,7 +251,8 @@ derivatives of a loss function fits this label
 1980's [cite:@shynkAdaptive1989]. In addition to Engel et al.'s timbre
 transfer implementation via a differentiable spectral modelling
 synthesiser, DDSP has been applied to audio tasks such as source
-separation, filter optimisation, speech synthesis, and echo
+separation [cite:@schulze-forsterUnsupervised2023], filter
+optimisation [cite:@kuznetsovDifferentiable2020], and echo
 cancellation [cite:@casebeerAutoDSP2021] --- see
 [cite:@hayesReview2023] for a comprehensive review.
 
@@ -1253,15 +1254,18 @@ In \F{}, this can be achieved via recursion, and by changing the
 definition of the variables delivered to ~df.env~. Since values will
 be updated automatically via gradient descent, the sliders used in
 [[cref:lst:gain-dc-diff]] are no longer appropriate; instead, a bargraph
-instance can be used to display the value of each variable, with
-recursive subtractions accumulating the incoming gradients.
+instance can be used to display the value of each variable, with a
+recursive subtraction accumulating each parameter's incoming scaled
+gradient.
 
-#+begin_src faust
+#+begin_src faust :results none
+// diff.lib
+var(meter) = -~_ <: attach(meter);
+
+// gain_dc_AD.dsp
 X = df.vars((gain,dc)) with {
-  gain = -~_
-    <: attach(hbargraph("Gain", 0, 1));
-  dc = -~_
-    <: attach(hbargraph("DC", -1, 1));
+  gain = df.var(hbargraph("Gain", 0, 1));
+  dc = df.var(hbargraph("DC", -1, 1));
 };
 #+end_src
 
@@ -1278,11 +1282,12 @@ gradients produced by the latter back to ~estimate~.
 process = no.noise <: (
     route(nvars+nInputs, nvars+nInputs,
       // Route gradients to estimate.
-      par(i, nvars, (i+1, i+3)),
+      par(n, nvars, (n+1, n+1+nInputs)),
       // Route input to target & estimate.
-      (nvars+1, 1), (nvars+2, 2))
+      par(n, nInputs, (nvars+1+n, n+1))
+    )
     : target,estimate : d.lossL1(1e-3)
-    // Recurse the gradients.
+  // Recurse the gradients.
   ) ~ (!,si.bus(nvars))
   // Block the gradients, post-recursion.
   : _,si.block(nvars)
@@ -1290,18 +1295,72 @@ with {
   nvars = inputs(estimate),
     inputs(target) : -;
   nInputs = inputs(target),2 : *;
-// ...
+  // ...
 #+end_src
+
+#+begin_src faust :results file svg :file images/backprop.svg :exports results
+import("stdfaust.lib");
+df = library("diff.lib");
+
+process = no.noise <: (
+    route(nvars+nInputs, nvars+nInputs,
+        // Route gradients to estimate.
+        par(n, nvars, (n+1, n+1+nInputs)),
+        // Route input to target & estimate.
+        par(n, nInputs, (nvars+1+n, n+1))
+    )
+    : target,estimate : d.lossL1(1e-3)
+    // Recurse the gradients.
+    ) ~ (!,si.bus(nvars))
+    // Block the gradients, post-recursion.
+    : _,si.block(nvars)
+with {
+    nvars = inputs(estimate),inputs(target) : -;
+    nInputs = inputs(target),2 : *;
+
+    x1 = hslider("gain", .5, 0, 1, .1);
+    x2 = hslider("dc", 0, -1, 1, .1);
+    target = _,x1 : *,x2 : +;
+			       
+    X = df.vars((gain,dc)) with {
+      gain = df.var(hbargraph("Gain", 0, 1));
+      dc = df.var(hbargraph("DC", -1, 1));
+    };
+
+    d = df.env(X);
+
+    estimate = d.input,X.var(1),X.var(2)
+        : d.diff(*),d.diff(_)
+        : d.diff(+);				  
+};
+#+end_src
+#+name: fig:backprop
+#+ATTR_LATEX: :float multicolumn :placement [ht!]
+#+caption: Top-level block diagram for the full \F{} program of which an
+#+caption: excerpt appears in cref:lst:backprop. ~target~ algorithm, with
+#+caption: /hidden/ parameters, and ~estimate~ algorithm, with two
+#+caption: /optimisable/ parameters, process a noise signal. Their outputs
+#+caption: are compared via a loss function; scaled derivatives of the loss
+#+caption: function are backpropagated such that estimated parameter values
+#+caption: can be updated.
+#+caption: Note that the only output signal produced by this example program
+#+caption: is the primal output signal produced by the loss function;
+#+caption: to hear the primal signal produced by ~estimate~, one could
+#+caption: perform additional routing prior to the loss function.
+#+RESULTS:
+[[file:images/backprop.svg]]
 
 This delivery of gradients from the outputs of the program back to its
 inputs is commonly (and particularly in material from the field of
 machine learning) referred to as /backpropagation/
-[cite:@baydinAutomatic2018;@casebeerAutoDSP2021;@brunelBackpropagation2020]. Whereas
-in reverse mode gradients arrive at the inputs as a result of passing
-backwards through the graph, in forward mode something like the
-recursion described in ref:lst:backprop is required.
+[cite:@baydinAutomatic2018;@casebeerAutoDSP2021;@brunelBackpropagation2020].
+Whereas in reverse mode gradients arrive at the inputs inevitably as a
+consequency of the reverse adjoint pass through the graph, in forward
+mode something like the recursion described in cref:lst:backprop is
+required; consult cref:fig:backprop for the corresponding top-level
+block diagram.
 
-[link to examples]
+[link to example]
 
 ** Differentiation of Audio-specific Primitives
 
@@ -1425,9 +1484,11 @@ for \(\frac{\partial{}y}{\partial{}x_{i}}\), expanding cref:eq:variable-delay-de
 where \(u = t - v_{2}(t)\). In the general case, that of \F{}'s ~@~
 operator, we need an expression that will handle both fixed and
 variable delays, and, at the time of writing, this has entailed taking
-a numerical derivative of \(v_{1}\) with respect to time. This approach
-is able to support parameter optimisation for increasing delays, but,
-for reasons of causality, for /decreasing/ ones it is of limited use.
+a numerical derivative of \(v_{1}\) with respect to (discrete) time,
+analogous to convolution with the derivative of a rectangular
+pulse. This approach is able to support parameter optimisation for
+increasing delays, but, for reasons of causality, for /decreasing/
+ones it is of limited use.
 
 *** Variable Delay as a Differentiable Filterbank
 
@@ -1439,7 +1500,7 @@ difference equation [cite:@mcclellanSignal2003]:
 
 #+NAME: eq:general-fir-1
 \begin{equation}
-y[n] = \sum_{k=0}^{M-1}x_{k}s[n-k]
+y[n] = \sum_{k=0}^{M-1}x_{k}s[n-k].
 \end{equation}
 We can express \(y = y[n]\) as a function of a vector of independent
 variables \(\mathbf{v}\):
@@ -1456,20 +1517,21 @@ where \(v_{j}\) is a function of a vector of filter coefficients
 v_{2k-1}(\mathbf{x}) &= x_{k} \\
 v_{2k}(\mathbf{x}) &= s[n - (k - 1)].
 \end{align*}
-To differentiate \(y\) with respect to a filter coefficient \(x_{i}\),
-use the chain rule:
+Differentiating \(y\) with respect to filter coefficient \(x_{i}\) yields
+the following result:
 
 #+NAME: eq:diff-fir
 \begin{align}
 \frac{\partial{}y}{\partial{}x_{i}} &= \sum_{j=1}^{2M}\frac{\partial{}y}{\partial{}v_{j}}\frac{\partial{}v_{j}}{\partial{}x_{i}} \nonumber \\
-  &= \frac{\partial{}y}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x_{i}} + \cdots + \frac{\partial{}y}{\partial{}v_{2M}}\frac{\partial{}v_{2M}}{\partial{}x_{i}} \nonumber \\
+  &= \sum_{j=1}^{M}\left(\frac{\partial{}y}{\partial{}v_{2j-1}}\frac{\partial{}v_{2j-1}}{\partial{}x_{i}} + \frac{\partial{}y}{\partial{}v_{2j}}\frac{\partial{}v_{2j}}{\partial{}x_{i}} \right) \nonumber \\
+  &= \sum_{j=1}^{M}\left(v_{2j}\frac{\partial{}v_{2j-1}}{\partial{}x_{i}} \right) \nonumber \\
   &= v_{2i} \nonumber \\
   &= s[n - (i - 1)].
 \end{align}
 Thus, differentiating the general FIR filter with respect to \(x_{i}\)
-has the effect of isolating the \((i-1)\)^{th} tap. Consequently,
-optimising against a (hidden) variable delay will have the effect of
-plucking out the closest filter tap.
+has the effect of isolating the \((i-1)\)^{th} tap; optimising against a
+hidden delay will result in plucking out the filter tap whose delay
+line is closest in length to that of the hidden delay.
 
 *** Differentiable Recursion
 
@@ -1479,8 +1541,9 @@ parallel and sequential types of composition we have encountered so
 far have no arithmetical impact on the signals they act upon, and thus
 no impact on derivative computation in forward mode. Of \F{}'s five
 composition operators, only merge composition, ~:>~, has such an
-effect, that of summation; consequently differentiable merge
-composition could be defined as something like the following:
+effect, that of summation; consequently, given a basic definition of
+differentiable parallel composition, differentiable merge composition
+could be defined as something like the following:
 
 #+begin_src faust :results none
 diff((A,B)) = diff(A),diff(B);
@@ -1520,7 +1583,7 @@ variables, \(v_{j}\), which are in turn functions of \(x\):
 y &= f(v_{1},v_{2}) = v_{1} + v_{2}, \nonumber\\
 v_{1}(x) &= x, \quad v_{2}(x) = y[n - 1],
 \end{align}
-and find find its derivative with respect to \(x\):
+and find its derivative with respect to \(x\):
 
 #+NAME: eq:ramp-diff
 \begin{align}
@@ -1555,7 +1618,8 @@ v_{2l-1}(\mathbf{x}) &= x_{l} \\
 v_{2l}(\mathbf{x}) &= y[n - l].
 \end{align*}
 To find the derivative of \(y\) with respect to the \(i\)^{th} filter
-coefficient, we proceed in a similar manner to cref:eq:diff-fir:
+coefficient, we proceed in a manner comparable to that of
+cref:eq:diff-fir:
 
 #+NAME: eq:diff-one-pole
 \begin{align}
@@ -1566,18 +1630,20 @@ coefficient, we proceed in a similar manner to cref:eq:diff-fir:
   &= y[n - i] + \sum_{j=1}^{N}x_{j}\frac{\partial{}}{\partial{}x_{i}}y[n-j].
 \end{align}
 Similar to the FIR filter, differentiating with respect to \(x_{i}\)
-extracts the \(i\)^{th} tap, plus weighted recursive derivatives
+extracts the \(i\)^{th} tap; in the case of the all-pole filter, due to
+its recursive description we also have weighted recursive derivatives
 numbering the length of the entire filter (see
 [cite:@shynkAdaptive1989] for a more exhaustive treatment of this
 topic).
-
 
 * Discussion
 :PROPERTIES:
 :CUSTOM_ID: sec:discussion
 :END:
 
-** Limitations
+
+
+** Limitations and Outlook
 
 - derivative of delay
 - deterministic input
