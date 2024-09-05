@@ -149,8 +149,8 @@ env(vars) = environment {
     // A differentiable constant signal.
     // Returns the signal, plus its partial derivatives wrt all variables, which
     // are all zero.
-    // <x, x'> = <x, 0>
-    diff(x) = diffConst with{ diffConst = x,par(i, vars.N, 0); };
+    // <c, c'> = <c, 0>
+    diff(c) = diffConst with{ diffConst = c,par(i, vars.N, 0); };
 
     // Differentiable input.
     input = _,par(i, vars.N, 0);
