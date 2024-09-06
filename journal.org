@@ -3377,3 +3377,18 @@ unstable. Seems more reliable to start the audio subsystem during
 ***** TODO Type up proper notes on nsps adjustment applied to PLL4
 
 Entered on [2024-08-29 jeu. 19:14]
+
+** 2024-09 septembre
+*** 2024-09-03 mardi
+**** Meeting with Romain
+- Internet of Sounds
+  + Grame to pay for hotel and travel
+  + Inria to cover registration & expenses
+    * Arrange with Anouchka to make registration payment
+  + Register /mission/ with Inria
+- Frontiers article
+  + Wait for Frontiers to find another reviewer
+  + Tell editor: "if it can't be published before the end of the year
+    I will have to withdraw it for budgetary reasons"
+
+Entered on [2024-09-03 mar. 09:19]

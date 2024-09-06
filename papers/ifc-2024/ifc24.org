@@ -16,24 +16,17 @@
 Differentiable Digital Signal Processing is the application of
 differentiable programming, whereby a computer program may be
 differentiated end-to-end, to audio tasks. Coupled with gradient-based
-optimisation methods, differentiable signal processors can be applied
-to a variety of audio problems
-
-. Research in this area has garnered
-significant interest in recent years with the boom in machine learning
-research.
+optimisation methods, differentiable signal processors are central to
+a variety of audio problems and can be incorporated into machine
+learning architectures.
 
 In this paper it is shown that, using the ~environment~ expression and
 pattern matching abstraction, it is possible to write \F{} code that
 is differentiable end-to-end. A system for writing \F{} programs that
 are automatically differentiable in the forward-mode is developed and
-a parameter optimisation example presented. 
-
-facilitating the computation and
-propagation of gradients, and in turn supporting the creation of
-parameter optimisation algorithms. Differentiable programming in \F{}
-could serve as a platform for a \F{}-native approach to machine
-learning problems in the audio domain.
+a parameter optimisation example presented. Differentiable programming
+in \F{} could serve as a platform for native approaches to
+machine learning problems in the audio domain.
 #+end_abstract
 
 * About                                                            :noexport:
@@ -247,16 +240,16 @@ programs that perform gradient-based optimization, and differentiable
 programming via automatic differentiation is the foundation for
 contemporary approaches to machine learning [cite:@harrisonBrief2021].
 
-Differentiable DSP (DDSP) is the application of differentiable
-programming to digital signal processing operations
+Differentiable Digital Signal Processing (DDSP) is the application of
+differentiable programming to DSP operations
 [cite:@hayesReview2023]. The acronym /DDSP/ was coined by Engel et
 al. [cite:@engelDifferentiable2020], who used it to refer to the
 specific case of combining differentiable signal processors with a
-neural network architecture, but in principle any DSP approach
-featuring recursive optimisation using gradients found as partial
-derivatives of a loss function fits this label
-[cite:@hayesReview2023], including work dating as far back as the late
-1980's [cite:@shynkAdaptive1989]. In addition to Engel et al.'s timbre
+neural network architecture, but in principle any DSP system featuring
+recursive optimisation using gradients found as partial derivatives of
+a loss function fits this label [cite:@hayesReview2023], including
+work dating as far back as the late 1980's
+[cite:@shynkAdaptive1989]. In addition to Engel et al.'s timbre
 transfer implementation via a differentiable spectral modelling
 synthesiser, DDSP has been applied to audio tasks such as source
 separation [cite:@schulze-forsterUnsupervised2023], filter
@@ -264,40 +257,39 @@ optimisation [cite:@kuznetsovDifferentiable2020], and echo
 cancellation [cite:@casebeerAutoDSP2021] --- see
 [cite:@hayesReview2023] for a comprehensive review.
 
-This paper introduces the concept of a /differentiation arithmetic/ to
-\F{}, facilitating the creation of differentiable audio algorithms in
-the \F{} language. Following a detailed account of the arithmetic of
-automatic differentiation, the development of an automatic
-differentiation framework in \F{} is outlined, and applied to a
-simple, but illustrative, parameter optimisation problem. There is a
-sense in which the block-diagram algebra of \F{} lends itself
-intuitively to the problem of automatic differentiation (in its
-forward mode at least), and the possibilty of writing differentiable
-code in an audio domain specific language paves the way for novel
-approaches to problems at the intersection of DSP and machine
-learning.
+This paper introduces the concept of a /differentiation
+arithmetic/[cite:@rallArithmetic1986] to \F{}, facilitating the
+creation of differentiable audio algorithms in the \F{}
+language. Following a detailed account of the arithmetic of automatic
+differentiation, the development of an automatic differentiation
+framework in \F{} is outlined, and applied to a simple, but
+illustrative, parameter optimisation problem. There is a sense in
+which the block-diagram algebra of \F{} lends itself intuitively to
+the problem of automatic differentiation (in its forward mode at
+least), and the possibility of writing differentiable code in an audio
+domain specific language paves the way for novel approaches to
+problems at the intersection of DSP and machine learning.
 
 * Algorithmic Differentiation
 :PROPERTIES:
 :CUSTOM_ID: sec:algorithmic-diff
 :END:
 
-Computational approaches to differentiation are typically
-characterised as falling into one of three camps: /numerical/,
-/symbolic/, and /automatic/. Numerical differentiation produces
-numerical values for derivatives via approximation by finite
-differences, and will be familiar to those acquainted with
-finite-difference time-domain audio synthesis methods
-[cite:@bilbaoNumerical2009]. Symbolic differentiation takes a
-computational expression and generates the corresponding expression
-for its derivative; this approach may resonate with users of MATLAB's
-Symbolic Math Toolbox [cite:@molerSymbolic1997] or the Maple
-programming language [cite:@monaganGRADIENT1993]. Automatic
-differentiation describes an arithmetic for accumulating both the
-numerical output of a computational expression and the numerical value
-of its derivative; it is an arithmetic of this kind that underpins the
-current crop of Python libraries for machine learning
-[cite:@harrisonBrief2021].
+Methods for computational differentiation are typically characterised
+as falling into one of three camps: /numerical/, /symbolic/, and
+/automatic/. Numerical differentiation produces numerical values for
+derivatives via approximation by finite differences, and will be
+familiar to those acquainted with finite-difference time-domain audio
+synthesis methods [cite:@bilbaoNumerical2009]. Symbolic
+differentiation takes a computational expression and generates the
+corresponding expression for its derivative; this approach may
+resonate with users of MATLAB's Symbolic Math Toolbox
+[cite:@molerSymbolic1997] or the Maple programming language
+[cite:@monaganGRADIENT1993]. Automatic differentiation describes an
+arithmetic for accumulating both the numerical output of a
+computational expression and the numerical value of its derivative; it
+is an arithmetic of this kind that underpins the current crop of
+Python libraries for machine learning [cite:@harrisonBrief2021].
 
 A certain ambiguity abounds with regard to how automatic and symbolic
 differentiation relate to each other[cite:@laueEquivalence2022], and
@@ -306,20 +298,14 @@ efficient[cite:@guenterEfficient2007]. The ambiguity may be ascribed
 in part to the former's nature as "partly symbolic and partly
 numerical" [cite:@harrisonBrief2021], and perhaps also to the fact
 that programs composed symbolically may be differentiated
-automatically [cite:@villardADrien1999].
-# Dismissal of symbolic
-# differentiation over the purported problem of /expression swell/
-# [cite:@harrisonBrief2021; @baydinAutomatic2018] may be driven by
-# certain implementation-specific assumptions or historical lack of
-# available computing power.
-For our purposes, we shall defer to Rall,
-who, writing in the mid-1980's, before the waters were muddied by
-legions of machine learning researchers, observed (to paraphrase):
-/symbolic approaches produce formulas whereas automatic approaches
-produce numerical outputs/ [cite:@rallArithmetic1986]. The latter do
-so, however, by implementing differentiation rules, symbolically, at
-the level, as we will see, of the primitive operations of the
-programming language upon which they are based.
+automatically [cite:@villardADrien1999]. For our purposes, we shall
+defer to Rall, who, writing in the mid-1980's, before the waters were
+muddied by legions of machine learning researchers, observed (to
+paraphrase): /symbolic approaches produce formulas whereas automatic
+approaches produce numerical outputs/ [cite:@rallArithmetic1986]. The
+latter do so, however, by implementing differentiation rules,
+symbolically, at the level, as we will see, of the primitive
+operations of the programming language upon which they are based.
 
 ** The Arithmetic of Automatic Differentiation
 
@@ -359,7 +345,7 @@ The chain rule states that, for any \(k \in 1, \dots, n\), the derivative of
 \frac{\partial{}y}{\partial{}w_{k}} = \sum_{j=1}^{m}\frac{\partial{}y}{\partial{}v_{j}}\frac{\partial{}v_{j}}{\partial{}w_{k}}
 \end{equation}
 
-We can also imagine a situaion in which \(w_{k} = w_{k}(\mathbf{x})\) is, in
+We can also imagine a situation in which \(w_{k} = w_{k}(\mathbf{x})\) is, in
 turn, a function of \(p\) independent variables:
 
 #+NAME: eq:diff-functions-2
@@ -415,7 +401,7 @@ solutions have been reached without us having to consider anything
 more complicated at any one time than the derivative of the product of
 a variable by a constant (e.g. \(\frac{\partial{}v_{1}}{\partial{}w_{2}}\)). The answers
 emerged /automatically/, in a sense; indeed, this fastidious
-decomposition of an exression into its differentiable, primitive
+decomposition of an expression into its differentiable, primitive
 operations is the essence of automatic differentiation.
 
 *** Forward Mode Automatic Differentiation
@@ -423,8 +409,8 @@ operations is the essence of automatic differentiation.
 :CUSTOM_ID: subsubsec:forward-mode
 :END:
 
-To approach forward mode, we can use an example \F{} program with the
-following block diagram:
+To investigate forward mode, we can use an example \F{} program with
+the following block diagram:
 
 #+begin_src faust :results file svg :file (org-babel-temp-file "faust-" ".svg") :exports results
 N = 5;
@@ -446,16 +432,16 @@ with {
 #+RESULTS:
 [[file:/tmp/babel-25ewEB/faust-RhquEY.svg]]
 
-This program consists of a number of primitive operations \(v_{j}\). \(N
-= 2\) of these we will consider to be parameter primitives, each
-taking its value from a vector, \(\mathbf{x} = \begin{bmatrix}x_{1} &
-x_{2}\end{bmatrix}\), of input variables:
+This program consists of a number of what we will consider to be
+primitive operations \(v_{j}\). \(N = 2\) of these we will designate as
+parameter primitives, each taking its value from a vector,
+\(\mathbf{x} = \begin{bmatrix}x_{1} & x_{2}\end{bmatrix}\), of input
+variables:
 
 \begin{align}
 v_{0} &= x_{1}_{}, \label{eq:v0} \\
 v_{1} &= x_{2}. \label{eq:v1}
 \end{align}
-
 These parameters are passed to two further primitives:
 
 #+NAME: eq:v2-v3
@@ -484,11 +470,9 @@ primitive \(v_{0}\) returns as its derivative:
 \end{equation}
 On paper, per [[cref:eq:v0]], this simplifies to \(\begin{bmatrix}1 &
 0\end{bmatrix}^{T}\), but in the context of automatic differentiation no
-such simplification takes place; rather, derivatives emerge
-automatically via differentiation rules provided by each primitive.
-
-By that token, stepping forward through the graph, the partial
-derivatives of primitive \(v_{2}\) are, via the chain rule:
+such simplification takes place; rather, we take this result and pass
+it to the next primitive in the graph. Stepping forward then, the
+partial derivatives of primitive \(v_{2}\) are, via the chain rule:
 
 #+NAME: eq:dv2-dx
 \begin{equation}
@@ -548,8 +532,8 @@ derivative expression for \(v_{4}\):
 and that, in effect, gives us an expression for
 \(\frac{\partial{}y}{\partial{}\mathbf{x}}\), a \(2\times1\) Jacobian matrix.
 
-The ultimate aim of automatic differentiation is not, however, to
-produce derivative expressions, but numerical outputs. To calculate
+The ultimate aim of automatic differentiation is not, however, simply
+to produce symbolic expressions, but numerical outputs. To calculate
 the numerical value of the derivative of \(y\) with respect to \(x_{i}\),
 we begin by differentiating \(\mathbf{x}\) with respect to \(x_{i}\):
 
@@ -604,14 +588,14 @@ and substitute these into [[cref:eq:vec-prod]] (and the equivalent for
   &= \sin(x_{1}). \label{eq:concrete-fwd-x2}
 \end{align}
 Providing numerical values for \(x_{1}\) and \(x_{2}\) would of course yield
-numerical values for the above derivatives.
+numerical values for the above.
 
 One potential drawback of forward mode concerns computational
 efficiency --- to compute all of the partial derivatives of \(y\),
 \(N\) passes are required. For programs with more outputs than inputs,
 this would not be a problem, but in the audio domain, where inputs
 will likely outnumber outputs, it is potentially a concern (see
-ref:subsec:efficiency for more on this point).
+ref:subsec:efficiency for more on this subject).
 
 *** Reverse Mode Automatic Differentiation
 
@@ -658,10 +642,9 @@ As before, we have a single output, \(y = v_{2,0}\).
 Whereas in forward mode the primal and tangent outputs of the program
 are computed in parallel during the forward pass, in reverse mode we
 complement the forward primal pass with a /reverse adjoint pass/;
-instead of computing the /sensitivity/ of each primitive with respect to
-its inputs, we compute the /influence/ of a given primitive on the
-output of the program (or the sensitivity of the output with respect
-to a given primitive):
+instead of computing the /sensitivity/ of each primitive with respect
+to its inputs, we compute the /influence/ of a given primitive on the
+output of the program:
 
 #+NAME: eq:adjoint
 \begin{equation}
@@ -676,7 +659,7 @@ output (i.e. the influence of the output over itself):
 \begin{equation}
 \bar{y} = \bar{v}_{2,0} = \frac{\partial{}y}{\partial{}v_{2,0}} = 1,
 \end{equation}
-and propagate that backward though the graph. Adjoints for layer \(p =
+and propagate that backward through the graph. Adjoints for layer \(p =
 1\) are:
 
 #+NAME: eq:v1-adjoints
@@ -752,21 +735,21 @@ which are entirely the same results achieved in
 cref:eq:concrete-fwd-x1,eq:concrete-fwd-x2 via tangent mode.
 
 For reverse mode to work in practice, however, some knowledge of a
-program's structure is required. Whether this is achived via a
-bookkeeping mechanism [cite:@baydinAutomatic2018] such as a /tape/
+program's structure is required. Whether this is achieved via a
+bookkeeping mechanism [cite:@baydinAutomatic2018] such as a /"tape"/
 [cite:@pearlmutterReversemode2008;@radulYou2023], or by organising the
-program into layers as we have here, a degree of complexity is
-introduced that tangent mode, with its more brute-force approach, does
-not.
+program into layers as we have here, adjoint mode introduces a degree
+of complexity that tangent mode, with its more brute-force approach,
+does not.
 
 *** Dual Number Arithmetic
 
-One interesting property of forward mode autodiff lies in the
-possibility of formulating differentiation in a manner similar to the
-complex numbers [cite:@rallArithmetic1986;@yuDNAD2013]. Where complex
-arithmetic uses the imaginary unit \(i\) to designate the imaginary
-part of a complex number \(z = x + iy\), with \(i^{2} = -1\),
-differentiable arithmetic uses the /nilpotent symbol/, \(\varepsilon\)
+One interesting property of forward mode lies in the possibility of
+formulating differentiation in a manner similar to the complex numbers
+[cite:@rallArithmetic1986;@yuDNAD2013]. Where complex arithmetic uses
+the imaginary unit \(i\) to designate the imaginary part of a complex
+number \(z = x + iy\), with \(i^{2} = -1\), differentiation arithmetic
+uses the /nilpotent symbol/, \(\varepsilon\)
 [cite:@yuDNAD2013;@baydinAutomatic2018]:
 
 #+NAME: eq:nilpotent
@@ -792,7 +775,7 @@ Similarly, the product rule, via a simple polynomial expansion:
 \end{align}
 the final term cancelling due to the presence of \(\varepsilon^{2}\).
 
-This arithmetic may be more conviently expressed, for computational
+This arithmetic may be more conveniently expressed, for computational
 purposes, as one of /ordered
 pairs/[cite:@rallArithmetic1986;@kalmanDoubly2002] or /dual numbers/
 [cite:@yuDNAD2013;@sigalAutomatic2021;@revelsForwardMode2016]:
@@ -875,9 +858,9 @@ simply returns the signal block ~A~; ~chain(A:As)~ creates a recursive
 structure containing ~A~ and ~chain(As)~. Similarly, =wdmodels.lib=
 facilitates the creation of wave digital filter models via primitive
 elements, resistors, capacitors, etc. [cite:@roosenburgWave2021],
-whose behaviour is defined via pattern matching syntax. Both
-libraries extend \F{}'s arithmetic with their own rules, with the aim
-of achievening a particular goal within the syntax provided by \F{}.
+whose behaviour is defined via pattern matching syntax. Both libraries
+extend \F{}'s arithmetic with their own rules, with the aim of
+achieving a particular goal within the syntax provided by \F{}.
 
 If one's particular goal was to be able to compose reciprocal
 expressions, one could create an arithmetic of the following form,
@@ -921,13 +904,13 @@ approach to differentiable programming in \F{} based on forward mode
 automatic differentiation. End-to-end differentiability is predicated
 on the availability of derivative expressions for the primitive
 operations of the language; presented in the subsections that follow
-is an approach to definining \F{} primitives that are differentiable
-in forward mode.
+is an approach to defining \F{} primitives that are differentiable in
+forward mode.
 
 ** Defining a Differentiable Primitive
 
-As a basic example, consider the addition primitive; in \F{} one can
-write:
+As a basic starting point, consider the addition primitive; in \F{}
+one can write:
 
 #+NAME: faust_add
 #+begin_src faust
@@ -1003,7 +986,7 @@ On that note, let's define some more differentiable primitives for
 which we will represent with \F{}'s identity function, ~_~. Such a
 signal has no relationship with \(x\), so \(u' = 0\). To \(v\) we
 assign the variable \(x\); one possible analogy to a variable in \F{}
-is a slider, so that is what we shall use; \(v = x\), so \(v' = 1\).
+is a slider; \(v = x\), so \(v' = 1\).
 
 #+begin_src faust :results none
 diffInput = _,0;
@@ -1028,7 +1011,7 @@ process = diffInput,diffSlider : diffAdd;
 #+RESULTS:
 [[file:images/dc.svg]]
 The primal output signal of this program is the result of applying a
-DC offset, \(x\) to an input signal; the tangent output, the
+DC offset, \(x\), to an input signal; the tangent output, the
 derivative with respect to \(x\), is a constant signal of value
 \(1\). By composing primitives with well-defined derivatives, the
 derivative of the entire program has been found /automatically/; the
@@ -1056,7 +1039,7 @@ which can be notated thus:
 y = uv + w, \quad v = x_1, \quad w = x_2.
 \end{equation}
 Once again \(u\) is an arbitrary input signal, for which we have no
-analytic expression. Now, rather than being a lone ordinary derivative
+analytic expression. Now, rather a lone ordinary derivative
 \(\frac{dy}{dx}\), we have \(\nabla{}y\), a matrix of partial derivatives:
 
 #+NAME: eq:pds
@@ -1079,11 +1062,11 @@ product and addition rules of differentiation, we have:
 \end{align}
 
 To implement the above in \F{} calls for the creation of multivariate
-differentiable primitives. One approach to achieving this would be to
+differentiable primitives. One way to achieve this would be to
 implement ~diffInput~, ~diffSlider~, and ~diffAdd~ as functions, each
 taking as a parameter ~NVARS~, the number of variables in the program,
 and thus partial derivatives that they should produce. Using \F{}'s
-~environment~ expression, however it is possible to approach the
+~environment~ expression, however it is possible to address the
 problem in a more general, and syntactically succinct fashion.
 
 *** A Differentiable Environment
@@ -1355,7 +1338,7 @@ with {
 #+caption: Note that the only output signal produced by this example program
 #+caption: is the primal output signal produced by the loss function;
 #+caption: to hear the primal signal produced by ~estimate~, one could
-#+caption: perform additional routing prior to the loss function.
+#+caption: perform additional signal routing prior to the loss function.
 #+RESULTS:
 [[file:images/backprop.svg]]
 
@@ -1364,10 +1347,18 @@ inputs is commonly (and particularly in material from the field of
 machine learning) referred to as /backpropagation/
 [cite:@baydinAutomatic2018;@casebeerAutoDSP2021;@brunelBackpropagation2020].
 Whereas in reverse mode gradients arrive at the inputs inevitably as a
-consequency of the reverse adjoint pass through the graph, in forward
+consequence of the reverse adjoint pass through the graph, in forward
 mode something like the recursion described in cref:lst:backprop is
 required; consult cref:fig:backprop for the corresponding top-level
-block diagram.[fn:2]
+block diagram.
+
+Running this program[fn:2] reveals a user interface which includes
+slider elements for the parameters of the ~target~ algorithm, and
+bargraphs that report the values of the parameters of
+~estimate~. Moving a slider results in an increase in the value
+returned by the loss function, which is then minimised via gradient
+descent, the estimated parameter values tracking the values of the
+target.
 
 ** Differentiation of Audio-specific Primitives
 
@@ -1451,6 +1442,7 @@ be represented with dual numbers:
 and in Faust:
 
 #+begin_src faust :results none
+diff(v') = diff(v) : diff(mem);
 diff(mem) = mem,par(i, vars.N, mem);
 #+end_src
 
@@ -1494,7 +1486,7 @@ for \(\frac{\partial{}y}{\partial{}x_{i}}\), expanding cref:eq:variable-delay-de
 where \(u = t - v_{2}(t)\). In the general case, that of \F{}'s ~@~
 operator, we need an expression that will handle both fixed and
 variable delays, and, at the time of writing, this has entailed taking
-a numerical derivative of \(v_{1}\) with respect to (discrete) time,
+a numerical derivative of \(v_{1}\) with respect to discrete time,
 analogous to convolution with the derivative of a rectangular
 pulse. This approach is able to support parameter optimisation for
 increasing delays, but, for reasons of causality, for /decreasing/
@@ -1502,11 +1494,11 @@ ones it is of limited use.
 
 *** Variable Delay as a Differentiable Filterbank
 
-Perhaps a better approach, in parameter optimisation scenarios
-involving variable-length delay lines, is to model the variable delay
-as a differentiable FIR filterbank. The general FIR filter, with
-coefficients \(x_{i}\) and input signal \(s\), is defined by the following
-difference equation [cite:@mcclellanSignal2003]:
+Perhaps a better tactic, in parameter optimisation scenarios involving
+variable-length delay lines, is to model the delay as a differentiable
+FIR filterbank. The general FIR filter, with coefficients \(x_{i}\) and
+input signal \(s\), is defined by the following difference equation
+[cite:@mcclellanSignal2003]:
 
 #+NAME: eq:general-fir-1
 \begin{equation}
@@ -1655,8 +1647,8 @@ of this topic).
 :END:
 
 The previous section presented an approach to differentiable
-programming in \F{}, but this approach is not free from
-disadvantages. Considered in the following subsections are some
+programming in \F{}, but the scheme under consideration is not free
+from disadvantages. Considered in the following subsections are some
 limitations of the suggested automatic differentiation strategy, plus
 a selection of ideas for future development.
 
@@ -1702,13 +1694,14 @@ comparing \(y\) and \(\hat{y}\) after a short-duration application of
 unaligned phase, were employed instead.
 
 One way to combat problems of this sort would be to calculate loss in
-the frequency domain instead; indeed it is by way of comparison of
-magnitude spectrograms that loss is often approached in a DDSP setting
-[cite:@hayesReview2023]. Various functions exist in \F{}'s
-=analyzers.lib= library that could be used to achieve /spectral loss/
-computation; being based on an FFT implemenation that is
-restricted, however, to a single sample hop-size, at the time of
-writing computational effeciency casts doubt on such an approach.
+the frequency domain instead; indeed it is typically by way of
+perceptually-informed /spectral loss/ that optimisation is conducted
+in a DDSP setting [cite:@hayesReview2023]. Various functions exist in
+\F{}'s =analyzers.lib= library that could be used to this end; being
+based on an FFT implementation that is restricted, however, to a
+single sample hop-size, at the time of writing computational expense
+places limits on the computation of magnitude spectrograms,
+particularly in a real-time setting.
 
 ** Computational Efficiency
 :PROPERTIES:
@@ -1738,7 +1731,7 @@ optimisation in mind, applying various rewriting rules after its
 symbolic propagation phase to simplify expressions and avoid
 redundancy [cite:@orlareyFAUST2009]. In effect, the compiler will
 attempt to produce the most efficient possible /Faust Imperative
-Representation/ for any given \F{} program. Nevertherless, the
+Representation/ for any given \F{} program. Nevertheless, the
 creation of a generalisable approach to reverse mode should be
 explored, and this too would benefit from compile-time
 optimisations. Moreover, forward and reverse mode can be thought of as
@@ -1770,15 +1763,15 @@ should be employed. In that instance, it would be possible to define
 #+begin_src faust
 estimate = forwardAD(target);
 #+end_src
-In addition to abstracting away the calls to ~diff()~, this could
-permit identifying input signals by counting the number of inputs to
-the circuit passed to ~forwardAD~. Standing in the way of this idea,
+In addition to abstracting away calls to ~diff()~, this could permit
+identifying input signals by counting the number of inputs to the
+circuit passed to ~forwardAD~. Standing in the way of this idea,
 however, are limitations in \F{}'s pattern matching system at the time
 of writing, the principal issue being the impossibility of
 pattern-matching user interface elements in the general case; i.e., to
 match a ~hslider~ one needs to match its label exactly, plus the
 values provided for ~init~, ~min~, ~max~ and ~step~. By way of an
-alterantive, a strategy based on \F{}'s /widget modulation/ syntax may
+alternative, a strategy based on \F{}'s /widget modulation/ syntax may
 help circumvent this problem.
 
 ** Application to Machine Learning
@@ -1787,24 +1780,44 @@ Further to the caveats mentioned in ref:subsec:freq-loss, the success
 of the parameter optimisation example presented in this paper is
 contingent on the provision of deterministic input data; essentially
 the example constitutes an extreme example of /overfitting/, solving
-one specific problem very well, but possessing no capability to
-generalise. Nevertheless, it shares its basis, in the form of
-differentiable programming, with more sophisticated mathematical
-optimisation approaches, chief amongst these being machine learning.
+one specific problem, on one particular set of input data, very well,
+but possessing no capability to generalise. Nevertheless, it shares
+its basis, in the form of differentiable programming, with more
+sophisticated mathematical optimisation approaches, chief amongst
+these being machine learning.
 
 Using differentiable \F{} primitives it is straightforward to create
 differentiable loss functions; activation functions and artificial
 neurons (the latter being based on simple linear algebra principles)
-could follow without much trouble. Neural network structures would
-require significant effort to generalise, but it is unlikely that they
-lie beyond the capabilities of the language.
+could follow without much trouble. Neural network structures, which
+support the training of models capable of generalising to unseen input
+data, would require significant effort to implement in a composable,
+extensible fashion, but it is unlikely that they lie beyond the
+capabilities of the language.
 
 * Conclusion
-:PROPERTIES:
-:CUSTOM_ID: sec:conclusion
-:END:
 
+In this paper, it has been shown that differentiable programming is
+well within the capabilities of the \F{} language, and thus that \F{}
+can be used to tackle audio problems based on principles of
+mathematical optimisation. It has also been demonstrated that the
+derivatives of certain audio specific primitive operations are
+well-defined, though delay lines of variable length require a
+sensitive approach.
 
+The presence of a comprehensive automatic differentiation framework in
+\F{} would lend the language to a multitude of DDSP problems and
+applications that currently lie unexplored by \F{} programmers; in
+turn, the ability to tackle such problems in a domain specific
+language could foster innovation in what is a vibrant research area.
+
+Aims for further investigation should be the implementation of
+differentiation rules for all of the primitives of the language, the
+development of a less intrusive syntax for automatic differentiation
+transformations, and perhaps enhancements to pattern matching at the
+level of the \F{} compiler. An FFT implementation of greater
+efficiency, or a novel approach to perceptually-informed loss
+computation, would also be of great benefit.
 
 #+begin_export latex
 %%\nocite{*}
@@ -1813,7 +1826,8 @@ lie beyond the capabilities of the language.
 
 * Footnotes
 
-[fn:2] A full code example can be found at
+[fn:2] A full code example, adapted from the excerpts in this paper,
+can be found at
 [[https://gist.github.com/hatchjaw/59f35d0cde7aba218d785d31f26d2d83]].
 
 [fn:3] Alternatively, for the case where ~A~ consists of an arbitrary
@@ -1824,7 +1838,7 @@ primitive instead of merge composition.
 [fn:1] Transformations /are/ in fact possible at the level of the \F{}
 compiler, and automatic differentiation /could/ occur as a compilation
 step. For reasons of scope, this paper focuses solely on the topic of
-autodiff in the \F{} language itself.
+automatic differentiation in the \F{} language itself.
 
 * Emacs Setup                                                      :noexport:
 
