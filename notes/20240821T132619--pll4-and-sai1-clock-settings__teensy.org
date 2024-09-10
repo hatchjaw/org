@@ -265,11 +265,11 @@ FsMin = (OSC_24M * DpMin)/(pll4Div*sai1Div*1<<8)
 ** General Expression for the Sample Rate
 
 Bringing all of the above together, the general expression for
-achieving target sample rate \(\bar{F}_{s}\) is:
+achieving target sample rate \(\hat{F}_{s}\) is:
 
 #+NAME: eq:general-fs
 \begin{align}
-\bar{F}_{s} &= \frac{F_{I}}{2^{8}} \nonumber \\
+\hat{F}_{s} &= \frac{F_{I}}{2^{8}} \nonumber \\
   &= \frac{F_{M}}{2^{8}D_{I_{1}}D_{I_{2}}} \nonumber \\
   &= \frac{F_{X}D_{P}}{2^{8}D_{p}D_{A}D_{I_{1}}D_{I_{2}}} \nonumber \\
   &= \frac{24\times10^{6}}{2^{8}}\frac{D_{S}+\frac{D_{N}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}
@@ -284,7 +284,7 @@ is probably going to be necessary.
 * Setting a different audio sample rate
 
 Say we want to set a sample rate of \(F_{s} = 48\,\text{kHz}\). Our
-target \({F_{I}}\), \(\bar{F}_{I}\), equals \(\bar{F}_{S}\cdot2^{8}\):
+target \({F_{I}}\), \(\hat{F}_{I}\), equals \(\hat{F}_{S}\cdot2^{8}\):
 
 #+begin_src julia :session :results output :exports both :eval never-export
 Fs = 48000
@@ -339,10 +339,10 @@ let
                 sai1Post += 1
             end
 
-            # If there's more than one multiplier between us and success,
-            # try a different PRED/PODF combination.
-            if (Fs * sai1Pre * sai1Post - div * multiplier > multiplier
-                   && sai1Pre < 8)
+            # If target Fs is greater than the current achievable Fs,
+            # try another combination of SAI1 dividers.
+            if (Fs > ((div + 1)/(sai1Pre * sai1Post)) * multiplier
+                && sai1Pre < 8)
                 sai1Pre += 1
                 sai1Post = 1
                 continue
@@ -374,7 +374,7 @@ let
                 denom *= 10
                 num = floor(divExact * denom - div * denom)
             end
-            
+            j
             if denom <= 1e6
                 # Found a match
                 @printf "24 MHz * (%d + %d/%d)" div num denom

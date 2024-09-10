@@ -4,7 +4,7 @@
 #+TITLE:       Research Journal
 #+AUTHOR:      Thomas Rushton
 #+LANGUAGE:    en
-#+TAGS: noexport(n) MEETING(m) PRESENTATION(p) BLOG(b) TRAINING(T)
+#+TAGS: noexport(n) MEETING(m) SUPERVISION(V) PRESENTATION(p) BLOG(b) TRAINING(T)
 #+TAGS: INSPO(i) DIY(d) TEACHING(t) REPRES(R) REVIEW(v) GSoC(G)
 #+TAGS: [ PROGRAMMING : R(r) PYTHON(P) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ZOTERO(z) LATEX(l) ]
@@ -577,7 +577,7 @@ The plan is something like:
 
 Entered on [2024-04-23 mar. 18:19]
 *** 2024-04-24 mercredi
-**** Meeting with Romain — PhD committee                         :MEETING:
+**** Meeting with Romain — PhD committee             :MEETING:SUPERVISION:
 - We need to spend money on equipment — soon — so we need to know what
   to buy.
 - For the committee, talk about the state of the art, plan for the
@@ -1647,7 +1647,7 @@ Also to be found in my Zotero.
  
 Entered on [2024-05-31 ven. 10:19]
 *** 2024-05-31 vendredi
-**** Superivision Meeting with Romain                            :MEETING:
+**** Superivision Meeting with Romain                :MEETING:SUPERVISION:
 - Develop a comprehensive plan of experiments to be conducted with RPi
   and Teensy in order to establish our candidate hardware platform.
   + I have until September, realistically, to carry out the
@@ -1815,7 +1815,7 @@ institutes may offer file storage services. Other options include
 
 Entered on [2024-06-06 jeu. 14:07]
 *** 2024-06-07 vendredi
-**** Meeting with Romain: Frontiers Article Revisions            :MEETING:
+**** Meeting with Romain: Frontiers Article Revisions :MEETING:SUPERVISION:
 My Frontiers review forum says the following:
 #+begin_quote
 You are pending to respond to Reviewer 1 and/or resubmit a new version
@@ -2545,7 +2545,7 @@ Entered on [2024-07-10 mer. 13:29]
   
 Entered on [2024-07-11 jeu. 17:51]
 *** 2024-07-12 vendredi
-**** Meeting with Romain                                         :MEETING:
+**** Meeting with Romain                             :MEETING:SUPERVISION:
 - Don't spend too long on the IFC paper;
   + But do submit something; a short, demo-like affair.
 - Re. sync; making a more costly, PTP-based system, may be fine if
@@ -2902,7 +2902,7 @@ Entered on [2024-07-28 dim. 19:51]
   
   [[file:~/org/journal.org::*Teensy supports IEEE 1588][Teensy supports IEEE 1588]]
 *** 2024-07-29 lundi
-**** Meeting with Romain (CW31)                                  :MEETING:
+**** Meeting with Romain (CW31)                      :MEETING:SUPERVISION:
 - Nando used PTP-enabled USB ethernet dongles to support one of his
   projects.
 - Doesn't this act as a bridge for an internal ethernet PHY with
@@ -3380,7 +3380,7 @@ Entered on [2024-08-29 jeu. 19:14]
 
 ** 2024-09 septembre
 *** 2024-09-03 mardi
-**** Meeting with Romain
+**** Meeting with Romain                             :MEETING:SUPERVISION:
 - Internet of Sounds
   + Grame to pay for hotel and travel
   + Inria to cover registration & expenses
@@ -3392,3 +3392,49 @@ Entered on [2024-08-29 jeu. 19:14]
     I will have to withdraw it for budgetary reasons"
 
 Entered on [2024-09-03 mar. 09:19]
+*** 2024-09-09 lundi
+**** More PLL4/SAI1 stuff                                     :TEENSY:PTP:
+- Numerical precision is an issue when trying to calculate clock
+  dividers in C++. Took a different approach to my python/julia
+  script, which rested on the assumption that those languages are
+  opinionated when it comes to precsion.
+- Maybe my class(es) for managing the audio subsystem should be
+  singletons? Compare with =QNEthernet=.
+- Turns out it helps to set the ~CCM_ANALOG_PLL_AUDIO~ register to
+  ~0x0~ as a first step, otherwise there's a good chance of there
+  being obstructive garbage in there.
+
+Entered on [2024-09-09 lun. 14:33]
+*** 2024-09-10 mardi
+**** Meeting with Romain                             :SUPERVISION:MEETING:
+- Stanford
+  + Inria stipend!
+  + Should take day off during week since we'll be working Sunday.
+  + Key people to meet: Nando, Matt Wright (technical director CCRMA).
+  + Maybe Chris Chafe, but he's the chair of the dept. so could be too
+    busy.
+    * Maybe not for dinner, however. Could meet Julius Smith, John
+      Chowning, etc.
+  + Sunday: Faust workshop; I'm to lead the morning session.
+    * Start with something practical; writing something in the Web
+      IDE; demonstrate that you can export; then build something
+      slightly more advanced; talk about the semantics, block
+      diagrams, etc. Focus on key concepts that people will be most
+      likely to remember later.
+    * Start at 10; basically a half day, so don't go nuts with
+      content.
+    * Lunch at 12; resume 13h30; finish around 16h. Romain to take
+      over with an hour or so to go to talk current research
+      directions.
+    * Assume a good level of understanding in the audience (it's CCRMA
+      after all).
+- Teensy
+  + Try a sine wave
+  + Try to implement the full thing (!) --- better not to just be
+    working on the low level problem; also attempt the global problem,
+    a couple of Teensies, networked audio, etc.
+  + Remember to try to do something fun every once in a while.
+  + Try a convolution algorithm; assess capabilities of the platform.
+  
+Entered on [2024-09-10 mar. 09:48]
+ 
