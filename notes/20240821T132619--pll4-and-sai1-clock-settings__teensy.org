@@ -301,31 +301,32 @@ register and field options:
 
 #+begin_src julia :session :results output :eval never-export :exports both
 let
+    # This will simplify some of the calculations, and should help
+    # with getting accurate results, particularly in C++.
+    MHz = 1e6
+    oscMHz = 24;
+    oscHz = oscMHz * MHz
     wordsize = 1 << 8
     # Adjustment to all figures so we can compare integer targets...
-    multiplier = OSC_24M/wordsize
+    cyclesPerWord = oscHz/wordsize
     # Frequency limitaitions
-    pll4Min = 650e6
-    pll4Max = 1300e6
-    sai1PostMaxInputFreq = 300e6
+    pll4Min = 650 * MHz
+    pll4Max = 1300 * MHz
+    sai1PostMaxInputFreq = 300 * MHz
+    numMax = (1 << 29) - 1
+    denomMax = (1 << 30) - 1
 
     @printf "Target sample rate:   %s Hz\n" cfmt("%'d", Fs)
     @printf "Target SAI1_CLK_ROOT: %s Hz\n\n" cfmt("%'d", Fi)
 
     for div in 27:54
-        num = 0           # Initial numerator
-        denom = 10        # Start with tenths
-        sai1Pre = 1       # Initial SAI1 pre-divider
-        sai1Post = 1      # and post-divider
-        divExact = -1.0
+        num = 0            # Initial numerator
+        denom = 1e6        # Start with millionths
+        sai1Pre = 1        # Initial SAI1 pre-divider
+        sai1Post = 1       # and post-divider
+        divExact = -1.0        
 
-        while OSC_24M * (div + num / denom) < pll4Min
-            num +=1
-        end            
-
-        pllFreq = OSC_24M * (div + num / denom)
-        # num = Int(num * 1e5)
-        # denom = Int(denom * 1e5)
+        pllFreq = oscHz * (div + num / denom)
 
         # Adjust first sai1 divider to get a valid input to the second
         # divider
@@ -333,27 +334,29 @@ let
             sai1Pre += 1
         end
 
-        while floor(divExact) != div
+        while floor(divExact / MHz) != div
             # Adjust second sai1 divider to get a value below the target
-            while multiplier * div / (sai1Pre * sai1Post) > Fs && sai1Post < 64
+            while cyclesPerWord * div / (sai1Pre * sai1Post) > Fs && sai1Post < 64
                 sai1Post += 1
             end
 
             # If target Fs is greater than the current achievable Fs,
             # try another combination of SAI1 dividers.
-            if (Fs > ((div + 1)/(sai1Pre * sai1Post)) * multiplier
+            if (Fs > ((div + 1)/(sai1Pre * sai1Post)) * cyclesPerWord
                 && sai1Pre < 8)
                 sai1Pre += 1
                 sai1Post = 1
                 continue
             end
 
-            divExact = Fs * wordsize * sai1Pre * sai1Post / OSC_24M
+            # Divide by the main oscillator's frequency in MHz to get
+            # a better-behaved number with which to calculate.
+            divExact = Fs * wordsize * sai1Pre * sai1Post / oscMHz
 
             # If fractional and integer div don't have the same
             # integer part, something's wrong; try a different SAI1
             # predivider.
-            if floor(divExact) != div
+            if floor(divExact / MHz) != div
                 if sai1Pre < 8
                     sai1Pre += 1
                     sai1Post = 1
@@ -363,19 +366,18 @@ let
                 end
             end
 
-            num = floor(divExact * denom - div * denom)
+            num = floor(divExact - div * MHz)
 
-            # Scale denom and recalculate num until the clock
-            # calculation matches the target; if it doesn't by the
-            # time we're dividing by a million, it (probably) isn't
-            # going to happen.
-            while (floor(OSC_24M * (div + num / denom) / (sai1Pre * sai1Post)) != Fi
-                   && denom <= 1e6)
-                denom *= 10
-                num = floor(divExact * denom - div * denom)
+            # Scale num and denom to take greatest possible advantage
+            # of the available numerical resolution.
+            while num * 10 < numMax && denom * 10 < denomMax
+                num *= 10;
+                denom *= 10;
             end
-            j
-            if denom <= 1e6
+
+            pll4Freq = oscHz * (div + num/denom)
+            
+            if pll4Freq > pll4Min && pll4Freq < pll4Max
                 # Found a match
                 @printf "24 MHz * (%d + %d/%d)" div num denom
                 @printf "/(1 * 1 * %d * %d)" sai1Pre sai1Post
@@ -393,29 +395,84 @@ end
 Target sample rate:   48,000 Hz
 Target SAI1_CLK_ROOT: 12,288,000 Hz
 
-24 MHz * (27 + 648/1000)/(1 * 1 * 3 * 18) = 12288000.000000
-24 MHz * (28 + 672/1000)/(1 * 1 * 4 * 14) = 12288000.000000
-24 MHz * (29 + 184/1000)/(1 * 1 * 3 * 19) = 12288000.000000
-24 MHz * (30 + 72/100)/(1 * 1 * 3 * 20) = 12288000.000000
-24 MHz * (32 + 256/1000)/(1 * 1 * 3 * 21) = 12288000.000000
-24 MHz * (33 + 792/1000)/(1 * 1 * 3 * 22) = 12288000.000000
-24 MHz * (34 + 816/1000)/(1 * 1 * 4 * 17) = 12288000.000000
-24 MHz * (35 + 328/1000)/(1 * 1 * 3 * 23) = 12288000.000000
-24 MHz * (38 + 912/1000)/(1 * 1 * 4 * 19) = 12288000.000000
-24 MHz * (39 + 936/1000)/(1 * 1 * 6 * 13) = 12288000.000000
-24 MHz * (40 + 96/100)/(1 * 1 * 4 * 20) = 12288000.000000
-24 MHz * (43 + 8/1000)/(1 * 1 * 4 * 21) = 12288000.000000
-24 MHz * (45 + 56/1000)/(1 * 1 * 4 * 22) = 12288000.000000
-24 MHz * (46 + 8/100)/(1 * 1 * 5 * 18) = 12288000.000000
-24 MHz * (47 + 104/1000)/(1 * 1 * 4 * 23) = 12288000.000000
-24 MHz * (48 + 64/100)/(1 * 1 * 5 * 19) = 12288000.000000
-24 MHz * (49 + 152/1000)/(1 * 1 * 4 * 24) = 12288000.000000
-24 MHz * (50 + 176/1000)/(1 * 1 * 7 * 14) = 12288000.000000
-24 MHz * (51 + 2/10)/(1 * 1 * 5 * 20) = 12288000.000000
-24 MHz * (52 + 224/1000)/(1 * 1 * 6 * 17) = 12288000.000000
-24 MHz * (53 + 76/100)/(1 * 1 * 5 * 21) = 12288000.000000
+24 MHz * (27 + 64800000/100000000)/(1 * 1 * 3 * 18) = 12288000.000000
+24 MHz * (28 + 67200000/100000000)/(1 * 1 * 4 * 14) = 12288000.000000
+24 MHz * (29 + 184000000/1000000000)/(1 * 1 * 3 * 19) = 12288000.000000
+24 MHz * (30 + 72000000/100000000)/(1 * 1 * 3 * 20) = 12288000.000000
+24 MHz * (32 + 256000000/1000000000)/(1 * 1 * 3 * 21) = 12288000.000000
+24 MHz * (33 + 79200000/100000000)/(1 * 1 * 3 * 22) = 12288000.000000
+24 MHz * (34 + 81600000/100000000)/(1 * 1 * 4 * 17) = 12288000.000000
+24 MHz * (35 + 328000000/1000000000)/(1 * 1 * 3 * 23) = 12288000.000000
+24 MHz * (36 + 86400000/100000000)/(1 * 1 * 3 * 24) = 12288000.000000
+24 MHz * (38 + 91200000/100000000)/(1 * 1 * 4 * 19) = 12288000.000000
+24 MHz * (39 + 93600000/100000000)/(1 * 1 * 6 * 13) = 12288000.000000
+24 MHz * (40 + 96000000/100000000)/(1 * 1 * 4 * 20) = 12288000.000000
+24 MHz * (43 + 8000000/1000000000)/(1 * 1 * 4 * 21) = 12288000.000000
+24 MHz * (45 + 56000000/1000000000)/(1 * 1 * 4 * 22) = 12288000.000000
+24 MHz * (46 + 80000000/1000000000)/(1 * 1 * 5 * 18) = 12288000.000000
+24 MHz * (47 + 104000000/1000000000)/(1 * 1 * 4 * 23) = 12288000.000000
+24 MHz * (48 + 64000000/100000000)/(1 * 1 * 5 * 19) = 12288000.000000
+24 MHz * (49 + 152000000/1000000000)/(1 * 1 * 4 * 24) = 12288000.000000
+24 MHz * (50 + 176000000/1000000000)/(1 * 1 * 7 * 14) = 12288000.000000
+24 MHz * (51 + 200000000/1000000000)/(1 * 1 * 5 * 20) = 12288000.000000
+24 MHz * (52 + 224000000/1000000000)/(1 * 1 * 6 * 17) = 12288000.000000
+24 MHz * (53 + 76000000/100000000)/(1 * 1 * 5 * 21) = 12288000.000000
 #+end_example
 
+That's a lot of options, without even using \(D_{P}\) and \(D_{A}\). Some of
+these combinations of dividers, i.e. those for which ~num~ is less
+than ~(1 << 29) - 1~, offer an order of magnitude better resolution
+than others, so that's something to bear in mind. There's some
+suggestion (see =FlexIO_t4.h= in the framework-arduinoteensy
+libraries) that combinations built on a PLL4 frequency that lies in
+the middle of the valid range (650 - 1300 MHz) may be preferable (more
+stable?).
+
+* Fine-tuning the Sample Rate
+
+Say we have selected a set of dividers, and we want to make some
+manner of fine adjustment to the sample rate, e.g. to compensate for
+clock drift. We can rewrite equation eqref:eq:general-fs to find an
+expression for an unknown \(D_{N}\):
+
+#+NAME: eq:fine-num-1
+\begin{align}
+\hat{F_{s}} &= \frac{24\times10^{6}}{2^{8}}\frac{D_{S} +
+  \frac{D_{N}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}} \nonumber \\
+D_{N} &= D_{D}\left(\frac{2^{8}\hat{F}_{s}D_{I_{1}}D_{I_{2}}}{F_{X}} - D_{S}\right)
+\end{align}
+
+For very large \(D_{D}\), it may be advantageous to divide by the main
+oscillator's frequency in MHz instead of Hz. To do so, multiply
+the contents of the parenthesis by one million, and divide the outside
+by one million to compensate:
+
+#+NAME: eq:fine-num-2
+\begin{equation}
+D_{N} = \frac{D_{D}}{1\times10^{6}}\left(
+  \frac{2^{8}\hat{F}_{s}D_{I_{1}}D_{I_{2}}}{\frac{F_{X}}{1\times10^{6}}} - 1\times10^{6}D_{S}
+\right)
+\end{equation}
+
+For example:
+
+#+begin_src julia :results output :eval never-export :exports both
+MHz = 1e6
+oscMHz = 24
+div = 43
+denom = 1e9
+wordsize = 1 << 8
+sai1Pre = 4
+sai1Post = 21
+Fs = 48000 + 1/17
+
+num = (denom / MHz) * ((wordsize * Fs * sai1Pre * sai1Post) / oscMHz - div * MHz)
+
+@printf "num = %d\n" num
+#+end_src
+
+#+RESULTS:
+: num = 8052706
 
 * Footnotes
 

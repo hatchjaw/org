@@ -3437,4 +3437,31 @@ Entered on [2024-09-09 lun. 14:33]
   + Try a convolution algorithm; assess capabilities of the platform.
   
 Entered on [2024-09-10 mar. 09:48]
- 
+*** 2024-09-11 mercredi
+**** Teensy Audio Mysteries                                       :TEENSY:
+I encapsulated audio clock setup from Teensy's =imxrt_hw.cpp= and
+=output_i2s.cpp= into dedicated classes that control hardware
+registers. What I think I've discovered so far is that the Analog
+Audio PLL Control Register prefers to be powered up precisely
+once. It's not that audio data isn't sent to pin 7 as expected
+following a power cycle, but rather that the audio shield doesn't
+appear to make any sound. This suggests, perhaps, that there's some
+consequence of power cycling the PLL that means the audio shield needs
+to be reconfigured, or maybe that something else in audio subsystem
+setup needs to be renewed.
+
+I tried to investigate just how far out of sync my master/slave
+(leader/follower) audio subsystems are, by sending
+distinctively-shaped pulses as output, e.g.
+#+begin_example
+i2s_tx_buffer[0] = ((1 << 16) - 1) ^ (((1 << 2) - 1) << 7);
+#+end_example
+But that didn't yield impressive results. It wasn't until I reverted
+to my old approach of counting ten seconds at a time, stopping leader
+and follower's audio subsystems on nine and restarting on ten, that
+I achieved anything approaching synchronicity. Sample rates are close
+(the follower appears to drift /very slightly/ fast on average; need
+to address that), but audio interrupts appear to be out of sync on the
+order of 20-40 \micro{}s.
+
+Entered on [2024-09-11 mer. 14:23]
