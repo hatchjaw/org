@@ -4,37 +4,31 @@
 
 * Tasks
 ** TODO Read Yann's Widget Modulation paper
-DEADLINE: <2024-08-19 lun.>
+DEADLINE: <2024-09-13 ven.>
 ** DONE [#B] Review PAUC manuscript
 DEADLINE: <2024-08-19 lun.>
 - State "DONE"       from "TODO"       [2024-08-18 dim. 15:56]
-** TODO [#A] Send Romain weekly update
-DEADLINE: <2024-08-16 ven. ++1w>
-:PROPERTIES:
-:LAST_REPEAT: [2024-08-04 dim. 17:14]
-:END:
-- State "DONE"       from "TODO"       [2024-08-04 dim. 17:14]
-- State "DONE"       from "TODO"       [2024-07-21 dim. 13:36]
-- State "DONE"       from "TODO"       [2024-07-12 ven. 18:12]
-** TODO [#A] Submit IFC article
+** DONE [#A] Submit IFC article
 DEADLINE: <2024-08-23 ven.>
+- State "DONE"       from "TODO"       [2024-09-12 jeu. 10:21]
 ** TODO Check entry requirements for US
-DEADLINE: <2024-08-16 ven.>
+DEADLINE: <2024-09-14 sam.>
 ** TODO Ask Maxime again about practicalities of using his DAC with Teensy or the Pi
-DEADLINE: <2024-08-19 lun.>
+DEADLINE: <2024-09-13 ven.>
 ** TODO Prepare PhD meeting presentation
 DEADLINE: <2024-09-16 lun. ++1m>
 
 - State "DONE"       from "TODO"       [2024-07-10 mer. 13:32]
 ** TODO Read Papers
-DEADLINE: <2024-08-18 dim.>
+DEADLINE: <2024-09-16 lun.>
 *** TODO Wierstorf thesis
 *** TODO Ritsch: AOO
 *** TODO Carôt: latency-optimized soundcards
 *** TODO Meier et al.: The JamBerry
 
-** TODO [#B] Start French Language MOOC
+** STARTED [#B] Start French Language MOOC
 
+- State "STARTED"    from "TODO"       [2024-09-12 jeu. 10:21]
 ** TODO [#C] Start Ethics/Integrity MOOC
 
 ** WAITING [#B] Apply, again, for social security [10/10]
@@ -75,7 +69,7 @@ DEADLINE: [2024-06-18 mar.]
 *** DONE Receive another update via post
 - State "DONE"       from "WAITING"    [2024-08-14 mer. 11:03]
 *** TODO Apply for Carte Vitale
-DEADLINE: <2024-08-16 ven.>
+DEADLINE: <2024-09-16 lun.>
 
 ** TODO Read Razvan's Thesis
 The PDF is in ~/Documents
@@ -88,7 +82,7 @@ The PDF is in ~/Documents
 ** TODO Sign up to ShareAmi
 
 ** TODO Prendre rendez-vous chez le coiffeur
-DEADLINE: <2024-08-15 jeu. .+1m>
+DEADLINE: <2024-09-13 ven. .+1m>
 :PROPERTIES:
 :LAST_REPEAT: [2024-06-06 jeu. 13:37]
 :END:

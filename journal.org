@@ -2166,7 +2166,7 @@ challenges, etc.
 
 Entered on [2024-06-12 mer. 10:10]
 *** 2024-06-13 jeudi
-**** "Lerp Smoothing Is Broken"
+**** "Lerp Smoothing Is Broken"                                    :INSPO:
 Fun/interesting [[https://youtu.be/LSNQuFEDOyQ?si=HZkWxfaahJqe7tfX][talk]] by Freya Holmér.
 
 Takeaways:
@@ -3465,3 +3465,51 @@ to address that), but audio interrupts appear to be out of sync on the
 order of 20-40 \micro{}s.
 
 Entered on [2024-09-11 mer. 14:23]
+*** 2024-09-13 vendredi
+**** New project: =teensy-audiosync=                          :TEENSY:PTP:
+Created a new repository for the Teensy PTP project:
+=teensy-audiosync=.
+- Made an attempt to get away from the master/slave naming convention
+  (if only so I can avoid the earworm that is /Savant/ by Oceansize
+  (but also for more compelling reasons of cultural baggage)). For
+  now, I'm going with *authority* and *subscriber*, though *leader*
+  and *follower* could work.
+- I've more-or-less nicely encapsulated the idea of a processor
+  register in an abstract class, ~IMXRT1060Register~. Concrete
+  registers inherit from this class, and writes (and set/clear/toggle
+  for SCT (or /bitband/) registers) are encapsulated in a method that
+  dereferences a pointer to the register address, which is quite
+  pleasant --- entails less preprocessor abuse.
+  + I started down this route by emulating the approach taken in
+    =QNEthernet=, which also employs the singleton pattern, an
+    approach that I followed in turn. Of course, singletons don't lend
+    themselves well to testing, and the =QNEthernet= approach involves
+    inserting a reference to the ~instance_~ of each concrete class at
+    the top of its .cpp file. I could use a template-based singleton
+    approach instead, but I think I'd be better off trying dependency
+    injection or something of that sort.
+
+NB. Sometimes ~nspsAdjust~ evaluates to some enormous number that
+results in a suggested adjustment of greater than 2x; thus invalid PLL
+numerators are computed, and sample rate parity is not achieved; I'm
+not sure what causes this, and it seems to be non-deterministic (or at
+least due to factors that are out of my hands); at some point I'll
+have to investigate further.
+
+NB. It seems that clock setup needs to conclude with setting ENABLE,
+unsetting POWER_DOWN, and unsetting BYPASS. Not necessarily in that
+order, but apparently that can't wait until later (further
+investigation required). Interestingly, removing these from a method
+that's ultimately called from ~setup()~ and rebuilding/rebooting may
+result in the appearance of all being well, but /following a
+hard-restart, no audio output will be produced/.
+  
+Entered on [2024-09-13 ven. 10:58]
+**** Org Babel: Faust                                        :FAUST:EMACS:
+Just a reminder that I should put some more work into [[https://github.com/hatchjaw/ob-faust/tree/main][ob-faust]] at some
+point.
+
+[[https://github.com/shg/ob-julia-vterm.el/blob/master/ob-julia-vterm.el][ob-julia-vterm]] is a fairly simple Org Babel language support extension
+from which I could purloin ideas.
+
+Entered on [2024-09-13 ven. 17:45]

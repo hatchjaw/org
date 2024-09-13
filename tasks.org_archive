@@ -235,3 +235,17 @@ DEADLINE: <2024-06-27 jeu.>
 :ARCHIVE_TODO: DONE
 :END:
 - State "DONE"       from "TODO"       [2024-06-26 mer. 16:52]
+
+* TODO [#A] Send Romain weekly update
+DEADLINE: <2024-08-16 ven. ++1w>
+:PROPERTIES:
+:LAST_REPEAT: [2024-08-04 dim. 17:14]
+:ARCHIVE_TIME: 2024-09-12 jeu. 10:21
+:ARCHIVE_FILE: ~/org/tasks.org
+:ARCHIVE_OLPATH: Tasks
+:ARCHIVE_CATEGORY: tasks
+:ARCHIVE_TODO: TODO
+:END:
+- State "DONE"       from "TODO"       [2024-08-04 dim. 17:14]
+- State "DONE"       from "TODO"       [2024-07-21 dim. 13:36]
+- State "DONE"       from "TODO"       [2024-07-12 ven. 18:12]
