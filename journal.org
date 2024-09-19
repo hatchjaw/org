@@ -3523,3 +3523,30 @@ Entered on [2024-09-13 ven. 17:45]
 - Prioritise getting a /working demo/ running.
   
 Entered on [2024-09-18 mer. 09:04]
+*** 2024-09-19 jeudi
+**** Indecision: How to approach the next bit?                    :TEENSY:
+I don't fully understand how ~AudioStream~ handles interrupt-based
+audio system updates.
+
+Specifically, there's the virtual ~update()~ method, which I know well
+enough (having implemented it a few times previously) --- what I don't
+know is where it's called from. In ~AudioOutputI2S~, for example,
+which has a static ~dma~ class member (which is the approach I'm
+taking in ~AudioSystemManager~), a static fuction, ~isr~, is passed to
+~DMAChannel::attachInterrupt~; in ~isr~, there's a call to
+~AudioStream::update_all()~, which one would reasonably expect to call
+~update~ for all ~AudioStream~ descendents. What it actually does is
+update the ~IRQ_SOFTWARE~ /Interrupt Set-Pending Register/ (see
+Armv7-M Architecture Reference Manual §B3.4.6).
+
+#+begin_src c++
+static void update_all(void) { NVIC_SET_PENDING(IRQ_SOFTWARE); }
+#+end_src
+
+My best guess at this stage is that this indicates that the interrupt
+that calls ~update~ should be triggered at the soonest possible
+subsequent time, to avoid overburdening ~AudioOutputI2S::isr~, which
+is presumably supposed to do as little work as possible. Anyway,
+further investigation required.
+
+Entered on [2024-09-19 jeu. 18:10]
