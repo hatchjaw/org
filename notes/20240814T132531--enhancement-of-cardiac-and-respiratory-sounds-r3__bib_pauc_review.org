@@ -29,12 +29,12 @@ to discuss those in detail.
     mobile phones may not be capable of reproducing low-frequency
     waves accurately".
   It would suffice to say that phone speaker technology has typically
-  been concerned with vocal intelligility, rather fidelity across the
-  audible range.
+  been concerned with vocal intelligility, rather than fidelity across
+  the audible range.
 - 6, 1, 35-39: I think I raised this with you a couple of revisions
   ago; when you assert "To make the compression more efficient" it
   sounds like you're referring to the efficiency of the algorithm,
-  when I think perhaps you mean something lyike "in order to reduce
+  when I think perhaps you mean something like "in order to reduce
   the effort of bulk-processing the audio samples".
 - Tables 1 & 2: To be more specific about my previous recommendation,
   please indicate in the caption for table 1 that this refers to the

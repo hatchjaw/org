@@ -5,11 +5,13 @@
 
 ENTRY
   { address
+    archiveprefix
     author
     booktitle
     chapter
     edition
     editor
+    eprint
     howpublished
     institution
     journal
@@ -812,6 +814,15 @@ FUNCTION {mastersthesis}
   fin.entry
 }
 
+FUNCTION {format.eprint}
+{ archiveprefix empty$
+    { "" }
+    { archiveprefix ":" * }
+  if$
+  eprint field.or.null
+  *
+}
+
 FUNCTION {misc}
 { output.bibitem
   format.authors output
@@ -823,6 +834,7 @@ FUNCTION {misc}
   format.date output
   new.block
   note output
+  format.eprint output
   fin.entry
   empty.misc.check
 }

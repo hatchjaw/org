@@ -26,7 +26,7 @@ with {
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-XFgGX6/block_0Zfw70.svg]]
+[[file:/tmp/babel-opgpxN/faust-Pa6SMN.svg]]
 
 This program consists of a number of what we will consider /primitive/
 operations, \(v_{n}\). The program features \(N = 2\) input primitives
@@ -143,7 +143,7 @@ derivative expression for \(v_{4}\):
     \frac{\partial{}v_{0}}{\partial{}x_{1}}\cdot
     \frac{\partial{}v_{3}}{\partial{}v_{0}}\cdot
     \frac{\partial{}v_{4}}{\partial{}v_{3}} +
-    \frac{\partial{}v_{0}}{\partial{}x_{1}}\cdot
+    \frac{\partial{}v_{1}}{\partial{}x_{1}}\cdot
     \frac{\partial{}v_{3}}{\partial{}v_{1}}\cdot
     \frac{\partial{}v_{4}}{\partial{}v_{3}}
   \right) \\
@@ -156,7 +156,7 @@ derivative expression for \(v_{4}\):
     \frac{\partial{}v_{0}}{\partial{}x_{2}}\cdot
     \frac{\partial{}v_{3}}{\partial{}v_{0}}\cdot
     \frac{\partial{}v_{4}}{\partial{}v_{3}} +
-    \frac{\partial{}v_{0}}{\partial{}x_{2}}\cdot
+    \frac{\partial{}v_{1}}{\partial{}x_{2}}\cdot
     \frac{\partial{}v_{3}}{\partial{}v_{1}}\cdot
     \frac{\partial{}v_{4}}{\partial{}v_{3}}
   \right)
@@ -195,7 +195,7 @@ the vector in [[cref:eq:dv4-dx]]; for example:
     \frac{\partial{}v_{0}}{\partial{}x_{1}}\cdot
     \frac{\partial{}v_{3}}{\partial{}v_{0}}\cdot
     \frac{\partial{}v_{4}}{\partial{}v_{3}} +
-    \frac{\partial{}v_{0}}{\partial{}x_{1}}\cdot
+    \frac{\partial{}v_{1}}{\partial{}x_{1}}\cdot
     \frac{\partial{}v_{3}}{\partial{}v_{1}}\cdot
     \frac{\partial{}v_{4}}{\partial{}v_{3}}
   \right).

@@ -3513,3 +3513,13 @@ point.
 from which I could purloin ideas.
 
 Entered on [2024-09-13 ven. 17:45]
+*** 2024-09-18 mercredi
+**** Meeting: Romain                                 :MEETING:SUPERVISION:
+- Oct 15th funding dealine:
+  + Buy Teensies!
+  + But... check convolution for viability; need to have a clear view
+    on memory usage.
+- Port the old multicast client.
+- Prioritise getting a /working demo/ running.
+  
+Entered on [2024-09-18 mer. 09:04]
