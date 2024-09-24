@@ -3550,3 +3550,41 @@ is presumably supposed to do as little work as possible. Anyway,
 further investigation required.
 
 Entered on [2024-09-19 jeu. 18:10]
+*** 2024-09-24 mardi
+**** Meeting: Romain                                 :MEETING:SUPERVISION:
+- Frontiers review: minor changes; feedback a bit vague; one week to
+  respond.
+- No need to give Tanguy project ideas.
+- New associate team (replaces PLASMA); for a prospective extended
+  visit to Stanford, it's useful that I'm mentioned in the proposal.
+- Return to work after a short vacation; things to do:
+  + PAUC review
+  + IFC revisions
+  + Frontiens revisions
+  + Bureaucratic business; CVEC, Pegase
+  + Synchronised audio POC --- equipment order ideas by 15/10
+  
+Entered on [2024-09-24 mar. 09:11]
+**** DMA, logic analyser                                          :TEENSY:
+Teensy's audio shield supports 16-bit output, but the audio library
+uses a buffer of 32-bit integers. This seems to be because the I2S DAC
+expects to receive interleaved samples; the first 16 bits of each
+entry in the buffer is a left channel sample, the second 16 bits is a
+right channel sample. Added convenience/transparency comes from being
+able to count in /frames/ rather than samples, i.e. the buffer is
+~AUDIO_BLOCK_SAMPLES~ in length, not ~AUDIO_BLOCK_SAMPLES * 2~.
+
+Still, it's not clear what the advantage is of having two interrupts
+per buffer period; this is the behaviour of the audio library, so I've
+copied it. It entails setting both the TCD Control and Status
+register's ~INTHALF~ and ~INTMAJOR~ fields. This entails, for a given
+interrupt, checking the current source address reported by the DMA
+controller, and only counting half the number of frames.
+
+I switched from the oscilloscope to the Digilent logic analyser. This
+was a good move, as I can now (in Logic mode, using the built-in I2S
+profile), check the sample values reported on Teensy pin 7 (compared
+against the LRCLK and BCLK signals); I can assess both synchronicity
+and signal integrity, the latter numerically rather than by eye.
+
+Entered on [2024-09-24 mar. 18:13]

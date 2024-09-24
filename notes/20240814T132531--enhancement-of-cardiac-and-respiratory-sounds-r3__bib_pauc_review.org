@@ -25,7 +25,7 @@ to discuss those in detail.
 - 4, 1, 1: "i.e. frequencies below 1000 Hz" is a problem:
   - this purported frequency limit for the voiceband isn't mentioned
     in reference [31];
-  - it this contradicts the preceding point, "...the speakers on
+  - this contradicts the preceding point, "...the speakers on
     mobile phones may not be capable of reproducing low-frequency
     waves accurately".
   It would suffice to say that phone speaker technology has typically
