@@ -9,3 +9,29 @@
 See [[denote:20240814T133907][Enhancement of cardiac and respiratory sounds R2]] and [[denote:20240814T132531][Enhancement
 of Cardiac and Respiratory Sounds R3]].
 
+* Detailed observations
+
+Thank you for addressing the comments raised regarding the previous
+revision.
+
+Just a few further comments/recommendations:
+
+- Page 3, column 2, lines 10-11: "...pitch can be used as the main
+  descriptor... as there are timbral identifiers in these sounds" ---
+  it isn't clear how the presence of timbral identifiers entails that
+  pitch can be used as the main descriptor, and reference [28] doesn't
+  appear to corroborate this statement. Please revise this sentence,
+  clarifying your meaning.
+- Page 3, column 2, lines 31-41: both coarse and fine crackles are
+  described as "resembling the noise produced by rubbing strands of
+  hair together". Try to find a way to avoid re-using the same
+  word-for-word description.
+- Page 4, column 1, line 2: It looks like "transition" should be
+  "transmission".
+- Page 5, column 2, line 19: "altered" -> "abnormal".
+- References: For [46], since it was published in English, display the
+  English language version of the publication type and institution:
+  "Doctoral dissertation, University of Zagreb. Faculty of Electrical
+  Engineering and Computing. Department of Electroacoustics" (or
+  equivalent). Also, it appears that the word "Preuzeto"
+  ("Downloaded") has snuck in, perhaps from some copied text.

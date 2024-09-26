@@ -3588,3 +3588,53 @@ against the LRCLK and BCLK signals); I can assess both synchronicity
 and signal integrity, the latter numerically rather than by eye.
 
 Entered on [2024-09-24 mar. 18:13]
+*** 2024-09-25 mercredi
+**** Sync Improvements; AudioStream workings                      :TEENSY:
+Simply starting audio on the clock authority and the subscriber at t =
+10 s achieves a pretty decent degree of synchronicity; sometimes
+sub-10 \micro{}s; typically less than 100 \micro{}s. This only works, however, if
+the subscriber is started at /around the same time/ as the authority;
+if there's a large initial coarse time correction --- e.g. subscriber
+t = 1 s, authority t = 15 s, subscriber jumps to t = 15 s --- then the
+audio clock may be started "between" seconds, or so it appears from
+logic analyser output. In any case, something that accounts for
+arbitrary startup times (relative to the authority) will probably be
+required.
+
+This appears to hold for Teensy's default audio block size (128
+frames). Early experiments essentially used a buffer size of 2, but
+more recently I've been using 16/32 frames. My concern was that
+running a longer buffer resulted in some authority/subscriber offset
+between writing to the DMA memory and that memory being processed, but
+that seems not to be an issue (for the time being).
+
+I think I worked out what's going on with ~AudioStream::update~:
+- ~AudioOutputI2S~ has a static member, ~update_responsibility~,
+  which, in ~begin~ is set to the result of a call to a static method,
+  ~update_setup~
+- ~update_setup~ calls ~attachInterruptVector~ --- a global static
+  function, defined alongside all the processor macros in =imxrt.h=
+  --- with arguments ~IRQ_SOFTWARE~ and a pointer to a function that
+  loops over all ~AudioStream~ instances and calls ~update~.
+  + ~update_setup~ enables the ~IRQ_SOFTWARE~ interrupt
+  + ~IRQ_SOFTWARE~ is IRQ number 70. This IRQ is listed as /Reserved/
+    in the reference manual (this is a little bit confusing).
+- Anyway, the purpose of ~update_responsibility~ appears to be to
+  indicate whether a given ~AudioStream~ instance is responsible for
+  triggering ~IRQ_SOFTWARE~ (by calling
+  ~NVIC_SET_PENDING(IRQ_SOFTWARE)~).
+- Far from clear whether I should emulate this approach. Maybe it's
+  better than performing a lot of calculations on the audio
+  ISR. Presumably that /PENDING/ situation introduces a delay over
+  which I won't have much control...
+  + There's also ~NVIC_TRIGGER_IRQ~, which might be [[https://forum.pjrc.com/index.php?threads/software-interrupt-setup-for-the-teensy-4-x.73330/post-329846][more performant]].
+- Ultimately, this all seems to hinge on a static member of
+  ~AudioStream~, a static pointer to an ~AudioStream~ instance called
+  ~first_update~ (and associated, non-static ~next_update~
+  pointer). That, and the fact that the function pointer passed to
+  ~attachInterruptVector~ is defined globally, albeit within
+  =AudioStream.cpp=. Perhaps there's no way around a static approach,
+  though I can probably improve on what I've implemented for the sine
+  wave generator.
+
+Entered on [2024-09-25 mer. 16:19]
