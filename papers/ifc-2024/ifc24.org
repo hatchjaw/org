@@ -415,28 +415,28 @@ operations is the essence of automatic differentiation.
 :CUSTOM_ID: subsubsec:forward-mode
 :END:
 
-To investigate forward mode, we can use an example \F{} program with
-the following block diagram:
+To investigate forward mode automatic differentiation, we can use an
+example \F{} program with the following block diagram:
 
 #+begin_src faust :results file svg :file (org-babel-temp-file "faust-" ".svg") :exports results
 N = 5;
 // Just create something that the compiler will bundle into an
 // abstraction in the block diagram.
 S(j) = sum(i,N,((i+j) : sqrt)/N);
-process = (v0 <: _,_),v1 : v2,v3 : v4
+process = (v1 <: _,_),v2 : v3,v4 : v5
 with {
-    v0 = S(0);
-    v1 = S(1);
-    v2 = _,S(2) : +;
-    v3 = +,S(3) : +;
-    v4 = +,S(4) : +;
+    v1 = S(0);
+    v2 = S(1);
+    v3 = _,S(2) : +;
+    v4 = +,S(3) : +;
+    v5 = +,S(4) : +;
 };
 #+end_src
 #+CAPTION: /Block diagram of a \F{} program consisting of primitive/
-#+CAPTION: /operators, \(v_{j}\)./
+#+CAPTION: /operations, \(v_{j}\)./
 #+NAME: fig:block-diag-forward-mode
 #+RESULTS:
-[[file:/tmp/babel-25ewEB/faust-RhquEY.svg]]
+[[file:/tmp/babel-opgpxN/faust-tKVbw0.svg]]
 
 This program consists of a number of what we will consider to be
 primitive operations \(v_{j}\). \(N = 2\) of these we will designate as
@@ -445,15 +445,15 @@ parameter primitives, each taking its value from a vector,
 variables:
 
 \begin{align}
-v_{0} &= x_{1}_{} \label{eq:v0} \\
-v_{1} &= x_{2}\;. \label{eq:v1}
+v_{1} &= x_{1}_{} \label{eq:v1} \\
+v_{2} &= x_{2}\;. \label{eq:v2}
 \end{align}
 These parameters are passed to two further primitives,
 
 #+NAME: eq:v2-v3
 \begin{align}
-v_{2} &= v_{2}(v_{0}) \\
-v_{3} &= v_{3}(v_{0}, v_{1})\;,
+v_{3} &= v_{3}(v_{1}) \\
+v_{4} &= v_{4}(v_{1}, v_{2})\;,
 \end{align}
 and the program produces one output signal, the output of the final
 primitive in the graph, which we can refer to as the /primal/ output
@@ -461,73 +461,77 @@ of the program,
 
 #+NAME: eq:output
 \begin{equation}
-y = v_{4} = v_{4}(v_{2}, v_{3})\;.
+y = v_{5} = v_{5}(v_{3}, v_{4})\;.
 \end{equation}
 
-In forward mode, differentiating each primitive is a case of computing
-the sensitivity of each to changes in the program's inputs, producing
-a /tangent/ vector of partial derivatives, each with respect to an
-element in the parameter vector \(\mathbf{x}\). For example, the input
-primitive \(v_{0}\) returns as its derivative
+In forward mode, differentiating a given primitive is a case of
+computing its sensitivity to changes in the program's inputs,
+producing a /tangent/ vector of partial derivatives, each with respect
+to an element in the parameter vector \(\mathbf{x}\). For example, the
+input primitive \(v_{1}\) returns as its derivative
 
-#+NAME: eq:dv0-dx
+#+NAME: eq:dv1-dx
 \begin{equation}
-\frac{\partial{}v_{0}}{\partial{}\mathbf{x}} = \begin{bmatrix}\frac{\partial{}v_{0}}{\partial{}x_{1}} \\ \frac{\partial{}v_{0}}{\partial{}x_{2}}\end{bmatrix}\;.
+\frac{\partial{}v_{1}}{\partial{}\mathbf{x}} = \begin{bmatrix}\frac{\partial{}v_{1}}{\partial{}x_{1}} \\ \frac{\partial{}v_{1}}{\partial{}x_{2}}\end{bmatrix}\;.
 \end{equation}
-On paper, per [[cref:eq:v0]], this simplifies to \(\begin{bmatrix}1 &
-0\end{bmatrix}^{T}\), but in the context of automatic differentiation no
-such simplification takes place; rather, we take this result and pass
-it to the next primitive in the graph. Stepping forward then, the
-partial derivatives of primitive \(v_{2}\) are, via the chain rule,
-
-#+NAME: eq:dv2-dx
-\begin{equation}
-\frac{\partial{}v_{2}}{\partial{}\mathbf{x}} = \begin{bmatrix}
-  \frac{\partial{}v_{0}}{\partial{}x_{1}}\frac{\partial{}v_{2}}{\partial{}v_{0}} \\
-  \frac{\partial{}v_{0}}{\partial{}x_{2}}\frac{\partial{}v_{2}}{\partial{}v_{0}}
-\end{bmatrix}\;,
-\end{equation}
-notwithstanding the fact that \(v_{0}\) (and by extension \(v_{2}\)) does
-not depend on \(x_{2}\). \(v_{3}\) is a multivariate primitive, so the chain
-rule for multivariate functions comes into play:
+On paper, per cref:eq:v1, this simplifies to \(\begin{bmatrix}1 &
+0\end{bmatrix}^{T}\), but in the context of automatic differentiation
+no such simplification takes place; rather, we take this result and
+pass it to the next primitive in the graph. Stepping forward then, and
+using the description of the chain rule in cref:eq:chain-rule-1, with
+\(m = 1\), \(y = v_{3}\) and \(w_{k} = x_{i}\) (and the order of multiplicative terms
+reversed to better illustrate our forward progress through the graph),
+the partial derivatives of primitive \(v_{3}\) are
 
 #+NAME: eq:dv3-dx
 \begin{equation}
 \frac{\partial{}v_{3}}{\partial{}\mathbf{x}} = \begin{bmatrix}
-  \frac{\partial{}v_{0}}{\partial{}x_{1}}\frac{\partial{}v_{3}}{\partial{}v_{0}} + \frac{\partial{}v_{1}}{\partial{}x_{1}}\frac{\partial{}v_{3}}{\partial{}v_{1}} \\
-  \frac{\partial{}v_{0}}{\partial{}x_{2}}\frac{\partial{}v_{3}}{\partial{}v_{0}} + \frac{\partial{}v_{1}}{\partial{}x_{2}}\frac{\partial{}v_{3}}{\partial{}v_{1}}
-\end{bmatrix}\;.
+  \frac{\partial{}v_{1}}{\partial{}x_{1}}\frac{\partial{}v_{3}}{\partial{}v_{1}} \\
+  \frac{\partial{}v_{1}}{\partial{}x_{2}}\frac{\partial{}v_{3}}{\partial{}v_{1}}
+\end{bmatrix}\;,
 \end{equation}
-
-Combining and extending [[cref:eq:dv2-dx,eq:dv3-dx]] we can produce a
-derivative expression for \(v_{4}\),
+notwithstanding the fact that \(v_{1}\) (and by extension \(v_{3}\)) does
+not depend on \(x_{2}\). \(v_{4}\) is a multivariate primitive, so the chain
+rule for multivariate functions, i.e. cref:eq:chain-rule-1 with \(m =
+2\), comes into play:
 
 #+NAME: eq:dv4-dx
 \begin{equation}
 \frac{\partial{}v_{4}}{\partial{}\mathbf{x}} = \begin{bmatrix}
-  \frac{\partial{}v_{0}}{\partial{}x_{1}}
-  \frac{\partial{}v_{2}}{\partial{}v_{0}}
-  \frac{\partial{}v_{4}}{\partial{}v_{2}}
-  +
-  \frac{\partial{}v_{0}}{\partial{}x_{1}}
-  \frac{\partial{}v_{3}}{\partial{}v_{0}}
-  \frac{\partial{}v_{4}}{\partial{}v_{3}}
-  +
+  \frac{\partial{}v_{1}}{\partial{}x_{1}}\frac{\partial{}v_{4}}{\partial{}v_{1}} + \frac{\partial{}v_{2}}{\partial{}x_{1}}\frac{\partial{}v_{4}}{\partial{}v_{2}} \\
+  \frac{\partial{}v_{1}}{\partial{}x_{2}}\frac{\partial{}v_{4}}{\partial{}v_{1}} + \frac{\partial{}v_{2}}{\partial{}x_{2}}\frac{\partial{}v_{4}}{\partial{}v_{2}}
+\end{bmatrix}\;.
+\end{equation}
+
+Combining and extending [[cref:eq:dv3-dx,eq:dv4-dx]] we can produce a
+derivative expression for \(v_{5}\),
+
+#+NAME: eq:dv5-dx
+\begin{equation}
+\frac{\partial{}v_{5}}{\partial{}\mathbf{x}} = \begin{bmatrix}
   \frac{\partial{}v_{1}}{\partial{}x_{1}}
   \frac{\partial{}v_{3}}{\partial{}v_{1}}
-  \frac{\partial{}v_{4}}{\partial{}v_{3}}
-  \\
-  \frac{\partial{}v_{0}}{\partial{}x_{2}}
-  \frac{\partial{}v_{2}}{\partial{}v_{0}}
+  \frac{\partial{}v_{5}}{\partial{}v_{3}}
+  +
+  \frac{\partial{}v_{1}}{\partial{}x_{1}}
+  \frac{\partial{}v_{4}}{\partial{}v_{1}}
+  \frac{\partial{}v_{5}}{\partial{}v_{4}}
+  +
+  \frac{\partial{}v_{2}}{\partial{}x_{1}}
   \frac{\partial{}v_{4}}{\partial{}v_{2}}
-  +
-  \frac{\partial{}v_{0}}{\partial{}x_{2}}
-  \frac{\partial{}v_{3}}{\partial{}v_{0}}
-  \frac{\partial{}v_{4}}{\partial{}v_{3}}
-  +
+  \frac{\partial{}v_{5}}{\partial{}v_{4}}
+  \\
   \frac{\partial{}v_{1}}{\partial{}x_{2}}
   \frac{\partial{}v_{3}}{\partial{}v_{1}}
-  \frac{\partial{}v_{4}}{\partial{}v_{3}}
+  \frac{\partial{}v_{5}}{\partial{}v_{3}}
+  +
+  \frac{\partial{}v_{1}}{\partial{}x_{2}}
+  \frac{\partial{}v_{4}}{\partial{}v_{1}}
+  \frac{\partial{}v_{5}}{\partial{}v_{4}}
+  +
+  \frac{\partial{}v_{2}}{\partial{}x_{2}}
+  \frac{\partial{}v_{4}}{\partial{}v_{2}}
+  \frac{\partial{}v_{5}}{\partial{}v_{4}}
 \end{bmatrix}\;,
 \end{equation}
 and that, in effect, gives us an expression for
@@ -547,42 +551,42 @@ We then propagate this tangent vector through the graph, producing the
 /forward tangent output/ of the program. On paper this looks like a
 vector product (a /Jacobian vector product/ in fact
 [cite:@baydinAutomatic2018]), and simply extracts the first element of
-the vector in [[cref:eq:dv4-dx]]; for example,
+the vector in [[cref:eq:dv5-dx]]; for example,
 
 #+NAME: eq:vec-prod
 \begin{align}
 \frac{\partial{}y}{\partial{}x_{1}} &= \frac{\partial{}\mathbf{x}}{\partial{}x_{1}}\frac{\partial{}y}{\partial{}\mathbf{x}} \nonumber \\
 &= \begin{bmatrix}1 & 0\end{bmatrix}\frac{\partial{}y}{\partial{}\mathbf{x}} \nonumber \\
-&= \frac{\partial{}v_{0}}{\partial{}x_{1}}
-  \frac{\partial{}v_{2}}{\partial{}v_{0}}
-  \frac{\partial{}v_{4}}{\partial{}v_{2}}
-  +
-  \frac{\partial{}v_{0}}{\partial{}x_{1}}
-  \frac{\partial{}v_{3}}{\partial{}v_{0}}
-  \frac{\partial{}v_{4}}{\partial{}v_{3}}
+&= \frac{\partial{}v_{1}}{\partial{}x_{1}}
+  \frac{\partial{}v_{3}}{\partial{}v_{1}}
+  \frac{\partial{}v_{5}}{\partial{}v_{3}}
   +
   \frac{\partial{}v_{1}}{\partial{}x_{1}}
-  \frac{\partial{}v_{3}}{\partial{}v_{1}}
-  \frac{\partial{}v_{4}}{\partial{}v_{3}}\;.
+  \frac{\partial{}v_{4}}{\partial{}v_{1}}
+  \frac{\partial{}v_{5}}{\partial{}v_{4}}
+  +
+  \frac{\partial{}v_{2}}{\partial{}x_{1}}
+  \frac{\partial{}v_{4}}{\partial{}v_{2}}
+  \frac{\partial{}v_{5}}{\partial{}v_{4}}\;.
 \end{align}
 To compute \(\frac{\partial{}y}{\partial{}x_{2}}\), we find \(\frac{\partial{}\mathbf{x}}{\partial{}x_{2}}
 = \begin{bmatrix}0 & 1\end{bmatrix}\) and proceed similarly.
 
-To give an example, let's assign some concrete functions to \(v_{n}\):
+To give an example, let's assign some concrete functions to \(v_{j}\):
 
 #+NAME: eq:funcs
 \begin{equation}
-v_{2} = \sin(v_{0})\;, \quad v_{3} = v_{0} + v_{1}\;, \quad v_{4} = v_{2}v_{3}\;,
+v_{3} = \sin(v_{1})\;, \quad v_{4} = v_{1} + v_{2}\;, \quad v_{5} = v_{3}v_{4}\;,
 \end{equation}
 and substitute these into [[cref:eq:vec-prod]] (and the equivalent for
 \(x_{2}\)):
 
 \begin{align}
-\frac{\partial{}y}{\partial{}x_{1}} &= \left(1\cdot\cos(v_{0})\cdot{}v_{3}\right) + \left(1\cdot1\cdot{}v_{2} + 0\cdot1\cdot{}v_{2}\right) \nonumber \\
-  &= v_{3}\cos(v_{0}) + v_{2} \nonumber \\
+\frac{\partial{}y}{\partial{}x_{1}} &= \left(1\cdot\cos(v_{1})\cdot{}v_{4}\right) + \left(1\cdot1\cdot{}v_{3} + 0\cdot1\cdot{}v_{3}\right) \nonumber \\
+  &= v_{4}\cos(v_{1}) + v_{3} \nonumber \\
   &= (x_{1} + x_{2})\cos(x_{1}) + \sin(x_{1}) \label{eq:concrete-fwd-x1} \\
-\frac{\partial{}y}{\partial{}x_{2}} & = \left(0\cdot\cos(v_{0})\cdot{}v_{3}\right) + \left(0\cdot1\cdot{}v_{2} + 1\cdot1\cdot{}v_{2}\right) \nonumber \\
-  &= v_{2} \nonumber \\
+\frac{\partial{}y}{\partial{}x_{2}} & = \left(0\cdot\cos(v_{1})\cdot{}v_{4}\right) + \left(0\cdot1\cdot{}v_{3} + 1\cdot1\cdot{}v_{3}\right) \nonumber \\
+  &= v_{3} \nonumber \\
   &= \sin(x_{1})\;. \label{eq:concrete-fwd-x2}
 \end{align}
 Providing numerical values for \(x_{1}\) and \(x_{2}\) would of course yield
@@ -605,13 +609,13 @@ N = 5;
 // Just create something that the compiler will bundle into an
 // abstraction in the block diagram.
 S(j) = sum(i,N,((i+j) : sqrt)/N);
-process = (v00 <: _,_),v01 : v10,v11 : v20
+process = (v11 <: _,_),v12 : v21,v22 : v31
 with {
-    v00 = S(0);
-    v01 = S(1);
-    v10 = _,S(2) : +;
-    v11 = +,S(3) : +;
-    v20 = +,S(4) : +;
+    v11 = S(0);
+    v12 = S(1);
+    v21 = _,S(2) : +;
+    v22 = +,S(3) : +;
+    v31 = +,S(4) : +;
 };
 #+end_src
 #+CAPTION: /Block diagram of a \F{} program with primitives/
@@ -619,7 +623,7 @@ with {
 #+CAPTION: /automatic differentiation./
 #+NAME: fig:block-diag-reverse-mode
 #+RESULTS:
-[[file:/tmp/babel-25ewEB/faust-vN3e6l.svg]]
+[[file:/tmp/babel-opgpxN/faust-PWTlte.svg]]
 
 As with forward mode, we have an input vector \(\mathbf{x}\) of length
 \(N = 2\). This time, however, we group our primitives, \(v_{p,q}\), into
@@ -628,13 +632,13 @@ layer:
 
 #+NAME: eq:primitives
 \begin{align}
-v_{0,0} &= x_{1} \\
-v_{0,1} &= x_{2} \\
-v_{1,0} &= v_{1,0}(v_{0,0}) = v_{1,0}(x_{1}) \\
-v_{1,1} &= v_{1,1}(v_{0,0}, v_{0,1}) = v_{1,1}(x_{1}, x_{2}) \\
-v_{2,0} &= v_{2,0}(v_{1,0}, v_{1,1}) = v_{2,0}(v_{1,0}(x_{1}), v_{1,1}(x_{1}, x_{2}))\;.
+v_{1,1} &= x_{1} \\
+v_{1,2} &= x_{2} \\
+v_{2,1} &= v_{2,1}(v_{1,1}) = v_{2,1}(x_{1}) \\
+v_{2,2} &= v_{2,2}(v_{1,1}, v_{1,2}) = v_{2,2}(x_{1}, x_{2}) \\
+v_{3,1} &= v_{3,1}(v_{2,1}, v_{2,2}) = v_{3,1}(v_{2,1}(x_{1}), v_{2,2}(x_{1}, x_{2}))\;.
 \end{align}
-As before, we have a single output, \(y = v_{2,0}\).
+As before, we have a single output, \(y = v_{3,1}\).
 
 Whereas in forward mode the primal and tangent outputs of the program
 are computed in parallel during the forward pass, in reverse mode we
@@ -645,7 +649,7 @@ output of the program:
 
 #+NAME: eq:adjoint
 \begin{equation}
-\bar{v_{}}_{j} = \frac{\partial{}y}{\partial{}v_{j}}\;.
+\bar{v}_{p,q} = \frac{\partial{}y}{\partial{}v_{p,q}}\;.
 \end{equation}
 
 Rather than propagate successive tangent vectors forward through the
@@ -654,14 +658,14 @@ output (i.e. the influence of the output over itself),
 
 #+NAME: eq:y-adjoint
 \begin{equation}
-\bar{y} = \bar{v}_{2,0} = \frac{\partial{}y}{\partial{}v_{2,0}} = 1\;,
+\bar{y} = \bar{v}_{3,1} = \frac{\partial{}y}{\partial{}v_{3,1}} = 1\;,
 \end{equation}
 and propagate that backward through the graph. Adjoints for layer \(p =
-1\) are
+2\) are
 
-#+NAME: eq:v1-adjoints
+#+NAME: eq:v2-adjoints
 \begin{equation}
-\bar{v}_{1,q} &= \bar{v}_{2,0}\frac{\partial{}v_{2,0}}{\partial{}v_{1,q}} = \frac{\partial{}y}{\partial{}v_{2,0}}\frac{\partial{}v_{2,0}}{\partial{}v_{1,q}}\;.
+\bar{v}_{2,q} &= \bar{v}_{3,1}\frac{\partial{}v_{3,1}}{\partial{}v_{2,q}} = \frac{\partial{}y}{\partial{}v_{3,1}}\frac{\partial{}v_{3,1}}{\partial{}v_{2,q}}\;.
 \end{equation}
 
 In general, the adjoint for primitive \(v_{p,q}\) is found as the sum of
@@ -669,44 +673,45 @@ the derivatives of the \(M\) primitives in the \((p+1)\)^{th} layer,
 
 #+NAME: eq:general-adjoint
 \begin{align}
-\bar{v}_{p,q} &= \frac{\partial{}y}{\partial{}v_{p,q}} = \sum^{M-1}_{m=0}\frac{\partial{}y}{\partial{}v_{p+1,m}}\frac{\partial{}v_{p+1,m}}{\partial{}v_{p,q}} \\
-  &= \sum^{M-1}_{m=0}\bar{v}_{p+1,m}\frac{\partial{}v_{p+1,m}}{\partial{}v_{p,q}}\;,
+\bar{v}_{p,q} &= \frac{\partial{}y}{\partial{}v_{p,q}} \nonumber \\
+  &= \sum^{M}_{m=1}\frac{\partial{}y}{\partial{}v_{p+1,m}}\frac{\partial{}v_{p+1,m}}{\partial{}v_{p,q}} \nonumber \\
+  &= \sum^{M}_{m=1}\bar{v}_{p+1,m}\frac{\partial{}v_{p+1,m}}{\partial{}v_{p,q}}\;,
 \end{align}
-so adjoints for the input layer, \(p = 0\), emerge as
+so adjoints for the input layer, \(p = 1\), emerge as
 
-#+name: eq:v0-adjoint
+#+name: eq:v1-adjoint
 \begin{align}
-\bar{v}_{0,q} &= \bar{v}_{1,0}
-  \frac{\partial{}v_{1,0}}{\partial{}v_{0,q}} +
-  \bar{v}_{1,1}
-  \frac{\partial{}v_{1,1}}{\partial{}v_{0,q}} \nonumber \\
-&= \bar{v}_{2,0}
-  \frac{\partial{}v_{2,0}}{\partial{}v_{1,0}}
-  \frac{\partial{}v_{1,0}}{\partial{}v_{0,q}} +
-  \bar{v}_{2,0}
-  \frac{\partial{}v_{2,0}}{\partial{}v_{1,1}}
-  \frac{\partial{}v_{1,1}}{\partial{}v_{0,q}} \nonumber \\
-&= \frac{\partial{}y}{\partial{}v_{2,0}}
-  \frac{\partial{}v_{2,0}}{\partial{}v_{1,0}}
-  \frac{\partial{}v_{1,0}}{\partial{}v_{0,q}} +
-  \frac{\partial{}y}{\partial{}v_{2,0}}
-  \frac{\partial{}v_{2,0}}{\partial{}v_{1,1}}
-  \frac{\partial{}v_{1,1}}{\partial{}v_{0,q}}\;,
+\bar{v}_{1,q} &= \bar{v}_{2,1}
+  \frac{\partial{}v_{2,1}}{\partial{}v_{1,q}} +
+  \bar{v}_{2,2}
+  \frac{\partial{}v_{2,2}}{\partial{}v_{1,q}} \nonumber \\
+&= \bar{v}_{3,1}
+  \frac{\partial{}v_{3,1}}{\partial{}v_{2,1}}
+  \frac{\partial{}v_{2,1}}{\partial{}v_{1,q}} +
+  \bar{v}_{3,1}
+  \frac{\partial{}v_{3,1}}{\partial{}v_{2,2}}
+  \frac{\partial{}v_{2,2}}{\partial{}v_{1,q}} \nonumber \\
+&= \frac{\partial{}y}{\partial{}v_{3,1}}
+  \frac{\partial{}v_{3,1}}{\partial{}v_{2,1}}
+  \frac{\partial{}v_{2,1}}{\partial{}v_{1,q}} +
+  \frac{\partial{}y}{\partial{}v_{3,1}}
+  \frac{\partial{}v_{3,1}}{\partial{}v_{2,2}}
+  \frac{\partial{}v_{2,2}}{\partial{}v_{1,q}}\;,
 \end{align}
 giving us
 
 #+NAME: eq:xi-adjoint
 \begin{equation}
-\bar{x}_{i} = \frac{\partial{}y}{\partial{}x_{i}} = \bar{v}_{0,i-1}\;.
+\bar{x}_{i} = \frac{\partial{}y}{\partial{}x_{i}} = \bar{v}_{1,i}\;.
 \end{equation}
 
 Expanding the terms above, while illustrative, is not necessary;
-indeed, [[cref:eq:v0-adjoint]] could end at the first line; we have
-definitions for \(\bar{v}_{1,0}\) and \(\bar{v}_{1,1}\) and these propagate
+indeed, [[cref:eq:v1-adjoint]] could end at the first line; we have
+definitions for \(\bar{v}_{2,1}\) and \(\bar{v}_{2,2}\) and these propagate
 backward through the graph without any need for them to be
 recomputed. In effect, though the graph may branch as adjoints
-propagate, we achieve both \(\frac{\partial{}y}{\partial{}x_{1}} = \bar{v}_{0,0}\) and
-\(\frac{\partial{}y}{\partial{}x_{2}} = \bar{v}_{0,1}\) in a single pass, unlike in tangent
+propagate, we achieve both \(\frac{\partial{}y}{\partial{}x_{1}} = \bar{v}_{1,1}\) and
+\(\frac{\partial{}y}{\partial{}x_{2}} = \bar{v}_{1,2}\) in a single pass, unlike in tangent
 mode, where two passes are required.
 
 As with the forward mode example, let's assign some functions to
@@ -714,17 +719,17 @@ As with the forward mode example, let's assign some functions to
 
 #+NAME: eq:concrete-funcs
 \begin{equation}
-v_{1,0} = \sin(v_{0,0})\:, \quad v_{1,1} = v_{0,0} + v_{0,1}\:, \quad v_{2,0} = v_{1,0}v_{1,1}\;.
+v_{2,1} = \sin(v_{1,1})\:, \quad v_{2,2} = v_{1,1} + v_{1,2}\:, \quad v_{3,1} = v_{2,1}v_{2,2}\;.
 \end{equation}
-Substituting these into [[cref:eq:v0-adjoint]],
+Substituting these into [[cref:eq:v1-adjoint]],
 
 \begin{align}
-\frac{\partial{}y}{\partial{}x_{1}} &= 1\cdot{}v_{1,1}\cdot\cos(v_{0,0}) + 1\cdot{}v_{1,0}\cdot1 \nonumber \\
-  &= (v_{0,0} + v_{0,1})\cos(v_{0,0}) + v_{1,0} \nonumber \\
+\frac{\partial{}y}{\partial{}x_{1}} &= 1\cdot{}v_{2,2}\cdot\cos(v_{1,1}) + 1\cdot{}v_{2,1}\cdot1 \nonumber \\
+  &= (v_{1,1} + v_{1,2})\cos(v_{1,1}) + v_{2,1} \nonumber \\
   &= (x_{1} + x_{2})\cos(x_{1}) + \sin(x_{1}) \label{eq:concrete-rev-x1} \\
-\frac{\partial{}y}{\partial{}x_{2}} &= 1\cdot{}v_{1,1}\cdot0 + 1\cdot{}v_{1,0}\cdot1 \nonumber \\
-  &= v_{1,0} \nonumber \\
-  &= \sin(v_{0,0}) \nonumber \\
+\frac{\partial{}y}{\partial{}x_{2}} &= 1\cdot{}v_{2,2}\cdot0 + 1\cdot{}v_{2,1}\cdot1 \nonumber \\
+  &= v_{2,1} \nonumber \\
+  &= \sin(v_{1,1}) \nonumber \\
   &= \sin(x_{1})\;, \label{eq:concrete-rev-x2}
 \end{align}
 we reach entirely the same results as achieved in
@@ -1246,10 +1251,10 @@ env(vars) = environment {
 The loss function's partial derivatives are the /gradients/ associated
 with each variable in \(\mathbf{\hat{x}}\). In our two-parameter
 example, \(\mathcal{L}\) will describe a three-dimensional surface,
-and \(\frac{\partial\mathcal{L}}{\partial x_{i}}\) its slope in the direction of
-\(x_{i}\). Variables at time \(t+1\) are found by scaling gradients by a
-learning rate, \(\alpha\), and subtracting the result from variable values
-at time \(t\):
+and \(\frac{\partial\mathcal{L}}{\partial x_{i}}\) its slope relative
+to \(x_{i}\). Values at time \(t+1\) are found by scaling gradients by
+a learning rate, \(\alpha\), and subtracting the result from values at
+time \(t\):
 
 #+NAME: eq:gradient-descent
 \begin{equation}
@@ -1263,6 +1268,9 @@ instance can be used to display the value of each variable, with a
 recursive subtraction accumulating each parameter's incoming scaled
 gradient.
 
+#+NAME: lst:diffvars
+#+caption: /Definition of differentiable variables encapsulating/
+#+caption: /recursive gradient descent./
 #+begin_src faust :results none
 // diff.lib
 var(meter) = -~_ <: attach(meter);
@@ -1489,7 +1497,8 @@ remaining term, \(\frac{\partial{}y}{\partial{}v_{2}}\). By the chain rule, we h
 Disappointingly, it feels like we're back to where we started (albeit
 having introduced a negative sign), and that is essentially the nature
 of the beast in this instance. Nevertheless, our complete expression
-for \(\frac{\partial{}y}{\partial{}x_{i}}\), expanding cref:eq:variable-delay-deriv, is
+for \(\frac{\partial{}y}{\partial{}x_{i}}\), expanding
+cref:eq:variable-delay-deriv, is
 
 #+NAME: eq:dydxi-via-chain-rule
 \begin{align}
@@ -1550,18 +1559,18 @@ closest in length to that of the hidden delay.
 
 *** Differentiable Recursion
 
-Thus far it has not been necessary to define derivative expressions
-for any of \F{}'s /composition operations/; this is because for
-parallel and sequential types of composition we have encountered so
-far have no arithmetical impact on the signals they act upon, and thus
-no impact on derivative computation in forward mode. Of \F{}'s five
-composition operators, only merge composition, ~:>~, has such an
-effect, that of summation; consequently, given a basic definition of
-differentiable parallel composition, differentiable merge composition
-could be defined as something like the following:
+So far it has not been necessary to define derivative expressions
+for any of \F{}'s /composition operations/; this is because the
+parallel and sequential types of composition we have encountered to
+this point have no arithmetical impact on the signals they act upon,
+and thus no effect on derivative computation in forward mode. Of
+\F{}'s five composition operators, only merge composition, ~:>~, has
+such an effect, that of summation; consequently, accompanied by a
+basic definition of differentiable parallel composition,
+differentiable merge composition could be defined as
 
 #+name: lst:diff-merge
-#+caption: /Possible implementation of differentiable merge and parallel/
+#+caption: /Possible implementation of differentiable parallel and merge/
 #+caption: /composition operators./
 #+begin_src faust :results none
 diff((A,B)) = diff(A),diff(B);
@@ -1707,13 +1716,13 @@ comparing \(y\) and \(\hat{y}\) after a short-duration application of
 unaligned phase, were employed instead.
 
 One way to combat problems of this sort would be to calculate loss in
-the frequency domain instead; indeed it is typically by way of
+the frequency domain; indeed it is typically by way of
 perceptually-informed /spectral loss/ that optimisation is conducted
 in a DDSP setting [cite:@hayesReview2023]. Various functions exist in
 \F{}'s =analyzers.lib= library that could be used to this end; being
 based on an FFT implementation that is restricted, however, to a
 single sample hop-size, at the time of writing computational expense
-places limits on the computation of magnitude spectrograms,
+places limits on the calculation of magnitude spectrograms,
 particularly in a real-time setting.
 
 ** Computational Efficiency
