@@ -5,7 +5,8 @@
 #+AUTHOR:      Thomas Rushton
 #+LANGUAGE:    en
 #+TAGS: noexport(n) MEETING(m) SUPERVISION(V) PRESENTATION(p) BLOG(b) TRAINING(T)
-#+TAGS: INSPO(i) DIY(d) TEACHING(t) REPRES(R) REVIEW(v) GSoC(G)
+#+TAGS: INSPO(i) DIY(d) TEACHING(t) REPRES(R) REVIEW(v) GSoC(G) CONFERENCE(C)
+#+TAGS: WRTIING(w)
 #+TAGS: [ PROGRAMMING : R(r) PYTHON(P) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ZOTERO(z) LATEX(l) ]
 #+TAGS: [ AUDIO : SYNTHESIS(s) PHYSMOD(y) SPATIALAUDIO(S) NETWORKEDAUDIO(N) DDSP(D) ]
@@ -3638,3 +3639,191 @@ I think I worked out what's going on with ~AudioStream::update~:
   wave generator.
 
 Entered on [2024-09-25 mer. 16:19]
+*** 2024-09-30 lundi
+**** Frontiers; Internet of Sounds                    :WRITING:CONFERENCE:
+Frontiers third revision submitted. Reviewer 3 used an LLM to
+embellish their derisory review (It began "Here's an extended version
+of the provided text:"; they neglected to remove that part). I made
+some minor edits, reproduced some figures with text that was too
+small. I requested that they elaborate on their requests for more on
+the state-of-the-art, and recent research on multicast/scalable
+client-server systems --- I think the manuscript contains what it
+needs to in these regards, and that request was just the LLM parroting
+the most probabilistically-likely thing.
+
+I've been reading some IoS stuff (and should really take some proper
+notes at some point); behind it there lies a /big/ drive to publish.
+  
+Entered on [2024-09-30 lun. 08:59]
+**** Internet of Sounds (IS^{2}): Opening remarks                :CONFERENCE:
+- Internet of Sounds network is a nonprofit endeavour.
+- 5th edition; 6th already planned
+- It's an IEEE ComSoc thing; German/Italian section/chapter involved,
+  plus WiE (Women in Engineering)
+- Supported by Genelec, Qualcomm, Samsung, Sennheiser, etc.
+- Held at Frounhofer IIS (Audio Labs), in partnership with FAU
+  (Friedrich-Alexander-Universität)
+
+Entered on [2024-09-30 lun. 09:12]
+**** IS^{2}: Keynote: Hanna Lukashevich                          :CONFERENCE:
+Lord Kelvin on importance of measuring things.
+
+#+begin_quote
+"When you can measure what you are speaking about, and express it in
+numbers, you know something about it, when you cannot express it in
+numbers, your knowledge is of a meager and unsatisfactory kind; it may
+be the beginning of knowledge, but you have scarely, in your thoughts
+advanced to the stage of science."
+#+end_quote
+
+- Urban environment acoustic monitoring
+  + public safety, traffic management, emergency services, noise
+    pollution, urban wildlife
+- "Sounds boring" -> yes it does
+  + but clear that there are applications & tangible outcomes,
+    difference to be made
+- In addition to urban, industrial & natural environment...
+  + industrial policy, timely maintenance, production adjustments
+  + biodiversity, climate change, natural disaster early-warning
+- Acoustic monitoring w/ human experience
+  + perception is multimodal
+  + auditory scene, source separation, localisation
+  + "If I can hear it... it should be possible to train an AI to do
+    it" --- "mostly true... sometimes not"
+- /Computational Analysis of Sound Scenes and Events/, Virtanen,
+  Plumbley, Ellis, eds.
+- Acoustic monitoring
+  + Pallete of sound characteristics much broader than speech/music
+    * timbral range, stationary/dynamic, repetitive vs. unpredictable,
+      /timescales/ --- extreme short/long
+  + Use case restrictions: privacy, energy, etc.
+    * synthetic daat, signal transformations...
+  + Stakeholders/clients most important; NN architecture more
+    exciting, but an ancillary concern.
+
+Back to Kelvin: without data there's no way to influence
+policy. Example of lack of funding for farmers for rewilding/meadowing
+parts of their land to encourage pollinators.
+**** IS^{2}: Papers                                 :PRESENTATION:CONFERENCE:
+***** RBS-based Time Synchronization Approach with Autonomous Acoustic Sensors – a Simulative Proof of Concept
+Alexander Tessmer, Leonhard Brüggemann and Nils Aschenbruck
+#+begin_quote
+Low-cost Autonomous Recording Units (ARUs), like the AudioMoth, and
+advances in AI-based classifiers have enabled researchers and
+hobbyists to increase automation of the previously manual discipline
+of species monitoring. Often, the evaluation of acoustic monitoring
+still has to be done manually and one particular reoccurring challenge
+in the automated evaluation is the clock drift of the distributed
+ARUs. In this paper, we present a proof of concept for a time
+synchronization approach based on Reference Broadcast Synchronization
+(RBS) that uses random environmental sound events like bird calls to
+synchronize the clocks of receiving recording units. The application
+of RBS in the acoustic monitoring context is evaluated by simulation
+with the TAWNS framework. Subsequently, a problem in using RBS with
+sound events is identified and mitigated.
+#+end_quote
+Could I sync clocks via /random sound eventsl/, or maybe (more likely)
+perform position calibration by some related approach?
+** 2024-10 octobre
+*** 2024-10-01 mardi
+**** IS^{2}: Keynote: Georg Hajdu                                :CONFERENCE:
+- Telematic performance, CCRMA, using traditional scores nonetheless;
+  what about streaming scores? (Not a popular idea?)
+- God. /Everything Everywhere All at Once/ described as "paradigmatic"
+  for telematic/hybrid music performance.
+  + Why am I salty about this? Because I don't trust the film, and I
+    think that's a flimsy analogy, but also because I would like to be
+    making flimsy analogies of that sort (well, stronger ones, but
+    having licence to do so).
+- *The Ligeti Centre* --- Hamburg, named for the composer, also an
+  acronym for /Labs for Innovation and General-audience Edification
+  through the Translation of Ideas/. Consortium of universities.
+- Liminal spaces! This just gets better. Telematic/hybrid performance
+  as a liminal space.
+- "As the players are separated by (large) geographical spaces, the
+  relationshpis between them *need to be representede virtually*...";
+  need for embodied representation. Metaverse stuff.
+- /League of Automatic Music Composers/ (1978-1983)
+- /[[https://www.kehrerverlag.com/en/zkm-hertz-lab-the-hub-pioneers-of-network-music-978-3-96900-041-0][THE HUB: Pioneers of Network Music]]/ (2021, Ludger Brümmer)
+- Alvin Curran: /Crystal Psalms/ (1988), Telepresent, telematic
+  performance.
+- Miller Puckette: /Not Being There/ (2008)
+- Ah! This is (one of) the guy(s) behind Quintet.net.
+  + Multimedia instrument rather than ensemble
+  + Cage's /Number/ pieces as compositional paradigm: time brackets
+  + "Quintet", because that's how many great staves would fit on the
+    screen at once (at the time).
+  + 2000-2022 (R.I.P.)
+  + So this worked as a MIDI streaming platform...
+  + Liminality problems... lack of real-time interaction between
+    performers, and artificial quality of MIDI synths
+    used. "Artificial, machine-like, disembodied".
+- Brown & Bischoff: /Indigenous to the Net/ (2002) --- kind of
+  inaccessible.
+- Talk not exactly running to time.
+- The keyhole (of network transmission) has widened (literal,
+  metaphorical bandwidth) considerably over the past 20
+  years. Immediacy/sensation of. Space less liminal. Haptics, etc.
+- But VR/holography brings its own set of problems.
+
+Entered on [2024-10-01 mar. 09:10]
+**** IS^{2}: Papers                                 :PRESENTATION:CONFERENCE:
+***** Holodeck: A Research Framework for Distributed Multimedia Concert Performances
+Andrea Genovese, Marta Gospodarek, Zack Nguyen, Robert Pahle,
+Agnieszka Roginska and Corinne Brenner Entered on
+
+#+begin_quote
+This paper presents the Holodeck project, a multi-room research
+framework designed to support distributed multimedia concert
+performances. Developed through an inter-lab collaboration at New York
+University, the Holodeck platform leverages the Corelink engine, a
+flexible and unitary data routing system that facilitates immersive,
+interactive experiences across diverse networked environments. The
+framework enables real-time streaming and synchronization of various
+data types, including audio, video, and motion-capture data, thus
+supporting the design and implementation of augmented Network Music
+Performances (NMPs). Discussion around case studies of large-scale
+distributed concerts illustrate the system's capabilities and
+potential applications. In a pilot research exploration, the platform
+has been used to gather preliminary data on the quality of experience
+from both audiences and musicians. This research aims to enhance
+telepresence and realism in remote collaborations, contributing to the
+development of new methodologies and artistic practices in multimedia
+performances. The paper also discusses the technical challenges and
+solutions associated with implementing such a flexible and adaptive
+system and future work regarding the platform and its usage in
+multimedia immersive NMPs.
+#+end_quote
+
+Like [[*Meeting: Christof Ressi][AOO]], this might be a source of inspo --- or a component I could
+reuse --- for networked audio transmission/reception.
+
+[2024-10-01 mar. 13:53]
+**** IS^{2}: Keynote: Pieter-Jan Maes               :PRESENTATION:CONFERENCE:
+/Virtual embodiment in music interaction: concepts, experiments and
+applications/
+
+Entrainment and spontaeous synchronisation. This is very interesting
+embodied interaction stuff, in XR.
+
+Mentioned the /[[https://en.wikipedia.org/wiki/Kuramoto_model][Kuramoto Model]]/, which describes synchronisation. Used
+for syncing drumming avatar to human performer... Could such a model
+be a nice alternative to a PID or least-squares appreach in clock
+synchronisation?
+
+Use of exoskeletons to aid with /learning fine sensorimotor skills/
+(handwriting, music learning). Instructor and student each wear
+exoskeleton; instructor moves, student given "force-feedback" in order
+to control (inform?...) their physical movements. Is this a form of
+torture? Or would repeated physical input result in faster adoption of
+fine motor skills. Apparently the exoskeleton just "gives you a push".
+
+- Virtual embodiment -> naturalistic action-perception
+- Embodied virtual avatars/agents -> bodily presence in remote musical
+  interactions
+- Bridging realism to controllability -> social-cognitive music
+  science
+- Extension of human action/perception -> new opportunities for
+  research & practical applications 
+
+Entered on [2024-10-01 mar. 14:09]
