@@ -3918,3 +3918,56 @@ Problems
 /"Consensus optimization framework"/
 
 Entered on [2024-10-02 mer. 09:04]
+**** Politecnico Milano                               :MEETING:CONFERENCE:
+Christina Rottondi introduced me to Alessandro Ilic Mezza and *Alberto
+Bernardini* (see [[https://ispl.deib.polimi.it/people/][Image & Sound Processing Lab @ Politecnico di Milano]])
+
+Sounds like they're doing research that overlaps with what Romain and
+I are interested in.
+
+Check their [[https://ispl.deib.polimi.it/publications/][publications]] (non-exhaustive, check Scholar too). And
+*email Alberto*.
+
+**** IS^{2}: Papers: Networked Immersive Audio                   :CONFERENCE:
+- Jouni Paulus et al. (Nokia)
+  + /Immersive Voice and Audio Services/ (IVAS); /Metadata-Assisted
+    Spatial Audio/ (MASA)
+  + Directional spatial metadata; directional sound properties in each
+    time-freq tile... azimuth/elevation as "spherical index"
+  + Common spatial metadata
+  + Paper describes how to compute parameters from Ambisonics
+    signal...
+  + IVAS renderer available.
+  + Probably way beyond my reach; imaginable to incorporate this as a
+    supported format for my system?
+- Patrick Cairns et al.
+  + Metaverse concerts... JackTrip?
+  + 6DoF Convolution... networked ambisonic rendering.
+  + *Check /efficient convolution/ approach.*
+- Robert Hupke et al.
+  + /Impact of Extended Reality on the Quality of Experience/
+  + Importance of spatial audio in immersive networked music
+    performance (NMP)
+  + Musicians tend not to use video link...(?)
+  + But instrument and ancillary movement is important...
+  + OK, just send movement metadata rather than full video? Avatar
+    stuff; apparently it boosts overall with QoE.
+  + Hupke et al. (2022) /Immersive Room Extension Environment for NMP/
+    might be more relevant for me.
+- Stefano Giacomelli et al.
+  + /Remote Immersive Audio Production/
+  + Performers, production, and audience in different places; attempt
+    to provide seamless, high-quality experience.
+  + Low-latency, minimal jitter, etc., etc.
+  + Two spatialisation methods: MACH1 (Spatial PCM Sampling cubic
+    periphony (!)); ambisonics.
+  + Like the previous talk, incredibly complex system of many moving
+    parts.
+  + VPN tunnels for secure/reliable transmission. Dante-based. GPS
+    sync. VPN also tricks Dante into thinking it's a local
+    network. Interesting, that.
+  + Dante imposes 40 ms latency limit... transmission mustn't exceed
+    this.
+  + Use Sonobus instead?
+  
+Entered on [2024-10-02 mer. 11:04]
