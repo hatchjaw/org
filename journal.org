@@ -3827,3 +3827,94 @@ fine motor skills. Apparently the exoskeleton just "gives you a push".
   research & practical applications 
 
 Entered on [2024-10-01 mar. 14:09]
+*** 2024-10-02 mercredi
+**** IS^{2}: Keynote: Toon van Waterschoot                       :CONFERENCE:
+/Distributed Audio Signal Processing in a Concensus Framework/
+
+/SOUNDS/ --- Service-Oriented Ubiquitous Network-Driven Sound
+
+- Audio as a service
+- Exploiting multitude of devices
+- Wireless acoustic sensor & actuator networks
+- Sound processing; speech, music...
+
+Paradigm shift from CPU to /LPU/ (L for /local/)
+
+Use-cases: hearing assistance, smart home, voice, *spatial audio*
+
+Lots of industrial involment (Oticon, B&O...) in addition to
+academic...
+
+Challenges:
+- Transducer subset selection; which mics/speakers to use.
+  + A. Lohmann et al. /Microphone subset selection for the weighted
+    prediction error algorithm using a group sparsity penalty/ (2024)
+  + V. Sathyapriyan et al. /Speech enhancement using binary estimator
+    selection applied to hearing aids with a remote microphone/ (2023)
+- Privacy; sharing mic signals may raise privacy concerns; removing
+  identifiable info from speech improves privacy. Voice
+  anonymisation; "neural audio codecs".
+- Large, unknown, changing array geometries
+  + J. Brooks-Park et al. /Room impulse response prototyping using
+    receiver distance estimations for high quality room equalisation
+    algorithms/ (2024)
+  + A. Lohmann et al. /Dereverberation in acoustic sensor networks
+    using weighted prediction error with microphone-dependent
+    prediction delays/ (2023)
+- Signal compression; wireless network; bandwidth & energy
+  consumption; "linear signal compression".
+  + P. Didier et al. /One-shot distributed node-specific signal
+    estimation with non-overlapping latent subspaces in acoustic
+    sensor networks/ (2024)
+  + M. Blochberger et al. /Adaptive coding in wireless acoustic sensor
+    networks for distributed blind system identification/ (2023)
+- Low-latency coding
+  + M. Bokaei et al. /Deep joint source-channel analog coding for
+    low-latency speech transmission over Gaussian channels/ (2023)
+- Synchronisation
+  + P. Didier et al. /Sampling rate offset estimation and compensation
+    for distributed adaptive node-specific signal estimation in
+    wireless acoustic sensor networks/ (2023)
+- Sound source localisation (SSL); SRP method; selection of
+  "most-informative microphone pairs".
+  + B. Çakmak Kenanli et al. /Microphone pair selection for sound
+    source localization in massive arrays of spatially distributed
+    microphones/ (2024)
+  + Kaspar Müller, "Near-field steered response power (SRP) for
+    speaker localization"
+  + E. Grinstein et al. /The Neural-SRP Method for Universal Robust
+    Multi-Source Tracking/ (2024)
+- Room Impulse Response (RIR) estimation; handle dynamic transducer
+  positions; avoid excessive data exchange, power usage...
+  + M. Blochberger et al. /Distributed cross-relation-based
+    frequency-domain blund sytem identification using Online-ADMM/ (2022)
+  + J. Cadavid et al. /Spatial sampling versus acquisition.../
+- Perceptual cues
+  + P. N. Porysek Moreta et al. /Sensory evaluation of spatially
+    dynamic audiovisual sound scenes: A review/ (2022)
+  + V. Tokala et al. /Binaural speech enhancement using deep complex.../
+
+"WASN: Wireless acoustic sensor network"
+- Battern-driven mobile devices; minimise energy consumption.
+- Architecture-dependent
+- (energy req'd for 1 bit tx)/(energy req'd for 1 instruction) =
+  1-3000, depending on device.
+- *Favour local computations over data transmission* -- most
+  energy-saving approach
+
+Problems
+- Parameter estimation
+  + network-wide: T60 estimation, room geometry, sound source localisation
+  + node/pair-specific: RIR estimation, cross-correlation, signal
+    estimation
+  + Distributed strategies: Centralised, Consensus, Diffusion, Local-only
+  + A. H. Sayed, /Adaptive Networks/ (2014)
+  + Consensus: Global consensus optimization; Consensus
+    averaging. Loss functions; consensus parameter vectors.
+    * S. Boyd et al. /Distributed optimization and statistical learning.../
+  + B. Çakmak et al. /A distributed.../
+  + Blind RIR estimation
+
+/"Consensus optimization framework"/
+
+Entered on [2024-10-02 mer. 09:04]
