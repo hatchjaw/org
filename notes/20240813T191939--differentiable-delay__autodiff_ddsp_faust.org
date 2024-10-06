@@ -299,7 +299,7 @@ matplot_lib_filename
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-25ewEB/figureihzfNN.png]]
+[[file:/tmp/babel-rUyGqK/figureI3US2D.png]]
 
 - If \(v_{2}\) increases at the rate of increase of \(t\), \(v_{1}\) stays
   static. E.g. \(v_{2} = t - 0.1\) introduced at \(t = 0.1\):
@@ -318,7 +318,7 @@ matplot_lib_filename
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-25ewEB/figurehFMVEH.png]]
+[[file:/tmp/babel-rUyGqK/figureqVssF8.png]]
 
 - If \(v_{2}\) increases more slowly than the rate of increase of \(t\),
   \(v_{1}\) will be slowed down.  E.g. delay of \(v_{2} = \frac{t -
@@ -338,7 +338,7 @@ matplot_lib_filename
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-25ewEB/figurePjXSm6.png]]
+[[file:/tmp/babel-rUyGqK/figureim0Ia1.png]]
 
 - If \(v_{2}\) increases faster than the rate of increase of \(t\),
   \(v_{1}\) will /reverse/.  E.g. delay of \(v_{2} = 2(t - 0.4)\) introduced
@@ -358,7 +358,7 @@ matplot_lib_filename
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-25ewEB/figure4Hg1kI.png]]
+[[file:/tmp/babel-rUyGqK/figurefrdZgu.png]]
 
 - If \(v_{2}\) decreases, \(v_{1}\) speeds up. E.g. \(v_{2} = 0.1\) at \(t =
   0.1\), decreasing until \(v = 0\) at \(t = 0.6\):
@@ -376,7 +376,7 @@ matplot_lib_filename
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-25ewEB/figureFgDx05.png]]
+[[file:/tmp/babel-rUyGqK/figureIAStJJ.png]]
 
 - E.g. let \(v_{2}(x_{1}, x_{2}) = A\((1+sin(x_{2}(t))/2)\), \(x_{2}(t) = 2\pi{}tf_{m}\) and
   \(f_{m} = 10, A = 200\):
@@ -397,7 +397,7 @@ matplot_lib_filename
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-25ewEB/figurePOu2mX.png]]
+[[file:/tmp/babel-rUyGqK/figureOJHvNf.png]]
 
 These are all /phase modulations/ of some variety or other. Maybe
 there's something in the phase response of a variable delay that could

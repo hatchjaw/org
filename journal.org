@@ -3971,3 +3971,61 @@ Check their [[https://ispl.deib.polimi.it/publications/][publications]] (non-exh
   + Use Sonobus instead?
   
 Entered on [2024-10-02 mer. 11:04]
+**** STM32 thoughts                                             :HARDWARE:
+Jurek was extolling the virtues, on Monday, of the STM range (plus
+[[https://github.com/embassy-rs/embassy][embassy]], the Rust toolchain(s) for embedded devices). I thought the
+most powerful smallish STM32 was clocked at 480 MHz, but I just saw a
+presentation --- tinyVocos: Neural Vocoders on MCUs, Stefano Ciapponi
+et al. --- that alluded to a 600 MHz model: [[https://www.st.com/en/evaluation-tools/stm32h7s78-dk.html][STM32H7S78-DK]]. Development
+kit with 1 GB memory expansion (useful because it only has 620 KB
+built-in!), I^{2}S audio codec, MEMS mic, RJ45 ethernet... but it's ~€95
+(without the memory expansion).
+
+Anyway, I should take another good look at the STM range.
+
+Entered on [2024-10-02 mer. 14:12]
+**** NIME Stuff: libmapper/mapperd                                  :NIME:
+I don't recall Dan ever mentioning [[https://github.com/libmapper][libmapper]] during the NIME course;
+that would've been incredibly useful. Anyway, T-Stick-derived library
+for interoperable parameter mapping framework, now with a daemon,
+=mapperd=, to "support mapping to and from a sandboxed browser
+environment".
+
+Matthew Peachey et al., /Extending Networked Mapping Research
+Middleware Into the Browser Sandbox/.
+
+Could be handy if I ever do NIMEy stuff again, or find myself called
+upon to be a source of ideas/info on the topic.
+
+Entered on [2024-10-02 mer. 14:37]
+**** Room Impulse Response datasets
+From Alessandro Mezza's talk, /Large-Scale Room Impulse Response
+Dataset Compression With Neural Audio Codecs/, we have RIR datasets:
+
+- MIT Acoustical Reverberation Scene Statistics Survey database
+  + Traer & McDermott, 2016
+- HOMULA-RIR
+  + Miotello et al., 2024
+
+I need material for testing convolutions on the Teensy (or whatever
+other target hardware platform)...
+
+...In fact, maybe (a distant maybe), the approach described in this
+talk could have benefits in a memory-starved embedded setting:
+"working with large databases of room acoustic measurements presents
+significant challenges in terms of memory and bandwidth
+requirements. To address this issue, we investigate neural audio
+codecs as a means to achieve lossy RIR data compression... we show
+that EnCodec, a recently proposed state-of-the-art neural audio codec
+with bitrate as low as 1.5 kbps, is able to achieve a compression
+ratio over two orders of magnitude larger than lossless coding"
+
+Entered on [2024-10-02 mer. 14:48]
+*** 2024-10-04 vendredi
+**** IFC revisions                                                  :DDSP:
+Tanguy doesn't like my "proof" of the time-invariance of the ideal
+differentiator. I agree that my notational approach is a bit
+ambiguous; need to revise it based on my old notes, and probably
+update my denote notes too.
+
+Entered on [2024-10-04 ven. 13:15]

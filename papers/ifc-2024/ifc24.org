@@ -34,7 +34,7 @@ machine learning problems in the audio domain.
 Org file describing a paper for the 2024 International Faust
 Conference.
 
-Uses =org-ref= for cross references (and it was a real bugger to set
+Uses =org-ref= for cross references (which was a real bugger to set
 up), and =citar=/=org-cite= for citations.
 
 * Latex Setup                                                      :noexport:
@@ -625,6 +625,7 @@ with {
 #+RESULTS:
 [[file:/tmp/babel-opgpxN/faust-PWTlte.svg]]
 
+\noindent
 As with forward mode, we have an input vector \(\mathbf{x}\) of length
 \(N = 2\). This time, however, we group our primitives, \(v_{p,q}\), into
 layers, \(p\), and identify them by their index, \(q\), within each
@@ -636,9 +637,9 @@ v_{1,1} &= x_{1} \\
 v_{1,2} &= x_{2} \\
 v_{2,1} &= v_{2,1}(v_{1,1}) = v_{2,1}(x_{1}) \\
 v_{2,2} &= v_{2,2}(v_{1,1}, v_{1,2}) = v_{2,2}(x_{1}, x_{2}) \\
-v_{3,1} &= v_{3,1}(v_{2,1}, v_{2,2}) = v_{3,1}(v_{2,1}(x_{1}), v_{2,2}(x_{1}, x_{2}))\;.
+v_{3,1} &= v_{3,1}(v_{2,1}, v_{2,2}) = v_{3,1}(v_{2,1}(x_{1}), v_{2,2}(x_{1}, x_{2}))\;,
 \end{align}
-As before, we have a single output, \(y = v_{3,1}\).
+and, as before, we have a single output, \(y = v_{3,1}\).
 
 Whereas in forward mode the primal and tangent outputs of the program
 are computed in parallel during the forward pass, in reverse mode we
@@ -871,16 +872,18 @@ using pattern matching to avoid division by zero:
 import("stdfaust.lib");
 recip(0) = recip(ma.EPSILON);
 recip(0.0) = recip(0);
-recip(op) = 1,op : /;
-process = recip(log(1)),recip((_,2 : ^))
-  : recip(-);
+recip(expr) = 1,expr : /;
+a = log(1);
+b = _,2 : ^;
+c = -;
+process = recip(a),recip(b) : recip(c);
 #+end_src
 Wrapping our expressions in ~recip~ gives us automatic reciprocals
 without affecting the fundamental composability of \F{}'s
 primitives. Note that if we were to insert the expression ~recip(-) =
 +;~ at the top of the program, the final operation, rather than
-returning \(1/(x_{1} - x_{2})\) would be /overridden/, in a manner of
-speaking, returning \((x_{1} + x_{2})\) instead. An approach along these
+returning \(1/(a - b)\) would be /overridden/, in a manner of
+speaking, returning \(a + b\) instead. An approach along these
 lines will form the basis for the creation of differentiable \F{}
 primitives.
 
@@ -1395,72 +1398,92 @@ recursive composition operation.
 :END:
 
 What is the derivative of a delayed expression? To explore this idea,
-consider the case of delaying a function \(f(v)\), \(v = v(x)\), by
+consider the case of delaying a function \(f(v,t)\), \(v = v(x)\), by
 some fixed time \(\tau\):
 
 #+NAME: eq:fixed-delay
 \begin{align}
-y = f(v) &= v(t - \tau)\;.
+y = f(v,t) &= v(t - \tau)\;.
 \end{align}
-The derivative of the above, via the chain rule, is
+It is clear enough that the delay does not depend on \(x\), so the
+derivative of \(y\) with respect to \(x\) could be expressed, via the
+chain rule, as
 
 #+NAME: eq:diff-delay-1
 \begin{equation}
-\frac{dy}{dx} = \frac{dy}{dv}\frac{dv}{dx}\;. \\
+\frac{dy}{dx} = \left(
+  \frac{dy}{dv}\frac{dv}{dx}
+\right)(t - \tau)\;,
 \end{equation}
-But what is \(\frac{dy}{dv}\)? To proceed, recall that the impulse
+and, since, with \(t\) out of the way, \(y\) is effectively equal to
+\(v\), this simplifies to \(v'(t - \tau)\).
+
+To offer a more rigorous account, first consider that the impulse
 response of the ideal delay system is a time-shifted impulse,
 
 #+NAME: eq:ideal-delay-ir
 \begin{equation}
 h(t) = \delta(t - \tau)\;,
 \end{equation}
-and we can represent cref:eq:fixed-delay as a convolution of \(v(t)\)
-and that impulse response,
+and that cref:eq:fixed-delay can be represented as a convolution with
+that impulse response,
 
 #+NAME: eq:conv
 \begin{equation}
 v(t - \tau) = v(t) \ast h(t)\;.
 \end{equation}
 Next, we can use the convolution and differentiation properties of the
-Fourier transform [cite:@mcclellanSignal2003]:
+Fourier transform [cite:@mcclellanSignal2003], which, when combined,
+tell us that to differentiate a convolution it is only necessary to
+differentiate /one/ of the functions being convolved:
 
 #+NAME: eq:fourier-properties
 \begin{align}
-x(t) \ast h(t) \quad&\xleftrightarrow{\mathcal{F}}\quad X(j\omega)H(j\omega) \\
-\frac{d}{dt}x(t) \quad&\xleftrightarrow{\mathcal{F}}\quad j\omega{}X(j\omega)\;,
+v_{1}(x) \ast v_{2}(x) \quad&\xleftrightarrow{\mathcal{F}}\quad V_{1}(j\omega)V_{2}(j\omega) \\
+\frac{d}{dx}v(x) \quad&\xleftrightarrow{\mathcal{F}}\quad j\omega{}V(j\omega) \\
+\frac{d}{dx}\left(v_{1}(x) \ast v_{2}(x)\right)
+  \quad&\xleftrightarrow{\mathcal{F}}\quad
+  j\omega{}V_{1}(j\omega)V_{2}(j\omega)\;.
 \end{align}
-which, when combined, tell us that the Fourier transform of the
-derivative of a convolution exhibits the following equivalence:
+This rule holds in the two-dimensional case; for example, if we write
+\(v\) as \(v(x,t)\), a function that, for all \(t\), returns \(v(x)\),
+and \(h\) as \(h(x,t)\), a function that, for all \(x\), returns
+\(h(t)\), then
 
-#+NAME: eq:diff-conv
+#+NAME: eq:differentiation-is-time-invariant-1
 \begin{align}
-\mathcal{F}\left[\frac{d}{dt}(x(t) \ast h(t))\right]
-  &= \mathcal{F}\left[\left(\frac{d}{dt}x(t)\right)\right]\cdot\mathcal{F}[h(t)] \\
-  &= \mathcal{F}[x(t)]\cdot\mathcal{F}\left[\left(\frac{d}{dt}h(t)\right)\right] \\
-  &= j\omega{}X(j\omega)H(j\omega)\;.
+\mathcal{F}\left[\frac{\partial{}}{\partial{}x}\left(v(x,t) \ast h(x,t)\right)\right]
+  &= j\omega_{x}V(j\omega_{x},j\omega_{t})H(j\omega_{x},\omega_{t}) \nonumber \\
+  &= \mathcal{F}\left[\frac{\partial{}}{\partial{}x}v(x,t)\right]\cdot\mathcal{F}\left[h(x,t)\right] \nonumber \\
+\therefore \frac{\partial{}}{\partial{}x}\left(v(x,t) \ast h(x,t)\right) &= \left(\frac{\partial{}}{\partial{}x}v(x,t)\right) \ast h(x,t) \nonumber \\
+  &= \frac{\partial{}}{\partial{}x}v(x,t-\tau)\;,
 \end{align}
-This in turn tells us that, to differentiate a convolution, we only
-have to differentiate /one/ of the functions being convolved. Now we
-can solve cref:eq:diff-delay-1:
+and, since \(v(x,t)\) is separable into \(v(x)w(t)\),
 
 #+NAME: eq:diff-delay
-\begin{align}
-\frac{dy}{dx} &= \frac{dv}{dx}\frac{d}{dv}(v(t) \ast h(t)) \nonumber \\
-  &= \frac{dv}{dx}\frac{d}{dv}(v(t)) \ast h(t) \nonumber \\
-  &= \frac{dv}{dx} \ast h(t) \nonumber \\
-  &= v'(t - \tau)\;.
-\end{align}
-This proves that the ideal differentiator is a time-invariant system.
+\begin{equation}
+\frac{dy}{dx} = v'(t - \tau)\;,
+\end{equation}
+where, as in cref:eq:fixed-delay, \(v = v(x)\). This proves that the
+ideal differentiator is a time-invariant system.
 
-Differentiable delay in discrete time, by some fixed time \(k\), can
-be represented with dual numbers as
+We can use the fundamental definition of the derivative to find the
+equivalent result in discrete time. For delay by some fixed time
+\(k\),
+
+#+NAME: eq:discrete-time-delay
+\begin{align}
+\frac{d}{dx}v(x)[n-k] &= \lim_{h\to0}\frac{v(x+h)[n-k] - v(x)[n-k]}{h} \nonumber \\
+  &= \left(\lim_{h\to0}\frac{v(x+h) - v(x)}{h}\right)[n-k] \nonumber \\
+  &= v'(x)[n-k]\;,
+\end{align}
+which can be represented with dual numbers as
 
 #+NAME: eq:diff-delay-dual
 \begin{equation}
 \langle v,\nabla{}v \rangle[n - k] = \langle v[n - k], \nabla{}v[n - k] \rangle\;,
 \end{equation}
-and in Faust,
+and in Faust:
 
 #+begin_src faust :results none
 diff(v') = diff(v) : diff(mem);
@@ -1474,7 +1497,7 @@ a differentiable parameter, e.g.
 
 #+NAME: eq:variable-delay
 \begin{equation}
-y = f(\mathbf{v}) = v_{1}(t - v_{2}(t)), \quad v_{j}(\mathbf{x}) = v_{j}(x_{1}, x_{2})\;.
+y = f(\mathbf{v}) = v_{1}(t - v_{2}), \quad v_{j}(\mathbf{x}) = v_{j}(x_{1}, x_{2})\;.
 \end{equation}
 It's derivative, via the chain rule, with respect to \(x_{i}\) is
 
@@ -1482,37 +1505,36 @@ It's derivative, via the chain rule, with respect to \(x_{i}\) is
 \begin{equation}
 \frac{\partial{}y}{\partial{}x_{i}} = \frac{\partial{}y}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x_{i}} + \frac{\partial{}y}{\partial{}v_{2}}\frac{\partial{}v_{2}}{\partial{}x_{i}}\;.
 \end{equation}
-Courtesy of cref:eq:diff-delay we know that the first term reduces to
-\(\frac{\partial{}v_{1}}{\partial{}x_{i}} \ast h(t) = v_{1}'(t - v_{2}(t))\). We have nothing in
-particular to fear from \(\frac{\partial{}v_{2}}{\partial{}x_{i}} = v_{2}'\). Let's tackle the
-remaining term, \(\frac{\partial{}y}{\partial{}v_{2}}\). By the chain rule, we have
+Courtesy of cref:eq:diff-delay we know that the first additive term
+reduces to \(\frac{\partial{}}{\partial{}x_{i}}v_{1}(t - v_{2})\), i.e. the derivative of \(v_{1}\),
+delayed by the primal of \(v_{2}\). We have nothing in particular to fear
+from \(\frac{\partial{}v_{2}}{\partial{}x_{i}}\). Let's tackle the remaining term,
+\(\frac{\partial{}y}{\partial{}v_{2}}\). By the chain rule, we have
 
 #+NAME: eq:chain-rule-dydv2
 \begin{align}
-\frac{\partial{}y}{\partial{}v_{2}} &= \frac{\partial{}y}{\partial{}u}\frac{\partial{}u}{\partial{}v_{2}}, \quad u = t - v_{2}(t) \nonumber \\
-  &= \frac{\partial{}}{\partial{}u}v_{1}(u)\frac{\partial{}}{\partial{}v_{2}}(t - v_{2}(t)) \nonumber \\
+\frac{\partial{}y}{\partial{}v_{2}} &= \frac{\partial{}y}{\partial{}u}\frac{\partial{}u}{\partial{}v_{2}}, \quad u = t - v_{2} \nonumber \\
   &= \frac{\partial{}}{\partial{}u}v_{1}(u)\cdot(-1) \nonumber \\
   &= -\frac{\partial{}}{\partial{}u}v_{1}(u)\;.
 \end{align}
-Disappointingly, it feels like we're back to where we started (albeit
+Disappointingly, it feels like we haven't made much progress (besides
 having introduced a negative sign), and that is essentially the nature
 of the beast in this instance. Nevertheless, our complete expression
-for \(\frac{\partial{}y}{\partial{}x_{i}}\), expanding
-cref:eq:variable-delay-deriv, is
+for \(\frac{\partial{}y}{\partial{}x_{i}}\), expanding cref:eq:variable-delay-deriv, is
 
 #+NAME: eq:dydxi-via-chain-rule
-\begin{align}
-\frac{\partial{}y}{\partial{}x_{i}} &= 1\cdot{}v_{1}'(t - v_{2}(t)) - \frac{\partial{}}{\partial{}u}v_{1}(u)\cdot{}v_{2}'(t) \nonumber \\
-  &= v_{1}'(t - v_{2}(t)) - v_{2}'(t)\frac{\partial{}}{\partial{}u}v_{1}(u)\;,
-\end{align}
-where \(u = t - v_{2}(t)\). In the general case, that of \F{}'s ~@~
-operator, we need an expression that will handle both fixed and
-variable delays, and, at the time of writing, this has entailed taking
-a numerical derivative of \(v_{1}\) with respect to discrete time,
-analogous to convolution with the derivative of a rectangular
-pulse. This approach is able to support parameter optimisation for
-increasing delays, but, for reasons of causality, for /decreasing/
-ones it is of limited use.
+\begin{equation}
+\frac{\partial{}y}{\partial{}x_{i}} = \frac{\partial{}}{\partial{}x_{i}}v_{1}(t - v_{2}) - \frac{\partial{}v_{2}}{\partial{}x_{i}}\frac{\partial{}}{\partial{}u}v_{1}(u)\;.
+\end{equation}
+In the general case, that of \F{}'s ~@~ primitive, we need an expression
+that will handle both fixed and variable delays, but the final
+multiplicative term in cref:eq:dydxi-via-chain-rule appears to defy a
+closed-form solution. At the time of writing, a compromise, in the
+form of a numerical approximation with respect to time, forms the
+basis for implementation of the differentiable delay primitive. This
+approach is able to support parameter optimisation for increasing
+delays, but, for reasons of causality, for /decreasing/ ones it is of
+limited use.
 
 *** Variable Delay as a Differentiable Filterbank
 
@@ -1622,8 +1644,8 @@ Thus the derivative of a recursive circuit is itself recursive. If the
 presence of the recurrence relation in the result seems surprising,
 recall that \(y = y[n]\), so \(\frac{dy}{dx} = \frac{dy}{dx}[n]\).
 
-Expanding on the above, we can differentiate an all-pole filter with
-the following difference equation:
+With this insight in hand, we can differentiate an all-pole filter
+with the following difference equation:
 
 #+NAME: eq:all-pole-autodiff
 \begin{equation}
