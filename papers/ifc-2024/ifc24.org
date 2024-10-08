@@ -840,7 +840,7 @@ thanks to \F{}'s pattern matching abstraction, however, we can go one
 better, achieving something akin to, albeit slightly more verbose
 than, operator overloading.
 
-Pattern matching has been used extensively in the Faust libraries. The
+Pattern matching has been used extensively in the \F{} libraries. The
 =basics.lib= library, for example, provides a function with a
 recursive pattern matching definition for taking an element from a
 list:
@@ -1060,8 +1060,8 @@ which can be notated
 y = uv + w, \quad v = x_1, \quad w = x_2\;.
 \end{equation}
 Once again \(u\) is an arbitrary input signal, for which we have no
-analytic expression. Now, rather a lone ordinary derivative
-\(\frac{dy}{dx}\), we have \(\nabla{}y\), a matrix of partial derivatives:
+analytic expression. Now, rather a lone ordinary derivative \(y'\), we
+have \(\nabla{}y\), a matrix of partial derivatives:
 
 #+NAME: eq:pds
 \begin{equation}
@@ -1398,8 +1398,8 @@ recursive composition operation.
 :END:
 
 What is the derivative of a delayed expression? To explore this idea,
-consider the case of delaying a function \(f(v,t)\), \(v = v(x)\), by
-some fixed time \(\tau\):
+consider the case of delaying a continuous-time function \(f(v,t)\),
+\(v = v(x)\), by some fixed time \(\tau\):
 
 #+NAME: eq:fixed-delay
 \begin{align}
@@ -1467,9 +1467,9 @@ and, since \(v(x,t)\) is separable into \(v(x)w(t)\),
 where, as in cref:eq:fixed-delay, \(v = v(x)\). This proves that the
 ideal differentiator is a time-invariant system.
 
-We can use the fundamental definition of the derivative to find the
-equivalent result in discrete time. For delay by some fixed time
-\(k\),
+The above also holds in discrete time. In the discrete domain we may
+alternatively use the fundamental definition of the derivative to find
+the equivalent result. For delay by some fixed time \(k\),
 
 #+NAME: eq:discrete-time-delay
 \begin{align}
@@ -1483,7 +1483,7 @@ which can be represented with dual numbers as
 \begin{equation}
 \langle v,\nabla{}v \rangle[n - k] = \langle v[n - k], \nabla{}v[n - k] \rangle\;,
 \end{equation}
-and in Faust:
+and in \F{}:
 
 #+begin_src faust :results none
 diff(v') = diff(v) : diff(mem);
@@ -1493,56 +1493,62 @@ diff(mem) = mem,par(i, vars.N, mem);
 *** Variable Delay
 
 A thornier matter is the case where the length of the delay is itself
-a differentiable parameter, e.g.
+a differentiable parameter, e.g., returning to continuous time,
 
 #+NAME: eq:variable-delay
 \begin{equation}
-y = f(\mathbf{v}) = v_{1}(t - v_{2}), \quad v_{j}(\mathbf{x}) = v_{j}(x_{1}, x_{2})\;.
+y = f(\mathbf{v},t) = v_{1}(x,u_{}), \quad u = t - v_{2}(x,t)\;.
 \end{equation}
-It's derivative, via the chain rule, with respect to \(x_{i}\) is
+Having introduced the intermediate variable, \(u\), the derivative,
+via the chain rule, of \(y\) with respect to \(x\) is
 
 #+NAME: eq:variable-delay-deriv
 \begin{equation}
-\frac{\partial{}y}{\partial{}x_{i}} = \frac{\partial{}y}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x_{i}} + \frac{\partial{}y}{\partial{}v_{2}}\frac{\partial{}v_{2}}{\partial{}x_{i}}\;.
+\frac{\partial{}y}{\partial{}x} = \frac{\partial{}y}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x} +
+  \frac{\partial{}y}{\partial{}u}\frac{\partial{}u}{\partial{}v_{2}}\frac{\partial{}v_{2}}{\partial{}x}\;.
 \end{equation}
-Courtesy of cref:eq:diff-delay we know that the first additive term
-reduces to \(\frac{\partial{}}{\partial{}x_{i}}v_{1}(t - v_{2})\), i.e. the derivative of \(v_{1}\),
-delayed by the primal of \(v_{2}\). We have nothing in particular to fear
-from \(\frac{\partial{}v_{2}}{\partial{}x_{i}}\). Let's tackle the remaining term,
-\(\frac{\partial{}y}{\partial{}v_{2}}\). By the chain rule, we have
+If we imagine that, for all \(t\), \(v_{2}\) returns a constant value
+\(\tau\), the second additive term evaluates to zero, and
+cref:eq:variable-delay-deriv reduces to the fixed delay case described
+by cref:eq:differentiation-is-time-invariant-1. More generally, we can
+observe that the first additive term represents the derivative of
+\(v_{1}\), delayed by the primal of \(v_{2}\). Continuing to evaluate, we
+find
 
-#+NAME: eq:chain-rule-dydv2
+#+NAME: eq:variable-delay-deriv-eval
 \begin{align}
-\frac{\partial{}y}{\partial{}v_{2}} &= \frac{\partial{}y}{\partial{}u}\frac{\partial{}u}{\partial{}v_{2}}, \quad u = t - v_{2} \nonumber \\
-  &= \frac{\partial{}}{\partial{}u}v_{1}(u)\cdot(-1) \nonumber \\
-  &= -\frac{\partial{}}{\partial{}u}v_{1}(u)\;.
+\frac{\partial{}y}{\partial{}x} &= \frac{\partial{}}{\partial{}x}v_{1}(x,u) +
+  \frac{\partial{}}{\partial{}u}v_{1}(x,u)\cdot(-1)\cdot\frac{\partial{}}{\partial{}x}v_{2}(x,t) \nonumber \\
+  &= \frac{\partial{}}{\partial{}x}v_{1}(x,u) - \frac{\partial{}}{\partial{}u}v_{1}(x,u)\frac{\partial{}}{\partial{}x}v_{2}(x,t)\;.
 \end{align}
-Disappointingly, it feels like we haven't made much progress (besides
-having introduced a negative sign), and that is essentially the nature
-of the beast in this instance. Nevertheless, our complete expression
-for \(\frac{\partial{}y}{\partial{}x_{i}}\), expanding cref:eq:variable-delay-deriv, is
 
-#+NAME: eq:dydxi-via-chain-rule
+While \(v_{1}\) and \(v_{2}\) may be trivially differentiable with respect
+to \(x\), calculating \(\frac{\partial{}v_{1}}{\partial{}u}\) --- essentially a derivative
+with respect to time --- appears to defy a closed form
+solution. Nevertheless, in the case of \F{}'s ~@~ primitive, a
+discrete-time expression that will handle both fixed and variable
+delays is required. At the time of writing, a compromise, in the form
+of a numerical approximation, forms the basis for implementation of
+the differentiable delay primitive; as a dual signal:
+
+#+NAME: eq:variable-delay-deriv-dual
 \begin{equation}
-\frac{\partial{}y}{\partial{}x_{i}} = \frac{\partial{}}{\partial{}x_{i}}v_{1}(t - v_{2}) - \frac{\partial{}v_{2}}{\partial{}x_{i}}\frac{\partial{}}{\partial{}u}v_{1}(u)\;.
+    \begin{split}
+        \langle v_{1}&,\nabla{}v_{1 }\rangle[n - \langle v_{2},\nabla{}v_{2} \rangle] = \bigl\langle v_{1}[n-v_{2}], \\
+      &\nabla{}v_{1}[n-v_{2}] - \nabla{}v_{2}(v_{1}[n-v_{2}]-v_{1}[n-v_{2}-1]) \bigr\rangle\;.
+    \end{split}
 \end{equation}
-In the general case, that of \F{}'s ~@~ primitive, we need an expression
-that will handle both fixed and variable delays, but the final
-multiplicative term in cref:eq:dydxi-via-chain-rule appears to defy a
-closed-form solution. At the time of writing, a compromise, in the
-form of a numerical approximation with respect to time, forms the
-basis for implementation of the differentiable delay primitive. This
-approach is able to support parameter optimisation for increasing
-delays, but, for reasons of causality, for /decreasing/ ones it is of
+This approach is able to support parameter optimisation for increasing
+delays, but, for reasons of causality, for decreasing ones it is of
 limited use.
 
 *** Variable Delay as a Differentiable Filterbank
 
 Perhaps a better tactic, in parameter optimisation scenarios involving
 variable-length delay lines, is to model the delay as a differentiable
-FIR filterbank. The general FIR filter, with coefficients \(x_{i}\) and
-input signal \(s\), is defined by the following difference equation
-[cite:@mcclellanSignal2003]:
+FIR filterbank. The general discrete-time FIR filter, with
+coefficients \(x_{i}\) and input signal \(s\), is defined by the
+following difference equation [cite:@mcclellanSignal2003]:
 
 #+NAME: eq:general-fir-1
 \begin{equation}
@@ -1774,7 +1780,7 @@ That being said, the \F{} /compiler/ is designed with this sort of
 optimisation in mind, applying various rewriting rules after its
 symbolic propagation phase to simplify expressions and avoid
 redundancy [cite:@orlareyFAUST2009]. In effect, the compiler will
-attempt to produce the most efficient possible /Faust Imperative
+attempt to produce the most efficient possible /\F{} Imperative
 Representation/ for any given \F{} program. Nevertheless, the
 creation of a generalisable approach to reverse mode should be
 explored, and this too would benefit from compile-time

@@ -6,7 +6,7 @@
 #+LANGUAGE:    en
 #+TAGS: noexport(n) MEETING(m) SUPERVISION(V) PRESENTATION(p) BLOG(b) TRAINING(T)
 #+TAGS: INSPO(i) DIY(d) TEACHING(t) REPRES(R) REVIEW(v) GSoC(G) CONFERENCE(C)
-#+TAGS: WRTIING(w) BRAINDUMP(B)
+#+TAGS: WRITING(w) BRAINDUMP(B)
 #+TAGS: [ PROGRAMMING : R(r) PYTHON(P) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ZOTERO(z) LATEX(l) ]
 #+TAGS: [ AUDIO : SYNTHESIS(s) PHYSMOD(y) SPATIALAUDIO(S) NETWORKEDAUDIO(N) DDSP(D) ]
@@ -4050,12 +4050,81 @@ Entered on [2024-10-07 lun. 10:12]
   doesn't like \(v = v(x)\), and make it clearer, wrt. differentiable
   delay, that we're starting with the continuous-time case.
 - Incidentally, Yann asked if it'd be possible to optimise the phase
-  increment parameter of a phasor...
-- Advik's pull request...
-- Holiday vouchers?
-- Email JM Friedt
-- Teensy forum
-- Pay CVEC/Pégase
-- Carte vital
+  increment parameter of a phasor, e.g.:
+  #+begin_src faust
+phasor = x : f ~ g
+with {
+    x = hslider("X", 0, -1e-5, 1e-5, 1e-9);
+    f = + <: _,int : -;
+    g = _;
+}; 
+  #+end_src
+  Turns out no, it doesn't work (in the time domain), but, as with the
+  case of the differentiable oscillator, the loss function (and in
+  this case the output of ~estimate~) makes cool sounds; the gradient
+  descent process has /emergent/ properties, etc.  I'm putting the
+  following code here for reference (and in case something goes wrong
+  in the web IDE (again) and I lose it); note that it uses the /old/
+  version of =diff.lib= where ~vars~ is defined outside of the
+  differentiable environment.
+  #+begin_src faust
+import("stdfaust.lib");
+df = library("diff.lib");
+
+process = df.backprop(target, estimate, d.losses.L1(1<<smooth, alpha)) : _,!,_
+with {
+    smooth = hslider("smooth", 0, 0, 10, 1);
+    alpha = hslider("alpha [scale:log]", 1e-8, 1e-9, 1e-5, 1e-9);
+
+    target = x : f ~ g
+    with {
+        x = hslider("X", 0, -1e-5, 1e-5, 1e-9);
+        f = + <: _,int : -;
+        g = _;
+    }; 
+
+    vars = df.vars((-~_ : +(1e-6) <: attach(hbargraph("x", 0, 1e-5))));
+    d = df.env(vars);
+    
+    estimate = vars.var(1)
+        : df.rec(f~g,0)
+        with {
+            f = d.diff(+) <: d.diff(_),d.diff(int) : d.diff(-);
+            g = d.diff(_);
+        };
+};
+  #+end_src
+- Advik's pull request: I need to deal with that.
+- Holiday vouchers: 
+- Prepare for CCRMA: I have to deliver a Faust workshop. I should ask
+  Yann for ideas.
+- Email JM Friedt: He might like to know that Teensy (well, the NXP
+  i.MXRT1060 MCU) supports PTP.
+- Teensy forum: I should follow up on the thread I opened during the
+  summer with an update, mentioning the work of the Hannover team, and
+  (hopefully) demonstrating synced networked audio.
+- Pay CVEC/Pégase: 💸
+- Carte vital: Need to scan my /titre de séjour/, then ask Cecilia if
+  she can help me send that off.
   
 Entered on [2024-10-08 mar. 11:36]
+**** IFC Revisions                                         :WRITING:FAUST:
+OK, what to do about something like the following?
+
+\begin{align*}
+v_{1} &= x \\
+v_{2} &= v_{2}(v_{1})
+\end{align*}
+
+Then, later...
+
+\begin{equation*}
+v_{2} = \sin(v_{1})
+\end{equation*}
+
+Shouldn't \(v_{1}\) be \(v_{1}(x)\)? And strictly \(v_{2}\) is also a function
+of \(x\), so what is that?... (Ah, no, that's \(v_{2}(v_{1}(x))\) (or \((v_{2}
+\circ v_{1})(x)\)), hence the chain rule, i.e. we differentiate /through/
+\(v_{1}\), \(\frac{\partial{}v_{2}}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x}\)). Anyway...
+
+Entered on [2024-10-08 mar. 13:04]
