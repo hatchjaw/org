@@ -6,7 +6,7 @@
 #+LANGUAGE:    en
 #+TAGS: noexport(n) MEETING(m) SUPERVISION(V) PRESENTATION(p) BLOG(b) TRAINING(T)
 #+TAGS: INSPO(i) DIY(d) TEACHING(t) REPRES(R) REVIEW(v) GSoC(G) CONFERENCE(C)
-#+TAGS: WRTIING(w)
+#+TAGS: WRTIING(w) BRAINDUMP(B)
 #+TAGS: [ PROGRAMMING : R(r) PYTHON(P) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ZOTERO(z) LATEX(l) ]
 #+TAGS: [ AUDIO : SYNTHESIS(s) PHYSMOD(y) SPATIALAUDIO(S) NETWORKEDAUDIO(N) DDSP(D) ]
@@ -4029,3 +4029,33 @@ ambiguous; need to revise it based on my old notes, and probably
 update my denote notes too.
 
 Entered on [2024-10-04 ven. 13:15]
+*** 2024-10-07 lundi
+**** The ARC Course                                             :TEACHING:
+Tanguy invited me (email, 30/09/24) to co-TA the course, /Architecture
+des circuits; Architecture des ordinateurs/. Attached to his email is
+a PDF with teaching notes. Other resources:
+- [[https://moodle.insa-lyon.fr/course/view.php?id=5227][INSA Moodle page]] for the ARC course
+  + There's also what appears to amount to a textbook on the course
+    (/[[https://moodle.insa-lyon.fr/pluginfile.php/132782/course/section/39170/poly.pdf][Poly cours Architecture]]/)
+- A fun intro to [[https://practicalee.com/boolean-algebra/][Boolean Algebra]]
+  
+Entered on [2024-10-07 lun. 10:12]
+*** 2024-10-08 mardi
+**** Brain dump                                                :BRAINDUMP:
+- Prepare for /Journée de Rentrée/, 24/10. Claire Goursaud sent a template
+  for the slides (it isn't attractive). No word on how long to speak
+  for. Slides due 15/10.
+- Revise IFC paper again. Tanguy and Yann appear to be on board for
+  the most part; I just need to change some of the notation, e.g. Yann
+  doesn't like \(v = v(x)\), and make it clearer, wrt. differentiable
+  delay, that we're starting with the continuous-time case.
+- Incidentally, Yann asked if it'd be possible to optimise the phase
+  increment parameter of a phasor...
+- Advik's pull request...
+- Holiday vouchers?
+- Email JM Friedt
+- Teensy forum
+- Pay CVEC/Pégase
+- Carte vital
+  
+Entered on [2024-10-08 mar. 11:36]
