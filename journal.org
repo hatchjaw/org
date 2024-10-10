@@ -3920,7 +3920,7 @@ Problems
 Entered on [2024-10-02 mer. 09:04]
 **** Politecnico Milano                               :MEETING:CONFERENCE:
 Christina Rottondi introduced me to Alessandro Ilic Mezza and *Alberto
-Bernardini* (see [[https://ispl.deib.polimi.it/people/][Image & Sound Processing Lab @ Politecnico di Milano]])
+Bernardini* (see [[https://ispl.deib.polimi.it/people/][Image & Sound Processing Lab @ Politecnico di Milano]]).
 
 Sounds like they're doing research that overlaps with what Romain and
 I are interested in.
@@ -4126,5 +4126,7 @@ Shouldn't \(v_{1}\) be \(v_{1}(x)\)? And strictly \(v_{2}\) is also a function
 of \(x\), so what is that?... (Ah, no, that's \(v_{2}(v_{1}(x))\) (or \((v_{2}
 \circ v_{1})(x)\)), hence the chain rule, i.e. we differentiate /through/
 \(v_{1}\), \(\frac{\partial{}v_{2}}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x}\)). Anyway...
+
+So I decided to use barred arrow notation, \(f : x \mapsto x^{2}\).
 
 Entered on [2024-10-08 mar. 13:04]
