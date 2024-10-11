@@ -405,7 +405,8 @@ i = 2, &= 1\left(w_{2}\cdot0 + w_{1}\cdot0 + 0\cdot1\right) + 1\left(0\cdot0 + 0
 The above may look awfully fussy on paper, but note that the correct
 solutions have been reached without us having to consider anything
 more complicated at any one time than the derivative of the product of
-a variable by a constant (e.g. \(\frac{\partial{}v_{1}}{\partial{}w_{2}}\)). The answers
+a variable by a constant
+(e.g. \(\frac{\partial{}v_{1}}{\partial{}w_{2}}\)). The answers
 emerged /automatically/, in a sense; indeed, this fastidious
 decomposition of an expression into its differentiable, primitive
 operations is the essence of automatic differentiation.
@@ -1428,7 +1429,7 @@ and reversing the separation yields
 \(\frac{\partial{}}{\partial{}x}v(x,t-\tau)\): /the derivative of a
 delay is the delayed derivative./
 
-Further insight may be achieved by stepping into the frequency
+Further insight may be achieved via an excursion into the frequency
 domain. First consider that the impulse response of the ideal delay
 system is a time-shifted impulse,
 
@@ -1560,7 +1561,7 @@ following difference equation [cite:@mcclellanSignal2003]:
 \begin{equation}
 y[n] = \sum_{k=0}^{M-1}x_{k}s[n-k]\;.
 \end{equation}
-We can express \(y = y[n]\) as a function of a vector of independent
+We can express \(y\) as a function of a vector of independent
 variables \(\mathbf{v}\),
 
 #+NAME: eq:general-fir-2
@@ -1634,27 +1635,32 @@ This can be notated, in discrete time,
 
 #+NAME: eq:ramp-1
 \begin{equation}
-y[n] = x + y[n-1]\;.
+y[n] = x[n] + y[n-1]\;.
 \end{equation}
-As usual, we can express \(y = y[n]\) as a function of independent
+As usual, we can express \(y\) as a function of independent
 variables, \(v_{j}\), which are in turn functions of \(x\):
 
 #+NAME: eq:ramp-2
 \begin{align}
-y &= f(v_{1},v_{2}) = v_{1} + v_{2} \nonumber\\
-v_{1}(x) &= x\;, \quad v_{2}(x) = y[n - 1]\;,
+y &: \begin{pmatrix}v_{1}\\v_{2}\end{pmatrix} \mapsto v_{1} + v_{2} \\
+v_{1} &: \begin{pmatrix}x\\n\end{pmatrix} \mapsto x[n] \\
+v_{2} &: \begin{pmatrix}x\\n\end{pmatrix} \mapsto y[n-1]\;,
 \end{align}
 and find its derivative with respect to \(x\),
 
 #+NAME: eq:ramp-diff
 \begin{align}
-\frac{dy}{dx} &= \frac{dy}{dv_{1}}\frac{dv_{1}}{dx} + \frac{dy}{dv_{2}}\frac{dv_{2}}{dx} \nonumber \\
-  &= 1\cdot{}1 + 1\cdot\frac{dy}{dx}[n-1] \nonumber \\
-  &= 1 + \frac{dy}{dx}[n-1]\;.
+\frac{\partial{}y}{\partial{}x}
+  &= \frac{\partial{}y}{\partial{}v_{1}}\frac{\partial{}v_{1}}{\partial{}x} +
+    \frac{\partial{}y}{\partial{}v_{2}}\frac{\partial{}v_{2}}{\partial{}x} \nonumber \\
+  &= 1\cdot{}1 + 1\cdot\frac{\partial{}y}{\partial{}x}[n-1] \nonumber \\
+  &= 1 + \frac{\partial{}y}{\partial{}x}[n-1]\;.
 \end{align}
 Thus the derivative of a recursive circuit is itself recursive. If the
-presence of the recurrence relation in the result seems surprising,
-recall that \(y = y[n]\), so \(\frac{dy}{dx} = \frac{dy}{dx}[n]\).
+presence of the recurrence relation in the result seems at all
+surprising, note that \(\frac{\partial{}y}{\partial{}x}\) can be
+thought of as \(\frac{\partial{}y}{\partial{}x}[n]\), /the partial
+derivative of \(y\) with respect to \(x\) at time \(n\)./[fn:4]
 
 With this insight in hand, we can differentiate an all-pole filter
 with the following difference equation:
@@ -1663,7 +1669,7 @@ with the following difference equation:
 \begin{equation}
 y[n] = s[n] + \sum_{l=1}^{N}x_{l}y[n - l]\;.
 \end{equation}
-Once again, defining \(y = y[n]\) as a function of a vector of
+Once again, defining \(y\) as a function of a vector of
 independent variables \(\mathbf{v}\),
 
 #+NAME: eq:all-pole-2
@@ -1881,15 +1887,19 @@ computation, would also be of great benefit.
 #+PRINT_BIBLIOGRAPHY:
 
 * Footnotes
-
-[fn:2] A full code example, adapted from the excerpts in this paper,
-can be found at
-[[https://gist.github.com/hatchjaw/59f35d0cde7aba218d785d31f26d2d83]].
+[fn:4] One could imagine writing, e.g.,
+\(\frac{\partial{}y}{\partial{}v_{1}}[n] = (1 + 0)[n] = 1[n]\), but,
+with the aim of maintaining a familiar-looking notation, time indices
+have been omitted from non-delayed terms in cref:eq:ramp-diff.
 
 [fn:3] Alternatively, for the case where ~A~ consists of an arbitrary
 number of parallel signals, it could simply be the responsibility of
 the programmer to make appropriate use of the differentiable addition
 primitive instead of merge composition.
+
+[fn:2] A full code example, adapted from the excerpts in this paper,
+can be found at
+[[https://gist.github.com/hatchjaw/59f35d0cde7aba218d785d31f26d2d83]].
 
 [fn:1] Transformations /are/ in fact possible at the level of the \F{}
 compiler, and automatic differentiation /could/ occur as a compilation
