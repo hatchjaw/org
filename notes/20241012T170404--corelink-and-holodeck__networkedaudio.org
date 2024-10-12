@@ -1,0 +1,25 @@
+#+title:      Corelink and Holodeck
+#+date:       [2024-10-12 sam. 17:04]
+#+filetags:   :networkedaudio:is2:
+#+identifier: 20241012T170404
+
+Andrea Genovese and Zack Nguyen were at IS^{2} in Erlangen to present
+their paper on distributed multimedia concert performances, based on
+the [[file:~/org/journal.org::*Holodeck: A Research Framework for Distributed Multimedia Concert Performances][Holodeck]] project. Holodeck is based on a platform called
+/Corelink/, which, IIRC, is the multimedia content server/client
+system.
+
+Zack seemed to know what he was talking about (he co-presented the
+paper with Andrea, the more senior researcher), and, particularly for
+an undergrad, had read a lot about JackTrip for instance; clearly
+aware of the problem space.
+
+* Resources
+
+- [[https://dev.hsrn.nyu.edu/corelink][Corelink GitLab]], particularly the =corelink-examples= repo.
+
+* See also
+
+- [[denote:20241012T181708][Audio Over OSC]] (AOO)
+
+* TODO Read and take notes on IS^{2} paper

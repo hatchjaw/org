@@ -4095,7 +4095,8 @@ with {
 };
   #+end_src
 - Advik's pull request: I need to deal with that.
-- Holiday vouchers: 
+- Holiday vouchers: AGOS stuff. I would like to join the Pilates class
+  too, but I need to know how much Inria can contribute towards that.
 - Prepare for CCRMA: I have to deliver a Faust workshop. I should ask
   Yann for ideas.
 - Email JM Friedt: He might like to know that Teensy (well, the NXP
