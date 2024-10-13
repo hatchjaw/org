@@ -1,0 +1,23 @@
+#+title:      Image and Sound Processing Lab, Politecnico di Milano
+#+date:       [2024-10-13 dim. 16:49]
+#+filetags:   :networkedaudio:spatialaudio:
+#+identifier: 20241013T164954
+
+I was introduced to [[https://www.deib.polimi.it/ita/personale/dettagli/841564][Alessandro Ilic Mezza]] and [[https://www.deib.polimi.it/ita/personale/dettagli/936408][Alberto Bernardini]] from
+ISPL (by Christina Rottondi) at [[denote:20241013T170234][IS2]] in Erlangen. They were quite
+instrumental in the conference, running the packet loss concealment
+challenge, Alessandro (interest in ML, "neural audio codecs", etc.)
+chairing the first paper session.
+
+Alberto knows Romain, and it seems there's some overlap in research
+interest, e.g. the ISPL thesis [[https://ispl.deib.polimi.it/thesis/][proposal]], /"Spatial audio in networked
+music performance applications."/
+
+Worth bearing these guys and their work in mind for future
+collaboration, perhaps, and certainly for perusing recent
+publications.
+
+* Resources
+
+- Lab [[https://ispl.deib.polimi.it/][website]]
+  + [[https://ispl.deib.polimi.it/publications/][Publications]] (link broken at time of writing; check Scholar)

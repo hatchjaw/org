@@ -1,0 +1,14 @@
+#+title:      Telecommunication Networks Group, Politecnico di Torino
+#+date:       [2024-10-13 dim. 17:23]
+#+filetags:   :networkedaudio:
+#+identifier: 20241013T172307
+
+Met [[https://www.telematica.polito.it/member/cristina-rottondi/][Christina Rottondi]], Matteo Sacchetto, and Leonardo Severi at [[denote:20241013T170234][IS2]]
+in Erlangen. Christina is involved with the IS2/Internet of Sounds
+research network. The guys were there to present their paper on a
+dataset of [[denote:20241013T174636][Real-Time UDP Sound Packet Traces]].
+
+* Resources
+
+- Departmental [[https://www.det.polito.it/en/research/research_groups/telecommunications/tng][website]]
+- Research group [[https://www.telematica.polito.it/][website]]

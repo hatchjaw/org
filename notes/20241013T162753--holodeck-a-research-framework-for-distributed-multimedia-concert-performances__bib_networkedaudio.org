@@ -1,0 +1,6 @@
+#+title:      Holodeck: A Research Framework for Distributed Multimedia Concert Performances
+#+date:       [2024-10-13 dim. 16:27]
+#+filetags:   :bib:networkedaudio:
+#+identifier: 20241013T162753
+#+reference:  genoveseHolodeck2024
+

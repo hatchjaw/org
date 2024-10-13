@@ -1,0 +1,37 @@
+#+title:      Zotero File Storage
+#+date:       [2024-10-13 dim. 14:00]
+#+filetags:   :literature:webhosting:
+#+identifier: 20241013T140048
+
+I've been using [[https://zotero.org][Zotero]] for bibliography management since
+early 2022. It's rather good and useful, and, combined with [[https://retorque.re/zotero-better-bibtex/][Better
+Bixtex]], and [[https://lucidmanager.org/productivity/bibliographic-notes-in-emacs-with-citar-denote/][citar-denote]], I can consolidate my bibliography and
+notes via Emacs. Zotero keeps a database of bibliography entries, with
+citation info and metadata, plus associated files (most likely one or
+more PDFs). All data is stored locally, but can be [[https://www.zotero.org/support/sync][synced]] to external
+storage for use between machines, etc.
+
+As long as one has a Zotero account, "data" syncing (that's metadata,
+basically everything besides attachments) isn't a problem:
+
+#+begin_quote
+Data syncing merges library items, notes, links, tags, etc. —
+everything except attachment files — between your local computer and
+the Zotero servers, allowing you to work with your data from any
+computer with Zotero installed and to view your library online on
+zotero.org. Data syncing is free and unlimited, and it can be used
+without file syncing.
+#+end_quote
+
+Zotero offers its own /file/ syncing service, for storing
+attachments. There's a 300 MB per-user quota, the limit of which I've
+been flirting with of late, using ghostscript to reduce PDF sizes in
+order to stay within, etc. The limit can be extended, for a fee ---
+$20/year for 2 GB, $60/year 6 GB, $120/year unlimited --- but I have
+server space that I'm already paying for. One can use [[https://en.wikipedia.org/wiki/WebDAV][WebDAV]] for file
+syncing instead, and Dreamhost permits the [[https://help.dreamhost.com/hc/en-us/articles/216660118-How-to-enable-disable-WebDAV-in-the-panel][creation]] of WebDAV
+directories, so I created one:
+
+- https://files.andraste.org.uk
+- user: tommy
+- pass: [in 1Password]

@@ -3655,7 +3655,7 @@ I've been reading some IoS stuff (and should really take some proper
 notes at some point); behind it there lies a /big/ drive to publish.
   
 Entered on [2024-09-30 lun. 08:59]
-**** Internet of Sounds (IS^{2}): Opening remarks                :CONFERENCE:
+**** Internet of Sounds (IS2): Opening remarks                :CONFERENCE:
 - Internet of Sounds network is a nonprofit endeavour.
 - 5th edition; 6th already planned
 - It's an IEEE ComSoc thing; German/Italian section/chapter involved,
@@ -3665,7 +3665,7 @@ Entered on [2024-09-30 lun. 08:59]
   (Friedrich-Alexander-Universität)
 
 Entered on [2024-09-30 lun. 09:12]
-**** IS^{2}: Keynote: Hanna Lukashevich                          :CONFERENCE:
+**** IS2: Keynote: Hanna Lukashevich                          :CONFERENCE:
 Lord Kelvin on importance of measuring things.
 
 #+begin_quote
@@ -3704,7 +3704,7 @@ advanced to the stage of science."
 Back to Kelvin: without data there's no way to influence
 policy. Example of lack of funding for farmers for rewilding/meadowing
 parts of their land to encourage pollinators.
-**** IS^{2}: Papers                                 :PRESENTATION:CONFERENCE:
+**** IS2: Papers                                 :PRESENTATION:CONFERENCE:
 ***** RBS-based Time Synchronization Approach with Autonomous Acoustic Sensors – a Simulative Proof of Concept
 Alexander Tessmer, Leonhard Brüggemann and Nils Aschenbruck
 #+begin_quote
@@ -3726,7 +3726,7 @@ Could I sync clocks via /random sound eventsl/, or maybe (more likely)
 perform position calibration by some related approach?
 ** 2024-10 octobre
 *** 2024-10-01 mardi
-**** IS^{2}: Keynote: Georg Hajdu                                :CONFERENCE:
+**** IS2: Keynote: Georg Hajdu                                :CONFERENCE:
 - Telematic performance, CCRMA, using traditional scores nonetheless;
   what about streaming scores? (Not a popular idea?)
 - God. /Everything Everywhere All at Once/ described as "paradigmatic"
@@ -3767,7 +3767,7 @@ perform position calibration by some related approach?
 - But VR/holography brings its own set of problems.
 
 Entered on [2024-10-01 mar. 09:10]
-**** IS^{2}: Papers                                 :PRESENTATION:CONFERENCE:
+**** IS2: Papers                                 :PRESENTATION:CONFERENCE:
 ***** Holodeck: A Research Framework for Distributed Multimedia Concert Performances
 Andrea Genovese, Marta Gospodarek, Zack Nguyen, Robert Pahle,
 Agnieszka Roginska and Corinne Brenner Entered on
@@ -3799,7 +3799,7 @@ Like [[*Meeting: Christof Ressi][AOO]], this might be a source of inspo --- or a
 reuse --- for networked audio transmission/reception.
 
 [2024-10-01 mar. 13:53]
-**** IS^{2}: Keynote: Pieter-Jan Maes               :PRESENTATION:CONFERENCE:
+**** IS2: Keynote: Pieter-Jan Maes               :PRESENTATION:CONFERENCE:
 /Virtual embodiment in music interaction: concepts, experiments and
 applications/
 
@@ -3828,7 +3828,7 @@ fine motor skills. Apparently the exoskeleton just "gives you a push".
 
 Entered on [2024-10-01 mar. 14:09]
 *** 2024-10-02 mercredi
-**** IS^{2}: Keynote: Toon van Waterschoot                       :CONFERENCE:
+**** IS2: Keynote: Toon van Waterschoot                       :CONFERENCE:
 /Distributed Audio Signal Processing in a Concensus Framework/
 
 /SOUNDS/ --- Service-Oriented Ubiquitous Network-Driven Sound
@@ -3928,7 +3928,7 @@ I are interested in.
 Check their [[https://ispl.deib.polimi.it/publications/][publications]] (non-exhaustive, check Scholar too). And
 *email Alberto*.
 
-**** IS^{2}: Papers: Networked Immersive Audio                   :CONFERENCE:
+**** IS2: Papers: Networked Immersive Audio                   :CONFERENCE:
 - Jouni Paulus et al. (Nokia)
   + /Immersive Voice and Audio Services/ (IVAS); /Metadata-Assisted
     Spatial Audio/ (MASA)
@@ -4021,7 +4021,6 @@ with bitrate as low as 1.5 kbps, is able to achieve a compression
 ratio over two orders of magnitude larger than lossless coding"
 
 Entered on [2024-10-02 mer. 14:48]
-*** 2024-10-04 vendredi
 **** IFC revisions                                                  :DDSP:
 Tanguy doesn't like my "proof" of the time-invariance of the ideal
 differentiator. I agree that my notational approach is a bit

@@ -1,0 +1,6 @@
+#+title:      Introducing DUST: A Dataset of Real-Time UDP Sound Packet Traces
+#+date:       [2024-10-13 dim. 17:46]
+#+filetags:   :bib:networkedaudio:
+#+identifier: 20241013T174636
+#+reference:  severiIntroducing2024
+

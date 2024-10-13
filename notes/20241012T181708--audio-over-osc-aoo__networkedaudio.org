@@ -3,3 +3,20 @@
 #+filetags:   :networkedaudio:
 #+identifier: 20241012T181708
 
+Met with Christof Ressi of the Audio Over OSC project back in
+June. [[file:~/org/journal.org::*Meeting: Christof Ressi][Notes from the meeting]] are in my journal.
+
+Could be a useful platform on which to build an audio server at some
+point. Compare with [[denote:20241012T170404][Corelink/Holodeck]]. [[https://sonobus.net/][Sonobus]] uses AOO under the
+hood, apparently ([[https://github.com/sonosaurus/sonobus?tab=readme-ov-file#license-and-3rd-party-software][yep]]).
+
+* Resources
+
+- [[https://drive.google.com/drive/folders/1Q2DRcb0xTf_doTtv3dRSVqFm9iltPXwG][Recent presentation on AOO]] + Pd patches
+  + [[https://docs.google.com/presentation/d/188OlFnJTD2fEn2gdGAmfI7w7UTVNmCRc80KIkUrTbsQ/edit?usp=sharing][slides]] imported into Google slides.
+- [[https://medias.ircam.fr/x68e59d_audio-over-osc][Ircam presentation]]
+- [[http://christofressi.com/][Christof's personal site]]
+- [[https://git.iem.at/cm/aoo][AOO gitlab]]
+  + AOO ESP32 test [[https://git.iem.at/ressi/esp32_aoo_test][code]]
+- [[https://lac.linuxaudio.org/2014/papers/36.pdf][Winfried Ritsch's paper]] (LAC 2014)
+- [[https://www.soundingfuture.com/en/article/aoo-low-latency-peer-peer-audio-streaming-and-messaging][Article in Sounding Future]] (2024)

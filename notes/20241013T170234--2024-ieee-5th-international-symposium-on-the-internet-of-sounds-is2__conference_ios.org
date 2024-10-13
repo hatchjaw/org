@@ -1,0 +1,19 @@
+#+title:      2024 IEEE 5th International Symposium on the Internet of Sounds (IS2)
+#+date:       [2024-10-13 dim. 17:02]
+#+filetags:   :conference:ios:
+#+identifier: 20241013T170234
+
+30/09/24-02/10/24, Erlangen, Germany
+
+* Connections
+
+- [[denote:20241012T182615][The SOUNDS Project]]
+- [[denote:20241013T164954][Image and Sound Processing Lab, Politecnico di Milano]]
+- [[denote:20241012T170404][Corelink and Holodeck]]
+- [[denote:20241013T172307][Telecommunication Networks Group, Politecnico di Torino]]
+
+* Resources
+
+- My [[file:~/org/journal.org::*Internet of Sounds (IS2): Opening remarks][journal notes]] from the conference
+- [[https://ieeexplore.ieee.org/xpl/conhome/10704037/proceeding][Proceedings]]
+- Conference [[https://internetofsounds2024.ieee-is2.org/][website]]

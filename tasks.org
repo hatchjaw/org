@@ -5,18 +5,10 @@
 * Tasks
 ** TODO Read Yann's Widget Modulation paper
 DEADLINE: <2024-09-13 ven.>
-** DONE [#B] Review PAUC manuscript
-DEADLINE: <2024-08-19 lun.>
-- State "DONE"       from "TODO"       [2024-08-18 dim. 15:56]
-** DONE [#A] Submit IFC article
-DEADLINE: <2024-08-23 ven.>
-- State "DONE"       from "TODO"       [2024-09-12 jeu. 10:21]
-** TODO Check entry requirements for US
-DEADLINE: <2024-09-14 sam.>
 ** TODO Ask Maxime again about practicalities of using his DAC with Teensy or the Pi
 DEADLINE: <2024-09-13 ven.>
 ** TODO Prepare PhD meeting presentation
-DEADLINE: <2024-09-16 lun. ++1m>
+DEADLINE: <2024-10-14 lun. ++1m>
 
 - State "DONE"       from "TODO"       [2024-07-10 mer. 13:32]
 ** TODO Read Papers
@@ -31,7 +23,7 @@ DEADLINE: <2024-09-16 lun.>
 - State "STARTED"    from "TODO"       [2024-09-12 jeu. 10:21]
 ** TODO [#C] Start Ethics/Integrity MOOC
 
-** WAITING [#B] Apply, again, for social security [10/10]
+** WAITING [#B] Apply, again, for social security [11/11]
 - State "WAITING"    from "DONE"       [2024-06-12 mer. 11:04] \\
   Waiting for an update by post.
 - State "DONE"       from "TODO"       [2024-05-07 mar. 15:55]
@@ -68,9 +60,12 @@ DEADLINE: [2024-06-18 mar.]
 *** DONE Update Mme Le Prince re. Ameli
 *** DONE Receive another update via post
 - State "DONE"       from "WAITING"    [2024-08-14 mer. 11:03]
-*** TODO Apply for Carte Vitale
+*** DONE Apply for Carte Vitale
 DEADLINE: <2024-09-16 lun.>
+Sent form, photo, and scan of titre de séjour.
+*** WAITING Recevive Carte Vitale
 
+- State "DONE"       from "TODO"       [2024-10-13 dim. 17:56]
 ** TODO Read Razvan's Thesis
 The PDF is in ~/Documents
 
@@ -80,12 +75,3 @@ The PDF is in ~/Documents
 - [[https://www.cnx-software.com/2024/04/08/adlink-osm-imx93-osm-size-l-module-nxp-i-mx-93-soc/][ADLINK OSM-IMX93]]
   
 ** TODO Sign up to ShareAmi
-
-** TODO Prendre rendez-vous chez le coiffeur
-DEADLINE: <2024-09-13 ven. .+1m>
-:PROPERTIES:
-:LAST_REPEAT: [2024-06-06 jeu. 13:37]
-:END:
-- State "DONE"       from "TODO"       [2024-06-06 jeu. 13:37]
-- State "DONE"       from "TODO"       [2024-04-20 sam. 16:31]
-

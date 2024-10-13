@@ -3,3 +3,40 @@
 #+filetags:   :networkedaudio:
 #+identifier: 20241012T182615
 
+#+begin_quote
+The SOUNDS European Training Network (ETN) revolves around a new and
+promising paradigm coined as Service-Oriented, Ubiquitous,
+Network-Driven Sound.
+#+end_quote
+
+Toon van Waterschoot gave a [[file:~/org/journal.org::*IS^{2}: Keynote: Toon van Waterschoot][keynote]] on this project at [[denote:20241013T170234][IS2]] in
+Erlangen.
+
+* About
+
+- Ubiquity of mobile/wearable devices capable of
+  capturing/processing/reproducing sound.
+- Intention to exploit network-enabled cooperation between devices.
+- IoT opportunities; ad-hoc networks.
+- Aim to create a software layer in which audio devices cooperate on
+  top of IoT connectivity.
+- Next-gen audio tech capable of hearing assistance, immersive audio,
+  voice control, etc.
+- Exchange of signals and control data, spatial analysis/processing.
+- /Audio as a Service/
+
+* Research objectives
+
+- Distributed Acoustic Array Signal Processing
+- Network-Driven Audio Signal Processing
+- Acoustic Awareness
+
+* Resources
+
+- Project [[https://www.sounds-etn.eu/][website]]
+  + [[https://www.sounds-etn.eu/index.php/publications][Publications]]
+
+Plenty of interesting papers already published. Consult my [[file:~/org/journal.org::*IS^{2}: Keynote: Toon van Waterschoot][notes on
+Toon's keynote]] for ideas.
+
+* TODO Read some SOUNDS papers
