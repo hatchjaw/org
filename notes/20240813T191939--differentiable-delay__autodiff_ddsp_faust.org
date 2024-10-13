@@ -403,6 +403,13 @@ These are all /phase modulations/ of some variety or other. Maybe
 there's something in the phase response of a variable delay that could
 offer a better solution than offered above.
 
+* Other potential lines of enquiry
+
+- [[https://en.wikipedia.org/wiki/Delay_differential_equation][Delay differential equations]]
+- Analysis of the Dirac Delta function of a function, \(\delta(f(x))\) or
+  \(\delta(x - f(x))\).
+  + Mathematics Stack Exchange [[https://math.stackexchange.com/questions/276583/dirac-delta-function-of-a-function][thread]]. And [[https://math.stackexchange.com/questions/3646231/variable-transformation-of-a-dirac-delta-function][another]].
+
 * Resources
 
 - [[https://www.youtube.com/watch?v=pkL7cuy29XU][YouTube video]]: Convolution & Derivatives

@@ -1,0 +1,67 @@
+#+title:      Sonifying loss in Faust
+#+date:       [2024-10-13 dim. 19:46]
+#+filetags:   :autodiff:ddsp:faust:
+#+identifier: 20241013T194608
+
+As mentioned in a recent research journal [[file:~/org/journal.org::*Brain dump][brain dump]], I found (hat tip
+to Yann) a loss function sonification algorithm that makes interesting
+sounds and exhibits emergent behaviour:
+
+#+begin_src faust
+import("stdfaust.lib");
+df = library("diff.lib");
+
+process = df.backprop(target, estimate, d.losses.L1(1<<smooth, alpha))
+    : _,!,_ <: dm.greyhole_demo,_,_
+with {
+    smooth = hslider("smooth", 0, 0, 10, 1);
+    alpha = hslider("alpha [scale:log]", 1e-8, 1e-10, 1e-3, 1e-10);
+
+    target = x : f ~ g
+    with {
+        x = hslider("X", 0, -1e-5, 1e-5, 1e-9);
+        f = + <: _,int : -;
+        g = _;
+    }; 
+
+    vars = df.vars((-~_ : +(1e-6) <: attach(hbargraph("x", 0, 1e-5))));
+    d = df.env(vars);
+    
+    estimate = vars.var(1)
+        : df.rec(f~g,0)
+        with {
+            f = d.diff(+) <: d.diff(_),d.diff(int) : d.diff(-);
+            g = d.diff(_);
+        };
+};
+#+end_src
+
+As stated in the journal entry, it uses the /old/ version of
+=diff.lib= where ~vars~ is defined outside of the differentiable
+environment.
+
+It compares very favourably with the old =broken-osc.dsp= example from
+=faust-ddsp= (surpassing it, even), producing dynamic, aggressive
+textures (for high values of ~alpha~), but also (typically for lower
+~alpha~) generating /melodic/ output and arpeggios! It sometimes
+settles down into sax-like timbres, or, with ~smooth~ at about 2-3,
+stuff reminiscent of uillean pipes. High values of ~smooth~ devolve
+into a noisy square wave, which is less interesting.
+
+It doesn't offer much by way of direct control, but it's
+nudgeable. Moving the hidden parameter, ~X~, a little can be
+interesting, but the estimate will drift away from DC=0 when ~X~ is
+not zero, and if it starts to hit \pm1, the whole thing can get stuck;
+so remember to set ~X~ back to 0 after a little while. Difficult to
+say exactly what's going on there. Leaving it alone for a while it
+drifts in and out of stability; it's quite interesting without any
+parametric input whatsoever.
+
+It always produces the same output on startup. No surprise, I suppose,
+that it's fundamentally deterministic; still, it'd be interesting to
+know why exactly.
+
+The reverb (needs to be adjusted down on startup) is just there to
+make it sound nicer. The extra two output channels are so it's
+possible to scope the pre-reverb signals. Output is a L/R combination
+of loss function and estimate algo output.

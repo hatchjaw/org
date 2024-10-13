@@ -1,0 +1,28 @@
+#+title:      bark: live sync audio streaming for local networks
+#+date:       [2024-10-13 dim. 19:26]
+#+filetags:   :networkedaudio:webhosting:
+#+identifier: 20241013T192659
+
+Stéphane saw this on the Linux Audio User mailing list.
+
+#+begin_quote
+Introducing Bark! Low-latency multi-receiver live-sync lossless audio
+streaming for local networks. It's like Sonos, but open source, so
+nobody can brick your devices remotely. It's also written in Rust :)
+...  It sends 48khz uncompressed float32 data over UDP multicast. It
+can achieve playback sync to within hundreds of microseconds in ideal
+conditions, and usually to within a millisecond.
+#+end_quote
+
+Assuming its resampler (Speex), and its "built-in time synchronisation
+and latency detection" mechanisms, are good, it's likely at least as
+good as my multicast system --- probably better, if it's able to
+support home-listening without strong warnings about audible artefacts
+in its git readme.
+
+Unlikely to be worth digging into (not least because it's written in
+Rust), but you never know.
+
+* Resources
+
+- GitHub [[https://github.com/haileys/bark][repo]]
