@@ -4130,3 +4130,32 @@ of \(x\), so what is that?... (Ah, no, that's \(v_{2}(v_{1}(x))\) (or \((v_{2}
 So I decided to use barred arrow notation, \(f : x \mapsto x^{2}\).
 
 Entered on [2024-10-08 mar. 13:04]
+*** 2024-10-14 lundi
+**** Machine update                                                :LINUX:
+System stopped finding connected Teensies, so I decided it was time to
+update/restart.
+
+- Thunderbird now features native iCloud calendar sync, so no need for
+  the TbSync extension.
+- For updating, e.g. MCUXpresso config tools, whose installer is
+  behind a login (thus cannot be automatically downloaded), it's
+  necessary to download the .deb.bin file and copy it to
+  =/var/tmp/pamac-build-tar/mcuxpresso-config-tools/=, i.e. the
+  directory where =PKGBUILD= resides.
+
+Entered on [2024-10-14 lun. 11:31]
+**** Trying an intermediate audio buffer                      :TEENSY:PTP:
+I'm really, really not happy with all the static variables I'm using,
+but I've successfully put an intermediate buffer between the sine wave
+generator and the DMA buffer, so I can do useless-but-illustrative
+things like delay the clock subsciber's audio output by 100 samples
+(half a period at 240 Hz).
+
+Weirdly, trying to move the subscriber's output /ahead/ of the
+authority's doesn't work. That's perplexing.
+
+Anyway, next step is to use the audio buffer as the source for
+outgoing networked audio packets from the clock authority, which will
+double as an audio server.
+
+Entered on [2024-10-14 lun. 19:27]
