@@ -4021,6 +4021,7 @@ with bitrate as low as 1.5 kbps, is able to achieve a compression
 ratio over two orders of magnitude larger than lossless coding"
 
 Entered on [2024-10-02 mer. 14:48]
+*** 2024-10-04 vendredi
 **** IFC revisions                                                  :DDSP:
 Tanguy doesn't like my "proof" of the time-invariance of the ideal
 differentiator. I agree that my notational approach is a bit
@@ -4159,3 +4160,38 @@ outgoing networked audio packets from the clock authority, which will
 double as an audio server.
 
 Entered on [2024-10-14 lun. 19:27]
+*** 2024-10-15 mardi
+**** Bruno Bodin                                            :PRESENTATION:
+/Hardware Synthesis of a Functional Programming Language with Kiter/
+
+PhD student of Bruno's working on audio on FPGA with Faust.
+
+Resource usage good, latency reasonable... what's the problem?
+- Synthesis too complex --- takes a lot of RAM and time to compile,
+  and may just crash.
+- No flexibility --- in design generation; Vitis/Vivado make all the
+  decisions.
+- Zero transparency --- if design doesn't meet the constraints, no way
+  to know what to do.
+
+Cyclo-Static Dataflow Graphs (CSDFG)
+
+Model-based frameworks:
+- PREESM
+- SDF3
+- Kiter: https://github.com/bbodin/kiter
+
+An XML file, compatible with Kiter, can be produced from a Faust
+program. Kiter performs analysis and transformations on the
+graph. Kiter generates VHDL code for any given graph, as long as the
+basic operations are implemented.
+
+Most Faust primitives implemented, but not all, e.g. tables. UI
+elements treated as inputs.
+
+Outputs floating point signals.
+
+Bruno and student added =-sdf= flag to the compiler, to produce XML
+output at the box stage.
+
+Entered on [2024-10-15 mar. 14:00]

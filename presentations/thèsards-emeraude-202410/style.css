@@ -1,0 +1,8 @@
+.title-slide > h2 {
+    color: #ededed !important;
+}
+
+.org-src-container > pre {
+    padding: 1em;
+    width: 66.6%;
+}

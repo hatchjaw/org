@@ -21,8 +21,8 @@
 
 * About This Presentation                                          :noexport:
 
-This =org= file describes my presentation for a meeting with
-Jean-Michel Friedt.
+This =org= file describes my presentation for the July 2024 meeting of
+the Emeraude Thèsards.
 
 ** Dependencies
 
