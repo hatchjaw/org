@@ -4195,3 +4195,112 @@ Bruno and student added =-sdf= flag to the compiler, to produce XML
 output at the box stage.
 
 Entered on [2024-10-15 mar. 14:00]
+**** Discussion: derivative notation                  :MEETING:FAUST:DDSP:
+- I think I finally understand precisely what's been bothering Tanguy;
+  I've been using \(y\) to refer to an /output signal/, and
+  \(\frac{dy}{dx}\) to refer to the derivative of \(y\) with respect
+  to \(x\), but that's not strictly what forward mode autodiff is
+  computing. \(y\) is actually /the expression (or *circuit*) that
+  produces the output signal/.
+  + If I'd read the Faust documentation more closely, and hadn't
+    dismissed Yann's way of expressing numerical domains as being
+    beyond my ken, I might've been more discriminating with my use of
+    notation. For example, Yann uses \(\mathbb{C}\) to refer to a
+    /circuit/, that maps some number of signals to some other number
+    of signals:
+
+\begin{align}
+\mathbb{C} &: \mathbb{S}^{n} \to \mathbb{S}^{m} \\
+\mathbb{S} &: \mathbb{Z} \to \mathbb{R}
+\end{align}
+
+    So, perhaps, for a specific example circuit, \(C\), with two
+    parameters and one output signal, I should've used something
+    like...
+
+\begin{align}
+&C : \mathbb{S}^{2} \to \mathbb{S}^{1} \\
+&C : \mathbf{x} \mapsto C(\mathbf{x})
+\end{align}
+
+    or
+
+\begin{equation}
+C : \begin{cases}
+  \mathbb{S}^{2} \to \mathbb{S}^{1} \\
+  \mathbf{x} \mapsto C(\mathbf{x})
+\end{cases}
+\end{equation}
+
+- I also need to say a little more about the loss function I mention
+  in the text, i.e. that loss is calculated sample-by-sample in the
+  time domain.
+
+Entered on [2024-10-15 mar. 18:13]
+*** 2024-10-16 mercredi
+**** Emeraude Thèsards                              :MEETING:PRESENTATION:
+Gave progress report: Romain, to his great credit, had some
+suggestions for /rate-synchronous programming/, formal sematics, etc.
+
+***** Oregane
+- Fixpoint and rounding functions...
+- People doing activation functions wrong (/selon/ Florent).
+  + Bad AI people using quadratic approximation of tanh, when a table
+    would be much, much more efficient.
+  + Bad AI peole computing rouding error, but not /approximation/
+    error.
+
+***** Bastien
+- Neural networks; inference phase
+- Activation function input is a Multiple Constant Multiplication
+  (MCM) problem
+  + Bits shifted and added to produce a given constant output
+  + As opposed to /Single/ Constant Multiplication (SCM)
+- What if MCM outputs /change/ during dynamically
+  + Find design that minimises the number of configuration bits
+  + Extremely difficult optimisation problem
+  + Tried constraint programming; research space way too big
+  + "Satisfiability (SAT) problem"
+- Hardware Quantisation: /Quantisation Aware Training/
+- Bastien has a side-project in /arithmetic/ (which was originally the
+  primary focus of his PhD... it's turned into an optimisation topic).
+- Turns out Bastien is not authorised to teach; admin stupidity as
+  usual.
+
+***** Romain
+- Admin wranglings!
+- Like Bastien, presenting work at RAIM, /2D and 3D norm/ stuff...
+- PhD topic: very small number formats for efficient ML
+- Waiting for an expensive laptop to start actual work; needs graphics
+  card.
+- LNS: /Logarithmic Number System/
+
+***** Onyr
+- TD-(C)VRP-TW
+- Optimisation problems...
+- Branch & Bound (B&B) for solving the Travelling Salesman Problem
+  (TSP)...
+- Constrained partitioning; not a good idea.
+- Column generation?... (i.e. colmun in a matrix) lots of papers, but
+  no good book on the topic.
+
+Next time, Benjamin to go first? I'll put word out on WhatsApp to see
+if anyone wants dedicated time for practicing a presentation.
+
+Entered on [2024-10-16 mer. 10:38]
+
+*** 2024-10-18 vendredi
+**** Romain: Prep for CCRMA                                :MEETING:FAUST:
+Romain has created a slideshow for the afternoon session of the CCRMA
+Faust day. Yann will add some stuff about the Faust Consortium,
+On-Demand computation, etc.
+
+Romain would like me to add:
+- ~3 slides on distributed spatial audio in Faust
+- 15-20 mins worth of material on Faust DDSP
+
+He knows I have a lot to do at the moment, and he could give a Faust
+workshop in his sleep, so he's happy to take over the /Faust 101/ part
+of the morning session if I feel like I have too much on my plate.
+
+Entered on [2024-10-18 ven. 12:06]

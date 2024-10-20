@@ -64,7 +64,7 @@ Authors' affiliations have to be set below.
 ** Packages
 #+begin_src latex
 \usepackage{IFC-24}
-\usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools}
+\usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools,stmaryrd}
 \usepackage{euscript}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -317,14 +317,14 @@ programming language upon which they are based.
 
 ** The Arithmetic of Automatic Differentiation
 
-Two main /modes/ of automatic differentiation are typically alluded to
-in scholarly works on the topic: forward (or /tangent/) mode, and
-reverse (or /adjoint/) mode [cite:@blondelElements2024;
-@baydinAutomatic2018; @harrisonBrief2021]. These modes describe, in
-effect, two directions of derivative propagation through a computation
-graph; in tangent mode, derivatives propagate forward, from inputs to
-outputs; in adjoint mode, propagation occurs backwards, from outputs
-to inputs. What does it mean, however, for a derivative to propagate?
+Two principal /modes/ of automatic differentiation are alluded to in
+scholarly works on the topic: forward (or /tangent/) mode, and reverse
+(or /adjoint/) mode [cite:@blondelElements2024; @baydinAutomatic2018;
+@harrisonBrief2021]. These modes describe, in effect, two directions
+of derivative propagation through a computation graph; in tangent
+mode, derivatives propagate forward, from inputs to outputs; in
+adjoint mode, propagation occurs backwards, from outputs to
+inputs. What does it mean, however, for a derivative to propagate?
 And is that propagation numerical or symbolic? As we will see, the
 answer to the second question is /"both"/; the answer to the first is
 less concise, but, irrespective of the direction of propagation, it
@@ -370,13 +370,20 @@ with respect to \(x_{i}\) is
 
 To give an audio-relevant example, imagine the case of a gain control,
 \(x_{1}\), and a DC offset, \(x_{2}\), applied to an input signal,
-\(s\). With some knowledge of elementary calculus, one could observe
-that \(y = sx_{1} + x_{2}\) and find \(\frac{\partial{}y}{\partial{}x_{1}} = s\), and
-\(\frac{\partial{}y}{\partial{}x_{2}} = 1\). This entails having an overview of the
-expression as a whole, however, which works for this simple example,
-but may not be feasible for more complex audio processes. Using the
-chain rule, we can break our expression down into its fundamental,
-/primitive/ operations, and differentiate each separately:
+\(s\). One could write this as
+
+#+NAME: eq:gain-dc-example
+\begin{equation}
+y = sx_{1} + x_{2}\;,
+\end{equation}
+and, with some knowledge of elementary calculus, find
+\(\frac{\partial{}y}{\partial{}x_{1}} = s\), and
+\(\frac{\partial{}y}{\partial{}x_{2}} = 1\). This entails having an
+overview of the expression as a whole, however, which works for this
+simple example, but may not be feasible for more complex audio
+processes. Using the chain rule, we can break our expression down into
+its fundamental, /primitive/ operations, and differentiate each
+separately:
 
 #+NAME: eq:chainrule-example
 \begin{align*}
@@ -412,6 +419,69 @@ constant (e.g. \(\frac{\partial{}v_{1}}{\partial{}w_{2}}\)). The answers emerged
 an expression into its differentiable, primitive operations is the
 essence of automatic differentiation.
 
+*** Symbolic Expressions versus Numerical Outputs
+
+The example given in the previous section confronts us with a
+significant ambiguity: whereas cref:eq:gain-dc-example is clearly a
+symbolic expression for \(y\) --- a numerical output will only emerge
+if numerical values for \(x_{1}\), \(x_{2}\), and \(s\) are provided
+--- \(1\) represents both the symbolic result for
+\(\frac{\partial{}y}{\partial{}x_{2}}\) /and/ its corresponding
+numerical value, with no clear means to distinguish between the
+two. The issue here is a semantic one, and one with which the
+definition of the \F{} language itself can assist us.
+
+\F{} essentially draws a semantic distinction between a block diagram,
+\(D\), and the signal processor represented by that block diagram,
+notated \(\llbracket D \rrbracket\) [cite:@orlareySyntactical2004]. We
+can think of \(D\) as a symbolic expression that describes a block
+diagram, and \(\llbracket D \rrbracket\) as a processor that acts upon
+a vector of signals and produces a vector of signals as a result. A
+signal is discrete function of time and a member of the set
+\(\mathbb{S}\) of all signals; the value of a signal at discrete time
+\(n\) is analogous to a numerical output. If we consider the
+expression \(sx_{1} + x_{2}\) from our example to be the mathematical
+representation of a block diagram, \(Y\), we can describe the
+corresponding signal processor \(\llbracket Y \rrbracket\), receiving
+one input signal and producing one output signal, as
+
+#+NAME: eq:signal-processor
+\begin{equation}
+    \begin{split}
+        \llbracket Y \rrbracket &: \mathbb{S}^{1} \to \mathbb{S}^{1} \\
+        \llbracket Y \rrbracket(s) &= (y) \\
+        y[n] &= s[n]x_{1}[n] + x_{2}[n] \;.
+    \end{split}
+\end{equation}
+The partial derivatives of the block diagram \(Y\) are, in turn, block
+diagrams, and can thus undergo semantic transformation into signal
+processors; for the partial derivative with respect to \(x_{2}\), we
+have
+
+#+NAME: eq:diff-signal-processor
+\begin{equation}
+    \begin{split}
+        \left\llbracket \frac{\partial{}Y}{\partial{}x_{2}} = 1 \right\rrbracket &: \mathbb{S}^{1} \to \mathbb{S}^{1} \\
+        \llbracket 1 \rrbracket(s) &= \left(\frac{\partial{}y}{\partial{}x_{2}}\right) \\
+        \frac{\partial{}y}{\partial{}x_{2}}[n] &= 1\;,
+    \end{split}
+\end{equation}
+which tells us that the symbolic expression
+\(\frac{\partial{}Y}{\partial{}x_{2}}\) is equal to 1, and that the
+numerical output produced by the signal processor
+\(\llbracket\frac{\partial{}Y}{\partial{}x_{2}}\rrbracket\) is a
+signal whose value is 1 for all \(n\). Note also that the
+differentiated signal processor receives the input signal, \(s\), but
+discards it (or rather multiplies it by zero).
+
+In the sections that follow, \F{} block diagrams --- symbolic
+expressions whose derivatives we wish to find --- will be notated
+\(Y\), and their derivatives \(\frac{\partial{}Y}{\partial{}x_{i}}\);
+an output signal produced by \(\llbracket Y\rrbracket\) will be
+indicated by \(y\), and an output signal produced by
+\(\llbracket\frac{\partial{}Y}{\partial{}x_{i}}\rrbracket\) as
+\(\frac{\partial{}y}{\partial{}x_{i}}\) .
+
 *** Forward Mode Automatic Differentiation
 :PROPERTIES:
 :CUSTOM_ID: subsubsec:forward-mode
@@ -438,7 +508,7 @@ with {
 #+CAPTION: /operations, \(v_{j}\)./
 #+NAME: fig:block-diag-forward-mode
 #+RESULTS:
-[[file:/tmp/babel-opgpxN/faust-tKVbw0.svg]]
+[[file:/tmp/babel-wWU0z7/faust-BBHtgK.svg]]
 
 This program consists of a number of what we will consider to be
 primitive operations \(v_{j}\). \(N = 2\) of these we will designate as
@@ -457,18 +527,20 @@ These parameters are passed to two further primitives,
 v_{3} &: v_{1} \mapsto v_{3}(v_{1}) \\
 v_{4} &: \begin{bmatrix}v_{1}\\v_{2}\end{bmatrix} \mapsto v_{4}(v_{1}, v_{2})\;,
 \end{align}
-and the program produces one output signal, the output of the final
-primitive in the graph, which we can refer to as the /primal/ output
-of the program,
+and the block diagram as a whole is encapsulated by the operation of
+the final primitive on those that preceded it; we can refer to the
+result as the /primal/ block diagram,
 
 #+NAME: eq:output
 \begin{align}
 v_{5} : \begin{bmatrix}v_{3}\\v_{4}\end{bmatrix} &\mapsto v_{5}(v_{3}, v_{4}) \\
-y &= v_{5}\;.
+Y &= v_{5}\;,
 \end{align}
+which, as a signal processor, \(\llbracket Y \rrbracket\), produces
+the /primal/ output signal, \(y\).
 
 In forward mode, differentiating a given primitive is a case of
-computing its sensitivity to changes in the program's inputs,
+computing its sensitivity to changes in the program's input parameters,
 producing a /tangent/ vector of partial derivatives, each with respect
 to an element in the parameter vector \(\mathbf{x}\). For example, the
 input primitive \(v_{1}\) returns as its derivative
@@ -538,29 +610,28 @@ derivative expression for \(v_{5}\),
   \frac{\partial{}v_{5}}{\partial{}v_{4}}
 \end{bmatrix}\;,
 \end{equation}
-and that, in effect, gives us an expression for
-\(\frac{\partial{}y}{\partial{}\mathbf{x}}\), a \(2\times1\) Jacobian matrix.
+and that, in effect, gives us a symbolic expression for
+\(\frac{\partial{}Y}{\partial{}\mathbf{x}}\), a \(2\times1\) Jacobian
+matrix of block diagram expressions.
 
-The ultimate aim of automatic differentiation is not, however, simply
-to produce symbolic expressions, but numerical outputs. To calculate
-the numerical value of the derivative of \(y\) with respect to \(x_{i}\),
-we begin by differentiating \(\mathbf{x}\) with respect to \(x_{i}\):
+To produce the numerical output for a given partial derivative, we
+begin by differentiating \(\mathbf{x}\) with respect to \(x_{i}\):
 
 #+NAME: eq:partial-x1
 \begin{equation}
 \frac{\partial{}\mathbf{x}}{\partial{}x_{i}}
 = \begin{bmatrix}\frac{\partial{}x_{1}}{\partial{}x_{i}} & \frac{\partial{}x_{2}}{\partial{}x_{i}}\end{bmatrix}\;.
 \end{equation}
-We then propagate this tangent vector through the graph, producing the
-/forward tangent output/ of the program. On paper this looks like a
-vector product (a /Jacobian vector product/ in fact
-[cite:@baydinAutomatic2018]), and simply extracts the first element of
-the vector in [[cref:eq:dv5-dx]]; for example,
+We then propagate this vector through the graph, extracting the
+\(i\)^{th} element of the vector in [[cref:eq:dv5-dx]] via a Jacobian
+vector product [cite:@baydinAutomatic2018], and isolating the block
+diagram from which we can compute the /forward tangent output/ of the
+program; for \(i = 1\),
 
 #+NAME: eq:vec-prod
 \begin{align}
-\frac{\partial{}y}{\partial{}x_{1}} &= \frac{\partial{}\mathbf{x}}{\partial{}x_{1}}\frac{\partial{}y}{\partial{}\mathbf{x}} \nonumber \\
-&= \begin{bmatrix}1 & 0\end{bmatrix}\frac{\partial{}y}{\partial{}\mathbf{x}} \nonumber \\
+\frac{\partial{}Y}{\partial{}x_{1}} &= \frac{\partial{}\mathbf{x}}{\partial{}x_{1}}\frac{\partial{}Y}{\partial{}\mathbf{x}} \nonumber \\
+&= \begin{bmatrix}1 & 0\end{bmatrix}\frac{\partial{}Y}{\partial{}\mathbf{x}} \nonumber \\
 &= \frac{\partial{}v_{1}}{\partial{}x_{1}}
   \frac{\partial{}v_{3}}{\partial{}v_{1}}
   \frac{\partial{}v_{5}}{\partial{}v_{3}}
@@ -573,7 +644,7 @@ the vector in [[cref:eq:dv5-dx]]; for example,
   \frac{\partial{}v_{4}}{\partial{}v_{2}}
   \frac{\partial{}v_{5}}{\partial{}v_{4}}\;.
 \end{align}
-To compute \(\frac{\partial{}y}{\partial{}x_{2}}\), we find \(\frac{\partial{}\mathbf{x}}{\partial{}x_{2}}
+To compute \(\frac{\partial{}Y}{\partial{}x_{2}}\), we find \(\frac{\partial{}\mathbf{x}}{\partial{}x_{2}}
 = \begin{bmatrix}0 & 1\end{bmatrix}\) and proceed similarly.
 
 To give an example, let's assign some concrete functions to \(v_{j}\):
@@ -586,21 +657,22 @@ and substitute these into [[cref:eq:vec-prod]] (and the equivalent for
 \(x_{2}\)):
 
 \begin{align}
-\frac{\partial{}y}{\partial{}x_{1}} &= \left(1\cdot\cos(v_{1})\cdot{}v_{4}\right) + \left(1\cdot1\cdot{}v_{3} + 0\cdot1\cdot{}v_{3}\right) \nonumber \\
+\frac{\partial{}Y}{\partial{}x_{1}} &= \left(1\cdot\cos(v_{1})\cdot{}v_{4}\right) + \left(1\cdot1\cdot{}v_{3} + 0\cdot1\cdot{}v_{3}\right) \nonumber \\
   &= v_{4}\cos(v_{1}) + v_{3} \nonumber \\
   &= (x_{1} + x_{2})\cos(x_{1}) + \sin(x_{1}) \label{eq:concrete-fwd-x1} \\
-\frac{\partial{}y}{\partial{}x_{2}} & = \left(0\cdot\cos(v_{1})\cdot{}v_{4}\right) + \left(0\cdot1\cdot{}v_{3} + 1\cdot1\cdot{}v_{3}\right) \nonumber \\
+\frac{\partial{}Y}{\partial{}x_{2}} & = \left(0\cdot\cos(v_{1})\cdot{}v_{4}\right) + \left(0\cdot1\cdot{}v_{3} + 1\cdot1\cdot{}v_{3}\right) \nonumber \\
   &= v_{3} \nonumber \\
   &= \sin(x_{1})\;. \label{eq:concrete-fwd-x2}
 \end{align}
-Providing numerical values for \(x_{1}\) and \(x_{2}\) would of course yield
-numerical values for the above.
+Transforming these expressions into signal processors and providing
+numerical values for \(x_{1}\) and \(x_{2}\) would of course yield
+numerical values for \(\frac{\partial{}y}{\partial{}x_{i}}[n]\).
 
 One potential drawback of forward mode concerns computational
-efficiency --- to compute all of the partial derivatives of \(y\),
-\(N\) passes are required. For programs with more outputs than inputs,
-this would not be a problem, but in the audio domain, where inputs
-will likely outnumber outputs, it is potentially a concern (see
+efficiency --- to compute all of the partial derivatives, \(N\) passes
+are required. For programs with more outputs than inputs, this would
+not be a problem, but in the audio domain, where inputs will likely
+outnumber outputs, it is potentially a concern (see
 ref:subsec:efficiency for more on this subject).
 
 *** Reverse Mode Automatic Differentiation
@@ -643,9 +715,10 @@ v_{2,1} &: v_{1,1} \mapsto v_{2,1}(v_{1,1}) \\
 v_{2,2} &: \begin{bmatrix}v_{1,1} \\ v_{1,2}\end{bmatrix} \mapsto v_{2,2}(v_{1,1}, v_{1,2}) \\
 v_{3,1} &: \begin{bmatrix}v_{2,1} \\ v_{2,2}\end{bmatrix} \mapsto v_{3,1}(v_{2,1}, v_{2,2}) \;,
 \end{align}
-and, as before, we have a single output, \(y = v_{3,1}\).
+and, as before, the primal block diagram is expressible via the final
+primitive, \(Y = v_{3,1}\).
 
-Whereas in forward mode the primal and tangent outputs of the program
+Whereas in forward mode the primal and tangent expressions
 are computed in parallel during the forward pass, in reverse mode we
 complement the forward primal pass with a /reverse adjoint pass/;
 instead of computing the /sensitivity/ of each primitive with respect
@@ -654,7 +727,7 @@ output of the program:
 
 #+NAME: eq:adjoint
 \begin{equation}
-\bar{v}_{p,q} = \frac{\partial{}y}{\partial{}v_{p,q}}\;.
+\bar{v}_{p,q} = \frac{\partial{}Y}{\partial{}v_{p,q}}\;.
 \end{equation}
 
 Rather than propagate successive tangent vectors forward through the
@@ -663,14 +736,14 @@ output (i.e. the influence of the output over itself),
 
 #+NAME: eq:y-adjoint
 \begin{equation}
-\bar{y} = \bar{v}_{3,1} = \frac{\partial{}y}{\partial{}v_{3,1}} = 1\;,
+\bar{Y} = \bar{v}_{3,1} = \frac{\partial{}Y}{\partial{}v_{3,1}} = 1\;,
 \end{equation}
 and propagate that backward through the graph. Adjoints for layer \(p =
 2\) are
 
 #+NAME: eq:v2-adjoints
 \begin{equation}
-\bar{v}_{2,q} &= \bar{v}_{3,1}\frac{\partial{}v_{3,1}}{\partial{}v_{2,q}} = \frac{\partial{}y}{\partial{}v_{3,1}}\frac{\partial{}v_{3,1}}{\partial{}v_{2,q}}\;.
+\bar{v}_{2,q} &= \bar{v}_{3,1}\frac{\partial{}v_{3,1}}{\partial{}v_{2,q}} = \frac{\partial{}Y}{\partial{}v_{3,1}}\frac{\partial{}v_{3,1}}{\partial{}v_{2,q}}\;.
 \end{equation}
 
 In general, the adjoint for primitive \(v_{p,q}\) is found as the sum of
@@ -678,8 +751,8 @@ the derivatives of the \(M\) primitives in the \((p+1)\)^{th} layer,
 
 #+NAME: eq:general-adjoint
 \begin{align}
-\bar{v}_{p,q} &= \frac{\partial{}y}{\partial{}v_{p,q}} \nonumber \\
-  &= \sum^{M}_{m=1}\frac{\partial{}y}{\partial{}v_{p+1,m}}\frac{\partial{}v_{p+1,m}}{\partial{}v_{p,q}} \nonumber \\
+\bar{v}_{p,q} &= \frac{\partial{}Y}{\partial{}v_{p,q}} \nonumber \\
+  &= \sum^{M}_{m=1}\frac{\partial{}Y}{\partial{}v_{p+1,m}}\frac{\partial{}v_{p+1,m}}{\partial{}v_{p,q}} \nonumber \\
   &= \sum^{M}_{m=1}\bar{v}_{p+1,m}\frac{\partial{}v_{p+1,m}}{\partial{}v_{p,q}}\;,
 \end{align}
 so adjoints for the input layer, \(p = 1\), emerge as
@@ -696,10 +769,10 @@ so adjoints for the input layer, \(p = 1\), emerge as
   \bar{v}_{3,1}
   \frac{\partial{}v_{3,1}}{\partial{}v_{2,2}}
   \frac{\partial{}v_{2,2}}{\partial{}v_{1,q}} \nonumber \\
-&= \frac{\partial{}y}{\partial{}v_{3,1}}
+&= \frac{\partial{}Y}{\partial{}v_{3,1}}
   \frac{\partial{}v_{3,1}}{\partial{}v_{2,1}}
   \frac{\partial{}v_{2,1}}{\partial{}v_{1,q}} +
-  \frac{\partial{}y}{\partial{}v_{3,1}}
+  \frac{\partial{}Y}{\partial{}v_{3,1}}
   \frac{\partial{}v_{3,1}}{\partial{}v_{2,2}}
   \frac{\partial{}v_{2,2}}{\partial{}v_{1,q}}\;,
 \end{align}
@@ -707,7 +780,7 @@ giving us
 
 #+NAME: eq:xi-adjoint
 \begin{equation}
-\bar{x}_{i} = \frac{\partial{}y}{\partial{}x_{i}} = \bar{v}_{1,i}\;.
+\bar{x}_{i} = \frac{\partial{}Y}{\partial{}x_{i}} = \bar{v}_{1,i}\;.
 \end{equation}
 
 Expanding the terms above, while illustrative, is not necessary;
@@ -715,8 +788,8 @@ indeed, [[cref:eq:v1-adjoint]] could end at the first line; we have
 definitions for \(\bar{v}_{2,1}\) and \(\bar{v}_{2,2}\) and these propagate
 backward through the graph without any need for them to be
 recomputed. In effect, though the graph may branch as adjoints
-propagate, we achieve both \(\frac{\partial{}y}{\partial{}x_{1}} = \bar{v}_{1,1}\) and
-\(\frac{\partial{}y}{\partial{}x_{2}} = \bar{v}_{1,2}\) in a single pass, unlike in tangent
+propagate, we achieve both \(\frac{\partial{}Y}{\partial{}x_{1}} = \bar{v}_{1,1}\) and
+\(\frac{\partial{}Y}{\partial{}x_{2}} = \bar{v}_{1,2}\) in a single pass, unlike in tangent
 mode, where two passes are required.
 
 As with the forward mode example, let's assign some functions to
@@ -729,10 +802,10 @@ v_{2,1} = \sin(v_{1,1})\:, \quad v_{2,2} = v_{1,1} + v_{1,2}\:, \quad v_{3,1} = 
 Substituting these into [[cref:eq:v1-adjoint]],
 
 \begin{align}
-\frac{\partial{}y}{\partial{}x_{1}} &= 1\cdot{}v_{2,2}\cdot\cos(v_{1,1}) + 1\cdot{}v_{2,1}\cdot1 \nonumber \\
+\frac{\partial{}Y}{\partial{}x_{1}} &= 1\cdot{}v_{2,2}\cdot\cos(v_{1,1}) + 1\cdot{}v_{2,1}\cdot1 \nonumber \\
   &= (v_{1,1} + v_{1,2})\cos(v_{1,1}) + v_{2,1} \nonumber \\
   &= (x_{1} + x_{2})\cos(x_{1}) + \sin(x_{1}) \label{eq:concrete-rev-x1} \\
-\frac{\partial{}y}{\partial{}x_{2}} &= 1\cdot{}v_{2,2}\cdot0 + 1\cdot{}v_{2,1}\cdot1 \nonumber \\
+\frac{\partial{}Y}{\partial{}x_{2}} &= 1\cdot{}v_{2,2}\cdot0 + 1\cdot{}v_{2,1}\cdot1 \nonumber \\
   &= v_{2,1} \nonumber \\
   &= \sin(v_{1,1}) \nonumber \\
   &= \sin(x_{1})\;, \label{eq:concrete-rev-x2}
@@ -763,7 +836,7 @@ uses the /nilpotent symbol/, \(\varepsilon\)
 U = u + \varepsilon{}u'\;,
 \end{equation}
 where \(u' = \frac{du}{dx}\) is the derivative of \(u\) with respect
-to some variable \(x\)  and \(\varepsilon^{2}\) = 0.
+to some variable \(x\), and \(\varepsilon^{2}\) = 0.
 
 Using this arithmetic, the addition rule of differentiation emerges
 quite naturally as the sum of \(U\) and \(V = v + \varepsilon{}v'\),
@@ -822,7 +895,9 @@ partial derivatives must be calculated:
 
 #+NAME: eq:dual-gradient
 \begin{equation}
-U = \langle u, \nabla{}u \rangle\;.
+U = \langle u, \nabla{}u \rangle, \quad \nabla{}u
+  = \frac{\partial{}u}{\partial{}\mathbf{x}}
+  = \begin{bmatrix}\frac{\partial{}u}{\partial{}x_{1}} \\ \vdots \\ \frac{\partial{}u}{\partial{}x_{N}} \end{bmatrix}\;.
 \end{equation}
 
 ** Extending \F{}'s Arithmetic
@@ -932,23 +1007,29 @@ which yields the block diagram:
 #+caption: /addition primitive./
 #+RESULTS:
 [[file:images/add.svg]]
-This signal processor takes two input signals, \(u\) and \(v\), and
-produces one output signal, \(y\):
+\noindent The semantic scheme for the addition operator is described
+as [cite:@orlareySyntactical2004]
 
+#+NAME: eq:add-semantic
 \begin{equation}
-y = u + v\;.
+\begin{split}
+\llbracket + \rrbracket &: \mathbb{S}^{2} \to \mathbb{S} \\
+\llbracket + \rrbracket(s_{1},s_{2}) &= (y) \\
+y[n] &= s_{1}[n] + s_{2}[n]\;.
+\end{split}
 \end{equation}
 Note that \F{}'s addition primitive has no special knowledge of its
 arguments, their history, provenance, etc., it just consumes them and
 returns their sum. In \F{}'s arithmetic, the addition of two signals is
 simply well-defined.
 
-Suppose that \(y\) is dependent on some variable \(x\), and that we
-wish to know how sensitive \(y\) is to perturbations in \(x\). We can
-produce an analytic expression for this sensitivity by differentiating
-\(y\) with respect to \(x\). Recall, from [[cref:eq:addition-rule-dual]],
-that a dual-number addition takes the form of two additions in
-parallel; in \F{}, that could be expressed as:
+Suppose that the block diagram \(Y = +\) is dependent on some variable
+\(x\), and that we wish to know how sensitive \(Y\) is to
+perturbations in \(x\). We can produce an analytic expression for this
+sensitivity by differentiating \(Y\) with respect to \(x\). Recall,
+from [[cref:eq:addition-rule-dual]], that a dual-number addition takes the
+form of two additions in parallel; in \F{}, that could be expressed
+as:
 
 #+begin_src faust :results svg file :file images/dualadd.svg :exports both
 diffAdd = +,+;
@@ -960,22 +1041,30 @@ process = diffAdd;
 #+caption: /primitive, consisting of two parallel additions./
 #+RESULTS:
 [[file:images/dualadd.svg]]
-Since \F{} deals exclusively with the propagation of signals, we shall
-refer to this as a /dual signal/ representation.
+We can think of this as consisting of two block diagrams in parallel,
+and thus as a /dual block diagram/, \(\langle Y,Y' \rangle\);
+interpreted as a signal processor, we can refer to its output as a
+/dual signal/, \(\langle y,y' \rangle\).
 
 Just as the addition primitive has no special knowledge of its input
 signals, nor does ~diffAdd~, but at this stage the notion of
 differentiable addition is not well-defined. In order for this new
-primitive to behave as it should, it is necessary to supplement \F{}'s
-arithmetic with the following rule:
+primitive to behave as it should, it is necessary to define an
+accompanying semantic scheme. First, we denote \(\mathbb{X}\) to be
+the set of all dual signals: \(\mathbb{X} = \mathbb{S}^{2} \to
+\mathbb{S}^{2}\); differentiable addition can then be defined as
 
-#+begin_quote
-Supply \(\langle u, u' \rangle\) and \(\langle v, v' \rangle\) to the differentiable addition
-primitive, in that order, and it should return \(\langle u+v, u'+v' \rangle\).
-#+end_quote
-To satisfy this rule, ~diffAdd~ needs to be modified, otherwise it
-will produce the nonsensical result \(\langle y, y' \rangle = \langle u + u', v + v'
-\rangle\); this can be remedied with \F{}'s ~route~ primitive:
+#+NAME: eq:diff-add-semantic
+\begin{equation}
+\begin{split}
+\llbracket \langle +, +'\rangle \rrbracket &: \mathbb{X}^{2} \to \mathbb{X} \\
+\llbracket \langle +, +'\rangle \rrbracket(\langle s_{1},s_{1}'\rangle,\langle s_{2},s_{2}'\rangle)
+  &= (\langle y,y' \rangle) \\
+\langle y[n],y'[n]\rangle = \langle s_{1}[n] &+ s_{2}[n], s_{1}'[n] + s_{2}'[n] \rangle \;.
+\end{split}
+\end{equation}
+In its form above, ~diffAdd~ is not consistent with the scheme that we
+have just defined; this can be remedied with \F{}'s ~route~ primitive:
 
 #+begin_src faust :results svg file :file images/dualaddroute.svg :exports both
 diffAdd = route(4, 4,
@@ -986,11 +1075,10 @@ process = diffAdd;
 #+name: fig:dual-add
 #+caption: /Block diagram of a \F{} program representing a dual signal/
 #+caption: /differentiable addition primitive. Via appropriate signal/
-#+caption: /routing, dual signal output \(\langle y,y' \rangle = \langle u+v, u'+v' \rangle\)/
-#+caption: /is produced./
+#+caption: /routing, valid dual signal output is produced./
 #+RESULTS:
 [[file:images/dualaddroute.svg]]
-~diffAdd~ now satisfies the rule, implementing
+~diffAdd~ is now semantically sound, implementing
 cref:eq:addition-rule-dual, and describing a dual-signal
 differentiable addition primitive. As alluded to in
 cref:sec:algorithmic-diff, this primitive implements its
@@ -1000,11 +1088,32 @@ self-contained, well-defined, and composable with other similarly
 well-defined primitives.
 
 On that note, let's define some more differentiable primitives for
-~diffAdd~ to act upon. For \(u\) we can use an arbitrary input signal,
-which we will represent with \F{}'s identity function, ~_~. Such a
-signal has no relationship with \(x\), so \(u' = 0\). To \(v\) we
-assign the variable \(x\); one possible analogy to a variable in \F{}
-is a slider; \(v = x\), so \(v' = 1\).
+~diffAdd~ to act upon: a differentiable audio input, described by the
+following semantic scheme:
+
+#+NAME: eq:input-semantic
+\begin{equation}
+\begin{split}
+\llbracket\langle s_\text{in},s_\text{in}' \rangle\rrbracket &: \mathbb{S} \to \mathbb{X} \\
+\llbracket\langle s_\text{in},s_\text{in}' \rangle\rrbracket(s) &= (\langle y,y' \rangle) \\
+\langle y[n],y'[n]\rangle &= \langle s[n], 0 \rangle\;,
+\end{split}
+\end{equation}
+and a differentiable variable, \(x\),
+
+#+NAME: eq:variable-semantic
+\begin{equation}
+\begin{split}
+\llbracket\langle x,x' \rangle\rrbracket &: \mathbb{S}^{0} \to \mathbb{X} \\
+\llbracket\langle x,x' \rangle\rrbracket() &= (\langle y,y' \rangle) \\
+\langle y[n],y'[n]\rangle &= \langle x[n],1 \rangle\;.
+\end{split}
+\end{equation}
+For \(s_\text{in}\) we can use an arbitrary input signal, which we
+will represent with \F{}'s identity function, ~_~. Such a signal has
+no relationship with \(x\), hence \(s_\text{in}' = 0\). One possible
+analogy to a variable in \F{} is a slider; such a variable is equal to
+itself, so \(x' = 1\).
 
 #+begin_src faust :results none
 diffInput = _,0;
@@ -1013,9 +1122,7 @@ diffSlider = hslider("x", 0, -1, 1, .1),1;
 Now we can compose these with our differentiable addition primitive:
 
 #+begin_src faust :results none
-u = diffInput;
-v = diffSlider;
-process = u,v : diffAdd;
+process = diffInput,diffSlider : diffAdd;
 #+end_src
 
 #+begin_src faust :results file svg :file images/dc.svg :exports results
@@ -1034,8 +1141,7 @@ process = diffInput,diffSlider : diffAdd;
 #+RESULTS:
 [[file:images/dc.svg]]
 
-\noindent The primal output signal of this program (see
-cref:fig:differentiable-dc for its block diagram) is the result of
+\noindent The primal output signal of this program is the result of
 applying a DC offset, \(x\), to an input signal; the tangent output,
 the derivative with respect to \(x\), is a constant signal of value
 \(1\). By composing primitives with well-defined derivatives, the
@@ -1057,34 +1163,40 @@ x1 = hslider("gain", .5, 0, 1, .1);
 x2 = hslider("dc", 0, -1, 1, .1);
 process = _,x1 : *,x2 : +;
 #+end_src
-which can be notated
+which, in block diagram form, can be notated
 
 #+NAME: eq:gain-dc
 \begin{equation}
-y = uv + w, \quad v = x_1, \quad w = x_2\;.
+Y = s_\text{in}x_{1} + x_{2}\;.
 \end{equation}
-Once again \(u\) is an arbitrary input signal, for which we have no
-analytic expression. Now, rather a lone ordinary derivative \(y'\), we
-have \(\nabla{}y\), a matrix of partial derivatives:
+Now, rather a lone ordinary derivative \(Y'\), we have \(\nabla{}Y\),
+a matrix of partial derivatives (see cref:eq:dual-gradient). The
+supporting semantic transformation from block diagram to signal
+processor demands a redifinition the set of dual signals: \(\mathbb{X}
+= \mathbb{S}^{N+1} \to \mathbb{S}^{N+1}\), where \(N\) is the number
+of variables \(x_{i}\) with respect to which partial derivatives must
+be found. Our differentiable signal processor \(\llbracket\langle
+Y,\nabla{}Y \rangle\rrbracket\) can now be defined as
 
-#+NAME: eq:pds
+#+NAME: eq:dual-gain-dc-semantic
 \begin{equation}
-\nabla{}y = \frac{\partial y}{\partial \mathbf{x}}
-= \begin{bmatrix}\frac{\partial y}{\partial x_1} \\
-\frac{\partial y}{\partial x_2}\end{bmatrix}\;.
+\begin{split}
+\llbracket\langle Y,\nabla{}Y \rangle\rrbracket &: \mathbb{S} \to \mathbb{X} \\
+\llbracket\langle Y,\nabla{}Y \rangle\rrbracket(s) &= (\langle y,\nabla{}y \rangle)\;,
+\end{split}
 \end{equation}
-Our algorithm takes two parameter inputs, and produces one output
-signal, so the resulting Jacobian matrix is of dimension \(2 \times
-1\). Returning to dual signal representation and applying the chain,
-product and addition rules of differentiation,
+and, applying the chain, product and addition rules of
+differentiation:
 
 #+NAME: eq:dual-gain-dc
-\begin{align}
-\langle y,\nabla{}y \rangle &=
-\langle u,\nabla{}u \rangle \langle v,\nabla{}v \rangle + \langle w,\nabla{}w \rangle \nonumber \\
-&= \langle uv,\nabla{}uv + \nabla{}vu \rangle + \langle w,\nabla{}w \rangle \nonumber \\
-&= \langle uv + w,\nabla{}uv + \nabla{}vu + \nabla{}w\rangle\;.
-\end{align}
+\begin{align*}
+&\langle y[n],\nabla{}y[n] \rangle \\
+  &= \langle s[n],\nabla{}s[n] \rangle\langle x_{1}[n],\nabla{}x_{1}[n] \rangle +
+    \langle x_{2}[n],\nabla{}x_{2}[n] \rangle \\
+  &= \langle s[n]x_{1}[n],\nabla{}s[n]x_{1}[n] + \nabla{}x_{1}[n]s[n] \rangle +
+    \langle x_{2}[n],\nabla{}x_{2}[n] \rangle \\
+  &= \langle s[n]x_{1}[n] + x_{2}[n],\nabla{}s[n]x_{1}[n] + \nabla{}x_{1}[n]s[n] + \nabla{}x_{2}[n] \rangle \;.
+\end{align*}
 
 To implement the above in \F{} calls for the creation of multivariate
 differentiable primitives. One way to achieve this would be to
@@ -1134,10 +1246,10 @@ differentiable addition primitive can be named ~diff(+)~:
 env(vars) = environment {
   diff(+) = diffAdd with {
     diffAdd = route(nIN, nOUT,
-      (u, 1), (v, 2), // u + v
+      (s1, 1), (s2, 2), // s1 + s2
       par(i, vars.N,
-        // du/dx_i + dv/dx_i
-        (u+i+1, dx), (v+i+1, dx+1)
+        // ds1/dx_i + ds2/dx_i
+        (s1+i+1, dx), (s2+i+1, dx+1)
         with {
           // Start of derivatives wrt x_i
           dx = 2*i+3;
@@ -1146,8 +1258,8 @@ env(vars) = environment {
     ) with {
       nIN = 2+2*vars.N;
       nOUT = nIN;
-      u = 1;
-      v = u+vars.N+1;
+      s1 = 1;
+      s2 = s1+vars.N+1;
     }
     : +,par(i, vars.N, +);
   };
@@ -1158,11 +1270,11 @@ env(vars) = environment {
 #+end_src
 
 As before, the primal signal output of the differentiable addition
-primitive is the sum of the primal inputs, \(u+v\); now, however, the
-differentiable primitive produces ~vars.N~ tangent outputs, each
-corresponding to a derivative with respect to \(x_{i}\). As before, the
-~route~ primitive ensures that incoming signals are delivered to the
-parallel additions in the correct order.
+primitive is the sum of the primal inputs, \(s_{1}+s_{2}\); now,
+however, the differentiable primitive produces ~vars.N~ tangent
+outputs, each corresponding to a derivative with respect to
+\(x_{i}\). Once again, the ~route~ primitive ensures that incoming
+signals are delivered to the parallel additions in the correct order.
 
 Encapsulating [[cref:lst:var-env,lst:diff-env]] as a library in a file
 named =diff.lib=, we can use ~vars~ and ~env~ to write a
@@ -1214,22 +1326,22 @@ to some /estimated/ output, which itself depends on parameters that we
 wish to optimise.
 
 The algorithm in [[cref:lst:gain-dc]] is dependent on hidden parameters
-\(\mathbf{x}\) and produces a ground truth output signal \(y\); we
+\(\mathbf{x}\) and produces a ground truth output signal \(y[n]\); we
 assign this algorithm to a variable named ~target~. Its differentiable
 equivalent in [[cref:lst:gain-dc-diff]] is dependent on estimated
 parameters \(\mathbf{\hat{x}}\) and produces the dual output signal,
-\(\langle \hat{y}, \nabla\hat{y} \rangle\); we assign this to a variable named
-~estimate~. The output signals produced by ~target~ and ~estimate~ can
-now be compared by way of a loss function; to this end, we can employ
-time-domain L1-norm loss of the form
+\(\langle \hat{y}[n], \nabla\hat{y}[n] \rangle\); we assign this to a
+variable named ~estimate~. The output signals produced by ~target~ and
+~estimate~ can now be compared by way of a loss function; to this end,
+we can employ time-domain L1-norm loss of the form
 
 #+NAME: eq:l1-loss
 \begin{equation}
-\mathcal{L}(y,\hat{y}) = ||\hat{y} - y||\;.
+\mathcal{L}(y,\hat{y})[n] = ||\hat{y}[n] - y[n]||\;.
 \end{equation}
 
 Our aim is to minimise the value returned by the loss function,
-i.e. to reach the point at which \(y\) and \(\hat{y}\) (and by
+i.e. to reach the point at which \(y[n]\) and \(\hat{y}[n]\) (and by
 extension \(\mathbf{x}\) and \(\mathbf{\hat{x}}\)) most closely
 approximate one-another. The sensitivity of \(\mathcal{L}\) to
 perturbations in \(\mathbf{\hat{x}}\) can again be found by automatic
@@ -1259,13 +1371,14 @@ The loss function's partial derivatives are the /gradients/ associated
 with each variable in \(\mathbf{\hat{x}}\). In our two-parameter
 example, \(\mathcal{L}\) will describe a three-dimensional surface,
 and \(\frac{\partial\mathcal{L}}{\partial x_{i}}\) its slope relative
-to \(x_{i}\). Values at time \(t+1\) are found by scaling gradients by
+to \(x_{i}\). Values at time \(n+1\) are found by scaling gradients by
 a learning rate, \(\alpha\), and subtracting the result from values at
-time \(t\):
+time \(n\):
 
 #+NAME: eq:gradient-descent
 \begin{equation}
-\mathbf{\hat{x}}_{t+1} = \mathbf{\hat{x}}_t - \alpha\frac{\partial\mathcal{L}}{\partial \mathbf{\hat{x}}_t}\;.
+\mathbf{\hat{x}}[n+1] = \mathbf{\hat{x}}[n] -
+  \alpha\frac{\partial\mathcal{L}}{\partial \mathbf{\hat{x}}}[n]\;.
 \end{equation}
 In \F{}, this can be achieved via recursion, and by changing the
 definition of the variables delivered to ~df.env~. Since values will
