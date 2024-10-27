@@ -4304,3 +4304,47 @@ workshop in his sleep, so he's happy to take over the /Faust 101/ part
 of the morning session if I feel like I have too much on my plate.
 
 Entered on [2024-10-18 ven. 12:06]
+*** 2024-10-21 lundi
+**** Transmission Correction                                  :TEENSY:PTP:
+I discovered over the weekend that the clock subscriber, receiving
+audio packets over the network, was outputting garbage. After a bit of
+investigation today, it emerged that this was not, as I initially
+thought, due to a problem writing from the incoming packet stream to
+the DMA buffer; rather it was due to a transmission error, or rather a
+problem with how packets were being filled for the outgoing stream.
+
+Using an intermediate frame buffer, I wasn't checking properly that
+the read index for the frame buffer was in-range; consequently it
+would periodically overflow --- sometimes giving rise to half-buffer
+garbage, sometimes full-buffer, hence the idea that it might be
+DMA-buffer-related. Anyway, adopting a strategy similar to JUCE's FIFO
+class, with two start/length pairs, I resolved the issue. Assisting
+the debugging process was the ~hexDump~ method from
+~NetJUCEClient~. Now both the clock subscriber and the clock authority
+(both using the packet buffer for audio output) produce a consistent
+audio stream.
+
+Next step is to try incorporating packet timestamps (thus far these
+have been zeros), and comparing these with the ethernet clock.
+
+Entered on [2024-10-21 lun. 22:47]
+*** 2024-10-23 mercredi
+**** StreamUnlimited Hardware Modules                           :HARDWARE:
+Maybe a viable [[https://www.streamunlimited.com/hardware-modules/][platform]] for a wireless system?
+
+The [[https://www.streamunlimited.com/wp-content/uploads/2024/08/Stream210-v6.0-1.pdf][Stream210]] has a 1.3 GHz dual core Cortex-A32, 2 Gb RAM, I^{2}S, WiFi,
+but no ethernet. No mention of PTP, but Dante listed as a "technology
+partner" on the site. Configurable via [[https://www.streamunlimited.com/streamsdk-lite/][StreamSDK]]; the more I look at
+it, the more it looks like the platform is probably locked down in
+some way; it's certainly geared toward commercial /Content Services/
+like AirPlay, Spotify Connect, Dante, Google Cast, etc. Hackable,
+maybe? The telltale is I don't see a reference manual for the
+processor.
+
+Entered on [2024-10-23 mer. 11:09]
+**** Sample-Synchronous Networked Audio                       :TEENSY:PTP:
+Well, not quite. There's sometimes some weirdness on startup, and half
+the time the client starts its audio subsystem one sample out from the
+server, but it's a milestone nonetheless.
+
+Entered on [2024-10-23 mer. 18:18]
