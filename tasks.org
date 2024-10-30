@@ -8,8 +8,12 @@ DEADLINE: <2024-09-13 ven.>
 ** TODO Ask Maxime again about practicalities of using his DAC with Teensy or the Pi
 DEADLINE: <2024-09-13 ven.>
 ** TODO Prepare PhD meeting presentation
-DEADLINE: <2024-10-14 lun. ++1m>
+DEADLINE: <2024-11-25 lun. ++1m>
+:PROPERTIES:
+:LAST_REPEAT: [2024-10-28 lun. 14:50]
+:END:
 
+- State "DONE"       from "TODO"       [2024-10-28 lun. 14:50]
 - State "DONE"       from "TODO"       [2024-07-10 mer. 13:32]
 ** TODO Read Papers
 DEADLINE: <2024-09-16 lun.>

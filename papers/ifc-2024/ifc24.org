@@ -239,12 +239,12 @@ process = 1;
 Differentiable programming is a programming paradigm whereby a
 computer program can be differentiated end-to-end
 [cite:@blondelElements2024]. The sensitivity of a differentiable
-program's outputs to perturbations of its inputs can be computed via
-automatic differentiation (AD, autodiff)
+program's outputs to perturbations of its parameters can be computed
+via automatic differentiation (AD, autodiff)
 [cite:@rallArithmetic1986;@baydinAutomatic2018;], producing a partial
 derivative with respect to each input parameter. End-to-end
 differentiability is a desirable quality in the creation of computer
-programs that perform gradient-based optimization, and differentiable
+programs that perform gradient-based optimisation, and differentiable
 programming via automatic differentiation is the foundation for
 contemporary approaches to machine learning [cite:@harrisonBrief2021].
 
@@ -437,7 +437,7 @@ notated \(\llbracket D \rrbracket\) [cite:@orlareySyntactical2004]. We
 can think of \(D\) as a symbolic expression that describes a block
 diagram, and \(\llbracket D \rrbracket\) as a processor that acts upon
 a vector of signals and produces a vector of signals as a result. A
-signal is discrete function of time and a member of the set
+signal is a discrete function of time and a member of the set
 \(\mathbb{S}\) of all signals; the value of a signal at discrete time
 \(n\) is analogous to a numerical output. If we consider the
 expression \(sx_{1} + x_{2}\) from our example to be the mathematical
@@ -448,7 +448,7 @@ one input signal and producing one output signal, as
 #+NAME: eq:signal-processor
 \begin{equation}
     \begin{split}
-        \llbracket Y \rrbracket &: \mathbb{S}^{1} \to \mathbb{S}^{1} \\
+        \llbracket Y \rrbracket &: \mathbb{S} \to \mathbb{S} \\
         \llbracket Y \rrbracket(s) &= (y) \\
         y[n] &= s[n]x_{1}[n] + x_{2}[n] \;.
     \end{split}
@@ -461,18 +461,16 @@ have
 #+NAME: eq:diff-signal-processor
 \begin{equation}
     \begin{split}
-        \left\llbracket \frac{\partial{}Y}{\partial{}x_{2}} = 1 \right\rrbracket &: \mathbb{S}^{1} \to \mathbb{S}^{1} \\
-        \llbracket 1 \rrbracket(s) &= \left(\frac{\partial{}y}{\partial{}x_{2}}\right) \\
+        \left\llbracket \frac{\partial{}Y}{\partial{}x_{2}} \right\rrbracket &: \mathbb{S} \to \mathbb{S} \\
+        \left\llbracket \frac{\partial{}Y}{\partial{}x_{2}} \right\rrbracket(s) &= \left(\frac{\partial{}y}{\partial{}x_{2}}\right) \\
         \frac{\partial{}y}{\partial{}x_{2}}[n] &= 1\;,
     \end{split}
 \end{equation}
-which tells us that the symbolic expression
-\(\frac{\partial{}Y}{\partial{}x_{2}}\) is equal to 1, and that the
-numerical output produced by the signal processor
-\(\llbracket\frac{\partial{}Y}{\partial{}x_{2}}\rrbracket\) is a
-signal whose value is 1 for all \(n\). Note also that the
-differentiated signal processor receives the input signal, \(s\), but
-discards it (or rather multiplies it by zero).
+which tells us that the signal processor
+\(\llbracket\frac{\partial{}Y}{\partial{}x_{2}}\rrbracket\), which we know evaluates
+symbolically to 1, receives one input signal which it discards (or
+rather multiplies by zero), and generates a numerical output which is
+a signal whose value is 1 for all \(n\).
 
 In the sections that follow, \F{} block diagrams --- symbolic
 expressions whose derivatives we wish to find --- will be notated
@@ -1036,6 +1034,7 @@ diffAdd = +,+;
 process = diffAdd;
 #+end_src
 #+ATTR_LATEX: :width .5\linewidth
+#+name: fig:naive-dual-add
 #+caption: /Block diagram of a \F{} program representing a naive/
 #+caption: /implementation of a dual signal differentiable addition/
 #+caption: /primitive, consisting of two parallel additions./
@@ -1050,21 +1049,22 @@ Just as the addition primitive has no special knowledge of its input
 signals, nor does ~diffAdd~, but at this stage the notion of
 differentiable addition is not well-defined. In order for this new
 primitive to behave as it should, it is necessary to define an
-accompanying semantic scheme. First, we denote \(\mathbb{X}\) to be
-the set of all dual signals: \(\mathbb{X} = \mathbb{S}^{2} \to
-\mathbb{S}^{2}\); differentiable addition can then be defined as
+accompanying semantic scheme. First, we denote \(\mathbb{S}_{d}\) to be
+the set of all dual signals: \(\mathbb{S}_{d} = \mathbb{S}^{2}\);
+differentiable addition can then be defined as
 
 #+NAME: eq:diff-add-semantic
 \begin{equation}
 \begin{split}
-\llbracket \langle +, +'\rangle \rrbracket &: \mathbb{X}^{2} \to \mathbb{X} \\
-\llbracket \langle +, +'\rangle \rrbracket(\langle s_{1},s_{1}'\rangle,\langle s_{2},s_{2}'\rangle)
+\llbracket \texttt{diffAdd} \rrbracket &: \mathbb{S}_{d}^{2} \to \mathbb{S}_{d} \\
+\llbracket \texttt{diffAdd} \rrbracket(\langle s_{1},s_{1}'\rangle,\langle s_{2},s_{2}'\rangle)
   &= (\langle y,y' \rangle) \\
 \langle y[n],y'[n]\rangle = \langle s_{1}[n] &+ s_{2}[n], s_{1}'[n] + s_{2}'[n] \rangle \;.
 \end{split}
 \end{equation}
-In its form above, ~diffAdd~ is not consistent with the scheme that we
-have just defined; this can be remedied with \F{}'s ~route~ primitive:
+In its form in cref:fig:naive-dual-add, ~diffAdd~ is not consistent
+with the scheme that we have just defined; this can be remedied with
+\F{}'s ~route~ primitive:
 
 #+begin_src faust :results svg file :file images/dualaddroute.svg :exports both
 diffAdd = route(4, 4,
@@ -1094,26 +1094,26 @@ following semantic scheme:
 #+NAME: eq:input-semantic
 \begin{equation}
 \begin{split}
-\llbracket\langle s_\text{in},s_\text{in}' \rangle\rrbracket &: \mathbb{S} \to \mathbb{X} \\
-\llbracket\langle s_\text{in},s_\text{in}' \rangle\rrbracket(s) &= (\langle y,y' \rangle) \\
+\llbracket \texttt{diffInput} \rrbracket &: \mathbb{S} \to \mathbb{S}_{d} \\
+\llbracket \texttt{diffInput} \rrbracket(s) &= (\langle y,y' \rangle) \\
 \langle y[n],y'[n]\rangle &= \langle s[n], 0 \rangle\;,
 \end{split}
 \end{equation}
-and a differentiable variable, \(x\),
+and a differentiable variable, \(x\), one possible analogy to which,
+in \F{}, is a slider,
 
 #+NAME: eq:variable-semantic
 \begin{equation}
 \begin{split}
-\llbracket\langle x,x' \rangle\rrbracket &: \mathbb{S}^{0} \to \mathbb{X} \\
-\llbracket\langle x,x' \rangle\rrbracket() &= (\langle y,y' \rangle) \\
+\llbracket \texttt{diffSlider} \rrbracket &: \mathbb{S}^{0} \to \mathbb{S}_{d} \\
+\llbracket \texttt{diffSlider} \rrbracket() &= (\langle y,y' \rangle) \\
 \langle y[n],y'[n]\rangle &= \langle x[n],1 \rangle\;.
 \end{split}
 \end{equation}
 For \(s_\text{in}\) we can use an arbitrary input signal, which we
 will represent with \F{}'s identity function, ~_~. Such a signal has
-no relationship with \(x\), hence \(s_\text{in}' = 0\). One possible
-analogy to a variable in \F{} is a slider; such a variable is equal to
-itself, so \(x' = 1\).
+no relationship with \(x\), hence \(s'[n] = 0\). A variable is equal
+to itself, so \(x'[n] = 1\).
 
 #+begin_src faust :results none
 diffInput = _,0;
@@ -1169,20 +1169,19 @@ which, in block diagram form, can be notated
 \begin{equation}
 Y = s_\text{in}x_{1} + x_{2}\;.
 \end{equation}
-Now, rather a lone ordinary derivative \(Y'\), we have \(\nabla{}Y\),
-a matrix of partial derivatives (see cref:eq:dual-gradient). The
+Now, rather a lone ordinary derivative \(Y'\), we have \(\nabla{}Y\), a
+matrix of partial derivatives (see cref:eq:dual-gradient). The
 supporting semantic transformation from block diagram to signal
-processor demands a redifinition the set of dual signals: \(\mathbb{X}
-= \mathbb{S}^{N+1} \to \mathbb{S}^{N+1}\), where \(N\) is the number
-of variables \(x_{i}\) with respect to which partial derivatives must
-be found. Our differentiable signal processor \(\llbracket\langle
-Y,\nabla{}Y \rangle\rrbracket\) can now be defined as
+processor demands a redifinition the set of dual signals:
+\(\mathbb{S}_{d} = \mathbb{S}^{N+1}\), where \(N\) is the number of
+variables \(x_{i}\) with respect to which partial derivatives must be
+found. Our differentiable signal processor \(\llbracket \texttt{diff}(Y) \rrbracket\) can now be defined as
 
 #+NAME: eq:dual-gain-dc-semantic
 \begin{equation}
 \begin{split}
-\llbracket\langle Y,\nabla{}Y \rangle\rrbracket &: \mathbb{S} \to \mathbb{X} \\
-\llbracket\langle Y,\nabla{}Y \rangle\rrbracket(s) &= (\langle y,\nabla{}y \rangle)\;,
+\llbracket \texttt{diff}(Y) \rrbracket &: \mathbb{S} \to \mathbb{S}_{d} \\
+\llbracket \texttt{diff}(Y) \rrbracket(s) &= (\langle y,\nabla{}y \rangle)\;,
 \end{split}
 \end{equation}
 and, applying the chain, product and addition rules of
@@ -1464,7 +1463,7 @@ with {
 
     estimate = d.input,X.var(1),X.var(2)
         : d.diff(*),d.diff(_)
-        : d.diff(+);				  
+        : d.diff(+);
 };
 #+end_src
 #+name: fig:backprop

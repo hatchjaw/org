@@ -4,13 +4,13 @@
 #+TITLE:       Research Journal
 #+AUTHOR:      Thomas Rushton
 #+LANGUAGE:    en
-#+TAGS: noexport(n) MEETING(m) SUPERVISION(V) PRESENTATION(p) BLOG(b) TRAINING(T)
-#+TAGS: INSPO(i) DIY(d) TEACHING(t) REPRES(R) REVIEW(v) GSoC(G) CONFERENCE(C)
+#+TAGS: noexport(n) MEETING(m) SUPERVISION(V) PRESENTATION(p) BLOG(b) TRAINING(n)
+#+TAGS: INSPO(i) DIY(d) TEACHING(h) REPRES(R) REVIEW(v) GSoC(G) CONFERENCE(C)
 #+TAGS: WRITING(w) BRAINDUMP(B)
 #+TAGS: [ PROGRAMMING : R(r) PYTHON(P) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ZOTERO(z) LATEX(l) ]
 #+TAGS: [ AUDIO : SYNTHESIS(s) PHYSMOD(y) SPATIALAUDIO(S) NETWORKEDAUDIO(N) DDSP(D) ]
-#+TAGS: [ HARDWARE : RPI(R) TEENSY(Y) PTP ]
+#+TAGS: [ HARDWARE : RPI(R) TEENSY(t) PTP(T) ]
 #+EXPORT_SELECT_TAGS: BLOG
 #+OPTIONS:   H:3 num:0 toc:t \n:nil @:t ::t |:t ^:{} _:{} -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc html-style:nil
@@ -4348,3 +4348,16 @@ the time the client starts its audio subsystem one sample out from the
 server, but it's a milestone nonetheless.
 
 Entered on [2024-10-23 mer. 18:18]
+*** 2024-10-28 lundi
+**** CCRMA: Hassan Estakhrian, CAVIAR demo          :MEETING:SPATIALAUDIO:
+[[https://ccrma.stanford.edu/people/hassan-estakhrian][Hassan]] demoed [[https://ccrma.stanford.edu/docs/studios/Recording-Studio.html#caviar][CAVIAR]] to Romain and I in the listening room at CCRMA. I
+don't know how it works exactly (besides that statistically distinct
+impulse responses are used) but the effect is to pick up ambient sound
+using a pair of ceiling-mounted microphones, convolve the sound with
+impulse responses, and produce the effect, using the speaker array (14
+channels, I think) in the listening room of a dynamic/real reverberant
+space --- /and/ with impeccable feedback cancelling. Very impressive
+effect. Romain reckons Teensy should be able to handle something along
+those lines, in distributed form.
+
+Entered on [2024-10-28 lun. 16:12]
