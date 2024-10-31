@@ -4361,3 +4361,18 @@ effect. Romain reckons Teensy should be able to handle something along
 those lines, in distributed form.
 
 Entered on [2024-10-28 lun. 16:12]
+*** 2024-10-30 mercredi
+**** Possible hardware setup                                  :TEENSY:PTP:
+When I get back to Lyon, I should try:
+- Run one Teensy as a USB audio interface.
+  + Use that Teensy as the PTP clock authority.
+- Run a regular computer, with the Teensy as its audio interface, as
+  the audio/control data server.
+- That /might/, with a bit of luck, mean that the computer doesn't
+  drift relative to the clock subscribers.
+
+So that entails two authoritative sources... one for time and one for
+audio. If it works, it would eliminate the need to purchase
+PTP-compliant network adaptor(s)/dongle(s).
+
+Entered on [2024-10-30 mer. 17:13]
