@@ -244,7 +244,7 @@ via automatic differentiation (AD, autodiff)
 [cite:@rallArithmetic1986;@baydinAutomatic2018;], producing a partial
 derivative with respect to each input parameter. End-to-end
 differentiability is a desirable quality in the creation of computer
--programs that perform gradient-based optimisation, and differentiable
+programs that perform gradient-based optimisation, and differentiable
 programming via automatic differentiation is the foundation for
 contemporary approaches to machine learning [cite:@harrisonBrief2021].
 
@@ -324,7 +324,7 @@ of derivative propagation through a computation graph; in forward
 mode, the computation of the undifferentiated, or /primal/ output is
 accompanied by a tangent computation, with derivatives accumulated
 from inputs to outputs; in reverse mode, a forward primal pass is
-complmented by a reverse adjoint pass, during which derivatives
+complemented by a reverse adjoint pass, during which derivatives
 accumulate from outputs to inputs (consult [cite:@baydinAutomatic2018]
 for a detailed mathematical treatment of both). For a graph, \(f :
 \mathbb{R}^{N} \to \mathbb{R}^{M}\), with input variables, \(x_{i}\), and output
@@ -377,7 +377,7 @@ of differentiation, emerge quite naturally as the sum of \(U\) and \(V
 \begin{equation}
 (u + \varepsilon{}u') + (v + \varepsilon{}v') = u + v + \varepsilon(u' + v')\;.
 \end{equation}
-Similarly, the product rule, via a simple polynomial expansion
+Similarly, the product rule, via simple polynomial expansion
 
 #+NAME: eq:product-rule
 \begin{align}
@@ -639,78 +639,10 @@ well-defined primitives.
 
 ** Multivariate Differentiable Primitives
 
-
-
-
-
-On that note, let's define some more differentiable primitives for
-~diffAdd~ to act upon: a differentiable audio input, described by the
-following semantic scheme:
-
-#+NAME: eq:input-semantic
-\begin{equation}
-\begin{split}
-\llbracket \texttt{diffInput} \rrbracket &: \mathbb{S} \to \mathbb{S}_{d} \\
-\llbracket \texttt{diffInput} \rrbracket(s) &= (\langle y,y' \rangle) \\
-\langle y[n],y'[n]\rangle &= \langle s[n], 0 \rangle\;,
-\end{split}
-\end{equation}
-and a differentiable variable, \(x\), one possible analogy to which,
-in \F{}, is a slider,
-
-#+NAME: eq:variable-semantic
-\begin{equation}
-\begin{split}
-\llbracket \texttt{diffSlider} \rrbracket &: \mathbb{S}^{0} \to \mathbb{S}_{d} \\
-\llbracket \texttt{diffSlider} \rrbracket() &= (\langle y,y' \rangle) \\
-\langle y[n],y'[n]\rangle &= \langle x[n],1 \rangle\;.
-\end{split}
-\end{equation}
-The primal of ~diffInput~ is an arbitrary input signal, which we will
-represent with \F{}'s identity function, ~_~. Such a signal has no
-relationship with \(x\), hence \(s'[n] = 0\). A variable is equal to
-itself, so \(x'[n] = 1\).
-
-#+begin_src faust :results none
-diffInput = _,0;
-diffSlider = hslider("x", 0, -1, 1, .1),1;
-#+end_src
-Now we can compose these with our differentiable addition primitive:
-
-#+begin_src faust :results none
-process = diffInput,diffSlider : diffAdd;
-#+end_src
-
-#+begin_src faust :results file svg :file images/dc.svg :exports results
-diffAdd = route(4, 4,
-    (1, 1), (2, 3), (3, 2), (4, 4)) : +,+;
-diffInput = _,0;
-diffSlider = hslider("x", 0, -1, 1, .1),1;
-process = diffInput,diffSlider : diffAdd;
-#+end_src
-#+ATTR_LATEX: :width 1\linewidth :placement [ht!]
-#+name: fig:differentiable-dc
-#+caption: /Block diagram of a \F{} program consisting of application/
-#+caption: /of a differentiable addition primitive (see/
-#+caption: /cref:fig:dual-add) to differentiable input and ~hslider~/
-#+caption: /primitives./
-#+RESULTS:
-[[file:images/dc.svg]]
-
-\noindent The primal output signal of this program (see
-cref:fig:differentiable-dc) is the result of applying a DC offset,
-\(x\), to an input signal; the tangent output, the derivative with
-respect to \(x\), is a constant signal of value \(1\). By composing
-primitives with well-defined derivatives, the derivative of the entire
-program has been found /automatically/; the above program is a
-rudimentary implementation of forward-mode automatic differentiation
-in \F{}.
-
-** Multivariate Differentiable Primitives
-
-What if a program depends on more than one variable? Consider the
-following (non-differentiable) example consisting of a DC offset and a
-gain control applied to an input signal:
+The above holds for single-variable differentiation arithmetic, but
+what if a program features more than one dependent variable? Consider
+the following (non-differentiable) example consisting of a DC offset
+and a gain control applied to an input signal:
 
 #+CAPTION: /A \F{} program that applies gain and DC offset parameters/
 #+CAPTION: /to an input signal./
@@ -720,49 +652,16 @@ x1 = hslider("gain", .5, 0, 1, .1);
 x2 = hslider("dc", 0, -1, 1, .1);
 process = _,x1 : *,x2 : +;
 #+end_src
-which, as a signal processor, can be notated
 
-#+NAME: eq:gain-dc
-\begin{equation}
-y[n] = s[n]x_{1}[n] + x_{2}[n]\;.
-\end{equation}
-The differentiable counterpart to this program should not produce a
-derivative dual signal output \(\langle y,y' \rangle\), but rather \(\langle y,\nabla{}y \rangle\), a
-gradient dual signal (see cref:eq:dual-gradient). The supporting
-semantic transformation from block diagram to signal processor demands
-a redifinition the set of dual signals: \(\mathbb{S}_{d} =
-\mathbb{S}^{N+1}\), where \(N\) is the number of variables \(x_{i}\) with
-respect to which partial derivatives must be found. Our differentiable
-signal processor \(\llbracket \texttt{diff}(Y) \rrbracket\) can now be
-defined as
-
-#+NAME: eq:dual-gain-dc-semantic
-\begin{equation}
-\begin{split}
-\llbracket \texttt{diff}(Y) \rrbracket &: \mathbb{S} \to \mathbb{S}_{d} \\
-\llbracket \texttt{diff}(Y) \rrbracket(s) &= (\langle y,\nabla{}y \rangle)\;,
-\end{split}
-\end{equation}
-and, applying the chain, product and addition rules of
-differentiation:
-
-#+NAME: eq:dual-gain-dc
-\begin{align*}
-&\langle y[n],\nabla{}y[n] \rangle \\
-  &= \langle s[n],\nabla{}s[n] \rangle\langle x_{1}[n],\nabla{}x_{1}[n] \rangle +
-    \langle x_{2}[n],\nabla{}x_{2}[n] \rangle \\
-  &= \langle s[n]x_{1}[n],\nabla{}s[n]x_{1}[n] + \nabla{}x_{1}[n]s[n] \rangle +
-    \langle x_{2}[n],\nabla{}x_{2}[n] \rangle \\
-  &= \langle s[n]x_{1}[n] + x_{2}[n],\nabla{}s[n]x_{1}[n] + \nabla{}x_{1}[n]s[n] + \nabla{}x_{2}[n] \rangle \;.
-\end{align*}
-
-To implement the above in \F{} calls for the creation of multivariate
-differentiable primitives. One way to achieve this would be to
-implement ~diffInput~, ~diffSlider~, and ~diffAdd~ as functions, each
-taking as a parameter ~NVARS~, the number of variables in the program,
-and thus partial derivatives that they should produce. Using \F{}'s
-~environment~ expression, however it is possible to address the
-problem in a more general, and syntactically succinct fashion.
+\noindent The general case of gradient arithmetic (see
+cref:eq:dual-gradient) demands a redefinition of the set of dual
+signals, \(\mathbb{S}_{d} = \mathbb{S}^{N+1}\), where \(N\) is the number of
+variables, \(x_{i}\), with respect to which partial derivatives must be
+found. One way to implement a multivariate differentiable addition
+primitive in \F{} could be to define ~diffAdd~ as a function receiving
+\(N\) as a parameter; using \F{}'s ~environment~ expression, however
+it is possible to address the problem in a more general, and
+syntactically succinct fashion.
 
 *** A Differentiable Environment
 
@@ -787,7 +686,18 @@ vars(V) = environment {
 #+end_src
 ~vars~ receives a list of variables, expressed via parallel
 composition, e.g. ~X = vars((gain,dc));~, where ~gain~ and ~dc~ are
-defined as ~hslider~ instances.
+defined as ~hslider~ instances; the \(i\)^{th} differentiable variable
+is defined semantically as
+
+#+NAME: eq:diff-var
+\begin{equation}
+\begin{split}
+\llbracket \texttt{X.var(}i\texttt{)} \rrbracket &: \mathbb{S}^{0} \to \mathbb{S}_{d} \\
+\llbracket \texttt{X.var(}i\texttt{)} \rrbracket() &= (\langle y,\nabla{}y \rangle) \\
+\langle y[n],\nabla{}y[n] \rangle &= \langle x_{i}[n],\nabla{}x_{i}[n] \rangle \\
+  &= \left\langle x_{i}[n],\begin{bmatrix}0 \cdots 1 \cdots 0\end{bmatrix}^{T} \right\rangle\;.
+\end{split}
+\end{equation}
 
 Next, we can define a function that takes the variable environment
 produced by ~vars~ as its sole argument, and returns a /differentiable
@@ -828,14 +738,24 @@ env(vars) = environment {
 #+end_src
 
 As before, the primal signal output of the differentiable addition
-primitive is the sum of the primal inputs, \(s_{1}+s_{2}\); now,
+primitive is the sum of the primal inputs, \(s_{1}[n]+s_{2}[n]\); now,
 however, the differentiable primitive produces ~vars.N~ tangent
 outputs, each corresponding to a derivative with respect to
 \(x_{i}\). Once again, the ~route~ primitive ensures that incoming
 signals are delivered to the parallel additions in the correct order.
 
 Encapsulating [[cref:lst:var-env,lst:diff-env]] as a library in a file
-named =diff.lib=, we can use ~vars~ and ~env~ to write a
+named =diff.lib=, and defining a differentiable audio input, which,
+since it does not depend on \(x_{i}\), has the semantic representation
+#+NAME: eq:diff-input
+\begin{equation}
+\begin{split}
+\llbracket \texttt{input} \rrbracket &: \mathbb{S} \to \mathbb{S}_{d} \\
+\llbracket \texttt{input} \rrbracket(s) &= (\langle y,\nabla{}y \rangle) \\
+\langle y[n],\nabla{}y[n] \rangle &= \langle s[n],\mathbf{0} \rangle\;,
+\end{split}
+\end{equation}
+we can use ~vars~ and ~env~ to write a
 differentiable version of the gain-plus-DC-offset program encountered
 earlier:
 
@@ -864,10 +784,13 @@ process = d.input,X.var(1)
 #+RESULTS: lst:gain-dc-diff
 [[file:images/gain-dc.svg]]
 See [[cref:fig:gain-dc]] for the block diagram of this program. Note that
-while the routing for each primitive --- particularly ~diff(*)~ ---
-may be quite complex (and would only become more involved with the
-addition of further variables) the ~df~ library abstracts this
-complexity away.
+while the routing for the arithmetic primitives --- particularly
+~diff(*)~ --- may be quite complex (and would only become more
+involved with the addition of further variables) the ~df~ library
+abstracts this complexity away. Note also that partial derivatives of
+the program are found automatically via application of the chain rule
+of differentiation, imposed by the definition of
+semantically-consistent dual-signal primitives.
 
 ** Parameter Optimisation via Gradient Descent
 :PROPERTIES:
@@ -888,10 +811,11 @@ The algorithm in [[cref:lst:gain-dc]] is dependent on hidden parameters
 assign this algorithm to a variable named ~target~. Its differentiable
 equivalent in [[cref:lst:gain-dc-diff]] is dependent on estimated
 parameters \(\mathbf{\hat{x}}\) and produces the dual output signal,
-\(\langle \hat{y}[n], \nabla\hat{y}[n] \rangle\); we assign this to a
-variable named ~estimate~. The output signals produced by ~target~ and
-~estimate~ can now be compared by way of a loss function; to this end,
-we can employ time-domain L1-norm loss of the form
+\(\langle \hat{y}[n], \nabla\hat{y}[n] \rangle\); we assign this to a variable named
+~estimate~. The output signal produced by ~target~ and the primal
+output signal of ~estimate~ can now be compared by way of a loss
+function; to this end, we can employ time-domain L1-norm loss of the
+form
 
 #+NAME: eq:l1-loss
 \begin{equation}
@@ -1057,7 +981,7 @@ machine learning) referred to as /backpropagation/
 [cite:@baydinAutomatic2018;@casebeerAutoDSP2021;@brunelBackpropagation2020].
 Whereas in reverse mode gradients arrive at the inputs inevitably as a
 consequence of the reverse adjoint pass through the graph, in forward
-mode something like the recursion described in cref:lst:backprop is
+mode a recursion such as that described in cref:lst:backprop is
 required; consult cref:fig:backprop for the corresponding top-level
 block diagram.
 
@@ -1149,7 +1073,7 @@ Of course, a constant may well be followed, for instance, by a
 trigonometric function --- there is no guarantee that \(\nabla{}c\) will not
 contribute to a non-zero signal path, thus no scope for optimisation.
 
-That being said, the \F{} /compiler/ is designed with this sort of
+That being said, the \F{} compiler is designed with this sort of
 optimisation in mind, applying various rewriting rules after its
 symbolic propagation phase to simplify expressions and avoid
 redundancy [cite:@orlareyFAUST2009]. In effect, the compiler will
@@ -1168,7 +1092,7 @@ though finding the optimal ordering is deemed a challenge
 
 Although the differentiable algorithm in cref:lst:gain-dc-diff bears
 the same compositional structure as its undifferentiated sibling
-(cref:fig:gain-dc), the use of the differentiable environment, coupled
+(cref:lst:gain-dc),[fn:3] the use of the differentiable environment, coupled
 with pattern matching, inevitably leads to the necessity of wrapping
 primitives in ~d.diff(...)~ notation. ~d.input~ too is an
 unsatisfactory solution to the problem of there being no simple way,
@@ -1221,9 +1145,9 @@ capabilities of the language.
 * Conclusion
 
 In this paper, it has been shown that differentiable programming is
-well within the capabilities of the \F{} language, and thus that \F{}
-can be used to tackle audio problems based on principles of
-mathematical optimisation. The presence of a comprehensive automatic
+possible in the \F{} language, and thus that \F{} can be used to
+tackle audio problems based on principles of mathematical
+optimisation. The presence of a comprehensive automatic
 differentiation framework in \F{} would lend the language to a
 multitude of DDSP problems and applications that currently lie
 unexplored by \F{} programmers; in turn, the ability to tackle such
@@ -1245,6 +1169,13 @@ computation, would also be of great benefit.
 
 * Footnotes
 
+[fn:3] This is thanks to the quality of the parallel and sequential
+composition operators of having no arithmetical influence on the
+output of the program --- they are analogous to application of the
+identity function. This is not the case for merge composition, which,
+having the effect of summation, would, in a comprehensive
+implementation, require a differentiable transformation.
+
 [fn:5] Reverse mode does not entirely elude the capabilities of \F{},
 but it does not generalise easily. For a small reverse mode example,
 see
@@ -1255,7 +1186,7 @@ can be found at
 [[https://gist.github.com/hatchjaw/59f35d0cde7aba218d785d31f26d2d83]].
 
 [fn:1] Transformations /are/ in fact possible at the level of the \F{}
-compiler, and automatic differentiation /could/ occur as a compilation
+compiler, and automatic differentiation could occur as a compilation
 step. For reasons of scope, this paper focuses solely on the topic of
 automatic differentiation in the \F{} language itself.
 

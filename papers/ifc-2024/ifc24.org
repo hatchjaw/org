@@ -1172,7 +1172,7 @@ Y = s_\text{in}x_{1} + x_{2}\;.
 Now, rather a lone ordinary derivative \(Y'\), we have \(\nabla{}Y\), a
 matrix of partial derivatives (see cref:eq:dual-gradient). The
 supporting semantic transformation from block diagram to signal
-processor demands a redifinition the set of dual signals:
+processor demands a redifinition of the set of dual signals:
 \(\mathbb{S}_{d} = \mathbb{S}^{N+1}\), where \(N\) is the number of
 variables \(x_{i}\) with respect to which partial derivatives must be
 found. Our differentiable signal processor \(\llbracket \texttt{diff}(Y) \rrbracket\) can now be defined as
