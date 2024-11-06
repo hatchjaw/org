@@ -4,9 +4,9 @@
 #+TITLE:       Research Journal
 #+AUTHOR:      Thomas Rushton
 #+LANGUAGE:    en
-#+TAGS: noexport(n) MEETING(m) SUPERVISION(V) PRESENTATION(p) BLOG(b) TRAINING(n)
+#+TAGS: noexport(n) MEETING(m) SUPERVISION(u) PRESENTATION(p) BLOG(b) TRAINING(n)
 #+TAGS: INSPO(i) DIY(d) TEACHING(h) REPRES(R) REVIEW(v) GSoC(G) CONFERENCE(C)
-#+TAGS: WRITING(w) BRAINDUMP(B)
+#+TAGS: WRITING(w) BRAINDUMP(B) VISIT(V)
 #+TAGS: [ PROGRAMMING : R(r) PYTHON(P) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ZOTERO(z) LATEX(l) ]
 #+TAGS: [ AUDIO : SYNTHESIS(s) PHYSMOD(y) SPATIALAUDIO(S) NETWORKEDAUDIO(N) DDSP(D) ]
@@ -4349,7 +4349,7 @@ server, but it's a milestone nonetheless.
 
 Entered on [2024-10-23 mer. 18:18]
 *** 2024-10-28 lundi
-**** CCRMA: Hassan Estakhrian, CAVIAR demo          :MEETING:SPATIALAUDIO:
+**** CCRMA: Hassan Estakhrian, CAVIAR demo    :VISIT:MEETING:SPATIALAUDIO:
 [[https://ccrma.stanford.edu/people/hassan-estakhrian][Hassan]] demoed [[https://ccrma.stanford.edu/docs/studios/Recording-Studio.html#caviar][CAVIAR]] to Romain and I in the listening room at CCRMA. I
 don't know how it works exactly (besides that statistically distinct
 impulse responses are used) but the effect is to pick up ambient sound
@@ -4376,3 +4376,148 @@ audio. If it works, it would eliminate the need to purchase
 PTP-compliant network adaptor(s)/dongle(s).
 
 Entered on [2024-10-30 mer. 17:13]
+**** CCRMA: Meeting with Nando and Nils       :SPATIALAUDIO:VISIT:MEETING:
+Demonstrated Teensy/PTP synchronised networked audio; framed the
+situation in terms of its nature as a technical milestone, having a
+number of caveats, scope for improvement, and being in need of a
+use-case/demo to really make the case for it. Nando seemed very
+interested, asked a number of questions, and went as far as to
+congratulate me. He asked to be kept in the loop.
+
+Entered on [2024-10-31 jeu. 10:40]
+**** CCRMA Colloquium: György Ligeti retrospective    :PRESENTATION:VISIT:
+Matt Wright and Jonathan Berger introduced the event. Not much to say
+here besides that I heard Georg Hajdu speak for the [[*IS2: Keynote: Georg Hajdu][second time]] in a
+month (enigmatic this time, and in video form), Martin Bresnick
+speaking /at length/ about nearly working with Ligeti, then later
+actually working with him (nine hour composition tutorials at
+pre-CCRMA Stanford), and John Chowning being very humble indeed about
+being the target of Ligeti's effusive praise when [[https://docs.google.com/document/d/1cAXuPWP-fyPiHRUpBDHqGh3VDQ4GlKGUV-AlkRuM1So/edit?usp=sharing][interviewed]] (text
+taken from [[https://ccrma.stanford.edu/people/john-chowning][J.C.'s CCRMA page]]), in 1972, about his visit at that time
+to Stanford.
+
+Entered on [2024-10-31 jeu. 10:47]
+*** 2024-10-31 jeudi
+**** IFC Paper: Next steps                 :CONFERENCE:WRITING:FAUST:DDSP:
+Romain advises:
+- Produce a much-shortened version of the current paper for submission
+  to IFC.
+  + Dispense with the maths; focus on the implementation in Faust.
+  + Save a bunch for future submissions.
+- Next year, co-author something with Benjamin for [[https://aes2.org/events-calendar/2025-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio/][AES AIMLA]] (deadline
+  Feb 28th), drop more maths, etc.
+
+Meanwhile, I should bother Yann some more over a rigorous semantic
+foundation for the mathematical side of the work.
+
+Short term, ideally Romain wants a version of the paper that he can
+include in the proceedings before he goes on holiday next Wednesday.
+
+Entered on [2024-10-31 jeu. 11:07]
+**** SIVE Paper Submission           :WRITING:SPATIALAUDIO:NETWORKEDAUDIO:
+Romain suggests that I submit something to SIVE 2025. Sonic
+Interactive in Virtual Environments is an AAU thing, [[https://sive.create.aau.dk/][from the look of
+it]]. Not a lot of work presented last time; maybe it's hard to have
+work accepted.
+
+Anyway, one of the proposed topics is /Sound spatialisation and
+auralization/. The deadline for papers in January 12th. So, I pretty
+much need to smash it through Nov/Dec and have something to write up
+over Xmas.
+
+Entered on [2024-10-31 jeu. 12:37]
+**** CCRMA: Prof. Gerald Schuller                           :PRESENTATION:
+/Perceptual and Higher Level Loss and Distance Functions for Audio and
+Acoustics/
+
+(Donald Knuth is here, and Julius Smith, and Marina Bosi.)
+
+[[https://github.com/TUIlmenauAMS/Psychoacousticloss][SLIDES]]
+
+Asilomar Conference on Signals, Systems & Computers. DSP for
+media and communications. 2024 edition dedicated to
+perceptual/higher-level loss functions.
+
+Loss functions for audio; optimization-friendly loss functions;
+property-focused loss functions.
+
+Perceptually relevant loss functions may give favourable
+results. Challenges: smoothness, continuity, convexity, few local
+minima, focus on desired features; hard/impossible to satisfy all.
+
+Gloria Del Santo et al. /Similarity Metrics for Late Reverberation/.
+
+Linda Fabiani et al. /Time-Frequency Audio Similarity using Optimal
+Transport/. Optimal transport theory applied to spectrograms. Enhanced
+smoothness (somehow).
+
+Tailoring Loss Functions to Specific Properties. Incorporating human
+auditory models; improvements for compression/synthesis. Emphasis on
+properties like timbre, pitch -- again, perceptually-relevant.
+
+Schuller et al. /Psychoacoustic Loss Function Based on a
+Psychoacoustic Model/. Focused on perceptual relevance over convexity,
+so non-convnex optimization might be needed.
+
+Psychoacoustic Masking: Zwicker & Fastl, 1999, MPEG-1 Layer III
+model. MDCT ([[https://en.wikipedia.org/wiki/Modified_discrete_cosine_transform][Modified discrete cosine transform]]) domain for perceptual
+comparison; compare spectral differences above masking threshold, thus
+perceptually significant features.
+
+Hm. Some of this seems a little... lacking in direction. Not clear
+that the MUSHRA-based evaluation actually tells us anything
+meaningful. Actually, it's not clear what the training data is, what
+the model is, etc.
+
+Yin Le et al. /Instrumental Timbre Transfer Based on Disentangled
+Representation of Timbre and Pitch/. "Disentangled
+representations". Loss function focusing on timbral characteristics.
+
+Entered on [2024-10-31 jeu. 15:26]
+** 2024-11 novembre
+*** 2024-11-01 vendredi
+**** CCRMA: Gloria del Santo                                :PRESENTATION:
+/Machine Learning based Artificial Reverberation/
+
+PhD, Audio Signal Processing Team, Aalto University. ML based
+artificial reverb. Vesa Välimäki supervising.
+
+DDSP with /FLAMO/.
+
+Energy decay curve; Schroeder backward integration; used to derive
+reverb time \(T_{60}\).
+
+Artificial reverbs aim to reproduce the psychoacoustic impact of
+various reverb features of a target acoustic space. Schroeder reverb;
+four comb filters in parallel, different delays, loop gain < 1. Jot
+reverb; generalised comb-filter structure.
+
+Feedback delay networks. Cost-effective; hard to tune, not physically
+informed. Metallic. Can we use a machine learning to tune FDN params
+to /reduce coloration artifacts/...
+
+Differentiable FDN via frequency sampling. FIR approximation of IIR
+filter. FIR approximation leads to time-aliasing. High computational
+load for long responses.
+
+Time sparseness is a problem; combination of spectral loss plus
+/sparsity loss/, which forces the entries in the feedback matrix to be
+dense.
+
+End-to-end tuning: RIR2FDN. [[https://github.com/gdalsanto/rir2fdn]]
+
+***** FLAMO: Frequency-sampling Library for Audio-Module Optimization.n
+
+[[https://github.com/gdalsanto/flamo]]
+
+PyTorch library for training DDSP modules based on frequency sampling
+of LTI systems.
+
+Time-aliasing mitigated by sampling the frequency response outside the
+unit circle by applying exponentially decaying function, \(\gamma^{n}\), and
+later compensating for it... More details in the paper (on arXiv
+/FLAMO: An Open-Source/ etc.)
+
+Various DDSP modules implemented (including delays).
+
+Entered on [2024-11-01 ven. 15:29]
