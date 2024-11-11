@@ -1,0 +1,63 @@
+#+title:      Using Tikz Figures in Org Mode
+#+date:       [2024-11-11 lun. 05:40]
+#+filetags:   :emacs:latex:org:tikz:
+#+identifier: 20241111T054054
+
+* Option 1
+
+Include LaTeX/Tikz as a source block. Useful if exporting to formats
+besides PDF.
+
+#+header: :exports results :results file raw :file (org-babel-temp-file "tikz-" ".png")
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 400 -flatten :fit t
+#+header: :headers '("\\usepackage{tikz}")
+#+begin_src latex
+\begin{tikzpicture}
+    \node [circle, draw, fill=red!20] at (0,0) {1}
+    child { node [circle, draw, fill=blue!30] {2}
+      child { node [circle, draw, fill=green!30] {3} }
+      child { node [circle, draw, fill=yellow!30] {4} }};
+\end{tikzpicture}
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-rUuLsB/tikz-Iz4jBA.png]]
+
+* Option 2
+
+Add LaTeX preview support for Tikz figures.
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'org
+    (add-to-list 'org-latex-packages-alist '("" "tikz" t)))
+#+end_src
+
+#+RESULTS:
+|   | tikz | t |
+
+That alone might suffice, but dvipng doesn't behave nicely, so use
+imagemagick instead.
+
+#+begin_src emacs-lisp
+(setq org-preview-latex-default-process 'imagemagick)
+#+end_src
+
+#+RESULTS:
+: imagemagick
+
+Now give this block the usual =C-c C-x C-l=.
+
+\begin{tikzpicture}
+  \node [circle, draw, fill=red!50] at (0,0) {1}
+  child { node [circle, draw, fill=blue!50] {2}
+    child { node [circle, draw, fill=green!30] {3} }
+    child { node [circle, draw, fill=yellow!30] {4} }};
+\end{tikzpicture}
+
+Naturally, best to add the above to =init.el=.
+
+* Resources
+
+- Org LaTeX preview [[https://orgmode.org/worg/org-tutorials/org-latex-preview.html][documentation]].
+- Fanpeng Kong's [[https://fanpengkong.com/post/org-graphics/#include-tikz-figures][blog post]] on org+tikz.
+- Another [[https://msteamc.github.io/post/set-up-the-tikz-in-emacs-org/][blog post]].
