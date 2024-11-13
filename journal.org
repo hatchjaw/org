@@ -4522,3 +4522,18 @@ Various DDSP modules implemented (including delays).
 
 Entered on [2024-11-01 ven. 15:29]
 
+*** 2024-11-13 mercredi
+**** Autodiff notes; IFC presentation                       :WRITING:DDSP:
+Been writing about dual number arithmetic, with a view to working some
+of this stuff into my presentation for IFC:
+
+- The usual =reveal.js=-based affair.
+- Introduce fundamental, limit-based definition of the derivative.
+  + Plot (interactive?) a function and its secant/tangent.
+- Derive dual numbers from that definition.
+- Demonstrate some cool properties of dual numbers/forward mode.
+- Ideally some manner of interactive numerical derivative calculator.
+- Then take it to Faust and demonstrate the implementation.
+- Reverse mode too?
+
+Entered on [2024-11-13 mer. 18:45]
