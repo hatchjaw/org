@@ -1,0 +1,220 @@
+#+title:      Dual Number Arithmetic
+#+date:       [2024-11-13 mer. 11:14]
+#+filetags:   :autodiff:maths:
+#+identifier: 20241113T111447
+#+latex_header: \usepackage{cancel,cleveref}
+
+Dual numbers are an interesting way of framing differentiation and
+gradient arithmetic.
+
+* Derivation
+
+Dual numbers are derived from the fundamental definition of the
+derivative as a limit applied to the slope of a secant line:[fn:1]
+
+#+NAME: eq:fundamental-deriv
+\begin{equation}
+f'(x) = \lim_{h\to0}\frac{f(x+h)-f(x)}{h}\;.
+\end{equation}
+
+Setting \(h = \varepsilon{}\dot{x}\), where \(\dot{x}\) is Newton's notation for
+the derivative of \(x\)[fn:2] and \(\varepsilon\) is a nilpotent symbol, \(\varepsilon \neq 0\),
+\(\varepsilon^{2} = 0\),
+
+#+NAME: eq:dual-deriv1
+\begin{equation}
+f'(x) = \lim_{\varepsilon\dot{x}\to0}\frac{f(x+\varepsilon\dot{x})-f(x)}{\varepsilon\dot{x}}\;,
+\end{equation}
+
+then multiplying both sides by \(\varepsilon\dot{x}\) (and dispensing with the
+limit):
+
+#+NAME: eq:dual-nolimit
+\begin{equation}
+\varepsilon\dot{x}f'(x) = f(x+\varepsilon\dot{x}) - f(x)\;,
+\end{equation}
+
+and rearranging:
+
+#+NAME: eq:dual-1
+\begin{equation}
+f(x+\varepsilon\dot{x}) &= f(x) + \varepsilon\dot{x}f'(x)\;.
+\end{equation}
+
+This can be interpreted as a truncated Taylor series expansion at
+\(\varepsilon\dot{x} = 0\):
+
+#+NAME: eq:taylor
+\begin{align}
+f(x + \varepsilon\dot{x}) &= \sum_{n=0}^{\infty} (\varepsilon\dot{x})^{n}\frac{f^{(n)}(x)}{n!} \\
+  &= f(x) + \varepsilon\dot{x}f'(x) + (\varepsilon\dot{x})^{2}\frac{f''(x)}{2} + (\varepsilon\dot{x})^{3}\frac{f'''(x)}{6} + \cdots \\
+  &= f(x) + \varepsilon\dot{x}f'(x)\;,
+\end{align}
+
+since \(\varepsilon^{2} = 0\). Setting \(f(x) = x\), we have
+
+#+NAME: eq:dual-2
+\begin{align}
+f(x+\varepsilon\dot{x}) &= x + \varepsilon\dot{x}\cdot1 \\
+  &= x + \varepsilon\dot{x}\;.
+\end{align}
+
+* Arithmetic
+
+The basic arithmetical differentiation rules emerge from manipulation
+of dual numbers, grouping terms appropriately:
+
+#+NAME: eq:dual-arithmetic
+\begin{align}
+(u + \varepsilon\dot{u}) + (v + \varepsilon\dot{v}) &= u + v + \varepsilon(\dot{u} + \dot{v}) \\
+(u + \varepsilon\dot{u}) - (v + \varepsilon\dot{v}) &= u - v + \varepsilon(\dot{u} - \dot{v}) \\
+(u + \varepsilon\dot{u}) \times (v + \varepsilon\dot{v}) &= uv + \varepsilon(u\dot{v} + v\dot{u}) + \cancel{\varepsilon^{2}\dot{u}\dot{v}} \\
+(u + \varepsilon\dot{u}) \div (v + \varepsilon\dot{v}) &= (u + \varepsilon\dot{u})\frac{1}{(v + \varepsilon\dot{v})} \\
+  &= (u + \varepsilon\dot{u})\left(\frac{1}{v} - \varepsilon\frac{\dot{v}}{v^{2}}\right) \\
+  &= \frac{u}{v} - \varepsilon\frac{u\dot{v}}{v^{2}} + \varepsilon\frac{\dot{u}}{v} - \cancel{\varepsilon^{2}\frac{\dot{u}\dot{v}}{v^{2}}} \\
+  &= \frac{u}{v} + \varepsilon\left(\frac{\dot{u}}{v} - \frac{u\dot{v}}{v^{2}}\right) \\
+  &= \frac{u}{v} + \varepsilon\left(\frac{v\dot{u} - u\dot{v}}{v^{2}}\right)\;,
+\end{align}
+
+the rule for the quotient being based on the fact that the
+reciprocal of \((x + \varepsilon\dot{x})\) is
+
+#+NAME: eq:dual-recip
+\begin{align}
+\frac{1}{x + \varepsilon\dot{x}} &=
+  \frac{1}{x + \varepsilon\dot{x}}\frac{1 - \varepsilon\frac{\dot{x}}{x}}{1 - \varepsilon\frac{\dot{x}}{x}} \\
+  &= \frac{1 - \varepsilon\frac{\dot{x}}{x}}
+    {x - \varepsilon\frac{x\dot{x}}{x} + \varepsilon\dot{x} - \cancel{\varepsilon^{2}\frac{\dot{x}^{2}}{x}}} \\
+  &= \frac{1 - \varepsilon\frac{\dot{x}}{x}}{x + \cancel{\varepsilon(\dot{x}-\dot{x})}} \\
+  &= \frac{1}{x} - \varepsilon\frac{\dot{x}}{x^{2}}\;.
+\end{align}
+
+Yu and Blair [cite:@yuDNAD2013] allude to the dual version of the sine
+function; this is kind of interesting, but doesn't give us the
+derivation of the derivative of the function, just its nature as a
+truncated Taylor series,
+
+#+NAME: eq:dual-sin
+\begin{equation}
+\sin(x + \varepsilon\dot{x}) = \sin(x) + \varepsilon\dot{x}\cos(x)
+  - \cancel{(\varepsilon\dot{x})^{2}\frac{\sin(x)}{2}} - \cancel{(\varepsilon\dot{x})^{3}\frac{\cos(x)}{6}} + \cdots
+\end{equation}
+
+but this seems of limited utility, since we have to know, a priori,
+that
+
+#+NAME: eq:sin-derivs
+\begin{align}
+\sin'(x) &= \cos(x) \\
+\sin''(x) &= -\sin(x) \\
+\sin'''(x) &= -\cos(x) \\
+\sin^{(4)}(x) &= \sin(x)\,
+\end{align}
+
+etc. Anyway, by similar means we also achieve
+
+#+NAME: eq:more-dual-functions
+\begin{align}
+\ln(x + \varepsilon\dot{x}) &= \ln(x) + \varepsilon\frac{\dot{x}}{x} \\
+e^{x + \varepsilon\dot{x}} &= e^{x} + \varepsilon\dot{x}e^{x} \\
+(u + \varepsilon\dot{u})^{(v + \varepsilon\dot{v})} &= u^{v} + \varepsilon{}u^{v-1}(\dot{v}u\ln(u) + \dot{u}v)\;.
+\end{align}
+
+** The Chain Rule
+
+Cref:eq:dual-1 basically already provides us with the chain rule,
+e.g. let \(u = \sin(x)\) and \(f(u) = u^{2}\):
+
+#+NAME: eq:chain-rule-1
+\begin{align}
+f(u + \varepsilon\dot{u}) &= u^{2} + \varepsilon\dot{u}2u \\
+u^{2} + \varepsilon2u\dot{u} + \cancel{\varepsilon^{2}\dot{u}^{2}} &= \sin^{2}(x) + \varepsilon\cos(x)\cdot2\sin(x) \\
+  &= \sin^{2}(x) + \varepsilon2\sin(x)\cos(x)\;,
+\end{align}
+
+but we can take things further with multiple applications of that
+function:
+
+#+NAME: eq:chain-rule-2
+\begin{align}
+f(g(x + \varepsilon\dot{x})) &= f(g(x) + \varepsilon\dot{x}g'(x)) \\
+  &= f(w + \varepsilon\dot{w})\;,\quad w = g(x)\;,\quad \dot{w} = \dot{x}g'(x) \\
+  &= f(w) + \varepsilon\dot{w}f'(w) \\
+  &= f(g(x)) + \varepsilon\dot{x}g'(x)f'(g(x))\;,
+\end{align}
+
+which, particularly if we assume that \(x\) is our independent
+variable and thus \(\dot{x} = 1\), gives us the chain rule in a more
+recognisable form. Now let \(g(x) = \sin(x)\) and \(f(v) = v^{2}\):
+
+#+NAME: eq:chain-rule-3
+\begin{align}
+\sin^{2}(x + \varepsilon\dot{x}) &= \sin^{2}(x) + \varepsilon\dot{x}\cos(x)2v \\
+  &= \sin^{2}(x) + \varepsilon2\sin(x)\cos(x)\;.
+\end{align}
+
+* Multivariate Dual Numbers
+
+The above gives us /differentiation arithmetic/, a specific case of a
+more general /gradient arithmetic/ (see [cite:@rallArithmetic1986]),
+whereby instead of finding \(f'(x)\), we looking for a vector of
+gradients, \(\nabla{}f(\mathbf{x})\):
+
+#+NAME: eq:gradients-1
+\begin{align}
+\nabla{}f(\mathbf{x}) = \begin{bmatrix}\frac{\partial{}f}{\partial{}x_{1}} \\ \vdots \\ \frac{\partial{}f}{\partial{}x_{N}}\end{bmatrix}
+  &= \begin{bmatrix}
+    \lim_{\varepsilon_{1}\dot{x}_{1}\to0}\frac{f(x_{1}+\varepsilon_{1}\dot{x}_{1},\dots,x_{N}) - f(x_{1},\dots,x_{N})}{\varepsilon_{1}\dot{x}_{1}} \\
+    \vdots \\
+    \lim_{\varepsilon_{N}\dot{x}_{N}\to0}\frac{f(x_{1},\dots,x_{N}+\varepsilon_{N}\dot{x}_{N}) - f(x_{1},\dots,x_{N})}{\varepsilon_{N}\dot{x}_{N}}
+  \end{bmatrix} \\
+  &= \begin{bmatrix}
+    \frac{1}{\varepsilon_{1}\dot{x}_{1}} & 0 & \cdots & 0 \\
+    0 & \ddots & & \vdots \\
+    \vdots & & & \\
+    0 & \cdots & & \frac{1}{\varepsilon_{N}\dot{x}_{N}}
+  \end{bmatrix}\begin{bmatrix}
+    f(x_{1}+\varepsilon_{1}\dot{x}_{1},\dots,x_{N}) - f(x_{1},\dots,x_{N}) \\
+    \vdots \\
+    f(x_{1},\dots,x_{N}+\varepsilon_{N}\dot{x}_{N}) - f(x_{1},\dots,x_{N})
+  \end{bmatrix}\;.
+\end{align}
+
+That gives us an expression of the form \(\mathbf{A = BC}\). To
+approach a multivariate equivalent to cref:eq:dual-1, we can multiply
+both sides by the inverse of the diagonal matrix \(\mathbf{B}\):
+
+#+NAME: eq:gradients-2
+\begin{align}
+\mathbf{B}^{-1}\mathbf{A} &= \mathbf{C} \\
+\begin{bmatrix}
+  \varepsilon_{1}\dot{x}_{1}\frac{\partial{}f}{\partial{}x_{1}} \\ \vdots \\ \varepsilon_{N}\dot{x}_{N}\frac{\partial{}f}{\partial{}x_{N}}
+\end{bmatrix} &= \begin{bmatrix}
+  f(x_{1}+\varepsilon_{1}\dot{x}_{1},\dots,x_{N}) - f(x_{1},\dots,x_{N}) \\
+  \vdots \\
+  f(x_{1},\dots,x_{N}+\varepsilon_{N}\dot{x}_{N}) - f(x_{1},\dots,x_{N})
+\end{bmatrix}\;,
+\end{align}
+
+then, rearrange:
+
+#+NAME: eq:gradients-3
+\begin{align}
+\begin{bmatrix}
+  f(x_{1}+\varepsilon_{1}\dot{x}_{1},\dots,x_{N}) \\
+  \vdots \\
+  f(x_{1},\dots,x_{N}+\varepsilon_{N}\dot{x}_{N})
+\end{bmatrix} &= f(x_{1},\dots,x_{N})\mathbf{I} + \begin{bmatrix}
+  \varepsilon_{1}\dot{x}_{1}\frac{\partial{}f}{\partial{}x_{1}} \\ \vdots \\ \varepsilon_{N}\dot{x}_{N}\frac{\partial{}f}{\partial{}x_{N}}
+\end{bmatrix} \\
+  &= f(x_{1},\dots,x_{N})\mathbf{I} + \boldsymbol\varepsilon\mathbf{\dot{x}}^{}\nabla{}f(\mathbf{x})\;.
+\end{align}
+
+(There's a good chance the notation there can be improved upon.)
+
+* Footnotes
+[fn:2] Mixing notation (\(f'(x)\) and \(\dot{x}\)) like this feels a
+bit strange but it's the approach taken in [cite:@baydinAutomatic2018].
+
+[fn:1] Assuming that limit exists, that \(f(x)\) is differentiable;
+standard provisos.

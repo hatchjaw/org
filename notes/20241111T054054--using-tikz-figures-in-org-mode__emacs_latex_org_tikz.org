@@ -21,7 +21,7 @@ besides PDF.
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-rUuLsB/tikz-Iz4jBA.png]]
+[[file:/tmp/babel-x4CnuX/tikz-Tj3yxR.png]]
 
 * Option 2
 

@@ -4,9 +4,9 @@
 #+TITLE:       Research Journal
 #+AUTHOR:      Thomas Rushton
 #+LANGUAGE:    en
-#+TAGS: noexport(n) MEETING(m) SUPERVISION(u) PRESENTATION(p) BLOG(b) TRAINING(n)
-#+TAGS: INSPO(i) DIY(d) TEACHING(h) REPRES(R) REVIEW(v) GSoC(G) CONFERENCE(C)
-#+TAGS: WRITING(w) BRAINDUMP(B) VISIT(V)
+#+TAGS: noexport(n) MEETING(m) SUPERVISION(u) PRESENTATION(p) SOUTENANCE(F)
+#+TAGS: BLOG(b) TRAINING(n) INSPO(i) DIY(d) TEACHING(h) REPRES(R) REVIEW(v)
+#+TAGS: GSoC(G) CONFERENCE(C) WRITING(w) BRAINDUMP(B) VISIT(V)
 #+TAGS: [ PROGRAMMING : R(r) PYTHON(P) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ZOTERO(z) LATEX(l) ]
 #+TAGS: [ AUDIO : SYNTHESIS(s) PHYSMOD(y) SPATIALAUDIO(S) NETWORKEDAUDIO(N) DDSP(D) ]
@@ -4476,7 +4476,7 @@ representations". Loss function focusing on timbral characteristics.
 Entered on [2024-10-31 jeu. 15:26]
 ** 2024-11 novembre
 *** 2024-11-01 vendredi
-**** CCRMA: Gloria del Santo                                :PRESENTATION:
+**** CCRMA: Gloria dal Santo                                :PRESENTATION:
 /Machine Learning based Artificial Reverberation/
 
 PhD, Audio Signal Processing Team, Aalto University. ML based
@@ -4496,7 +4496,7 @@ Feedback delay networks. Cost-effective; hard to tune, not physically
 informed. Metallic. Can we use a machine learning to tune FDN params
 to /reduce coloration artifacts/...
 
-Differentiable FDN via frequency sampling. FIR approximation of IIR
+Differentiable FDN via frequency sampling. FIR approximation of IRI
 filter. FIR approximation leads to time-aliasing. High computational
 load for long responses.
 
@@ -4506,7 +4506,7 @@ dense.
 
 End-to-end tuning: RIR2FDN. [[https://github.com/gdalsanto/rir2fdn]]
 
-***** FLAMO: Frequency-sampling Library for Audio-Module Optimization.n
+***** FLAMO: Frequency-sampling Library for Audio-Module Optimization.
 
 [[https://github.com/gdalsanto/flamo]]
 
@@ -4521,3 +4521,4 @@ later compensating for it... More details in the paper (on arXiv
 Various DDSP modules implemented (including delays).
 
 Entered on [2024-11-01 ven. 15:29]
+

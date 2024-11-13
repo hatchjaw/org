@@ -4,6 +4,7 @@
 #+TITLE: Differentiable DSP in Faust
 # #+AUTHOR: Thomas Rushton
 
+#+startup: overview
 #+EXPORT_FILE_NAME: out/ifc24-short
 #+OPTIONS: toc:nil ':t ^:{} num:3
 #+LATEX_CLASS: ifc24
