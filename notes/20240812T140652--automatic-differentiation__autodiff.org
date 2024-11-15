@@ -21,6 +21,7 @@ contexts.
 
 - [[denote:20240819T095042][The Chain Rule]]
 - [[denote:20240812T142629][Forward Mode Autodiff]]
+- [[denote:20241113T111447][Dual Number Arithmetic]]
 - [[denote:20240813T115157][Reverse Mode Autodiff]]
 - [[denote:20240813T191939][Differentiable Delay]]
 - [[denote:20240826T200637][Differentiable FIR Filter]]

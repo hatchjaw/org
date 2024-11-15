@@ -1,0 +1,166 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+
+#+title: Differentiable DSP in Faust
+#+author: Thomas Rushton
+
+#+startup: overview
+#+options: num:t toc:nil reveal_width:1500 reveal_height:1000 ^:{} ':t
+#+export_file_name: index
+
+#+REVEAL_ROOT: ../reveal.js
+#+REVEAL_THEME: white
+#+REVEAL_PLUGINS: (math)
+#+REVEAL_MIN_SCALE: 1.0
+#+REVEAL_MAX_SCALE: 1.0
+#+REVEAL_EXTRA_OPTIONS: hash: true, fragmentInURL: true
+#+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
+#+reveal_extra_scripts: ("main.js")
+#+reveal_extra_css: style.css
+
+* About This Presentation                                          :noexport:
+
+This =org= file describes my presentation for the 2024 International
+Faust Conference.
+
+** Dependencies
+
+- =org-re-reveal= ([[https://gitlab.com/oer/org-re-reveal/-/tree/main][gitlab]]), which enables export support from Org to [[https://revealjs.com/][Reveal.js]].
+
+** Running the Presentation
+
+From the reveal.js directory (=../reveal.js=), run:
+
+#+begin_src shell :noeval :exports code
+npm start -- --root=../
+#+end_src
+
+Then navigate to [[http://localhost:8000/ifc-2024]].
+
+* Differentiation
+
+#+REVEAL: split
+
+#+begin_export html
+<div>
+  <canvas id="xSquared"></canvas>
+</div>
+<div>
+  <label for="xSquare-xValue">\(x\)</label>
+  <input type="range" id="xSquared-x" min=-5 max=5 value=-2 step=.01 />
+  <span id="xSquared-xValue" class="sliderValue">-2</span>
+</div>
+<div>
+  <label for="xSquare-hValue">\(h\)</label>
+  <input type="range" id="xSquared-h" min=-1 max=1 value=1 step=.01 />
+  <span id="xSquared-hValue" class="sliderValue">1</span>
+</div>
+#+end_export
+
+** JS/CSS for this slide                                           :noexport:
+
+#+begin_src css :results none :tangle style.css
+.sliderValue {
+    display: inline-block;
+    width: 1.6em;
+    text-align: right;
+}    
+#+end_src
+
+#+begin_src js :results none :tangle main.js
+const CANVAS = {
+    WIDTH: 550,
+    HEIGHT: 550,
+    PADDING: 10
+};
+
+const AXES = {
+    X: {
+	ZERO: CANVAS.WIDTH / 2,
+    },
+    Y: {
+	ZERO: CANVAS.HEIGHT - CANVAS.PADDING - 50,
+    }
+};
+
+const X = {
+    MIN: -5,
+    MAX: 5,
+    LEN: 1000
+};
+
+X.STEP = (X.MAX-X.MIN)/X.LEN;
+
+const xVec = Array.from({length: X.LEN + 1}, (_,x) => X.MIN + x * X.STEP);
+
+const xSquared = () => {
+    const canvas = document.getElementById("xSquared");
+    const xSlider = document.getElementById("xSquared-x");
+    const xValue = document.getElementById("xSquared-xValue");
+    const hSlider = document.getElementById("xSquared-h");
+    const hValue = document.getElementById("xSquared-hValue");
+    
+    if (canvas.getContext) {
+        canvas.setAttribute("width", CANVAS.WIDTH);
+        canvas.setAttribute("height", CANVAS.HEIGHT);
+	const ctx = canvas.getContext("2d");
+        
+        const yVec = xVec.map(x => ({x: x, y: x * x}));
+        const yMax = Math.max(...yVec.map(y => y.y));
+
+	// Draw axes
+	ctx.beginPath();
+	ctx.moveTo(CANVAS.PADDING, AXES.Y.ZERO);
+	ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING, AXES.Y.ZERO);
+	ctx.stroke();
+
+	ctx.beginPath();
+	ctx.moveTo(AXES.X.ZERO, CANVAS.PADDING);
+	ctx.lineTo(AXES.X.ZERO, CANVAS.HEIGHT - CANVAS.PADDING);
+	ctx.stroke();
+
+	// Draw function
+        ctx.beginPath();
+        ctx.moveTo(
+	    CANVAS.PADDING + (yVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+            CANVAS.PADDING + (yMax - yVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+	);
+        yVec.forEach(p => ctx.lineTo(
+            CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+            CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+	));
+        ctx.stroke();
+
+	// Draw secant
+	const xVal = Number(xSlider.value);
+	const hVal = Number(hSlider.value);
+	const ySec = ((xVal + hVal) * (xVal + hVal) - xVal * xVal) / hVal;
+	const ySecVec = xVec.map(x => ({x: x + xVal + hVal, y: ySec * x}));
+	ctx.beginPath();
+        ctx.moveTo(
+	    CANVAS.PADDING + (ySecVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+            CANVAS.PADDING + (yMax - ySecVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+	);
+        ySecVec.forEach(p => ctx.lineTo(
+            CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+            CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax)
+        );
+        ctx.stroke();
+    }
+
+    xSlider && xValue && xSlider.addEventListener("input", ({target: {value: v}}) => {
+	xValue.textContent = v;
+	// Redraw secant
+    }); 
+    hSlider && hValue && hSlider.addEventListener("input", ({target: {value: v}}) => {
+	hValue.textContent = v;
+	// Redraw secant
+    });
+}
+#+end_src
+
+* Consolidated calls to javascript components                      :noexport:
+
+#+begin_src js :results none :tangle main.js
+xSquared();
+#+end_src

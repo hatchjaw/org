@@ -3,8 +3,10 @@
 #+filetags:   :autodiff:maths:
 #+identifier: 20241113T111447
 #+latex_header: \usepackage{cancel,cleveref}
+#+export_file_name: export/dual-numbers
+#+refproc: :abbreviate nil
 
-Dual numbers are an interesting way of framing differentiation and
+Dual numbers are an interesting way of framing [[denote:20240812T140652][differentiation]] and
 gradient arithmetic.
 
 * Derivation
@@ -17,8 +19,8 @@ derivative as a limit applied to the slope of a secant line:[fn:1]
 f'(x) = \lim_{h\to0}\frac{f(x+h)-f(x)}{h}\;.
 \end{equation}
 
-Setting \(h = \varepsilon{}\dot{x}\), where \(\dot{x}\) is Newton's notation for
-the derivative of \(x\)[fn:2] and \(\varepsilon\) is a nilpotent symbol, \(\varepsilon \neq 0\),
+Setting \(h = \varepsilon{}\dot{x}\), where \(\dot{x}\) is Newton's notation[fn:2] for
+the derivative of \(x\), and \(\varepsilon\) is a nilpotent symbol, \(\varepsilon \neq 0\),
 \(\varepsilon^{2} = 0\),
 
 #+NAME: eq:dual-deriv1
@@ -38,7 +40,7 @@ and rearranging:
 
 #+NAME: eq:dual-1
 \begin{equation}
-f(x+\varepsilon\dot{x}) &= f(x) + \varepsilon\dot{x}f'(x)\;.
+f(x+\varepsilon\dot{x}) = f(x) + \varepsilon\dot{x}f'(x)\;.
 \end{equation}
 
 This can be interpreted as a truncated Taylor series expansion at
@@ -89,10 +91,10 @@ reciprocal of \((x + \varepsilon\dot{x})\) is
   &= \frac{1}{x} - \varepsilon\frac{\dot{x}}{x^{2}}\;.
 \end{align}
 
-Yu and Blair [cite:@yuDNAD2013] allude to the dual version of the sine
+Yu et al. [cite:@yuDNAD2013] allude to the dual version of the sine
 function; this is kind of interesting, but doesn't give us the
 derivation of the derivative of the function, just its nature as a
-truncated Taylor series,
+truncated Taylor series (again expanded at \(\varepsilon\dot{x} = 0\)),
 
 #+NAME: eq:dual-sin
 \begin{equation}
@@ -100,7 +102,7 @@ truncated Taylor series,
   - \cancel{(\varepsilon\dot{x})^{2}\frac{\sin(x)}{2}} - \cancel{(\varepsilon\dot{x})^{3}\frac{\cos(x)}{6}} + \cdots
 \end{equation}
 
-but this seems of limited utility, since we have to know, a priori,
+and this seems of limited utility, since we have to know, a priori,
 that
 
 #+NAME: eq:sin-derivs
@@ -127,8 +129,9 @@ e.g. let \(u = \sin(x)\) and \(f(u) = u^{2}\):
 
 #+NAME: eq:chain-rule-1
 \begin{align}
-f(u + \varepsilon\dot{u}) &= u^{2} + \varepsilon\dot{u}2u \\
-u^{2} + \varepsilon2u\dot{u} + \cancel{\varepsilon^{2}\dot{u}^{2}} &= \sin^{2}(x) + \varepsilon\cos(x)\cdot2\sin(x) \\
+f(u + \varepsilon\dot{u}) &= f(u) + \varepsilon\dot{u}f'(u) \\
+u^{2} + \varepsilon2u\dot{u} + \cancel{\varepsilon^{2}\dot{u}^{2}} &= u^{2} + \varepsilon\dot{u}2u \\
+  &= \sin^{2}(x) + \varepsilon\cos(x)\cdot2\sin(x) \\
   &= \sin^{2}(x) + \varepsilon2\sin(x)\cos(x)\;,
 \end{align}
 
@@ -157,8 +160,8 @@ recognisable form. Now let \(g(x) = \sin(x)\) and \(f(v) = v^{2}\):
 
 The above gives us /differentiation arithmetic/, a specific case of a
 more general /gradient arithmetic/ (see [cite:@rallArithmetic1986]),
-whereby instead of finding \(f'(x)\), we looking for a vector of
-gradients, \(\nabla{}f(\mathbf{x})\):
+whereby instead of finding \(f'(x)\), we seek a vector of gradients,
+\(\nabla{}f(\mathbf{x})\):
 
 #+NAME: eq:gradients-1
 \begin{align}
@@ -204,10 +207,10 @@ then, rearrange:
   f(x_{1}+\varepsilon_{1}\dot{x}_{1},\dots,x_{N}) \\
   \vdots \\
   f(x_{1},\dots,x_{N}+\varepsilon_{N}\dot{x}_{N})
-\end{bmatrix} &= f(x_{1},\dots,x_{N})\mathbf{I} + \begin{bmatrix}
+\end{bmatrix} &= f(x_{1},\dots,x_{N}) + \begin{bmatrix}
   \varepsilon_{1}\dot{x}_{1}\frac{\partial{}f}{\partial{}x_{1}} \\ \vdots \\ \varepsilon_{N}\dot{x}_{N}\frac{\partial{}f}{\partial{}x_{N}}
 \end{bmatrix} \\
-  &= f(x_{1},\dots,x_{N})\mathbf{I} + \boldsymbol\varepsilon\mathbf{\dot{x}}^{}\nabla{}f(\mathbf{x})\;.
+  &= f(x_{1},\dots,x_{N}) + \boldsymbol\varepsilon\mathbf{\dot{x}}^{}\nabla{}f(\mathbf{x})\;.
 \end{align}
 
 (There's a good chance the notation there can be improved upon.)

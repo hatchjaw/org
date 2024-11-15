@@ -30,6 +30,8 @@ This =org= file describes my presentation for the 2024 Emeraude Seminaire
 - =faust-web-component.js=, which provides a customised version of the
   ~<faust-editor>~ [[https://github.com/grame-cncm/faust-web-component][web component]] with support for specifying
   attributes and styling the content area of the component.
+  + This version of =faust-web-component.js= is a build of a [[https://github.com/hatchjaw/faust-web-component][fork]] of
+    the original repository.
 - =ob-faust= ([[https://github.com/hatchjaw/ob-faust][github]]), which adds (basic) support for Faust to Org Babel.
 - Emacs =faust-mode=, modified slightly to fix syntax highlighting in
   source blocks.
@@ -42,7 +44,7 @@ From the reveal.js directory (=../reveal.js=), run:
 npm start -- --root=../
 #+end_src
 
-Then navigate to [[localhost:8000/seminaire-emeraude-2024/]].
+Then navigate to [[http://localhost:8000/seminaire-emeraude-2024/]].
 
 * Whom?
 
