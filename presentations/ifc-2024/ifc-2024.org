@@ -44,6 +44,7 @@ Then navigate to [[http://localhost:8000/ifc-2024]].
 #+begin_export html
 <div>
   <canvas id="xSquared"></canvas>
+  <canvas id="secant"></canvas>
 </div>
 <div>
   <label for="xSquare-xValue">\(x\)</label>
@@ -60,12 +61,18 @@ Then navigate to [[http://localhost:8000/ifc-2024]].
 ** JS/CSS for this slide                                           :noexport:
 
 #+begin_src css :results none :tangle style.css
+#xSquared {
+    position: absolute;
+}
+
 .sliderValue {
     display: inline-block;
     width: 1.6em;
     text-align: right;
 }    
 #+end_src
+
+Some display constants:
 
 #+begin_src js :results none :tangle main.js
 const CANVAS = {
@@ -94,112 +101,152 @@ const X = {
 };
 
 X.STEP = (X.MAX-X.MIN)/X.LEN;
+#+end_src
 
+A vector for the independent variable \(x\):
+
+#+begin_src js :results none :tangle main.js
 const xVec = Array.from({length: X.LEN + 1}, (_,x) => X.MIN + x * X.STEP);
+#+end_src
 
+Prepare to plot \(f(x) = x^{2}\):
+
+#+begin_src js :results none :tangle main.js
 const xSquared = () => {
-    const canvas = document.getElementById("xSquared");
-    const xSlider = document.getElementById("xSquared-x");
-    const xValue = document.getElementById("xSquared-xValue");
-    const hSlider = document.getElementById("xSquared-h");
-    const hValue = document.getElementById("xSquared-hValue");
-
     const yVec = xVec.map(x => ({x: x, y: x * x}));
     const yMax = Math.max(...yVec.map(y => y.y));
+#+end_src
 
-    const visualiser = ctx => ({
-        drawAxes: () => {
-            ctx.beginPath();
-            ctx.moveTo(CANVAS.PADDING, AXES.Y.ZERO);
-            ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING, AXES.Y.ZERO);
-            ctx.stroke();
+Define the axes and the static plot of \(f(x)\):
 
-            ctx.beginPath();
-            ctx.moveTo(AXES.X.ZERO, CANVAS.PADDING);
-            ctx.lineTo(AXES.X.ZERO, CANVAS.HEIGHT - CANVAS.PADDING);
-            ctx.stroke();
-        },
+#+begin_src js :results none :tangle main.js
+    const staticLayer = {
+        canvas: document.getElementById("xSquared"),
 
-        drawIndicators: () => {
-	    const drawIndicator = (x, y) => ctx.fillRect(
-		CANVAS.PADDING - (AXES.X.INDICATOR.WIDTH / 2) + (x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-                y - AXES.X.INDICATOR.HEIGHT / 2,
-                AXES.X.INDICATOR.WIDTH,
-                AXES.X.INDICATOR.HEIGHT
-	    );
-            const xVal = Number(xSlider.value);
-            const xPlusH = xVal + Number(hSlider.value);
+        visualiser: ctx => ({
+            drawAxes: () => {
+                ctx.beginPath();
+                ctx.moveTo(CANVAS.PADDING, AXES.Y.ZERO);
+                ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING, AXES.Y.ZERO);
+                ctx.stroke();
 
-	    drawIndicator(xVal, AXES.Y.ZERO);
-	    drawIndicator(xPlusH, AXES.Y.ZERO);
-	    drawIndicator(xVal,
-			  CANVAS.PADDING + (yMax - xVal * xVal) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax);
-	    drawIndicator(xPlusH,
-			  CANVAS.PADDING + (yMax - xPlusH * xPlusH) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax);
-        },
+                ctx.beginPath();
+                ctx.moveTo(AXES.X.ZERO, CANVAS.PADDING);
+                ctx.lineTo(AXES.X.ZERO, CANVAS.HEIGHT - CANVAS.PADDING);
+                ctx.stroke();
+            },
 
-        drawFunction: () => {
-            ctx.beginPath();
-            ctx.moveTo(
-                CANVAS.PADDING + (yVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-                CANVAS.PADDING + (yMax - yVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
-            );
-            yVec.forEach(p => ctx.lineTo(
-                CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-                CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
-            ));
-            ctx.stroke();
-        },
+            drawFunction: () => {
+                ctx.beginPath();
+                ctx.moveTo(
+                    CANVAS.PADDING + (yVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - yVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                );
+                yVec.forEach(p => ctx.lineTo(
+                    CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                ));
+                ctx.stroke();
+            },
+        }),
 
-        drawSecant: () => {
-            const xVal = Number(xSlider.value);
-            const hVal = Number(hSlider.value);
-            const ySec = ((xVal + hVal) * (xVal + hVal) - xVal * xVal) / hVal;
-            const ySecVec = xVec.map(x => ({x: x, y: ySec * (x - xVal) + xVal * xVal}));
-            ctx.beginPath();
-            ctx.moveTo(
-                CANVAS.PADDING + (ySecVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-                CANVAS.PADDING + (yMax - ySecVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
-            );
-            ySecVec.forEach(p => ctx.lineTo(
-                CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-                CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
-            ));
-            ctx.stroke();
-        },
+        init() {
+            if (this.canvas.getContext) {
+                this.canvas.setAttribute("width", CANVAS.WIDTH);
+                this.canvas.setAttribute("height", CANVAS.HEIGHT);
 
-        clear: () => ctx.clearRect(0, 0, canvas.width, canvas.height),
-	
-        draw() {
-            this.drawAxes();
-            this.drawFunction();
-            this.drawIndicators();
-            this.drawSecant();
-        },
-	
-        redraw() {
-            this.clear();
-            this.draw()
+                const v = this.visualiser(this.canvas.getContext("2d"));
+                v.drawAxes();
+                v.drawFunction();
+            }
         }
-    });
-    
-    if (canvas.getContext) {        
-        canvas.setAttribute("width", CANVAS.WIDTH);
-        canvas.setAttribute("height", CANVAS.HEIGHT);
+    };
+#+end_src
 
-        const v = visualiser(canvas.getContext("2d"));
-        v.draw();
+Define the dynamic part of the plot --- the secant and axis
+indicators. Slope \(m\) found as \(m = \frac{f(x + h) - f(x)}{h}\);
+secant line found as \(m(x - x_{1}) + y_{1}\).
 
-        xSlider && xValue && xSlider.addEventListener("input", ({target: {value: val}}) => {
-            xValue.textContent = val;
-            v.redraw();
-        });
-        
-        hSlider && hValue && hSlider.addEventListener("input", ({target: {value: val}}) => {
-            hValue.textContent = val;
-            v.redraw();
-        });
-    }
+#+begin_src js :results none :tangle main.js
+    const dynamicLayer = {
+        canvas: document.getElementById("secant"),
+        xSlider: document.getElementById("xSquared-x"),
+        xValue: document.getElementById("xSquared-xValue"),
+        hSlider: document.getElementById("xSquared-h"),
+        hValue: document.getElementById("xSquared-hValue"),
+
+        visualiser: ctx => ({
+            drawIndicators: (x, h) => {
+                const drawIndicator = (x, y) => ctx.fillRect(
+                    CANVAS.PADDING - (AXES.X.INDICATOR.WIDTH / 2) + (x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    y - AXES.X.INDICATOR.HEIGHT / 2,
+                    AXES.X.INDICATOR.WIDTH,
+                    AXES.X.INDICATOR.HEIGHT
+                );
+
+                drawIndicator(x, AXES.Y.ZERO);
+                drawIndicator(x + h, AXES.Y.ZERO);
+                drawIndicator(x,
+                              CANVAS.PADDING + (yMax - x * x) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax);
+                drawIndicator(x + h,
+                              CANVAS.PADDING + (yMax - (x + h) * (x + h)) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax);
+            },
+
+            drawSecant: (x, h) => {
+                const slope = ((x + h) * (x + h) - x * x) / h;
+                const ySecVec = xVec.map(xVal => ({x: xVal, y: slope * (xVal - x) + x * x}));
+                ctx.beginPath();
+                ctx.moveTo(
+                    CANVAS.PADDING + (ySecVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - ySecVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                );
+                ySecVec.forEach(p => ctx.lineTo(
+                    CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                ));
+                ctx.stroke();
+            },
+
+            clear: () => ctx.clearRect(0, 0, CANVAS.WIDTH, CANVAS.HEIGHT),
+            
+            draw(x, h) {
+                this.drawIndicators(x, h);
+                this.drawSecant(x, h);
+            },
+            
+            redraw(x, h) {
+                this.clear();
+                this.draw(x, h)
+            }
+        }),
+
+        init() {
+            if (this.canvas.getContext) {
+                this.canvas.setAttribute("width", CANVAS.WIDTH);
+                this.canvas.setAttribute("height", CANVAS.HEIGHT);
+
+                const v = this.visualiser(this.canvas.getContext("2d"));
+                v.draw(Number(this.xSlider.value), Number(this.hSlider.value));
+
+                this.xSlider && this.xValue && this.xSlider.addEventListener("input", ({target: {value: val}}) => {
+                    this.xValue.textContent = val;
+                    v.redraw(Number(this.xSlider.value), Number(this.hSlider.value));
+                });
+                
+                this.hSlider && this.hValue && this.hSlider.addEventListener("input", ({target: {value: val}}) => {
+                    this.hValue.textContent = val;
+                    v.redraw(Number(this.xSlider.value), Number(this.hSlider.value));
+                });
+            }
+        }
+    };
+#+end_src
+
+Initialise the layers:
+
+#+begin_src js :results none :tangle main.js
+    staticLayer.init();
+    dynamicLayer.init();
 }
 #+end_src
 
