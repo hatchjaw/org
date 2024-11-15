@@ -47,12 +47,12 @@ Then navigate to [[http://localhost:8000/ifc-2024]].
 </div>
 <div>
   <label for="xSquare-xValue">\(x\)</label>
-  <input type="range" id="xSquared-x" min=-5 max=5 value=-2 step=.01 />
-  <span id="xSquared-xValue" class="sliderValue">-2</span>
+  <input type="range" id="xSquared-x" min=-3 max=2 value=1 step=.01 />
+  <span id="xSquared-xValue" class="sliderValue">1</span>
 </div>
 <div>
   <label for="xSquare-hValue">\(h\)</label>
-  <input type="range" id="xSquared-h" min=-1 max=1 value=1 step=.01 />
+  <input type="range" id="xSquared-h" min=-2 max=2 value=1 step=.01 />
   <span id="xSquared-hValue" class="sliderValue">1</span>
 </div>
 #+end_export
@@ -76,16 +76,20 @@ const CANVAS = {
 
 const AXES = {
     X: {
-	ZERO: CANVAS.WIDTH / 2,
+        ZERO: CANVAS.WIDTH / 2,
+        INDICATOR: {
+            WIDTH: 3,
+            HEIGHT: 10
+        }
     },
     Y: {
-	ZERO: CANVAS.HEIGHT - CANVAS.PADDING - 50,
+        ZERO: CANVAS.HEIGHT - CANVAS.PADDING - 50,
     }
 };
 
 const X = {
-    MIN: -5,
-    MAX: 5,
+    MIN: -2,
+    MAX: 2,
     LEN: 1000
 };
 
@@ -99,63 +103,103 @@ const xSquared = () => {
     const xValue = document.getElementById("xSquared-xValue");
     const hSlider = document.getElementById("xSquared-h");
     const hValue = document.getElementById("xSquared-hValue");
+
+    const yVec = xVec.map(x => ({x: x, y: x * x}));
+    const yMax = Math.max(...yVec.map(y => y.y));
+
+    const visualiser = ctx => ({
+        drawAxes: () => {
+            ctx.beginPath();
+            ctx.moveTo(CANVAS.PADDING, AXES.Y.ZERO);
+            ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING, AXES.Y.ZERO);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(AXES.X.ZERO, CANVAS.PADDING);
+            ctx.lineTo(AXES.X.ZERO, CANVAS.HEIGHT - CANVAS.PADDING);
+            ctx.stroke();
+        },
+
+        drawIndicators: () => {
+	    const drawIndicator = (x, y) => ctx.fillRect(
+		CANVAS.PADDING - (AXES.X.INDICATOR.WIDTH / 2) + (x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                y - AXES.X.INDICATOR.HEIGHT / 2,
+                AXES.X.INDICATOR.WIDTH,
+                AXES.X.INDICATOR.HEIGHT
+	    );
+            const xVal = Number(xSlider.value);
+            const xPlusH = xVal + Number(hSlider.value);
+
+	    drawIndicator(xVal, AXES.Y.ZERO);
+	    drawIndicator(xPlusH, AXES.Y.ZERO);
+	    drawIndicator(xVal,
+			  CANVAS.PADDING + (yMax - xVal * xVal) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax);
+	    drawIndicator(xPlusH,
+			  CANVAS.PADDING + (yMax - xPlusH * xPlusH) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax);
+        },
+
+        drawFunction: () => {
+            ctx.beginPath();
+            ctx.moveTo(
+                CANVAS.PADDING + (yVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                CANVAS.PADDING + (yMax - yVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+            );
+            yVec.forEach(p => ctx.lineTo(
+                CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+            ));
+            ctx.stroke();
+        },
+
+        drawSecant: () => {
+            const xVal = Number(xSlider.value);
+            const hVal = Number(hSlider.value);
+            const ySec = ((xVal + hVal) * (xVal + hVal) - xVal * xVal) / hVal;
+            const ySecVec = xVec.map(x => ({x: x, y: ySec * (x - xVal) + xVal * xVal}));
+            ctx.beginPath();
+            ctx.moveTo(
+                CANVAS.PADDING + (ySecVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                CANVAS.PADDING + (yMax - ySecVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+            );
+            ySecVec.forEach(p => ctx.lineTo(
+                CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+            ));
+            ctx.stroke();
+        },
+
+        clear: () => ctx.clearRect(0, 0, canvas.width, canvas.height),
+	
+        draw() {
+            this.drawAxes();
+            this.drawFunction();
+            this.drawIndicators();
+            this.drawSecant();
+        },
+	
+        redraw() {
+            this.clear();
+            this.draw()
+        }
+    });
     
-    if (canvas.getContext) {
+    if (canvas.getContext) {        
         canvas.setAttribute("width", CANVAS.WIDTH);
         canvas.setAttribute("height", CANVAS.HEIGHT);
-	const ctx = canvas.getContext("2d");
+
+        const v = visualiser(canvas.getContext("2d"));
+        v.draw();
+
+        xSlider && xValue && xSlider.addEventListener("input", ({target: {value: val}}) => {
+            xValue.textContent = val;
+            v.redraw();
+        });
         
-        const yVec = xVec.map(x => ({x: x, y: x * x}));
-        const yMax = Math.max(...yVec.map(y => y.y));
-
-	// Draw axes
-	ctx.beginPath();
-	ctx.moveTo(CANVAS.PADDING, AXES.Y.ZERO);
-	ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING, AXES.Y.ZERO);
-	ctx.stroke();
-
-	ctx.beginPath();
-	ctx.moveTo(AXES.X.ZERO, CANVAS.PADDING);
-	ctx.lineTo(AXES.X.ZERO, CANVAS.HEIGHT - CANVAS.PADDING);
-	ctx.stroke();
-
-	// Draw function
-        ctx.beginPath();
-        ctx.moveTo(
-	    CANVAS.PADDING + (yVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-            CANVAS.PADDING + (yMax - yVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
-	);
-        yVec.forEach(p => ctx.lineTo(
-            CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-            CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
-	));
-        ctx.stroke();
-
-	// Draw secant
-	const xVal = Number(xSlider.value);
-	const hVal = Number(hSlider.value);
-	const ySec = ((xVal + hVal) * (xVal + hVal) - xVal * xVal) / hVal;
-	const ySecVec = xVec.map(x => ({x: x + xVal + hVal, y: ySec * x}));
-	ctx.beginPath();
-        ctx.moveTo(
-	    CANVAS.PADDING + (ySecVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-            CANVAS.PADDING + (yMax - ySecVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
-	);
-        ySecVec.forEach(p => ctx.lineTo(
-            CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-            CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax)
-        );
-        ctx.stroke();
+        hSlider && hValue && hSlider.addEventListener("input", ({target: {value: val}}) => {
+            hValue.textContent = val;
+            v.redraw();
+        });
     }
-
-    xSlider && xValue && xSlider.addEventListener("input", ({target: {value: v}}) => {
-	xValue.textContent = v;
-	// Redraw secant
-    }); 
-    hSlider && hValue && hSlider.addEventListener("input", ({target: {value: v}}) => {
-	hValue.textContent = v;
-	// Redraw secant
-    });
 }
 #+end_src
 
