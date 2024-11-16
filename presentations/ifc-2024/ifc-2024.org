@@ -76,8 +76,8 @@ Some display constants:
 
 #+begin_src js :results none :tangle main.js
 const CANVAS = {
-    WIDTH: 550,
-    HEIGHT: 550,
+    WIDTH: 600,
+    HEIGHT: 600,
     PADDING: 10
 };
 
@@ -101,6 +101,12 @@ const X = {
 };
 
 X.STEP = (X.MAX-X.MIN)/X.LEN;
+
+const SVG = {
+    X: "data:image/svg+xml;base64, " + window.btoa(unescape(encodeURIComponent(
+	// new XMLSerializer().serializeToString(MathJax.tex2svg("x").childNodes[0])
+    )))
+};
 #+end_src
 
 A vector for the independent variable \(x\):
@@ -115,6 +121,7 @@ Prepare to plot \(f(x) = x^{2}\):
 const xSquared = () => {
     const yVec = xVec.map(x => ({x: x, y: x * x}));
     const yMax = Math.max(...yVec.map(y => y.y));
+    const f = x => x * x;
 #+end_src
 
 Define the axes and the static plot of \(f(x)\):
@@ -170,31 +177,49 @@ secant line found as \(m(x - x_{1}) + y_{1}\).
 #+begin_src js :results none :tangle main.js
     const dynamicLayer = {
         canvas: document.getElementById("secant"),
-        xSlider: document.getElementById("xSquared-x"),
-        xValue: document.getElementById("xSquared-xValue"),
-        hSlider: document.getElementById("xSquared-h"),
-        hValue: document.getElementById("xSquared-hValue"),
+        xSlider: {
+            element: document.getElementById("xSquared-x"),
+            valSpan: document.getElementById("xSquared-xValue")
+        },
+        hSlider: {
+            element: document.getElementById("xSquared-h"),
+            valSpan: document.getElementById("xSquared-hValue"),
+            prevValue: 0
+        },
 
         visualiser: ctx => ({
             drawIndicators: (x, h) => {
-                const drawIndicator = (x, y) => ctx.fillRect(
+                const drawXIndicator = (x, y) => ctx.fillRect(
                     CANVAS.PADDING - (AXES.X.INDICATOR.WIDTH / 2) + (x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
                     y - AXES.X.INDICATOR.HEIGHT / 2,
                     AXES.X.INDICATOR.WIDTH,
                     AXES.X.INDICATOR.HEIGHT
                 );
 
-                drawIndicator(x, AXES.Y.ZERO);
-                drawIndicator(x + h, AXES.Y.ZERO);
-                drawIndicator(x,
-                              CANVAS.PADDING + (yMax - x * x) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax);
-                drawIndicator(x + h,
-                              CANVAS.PADDING + (yMax - (x + h) * (x + h)) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax);
+                const drawFxIndicator = (x, y) => {
+		    const indicatorWidth = 6;
+                    ctx.beginPath();
+                    ctx.arc(
+			CANVAS.PADDING + (x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+			CANVAS.PADDING + (yMax - y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax,
+			indicatorWidth,
+			0, 2 * Math.PI
+		    );
+                    ctx.fill();
+                };
+
+                drawXIndicator(x, AXES.Y.ZERO);
+                drawXIndicator(x + h, AXES.Y.ZERO);
+
+                drawFxIndicator(x, f(x));
+                drawFxIndicator(x + h, f(x + h));
+
+		// ctx.drawImage(SVG.X, x, AXES.Y.ZERO);
             },
 
             drawSecant: (x, h) => {
-                const slope = ((x + h) * (x + h) - x * x) / h;
-                const ySecVec = xVec.map(xVal => ({x: xVal, y: slope * (xVal - x) + x * x}));
+                const slope = (f(x + h) - f(x)) / h;
+                const ySecVec = xVec.map(xVal => ({x: xVal, y: slope * (xVal - x) + f(x)}));
                 ctx.beginPath();
                 ctx.moveTo(
                     CANVAS.PADDING + (ySecVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
@@ -226,17 +251,25 @@ secant line found as \(m(x - x_{1}) + y_{1}\).
                 this.canvas.setAttribute("height", CANVAS.HEIGHT);
 
                 const v = this.visualiser(this.canvas.getContext("2d"));
-                v.draw(Number(this.xSlider.value), Number(this.hSlider.value));
+                v.draw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
 
-                this.xSlider && this.xValue && this.xSlider.addEventListener("input", ({target: {value: val}}) => {
-                    this.xValue.textContent = val;
-                    v.redraw(Number(this.xSlider.value), Number(this.hSlider.value));
-                });
+                this.xSlider.element && this.xSlider.valSpan &&
+                    this.xSlider.element.addEventListener("input", ({target: {value: val}}) => {
+                        this.xSlider.valSpan.textContent = val;
+                        v.redraw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
+                    });
                 
-                this.hSlider && this.hValue && this.hSlider.addEventListener("input", ({target: {value: val}}) => {
-                    this.hValue.textContent = val;
-                    v.redraw(Number(this.xSlider.value), Number(this.hSlider.value));
-                });
+                this.hSlider.element && this.hSlider.valSpan &&
+                    this.hSlider.element.addEventListener("input", ({target: {value: val}}) => {
+                        // Avoid division by zero!
+                        if (val == 0) {
+                            val = this.hSlider.prevValue > val ? -.01 : .01;
+                            this.hSlider.element.value = val;
+                        }
+                        this.hSlider.valSpan.textContent = val;
+                        this.hSlider.prevValue = val;
+                        v.redraw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
+                    });
             }
         }
     };
