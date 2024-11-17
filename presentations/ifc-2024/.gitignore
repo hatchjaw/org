@@ -1,3 +1,7 @@
-main.js
-style.css
+*.js
+*.css
 index.html
+src
+node_modules
+dist
+.idea

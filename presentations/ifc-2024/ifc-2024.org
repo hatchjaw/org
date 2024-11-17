@@ -15,7 +15,7 @@
 #+REVEAL_MAX_SCALE: 1.0
 #+REVEAL_EXTRA_OPTIONS: hash: true, fragmentInURL: true
 #+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
-#+reveal_extra_scripts: ("main.js")
+#+reveal_extra_scripts: ("dist/ifc24.js")
 #+reveal_extra_css: style.css
 
 * About This Presentation                                          :noexport:
@@ -28,6 +28,21 @@ Faust Conference.
 - =org-re-reveal= ([[https://gitlab.com/oer/org-re-reveal/-/tree/main][gitlab]]), which enables export support from Org to [[https://revealjs.com/][Reveal.js]].
 
 ** Running the Presentation
+
+Tangle, =C-c C-v t=, then export as a Reveal.js presentation, =C-c C-e
+v v=
+
+#+begin_src emacs-lisp
+(setq org-export-before-processing-hook nil)
+(add-hook 'org-export-before-processing-functions
+	  (lambda (backend)
+	    (interactive)
+	    (message "building js...")
+	    (shell-command "npm run build")))
+#+end_src
+
+#+RESULTS:
+| lambda | (backend) | (interactive) | (message building js...) | (shell-command-to-string npm run build) |
 
 From the reveal.js directory (=../reveal.js=), run:
 
@@ -74,7 +89,7 @@ Then navigate to [[http://localhost:8000/ifc-2024]].
 
 Some display constants:
 
-#+begin_src js :results none :tangle main.js
+#+begin_src js :results none :tangle src/xsquared.js
 const CANVAS = {
     WIDTH: 600,
     HEIGHT: 600,
@@ -111,14 +126,14 @@ const SVG = {
 
 A vector for the independent variable \(x\):
 
-#+begin_src js :results none :tangle main.js
+#+begin_src js :results none :tangle src/xsquared.js
 const xVec = Array.from({length: X.LEN + 1}, (_,x) => X.MIN + x * X.STEP);
 #+end_src
 
 Prepare to plot \(f(x) = x^{2}\):
 
-#+begin_src js :results none :tangle main.js
-const xSquared = () => {
+#+begin_src js :results none :tangle src/xsquared.js
+export default xSquared = () => {
     const yVec = xVec.map(x => ({x: x, y: x * x}));
     const yMax = Math.max(...yVec.map(y => y.y));
     const f = x => x * x;
@@ -126,7 +141,7 @@ const xSquared = () => {
 
 Define the axes and the static plot of \(f(x)\):
 
-#+begin_src js :results none :tangle main.js
+#+begin_src js :results none :tangle src/xsquared.js
     const staticLayer = {
         canvas: document.getElementById("xSquared"),
 
@@ -174,7 +189,7 @@ Define the dynamic part of the plot --- the secant and axis
 indicators. Slope \(m\) found as \(m = \frac{f(x + h) - f(x)}{h}\);
 secant line found as \(m(x - x_{1}) + y_{1}\).
 
-#+begin_src js :results none :tangle main.js
+#+begin_src js :results none :tangle src/xsquared.js
     const dynamicLayer = {
         canvas: document.getElementById("secant"),
         xSlider: {
@@ -277,7 +292,7 @@ secant line found as \(m(x - x_{1}) + y_{1}\).
 
 Initialise the layers:
 
-#+begin_src js :results none :tangle main.js
+#+begin_src js :results none :tangle src/xsquared.js
     staticLayer.init();
     dynamicLayer.init();
 }
@@ -285,6 +300,8 @@ Initialise the layers:
 
 * Consolidated calls to javascript components                      :noexport:
 
-#+begin_src js :results none :tangle main.js
+#+begin_src js :results none :tangle src/main.js
+import xSquared from "./xsquared.js";
+
 xSquared();
 #+end_src
