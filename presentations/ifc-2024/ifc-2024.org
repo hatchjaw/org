@@ -55,6 +55,13 @@ Finally, navigate to [[http://localhost:8000/ifc-2024]].
 
 #+REVEAL: split
 
+#+attr_html: :style font-size: 1.66em;
+\begin{equation}
+f'(x) = \lim_{h\to0}\frac{f(x + h) - f(x)}{h}
+\end{equation}
+
+#+REVEAL: split
+
 #+begin_export html
 <div id="xSquaredContainer">
   <div>
@@ -64,26 +71,18 @@ Finally, navigate to [[http://localhost:8000/ifc-2024]].
     </div>
     <div>
       <label for="xSquare-xValue">\(x\)</label>
-      <input type="range" id="xSquared-x" min=-2 max=2 value=.5 step=.01 />
-      <span id="xSquared-xValue" class="sliderValue">0.5</span>
+      <input type="range" id="xSquared-x" min=-2 max=2 value=0 step=.01 />
+      <span id="xSquared-xValue" class="sliderValue"></span>
     </div>
     <div>
       <label for="xSquare-hValue">\(h\)</label>
       <input type="range" id="xSquared-h" min=.01 max=3 value=2 step=.01 />
-      <span id="xSquared-hValue" class="sliderValue">2</span>
+      <span id="xSquared-hValue" class="sliderValue"></span>
     </div>
   </div>
   <div id="xSquaredMath">
     <p style="padding-bottom: 2em;">\(f(x) = x^{2}\)</p>
     <div id="xSquaredDynamicMath">
-    $$
-    \begin{align}
-        f'(x) &\approx \frac{f(x + h) - f(x)}{h} \\[10pt]
-          &\approx \frac{\phantom{f(x + h) - f(x)}}{\phantom{h}} \\[10pt]
-          &\approx \\[10pt]
-          &\approx \phantom{}x
-    \end{align}
-    $$
     </div>
   </div>
 </div>
@@ -112,7 +111,7 @@ Some CSS. Just tangle this to the current directory.
 
 .sliderValue {
     display: inline-block;
-    width: 1.6em;
+    width: 2.5em;
     text-align: right;
 }    
 #+end_src
@@ -374,7 +373,7 @@ secant line found as \(m(x - x_{1}) + y_{1}\).
                     const fprimex = (xhxh - xx) / h;
                     const mx = fprimex / x;
 
-                    mj.typesetClear([this.math]);
+                    mj.typesetClear([this.math, this.xSlider.valSpan, this.hSlider.valSpan]);
                     this.math.innerHTML = `$$
     \\begin{align}
         f'(x) &\\approx \\frac{f(x + h) - f(x)}{h} \\\\[10pt]
@@ -382,14 +381,15 @@ secant line found as \(m(x - x_{1}) + y_{1}\).
           &\\approx ${isFinite(mx) ? mx.toFixed(2) : "\\infty{}"}x
     \\end{align}
     $$`;
-                    await mj.typesetPromise([this.math]);
+                    this.xSlider.valSpan.innerHTML = `\\(${x.toFixed(2)}\\)`;
+                    this.hSlider.valSpan.innerHTML = `\\(${h.toFixed(2)}\\)`;
+                    await mj.typesetPromise([this.math, this.xSlider.valSpan, this.hSlider.valSpan]);
                 };
 
                 updateMath();
 
                 this.xSlider.element && this.xSlider.valSpan &&
                     this.xSlider.element.addEventListener("input", async ({target: {value: val}}) => {
-                        this.xSlider.valSpan.textContent = val;
                         v.redraw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
                         await updateMath();
                     });
@@ -401,7 +401,6 @@ secant line found as \(m(x - x_{1}) + y_{1}\).
                             val = this.hSlider.prevValue > val ? -.01 : .01;
                             this.hSlider.element.value = val;
                         }
-                        this.hSlider.valSpan.textContent = val;
                         this.hSlider.prevValue = val;
                         v.redraw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
                         await updateMath();
