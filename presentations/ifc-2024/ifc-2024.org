@@ -29,28 +29,27 @@ Faust Conference.
 
 ** Running the Presentation
 
-Tangle, =C-c C-v t=, then export as a Reveal.js presentation, =C-c C-e
-v v=
+Add this hook that'll run =npm= before export:
 
-#+begin_src emacs-lisp
-(setq org-export-before-processing-hook nil)
+#+begin_src emacs-lisp :results silent
+;; (setq org-export-before-processing-hook nil)
 (add-hook 'org-export-before-processing-functions
 	  (lambda (backend)
 	    (interactive)
 	    (message "building js...")
-	    (shell-command "npm run build")))
+	    (shell-command-to-string "npm run build")))
 #+end_src
 
-#+RESULTS:
-| lambda | (backend) | (interactive) | (message building js...) | (shell-command-to-string npm run build) |
+Tangle, =C-c C-v t=, then export as a Reveal.js presentation, =C-c C-e
+v v=, which will trigger the =npm= build.
 
-From the reveal.js directory (=../reveal.js=), run:
+Then, from the reveal.js directory (=../reveal.js=), run:
 
 #+begin_src shell :noeval :exports code
 npm start -- --root=../
 #+end_src
 
-Then navigate to [[http://localhost:8000/ifc-2024]].
+Finally, navigate to [[http://localhost:8000/ifc-2024]].
 
 * Differentiation
 
@@ -75,6 +74,8 @@ Then navigate to [[http://localhost:8000/ifc-2024]].
 
 ** JS/CSS for this slide                                           :noexport:
 
+Some CSS. Just tangle this to the current directory.
+
 #+begin_src css :results none :tangle style.css
 #xSquared {
     position: absolute;
@@ -85,6 +86,38 @@ Then navigate to [[http://localhost:8000/ifc-2024]].
     width: 1.6em;
     text-align: right;
 }    
+#+end_src
+
+Tangle JS to the =src= directory to be processed by Vite.
+
+Import MathJax:
+
+#+begin_src js :results none :tangle src/xsquared.js
+// import MathJax from 'mathjax';
+
+// // Initialize MathJax
+// MathJax.init({
+//   loader: {load: ['input/tex', 'output/svg']},
+//   tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+// }).then((MathJax) => {
+//   // MathJax is now ready to use
+
+//   // Example: Render a TeX expression
+//   const svg = MathJax.tex2svg('\\frac{x^2+1}{x-1}', {display: true});
+//   console.log(MathJax.startup.adaptor.outerHTML(svg));
+
+//   // You can now use MathJax functions like tex2svg, math2svg, etc.
+// }).catch((err) => console.log(err.message));
+
+import 'mathjax/es5/tex-svg';
+
+const SVG = {
+    // X: "data:image/svg+xml;base64, " + window.btoa(unescape(encodeURIComponent(
+    // 	// new XMLSerializer().serializeToString(MathJax.tex2svg("x").childNodes[0])
+    // )))
+};
+
+
 #+end_src
 
 Some display constants:
@@ -116,12 +149,6 @@ const X = {
 };
 
 X.STEP = (X.MAX-X.MIN)/X.LEN;
-
-const SVG = {
-    X: "data:image/svg+xml;base64, " + window.btoa(unescape(encodeURIComponent(
-	// new XMLSerializer().serializeToString(MathJax.tex2svg("x").childNodes[0])
-    )))
-};
 #+end_src
 
 A vector for the independent variable \(x\):
@@ -212,14 +239,14 @@ secant line found as \(m(x - x_{1}) + y_{1}\).
                 );
 
                 const drawFxIndicator = (x, y) => {
-		    const indicatorWidth = 6;
+                    const indicatorWidth = 6;
                     ctx.beginPath();
                     ctx.arc(
-			CANVAS.PADDING + (x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-			CANVAS.PADDING + (yMax - y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax,
-			indicatorWidth,
-			0, 2 * Math.PI
-		    );
+                        CANVAS.PADDING + (x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                        CANVAS.PADDING + (yMax - y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax,
+                        indicatorWidth,
+                        0, 2 * Math.PI
+                    );
                     ctx.fill();
                 };
 
@@ -229,7 +256,12 @@ secant line found as \(m(x - x_{1}) + y_{1}\).
                 drawFxIndicator(x, f(x));
                 drawFxIndicator(x + h, f(x + h));
 
-		// ctx.drawImage(SVG.X, x, AXES.Y.ZERO);
+                ctx.drawImage(
+		    SVG.XIMG,
+	            CANVAS.PADDING + (x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN) - 10,
+		    AXES.Y.ZERO + 10,
+		    20, 20
+		);
             },
 
             drawSecant: (x, h) => {
@@ -265,26 +297,40 @@ secant line found as \(m(x - x_{1}) + y_{1}\).
                 this.canvas.setAttribute("width", CANVAS.WIDTH);
                 this.canvas.setAttribute("height", CANVAS.HEIGHT);
 
-                const v = this.visualiser(this.canvas.getContext("2d"));
-                v.draw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
+                MathJax.startup.promise.then(() => {
+                    const svg = MathJax.tex2svg("x");
+                    // console.log(MathJax.startup.adaptor.outerHTML(svg));
+                    SVG.X = "data:image/svg+xml;base64, " + window.btoa(unescape(encodeURIComponent(
+                        new XMLSerializer().serializeToString(svg.childNodes[0])
+                    )));
 
-                this.xSlider.element && this.xSlider.valSpan &&
-                    this.xSlider.element.addEventListener("input", ({target: {value: val}}) => {
-                        this.xSlider.valSpan.textContent = val;
-                        v.redraw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
-                    });
-                
-                this.hSlider.element && this.hSlider.valSpan &&
-                    this.hSlider.element.addEventListener("input", ({target: {value: val}}) => {
-                        // Avoid division by zero!
-                        if (val == 0) {
-                            val = this.hSlider.prevValue > val ? -.01 : .01;
-                            this.hSlider.element.value = val;
-                        }
-                        this.hSlider.valSpan.textContent = val;
-                        this.hSlider.prevValue = val;
-                        v.redraw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
-                    });
+                    const img = new Image();
+                    img.onload = e => {
+                        SVG.XIMG = e.target;
+
+                        const v = this.visualiser(this.canvas.getContext("2d"));
+                        v.draw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
+
+                        this.xSlider.element && this.xSlider.valSpan &&
+                            this.xSlider.element.addEventListener("input", ({target: {value: val}}) => {
+                                this.xSlider.valSpan.textContent = val;
+                                v.redraw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
+                            });
+
+                        this.hSlider.element && this.hSlider.valSpan &&
+                            this.hSlider.element.addEventListener("input", ({target: {value: val}}) => {
+                                // Avoid division by zero!
+                                if (val == 0) {
+                                    val = this.hSlider.prevValue > val ? -.01 : .01;
+                                    this.hSlider.element.value = val;
+                                }
+                                this.hSlider.valSpan.textContent = val;
+                                this.hSlider.prevValue = val;
+                                v.redraw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
+                            });
+                    };
+                    img.src = SVG.X;
+                });
             }
         }
     };
