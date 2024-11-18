@@ -144,7 +144,7 @@ f(g(x + \varepsilon\dot{x})) &= f(g(x) + \varepsilon\dot{x}g'(x)) \\
   &= f(w + \varepsilon\dot{w})\;,\quad w = g(x)\;,\quad \dot{w} = \dot{x}g'(x) \\
   &= f(w) + \varepsilon\dot{w}f'(w) \\
   &= f(g(x)) + \varepsilon\dot{x}g'(x)f'(g(x))\;,
-\end{align}
+\end{align} 
 
 which, particularly if we assume that \(x\) is our independent
 variable and thus \(\dot{x} = 1\), gives us the chain rule in a more

@@ -5,17 +5,21 @@
 #+author: Thomas Rushton
 
 #+startup: overview
-#+options: num:t toc:nil reveal_width:1500 reveal_height:1000 ^:{} ':t
+#+options: num:t toc:nil ^:{} ':t
+#+options: reveal_width:1500 reveal_height:1000 reveal_slider_number:c/t
 #+export_file_name: index
 
 #+REVEAL_ROOT: ../reveal.js
 #+REVEAL_THEME: white
-#+REVEAL_PLUGINS: (math)
+#+reveal_trans: slide
+# #+REVEAL_PLUGINS: (math)
+# Prevent org-re-reveal from loading MathJax automatically!
+#+REVEAL_MATHJAX_URL:
 #+REVEAL_MIN_SCALE: 1.0
 #+REVEAL_MAX_SCALE: 1.0
 #+REVEAL_EXTRA_OPTIONS: hash: true, fragmentInURL: true
 #+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
-#+reveal_extra_scripts: ("dist/ifc24.js")
+#+reveal_extra_scripts: ("node_modules/mathjax/es5/tex-svg.js" "dist/ifc24.js")
 #+reveal_extra_css: style.css
 
 * About This Presentation                                          :noexport:
@@ -55,10 +59,16 @@ Finally, navigate to [[http://localhost:8000/ifc-2024]].
 
 #+REVEAL: split
 
-#+attr_html: :style font-size: 1.66em;
+#+attr_html: :class big-eqn
 \begin{equation}
 f'(x) = \lim_{h\to0}\frac{f(x + h) - f(x)}{h}
 \end{equation}
+
+#+begin_src css :exports none :results none :tangle style.css
+.big-eqn {
+    font-size: 1.66em;
+}
+#+end_src
 
 #+REVEAL: split
 
@@ -88,17 +98,73 @@ f'(x) = \lim_{h\to0}\frac{f(x + h) - f(x)}{h}
 </div>
 #+end_export
 
-** JS/CSS for this slide                                           :noexport:
+#+REVEAL: split
+
+\begin{equation}
+\textrm{Let}\; h = \varepsilon\dot{x}
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+\(\varepsilon\) is a /nilpotent symbol/:
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+\varepsilon \neq 0\;,\quad\varepsilon^{2} = 0
+\end{equation}
+
+#+attr_html: :class big-eqn
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
+\end{equation}
+
+#+attr_html: :class big-eqn
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+\varepsilon\dot{x}f'(x) = f(x + \varepsilon\dot{x}) - f(x)
+\end{equation}
+
+#+attr_html: :class big-eqn
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+{\color{blue} f(x + \varepsilon\dot{x}) = f(x) + \varepsilon\dot{x}f'(x)}
+\end{equation}
+
+#+REVEAL: split
+
+\begin{equation}
+\textrm{Let}\; f(x) = x
+\end{equation}
+
+#+attr_html: :class big-eqn
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+f(x + \varepsilon\dot{x}) = {\color{blue} x} + {\color{green} \varepsilon\dot{x}}
+\end{equation}
+
+#+begin_export html
+<p class="fragment">This is a <span style="color:blue;">DUAL</span> <span style="color:green;">NUMBER</span>.</p>
+<p class="fragment">The first component is the <span style="color:blue;">PRIMAL</span> expression; the second is the <span style="color:green;">TANGENT</span>.</p>
+#+end_export
+
+#+ATTR_REVEAL: :frag t
+/Possible interpretation/ --- truncated Taylor series expansion at
+\(\varepsilon\dot{x} = 0\):
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+f(x + \varepsilon\dot{x}) = x + \varepsilon\dot{x}f'(x) +
+  \cancel{(\varepsilon\dot{x})^{2}\frac{f''(x)}{2}} + \cancel{(\varepsilon\dot{x})^{3}\frac{f'''(x)}{6}} + \cdots
+\end{equation}
+
+** JS & CSS for the xSquared Plot                                  :noexport:
 
 Some CSS. Just tangle this to the current directory.
 
 #+begin_src css :results none :tangle style.css
 #xSquaredContainer {
     display: flex;
-}
-
-#xSquaredContainer > div:first-child {
-    width: 55%;
+    justify-content: space-evenly;
 }
 
 #xSquaredContainer> div:nth-child(2) {
@@ -118,17 +184,11 @@ Some CSS. Just tangle this to the current directory.
 
 Tangle JS to the =src= directory to be processed by Vite.
 
-Import MathJax ~tex2svg~:
-
-#+begin_src js :results none :tangle src/xsquared.js
-import 'mathjax/es5/tex-svg';
-
-const SVG = {};
-#+end_src
-
 Some display constants:
 
 #+begin_src js :results none :tangle src/xsquared.js
+const SVG = {};
+
 const CANVAS = {
     WIDTH: 600,
     HEIGHT: 600,
@@ -378,7 +438,7 @@ secant line found as \(m(x - x_{1}) + y_{1}\).
     \\begin{align}
         f'(x) &\\approx \\frac{f(x + h) - f(x)}{h} \\\\[10pt]
           &\\approx \\frac{${xhxh.toFixed(2)} - ${xx.toFixed(2)}}{${h}} = ${fprimex.toFixed(2)} \\\\[10pt]
-          &\\approx ${isFinite(mx) ? mx.toFixed(2) : "\\infty{}"}x
+          &\\approx ${isFinite(mx) ? mx.toFixed(2) + "x" : "\\infty{}"}
     \\end{align}
     $$`;
                     this.xSlider.valSpan.innerHTML = `\\(${x.toFixed(2)}\\)`;
@@ -418,10 +478,51 @@ Initialise the layers:
 }
 #+end_src
 
-* Consolidated calls to javascript components                      :noexport:
+* Dual Number Arithmetic
+
+#+REVEAL: split
+
+The basic rules of differentiation arithmetic arise from application
+of dual numbers.
+
+\begin{align}
+(u + \varepsilon\dot{u}) + (v + \varepsilon\dot{v}) &= {\color{blue} u + v} + {\color{green} \varepsilon(\dot{u} + \dot{v})} \\[.5em]
+(u + \varepsilon\dot{u}) - (v + \varepsilon\dot{v}) &= u - v + \varepsilon(\dot{u} - \dot{v}) \\[.5em]
+(u + \varepsilon\dot{u}) \times (v + \varepsilon\dot{v}) &= uv + \varepsilon(u\dot{v} + v\dot{u}) \\[.5em]
+(u + \varepsilon\dot{u}) \div (v + \varepsilon\dot{v}) &= (u + \varepsilon\dot{u})\frac{1}{(v + \varepsilon\dot{v})} \\
+  &= (u + \varepsilon\dot{u})\left(\frac{1}{v} - \varepsilon\frac{\dot{v}}{v^{2}}\right) \\
+  &= \frac{u}{v} + \varepsilon\left(\frac{v\dot{u} - u\dot{v}}{v^{2}}\right)
+\end{align}
+
+#+REVEAL: split
+
+The truncated Taylor series gives us some other useful results.
+
+\begin{align}
+\sin(x + \varepsilon\dot{x}) &= \sin(x) + \varepsilon\dot{x}\cos(x) \\[.5em]
+\ln(x + \varepsilon\dot{x}) &= \ln(x) + \varepsilon\dot{x}\frac{1}{x} \\[.5em]
+e^{x + \varepsilon\dot{x}} &= e^{x} + \varepsilon\dot{x}e^{x} \\[.5em]
+(u + \varepsilon\dot{u})^{(v + \varepsilon\dot{v})} &= u^{v} + \varepsilon{}u^{v-1}(\dot{v}u\ln(u) + \dot{u}v)
+\end{align}
+
+#+REVEAL: split
+
+Multiple applications of \(f(x + \varepsilon\dot{x})\) give us the chain rule.
+
+\begin{align}
+f(g(x + \varepsilon\dot{x})) &= f(g(x) + \varepsilon\dot{x}g'(x)) \\
+  &= f(w + \varepsilon\dot{w})\;,\quad w = g(x)\;,\quad \dot{w} = \dot{x}g'(x) \\
+  &= f(w) + \varepsilon\dot{w}f'(w) \\
+  &= {\color{blue} f(g(x))} + {\color{green} \varepsilon\dot{x}g'(x)f'(g(x))}
+\end{align} 
+
+* Set up Javascript components                                     :noexport:
 
 #+begin_src js :results none :tangle src/main.js
 import xSquared from "./xsquared.js";
 
-xSquared();
+// Should try to initialise MathJax here...
+Reveal.on("ready", e => {
+    xSquared();
+});
 #+end_src
