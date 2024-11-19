@@ -10,16 +10,17 @@
 #+export_file_name: index
 
 #+REVEAL_ROOT: ../reveal.js
-#+REVEAL_THEME: white
+#+REVEAL_THEME: simple
+#+reveal_highlight_css: %r/plugin/highlight/monokai.css
 #+reveal_trans: slide
-# #+REVEAL_PLUGINS: (math)
+#+REVEAL_PLUGINS: (highlight)
 # Prevent org-re-reveal from loading MathJax automatically!
 #+REVEAL_MATHJAX_URL:
 #+REVEAL_MIN_SCALE: 1.0
 #+REVEAL_MAX_SCALE: 1.0
 #+REVEAL_EXTRA_OPTIONS: hash: true, fragmentInURL: true
 #+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
-#+reveal_extra_scripts: ("node_modules/mathjax/es5/tex-svg.js" "dist/ifc24.js")
+#+reveal_extra_scripts: ("./node_modules/mathjax/es5/tex-svg.js" "./dist/ifc24.js")
 #+reveal_extra_css: style.css
 
 * About This Presentation                                          :noexport:
@@ -37,11 +38,11 @@ Add this hook that'll run =npm= before export:
 
 #+begin_src emacs-lisp :results silent
 ;; (setq org-export-before-processing-hook nil)
-(add-hook 'org-export-before-processing-functions
-	  (lambda (backend)
-	    (interactive)
-	    (message "building js...")
-	    (shell-command-to-string "npm run build")))
+;; (add-hook 'org-export-before-processing-functions
+;; 	  (lambda (backend)
+;; 	    (interactive)
+;; 	    (message "building js...")
+;; 	    (shell-command-to-string "npm run build")))
 #+end_src
 
 Tangle, =C-c C-v t=, then export as a Reveal.js presentation, =C-c C-e
@@ -80,12 +81,12 @@ f'(x) = \lim_{h\to0}\frac{f(x + h) - f(x)}{h}
       <canvas id="secantCanvas"></canvas>
     </div>
     <div>
-      <label for="xSquare-xValue">\(x\)</label>
+      <label for="xSquared-xValue">\(x\)</label>
       <input type="range" id="xSquared-x" min=-2 max=2 value=0 step=.01 />
       <span id="xSquared-xValue" class="sliderValue"></span>
     </div>
     <div>
-      <label for="xSquare-hValue">\(h\)</label>
+      <label for="xSquared-hValue">\(h\)</label>
       <input type="range" id="xSquared-h" min=.01 max=3 value=2 step=.01 />
       <span id="xSquared-hValue" class="sliderValue"></span>
     </div>
@@ -97,65 +98,6 @@ f'(x) = \lim_{h\to0}\frac{f(x + h) - f(x)}{h}
   </div>
 </div>
 #+end_export
-
-#+REVEAL: split
-
-\begin{equation}
-\textrm{Let}\; h = \varepsilon\dot{x}
-\end{equation}
-
-#+ATTR_REVEAL: :frag t
-\(\varepsilon\) is a /nilpotent symbol/:
-
-#+ATTR_REVEAL: :frag t
-\begin{equation}
-\varepsilon \neq 0\;,\quad\varepsilon^{2} = 0
-\end{equation}
-
-#+attr_html: :class big-eqn
-#+ATTR_REVEAL: :frag t
-\begin{equation}
-f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
-\end{equation}
-
-#+attr_html: :class big-eqn
-#+ATTR_REVEAL: :frag t
-\begin{equation}
-\varepsilon\dot{x}f'(x) = f(x + \varepsilon\dot{x}) - f(x)
-\end{equation}
-
-#+attr_html: :class big-eqn
-#+ATTR_REVEAL: :frag t
-\begin{equation}
-{\color{blue} f(x + \varepsilon\dot{x}) = f(x) + \varepsilon\dot{x}f'(x)}
-\end{equation}
-
-#+REVEAL: split
-
-\begin{equation}
-\textrm{Let}\; f(x) = x
-\end{equation}
-
-#+attr_html: :class big-eqn
-#+ATTR_REVEAL: :frag t
-\begin{equation}
-f(x + \varepsilon\dot{x}) = {\color{blue} x} + {\color{green} \varepsilon\dot{x}}
-\end{equation}
-
-#+begin_export html
-<p class="fragment">This is a <span style="color:blue;">DUAL</span> <span style="color:green;">NUMBER</span>.</p>
-<p class="fragment">The first component is the <span style="color:blue;">PRIMAL</span> expression; the second is the <span style="color:green;">TANGENT</span>.</p>
-#+end_export
-
-#+ATTR_REVEAL: :frag t
-/Possible interpretation/ --- truncated Taylor series expansion at
-\(\varepsilon\dot{x} = 0\):
-
-#+ATTR_REVEAL: :frag t
-\begin{equation}
-f(x + \varepsilon\dot{x}) = x + \varepsilon\dot{x}f'(x) +
-  \cancel{(\varepsilon\dot{x})^{2}\frac{f''(x)}{2}} + \cancel{(\varepsilon\dot{x})^{3}\frac{f'''(x)}{6}} + \cdots
-\end{equation}
 
 ** JS & CSS for the xSquared Plot                                  :noexport:
 
@@ -227,17 +169,15 @@ Prepare to plot \(f(x) = x^{2}\):
 
 #+begin_src js :results none :tangle src/xsquared.js
 export default async () => {
-    const yVec = xVec.map(x => ({x: x, y: x * x}));
-    const yMax = Math.max(...yVec.map(y => y.y));
     const f = x => x * x;
+    const yVec = xVec.map(x => ({x: x, y: f(x)}));
+    const yMax = Math.max(...yVec.map(y => y.y));
 
-    // Cache the NPM version of MathJax, otherwise it'll be overwritten by the version bundled by Reveal.js
-    const mj = MathJax;
-    await mj.startup.promise;
+    await MathJax.startup.promise;
     const xml = new XMLSerializer();
     const tex2imageSrc = tex => "data:image/svg+xml;base64, " +
           window.btoa(unescape(encodeURIComponent(
-              xml.serializeToString(mj.tex2svg(tex).firstElementChild)
+              xml.serializeToString(MathJax.tex2svg(tex).firstElementChild)
           )));
 #+end_src
 
@@ -416,12 +356,7 @@ secant line found as \(m(x - x_{1}) + y_{1}\).
                 SVG.XPLUSH = img;
 
                 const x = Number(this.xSlider.element.value);
-                const h = Number(this.hSlider.element.value);
-                const xx = f(x);
-                const xhxh = f(x + h);
-                const fprimex = (xhxh - xx) / h;
-                const mx = fprimex / x;
-                
+                const h = Number(this.hSlider.element.value);                
                 const v = this.visualiser(this.canvas.getContext("2d"));
                 v.draw(x, h);
 
@@ -433,7 +368,7 @@ secant line found as \(m(x - x_{1}) + y_{1}\).
                     const fprimex = (xhxh - xx) / h;
                     const mx = fprimex / x;
 
-                    mj.typesetClear([this.math, this.xSlider.valSpan, this.hSlider.valSpan]);
+                    MathJax.typesetClear([this.math, this.xSlider.valSpan, this.hSlider.valSpan]);
                     this.math.innerHTML = `$$
     \\begin{align}
         f'(x) &\\approx \\frac{f(x + h) - f(x)}{h} \\\\[10pt]
@@ -443,7 +378,7 @@ secant line found as \(m(x - x_{1}) + y_{1}\).
     $$`;
                     this.xSlider.valSpan.innerHTML = `\\(${x.toFixed(2)}\\)`;
                     this.hSlider.valSpan.innerHTML = `\\(${h.toFixed(2)}\\)`;
-                    await mj.typesetPromise([this.math, this.xSlider.valSpan, this.hSlider.valSpan]);
+                    await MathJax.typesetPromise([this.math, this.xSlider.valSpan, this.hSlider.valSpan]);
                 };
 
                 updateMath();
@@ -478,6 +413,65 @@ Initialise the layers:
 }
 #+end_src
 
+
+** A Bit of Mathematical Skulduggery
+
+\begin{equation}
+\textrm{Let}\; h = \varepsilon\dot{x}
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+\(\varepsilon\) is a /nilpotent symbol/: \(\quad\varepsilon \neq
+0\;,\quad\varepsilon^{2} = 0\)
+
+#+ATTR_REVEAL: :frag t
+\(\dot{x}\) is Newton's notation for the derivative.
+
+#+attr_html: :class big-eqn
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
+\end{equation}
+
+# #+attr_html: :class big-eqn
+# #+ATTR_REVEAL: :frag t
+# \begin{equation}
+# \varepsilon\dot{x}f'(x) = f(x + \varepsilon\dot{x}) - f(x)
+# \end{equation}
+
+#+attr_html: :class big-eqn
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+{\color{darkred} f(x + \varepsilon\dot{x}) = f(x) + \varepsilon\dot{x}f'(x)}
+\end{equation}
+
+#+REVEAL: split
+
+\begin{equation}
+\textrm{Let}\; f(x) = x
+\end{equation}
+
+#+attr_html: :class big-eqn
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+f(x + \varepsilon\dot{x}) = {\color{blue} x} + {\color{green} \varepsilon\dot{x}}
+\end{equation}
+
+#+begin_export html
+<p class="fragment">This is a <span style="color:blue;">DUAL</span> <span style="color:green;">NUMBER</span>.</p>
+<p class="fragment">The first component is the <span style="color:blue;">PRIMAL</span> expression; the second is the <span style="color:green;">TANGENT</span>.</p>
+#+end_export
+
+#+ATTR_REVEAL: :frag t
+/Possible interpretation/ --- truncated Taylor series expansion at
+\(\varepsilon\dot{x} = 0\):
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+f(x + \varepsilon\dot{x}) = x + \varepsilon\dot{x}f'(x) +
+  \cancel{(\varepsilon\dot{x})^{2}\frac{f''(x)}{2}} + \cancel{(\varepsilon\dot{x})^{3}\frac{f'''(x)}{6}} + \cdots
+\end{equation}
+
 * Dual Number Arithmetic
 
 #+REVEAL: split
@@ -487,11 +481,11 @@ of dual numbers.
 
 \begin{align}
 (u + \varepsilon\dot{u}) + (v + \varepsilon\dot{v}) &= {\color{blue} u + v} + {\color{green} \varepsilon(\dot{u} + \dot{v})} \\[.5em]
-(u + \varepsilon\dot{u}) - (v + \varepsilon\dot{v}) &= u - v + \varepsilon(\dot{u} - \dot{v}) \\[.5em]
-(u + \varepsilon\dot{u}) \times (v + \varepsilon\dot{v}) &= uv + \varepsilon(u\dot{v} + v\dot{u}) \\[.5em]
+(u + \varepsilon\dot{u}) - (v + \varepsilon\dot{v}) &= {\color{blue} u - v} + {\color{green} \varepsilon(\dot{u} - \dot{v})} \\[.5em]
+(u + \varepsilon\dot{u}) \times (v + \varepsilon\dot{v}) &= {\color{blue} uv} + {\color{green} \varepsilon(u\dot{v} + v\dot{u})} \\[.5em]
 (u + \varepsilon\dot{u}) \div (v + \varepsilon\dot{v}) &= (u + \varepsilon\dot{u})\frac{1}{(v + \varepsilon\dot{v})} \\
-  &= (u + \varepsilon\dot{u})\left(\frac{1}{v} - \varepsilon\frac{\dot{v}}{v^{2}}\right) \\
-  &= \frac{u}{v} + \varepsilon\left(\frac{v\dot{u} - u\dot{v}}{v^{2}}\right)
+  &= (u + \varepsilon\dot{u}){\color{darkred}\left(\frac{1}{v} - \varepsilon\frac{\dot{v}}{v^{2}}\right)} \\
+  &= {\color{blue} \frac{u}{v}} + {\color{green} \varepsilon\left(\frac{v\dot{u} - u\dot{v}}{v^{2}}\right)}
 \end{align}
 
 #+REVEAL: split
@@ -499,10 +493,10 @@ of dual numbers.
 The truncated Taylor series gives us some other useful results.
 
 \begin{align}
-\sin(x + \varepsilon\dot{x}) &= \sin(x) + \varepsilon\dot{x}\cos(x) \\[.5em]
-\ln(x + \varepsilon\dot{x}) &= \ln(x) + \varepsilon\dot{x}\frac{1}{x} \\[.5em]
-e^{x + \varepsilon\dot{x}} &= e^{x} + \varepsilon\dot{x}e^{x} \\[.5em]
-(u + \varepsilon\dot{u})^{(v + \varepsilon\dot{v})} &= u^{v} + \varepsilon{}u^{v-1}(\dot{v}u\ln(u) + \dot{u}v)
+\sin(u + \varepsilon\dot{u}) &= {\color{blue} \sin(u)} + {\color{green} \varepsilon\dot{u}\cos(u)} \\[.5em]
+\ln(u + \varepsilon\dot{u}) &= {\color{blue} \ln(u)} + {\color{green} \varepsilon\dot{u}\frac{1}{u}} \\[.5em]
+e^{(u + \varepsilon\dot{u})} &= {\color{blue} e^{u}} + {\color{green} \varepsilon\dot{u}e^{u}} \\[.5em]
+(u + \varepsilon\dot{u})^{(v + \varepsilon\dot{v})} &= {\color{blue} u^{v}} + {\color{green} \varepsilon{}u^{v-1}(\dot{v}u\ln(u) + \dot{u}v)}
 \end{align}
 
 #+REVEAL: split
@@ -514,15 +508,315 @@ f(g(x + \varepsilon\dot{x})) &= f(g(x) + \varepsilon\dot{x}g'(x)) \\
   &= f(w + \varepsilon\dot{w})\;,\quad w = g(x)\;,\quad \dot{w} = \dot{x}g'(x) \\
   &= f(w) + \varepsilon\dot{w}f'(w) \\
   &= {\color{blue} f(g(x))} + {\color{green} \varepsilon\dot{x}g'(x)f'(g(x))}
-\end{align} 
+\end{align}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :style padding-top: 1em
+E.g. let \(g(x) = \sin(x)\) and \(f(v) = v^{2}\):
+
+#+ATTR_REVEAL: :frag t
+\begin{align}
+\sin^{2}(x + \varepsilon\dot{x}) &= \sin^{2}(x) + \varepsilon\dot{x}\cos(x)2v \\
+  &= {\color{blue} \sin^{2}(x)} + {\color{green} \varepsilon2\sin(x)\cos(x)}
+\end{align}
+
+** A Change of Notation
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :class big-eqn
+\begin{equation}
+({\color{blue} u} + {\color{green} \varepsilon\dot{u}}) \to \langle {\color{blue} u}, {\color{green} u'} \rangle
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+UV = \langle {\color{blue} u}, {\color{green} u'} \rangle\langle {\color{blue} v}, {\color{green} v'} \rangle
+  = \langle {\color{blue} uv}, {\color{green} uv' + vu'} \rangle
+\end{equation}
+
+@@html: <div class="fragment">@@
+Possible implementation:
+
+#+attr_html: :style width: 1050px;
+#+begin_src c++
+class Dual {
+  //...
+  float primal, tangent;
+  //....
+  Dual operator*(Dual& d) {
+    Dual result;
+    result.primal = this->primal * d.primal;
+    result.tangent = this->primal * d.tangent + d.primal * this->tangent;
+    return result;
+  }
+}
+#+end_src
+@@html: </div>@@
+
+#+begin_src css :exports none :results none :tangle style.css
+pre code.hljs {
+    padding: 1em;
+}
+#+end_src
+
+** A numerical example
+
+Compute the primal and tangent of \((x + 1)(x - 2)\).
+
+#+ATTR_REVEAL: :frag t
+Variable, \(X = \langle {\color{blue} x}, {\color{green} 1} \rangle\). Constant,
+\(C = \langle {\color{blue} c}, {\color{green} 0} \rangle\).
+
+#+begin_export html
+<div id="dualExample" class="fragment">
+  <div>
+    <label for="dualX">\(x\)</label>
+    <input type="range" id="dualX" min=-2 max=2 value=0 step=.01 />
+  </div>
+  <div id="dualNumerical">
+  </div>
+  <canvas id="dualPlotStatic"></canvas>
+  <canvas id="dualPlotDynamic"></canvas>
+</div>
+#+end_export
+
+*** JS for the numerical example                                   :noexport:
+
+#+begin_src js :results none :tangle src/dualnumber.js
+export default class Dual {
+    constructor(primal, tangent) {
+        this.primal = primal;
+        this.tangent = tangent;
+    }
+
+    toString() {
+        return `\\langle{\\color{blue}${this.primal.toFixed(2)}},{\\color{green}${this.tangent.toFixed(2)}}\\rangle`;
+    }
+
+    add(d) {
+        return new Dual(this.primal + d.primal, this.tangent + d.tangent);
+    }
+
+    sub(d) {
+        return new Dual(this.primal - d.primal, this.tangent - d.tangent);
+    }
+
+    mul(d) {
+        return new Dual(this.primal * d.primal, this.primal * d.tangent + d.primal * this.tangent);
+    }
+};
+#+end_src
+
+#+begin_src js :results none :tangle src/numerical.js
+import Dual from "./dualnumber"
+
+const CANVAS = { WIDTH: 550, HEIGHT: 550, PADDING: 0 };
+const AXES = { X: { ZERO: CANVAS.WIDTH / 2 },
+               Y: { ZERO: CANVAS.HEIGHT - 250 } };
+const X = { LEN: 1000, MIN: -2.5, MAX: 2.5};
+X.STEP = (X.MAX - X.MIN) / X.LEN;
+const xVec = Array.from({length: X.LEN + 1}, (_,x) => X.MIN + x * X.STEP);
+const C1 = new Dual(1, 0);
+const C2 = new Dual(2, 0);
+// const f = x => x.add(C1).mul(C2.sub(x));
+const f = x => x.add(C1).mul(x.sub(C2));
+const yVec = xVec.map(x => ({x: x, y: f(new Dual(x, 1)).primal}));
+const yMax = 3.5;//Math.max(...yVec.map(y => y.y));
+
+export default async () => {
+    const math = document.getElementById("dualNumerical");
+    const slider = document.getElementById("dualX");
+
+    const plot = {
+        staticLayer: {
+            canvas: document.getElementById("dualPlotStatic"),
+
+            drawAxis: {
+                x: ctx => {
+                    ctx.beginPath();
+                    ctx.moveTo(0, AXES.Y.ZERO);
+                    ctx.lineTo(CANVAS.WIDTH, AXES.Y.ZERO);
+                    ctx.stroke();
+                    // Arrow
+                    ctx.beginPath();
+                    ctx.moveTo(CANVAS.WIDTH, AXES.Y.ZERO);
+                    ctx.lineTo(CANVAS.WIDTH - 10, AXES.Y.ZERO - 5);
+                    ctx.lineTo(CANVAS.WIDTH - 10, AXES.Y.ZERO + 5);
+                    ctx.closePath();
+                    ctx.fill();
+                },
+                y: ctx => {
+                    ctx.beginPath();
+                    ctx.moveTo(AXES.X.ZERO, 0);
+                    ctx.lineTo(AXES.X.ZERO, CANVAS.HEIGHT);
+                    ctx.stroke();
+                    // Arrow
+                    ctx.beginPath();
+                    ctx.moveTo(AXES.X.ZERO, 0);
+                    ctx.lineTo(AXES.X.ZERO - 5, 10);
+                    ctx.lineTo(AXES.X.ZERO + 5, 10);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            },
+
+            drawFunction: ctx => {
+                ctx.beginPath();
+                ctx.moveTo(
+                    CANVAS.PADDING + (yVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - yVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                );
+                yVec.forEach(p => ctx.lineTo(
+                    CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                ));
+                ctx.strokeStyle = "blue";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            },
+
+            init() {
+                if (this.canvas.getContext) {
+                    this.canvas.setAttribute("width", CANVAS.WIDTH);
+                    this.canvas.setAttribute("height", CANVAS.HEIGHT);
+
+                    const ctx = this.canvas.getContext("2d");
+                    this.drawAxis.x(ctx);
+                    this.drawAxis.y(ctx);
+                    this.drawFunction(ctx);
+                }
+            }
+        },
+
+        dynamicLayer: {
+            canvas: document.getElementById("dualPlotDynamic"),
+
+            artist: ctx => ({
+                clear: () => ctx.clearRect(0, 0, CANVAS.WIDTH, CANVAS.HEIGHT),
+
+                drawTangent: x => {
+                    const slope = f(new Dual(x, 1)).tangent;
+                    const yTanVec = xVec.map(xVal => ({x: xVal, y: slope * (xVal - x) + f(new Dual(x, 1)).primal}));
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        CANVAS.PADDING + (yTanVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                        CANVAS.PADDING + (yMax - yTanVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                    );
+                    yTanVec.forEach(p => ctx.lineTo(
+                        CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                        CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                    ));
+                    ctx.strokeStyle = "green";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                },
+
+                drawIntersection: x => {
+                    const indicatorWidth = 6;
+                    ctx.beginPath();
+                    ctx.arc(
+                        CANVAS.PADDING + (x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                        CANVAS.PADDING + (yMax - f(new Dual(x, 1)).primal) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax,
+                        indicatorWidth,
+                        0, 2 * Math.PI
+                    );
+                    ctx.fill();
+                },
+                
+                draw(x) {
+                    this.drawTangent(x);
+                    this.drawIntersection(x);
+                },
+                
+                redraw(x) {
+                    this.clear();
+                    this.draw(x);
+                }
+            }),
+
+            async init() {
+                if (this.canvas.getContext) {
+                    this.canvas.setAttribute("width", CANVAS.WIDTH);
+                    this.canvas.setAttribute("height", CANVAS.HEIGHT);
+
+                    const x = Number(slider.value);
+                    // this.ctx = this.canvas.getContext("2d");
+                    return this.artist(this.canvas.getContext("2d"));
+                }
+            }
+        }
+    };
+
+    const updateMath = async () => {
+        const x = new Dual(Number(slider.value), 1);
+        
+        MathJax.typesetClear([math]);
+        math.innerHTML = `\\begin{align}
+& ( ${x} + ${C1} )( ${x} - ${C2} ) \\\\[.5em]
+=& ${x.add(C1)} ${x.sub(C2)} \\\\[.5em]
+=& ${f(x)}
+\\end{align}`
+        await MathJax.typesetPromise([math]);
+    };
+
+    await MathJax.startup.promise;
+    
+    await updateMath();
+    plot.staticLayer.init();
+    const d = await plot.dynamicLayer.init();
+    d.draw(Number(slider.value));
+
+    slider.addEventListener("input", async ({target: {value}}) => {
+        await updateMath();
+        await d.redraw(Number(value));
+    });
+}
+#+end_src
+
+And some CSS
+
+#+begin_src css :results none :tangle style.css
+#dualExample {
+    position: relative;
+}
+
+#dualExample > canvas {
+    position: absolute;
+    top: -10%;
+    opacity: .5;
+    z-index: -100;
+}
+#+end_src
+
+** Computational Graph of \(f(x) = x^{2}\)
+
+** A more sophisticated computational graph
+
+** There's a reverse mode too...
+
+* What Does Have To Do With Faust?
 
 * Set up Javascript components                                     :noexport:
 
 #+begin_src js :results none :tangle src/main.js
 import xSquared from "./xsquared.js";
+import numerical from "./numerical.js";
 
-// Should try to initialise MathJax here...
+// Should try to initialise MathJax here?..
 Reveal.on("ready", e => {
     xSquared();
+    numerical();
 });
 #+end_src
+
+* Emacs Setup                                                      :noexport:
+
+Add a hook to run =npm= before export:
+
+# Local Variables:
+# eval: (add-hook 'org-export-before-processing-functions
+# (lambda (backend)
+# (interactive)
+# (message "building js...")
+# (shell-command-to-string "npm run build")))
+# End:

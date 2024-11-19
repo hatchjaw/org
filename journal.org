@@ -4537,3 +4537,13 @@ of this stuff into my presentation for IFC:
 - Reverse mode too?
 
 Entered on [2024-11-13 mer. 18:45]
+*** 2024-11-18 lundi
+**** IFC presentation                                   :CONFERENCE:FAUST:
+That's what I've been working on lately. Reveal.js + MathJax (loaded
+separately) + HTML ~<canvas>~. Plenty still to do.
+
+Might need to be more careful about how MathJax is loaded; promises,
+and doing dynamic retypesetting, mean sometimes things fail to display
+as intended.
+
+Entered on [2024-11-18 lun. 18:54]
