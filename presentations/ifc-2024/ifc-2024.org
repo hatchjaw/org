@@ -5,7 +5,7 @@
 #+author: Thomas Rushton
 
 #+startup: overview
-#+options: num:t toc:nil ^:{} ':t
+#+options: num:nil toc:nil ^:{} ':t
 #+options: reveal_width:1500 reveal_height:1000 reveal_slider_number:c/t
 #+export_file_name: index
 
@@ -55,6 +55,14 @@ npm start -- --root=../
 #+end_src
 
 Finally, navigate to [[http://localhost:8000/ifc-2024]].
+
+* Agenda
+
+#+ATTR_REVEAL: :frag (appear)
+- Differentiation
+- Dual Number arithmetic
+- Automatic Differentiation
+- Differentiable Programming in Faust
 
 * Differentiation
 
@@ -231,6 +239,8 @@ Define the axes and the static plot of \(f(x)\):
                     CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
                     CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
                 ));
+                ctx.strokeStyle = "blue";
+                ctx.lineWidth = 2;
                 ctx.stroke();
             },
         }),
@@ -324,6 +334,8 @@ secant line found as \(m(x - x_{1}) + y_{1}\).
                     CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
                     CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
                 ));
+                ctx.strokeStyle = "green";
+                ctx.lineWidth = 2;
                 ctx.stroke();
             },
 
@@ -434,12 +446,6 @@ Initialise the layers:
 f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
 \end{equation}
 
-# #+attr_html: :class big-eqn
-# #+ATTR_REVEAL: :frag t
-# \begin{equation}
-# \varepsilon\dot{x}f'(x) = f(x + \varepsilon\dot{x}) - f(x)
-# \end{equation}
-
 #+attr_html: :class big-eqn
 #+ATTR_REVEAL: :frag t
 \begin{equation}
@@ -484,7 +490,7 @@ of dual numbers.
 (u + \varepsilon\dot{u}) - (v + \varepsilon\dot{v}) &= {\color{blue} u - v} + {\color{green} \varepsilon(\dot{u} - \dot{v})} \\[.5em]
 (u + \varepsilon\dot{u}) \times (v + \varepsilon\dot{v}) &= {\color{blue} uv} + {\color{green} \varepsilon(u\dot{v} + v\dot{u})} \\[.5em]
 (u + \varepsilon\dot{u}) \div (v + \varepsilon\dot{v}) &= (u + \varepsilon\dot{u})\frac{1}{(v + \varepsilon\dot{v})} \\
-  &= (u + \varepsilon\dot{u}){\color{darkred}\left(\frac{1}{v} - \varepsilon\frac{\dot{v}}{v^{2}}\right)} \\
+  &= (u + \varepsilon\dot{u})\left(\frac{1}{v} - \varepsilon\frac{\dot{v}}{v^{2}}\right) \\
   &= {\color{blue} \frac{u}{v}} + {\color{green} \varepsilon\left(\frac{v\dot{u} - u\dot{v}}{v^{2}}\right)}
 \end{align}
 
@@ -789,7 +795,6 @@ And some CSS
 }
 #+end_src
 
-
 ** Multivariate Dual Numbers
 
 #+attr_html: :class big-eqn
@@ -805,8 +810,12 @@ And some CSS
 
 #+REVEAL: split
 
+\begin{equation}
+f(x_{1},x_{2}) = \sin(x_{1})(x_{1} + x_{2})
+\end{equation}
+
 #+begin_export html
-<div>
+<div id="graphMathContainer">
   <canvas id="graphStatic"></canvas>
   <canvas id="graphDynamic"></canvas>
   <input type="range" id="graphX1" min=-5 max=5 value=0 step=.01 />
@@ -822,6 +831,10 @@ And some CSS
 *** CSS & JS for the graph                                         :noexport:
 
 #+begin_src css :results none :tangle style.css
+#graphMathContainer {
+    position: relative;
+}
+
 input#graphX1 {
     position: absolute;
     left: 0;
@@ -1099,15 +1112,62 @@ export default async () => {
 
 #+ATTR_REVEAL: :frag (appear)
 - /End-to-end differentiability/ is fundamental to *gradient-based*
-  optimisation approaches.
+  optimisation methods.
 - Gradient descent is fundamental to contemporary approaches to
   machine learning.
 - /Automatic Differentiation/ and /Differentiable Programming/ ensure
   end-to-end differentiability.
 
-** There's a reverse mode too...
-
 * What Does This Have To Do With Faust?
+
+#+ATTR_REVEAL: :frag (appear)
+- Many of Faust's primitive operators can be differentiated.
+- Forward mode, dual-number automatic differentiation can be
+  implemented in Faust.
+- Pattern matching can be used to /override/ Faust's primitives with
+  differentiable implementations.
+
+** Gradient-based Parameter Optimisation
+
+#+ATTR_REVEAL: :frag t
+Take ground truth circuit producing target output signal \(y\), and
+optimisable circuit procuding estimate output \(\hat{y}\).
+
+#+ATTR_REVEAL: :frag t
+Compare \(y\) and \(\hat{y}\) via a loss function.
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+\mathcal{L}(y,\hat{y})[n] = ||\hat{y}[n] - y[n]||
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+Partial derivatives of the loss function are the *gradients* in the
+direction that minimises the loss function.
+
+#+ATTR_REVEAL: :frag t
+/Backpropagating/ the gradients, we can update the parameters of the
+optimisable circuit.
+
+* Examples
+#+ATTR_HTML: :target _blank
+[[https://faustide.grame.fr][🚀]]
+
+* Provisos, Caveats
+
+#+ATTR_REVEAL: :frag (appear)
+- Automatic Differentiation has a reverse mode too --- and it may be
+  more efficient.
+- Some of Faust's primitive's don't have well-defined derivatives.
+- The derivative of a variable delay defies a closed-form solution.
+- Pattern matching has its limitations.
+- Loss taken in time-domain; only works for deterministic input, not
+  perceptually-informed.
+- Optimisation \neq generalisation.
+
+* Thank you
+
+[[https://github.com/hatchjaw/faust-ddsp]]
 
 * Set up Javascript components                                     :noexport:
 
