@@ -19,7 +19,7 @@
 #+REVEAL_MIN_SCALE: 1.0
 #+REVEAL_MAX_SCALE: 1.0
 #+REVEAL_EXTRA_OPTIONS: hash: true, fragmentInURL: true
-#+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
+#+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%a</h2><h3>Inria, Emeraude Team --- INSA Lyon</h3>
 #+reveal_extra_scripts: ("./node_modules/mathjax/es5/tex-svg.js" "./dist/ifc24.js")
 #+reveal_extra_css: style.css
 
@@ -413,19 +413,20 @@ Initialise the layers:
 }
 #+end_src
 
+* A Bit of Mathematical Skulduggery
 
-** A Bit of Mathematical Skulduggery
+#+REVEAL: split
 
 \begin{equation}
 \textrm{Let}\; h = \varepsilon\dot{x}
 \end{equation}
 
 #+ATTR_REVEAL: :frag t
-\(\varepsilon\) is a /nilpotent symbol/: \(\quad\varepsilon \neq
-0\;,\quad\varepsilon^{2} = 0\)
+\(\dot{x}\) is Newton's notation for the derivative.
 
 #+ATTR_REVEAL: :frag t
-\(\dot{x}\) is Newton's notation for the derivative.
+\(\varepsilon\) is a /nilpotent symbol/: \(\quad\varepsilon \neq
+0\;,\quad\varepsilon^{2} = 0\)
 
 #+attr_html: :class big-eqn
 #+ATTR_REVEAL: :frag t
@@ -452,7 +453,6 @@ f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
 \end{equation}
 
 #+attr_html: :class big-eqn
-#+ATTR_REVEAL: :frag t
 \begin{equation}
 f(x + \varepsilon\dot{x}) = {\color{blue} x} + {\color{green} \varepsilon\dot{x}}
 \end{equation}
@@ -559,13 +559,13 @@ pre code.hljs {
 }
 #+end_src
 
-** A numerical example
+** A Numerical Example
 
 Compute the primal and tangent of \((x + 1)(x - 2)\).
 
 #+ATTR_REVEAL: :frag t
-Variable, \(X = \langle {\color{blue} x}, {\color{green} 1} \rangle\). Constant,
-\(C = \langle {\color{blue} c}, {\color{green} 0} \rangle\).
+Independent variable, \(X = \langle {\color{blue} x}, {\color{green} 1}
+\rangle\). Constant, \(C = \langle {\color{blue} c}, {\color{green} 0} \rangle\).
 
 #+begin_export html
 <div id="dualExample" class="fragment">
@@ -579,6 +579,9 @@ Variable, \(X = \langle {\color{blue} x}, {\color{green} 1} \rangle\). Constant,
   <canvas id="dualPlotDynamic"></canvas>
 </div>
 #+end_export
+
+#+ATTR_REVEAL: :frag t
+What we've achieved here is /*AUTOMATIC DIFFERENTIATION*/.
 
 *** JS for the numerical example                                   :noexport:
 
@@ -608,7 +611,7 @@ export default class Dual {
 #+end_src
 
 #+begin_src js :results none :tangle src/numerical.js
-import Dual from "./dualnumber"
+import Dual from "./dualnumber";
 
 const CANVAS = { WIDTH: 550, HEIGHT: 550, PADDING: 0 };
 const AXES = { X: { ZERO: CANVAS.WIDTH / 2 },
@@ -618,7 +621,6 @@ X.STEP = (X.MAX - X.MIN) / X.LEN;
 const xVec = Array.from({length: X.LEN + 1}, (_,x) => X.MIN + x * X.STEP);
 const C1 = new Dual(1, 0);
 const C2 = new Dual(2, 0);
-// const f = x => x.add(C1).mul(C2.sub(x));
 const f = x => x.add(C1).mul(x.sub(C2));
 const yVec = xVec.map(x => ({x: x, y: f(new Dual(x, 1)).primal}));
 const yMax = 3.5;//Math.max(...yVec.map(y => y.y));
@@ -739,8 +741,6 @@ export default async () => {
                     this.canvas.setAttribute("width", CANVAS.WIDTH);
                     this.canvas.setAttribute("height", CANVAS.HEIGHT);
 
-                    const x = Number(slider.value);
-                    // this.ctx = this.canvas.getContext("2d");
                     return this.artist(this.canvas.getContext("2d"));
                 }
             }
@@ -778,34 +778,351 @@ And some CSS
 #+begin_src css :results none :tangle style.css
 #dualExample {
     position: relative;
+    padding-bottom: 1em;
 }
 
 #dualExample > canvas {
     position: absolute;
     top: -10%;
-    opacity: .5;
+    opacity: .4;
     z-index: -100;
 }
 #+end_src
 
-** Computational Graph of \(f(x) = x^{2}\)
 
-** A more sophisticated computational graph
+** Multivariate Dual Numbers
+
+#+attr_html: :class big-eqn
+\begin{equation}
+\langle {\color{blue} u},{\color{green} u'} \rangle \to \langle {\color{blue} u}, {\color{green} \nabla{}u} \rangle
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :class big-eqn
+\begin{equation}
+\nabla{}u = \begin{bmatrix}\frac{\partial{}u}{\partial{}x_{1}} \\ \vdots \\ \frac{\partial{}u}{\partial{}x_{N}}\end{bmatrix}
+\end{equation}
+
+#+REVEAL: split
+
+#+begin_export html
+<div>
+  <canvas id="graphStatic"></canvas>
+  <canvas id="graphDynamic"></canvas>
+  <input type="range" id="graphX1" min=-5 max=5 value=0 step=.01 />
+  <input type="range" id="graphX2" min=-5 max=5 value=0 step=.01 />
+  <div id="graphx1" class="graphMath graphMathC1 graphMathR1 smallGraphMath"></div>
+  <div id="graphx2" class="graphMath graphMathC1 graphMathR2 smallGraphMath"></div>
+  <div id="graphSin" class="graphMath graphMathC2 graphMathR1 smallGraphMath"></div>
+  <div id="graphAdd" class="graphMath graphMathC2 graphMathR2 smallGraphMath"></div>
+  <div id="graphOutput" class="graphMath"></div>
+</div>
+#+end_export
+
+*** CSS & JS for the graph                                         :noexport:
+
+#+begin_src css :results none :tangle style.css
+input#graphX1 {
+    position: absolute;
+    left: 0;
+    top: 68px;
+}
+
+input#graphX2 {
+    position: absolute;
+    left: 0;
+    top: 410px;
+}
+
+div.graphMath {
+    position: absolute;
+}
+
+div.smallGraphMath {
+    font-size: .66em;
+}
+
+.graphMathC1 {
+    left: 320px;
+}
+
+.graphMathC2 {
+    left: 720px;
+}
+
+.graphMathR1 {
+    top: 70px;
+}
+
+.graphMathR2 {
+    top: 420px;
+}
+
+div#graphOutput {
+    left: 1200px;
+    top: 160px;
+}
+#+end_src
+
+#+begin_src js :results none :tangle src/dualN.js
+export default class DualN {
+    constructor(primal, gradients) {
+        this.primal = primal;
+        this.gradients = gradients;
+    }
+
+    toString() {
+        return `$$\\left\\langle{\\color{blue}${this.primal.toFixed(2)}},{\\color{green}\\begin{bmatrix}${this.gradients.map(g => g.toFixed(2)).join(" \\\\ ")}\\end{bmatrix}}\\right\\rangle$$`;
+    }
+
+    variable(x, N, i) {
+        this.primal = x;
+        this.gradients = Array(N).fill(0);
+        this.gradients[i] = 1;
+        return this;
+    }
+
+    add(d) {        
+        return new DualN(this.primal + d.primal, this.gradients.map((g,i) => g + d.gradients[i]));
+    }
+
+    mul(d) {
+        return new DualN(this.primal * d.primal,
+                         this.gradients.map((g,i) => this.primal * d.gradients[i]  + d.primal * g));
+    }
+
+    sin() {
+        return new DualN(Math.sin(this.primal), this.gradients.map((g,i) => g * Math.cos(this.primal)));
+    }
+};
+#+end_src
+
+#+begin_src js :results none :tangle src/graph.js
+import DualN from "./dualN";
+
+const CANVAS = { WIDTH: 1200, HEIGHT: 500, PADDING: 0 };
+const OPRADIUS = 75;
+
+const f = x => x[0].add(x[1]).mul(x[0].sin());
+
+export default async () => {
+    const sliders = [
+        document.getElementById("graphX1"),
+        document.getElementById("graphX2")
+    ];
+
+    const math = {
+        x1: document.getElementById("graphx1"),
+        x2: document.getElementById("graphx2"),
+        sin: document.getElementById("graphSin"),
+        add: document.getElementById("graphAdd"),
+        output: document.getElementById("graphOutput"),
+    };
+    
+    const graph = {
+        staticLayer: {
+            canvas: document.getElementById("graphStatic"),
+
+            drawOp: (ctx, x, y, svg) => {
+                ctx.beginPath();
+                ctx.arc(
+                    x, y, OPRADIUS, 0, 2 * Math.PI
+                );
+                ctx.stroke();
+
+                ctx.drawImage(svg,
+                              x - svg.naturalWidth,
+                              y - svg.naturalHeight,
+                              svg.naturalWidth * 2,
+                              svg.naturalHeight * 2);
+            },
+            
+            async init() {
+                if (this.canvas.getContext) {
+                    this.canvas.setAttribute("width", CANVAS.WIDTH);
+                    this.canvas.setAttribute("height", CANVAS.HEIGHT);
+
+                    const xml = new XMLSerializer();
+                    const tex2imgSrc = tex => "data:image/svg+xml;base64, " +
+                          window.btoa(unescape(encodeURIComponent(
+                              xml.serializeToString(MathJax.tex2svg(tex).firstElementChild)
+                          )));
+
+                    const ctx = this.canvas.getContext("2d");
+                    
+                    let img = new Image();
+                    img.src = tex2imgSrc("x_{1}");
+                    await img.decode();
+                    this.drawOp(ctx, 100, OPRADIUS + 5, img);
+
+                    ctx.beginPath();
+                    ctx.moveTo(100 + OPRADIUS, OPRADIUS + 5);
+                    ctx.lineTo(500 - OPRADIUS, OPRADIUS + 5);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.moveTo(500 - OPRADIUS, OPRADIUS + 5);
+                    ctx.lineTo(500 - OPRADIUS - 10, OPRADIUS + 5 + 5);
+                    ctx.lineTo(500 - OPRADIUS - 10, OPRADIUS + 5 - 5);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.moveTo(100 + OPRADIUS - 4, OPRADIUS + 5 + 25);
+                    ctx.lineTo(500 - OPRADIUS + 3, CANVAS.HEIGHT - (OPRADIUS + 5) - 25);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.moveTo(500 - OPRADIUS + 3, CANVAS.HEIGHT - (OPRADIUS + 5) - 25);
+                    ctx.lineTo(500 - OPRADIUS + 3 - 10, CANVAS.HEIGHT - (OPRADIUS + 5) - 25 - 4);
+                    ctx.lineTo(500 - OPRADIUS + 3 - 5, CANVAS.HEIGHT - (OPRADIUS + 5) - 25 - 13);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    img = new Image();
+                    img.src = tex2imgSrc("x_{2}");
+                    await img.decode();
+                    this.drawOp(ctx, 100, CANVAS.HEIGHT - (OPRADIUS + 5), img);
+
+                    ctx.beginPath();
+                    ctx.moveTo(100 + OPRADIUS, CANVAS.HEIGHT - (OPRADIUS + 5));
+                    ctx.lineTo(500 - OPRADIUS, CANVAS.HEIGHT - (OPRADIUS + 5));
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.moveTo(500 - OPRADIUS, CANVAS.HEIGHT - (OPRADIUS + 5));
+                    ctx.lineTo(500 - OPRADIUS - 10, CANVAS.HEIGHT - (OPRADIUS + 5) + 5);
+                    ctx.lineTo(500 - OPRADIUS - 10, CANVAS.HEIGHT - (OPRADIUS + 5) - 5);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    img = new Image();
+                    img.src = tex2imgSrc("\\sin");
+                    await img.decode();
+                    this.drawOp(ctx, 500, OPRADIUS + 5, img);
+
+                    ctx.beginPath();
+                    ctx.moveTo(500 + OPRADIUS, OPRADIUS + 5);
+                    ctx.lineTo(900 - OPRADIUS + 3, CANVAS.HEIGHT / 2 - 25);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.moveTo(900 - OPRADIUS + 3, CANVAS.HEIGHT / 2 - 25);
+                    ctx.lineTo(900 - OPRADIUS + 3 - 11, CANVAS.HEIGHT / 2 - 25);
+                    ctx.lineTo(900 - OPRADIUS + 3 - 8, CANVAS.HEIGHT / 2 - 25 - 10);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    img = new Image();
+                    img.src = tex2imgSrc("+");
+                    await img.decode();
+                    this.drawOp(ctx, 500, CANVAS.HEIGHT - (OPRADIUS + 5), img);
+
+                    ctx.beginPath();
+                    ctx.moveTo(500 + OPRADIUS, CANVAS.HEIGHT - (OPRADIUS + 5));
+                    ctx.lineTo(900 - OPRADIUS + 3, CANVAS.HEIGHT / 2 + 25);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.moveTo(900 - OPRADIUS + 3, CANVAS.HEIGHT / 2 + 25);
+                    ctx.lineTo(900 - OPRADIUS + 3 - 11, CANVAS.HEIGHT / 2 + 25);
+                    ctx.lineTo(900 - OPRADIUS + 3 - 8, CANVAS.HEIGHT / 2 + 25 + 10);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    img = new Image();
+                    img.src = tex2imgSrc("*");
+                    await img.decode();
+                    this.drawOp(ctx, 900, CANVAS.HEIGHT / 2, img);
+
+                    ctx.beginPath();
+                    ctx.moveTo(900 + OPRADIUS, CANVAS.HEIGHT / 2);
+                    ctx.lineTo(900 + OPRADIUS + 50, CANVAS.HEIGHT / 2);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.moveTo(900 + OPRADIUS + 50, CANVAS.HEIGHT / 2);
+                    ctx.lineTo(900 + OPRADIUS + 40, CANVAS.HEIGHT / 2 + 5);
+                    ctx.lineTo(900 + OPRADIUS + 40, CANVAS.HEIGHT / 2 - 5);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            }
+        },
+
+        dynamicLayer: {
+            canvas: document.getElementById("graphDynamic"),
+            
+            artist: ctx => ({
+                redraw(X) {
+
+                }
+            }),
+            
+            async init() {
+                if (this.canvas.getContext) {
+                    return this.artist(this.canvas.getContext("2d"));
+                }
+            }
+        }
+    };
+
+    const updateMath = async () => {
+        const X = [
+            new DualN(0, []).variable(Number(sliders[0].value), sliders.length, 0),
+            new DualN(0, []).variable(Number(sliders[1].value), sliders.length, 1)
+        ];
+
+        MathJax.typesetClear([math.output, math.x1, math.x2, math.sin, math.add]);
+        math.x1.innerHTML = `${X[0]}`;
+        math.x2.innerHTML = `${X[1]}`;
+        math.sin.innerHTML = `${X[0].sin()}`;
+        math.add.innerHTML = `${X[0].add(X[1])}`;
+        math.output.innerHTML = `${f(X)}`;
+        await MathJax.typesetPromise([math.output, math.x1, math.x2, math.sin, math.add]);
+    };
+
+    await MathJax.startup.promise;
+
+    await graph.staticLayer.init();
+    const d = await graph.dynamicLayer.init();
+    await updateMath();
+
+    sliders.forEach(s => s.addEventListener("input", async e => {
+        await d.redraw(sliders.map(s => s.value));
+        await updateMath();
+    }));
+};
+#+end_src
+
+** Why Would We Want To Do Any Of This?
+
+#+ATTR_REVEAL: :frag (appear)
+- /End-to-end differentiability/ is fundamental to *gradient-based*
+  optimisation approaches.
+- Gradient descent is fundamental to contemporary approaches to
+  machine learning.
+- /Automatic Differentiation/ and /Differentiable Programming/ ensure
+  end-to-end differentiability.
 
 ** There's a reverse mode too...
 
-* What Does Have To Do With Faust?
+* What Does This Have To Do With Faust?
 
 * Set up Javascript components                                     :noexport:
 
 #+begin_src js :results none :tangle src/main.js
 import xSquared from "./xsquared.js";
 import numerical from "./numerical.js";
+import graph from "./graph.js";
 
-// Should try to initialise MathJax here?..
-Reveal.on("ready", e => {
+// Waiting for this callback doesn't appear to help with MathJax
+// issues.
+Reveal.on("ready", async e => {
+    await MathJax.startup.promise;
     xSquared();
     numerical();
+    graph();
 });
 #+end_src
 
