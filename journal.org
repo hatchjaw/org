@@ -4547,3 +4547,29 @@ and doing dynamic retypesetting, mean sometimes things fail to display
 as intended.
 
 Entered on [2024-11-18 lun. 18:54]
+*** 2024-11-21 jeudi
+**** IFC24: Welcome (Stéphane, Romain, Francesco Mulassano) :CONFERENCE:FAUST:
+- Francesco: IFC was supposed to immediately precede /Soundmit/, but
+  the conditions for holding the latter weren't met. C'est la vie.
+  + Francesco involved in [[https://alphalab.audio][alphalab.audio]] --- collaborative design and
+    manufacture of DMIs.
+- Romain: Not many topic submissions for the roundtables.
+  + Faust is a community; please share your ideas!
+- Proceedings: new for IFC; these will be published.
+
+Entered on [2024-11-21 jeu. 09:04]
+**** IFC: Pierre Lecomte                   :PRESENTATION:CONFERENCE:FAUST:
+/Spatial Granual Synthesis With Ambitools & Supercollider/
+
+"Grains swarm in HOA format of any order."
+
+/The Granulator/ is part of Ambitools 1.3. Compiled from Faust to
+Supercollider.
+
+Partnership with IRCAM, composer José Miguel Fernandez.
+
+Real-time HOA granulation within Antescollider, itself an integration
+with Antescofo (electroacoustic music score/performance coordination
+software).
+
+Entered on [2024-11-21 jeu. 09:21]

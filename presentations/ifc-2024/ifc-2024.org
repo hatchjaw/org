@@ -63,6 +63,7 @@ Finally, navigate to [[http://localhost:8000/ifc-2024]].
 - Dual Number arithmetic
 - Automatic Differentiation
 - Differentiable Programming in Faust
+- Gradient-based Parameter Optimisation
 
 * Differentiation
 
@@ -425,7 +426,7 @@ Initialise the layers:
 }
 #+end_src
 
-* A Bit of Mathematical Skulduggery
+* Infinitessimal Jest
 
 #+REVEAL: split
 
@@ -452,6 +453,16 @@ f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
 {\color{darkred} f(x + \varepsilon\dot{x}) = f(x) + \varepsilon\dot{x}f'(x)}
 \end{equation}
 
+#+attr_html: :style font-size: .5em
+#+begin_quote
+Rall, Louis B. 1986. ‘The Arithmetic of Differentiation’. Mathematics
+Magazine 59 (5): 275–82.
+
+Baydin, Pearlmutter, Radul, and Siskind. 2018. ‘Automatic
+Diﬀerentiation in Machine Learning: A Survey’. Journal of Machine
+Learning Research 18.
+#+end_quote
+
 #+REVEAL: split
 
 \begin{equation}
@@ -460,7 +471,7 @@ f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
 
 #+attr_html: :class big-eqn
 \begin{equation}
-f(x + \varepsilon\dot{x}) = {\color{blue} x} + {\color{green} \varepsilon\dot{x}}
+f(x) + \varepsilon\dot{x}f'(x) = {\color{blue} x} + {\color{green} \varepsilon\dot{x}}
 \end{equation}
 
 #+begin_export html
@@ -558,6 +569,11 @@ class Dual {
 }
 #+end_src
 @@html: </div>@@
+
+#+attr_html: :style font-size: .5em
+#+begin_quote
+Yu and Blair. 2013. ‘DNAD, a Simple Tool for Automatic Differentiation of Fortran Codes Using Dual Numbers’. Computer Physics Communications 184 (5): 1446–52.
+#+end_quote
 
 #+begin_src css :exports none :results none :tangle style.css
 pre code.hljs {
@@ -1121,9 +1137,8 @@ export default async () => {
 * What Does This Have To Do With Faust?
 
 #+ATTR_REVEAL: :frag (appear)
-- Many of Faust's primitive operators can be differentiated.
-- Forward mode, dual-number automatic differentiation can be
-  implemented in Faust.
+- Many of Faust's primitive operators are trivially differentiable.
+- Dual-number automatic differentiation can be implemented in Faust.
 - Pattern matching can be used to /override/ Faust's primitives with
   differentiable implementations.
 
@@ -1143,7 +1158,7 @@ Compare \(y\) and \(\hat{y}\) via a loss function.
 
 #+ATTR_REVEAL: :frag t
 Partial derivatives of the loss function are the *gradients* in the
-direction that minimises the loss function.
+direction that minimises its value.
 
 #+ATTR_REVEAL: :frag t
 /Backpropagating/ the gradients, we can update the parameters of the
