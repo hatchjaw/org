@@ -4573,3 +4573,36 @@ with Antescofo (electroacoustic music score/performance coordination
 software).
 
 Entered on [2024-11-21 jeu. 09:21]
+**** IFC: MATSUURA Tomoya                  :PRESENTATION:CONFERENCE:FAUST:
+/\lambda{}mmm: The Intermediate Representation for Synchronous Signal
+Processing and Language Based on Lambda Calculus/
+
+https://github.com/tomoyanonymous/mimium-rs
+
+Semantics enspired by Faust's. Call-by-value \lambda-calculus that adds
+"delay" and "feed" semantics... "Higher-order functions with stateful
+functions".
+
+(Formal programming language semantics, notated in the slides... for
+an audience of audio/Faust people. Yann and Stéphane probably
+understand, but that's probably it.)
+
+Yann: This could be a language that uses Faust's signal or box API.
+
+Entered on [2024-11-21 jeu. 10:38]
+**** IFC: Obsoleszenz                                   :CONFERENCE:FAUST:
+/Experiences with Faust & Rust/
+
+Techno DJ + "tinkerer". Self-professed jack-of-all-trades.
+
+Equis: Faust+Rust project; JACK application; DJ mixer as software.
+
+LibreCDJ: Rust (no Faust); open source alternative to expensive
+proprietary DJing software.
+
+Rust has lots of nice things. "Joyful" experience, with some
+painpoints. A "new way of programming".
+
+https://codeberg.org/obsoleszenz/ifc24-slides
+
+Entered on [2024-11-21 jeu. 15:39]

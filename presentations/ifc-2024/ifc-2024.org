@@ -34,17 +34,6 @@ Faust Conference.
 
 ** Running the Presentation
 
-Add this hook that'll run =npm= before export:
-
-#+begin_src emacs-lisp :results silent
-;; (setq org-export-before-processing-hook nil)
-;; (add-hook 'org-export-before-processing-functions
-;; 	  (lambda (backend)
-;; 	    (interactive)
-;; 	    (message "building js...")
-;; 	    (shell-command-to-string "npm run build")))
-#+end_src
-
 Tangle, =C-c C-v t=, then export as a Reveal.js presentation, =C-c C-e
 v v=, which will trigger the =npm= build.
 
@@ -70,9 +59,9 @@ Finally, navigate to [[http://localhost:8000/ifc-2024]].
 #+REVEAL: split
 
 #+attr_html: :class big-eqn
-\begin{equation}
+\[
 f'(x) = \lim_{h\to0}\frac{f(x + h) - f(x)}{h}
-\end{equation}
+\]
 
 #+begin_src css :exports none :results none :tangle style.css
 .big-eqn {
@@ -455,12 +444,12 @@ f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
 
 #+attr_html: :style font-size: .5em
 #+begin_quote
-Rall, Louis B. 1986. ‘The Arithmetic of Differentiation’. Mathematics
-Magazine 59 (5): 275–82.
-
 Baydin, Pearlmutter, Radul, and Siskind. 2018. ‘Automatic
 Diﬀerentiation in Machine Learning: A Survey’. Journal of Machine
 Learning Research 18.
+
+Rall. 1986. ‘The Arithmetic of Differentiation’. Mathematics
+Magazine 59 (5): 275–82.
 #+end_quote
 
 #+REVEAL: split
@@ -1146,7 +1135,7 @@ export default async () => {
 
 #+ATTR_REVEAL: :frag t
 Take ground truth circuit producing target output signal \(y\), and
-optimisable circuit procuding estimate output \(\hat{y}\).
+optimisable circuit producing estimate output \(\hat{y}\).
 
 #+ATTR_REVEAL: :frag t
 Compare \(y\) and \(\hat{y}\) via a loss function.
