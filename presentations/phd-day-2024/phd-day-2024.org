@@ -18,6 +18,7 @@
 # #+REVEAL_EXTRA_SCRIPTS: <script src="https://cdn.jsdelivr.net/npm/@grame/faust-web-component@0.3.2/dist/faust-web-component.js" defer></script>
 #+REVEAL_EXTRA_SCRIPTS: ("faust-web-component.js" "faust-stop-on-slidechanged.js")
 #+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
+#+REVEAL_EXTRA_OPTIONS: hash: true, fragmentInURL: true
 
 * About This Presentation                                          :noexport:
 
@@ -98,7 +99,7 @@ process = +;
 
 #+RESULTS:
 #+begin_export html
-<faust-editor sizes="[0,100]" tab="svg">
+<faust-editor sizes="[0,100]" tab="svg" class="add">
 <!--
 process = +;
 -->
@@ -119,11 +120,11 @@ process = sum(i, 10, os.osc(220*((i+1)^1.8)) : *(1/(i+1)))
 
 #+RESULTS:
 #+begin_export html
-<faust-editor sizes="[0,100]" tab="ui">
+<faust-editor sizes="[0,100]" tab="ui" class="synth">
 <!--
 import("stdfaust.lib");
 process = sum(i, 10, os.osc(220*((i+1)^1.8)) : *(1/(i+1))) 
-    : *(en.ar(.025, 2.5, button("gate")))
+    : *(en.are(.025, 2.5, button("gate")))
     : *(.5)
     <: _,_;
 -->

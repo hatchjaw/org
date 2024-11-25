@@ -4606,3 +4606,109 @@ painpoints. A "new way of programming".
 https://codeberg.org/obsoleszenz/ifc24-slides
 
 Entered on [2024-11-21 jeu. 15:39]
+*** 2024-11-22 vendredi
+**** IFC: David Fierro                                  :CONFERENCE:FAUST:
+/Functional Stochastic Granulator/
+
+Custom GUI. Runs in Max? Machine learning algorithm?
+
+Filters \to feedback loop + delay \to envelope \to modulation \to grain
+transposition \to spatialisation (ambisonics possible?) \to feedback
+loop + transposition.
+
+Sounds lovely, actually.
+
+Envelope from raised cosine to sharkfin shape; logarithmic attack,
+exponential decay.
+
+Modulation: amplitude modulation applied to the envelope. Quite cool
+(to look at). FM applied to amp mod; i.e. variable amp mod.
+
+A 'one-layer perceptron' is the machine learning part; written in
+Faust --- I wonder what the implementation looks like. David wants to
+use =faust-ddsp= to enhance it. Alright; that's cool. I'd better get
+to work on Advik's PR.
+
+Entered on [2024-11-22 ven. 09:01]
+**** IFC: Felix Holzmüller                              :CONFERENCE:FAUST:
+/Assessment of Simulations in Faust and Tascar for the Development of
+Audio Algorithms in Accoustic Environments/
+
+- Active noise control (ANC) in time-variant environments.
+- Hard real-time constraints.
+- Thus difficult to evaluate/verify algorithms.
+- Evaluate on hardware... bare-metal; time-consuming; hard to adapt.
+- Conversion from higher-level language, e.g. via SyFaLa,
+  instead... costly, dedicated hardware.
+- Limits on replicability/repeatability.
+
+Thus real-time simulation of real acoustic spaces. [[https://www.tascar.org/][TASCAR]]: /Toolbox for
+Acoustic Scene Creation and Rendering/. Used in audiology, open
+source, etc. 3D scan taken of two listening environments (one
+quasi-anechoic, one anisotropic/reverberant), estimated absorption
+coefficients for surfaces. Environments also measured with linear
+microphone array.
+
+Soundfield analysis. Amplitude distribution along array; spatial
+coherence also.
+
+Real-time simulation with Faust: feedforward ANC algo; FxLMS. Noise
+and antinoise (remember CAVIAR...). Good accuracy in the
+quasi-anechoic space; doesn't work well in the reverberant
+space. Not a replacement for taking physical measurements.
+
+Entered on [2024-11-22 ven. 10:05]
+**** IFC: Landon McCoy & Martin Bartlett                :CONFERENCE:FAUST:
+/Faust Plugins on the Chaos Audio Stratus/
+
+Here's the €215 pedal: https://chaosaudio.com/products/stratus
+
+It has a Bela inside it.
+
+Here's a [[https://github.com/chaosaudio/Dev-Portal/wiki/Faust-and-the-Stratus-%E2%80%90-a-basic-tutorial][tutorial]] on writing a plugin. Hurdles:
+#+begin_quote
+You need to have signed up to the Chaos Stratus developer program, by
+which means you will have been given the necessary password to access
+your pedal's Linux system.
+
+You need to have become a Beta tester for the Chaos Stratus Android or
+IOS app - because that's where you will find the 9 Knob test effects.
+#+end_quote
+
+Entered on [2024-11-22 ven. 14:38]
+**** IFC: Allan Weng                                    :CONFERENCE:FAUST:
+/SHCdyna, a Dynamic and Interactive Application for Musical
+Performance/
+
+Continuation of =faust2smartphone= project. Smart Hand Computer (SHC)
+(not /smart phone/). Musical gesture-based projects. First introduced
+at IFC 2018.
+
+SHCdyna: iOS app. Compile/execute Faust (JIT), and dynamically load
+SHC projects. Includes =motion.lib= & customisable GUI. Creation of
+bespoke multitouch interfaces. Uses motion sensors too. Cool
+interactive demos.
+
+***** Sensor metadata
+I'm put in mind of [[https://faustdoc.grame.fr/manual/syntax/#sensors-control-metadatas][sensor control metadata]]. I should use that with
+some progressive web app exports. Wouldn't that be fun? I should also
+submit a PR to =faustdoc= to suggest "Sensor Control Metadata" as
+opposed to "Sensors Control Metadatas".
+
+Entered on [2024-11-22 ven. 14:59]
+**** IFC: Michel Buffa                                  :CONFERENCE:FAUST:
+/FAUST based Web Audio Modules in (sometimes unexpected) online hosts/
+([[https://docs.google.com/presentation/d/1cpyOAl4iXzkP_XFn0RcNr1JvP2lZ-SavGvlehOny2nU/edit?pli=1#slide=id.g1e21fb8b13a_0_0][slides]])
+
+/So easy/ to export from Faust IDE to web audio modules. Material from
+his IS2 presentation (upon which I failed to take notes), "Can you DAW
+it online?".
+
+Impressive: WAM audio plugins, written in Faust, running in real-time
+in a web-based DAW. Ah, this is the browser-based version of the 3D,
+VR version of which Michel showed footage at IS2.
+
+Collaborative music creation in https://sequencer.party. A room of us
+connecting browser-based sequencers/synths/samplers.
+
+Entered on [2024-11-22 ven. 15:37]

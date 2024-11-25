@@ -31,6 +31,26 @@ Faust Conference.
 ** Dependencies
 
 - =org-re-reveal= ([[https://gitlab.com/oer/org-re-reveal/-/tree/main][gitlab]]), which enables export support from Org to [[https://revealjs.com/][Reveal.js]].
+- Vite.js. Here's the config:
+
+#+begin_src js :results none :tangle ./vite.config.js
+import { resolve } from 'path'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+    build: {
+        minify: false,
+        lib: {
+            entry: resolve(__dirname, "src/main.js"),
+            name: "ifc24",
+            // formats: ["iife"],
+            // formats: ["es", "umd"]
+            fileName: () => "ifc24.js",
+        },
+        sourcemap: true,
+    }
+});
+#+end_src
 
 ** Running the Presentation
 
@@ -59,9 +79,9 @@ Finally, navigate to [[http://localhost:8000/ifc-2024]].
 #+REVEAL: split
 
 #+attr_html: :class big-eqn
-\[
+\begin{equation}
 f'(x) = \lim_{h\to0}\frac{f(x + h) - f(x)}{h}
-\]
+\end{equation}
 
 #+begin_src css :exports none :results none :tangle style.css
 .big-eqn {
@@ -1162,7 +1182,7 @@ optimisable circuit.
 #+ATTR_REVEAL: :frag (appear)
 - Automatic Differentiation has a reverse mode too --- and it may be
   more efficient.
-- Some of Faust's primitive's don't have well-defined derivatives.
+- Some of Faust's primitives don't have well-defined derivatives.
 - The derivative of a variable delay defies a closed-form solution.
 - Pattern matching has its limitations.
 - Loss taken in time-domain; only works for deterministic input, not
