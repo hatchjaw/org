@@ -6,11 +6,12 @@
 
 #+OPTIONS: num:nil toc:nil reveal_width:1200 reveal_height:800 ^:{} ':t
 #+EXPORT_FILE_NAME: index
-
+#+PROPERTY: header-args:faust :line-numbers false
+#+PROPERTY: header-args:css :tangle yes :results none :exports none
 #+REVEAL_ROOT: ../reveal.js
 #+REVEAL_THEME: white
 #+REVEAL_PLUGINS: (math)
-#+REVEAL_EXTRA_CSS: style.css
+#+REVEAL_EXTRA_CSS: ccrma-2024.css
 #+REVEAL_MIN_SCALE: 1.0
 #+REVEAL_MAX_SCALE: 1.0
 #+REVEAL_EXTRA_OPTIONS: hash: true, fragmentInURL: true
@@ -37,7 +38,28 @@ October 27th 22024.
 
 ** Running the Presentation
 
-From the reveal.js directory (=../reveal.js=), run:
+Tangle CSS,
+
+#+begin_src css
+.org-src-container > pre {
+    padding: 1em;
+    width: 66.6%;
+}
+
+.title-page > h2 {
+    color: #ededed;
+}
+
+.faust-editor-wrap {
+    font-size: 1.75rem;
+}
+
+faust-editor::part(editor) {
+    height: 8em;
+}
+    #+end_src
+
+Then, from the reveal.js directory (=../reveal.js=), run:
 
 #+begin_src shell :noeval :exports code
 npm start -- --root=../
@@ -140,9 +162,10 @@ process = + ~ _;
 
 ** Arithmetic
 Implicit
-#+begin_src faust
+#+begin_src faust :results none
 process = +;
 #+end_src
+
 Explicit
 #+begin_src faust :results file svg :file images/add.svg :exports both
 process = _,_ : + : _;
@@ -153,13 +176,15 @@ process = _,_ : + : _;
 
 #+REVEAL: split
 Infix syntax
-#+begin_src faust
+#+begin_src faust :results none
 process = _*(0.5);
 #+end_src
+
 Prefix syntax
-#+begin_src faust
+#+begin_src faust :results none
 process = *(0.5);
 #+end_src
+
 Core syntax
 #+begin_src faust :results file svg :file images/gain.svg :exports both
 process = _,0.5 : *;
@@ -177,11 +202,13 @@ process = hslider("gain", 0.5, 0, 1, .01),_ : *;
 
 #+RESULTS:
 #+begin_export html
-<faust-editor sizes="[50,50]" tab="ui">
+<div class="faust-editor-wrap">
+<faust-editor sizes="[50,50]" tab="ui" lineNumbers="false">
 <!--
 process = hslider("gain", 0.5, 0, 1, .01),_ : *;
 -->
 </faust-editor>
+</div>
 #+end_export
 
 ** Use the Faust Libraries
@@ -193,12 +220,14 @@ process = no.noise,hslider("gain", 0.1, 0, 1, .01) : *;
 
 #+RESULTS:
 #+begin_export html
-<faust-editor sizes="[50,50]" tab="ui">
+<div class="faust-editor-wrap">
+<faust-editor sizes="[50,50]" tab="ui" lineNumbers="false">
 <!--
 import("stdfaust.lib");
 process = no.noise,hslider("gain", 0.1, 0, 1, .01) : *;
 -->
 </faust-editor>
+</div>
 #+end_export
 
 ** Iterate
@@ -212,14 +241,16 @@ process = sum(i, N, os.osc((i + 1) * freq)) / N;
 
 #+RESULTS:
 #+begin_export html
-<faust-editor sizes="[50,50]" tab="svg">
+<div class="faust-editor-wrap">
+<faust-editor sizes="[50,50]" tab="ui" lineNumbers="false">
 <!--
 import("stdfaust.lib");
+N = 3;
 freq = hslider("freq", 200, 100, 300, .01);
-gain = hslider("gain", .5, 0, 1, .01);
-process = sum(i, 3, os.osc(i*freq)) * gain;
+process = sum(i, N, os.osc((i + 1) * freq)) / N;
 -->
 </faust-editor>
+</div>
 #+end_export
 
 * The Faust Web IDE

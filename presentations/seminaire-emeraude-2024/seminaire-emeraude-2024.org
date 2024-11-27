@@ -6,11 +6,12 @@
 
 #+OPTIONS: num:nil toc:nil reveal_width:1200 reveal_height:800 ^:{} ':t
 #+EXPORT_FILE_NAME: index
-
+#+PROPERTY: header-args:faust :line-numbers false
+#+PROPERTY: header-args:css :results none :exports none :tangle yes
 #+REVEAL_ROOT: ../reveal.js
 #+REVEAL_THEME: white
 #+REVEAL_PLUGINS: (math)
-#+REVEAL_EXTRA_CSS: style.css
+#+REVEAL_EXTRA_CSS: seminaire-emeraude-2024.css
 #+REVEAL_MIN_SCALE: 1.0
 #+REVEAL_MAX_SCALE: 1.0
 #+REVEAL_EXTRA_OPTIONS: hash: true, fragmentInURL: true
@@ -38,7 +39,24 @@ This =org= file describes my presentation for the 2024 Emeraude Seminaire
 
 ** Running the Presentation
 
-From the reveal.js directory (=../reveal.js=), run:
+Tangle CSS...
+
+#+begin_src css
+.org-src-container > pre {
+    padding: 1em;
+    width: 66.6%;p
+}
+
+.title-page > h2 {
+    color: #ededed;
+}
+
+.faust-editor-wrap {
+    font-size: 2rem;
+}
+#+end_src
+
+Then, from the reveal.js directory (=../reveal.js=), run:
 
 #+begin_src shell :noeval :exports code
 npm start -- --root=../
@@ -340,7 +358,7 @@ Differentiate wrt. $x$:
 
 - We can represent the addition and its derivative in parallel
 
-#+begin_src faust :results html :exports both :tab svg :sizes 0,100 :class dual-add
+#+begin_src faust :results html :exports results :tab svg :sizes 0,100 :class dual-add
 process = +,+;
 #+end_src
 
@@ -352,6 +370,13 @@ process = +,+;
 -->
 </faust-editor>
 #+end_export
+
+#+begin_src css
+.dual-add::part(content)
+{
+    height: 6em;
+}
+#+end_src
 
 #+ATTR_REVEAL: :frag t
 \begin{align*}
@@ -371,7 +396,7 @@ It's assumed that each derivative has been calculated elsewhere
 
 We need to define a derivative for /every/ primitive.
 
-#+begin_src faust :results html :exports both :tab svg :sizes 0,100 :class dual-add-again
+#+begin_src faust :results html :exports results :tab svg :sizes 0,100 :class dual-add-again
 x = hslider("x", 0, -1, 1, .1);
 u = _;
 v = x;
@@ -382,7 +407,8 @@ process = u,v,dudx,dvdx : +,+;
 
 #+RESULTS:
 #+begin_export html
-<faust-editor sizes="[0,100]" tab="svg" class="dual-add-again">
+<div class="faust-editor-wrap">
+<faust-editor sizes="[0,100]" tab="svg" lineNumbers="nil" class="dual-add-again">
 <!--
 x = hslider("x", 0, -1, 1, .1);
 u = _;
@@ -392,7 +418,15 @@ dvdx = 1;
 process = u,v,dudx,dvdx : +,+;
 -->
 </faust-editor>
+</div>
 #+end_export
+
+#+begin_src css
+.dual-add-again::part(content)
+{
+    height: 10em;
+}
+#+end_src
 
 ** Making it /Automatic/
 
@@ -431,7 +465,7 @@ process = diffInput,diffSlider : diffAdd;
 
 *** Variable gain and DC offset
 
-#+begin_src faust :results html :exports both :tab svg :sizes 0,100 :class multivariate
+#+begin_src faust :results html :exports results :tab svg :sizes 0,100 :class multivariate
 x1 = hslider("gain", .5, 0, 1, .1);
 x2 = hslider("dc", 0, -1, 1, .1);
 process = _,x1 : *,x2 : +;
@@ -447,6 +481,13 @@ process = _,x1 : *,x2 : +;
 -->
 </faust-editor>
 #+end_export
+
+#+begin_src css
+.multivariate::part(content)
+{
+    height: 6.5em;
+}
+#+end_src
 
 \[y = uv + w, \quad v = x_1, \quad w = x_2\]
 
@@ -560,6 +601,13 @@ diffMul(nvars) = route(nIN,nOUT,
 -->
 </faust-editor>
 #+end_export
+
+#+begin_src css
+.gain-dc::part(content)
+{
+    height: 17em;
+}
+#+end_src
 
 ** Gradient Descent
 
@@ -709,6 +757,13 @@ with {
 -->
 </faust-editor>
 #+end_export
+
+#+begin_src css
+.gain-dc-full::part(content)
+{
+    height: 8em;
+}
+#+end_src
 
 \[
 \mathcal{L}(y,\hat{y}) = ||y-\hat{y}|| \\

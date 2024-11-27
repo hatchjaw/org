@@ -43,8 +43,6 @@ export default defineConfig({
         lib: {
             entry: resolve(__dirname, "src/main.js"),
             name: "ifc24",
-            // formats: ["iife"],
-            // formats: ["es", "umd"]
             fileName: () => "ifc24.js",
         },
         sourcemap: true,
@@ -1220,4 +1218,5 @@ Add a hook to run =npm= before export:
 # (interactive)
 # (message "building js...")
 # (shell-command-to-string "npm run build")))
+# eval: (setq org-re-reveal-pdfseparatefragments nil)
 # End:

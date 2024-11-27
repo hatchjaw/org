@@ -4242,7 +4242,7 @@ Entered on [2024-10-15 mar. 18:13]
 Gave progress report: Romain, to his great credit, had some
 suggestions for /rate-synchronous programming/, formal sematics, etc.
 
-***** Oregane
+***** Orégane
 - Fixpoint and rounding functions...
 - People doing activation functions wrong (/selon/ Florent).
   + Bad AI people using quadratic approximation of tanh, when a table
@@ -4712,3 +4712,81 @@ Collaborative music creation in https://sequencer.party. A room of us
 connecting browser-based sequencers/synths/samplers.
 
 Entered on [2024-11-22 ven. 15:37]
+*** 2024-11-25 lundi
+**** Back in the lab, post IFC                                 :BRAINDUMP:
+Things I have to do:
+- Doctoral training: Français + Ethics + ...
+- Prepare something to submit to [[https://sive.create.aau.dk/][SIVE]]
+  + This is "Sonic Interaction in Virtual Environments"
+  + Papers: 4-6 pages + 5 min video if accepted.
+  + Deadline: 20/12/24.
+  + Or 14/02/25 for late-breaking reports...
+- Teensy audiosync: try running one Teensy as a USB audio device.
+- Accept/modify Advik's PR.
+- Reply to WECAM email; suggest a project idea (=faust2pwa=).
+
+Things I should do at some point:
+- Orgify my Emacs config.
+- Improve =ob-faust=.
+- Submit a PR with config attributes for =faust-web-component=.
+  
+Entered on [2024-11-25 lun. 16:31]
+*** 2024-11-27 mercredi
+**** Emeraude Thèsards                              :MEETING:PRESENTATION:
+***** Orégane
+- CIFRE company appears to be going bankrupt.
+- Bad atmosphere; company putting obstacles in the way of Orégane
+  working on his thesis.
+- Writing a paper; attempting to avoid burnout.
+  + Topic: matrix multiplication.
+  + Last time, working alone, receiving unhelpful feedback, tight
+    deadline.
+  + This time, there's less time-pressure, better feedback (maybe?).
+- Side-note: everyone should keep backups.
+
+***** Romain
+- Hard to find time to work on thesis...
+- Was at RAIM in Perpignan.
+- Neural Networks: followed DIY course from ENS.
+  + PyTorch, backprop, CNNs, batch normalisation, gradient descent
+    variants.
+- Logarithmic Number Systems stuff. Interesting properties...
+- ARITH 25: abstracts/papers due in the next 3-4 weeks.
+  + 2D/3D Euclidean norm circuit genrator work.
+  + Incl. CORDIC (coordinate rotation digital computer).
+  + Florent improved naive 2D. Still scales poorly in terms of LUTs.
+
+***** Bastien
+- Uses /Mega/ for backups.
+- Bastien was at RAIM too. 30 min talk on /Single Constant Multipliers/.
+- Big improvements (LUTs, etc.) over previous work by one of Florent's old
+  students (now at Intel).
+  + But... frequency takes a big hit (500+ MHz \to 130 MHz)
+  + Florent not keen to publish, as it doesn't bring anything new;
+    combination of existing elements.
+  + None of this on Bastien's PhD topic...
+- Returning to PhD topic.
+  + Idea: explore reinfocement learning + constraint programming.
+  + Trying to match non-quantised coefs with RSCM coefs.
+  + Investigating Kullback-Leibler divergence.
+    * *TODO send Bastien info on other measures of divergence.*
+- Bastien now allowed to teach... sort of? Yes, now a permanent
+  teacher, not a "vacataire".
+  + Been teaching /Archicture des Circuits/.
+  + Boolean arithmetic, Von Neumann-based computer, etc.
+  + Fun interactive demo in /[[https://github.com/hneemann/Digital][Digital]]/ software.
+
+***** Onyr
+- Also uses /Mega/ for backups.
+- (External display not working on NixOS!)
+- Past two months SoTA reading...
+- Now working on part one of thesis manuscript.
+  + Lots of nice stuff, in Obsidian; looks great.
+  + Much improved mathematical understanding over last time;
+    consolidated understanding of SoTA into mathematical progression
+    in own notes --- column generation + branch & bound.
+  + Pushing back against supervisor's doubts, and desire that Onyr
+    reuse prior student's algorithm; with better understanding of the
+    problem-space, Onyr knows that prior algorithm won't suffice.
+
+Entered on [2024-11-27 mer. 10:07]
