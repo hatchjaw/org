@@ -1,4 +1,6 @@
 index.html
 *.css
 *.js
+*.json
+*.svg
 dist
