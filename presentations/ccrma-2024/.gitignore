@@ -1,2 +1,5 @@
 index.html
 *.css
+*.js
+node_modules
+dist
