@@ -16,13 +16,13 @@
 #+REVEAL_MIN_SCALE: 1.0
 #+REVEAL_MAX_SCALE: 1.0
 #+REVEAL_EXTRA_OPTIONS: hash: true, fragmentInURL: true
-#+REVEAL_EXTRA_SCRIPTS: ("dist/ccrma.js")
+#+REVEAL_EXTRA_SCRIPTS: ("dist/ccrma.umd.js")
 #+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
 
 * About This Presentation                                          :noexport:
 
 This =org= file describes my Faust 101 workshop at CCRMA, delivered on
-October 27th 22024.
+October 27th 2024.
 
 ** Dependencies
 
@@ -32,17 +32,44 @@ October 27th 22024.
   attributes and styling the content area of the component.
   =package.json= was created by running ~npm create vite@latest~ and
   copying the resulting file into the directory containing /this/
-  file, then running the following:
-  #+begin_src shell :results none
-  npm install --save https://github.com/hatchjaw/faust-web-component/tree/a85d131231ee95b0b94373433a71b85cf5c47743
-  #+end_src
+  file, then running:
+
 - =ob-faust= ([[https://github.com/hatchjaw/ob-faust][github]]), which adds (basic) support for Faust to Org Babel.
 - Emacs =faust-mode=, modified slightly to fix syntax highlighting in
   source blocks.
 
 ** Running the Presentation
 
-Tangle JS
+*** Tangle package.json
+
+#+begin_src json :tangle package.json
+{
+  "name": "ccrma-2024",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.0.1"
+  },
+  "dependencies": {
+    "@grame/faust-web-component": "github:hatchjaw/faust-web-component#a85d131231ee95b0b94373433a71b85cf5c47743"
+  }
+}
+#+end_src
+
+The above was actually created by running ~npm create vite@latest~,
+then:
+
+#+begin_src shell :results none
+npm install --save https://github.com/hatchjaw/faust-web-component/tree/a85d131231ee95b0b94373433a71b85cf5c47743
+#+end_src
+
+*** Tangle JS
 
 #+begin_src js :results none :tangle ./vite.config.js
 import { resolve } from 'path'
@@ -54,7 +81,8 @@ export default defineConfig({
         lib: {
             entry: resolve(__dirname, "ccrma-2024.js"),
             name: "ccrma",
-            fileName: () => "ccrma.js",
+            formats: ['umd'],
+            fileName: format => `ccrma.${format}.js`,
         },
         sourcemap: true,
     }
@@ -69,7 +97,7 @@ Reveal.on('slidechanged', () => document.querySelectorAll('faust-editor')
 		    .dispatchEvent(new Event('click'))))
 #+end_src
 
-and CSS
+*** Tangle CSS
 
 #+begin_src css
 .org-src-container > pre {
@@ -90,13 +118,21 @@ faust-editor::part(editor) {
 }
     #+end_src
 
-Then, from the reveal.js directory (=../reveal.js=), run:
+*** Export
+
+Exporting to reveal.js =C-c C-e v v= triggers ~npm run build~ (see
+[[Emacs setup]])
+
+*** Start the reveal.js server
+
+From the reveal.js directory (=../reveal.js=), run:
 
 #+begin_src shell :noeval :exports code
 npm start -- --root=../
 #+end_src
 
-Then navigate to [[localhost:8000/ccrma-2024/]].
+Then navigate to [[localhost:8000/ccrma-2024/]]. This offers nice things
+like livereloading.
 
 * Whom?
 
@@ -295,5 +331,5 @@ process = sum(i, N, os.osc((i + 1) * freq)) / N;
 # (lambda (backend)
 # (interactive)
 # (message "building js...")
-# (shell-command-to-string "npm run build")))
+# (shell-command-to-string "npm install && npm run build")))
 # End:

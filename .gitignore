@@ -1,6 +1,7 @@
 personal/
 **/export
 **/ltximg
+**/node_modules
 **/out/
 **/svg-inkscape
 *.~undo-tree~
