@@ -4789,4 +4789,79 @@ Entered on [2024-11-25 lun. 16:31]
     reuse prior student's algorithm; with better understanding of the
     problem-space, Onyr knows that prior algorithm won't suffice.
 
-Entered on [2024-11-27 mer. 10:07]
+Entered on [2024-11-27 mer. 10:07] 
+*** 2024-11-28 jeudi
+**** Another Brain Dump I guess                                :BRAINDUMP:
+***** Faffing with =faust-web-component=
+Finally committed my largely cosmetic changes to =faust-editor= so I
+can use it in Reveal.js by including it as a package.json dependency;
+better than copying the local build. I fixed a couple of issues that
+might be worth a PR; e.g., having added an attribute to specify the
+default tab to show when /Run/ is clicked, it emerged that if the UI
+isn't displayed right away it's never drawn correctly --- text is
+never displayed, for instance.
+***** RPi CM5
+...has been released. Supports IEEE 1588 like the CM4. Uses a Broadcom
+[[https://www.raspberrypi.com/documentation/computers/processors.html#bcm2712][BCM2712]]; the internet isn't turning up a reference manual, but since
+it "shares many common architectural features with other devices in
+the BCM27xx family", I expect it has the same low-res (12-bit) PLL
+divider as the RPi4/CM4.
+***** Linear Algebra in Faust
+David Braun wrote a [[https://github.com/grame-cncm/faustlibraries/blob/master/linearalgebra.lib][linear algebra library]]; calculates determinants,
+inverses, does matrix multiplication, etc. Not available in
+=stdfaust.lib= but one can copy the code from the link above to the
+IDE and experiment with it. David doesn't appear to be aware of the
+autodiff project, as he states, in the docs « Next step of making a
+"Dense"/"Linear" layer from machine learning. » Not differentiably it
+isn't, mate.
+
+Entered on [2024-11-28 jeu. 15:23]
+*** 2024-11-29 vendredi
+**** MikroTik Cloud Router Switch                :NETWORKEDAUDIO:HARDWARE:
+Finally fired up the [[https://mikrotik.com/product/crs326_24g_2s_in][MikroTik CRS326-246-2S+IN]].
+
+Had a bit of trouble getting started; here's roughly how I got things
+moving:
+- Connected my computer (via USB hub/dongle) to port 1 of the switch.
+  + NB. this is /not/ the =CONSOLE= port.
+- In wired settings for Gnome's NetworkManager, set IPv4 to /Manual/
+  and, address to 192.168.88.10 (netmask to 255.255.255.0) and gateway
+  to 192.168.88.1, the latter being the switch's default IP.
+- Accessed the switch via SSH:
+  #+begin_src shell :noeval
+ssh admin@192.168.88.1
+  #+end_src
+- Set a password.
+- Then visited http://192.168.88.1 in a browser (to reach the /WebFig/
+  interface) and, via /Quick Set/, changed the IP to 192.168.10.1.
+- Back in NetworkManager, updated address and gateway to 192.168.10.10
+  and 192.168.10.1 respectively.
+  + This is just as a matter of convenience/personal preference, as
+    192.168.10.1 is the gateway I've been using in my work to-date.
+- Now I can access the switch either via http://192.168.10.1 or
+  #+begin_src shell :noeval
+ssh admin@192.168.10.1
+  #+end_src
+
+Interestingly, the device can act as a PTP master.
+
+***** Resources
+- [[https://help.mikrotik.com/docs/spaces/ROS/pages/64127015/Precision+Time+Protocol][PTP setup documentation]]
+- [[https://help.mikrotik.com/docs/spaces/ROS/pages/328088/Queues][Queues documentation]] --- likely useful for prioritising PTP traffic.
+
+Entered on [2024-11-29 ven. 17:09]
+**** Three Teensies                            :NETWORKEDAUDIO:TEENSY:PTP:
+OK, so it's been a long time coming, but I tried one clock authority
+and two suscribes and:
+- The PTP authority implementation works for multiple subscribers.
+- Subscribers seem to stay more closely-synchronised with each other
+  than they do with the authority.
+  + Caveat: that's a purely anecdotal observation.
+- There's still a fair bit of drift; we're well outside \pm5% of the
+  reference frame.
+  + I feel like it should be possible, with a managed switch, to
+    prioritise traffic of a certain protocol (i.e. PTPv2), but I
+    haven't yet found any obvious pointers in /WebFig/, in the docs
+    for the switch, nor in the MicroTik forum.
+
+Entered on [2024-11-29 ven. 19:46]

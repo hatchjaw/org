@@ -89,12 +89,20 @@ export default defineConfig({
 });
 #+end_src
 
-#+begin_src js
-import '@grame/faust-web-component/src/main'
+Wait till Reveal.js is ready before loading ~faust-editor~; other wise
+Split's parent element may not yet have a size, and the tab buttons
+will hang over the edge.
 
-Reveal.on('slidechanged', () => document.querySelectorAll('faust-editor')
-	   .forEach(f => f.shadowRoot.querySelector('#stop')
-		    .dispatchEvent(new Event('click'))))
+#+begin_src js
+import FaustEditor from '@grame/faust-web-component/src/faust-editor'
+
+Reveal.on('ready', () => {
+    customElements.define("faust-editor", FaustEditor)
+    
+    Reveal.on('slidechanged', () => document.querySelectorAll('faust-editor')
+	      .forEach(f => f.shadowRoot.querySelector('#stop')
+		       .dispatchEvent(new Event('click'))))
+})
 #+end_src
 
 *** Tangle CSS
@@ -123,9 +131,9 @@ faust-editor::part(editor) {
 Exporting to reveal.js =C-c C-e v v= triggers ~npm run build~ (see
 [[Emacs setup]])
 
-*** Start the reveal.js server
+*** Start the Reveal.js server
 
-From the reveal.js directory (=../reveal.js=), run:
+From =../reveal.js=, run:
 
 #+begin_src shell :noeval :exports code
 npm start -- --root=../

@@ -14,9 +14,6 @@
 #+REVEAL_EXTRA_CSS: phd-day-2024.css
 #+REVEAL_MIN_SCALE: 1.0
 #+REVEAL_MAX_SCALE: 1.0
-# #+REVEAL_HIGHLIGHT_CSS: %r/plugin/highlight/monokai.css
-# #+REVEAL_HIGHLIGHT_CSS: %r/node_modules/highlight.js/styles/zenburn.css
-# #+REVEAL_EXTRA_SCRIPTS: <script src="https://cdn.jsdelivr.net/npm/@grame/faust-web-component@0.3.2/dist/faust-web-component.js" defer></script>
 #+REVEAL_EXTRA_SCRIPTS: ("faust-web-component.js" "faust-stop-on-slidechanged.js")
 #+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
 #+REVEAL_EXTRA_OPTIONS: hash: true, fragmentInURL: true
