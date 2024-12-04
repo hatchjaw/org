@@ -4865,3 +4865,78 @@ and two suscribes and:
     for the switch, nor in the MicroTik forum.
 
 Entered on [2024-11-29 ven. 19:46]
+** 2024-12 décembre
+*** 2024-12-03 mardi
+**** Romain & Tanguy                                 :MEETING:SUPERVISION:
+- Try pulse-per-halfsecond?
+- Implementation: CAVIAR.
+  + Romain and I to talk with Jonathan Abel about the algorithm.
+- Set a limit on number of channels to support --- identify target
+  implementation.
+- Romain to send Chauvet impulse responses.
+- Maybe use Grame as a space for testing... studio quite heavily-used
+  though.
+  + Or at /Centrale/ with Pierre Lecomte; more space there.
+  + Or there's a room here, near the /Rotonde/.
+- Fuck, I should be using an /additional/ PID, or something similar,
+  when there's an unreliable switch in the way.
+  
+Entered on [2024-12-03 mar. 14:01]
+*** 2024-12-04 mercredi
+**** Teensies drifting via a switch                           :TEENSY:PTP:
+This is to be expected. Perhaps less so given that it's a managed
+switch, but perhaps I still haven't configured the MikroTik switch
+correctly.
+#+begin_quote
+Side note: I did update the firmware (to v7.16.2), which granted me
+access to some more PTP settings, including /aes67/ and /smpte/
+profiles.
+#+end_quote
+
+In any case, it appears that, via the switch, clock subscribers tend
+to run a little faster than the authority.
+
+***** Test procedure
+- Teensies running =t41-ptp=, outputting PPS on pin 24.
+- Logic analyser probes connected to pin 24.
+  + Channel 1 connected to clock authority.
+  + Channel 2 connected to one of the clock subscribers.
+- Using the /Scope/ view in /Waveforms/ in /Persistence/ mode, acquire
+  ~600 readings (10 mins worth)
+
+****** Via the managed switch
+
+#+ATTR_ORG: :width 750
+[[file:images/20241204/capture-via-managed.png]]
+
+The heatmap suggests the subscriber skews early more of the time (I
+should really plot a histogram at some point). The interval of
+interrupt offsets is around 10 \micro{}s (-6 to +4).
+
+****** Via an unmanaged switch
+
+#+ATTR_ORG: :width 750
+[[file:images/20241204/capture-via-unmanaged.png]]
+
+Results for the unmanaged switch (the HP thing I purloined from AAU)
+are very much comparable; skewing early, distributed over about 10 \micro{}s
+(again -6 to +4). This indicates either:
+- that the managed switch is garbage.
+- that there's more performance to be squeezed out of the managed
+  switch.
+
+****** Connected directly:
+
+#+ATTR_ORG: :width 750
+[[file:images/20241204/capture-direct.png]]
+
+There's the suggestion of things skewing very sightly early here too,
+but again, a histogram would give a clearer illustrationq. This setup
+offers something on the order of magnitude described in
+[cite:@schleusnerSubMicrosecond2024], with an interval of approx. -80
+-- +60 ns; comparable with figure 9b from Schleusner et al. There's
+also some asymmetry on display in that figure; hard to say at a glance
+whether its their client/slave that runs fast, as it appears to be
+with mine.
+
+Entered on [2024-12-04 mer. 15:04]
