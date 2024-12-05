@@ -4922,21 +4922,115 @@ Results for the unmanaged switch (the HP thing I purloined from AAU)
 are very much comparable; skewing early, distributed over about 10 \micro{}s
 (again -6 to +4). This indicates either:
 - that the managed switch is garbage.
-- that there's more performance to be squeezed out of the managed
-  switch.
+- that there's more performance to be squeezed out of the
+  aforementioned.
 
-****** Connected directly:
+****** Connected directly
 
 #+ATTR_ORG: :width 750
 [[file:images/20241204/capture-direct.png]]
 
 There's the suggestion of things skewing very sightly early here too,
-but again, a histogram would give a clearer illustrationq. This setup
+but again, a histogram would give a clearer illustration. This setup
 offers something on the order of magnitude described in
 [cite:@schleusnerSubMicrosecond2024], with an interval of approx. -80
--- +60 ns; comparable with figure 9b from Schleusner et al. There's
-also some asymmetry on display in that figure; hard to say at a glance
-whether its their client/slave that runs fast, as it appears to be
-with mine.
+-- +60 ns; comparable with their figure 9b. There's also some
+asymmetry on display in that figure; hard to say at a glance whether
+its their client/slave that runs fast, as it appears to be with mine.
 
 Entered on [2024-12-04 mer. 15:04]
+
+*** 2024-12-05 jeudi
+**** L2 PTP: Improved sync                                    :TEENSY:PTP:
+OK, this is more like it. Based on the fact that it looked very much
+like the managed switch was acting like the unmanaged one, I returned
+to the available options for PTP configuration.
+
+I observed that for the /trasport/ property in the [[https://help.mikrotik.com/docs/spaces/ROS/pages/64127015/Precision+Time+Protocol#PrecisionTimeProtocol-GeneralProperties][PTP > General
+Properties]] part of the MikroTik Router OS documentation, we have the
+following:
+
+#+begin_quote
+- ipv4 - uses the IPv4 multicast addresses 224.0.1.129 for PTP primary
+  messages and 224.0.0.107 for PTP peer delay messages.
+- l2-forwardable - uses the multicast MAC address 01-1B-19-00-00-00,
+  which is being forwarded through PTP-unaware network equipment.
+#+end_quote
+
+Recalling that, in addition to the ~l3PTP~ class in =t41-ptp=, there's
+an ~l2PTP~ class, I made a straight switch in the clock-authority and
+clock-subscriber sketches. Then, in settings for the switch, I opted
+for the "default" profile, with mode /e2e/ and transport /l2/:
+
+#+begin_quote
+[admin@MikroTik] > system ptp print
+Flags: I - inactive, X - disabled
+ 0   name="ptp1" priority1=255 priority2=255 delay-mode=e2e transport=l2 profile=default domain=0
+#+end_quote
+
+Then it was a case of connecting the clock authority and
+disabling/re-enabling the PTP profile on the switch. Without the
+restart, this sort of daftness can arise:
+
+#+begin_quote
+[admin@MikroTik] > system ptp monitor 0
+              name: ptp1
+          clock-id: D4:01:C3:FF:FE:3A:F7:C6
+         priority1: 255
+         priority2: 255
+           i-am-gm: no
+       gm-clock-id: FF:FF:04:E9:E5:14:30:EC
+      gm-priority1: 128
+      gm-priority2: 128
+   master-clock-id: FF:FF:04:E9:E5:14:30:EC
+        slave-port: ether14
+        freq-drift: 2147483647 ppb
+            offset: 2128077962 ns
+  slave-port-delay: 1898157126 ns
+#+end_quote
+
+Note the enormous figures for =freq-drift=, =offset=, and
+=slave-port-delay=. After re-enabling PTP:
+
+#+begin_quote
+[admin@MikroTik] > system ptp monitor 0
+                ...
+        freq-drift: -18877 ppb
+            offset: 5 ns
+  slave-port-delay: 1071 ns
+#+end_quote
+
+Now, measuring pin 24 on the clock authority (top) and one of the
+subscribers (bottom) I get the following persistence plot:
+
+#+ATTR_ORG: :width 750
+[[file:images/20241205/capture-l2ptp.png]]
+
+That appears to be even better than the equivalent plot for the [[*Connected directly][direct
+connection]], albeit with the subscriber skewing more clearly
+early. Nonetheless, the pin 13 LED lights up on my two connected
+clients, indicating a consistent sub-100 ns offset. 
+
+The situation clearly isn't quite perfect; for instance, comparing I^{2}S
+data for two subscribers, I see one subscriber drift slightly fast:
+
+#+ATTR_ORG: :width 750
+[[file:images/20241205/capture-i2s.png]]
+
+The red reference line represents the offset ten minutes or so
+earlier, at around ~1 \micro{}s, which, by the time I exported the above
+image, lay at around 1.5 \micro{}s. We're slightly outside 5% of the
+reference frame, so the AES wouldn't be happy, but we're in the right
+ballpark.
+
+***** Takeaways
+- I need to better-understand ~l2PTP~ (and PTP in general).
+- Why is it (sometimes?) necessary to restart PTP on the switch in
+  order to get decent figures for =freq-drift=, =offset=, and
+  =slave-port-delay=?
+  + Perhaps ~l2PTP~ and the switch don't quite agree.
+  + Does that mean the switch acts as a /boundary clock/?
+- The Teensy audio subsystem one-sample startup offset issue is still
+  present and a bit of a concern.
+
+Entered on [2024-12-05 jeu. 18:51]
