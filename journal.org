@@ -5034,3 +5034,46 @@ ballpark.
   present and a bit of a concern.
 
 Entered on [2024-12-05 jeu. 18:51]
+
+*** 2024-12-06 vendredi
+**** Capturing L2 PTP messages                              :HARDWARE:PTP:
+I was wondering why L2 PTP messages weren't showing up in Wireshark.
+It emerges that traffic of this sort isn't available for capture
+unless it's mirrored on the (physical) port to which my computer is
+connected. To that end, I set up port based mirroring, mirroring
+ingress and egress for ports 9, 10, 12 (to wich clock subscribers are
+connected), and 14 (clock authority) and setting the mirror target to
+port 1 (to which my computer is connected). Here are the CLI commands:
+
+#+begin_example
+[admin@MikroTik] > /interface/ethernet/switch/port/set ether9 mirror-egress=yes mirror-ingress=yes
+<...same on other ports...>
+[admin@MikroTik] > /interface/ethernet/switch/set switch1 mirror-target=ether1
+#+end_example
+
+Probably worthwhile, for performance reasons, disabling mirroring when
+I don't need to monitor PTP traffic.
+
+***** Resources
+Since org mode doesn't like this enormous URL, I'll paste it here:
+[[https://help.mikrotik.com/docs/spaces/ROS/pages/30474317/CRS3xx+CRS5xx+CCR2116+CCR2216+switch+chip+features#CRS3xx,CRS5xx,CCR2116,CCR2216switchchipfeatures-PortBasedMirroring]]
+
+Entered on [2024-12-06 ven. 13:55]
+
+*** 2024-12-09 lundi
+**** Maxime Popoff: Répétition, soutenance de thèse         :PRESENTATION:
+/Compilation of Real-Time Audio DSP on FPGA/
+
+- 2/42: Embeded \to Embedded.
+- 2: Actually, "embedded" could do with stronger definition.
+- 8: \(1/f\) is the sample period (not frequency), isn't it?
+- 9: "Non-inconvenient" is convoluted.
+- 10: "On the field" \to "in the field".
+- 15: "critial audio path" doesn't appear to be green in colour.
+- 20: Maxime is saying, e.g. "everything will be script"; wants
+  "scripted".
+- 23: Maxime said at least 16-bit resolution for audio, but slide
+  reads \leq 24-bit.
+- 29-30: C++ implementations look strange. Where is ~*ftemp~ defined?
+
+Entered on [2024-12-09 lun. 09:07]
