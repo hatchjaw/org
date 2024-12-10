@@ -1,0 +1,92 @@
+#+title:      Faust Mu-law Bitcrusher
+#+date:       [2024-12-09 lun. 20:50]
+#+filetags:   :ddsp:faust:
+#+identifier: 20241209T205054
+
+Prompted by a [[https://discord.com/channels/382895736356077570/651037481017409595/1315675191531147264][question]] on /The Audio Programmer/ discord, in the
+#faust channel.
+
+#+begin_quote
+MORPHOICE — Today at 14:43 does anyone know if it's possible to make a
+bitcrusher in faust that doesn't crush linear but μ-law?
+#+end_quote
+
+So, the [[https://en.wikipedia.org/wiki/%CE%9C-law_algorithm][\mu-law algorithm]] is a /compander/ used in telephony; it's for
+reducing dynamic range and, in the digital domain, reducing
+quantisation error. Essentially, the majority of a signal's samples
+are going to be clustered around zero where, ironically, the minority
+of resolution is available, proportionally- and perceptually-speaking
+([[https://www.youtube.com/watch?v=xq-HX1F6V2k][here]]'s a YouTube video on the topic); \mu-law moves sample amplitudes
+away from the low-resolution, low-amplitude range, toward the
+higher-resolution, higher-amplitude range.
+
+The \mu-law function, which looks a bit like a sigmoid or tanh[fn:1],
+has the equation
+
+\begin{equation}
+F(x) = \text{sgn}(x)\frac{\ln(1 + \mu|x|)}{\lr(1 + \mu)}, \quad -1 \leq x \leq 1\;,
+\end{equation}
+
+and its inverse is
+
+\begin{equation}
+F^{-1}(y) = \text{sgn}(y)\frac{(1 + \mu)^{|y| }- 1}{\mu}, \quad -1 \leq y \leq 1\;.
+\end{equation}
+
+These can be implemented in Faust as
+
+#+begin_src faust
+muLaw(x) = mu,abs(x) : *,1,1,mu : +,+ : log,log : /,ma.signum(x) : *
+with {
+    mu = hslider("mu1 [scale:log]", 255, 1, 1<<14 - 1, 1) : si.smoo;
+};
+#+end_src
+
+and
+
+#+begin_src faust
+invMu(y) = 1,mu : +,abs(y) : ^,1 : -,mu : /,ma.signum(y) : *
+with {
+    mu = hslider("mu2 [scale:log]", 255, 1, 1<<14 - 1, 1) : si.smoo;
+};
+#+end_src
+
+NB. 255 is a standard \mu-value and determines the steepness of the
+function as it passes through the origin.
+
+* Bitcrushing
+
+The bitcrusher from the Faust libraries, =ba.bitcrusher=, acts
+linearly, i.e. it breaks the amplitude range into equally-spaced
+intervals and fits samples to the quanta of those intervals. How can
+we make it exhibit something other than a linear distribution of
+amplitude values? In short, by applying \mu-law, /then/ quantising,
+/then/ applying the inverse:
+
+#+begin_src faust
+import("stdfaust.lib");
+
+process = os.osc(120) 
+    : muLaw 
+    : ba.bitcrusher(bits) 
+    : invMu 
+    <: _,_
+with {
+    muLaw(x) = mu,abs(x) : *,1,1,mu : +,+ : log,log : /,ma.signum(x) : *
+    with {
+        mu = hslider("mu1 [scale:log]", 255, 1, 1<<14 - 1, 1) : si.smoo;
+    };
+
+    invMu(y) = 1,mu : +,abs(y) : ^,1 : -,mu : /,ma.signum(y) : *
+    with {
+        mu = hslider("mu2 [scale:log]", 255, 1, 1<<14 - 1, 1) : si.smoo;
+    };
+
+    bits = hslider("bits", 8, 1, 16, 1);
+};
+#+end_src
+
+* Footnotes
+
+[fn:1] I should really get better at plotting quickly with
+python/julia in Org-mode. 

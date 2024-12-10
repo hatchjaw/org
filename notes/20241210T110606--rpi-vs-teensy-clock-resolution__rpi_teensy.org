@@ -1,0 +1,114 @@
+#+title:      RPi vs Teensy Clock Resolution
+#+date:       [2024-12-10 mar. 11:06]
+#+filetags:   :rpi:teensy:
+#+identifier: 20241210T110606
+
+Following AndrewMarch's [[file:~/org/journal.org::*Faust on the RPi Zero][post]] on [[https://discord.com/channels/1078607704769179729/1078607704769179732/1315752524581699614][Discord]], I decided to revisit the
+audio-clock-related reasons that I dismissed the RPi (CM4/5) as a
+viable platform; specifically whether the 12-bit clock divider
+limitation is accurate, as it also applies to the CM4 and CM5, which
+of course do support PTP at the hardware level. Closest I'm likely to
+get is this, from =circle/lib/gpioclock.cpp=:
+
+#+begin_src c++
+#define CLK_DIV_DIVI(x)		((x) << 12)
+#define CLK_DIV_DIVF(x)		((x) << 0)
+#+end_src
+
+which suggests that ~DIVF~ is indeed 12-bits wide. Is that sort of
+resolution /really/ too coarse for PTP-calibre audio clock
+adjustments? Here's some example Teensy serial output, reporting
+target sample rates derived from skew calculated via =t41-ptp='s PID
+implementation:
+
+#+begin_example
+Skew (nsps):              2333.93294760
+Proportional adjustment:     1.00000233
+Clock Subscriber - Frames/Fs: 128/48000 (48000.1120287814846961)
+PLL4 numerator:               184068113
+PLL4 denominator:            1000000000
+Skew (nsps):                25.95681081
+Proportional adjustment:     1.00000003
+Clock Subscriber - Frames/Fs: 128/48000 (48000.0012459269128158)
+PLL4 numerator:               184000757
+PLL4 denominator:            1000000000
+Skew (nsps):              2159.95681085
+Proportional adjustment:     1.00000216
+Clock Subscriber - Frames/Fs: 128/48000 (48000.1036779269124963)
+PLL4 numerator:               184063036
+PLL4 denominator:            1000000000
+Skew (nsps):              3545.95681085
+Proportional adjustment:     1.00000355
+Clock Subscriber - Frames/Fs: 128/48000 (48000.1702059269227902)
+PLL4 numerator:               184103485
+PLL4 denominator:            1000000000
+#+end_example
+
+Recalling, from [[*Broadcom BCM2835][GPIO clock setup on the Broadcom BCM2835]], that the
+basic relationship between source clock, \(F_{c} = 500\times10^{6}\), target sampling rate
+\(F_{s}\), and integer (\(D_{i}\)) and fractional (\(D_{f}\)) dividers is
+
+\begin{equation}
+F_{s} &= \frac{1}{64}\frac{F_{c}}{D_{i} + \frac{D_{f}}{4096}}\;,
+\end{equation}
+
+we have results like:
+
+#+begin_src emacs-lisp :results output
+(setq divf 3110)
+(while (< divf 3120)
+  (princ (format "DIVF = %d :: Fs = %.12f\n" divf
+                 (/ (/ 500e6 (+ 162 (/ (float divf) 4096))) 64)))
+  (setq divf (1+ divf)))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+DIVF = 3110 :: Fs = 48000.336002352014
+DIVF = 3111 :: Fs = 48000.264001452008
+DIVF = 3112 :: Fs = 48000.192000768002
+DIVF = 3113 :: Fs = 48000.120000299998
+DIVF = 3114 :: Fs = 48000.048000048002
+DIVF = 3115 :: Fs = 47999.976000012000
+DIVF = 3116 :: Fs = 47999.904000192000
+DIVF = 3117 :: Fs = 47999.832000588001
+DIVF = 3118 :: Fs = 47999.760001199997
+DIVF = 3119 :: Fs = 47999.688002027986
+#+end_example
+
+This doesn't look too promising. Bearing in mind, however, that the
+target sample rates from serial output are just that --- targets,
+computed by applying the proportional adjustment to the integer
+sampling rate (in this case 48 kHz) --- what sort of accuracy do we
+get via Teensy's 30-bit PLL4 dividers? E.g.
+
+#+begin_src emacs-lisp :results output
+(setq numerator 183999995)
+(while (< numerator 184000005)
+  (princ
+   (format "NUM = %d :: Fs = %.12f\n"
+           numerator
+           (* (/ 24e6 (lsh 1 8))          ;; 24 MHz XO, 2^8 wordsize
+              (/ (+ 29 (/ numerator 1e9)) ;; DIV + NUM / DENOM
+                 (* 3 19)))))             ;; SAI1 pre & post dividers
+  (setq numerator (1+ numerator)))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+NUM = 183999995 :: Fs = 47999.999991776320
+NUM = 183999996 :: Fs = 47999.999993421057
+NUM = 183999997 :: Fs = 47999.999995065795
+NUM = 183999998 :: Fs = 47999.999996710525
+NUM = 183999999 :: Fs = 47999.999998355263
+NUM = 184000000 :: Fs = 48000.000000000000
+NUM = 184000001 :: Fs = 48000.000001644737
+NUM = 184000002 :: Fs = 48000.000003289475
+NUM = 184000003 :: Fs = 48000.000004934212
+NUM = 184000004 :: Fs = 48000.000006578950
+#+end_example
+
+It's /daft/ how much precision 30 bits permit.
+
+Now, this doesn't mean there's no point trying the CM4/5 at some point
+/anyway/, but there's no contest in terms of clock resolution.

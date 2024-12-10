@@ -5077,3 +5077,43 @@ Entered on [2024-12-06 ven. 13:55]
 - 29-30: C++ implementations look strange. Where is ~*ftemp~ defined?
 
 Entered on [2024-12-09 lun. 09:07]
+*** 2024-12-10 mardi
+**** Faust on the RPi Zero                            :FAUST:HARDWARE:RPI:
+AndrewMarch on [[https://discord.com/channels/1078607704769179729/1078607704769179732/1315752524581699614][Discord]]:
+
+#+begin_quote
+With the rpi-zero-1 (Arm6) available now at unlimited volume for $15,
+and having contacted raspberry pi and been told it will stay that way
+for the foreseeable future, I decided to experiment with running Faust
+code, bare-metal, using circle-rpi (https://github.com/rsta2/circle)
+and the WM8960 codec (https://www.sparkfun.com/products/21250).  I was
+able to get the Greyhole reverb running, at 48k, stereo, 24bit, with
+buffers of 256 (about 2ms latency).  It sounds fantastic. This is also
+a very powerful target for Faust. Running bare-metal, the pi-zero-1
+boots in a few ms, and has 512 MB of RAM.  Here is my code example:
+https://github.com/marchingband/wm8960-circle-tests Circle also
+includes drivers for some OLED displays, HDMI, encoders, USB
+(including MIDI and audio), etc., so I think a lot of Faust features
+could be ported.
+#+end_quote
+
+Our friend used C as the target language for the Faust compiler, thus
+obviating the need for anything from the C++ standard library,
+something that caused the PIR group trouble in the end. No
+architecture file, just calling ~computemydsp()~ from
+~CAudio::GetChunk~.
+
+***** Thoughts
+- Attractive characteristics of the Pi Zero:
+  + Cheap; good availability.
+  + Lots of memory.
+  + Fast.
+  + Compatible with some nice audio hats (24/32-bit audio).
+- Drawbacks:
+  + No hardware PTP.
+  + 12-bit audio clock dividers.
+
+I decided to take [[denote:20241210T110606][another look]] at the audio-clock-resolution
+situation.
+
+Entered on [2024-12-10 mar. 09:42]

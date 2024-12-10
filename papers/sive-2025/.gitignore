@@ -1,0 +1,5 @@
+/out
+makefile
+*.tex
+*.pdf
+*.eps

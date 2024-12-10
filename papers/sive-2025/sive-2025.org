@@ -1,0 +1,208 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+
+#+title: Sample-Synchronous Distributed Something Something
+#+author: Thomas Rushton
+
+#+startup: overview
+#+export_file_name: out/sive2025
+#+options: author:nil toc:nil num:3
+#+latex_class: sive2025
+#+bibliography: template.bib
+# #+bibliography: sive2025.bib
+#+cite_export: biblatex
+#+latex_header_extra: \RequirePackage[]{./out/sive2025}
+#+refproc: :abbreviate nil
+
+#+begin_export latex
+\firstsection{Introduction}
+#+end_export
+
+* About                                                            :noexport:
+
+Org file describing a paper for submission to the 8th IEEE VR Workshop,
+[[https://sive.create.aau.dk/][SIVE]] (Sonic Interaction in Virtual Environments) 2025.
+
+Submission website: https://new.precisionconference.com/
+
+* Latex Setup                                                      :noexport:
+:PROPERTIES:
+:header-args: :tangle out/sive2025.sty :results silent
+:END:
+
+Remember to tangle, =C-c C-v t=.
+
+** Fundamentals
+
+#+begin_src latex
+\ProvidesPackage{sive2025}[2025/12/09 v0.1 Bundling SIVE2025 LaTeX style]
+#+end_src
+
+** Packages
+
+*** Typography
+
+#+begin_src latex
+\usepackage{times}                     % we use Times as the main font
+\renewcommand*\ttdefault{txtt}         % a nicer typewriter font
+#+end_src
+
+#+begin_quote
+We encourage the use of mathptmx for consistent usage of times font
+throughout the proceedings. However, if you encounter conflicts
+with other math-related packages, you may want to disable it.
+#+end_quote
+
+#+begin_src latex
+\usepackage{mathptmx}                  % use matching math font
+#+end_src
+
+*** Demo content
+
+#+begin_quote
+Only used in the template examples. You can remove these lines.
+#+end_quote
+
+#+begin_src latex
+\usepackage{tabu}                      % only used for the table example
+\usepackage{booktabs}                  % only used for the table example
+\usepackage{lipsum}                    % used to generate placeholder text
+\usepackage{mwe}                       % used to generate placeholder figures
+#+end_src
+
+** Figures
+
+#+begin_src latex
+%% it is recomended to use ``\cref{sec:bla}'' instead of ``Fig.~\ref{sec:bla}''
+\graphicspath{{figures/}{pictures/}{images/}{./}} % where to search for the images
+#+end_src
+
+** Metadata stuff
+
+#+begin_quote
+If you are submitting a paper to a conference for review with a double
+blind reviewing process, please replace the value ``0'' below with your
+OnlineID. Otherwise, you may safely leave it at ``0''.
+#+end_quote
+
+#+begin_src latex
+\onlineid{0}
+#+end_src
+
+#+begin_quote
+Declare the category of your paper, only shown in review mode
+#+end_quote
+
+#+begin_src latex
+\vgtccategory{Research}
+#+end_src
+
+#+begin_quote
+allow for this line if you want the electronic option to work properly
+#+end_quote
+
+#+begin_src latex
+\vgtcinsertpkg
+#+end_src
+
+#+begin_quote
+In preprint mode you may define your own headline. If not, the default
+IEEE copyright message will appear in preprint mode.
+#+end_quote
+
+#+begin_src latex
+%\preprinttext{To appear in an IEEE VGTC sponsored conference.}
+#+end_src
+
+#+begin_quote
+This adds a link to the version of the paper on IEEEXplore
+Uncomment this line when you produce a preprint version of the article 
+after the article receives a DOI for the paper from IEEE
+#+end_quote
+
+#+begin_src latex
+%\ieeedoi{xx.xxxx/TVCG.201x.xxxxxxx}
+#+end_src
+
+** Title
+
+#+begin_src latex
+\title{Global Illumination for Fun and Profit}
+#+end_src
+
+** Authors
+
+Author and Affiliation (single author).
+
+#+begin_src latex
+\author{Thomas Rushton\thanks{e-mail: thomas.rushton@inria.fr}}
+\affiliation{\scriptsize Inria, INSA Lyon, CITI, EA3720 \\ 69621 Villeurbanne, France}
+#+end_src
+
+** Teaser figure
+
+#+begin_src latex
+%% A teaser figure can be included as follows
+\teaser{
+  \centering
+  \includegraphics[width=\linewidth]{CypressView}
+  \caption{In the Clouds: Vancouver from Cypress Mountain.}
+  \label{fig:teaser}
+}
+#+end_src
+
+** Abstract
+
+The template takes a nonstandard approach to producing the abstract;
+got to tangle any time I change the following:
+
+#+begin_src latex
+\abstract{
+  What this paper is about.
+}
+#+end_src
+
+** Keywords
+
+#+begin_quote
+Keywords that describe your work. Will show as 'Index Terms' in
+journal please capitalize first letter and insert punctuation after
+last keyword.
+#+end_quote
+
+#+begin_src latex
+\keywords{Radiosity, global illumination, constant time.}
+#+end_src
+
+** Bibliography
+
+#+begin_src latex
+\bibliographystyle{abbrv-doi}
+#+end_src
+
+* Introduction
+
+Here we
+go...[cite:@Isenberg:2017:VMC;@Kindlmann:1999:SAG;@Kitware:2003;@Lorensen:1987:MCA;@Max:1995:OMF;@Nielson:1991:TAD;@Wyvill:1986:DSS]
+
+* Conclusion
+
+We did it.
+
+#+print_bibliography:
+
+* Emacs Setup                                                      :noexport:
+
+- Set up =sive2025= document class, based on =vgtc=.
+- Alter abstract export.
+
+# Local Variables:
+# eval:   (add-to-list 'org-latex-classes '("sive2025"
+# "\\documentclass{vgtc}
+# [NO-DEFAULT-PACKAGES]"
+# ("\\section{%s}" . "\\section*{%s}")
+# ("\\subsection{%s}" . "\\subsection*{%s}")
+# ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+# ("\\paragraph{%s}" . "\\paragraph*{%s}")
+# ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+# End:
