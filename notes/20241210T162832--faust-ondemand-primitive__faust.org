@@ -1,0 +1,28 @@
+#+title:      Faust ondemand primitive
+#+date:       [2024-12-10 mar. 16:28]
+#+filetags:   :faust:
+#+identifier: 20241210T162832
+
+Mostly because I'll be annoyed if Chrome crashes and I lose this
+little example:
+
+#+begin_src faust
+import("stdfaust.lib");
+
+process = clock,no.noise : ondemand(_) with {
+    clock = 1 : + ~ _,(1<<rate) : %,0 : ==;
+    rate = hslider("crush", 0, 0, 10, 1);
+} <: _,_; 
+#+end_src
+
+This is fun and qacts as an easy lo-fi sample-rate crusher;
+essentially a periodic sample and hold.
+
+Alternatively, a button can dictate whether the noise generator runs:
+
+#+begin_src faust
+process = (button("b"),1 : -),no.noise : ondemand(_);
+#+end_src
+
+~ondemand~ isn't available in the mainline web IDE at the moment, but
+can be used [[https://orlarey.github.io/faustide/][here]].

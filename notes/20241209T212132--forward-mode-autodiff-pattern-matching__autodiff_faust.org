@@ -1,0 +1,262 @@
+#+title:      Forward-mode Autodiff: Pattern Matching
+#+date:       [2024-12-09 lun. 21:21]
+#+filetags:   :autodiff:faust:
+#+identifier: 20241209T212132
+#+property: header-args:faust :results none
+
+In the end it wasn't too difficult to create a more general
+pattern-matching scheme for forward mode autodiff:
+
+#+begin_src faust
+env(vars) = environment {
+    // Forward mode automatic differentiation.
+    fwdAD(C) = par(i, inputs(C), input) : fwdADImpl(C);
+
+    fwdADImpl(C) = fwd(C)
+    with {
+        fwd(A ~ B) = fwd(A) ~ fwd(B);
+        fwd(A :> B) = fwd(A) : sumall(outputs(A)) : fwd(B);
+        fwd(A <: B) = fwd(A) <: fwd(B);
+        fwd((A,B)) = fwd(A),fwd(B);
+        fwd(A : B) = fwd(A) : fwd(B);
+        fwd(A) = diff(A);
+    };
+
+    // ...
+#+end_src
+
+- ~fwdAD~ counts the inputs of the circuit it receives to create as
+  many differentiable audio inputs as are required.
+- The rule for merge composition uses the differentiable ~sumall~
+  function, which is a nice bit of re-use.
+- Maybe ~fwdADImpl~ should be called ~fwdAD~ and ~fwdAD~ should be
+  called something like ~fwdADIn~; nomenclature a challenge in this
+  instance.
+
+One nice consequence is it's possible to write an activation function
+like so:
+
+#+begin_src faust
+sigmoid = fwdADImpl(*(-1) : 1 / (1 + exp));
+#+end_src
+
+and loss functions as:
+
+#+begin_src faust
+losses = environment {
+    L1 = lossFunction(abs);
+    L2 = lossFunction(^(2));
+} with {
+    lossFunction(function, windowSize, learningRate, y, yHat) = error,par(i,vars.N,_)
+        : window
+        : fwdADImpl(function) 
+        : meter 
+        : _,scaleGrads
+    with {
+        window = par(i, vars.N+1, ba.slidingMean(windowSize));
+        error = yHat,y : -;
+        meter = (_ <: attach(hbargraph("[100]loss",0.,.05))),
+            par(i, vars.N, _ <: attach(hbargraph("[101]gradient %i",-.5,.5)));
+        scaleGrads = par(i, vars.N, _,learningRate : *);
+    };
+};
+#+end_src
+
+Basically there's no need to use the ~diff~ primitives directly.
+
+* Examples
+
+** A filter
+
+It's possible to differentiate a filter from the libraries:
+
+#+begin_src faust
+e1 = fi.fir(coeffs)
+with {
+    coeffs = par(i, N, var(i+1));
+};
+
+process = d.fwdAD(e1);
+#+end_src
+
+where
+
+#+begin_src faust
+N = 5;
+var(i) = hslider("x%i", 0, -1, 1, .01);
+d = df.env(df.vars(par(i, N, var(i+1))));
+#+end_src
+
+** A neuron
+
+#+begin_src faust
+e3 = neuron(N/2)
+with {
+    neuron(n) = Z : Y
+    with {
+        WX = sum(i, n, hslider("w_%j", 0, -1, 1, .01) * hslider("x_%j", 0, -1, 1, .01) with { j = i + 1; });
+        b = hslider("b", 0, -1, 1, .01);
+        Z = WX + b;
+        Y = *(-1) : 1 / (1 + exp);
+    };
+};
+
+process = d.fwdAD(e3);
+#+end_src
+
+** A parameter optimisation example
+:PROPERTIES:
+:CUSTOM_ID: h:6406ad6a-8da4-4b88-9e79-7ead27b6b49b
+:END:
+
+This is just a differentiable gain control:
+
+#+begin_src faust
+M = 1;
+d2 = df.env(df.vars(par(i, M, var(i+1))));
+
+e2 = _,var(1) : *;
+
+sgd(target, estimate, lossFn) = target,_ : backprop
+with {
+    backprop(y) = (["x1":grad(1) -> estimate] : _,si.bus(M) : lossWrap) ~ (!,!,_)
+        : _,y,_,si.block(M) // Return: yHat, y, L
+    with {
+        grad(i) = !,_ : - ~ _ <: attach(hbargraph("x%i\Hat", -1, 1));
+        lossWrap(yHat) = yHat,lossFn(y, yHat);
+    };
+};
+
+process = no.noise <: sgd(e2, d2.fwdAD(e2), d2.losses.L1(1, 5e-4));
+#+end_src
+
+Note that it uses widget modulation [cite:@orlareyWidget] to apply the
+gradient update. Note also that it depends on the following dumb
+addition to =diff.lib=:
+
+#+begin_src faust
+diff(hslider("x1", 0, -1, 1, .01)) = hslider("x1", 0, -1, 1, .01),1,par(i, vars.N-1, 0);
+#+end_src
+
+But this is just a hack to show that the system works, in principle.
+
+* Limitations
+
+Pattern-matching independent variables is an issue, but there are
+others.
+
+** Lambda abstractions
+
+It isn't possible to differentiate ~fi.iir~, for example, because it
+uses a lambda abstraction in the form of ~ma.sub~. The trouble is it
+isn't possible to pattern-match a lambda abstraction, so ~fwdAD~
+treats the whole expression as it would a numerical constant (emphasis
+mine):
+
+#+begin_quote
+ERROR : recursive composition diffconst~B The number of inputs [2] of
+diffconst must be at least the number of outputs [6] of B. Here
+diffconst = *\(x7).(\(x8).(x8,x7 : -)),0,0,0,0,0;* has 2 inputs and 6
+outputs while B = _,_,_,_,_,_<:(_,_,_,_,_,_,hslider("a1", 0.0f, -1.0f,
+1.0f, 0.01f),0,0,0,0,0 : route(12,22,1,1,7,2,1,3,8,4,2,...; has 6
+inputs and 6 outputs
+#+end_quote
+
+Rewriting ~sub~ helps, however:
+
+#+begin_src faust
+e11 = sub ~ fi.fir(a) : fi.fir(b)
+with {
+    sub = _,_ <: !,_,_,! : -; // Or: sub = *(-1),_ : +;
+    a = par(i, floor(N/2), hslider("a%j", 0, -1, 1, .01) with { j = i + 1; });
+    b = par(i, ceil(N/2), hslider("b%i", 0, -1, 1, .01));
+};
+
+process = d.fwdAD(e11);
+#+end_src
+
+** Counting independent variables
+
+Ideally we'd like to count the ~hslider~ instances in ~C~, or (better
+still?) those with metadata indicating that they should be considered
+differentiable, e.g.
+
+#+begin_src faust
+x1 = hslider("x1 [diff]", 0, -1, 1, .01);
+x2 = hslider("x2 [nodiff]", 0, -1, 1, .01);
+#+end_src
+
+That would certainly require work at the level of the compiler.
+
+I had the idea to move ~fwdAD~ outside of the environment, receiving
+the number of parameters, ~N~, then do something like this (here with
+one test widget-modulated parameter):
+
+#+begin_src faust
+fwdAD(C, N) = par(i, inputs(C), d.input) : ["x1":X.var(1) -> fwdADImpl(C)]
+with {
+    X = vars(par(i, N, - ~ _ <: attach(hbargraph("x%j", -1, 1)) with { j = i + 1; }));
+    d = env(X);
+
+    fwdADImpl(C) = fwd(C)
+    with {
+        fwd(A ~ B) = fwd(A) ~ fwd(B);
+        fwd(A :> B) = fwd(A) : sumall(outputs(A)) : fwd(B);
+        fwd(A <: B) = fwd(A) <: fwd(B);
+        fwd((A,B)) = fwd(A),fwd(B);
+        fwd(A : B) = fwd(A) : fwd(B);
+        fwd(A) = d.diff(A);
+    };
+};
+#+end_src
+
+But that's not a goer:
+
+#+begin_quote
+ERROR : invalid modulation circuit, it should have exactly 1 output
+#+end_quote
+
+I.e. there's no way to widget-modulate the partial derivatives of the
+hslider in addition to the slider itself.
+
+Nevertheless, the idea points toward something like this:
+
+#+begin_src faust
+fwdAD(C, N) = par(i, inputs(C), d.input)
+    : [par(i, N, "x%j":X.var(j) with { j = i + 1; }) -> fwdADImpl(C)]
+#+end_src
+
+But that comes with its own set of problems. (What if variables aren't
+labelled x1, x2, etc?)
+
+** Routing gradients
+
+Tying in with the previous limitation, how are we to route gradients
+arbitrarily to sliders (or their replacements) that may be nested deep
+within the circuit? Widget modulation is the obvious candidate (see
+the [[denote:20241209T212132::#h:6406ad6a-8da4-4b88-9e79-7ead27b6b49b][parameter optimisation example]] above)... something like this
+perhaps?
+
+#+begin_src faust
+fwdAD(C, N) = si.bus(N),par(i, inputs(C), d.input) : [
+    "x1":grad(1),
+    "x2":grad(2),
+    "x3":grad(3) //...
+    -> fwdADImpl([
+        "x1":button("1"),
+        "x2":button("2"),
+        "x3":button("3") //...
+        -> C])]
+#+end_src
+
+And in the differentiable environment:
+
+#+begin_src faust
+diff(button("1")) = vars.var(1);
+diff(button("2")) = vars.var(2);
+diff(button("3")) = vars.var(3);
+//...
+#+end_src
+
+But this is obviously inflexible and serves no purpose for parameters
+with arbitrary labels.

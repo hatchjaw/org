@@ -135,7 +135,7 @@ after the article receives a DOI for the paper from IEEE
 Author and Affiliation (single author).
 
 #+begin_src latex
-\author{Thomas Rushton\thanks{e-mail: thomas.rushton@inria.fr}}
+\author{Thomas Rushton\thanks{e-mail: \href{thomas.rushton@inria.fr}{thomas.rushton@inria.fr}}}
 \affiliation{\scriptsize Inria, INSA Lyon, CITI, EA3720 \\ 69621 Villeurbanne, France}
 #+end_src
 
