@@ -10,7 +10,7 @@
 #+TAGS: [ PROGRAMMING : R(r) PYTHON(P) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ZOTERO(z) LATEX(l) ]
 #+TAGS: [ AUDIO : SYNTHESIS(s) PHYSMOD(y) SPATIALAUDIO(S) NETWORKEDAUDIO(N) DDSP(D) ]
-#+TAGS: [ HARDWARE : RPI(R) TEENSY(t) PTP(T) ]
+#+TAGS: [ HARDWARE : RPI(i) TEENSY(t) PTP(T) ]
 #+EXPORT_SELECT_TAGS: BLOG
 #+OPTIONS:   H:3 num:0 toc:t \n:nil @:t ::t |:t ^:{} _:{} -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc html-style:nil
@@ -5117,3 +5117,144 @@ I decided to take [[denote:20241210T110606][another look]] at the audio-clock-re
 situation.
 
 Entered on [2024-12-10 mar. 09:42]
+
+*** 2024-12-11 mercredi
+**** Networked audio sync: Sample rate issue   :NETWORKEDAUDIO:TEENSY:PTP:
+Well, isn't this hilarious?
+- Running as a USB audio device, Teensy doesn't run at 48 kHz.
+  + Well, it runs, but something's off with buffering (I think)
+    because it sends audio with quasi-periodic silences over I^{2}S.
+- Running at 44.1 kHz, I can have one T41 running as a USB-audio
+  device + networked audio server + PTP authority, and three as PTP
+  subscriber + networked audio client, and they're synced... but
+  /only/ if the subscribers all start up during the same second.
+  + This is because
+    #+begin_src emacs-lisp
+(/ 48000.0 128)
+    #+end_src
+
+    #+RESULTS:
+    : 375.0
+
+    whereas
+    #+begin_src emacs-lisp
+(/ 44100.0 128)
+    #+end_src
+
+    #+RESULTS:
+    : 344.53125
+
+    In fact there's no power of two greater than four by which 44100
+    can be divided without a remainder.
+  + Anyway, the upshot is if subscribers start during different
+    seconds, it's vanishingly unlikely that they'll synchronise,
+    because the audio subsytsem /interrupt interval/ isn't a
+    whole-number divisor of one second.
+
+***** Questions/next steps
+- Can I rewrite Teensy's USB audio driver such that it respects a
+  sample rate of 48 kHz?
+- Even if I did, can I transmit more than two channels over USB (to
+  then relay to the network)?
+- If I instead run Teensy as a USB audio device + PTP clock authority
+  but use a general purpose machine as the audio server, what
+  reference do I use for packet timestamps on the general purpose
+  machine?
+  + The general purpose machine isn't strictly part of the PTP
+    network, though it can probably access the L2 frames (if I [[*Capturing L2 PTP messages][mirror]]
+    those on the port on which it's connected to the switch.
+  + Even then, what would I do with the time received from the clock
+    authority? Save it /once/ and add some number of nanoseconds to it
+    each audio interrupt?
+
+    #+begin_src emacs-lisp :results output
+(princ (format "%f ns" (* 1e9 (/ 128.0 48000))))
+    #+end_src
+
+    #+RESULTS:
+    : 2666666.666667 ns
+
+    Doesn't look promising.
+  + What about just using 'true' time from the general purpose
+    machine? Could I just calculate a /sensible/ offset at the
+    networked audio clients, e.g.
+    #+begin_example
+                    audio server -> audio client
+11.12.2024 15:10:12::001:130:470 -> 01.01.1970 00:08:38::001:130:470
+    #+end_example
+    * What happens when (presumably) the NTP daemon updates the
+      system time?
+    
+Entered on [2024-12-11 mer. 14:13]
+
+*** 2024-12-12 jeudi
+**** Faust IDE trouble                                             :FAUST:
+Well, that's just short of a day lost because of a Faust IDE update.
+
+Turns out the filesystem emulator, [[https://github.com/zen-fs/core][zenfs]], was updated, and that
+rendered existing IndexedDB data (in Firefox fwiw), incompatible with
+the IDE; that meant I'd lost a heap of my recent autodiff work,
+inculding a formative autoencoder.
+
+IndexedDB is ultimately a SQLite database, located at
+=~/.mozilla/firefox/xxxxxx-default-release/storage/https+++faustide.grame.fr/idb=.
+I tried accessing this via Python, but what I got back was garbage;
+some code, mostly binary junk. For a few hours I thought it was a text
+encoding issue, then I realised (comparing client-side JS in the Faust
+IDE with that in Yann's [[https://orlarey.github.io/faustide/][github-based instance]]) that the structure of
+the zenfs package had changed.
+
+I created a little Vite-based web application, with =@zenfs/core= and
+=@zenfs/dom= dependencies whose versions matched those for the
+previous version of the Faust IDE. I copied
+=.../https+++faustide.grame.fr= to =.../http+++localhost+5173= (Vite's
+default server) and opened the .sqlite file in PHPStorm's database
+viewer, changing the value of the =origin= field in the =database=
+table from =https://faustide.grame.fr= to
+=http://localhost:5173=. Accessing my little app in Firefox I was able
+to iterate over files in the emulated root directory and print their
+names and contents to the console. /Phind/ provided me with some code
+for writing the contents to blobs and downloading those as text files
+(with the appropriate names). Here's the (sortof) typescript:
+
+#+begin_src js :results none
+function downloadData(data: BlobPart, fileName: string) {
+    const blob = new Blob([data], {type: 'application/octet-stream'});
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+
+    document.body.appendChild(a);
+    a.click();
+
+    setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    }, 0);
+}
+
+const go = async ()=> {
+    const BrowserFS = await import("@zenfs/core");
+    const { IndexedDB } = await import("@zenfs/dom");
+    await BrowserFS.configureSingle({
+        backend: IndexedDB,
+        storeName: "FaustIDE" as any
+    });
+    const bfs = BrowserFS.promises;
+
+    const files = await bfs.readdir("/")
+    files.forEach(f => {
+        console.log(f)
+
+        const content = BrowserFS.readFileSync(f, 'utf-8')
+        console.log(content);
+        // downloadData(content, f);
+    });
+}
+
+go();
+#+end_src
+
+Entered on [2024-12-12 jeu. 14:57]

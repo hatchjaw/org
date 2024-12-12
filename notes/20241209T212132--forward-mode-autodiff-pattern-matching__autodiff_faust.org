@@ -104,6 +104,39 @@ with {
 process = d.fwdAD(e3);
 #+end_src
 
+** An autoencoder
+
+#+begin_src faust
+df = library("diff.lib");
+
+var(i) = hslider("X%i", 0, -1, 1, .01);
+
+// N = 4*(3+1) + 3*(4+1) + 2*(3+1) + 3*(2+1) + 4*(3+1); // True number of PDs; for each layer, nNeurons * (nWeights + nBias)
+N = 10;
+
+d = df.env(df.vars(par(i, N, var(i+1))));
+
+autoencoder = layer(1, 4, 3) // Encoder
+    <: layer(2, 3, 4)        // ...
+    <: layer(3, 2, 3)        // Latent space representation
+    <: layer(4, 3, 2)        // Decoder
+    <: layer(5, 4, 3)        // ...
+with {
+    layer(k, nNeurons, wPerNeuron) = par(iN, nNeurons, neuron(wPerNeuron)
+    with {
+        neuron(nWeights) = Z : Y
+        with {
+            WX = sum(iW, nWeights, hslider("w_%k%iN%iW", 0, -1, 1, .01),_ : *);
+            b = hslider("b_%k%iN", 0, -1, 1, .01);
+            Z = WX + b;
+            Y = *(-1) : 1 / (1 + exp);
+        };
+    });
+};
+
+process = d.fwdAD(autoencoder) :> _;
+#+end_src
+
 ** A parameter optimisation example
 :PROPERTIES:
 :CUSTOM_ID: h:6406ad6a-8da4-4b88-9e79-7ead27b6b49b
@@ -260,3 +293,101 @@ diff(button("3")) = vars.var(3);
 
 But this is obviously inflexible and serves no purpose for parameters
 with arbitrary labels.
+
+To demonstrate that this approach works, however, consult the
+following example:
+
+#+begin_src faust
+NTAPS = 3;
+
+e4 = _ <: sum(n, NTAPS, _,n : @,bn : *
+with {
+    n1 = n + 1;
+    bn = hslider("x%n1", sin(n), -1., 1., .001);
+});
+
+process = no.noise <: hgroup("", sgd(vgroup("[0]target", e4), df.fwdAD(e4, NTAPS), loss))
+with {
+    loss = df.env(df.vars((si.bus(NTAPS)))).losses.L2(1, 5e-4);
+    
+    sgd(target, estimate, lossFn) = target,_ : backprop
+    with {
+        backprop(y) = (vgroup("estimate", estimate) 
+            : _,si.bus(NTAPS) 
+            : lossWrap) 
+            ~ (!,!,si.bus(NTAPS))
+            : _,y,_,si.block(NTAPS) // Return: yHat, y, L
+        with {
+            grad(i) = !,_ : - ~ _ <: attach(hbargraph("x%i\Hat", -1, 1));
+            lossWrap(yHat) = yHat,vgroup("[1]loss", lossFn(y, yHat));
+        };
+    };
+};
+#+end_src
+
+This only works for three taps, however, because widget-modulating
+~x1~, etc., with ~grad(i)~ adds inputs to the result of ~fwdADImpl~.
+
+* Ideal Syntax/API
+
+What would be the best way to present automatic differentiation in
+general, and gradient-based optimisation in particular, to the Faust
+programmer?
+
+** Widget-modulation-like approach
+
+This would entail providing a list of parameters to a function named,
+e.g. ~fwdAD~, with respect to which a Faust circuit ~C~ should be
+differentiated:
+
+#+begin_src faust
+C = // some arbitrary Faust circuit...
+
+Cdiff = fwdAD("param1", "param2" -> C);
+#+end_src
+
+~fwdAD~ would assume that any inputs to ~C~ are identity functions.
+
+** What about optimisation algorithms?
+
+Perhaps something like this:[fn:1]
+
+#+begin_src faust
+B = // signal produced by black box or target algorithm
+C = // estimate circuit
+
+process = optimize(B, fwdAD("p1", "p2", ... -> C), lossFn);
+#+end_src
+
+~lossFn~ needs to be part of the same /differentiable environment/ as
+C; but I think that only extends to knowing how many gradients it
+should produce. ~lossFn~ should encapsulate the learning rate and
+optimisation strategy (SGD, ADAM, etc.). Inputs, \(s\), to ~C~, in
+this case, are not dependent on paremeters ~"px"~, so ~optimize~
+should prefix ~C~ with differentiable audio inputs of the form \(\langle
+s,\mathbf{0} \rangle\)
+
+#+begin_src faust
+input = _,0,0,...;
+#+end_src
+
+But how to do this without passing both the differentiated and /raw/
+circuit ~C~?
+
+#+begin_src faust
+optimize(target, estimate, diffEstimate, loss) = ... par(i, inputs(estimate), d.input) : diffEstimate ...
+with {
+    //...
+    d = df.env(vars);
+};                                                
+#+end_src
+
+Unless there were some way to compute, e.g.
+
+#+begin_src faust
+nInputs = inputs(diffEstimate) - widgets(diffEstimate); 
+#+end_src
+
+* Footnotes
+
+[fn:1] /-ize/ is [[https://books.google.com/ngrams/graph?content=optimise%2Coptimize&year_start=1800&year_end=2022&corpus=en&smoothing=3][the more common spelling]].
