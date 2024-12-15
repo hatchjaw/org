@@ -695,7 +695,7 @@ Entered on [2024-05-02 jeu. 10:54]
 Resources
 - [[https://pinout.xyz/][RPi GPIO pinout guide]]
 - [[https://datasheets.raspberrypi.com/bcm2835/bcm2835-peripherals.pdf][Broadcom BCM2835 ARM Peripherals [pdf]​]]
-  + [[https://elinux.org/BCM2835_datasheet_errata#p104_table][Relevant errata]]
+  + [[https://elinux.org/BCM2835_datasheet_errata#p105_table][Relevant errata]]
 - [[https://abyz.me.uk/rpi/pigpio/][pigpio]]
 - [[https://github.com/arisena-com/rpi_src/tree/master][RPi I2S test app]]
 
@@ -5215,46 +5215,203 @@ table from =https://faustide.grame.fr= to
 to iterate over files in the emulated root directory and print their
 names and contents to the console. /Phind/ provided me with some code
 for writing the contents to blobs and downloading those as text files
-(with the appropriate names). Here's the (sortof) typescript:
+(with the appropriate names). Here's the typescript:
 
 #+begin_src js :results none
-function downloadData(data: BlobPart, fileName: string) {
+import {configureSingle} from '@zenfs/core';
+import {readdir, readFile} from '@zenfs/core/promises';
+import {IndexedDB} from '@zenfs/dom';
+
+await configureSingle({
+    backend: IndexedDB,
+    storeName: "FaustIDE" as any
+});
+
+// Display a filename, code, and download link.
+const displayData = (data: BlobPart, fileName: string) => {
     const blob = new Blob([data], {type: 'application/octet-stream'});
     const url = window.URL.createObjectURL(blob);
+
+    const h3 = document.createElement('h3');
+    h3.innerText = fileName;
+    document.body.appendChild(h3);
+    const pre = document.createElement('pre');
+    pre.innerText = data.toString();
+    document.body.appendChild(pre);
 
     const a = document.createElement('a');
     a.href = url;
     a.download = fileName;
+    a.innerText = `download ${fileName}`
 
     document.body.appendChild(a);
-    a.click();
+};
 
-    setTimeout(() => {
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-    }, 0);
+// Get the files.
+const files = await readdir("/")
+
+// Display some info for each file.
+for (const f of files) {
+    console.log(f)
+
+    const content = await readFile(f, 'utf-8')
+    console.log(content);
+    displayData(content, f);
 }
 
-const go = async ()=> {
-    const BrowserFS = await import("@zenfs/core");
-    const { IndexedDB } = await import("@zenfs/dom");
-    await BrowserFS.configureSingle({
-        backend: IndexedDB,
-        storeName: "FaustIDE" as any
-    });
-    const bfs = BrowserFS.promises;
+// Download 'em all in one go.
+const button = document.getElementById("download-all")
+button?.addEventListener('click', async () => {
+    for (const f of files) {
+        const content = await readFile(f, 'utf-8');
+        const a = document.createElement('a');
+        const blob = new Blob([content], {type: 'application/octet-stream'});
+        const url = window.URL.createObjectURL(blob);
+        a.href = url;
+        a.download = f;
+        document.body.appendChild(a);
+        a.click();
 
-    const files = await bfs.readdir("/")
-    files.forEach(f => {
-        console.log(f)
-
-        const content = BrowserFS.readFileSync(f, 'utf-8')
-        console.log(content);
-        // downloadData(content, f);
-    });
-}
-
-go();
+        // setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        // }, 0);
+    }
+})
 #+end_src
 
 Entered on [2024-12-12 jeu. 14:57]
+*** 2024-12-13 vendredi
+**** Soutenance de thèse: Maxime Popoff                       :SOUTENANCE:
+Maxime did very well, but he spoke too quickly and mumbled a bit at
+times. If he raced through it, perhaps that's in part because he had
+so much ground to cover, and an imprssive publication history --- he
+has been quite prolific during his 3+ years.
+
+Andrew McPherson (ICL):
+- loves the work; thinks it's great that there's something linking
+  FPGA-audio and the audio-research commuinty.
+- Asks whether Maxime has examples of audio algorithms that aren't
+  well-suited to FPGAs, mentions FFT; Maxime agrees that CPU may be
+  better for FFT.
+- Maxime says non-linear, iterative approaches to virtual analog would
+  be good FPGA candidates.
+- Doesn't have an answer re. neural networks (fair enough, not his
+  area) (to me, looking at the autoencoder block diagram I produced
+  yesterday, that they appear highly parallelisable).
+- Andrew challenges the idea that control I/O (sensors etc.) should be
+  handled by the CPU rather than by the FPGA.
+- What about other computing paradigms, besides Faust? What about
+  dynamically-changing DSP graphs? Maxime says the hardware can't be
+  dynamically-reconfigured.
+- How can the compilation-flow be optimised to speed it up? 20-30 mins
+  is a long time to wait. Maxime counters that Syfala can provide
+  quick resource-usage estimates. But Andrew is asking about rapid
+  prototyping, really (I'd say that's what the Faust IDE is for, or,
+  depending on the project, an MCU rather than an FPGA).
+
+Roselyne Chotin (Sorbonne Université):
+- What concrete applications of /Ultra-Low Latency/ (\lt 1ms)? Maxime
+  says /acoustic control/; when dealing directly with physical
+  propagation of sound, 1 ms is 34 cm; acoustic control in headphones,
+  for example, must be on the order of 10-100 \micro{}s.
+  + Maxime using 'feedback' a little ambiguously (I didn't fully
+    understand on Monday); he's referring not to feedback cancellation
+    in this case, but auditory feedback following physical input,
+    e.g. T(finger \to piano key \to hammer \to string \to sound in air \to ear).
+- Why so few FPGA DSPs used by a 250-tap FIR? This is curious. This is
+  just the nature of the beast in this instance, says Maxime.
+
+Thomas Hélie (IRCAM Paris):
+- Style of thesis very "professional"; quite unlike other PhD
+  write-ups that he encounters.
+- etc.
+
+Christine Solnon (CITI):
+- Noticed some confused example code in one of Maxime's
+  examples. Amusing because it's something we brought up with him on
+  Monday. Not a big problem, because it was only ever intended to be
+  illustrative. Still, she noticed; intention-to-detail important.
+
+Olivier Sentieys (Université de Rennes):
+- How do you specify parallel filters in Faust? Maybe a missing
+  example of how Faust code looks. Is there a for loop? Maxime: no (of
+  course). But yeah, bit of an oversight for the uninitiated,
+  perhaps... but I haven't read the manuscript.
+
+Entered on [2024-12-13 ven. 10:33]
+**** STM32 Nucleo-144 development board                         :HARDWARE:
+[[https://www.cnx-software.com/][CNX Software]] turns up something interesting today: a [[https://www.cnx-software.com/2024/12/13/stmicro-releases-stm32n6-cortex-m55-mcu-series-with-in-house-npu-and-dedicated-computer-vision-pipeline/][new STM32]] with an
+800 MHz ARM Cortex-M55 (not much SRAM though; 4.2 MB
+embedded?). There's a development board (/[[https://www.st.com/en/evaluation-tools/nucleo-n657x0-q.html][STM32 Nucleo-144 development
+board with STM32N657X0 MCU]]/) that goes for ~$60 (apparently). The
+chip features:
+
+- I^{2}S audio.
+- PLLs with 24-bit clock dividers.
+- Ethernet with IEEE 1588 support.
+
+Details in the chip [[https://www.st.com/resource/en/reference_manual/rm0486-stm32n647657xx-armbased-32bit-mcus-stmicroelectronics.pdf][reference manual]].
+
+Entered on [2024-12-13 ven. 16:33]
+*** 2024-12-15 dimanche
+**** SIVE 2025 requirements                           :CONFERENCE:WRITING:
+- The field of /Sonic Interaction in Virtual Environments/ lies at the
+  intersection of interaction design and sound and music computing.
+- Limited research (traditionally) in the VR community on auditory
+  feedback; greater emphasis on visual (predictably) and haptic
+  feedback.
+- Main goal of the workshop is "to increase awareness among the
+  virtual reality community of the importance of sonic elements when
+  designing [XR environments]."
+- Topics can include... Sound spatialisation and auralization.
+- Papers should be 4-6 pages in length and prepared using the IEEE
+  Computer Society conference-style format described at
+  https://tc.computer.org/vgtc/publications/conference/. For accepted
+  papers, authors must prepare a 5 minutes video to be delivered
+  during the workshop.
+
+What, then, should the thrust of my paper be?
+- Lowering the barrier of entry to large-scale spatial audio systems?
+- Sample-synchronous distributed audio systems on a budget?
+- Another step toward democratised, distributed spatial audio?
+
+Entered on [2024-12-15 dim. 12:16]
+**** Catching up on correspondence                              :HARDWARE:
+***** Jean-Michel Friedt
+I emailed JM with a short update on the progress I've made with
+PTP+Teensy.
+***** Nando
+Also emailed Nando with the latest, adding a question about the
+PTP-compliant ethernet dongle that Romain said he'd used at some
+point. He replied with
+#+begin_quote
+The ethernet dongle we bought is this, but it is thunderbolt:
+https://www.sonnettech.com/product/thunderbolt-avb-adapter/overview.html
+(not cheap).
+#+end_quote
+He CC'd Nils, who suggested
+#+begin_quote
+For our friends in Europe this one might also be an option. At least
+the AX88279 supports PTP.
+https://www.delock.com/produkt/66045/dokumente.html
+https://www.asix.com.tw/en/product/USBEthernet/Super-Speed_USB_Ethernet/AX88279
+#+end_quote
+The ASIX chip ([[https://www.asix.com.tw/en/product/USBEthernet/Super-Speed_USB_Ethernet/AX88279][AX88279]]) he linked to is one I'd been looking at
+(there's a demo board). I found ASIX the other day via a search for
+"usb network interface ptp", which led me, of all places, to a
+[[https://www.linkedin.com/posts/ahmadexp_here-is-the-first-usb-to-ethernet-from-asix-activity-7151720398097649664-gwK2][LinkedIn post]] about the company in question and one of their
+PTP-compliant ethernet chips. Anyway, this /DELOCK 66045/ device is
+built around one such chip; must ask Saliha to [[https://www.reichelt.de/de/de/netzwerkkarte-usb-3-0-2-5-gigabit-ethernet-1x-rj45-delock-66045-p392342.html][order one]].
+
+Nando also noticed that the CM4/5 are PTP compliant. I replied with my
+observations re. clock divider resolution.
+***** Leo Cardoso
+Sent Leo a similar account to that with which I furnished
+JM. Hopefully something that's at least of passing interest to him.
+***** Misc
+Just as a reminder, here's a [[https://github.com/jclark/rpi-cm4-ptp-guide/blob/main/switches.md][link]] to that guide to /Inexpensive
+Switches with PTP Support/ that I found a while back, from
+=jclark/rpi-cm4-ptp-guide=.
+
+Entered on [2024-12-15 dim. 12:26]

@@ -112,7 +112,7 @@ df = library("diff.lib");
 var(i) = hslider("X%i", 0, -1, 1, .01);
 
 // N = 4*(3+1) + 3*(4+1) + 2*(3+1) + 3*(2+1) + 4*(3+1); // True number of PDs; for each layer, nNeurons * (nWeights + nBias)
-N = 10;
+N = 10; // Just create some PD signal paths for illustrative purposes
 
 d = df.env(df.vars(par(i, N, var(i+1))));
 
@@ -138,9 +138,6 @@ process = d.fwdAD(autoencoder) :> _;
 #+end_src
 
 ** A parameter optimisation example
-:PROPERTIES:
-:CUSTOM_ID: h:6406ad6a-8da4-4b88-9e79-7ead27b6b49b
-:END:
 
 This is just a differentiable gain control:
 
