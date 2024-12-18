@@ -1,0 +1,13 @@
+var index = 0;
+
+Scope.Channel2.data.forEach(function(element, idx){
+    if(index == 0 && element > 1.5) {
+        index = idx
+    }
+})
+
+const time = Scope.Channel2.TimeOfIndex(index)
+
+FileAppendLine("~/org/papers/sive-2025/data/auth-sub-2.csv", [
+    time
+])

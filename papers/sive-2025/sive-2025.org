@@ -1,22 +1,17 @@
 # -*- coding: utf-8 -*-
 # -*- mode: org -*-
 
-#+title: Sample-Synchronous Distributed Something Something
+#+title: Two Hearts in PTP Time: A Sample-Synchronous Distributed Audio System
 #+author: Thomas Rushton
 
 #+startup: overview
 #+export_file_name: out/sive2025
 #+options: author:nil toc:nil num:3
 #+latex_class: sive2025
-#+bibliography: template.bib
-# #+bibliography: sive2025.bib
+#+bibliography: sive2025.bib
 #+cite_export: biblatex
 #+latex_header_extra: \RequirePackage[]{./out/sive2025}
 #+refproc: :abbreviate nil
-
-#+begin_export latex
-\firstsection{Introduction}
-#+end_export
 
 * About                                                            :noexport:
 
@@ -25,7 +20,13 @@ Org file describing a paper for submission to the 8th IEEE VR Workshop,
 
 Submission website: https://new.precisionconference.com/
 
-* Latex Setup                                                      :noexport:
+** Reminder: abstract
+
+Remember that the abstract is defined as part of the document style,
+so it lives in [[*Abstract][LaTeX setup]] and needs to be re-tangled as and when it
+is modified.
+
+* LaTeX Setup                                                      :noexport:
 :PROPERTIES:
 :header-args: :tangle out/sive2025.sty :results silent
 :END:
@@ -182,8 +183,87 @@ last keyword.
 
 * Introduction
 
-Here we
-go...[cite:@Isenberg:2017:VMC;@Kindlmann:1999:SAG;@Kitware:2003;@Lorensen:1987:MCA;@Max:1995:OMF;@Nielson:1991:TAD;@Wyvill:1986:DSS]
+Despite continued interest in lowering the barrier of entry to the
+burgeoning research field of spatial and immersive audio, this remains
+a comparatively exclusive arena. Recent work in distributed
+
+What does it take synchronise playback on physically separate audio
+devices?
+
+[cite:@friedtSynchronisation2023]
+
+** Precision Time Protocol
+
+PTP is a UDP-based protocol for precise clock synchronisation between
+networked devices... Though often associated with more expensive
+networking equipment, support for PTP is offered by a number of
+low-cost MCUs, including the Broadcom BCMxxx, as found on the
+Raspberry Pi Compute Module 4 and 5, STMxxx, and NXP iMXRT1060 series,
+the microcontroller utilised by the Teensy 4.1 development board.  In
+addition certain low-cost network switches, chief amongst these the
+MikroTik CRS326-24G-2S+ series, provide PTP suport.
+
+* Results
+:PROPERTIES:
+:header-args: :session :exports results
+:END:
+
+#+begin_src julia :results none
+using CSV, DataFrames, Plots
+
+# t41lastBytes = [191, 203, 234]
+# df = DataFrame()
+# for b in t41lastBytes
+#     for c in ["noptp", "unmanaged", "ptp"]
+#         tmp = CSV.read("./data/$b-$c.csv", DataFrame; header=false).Column1
+#         tmp = vcat(tmp, missings(610 - length(tmp)))
+#         df[!, "$b-$c"] = tmp
+#     end
+# end
+# CSV.write("./data/combined.csv", df, separator=',', header=true)
+
+function plotDrift(dataCategory)
+    t41lastBytes = [191, 203, 234]
+    plot(legendtitle="IP address", yformatter=:scientific)
+    xlabel!("Time (s)")
+    ylabel!("Offset (s)");
+    for b in t41lastBytes
+        local data = CSV.read("./data/$b-$dataCategory.csv", DataFrame; header=["offset"], limit=600)
+        data.offset .= data.offset .- data.offset[1]
+        plot!(data.offset, label="...48.$b", linewidth=1.5)
+    end
+
+    savefig("./figures/$dataCategory.png")
+end
+#+end_src
+
+#+begin_src julia :results file graphics :file noptp.png :output-dir ./figures
+plotDrift("noptp")
+#+end_src
+
+#+RESULTS:
+[[file:./figures/noptp.png]]
+
+#+begin_src julia :results file graphics :file unmanaged.png :output-dir ./figures
+plotDrift("unmanaged")
+#+end_src
+
+#+RESULTS:
+[[file:./figures/unmanaged.png]]
+
+#+begin_src julia :results file graphics :file ptp.png :output-dir ./figures
+plotDrift("ptp")
+#+end_src
+
+#+RESULTS:
+[[file:./figures/ptp.png]]
+
+#+begin_src julia :results file graphics :file ptp-2.png :output-dir ./figures
+plotDrift("ptp-2")
+#+end_src
+
+#+RESULTS:
+[[file:./figures/ptp-2.png]]
 
 * Conclusion
 
@@ -191,10 +271,9 @@ We did it.
 
 #+print_bibliography:
 
-* Emacs Setup                                                      :noexport:
+* Local Variables                                                  :noexport:
 
 - Set up =sive2025= document class, based on =vgtc=.
-- Alter abstract export.
 
 # Local Variables:
 # eval:   (add-to-list 'org-latex-classes '("sive2025"

@@ -12,7 +12,7 @@ high-res images. Ghostscript can be employed to address this issue:
 gs -sDEVICE=pdfwrite -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=out.pdf in.pdf
 #+end_src
 
-Instead of =/ebook=, try =/preprint= for something higher-fidelity, or
+Instead of =/ebook=, try =/prepress= for something higher-fidelity, or
 =/screen= for something more aggressive, compression-wise.
 
 [[https://askubuntu.com/questions/113544/how-can-i-reduce-the-file-size-of-a-scanned-pdf-file][Source]]

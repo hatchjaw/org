@@ -1,0 +1,195 @@
+#+title:      Teensy + PTP: Drift Measurements
+#+date:       [2024-12-18 mer. 14:11]
+#+filetags:   :ptp:teensy:
+#+identifier: 20241218T141125
+#+property: header-args:julia :session :exports results
+#+property: header-args:julia+ :output-dir (format "%s/20241218T141125" (org-babel-temp-directory))
+#+property: header-args:julia+ :var dir=(format "%s/20241218T141125" (org-babel-temp-directory))
+
+Preparing to write the SIVE paper, I decided to gather some results. I
+sent a 1 Hz pulse from a clock-authority/audio-server Teensy to a
+network of three further subscriber Teensies with the following IPs
+
+- 192.168.48.191
+- 192.168.48.203
+- 192.168.48.234
+
+I attached probes to pin 7 (I2S data) of the authority and one
+subscriber at a time, and measured the offset of the rising edge of
+the 1 Hz pulse, writing that offset at each triggered acquisition of
+the authority to a CSV file via a script in the /Waveforms/
+application.
+
+#+begin_src js :noeval
+var index = 0;
+
+Scope.Channel2.data.forEach(function(element, idx){
+    // Find the index of the datapoint where channel 2 first exceeds the trigger value
+    if(index == 0 && element > Scope.Trigger.Level.value) {
+        index = idx
+    }
+})
+
+// Find the time associated with the index found above.
+const time = Scope.Channel2.TimeOfIndex(index)
+
+// Append the offset time found to a CSV file.
+FileAppendLine("~/org/papers/sive-2025/data/191-ptp.csv", [ // e.g.
+    time
+])
+#+end_src
+
+I took just over 600 measurements (10 mins' worth) for each pair of IP
+and test codition:
+- Without PTP.
+- With PTP but simulating an unmanaged switch, by deactivating the PTP
+  profile on the switch.
+- With PTP.
+
+Finally, I combined these into one large CSV:
+
+#+begin_src julia :noeval
+using CSV, DataFrames
+
+t41lastBytes = [191, 203, 234]
+df = DataFrame()
+for b in t41lastBytes
+    for c in ["noptp", "unmanaged", "ptp"]
+        tmp = CSV.read("./data/$b-$c.csv", DataFrame; header=false).Column1
+        tmp = vcat(tmp, missings(610 - length(tmp)))
+        df[!, "$b-$c"] = tmp
+    end
+end
+CSV.write("./data/combined.csv", df, separator=',', header=true)
+#+end_src
+
+* Visualising the data
+
+First, load some Julia packages
+
+#+begin_src julia :results none
+using CSV, DataFrames, Plots
+#+end_src
+
+Now load the data. I recorded just over 600 samples in each case; take
+just the first 600.
+
+#+begin_src julia :results none
+data = CSV.read(
+    "./20241218T154907--teensy-ptp-drift-measurements-data__data_ptp_teensy.csv", DataFrame;
+    limit=600
+)
+#+end_src
+
+This function will take a category --- "noptp", "unmanaged", or "ptp"
+--- and generate the corresponding plot:
+
+#+begin_src julia :results none
+function plotDrift(dataCategory, plotFilepath)
+    t41lastBytes = [191, 203, 234]
+    plot(legendtitle="IP address", yformatter=:scientific)
+    xlabel!("Time (s)")
+    ylabel!("Offset (s)");
+    for b in t41lastBytes
+        column = data[!, "$b-$dataCategory"]
+        # Remove initial offset
+        column .= column .- column[1]
+        plot!(column, label="...48.$b", linewidth=1.5)
+    end
+
+    savefig(plotFilepath)
+end
+#+end_src
+
+** Without PTP
+
+#+begin_src julia :results file graphics :file noptp.png
+plotDrift("noptp", "$dir/noptp.png")
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-CvdCso/20241218T141125/noptp.png]]
+
+As one would expect, we see more-or-less linear drift, with two
+subscribers running fast (one, =...48.234=, significantly faster than
+the other, =...48.203=), and one slow. =...48.191= gets far enough
+behind that its buffer read index wraps around. Here, for =...48.234=,
+we see drift on the order of...
+
+#+begin_src emacs-lisp
+(format "%f ppm" (* (/ -4e-3 600) 1e6)) 
+#+end_src
+
+#+RESULTS:
+: -6.666667 ppm
+
+Which is just about commensurate with what we'd expect to see for a
+commercial grade XO.
+
+** With PTP, but unmanaged
+
+NB. this entailed using the ~l3PTP~ implementation, rather than
+~l2PTP~.
+
+#+begin_src julia :results file graphics :file unmanaged.png
+plotDrift("unmanaged", "$dir/unmanaged.png")
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-CvdCso/20241218T141125/unmanaged.png]]
+
+Unexpectedly, perhaps, we now see all three subscribers run fast, and
+by about the same degree.
+
+#+begin_src emacs-lisp
+(format "%f ppm" (* (/ -2.5e-4 600) 1e6)) 
+#+end_src
+
+#+RESULTS:
+: -0.416667 ppm
+
+Less than half a part-per-million is pretty respectable... put another
+way, that's .4 \micro{}s/s, or one sample @48kHz every
+
+#+begin_src emacs-lisp
+(format "%.1f s" (abs (/ 20 (* (/ -2.5e-4 600) 1e6))))
+#+end_src
+
+#+RESULTS:
+: 48.0 s
+
+** With PTP
+
+#+begin_src julia :results file graphics :file ptp.png
+plotDrift("ptp", "$dir/ptp.png")
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-CvdCso/20241218T141125/ptp.png]]
+
+There's still some drift, but now we're talking! In the worst case,
+that of =...48.234=, we have:
+
+#+begin_src emacs-lisp
+(format "%f ppb" (* (/ 1e-6 600) 1e9)) 
+#+end_src
+
+#+RESULTS:
+: 1.666667 ppb
+
+...or \(1\frac{2}{3}\) ns/s; 1 \micro{}s in ten minutes.
+
+There's still some drift, however. Interestingly, it appears to
+/mirror/ the case from the first plot, with =191= running slightly
+fast (rather than slightly slow), =203= running slow, and =234=
+running about 2.5x as slow as =203=. This suggests that there's some
+value, derivable from the /raw drift/, that can be applied in inverse
+fashion to correct the remaining drift.
+
+* A note regarding ob-julia-vterm
+
+I had to go through some contortions to get plot images to
+display. The above combination of ~header-args~ and and function that
+accepts the path to which to save the figure was the only way I could
+get things to work. Ultimately the [[https://github.com/shg/ob-julia-vterm.el][Org Babel]] Julia package probably
+needs some work.
