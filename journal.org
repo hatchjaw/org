@@ -5447,10 +5447,10 @@ Entered on [2024-12-16 lun. 14:03]
 SIVE:
 - I have a distributed spatial audio system + a plugin.
 - Sending sources through the plugin.
-- It's much better because it's way more scaleable than the SoTA.
+- It's much better because it's way more scalable than the SoTA.
 - Difference now is the modules are in sync.
 - New thing is the reliance on PTP --- now we have acceptable
-  synchronicity. 1 column's worth.
+  synchronicity. 1 column's worth of content on that topic.
 - Frame the paper as a progress report
   + I had a system that worked, but wasn't sure about synchronicity.
   + I was interpolating like crazy.
@@ -5460,10 +5460,10 @@ SIVE:
   horrible plots for IEEE/IS2, etc.
 - If someone wants to put together a distributed spatial audio system
   for spatial audio rendering, now they can do it and it works.
-- I'm not going to be able to deliver by Friday: perceptual evaluation.
-  + VR community is going to want something like this.
+- What I'm not going to be able to deliver by Friday: perceptual
+  evaluation.
+  + VR community would probably prefer something like this.
   + Don't do the evaluation, but just give the paper a try; high level
     affair; just say things are better than what we had before.
-  + Don't talk about perceptual stuff.
     
 Entered on [2024-12-18 mer. 13:20]

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -*- mode: org -*-
 
-#+title: Two Hearts in PTP Time: A Sample-Synchronous Distributed Audio System
+#+title: All Together Now: A Synchronous Distributed Audio System
 #+author: Thomas Rushton
 
 #+startup: overview
@@ -25,6 +25,31 @@ Submission website: https://new.precisionconference.com/
 Remember that the abstract is defined as part of the document style,
 so it lives in [[*Abstract][LaTeX setup]] and needs to be re-tangled as and when it
 is modified.
+
+** What's the cost per channel again?
+
+Excluding the cost of a computer, speakers and cables:
+
+#+begin_src emacs-lisp :exports results :results value
+(let* ((teensy-cost 31.5)
+       (audio-shield-cost 14.4)
+       (ethernet-kit-cost 3.9)
+       (switch-cost 200)
+       (computer-cost 1500)
+       (num-ports 24)
+       (output-channels-per-port 2)
+       (num-channels (* output-channels-per-port num-ports))
+       (basic-cost (+ switch-cost
+                      (* num-ports
+                         (+ teensy-cost audio-shield-cost ethernet-kit-cost))))
+       (cost-per-channel (/ basic-cost num-channels))
+       (cost-per-channel-with-pc (/ (+ basic-cost computer-cost) num-channels)))
+  (format "€ %.2f per channel\n€ %.2f per channel (incl. computer)" cost-per-channel cost-per-channel-with-pc))
+#+end_src
+
+#+RESULTS:
+: € 29.07 per channel
+: € 60.32 per channel (incl. computer)
 
 * LaTeX Setup                                                      :noexport:
 :PROPERTIES:
@@ -127,8 +152,10 @@ after the article receives a DOI for the paper from IEEE
 
 ** Title
 
+Just use the Org document title.
+
 #+begin_src latex
-\title{Global Illumination for Fun and Profit}
+%% \title{Global Illumination for Fun and Profit}
 #+end_src
 
 ** Authors
@@ -136,7 +163,9 @@ after the article receives a DOI for the paper from IEEE
 Author and Affiliation (single author).
 
 #+begin_src latex
-\author{Thomas Rushton\thanks{e-mail: \href{thomas.rushton@inria.fr}{thomas.rushton@inria.fr}}}
+\author{Thomas Rushton\thanks{e-mail: \href{thomas.rushton@inria.fr}{thomas.rushton@inria.fr}}
+  \and Romain Michon
+  \and Tanguy Risset}
 \affiliation{\scriptsize Inria, INSA Lyon, CITI, EA3720 \\ 69621 Villeurbanne, France}
 #+end_src
 
@@ -144,12 +173,12 @@ Author and Affiliation (single author).
 
 #+begin_src latex
 %% A teaser figure can be included as follows
-\teaser{
-  \centering
-  \includegraphics[width=\linewidth]{CypressView}
-  \caption{In the Clouds: Vancouver from Cypress Mountain.}
-  \label{fig:teaser}
-}
+%% \teaser{
+%%   \centering
+%%   \includegraphics[width=\linewidth]{CypressView}
+%%   \caption{In the Clouds: Vancouver from Cypress Mountain.}
+%%   \label{fig:teaser}
+%% }
 #+end_src
 
 ** Abstract
@@ -158,10 +187,27 @@ The template takes a nonstandard approach to producing the abstract;
 got to tangle any time I change the following:
 
 #+begin_src latex
-\abstract{
-  What this paper is about.
-}
-#+end_src
+\abstract{ Despite significant ongoing interest in spatial and
+  immersive audio research, the technical infrastructre required to
+  support large-scale, multichannel audio systems remains encumbered
+  by exclusivity in terms of cost, lack of modularity and limited
+  scalability. The research community rests largely at the mercy of
+  commercial forces when faced with the question of how to implement
+  and operate the kind of centralised audio installation typically
+  demanded by immersive applications. Recent scholarly work in this
+  area has demonstrated the feasibility of distributingc spatial audio
+  algorithms across a network of \textit{internet-of-things}-like
+  devices, paving the way toward scalable, modular systems based on
+  the latest low-cost embedded computing platforms. Spatial audio
+  algorithms are highly time-sensitive, however, and these efforts
+  have been beset by the problem of establishing an authoritative
+  source of time in a networked-audio context predicated on the use of
+  ubiquitous networking equipment. Here, we build on these efforts,
+  describing a distributed networked audio system, controllable with
+  familiar audio tooling, and with synchronicity ensured to sub-sample
+  accuracy via the precision time protocol (PTP) while maintaining a
+  low cost-per-output-channel. }
+  #+end_src
 
 ** Keywords
 
@@ -172,7 +218,8 @@ last keyword.
 #+end_quote
 
 #+begin_src latex
-\keywords{Radiosity, global illumination, constant time.}
+\keywords{Spatial audio, immersive audio, distributed systems,
+  embedded audio, internet of things, accessibility.}
 #+end_src
 
 ** Bibliography
@@ -197,13 +244,18 @@ devices?
 PTP is a UDP-based protocol for precise clock synchronisation between
 networked devices... Though often associated with more expensive
 networking equipment, support for PTP is offered by a number of
-low-cost MCUs, including the Broadcom BCMxxx, as found on the
-Raspberry Pi Compute Module 4 and 5, STMxxx, and NXP iMXRT1060 series,
-the microcontroller utilised by the Teensy 4.1 development board.  In
-addition certain low-cost network switches, chief amongst these the
-MikroTik CRS326-24G-2S+ series, provide PTP suport.
+low-cost MCUs, including the Broadcom BCM2711/2712, as found on the
+Raspberry Pi Compute Module 4 and 5, STM32H750IB (Daisy Seed), and NXP
+iMXRT1060 series, the microcontroller utilised by the Teensy 4.1
+development board. All of the above devices are supported by the Faust
+programming language via architecture files; =faust2alsa=,
+=faust2stm32=, and =faust2teensy=. In addition certain low-cost
+network switches, chief amongst these the MikroTik CRS326-24G-2S+
+series, provide PTP suport.
 
-* Results
+
+
+* Results That I'm Not Going To Include                            :noexport:
 :PROPERTIES:
 :header-args: :session :exports results
 :END:
