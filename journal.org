@@ -5458,8 +5458,8 @@ SIVE:
   + Now we can run without interpolation.
 - Say a little about the clock-conditioning algorithm, but save the
   horrible plots for IEEE/IS2, etc.
-- If someone wants to put together a distributed spatial audio system
-  for spatial audio rendering, now they can do it and it works.
+- If someone wants to put together a distributed system for spatial
+  audio rendering, now they can do it and it works.
 - What I'm not going to be able to deliver by Friday: perceptual
   evaluation.
   + VR community would probably prefer something like this.

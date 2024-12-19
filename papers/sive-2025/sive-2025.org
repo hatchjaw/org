@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -*- mode: org -*-
 
-#+title: All Together Now: A Synchronous Distributed Audio System
+#+title: All Together Now: A Synchronous Platform for Distributed Spatial Audio
 #+author: Thomas Rushton
 
 #+startup: overview
@@ -30,7 +30,7 @@ is modified.
 
 Excluding the cost of a computer, speakers and cables:
 
-#+begin_src emacs-lisp :exports results :results value
+#+begin_src emacs-lisp :results value
 (let* ((teensy-cost 31.5)
        (audio-shield-cost 14.4)
        (ethernet-kit-cost 3.9)
@@ -219,7 +219,7 @@ last keyword.
 
 #+begin_src latex
 \keywords{Spatial audio, immersive audio, distributed systems,
-  embedded audio, internet of things, accessibility.}
+  embedded computing, internet of things, accessibility.}
 #+end_src
 
 ** Bibliography
@@ -239,21 +239,47 @@ devices?
 
 [cite:@friedtSynchronisation2023]
 
+The greater part of the difficulty in such a project lies not
+necessarily in the mathematics of sound field synthesis, nor in
+writing the code to implement SFS algorithms, but in finding suitable
+hardware on which to run the system. One may find, for example, a €30
+development board such as the Daisy Seed, well known to the DIY/maker
+audio community, well-appointed with memory, easily programmable with
+Faust, and /even possessing a MCU with PTP support/, but having no
+Ethernet chip, and thus no way to connect it to a network. There is a
+sense in which, short of designing an manufacturing --- at scale --- a
+printed circuit board of one's own, the stars must align.
+
 ** Precision Time Protocol
 
 PTP is a UDP-based protocol for precise clock synchronisation between
 networked devices... Though often associated with more expensive
 networking equipment, support for PTP is offered by a number of
-low-cost MCUs, including the Broadcom BCM2711/2712, as found on the
-Raspberry Pi Compute Module 4 and 5, STM32H750IB (Daisy Seed), and NXP
-iMXRT1060 series, the microcontroller utilised by the Teensy 4.1
-development board. All of the above devices are supported by the Faust
-programming language via architecture files; =faust2alsa=,
-=faust2stm32=, and =faust2teensy=. In addition certain low-cost
-network switches, chief amongst these the MikroTik CRS326-24G-2S+
-series, provide PTP suport.
+low-cost MCUs, including the Broadcom BCM2711/2712
+[cite:@raspberrypiltd.BCM27112022], as found on the Raspberry Pi
+Compute Module 4 [cite:@raspberrypiltd.Raspberry2023] and 5
+[cite:@raspberrypiltd.Raspberry2024], STM32H750IB
+[cite:@stmicroelectronicsSTM32H750VB2023] (Daisy Seed), and NXP
+iMXRT1060 series [cite:@nxpsemiconductorsIMX2021], the microcontroller
+utilised by the Teensy 4.1 development board. All of the above devices
+are supported by the Faust programming language via architecture
+files; =faust2alsa=, =faust2stm32=, and =faust2teensy=. In addition
+certain low-cost network switches, chief amongst these the MikroTik
+CRS326-24G-2S+ series, provide PTP suport.
 
+** Sound Field Synthesis
 
+#+attr_org: :width 400
+#+attr_latex: :width \linewidth
+#+caption: The holophonic illusion of primary-source Wave Field Synthesis
+#+caption: is created by applying an appropriate per-loudspeaker delay
+#+caption: (indicated by the dashed grey lines) to a virtual sound source.
+#+caption: Since the delays for each loudspeaker are independent, they can
+#+caption: computed independently (or two at a time as pictured), in
+#+caption: distributed fashion. The integrity of the synthesised wavefront
+#+caption: is contigent on synchronicity amongst the group of distributed
+#+caption: processors.
+[[file:./figures/WFS.drawio.png]]
 
 * Results That I'm Not Going To Include                            :noexport:
 :PROPERTIES:
