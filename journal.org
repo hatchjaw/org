@@ -3094,7 +3094,7 @@ Entered on [2024-08-13 mar. 11:11]
   export my Org file to PDF, but not both; ~#+LATEX_HEADER_EXTRA:~ to
   the rescue (includes header in export, but not in preview
   generation).
-- Got to [[file:tasks.org::*Review PAUC manuscript][review the PAUC
+- Got to [[file:tasks.org_archive::*Review PAUC manuscript][review the PAUC
   paper]] by Monday.
 
 Entered on [2024-08-14 mer. 11:12]
@@ -5447,7 +5447,7 @@ Entered on [2024-12-16 lun. 14:03]
 SIVE:
 - I have a distributed spatial audio system + a plugin.
 - Sending sources through the plugin.
-- It's much better because it's way more scalable than the SoTA.
+- It's much better because it's way more scalable than the SotA.
 - Difference now is the modules are in sync.
 - New thing is the reliance on PTP --- now we have acceptable
   synchronicity. 1 column's worth of content on that topic.
@@ -5467,3 +5467,78 @@ SIVE:
     affair; just say things are better than what we had before.
     
 Entered on [2024-12-18 mer. 13:20]
+* 2025
+** 2025-01 janvier
+*** 2025-01-07 mardi
+**** Conference submission deadlines                             :WRITING:
+I should target the following:
+
+- [[https://aes2.org/contributions/2025-1st-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio-call-for-contributions/][AES AI/audio]]: February 28th
+- [[https://smc25.iem.at/call/][SMC]]: March 3rd
+- [[https://internetofsounds2025.ieee-is2.org/][IS2]]: July 1st
+
+This means I can probably safely return to practical work until the
+end of this month.
+
+(This year's NIME will be held in Australia, and the submission
+deadline is Feb 5th, so probably not worth considering.)
+
+Entered on [2025-01-07 mar. 11:27]
+*** 2025-01-10 vendredi
+**** HDR: Romain Michon                          :PRESENTATION:SOUTENANCE:
+/Embedded Real-Time Audio DSP – Improving Accessibility and Exploring
+Opportunities/ ([[https://ccrma.stanford.edu/~rmichon/talks/HDR.pdf][slides]])
+
+- Embedded Audio!
+- ASIC (Application-specific integrated circuit, non-programmable),
+  DSP (programmable), MCU (easier to program), CPU (general-purpose
+  computer), GPU, FPGA...
+- 12 years' work improving accessibility to programmable embedded
+  audio with Faust at the heart of these efforts.
+- 6 years at Stanford; 20 papers published during this time.
+- =faust2android= came out of Romain's PhD work at Stanford.
+  + Achieving low-latency audio on Android entailed liaising with the
+    Android team at Google in Mountain View.
+- MCUs with FPU appeared at the end of the 2010's --- Teensy, ESP32
+  TTGO, etc.
+  + Programmable in C++; perhaps not so easy for artists/makers/DIY
+    folks.
+  + One of Romain's [[https://web.archive.org/web/20200127172527/http://www.justinjayc.com/arnhenm-core/][fave projects]] from teaching with =faust2teensy=,
+    etc.
+- /Gramophone/ --- ESP32-based; intended as an enduring DMI. /Amstramgrame/
+  project; backpacks of 30 Gramophones to be used in middle school
+  classrooms.
+- Now there's Daisy, BELA, RPi, etc.
+  + ...and FPGAs.
+- FAST project: 2021-24. Fast Audio Signal Processing Technologies on
+  FPGA.
+  + Spawned Syfala.
+- Initial Syfala efforts saw audio running bare-metal; adaptation to
+  an OS facilitated integration with MIDI, ethernet, etc.
+- Maxime's boards; modular control interface (Popoffone) for FPGA,
+  ultra low-latency (~11 \micro{}s) audio interface.
+- Spatial audio applications.
+  + FPGA-based; centralised WFS; up to 50 sound sources can be
+    individually spatialised.
+  + Also 17-channel ambisonics dome.
+  + Drastic decrease in price; at least an order of magnitude over
+    SoTA.
+- 5th order \Sigma\Delta DAC (Jonas, Anastasia). 1 MHz sample rate, 124 dB SNR.
+- Very, /very/ positive words about my work on synchronous distributed
+  audio...
+- Virtual acoustics; Chauvet. My work, of course, ties into this.
+- Faust and AI.
+- Future Work:
+  + More of the above, plus...
+  + Fixed-point efficiency improvements in Faust.
+  + Porting HLS optimization techniques to Faust Syfala backend.
+  + Faust-VHDL compiler. This would bypass HLS, which is proprietary.
+  + AI + 3D soundscape rendering. Yes, I agree completely.
+  + Coupled with embedded systems with NPUs, this is an area that's
+    ripe for exploration.
+- Conference chairing, teaching, etc.
+
+- Stefania asks about the latest with DDSP; Romain a bit shaky on what
+  the outlook is there.
+  
+Entered on [2025-01-10 ven. 09:58]

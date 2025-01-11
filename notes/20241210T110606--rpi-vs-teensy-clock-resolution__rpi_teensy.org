@@ -44,7 +44,7 @@ PLL4 numerator:               184103485
 PLL4 denominator:            1000000000
 #+end_example
 
-Recalling, from [[*Broadcom BCM2835][GPIO clock setup on the Broadcom BCM2835]], that the
+Recalling, from [[file:~/org/journal.org::*Broadcom BCM2835][GPIO clock setup on the Broadcom BCM2835]], that the
 basic relationship between source clock, \(F_{c} = 500\times10^{6}\), target sampling rate
 \(F_{s}\), and integer (\(D_{i}\)) and fractional (\(D_{f}\)) dividers is
 
@@ -55,11 +55,11 @@ F_{s} &= \frac{1}{64}\frac{F_{c}}{D_{i} + \frac{D_{f}}{4096}}\;,
 we have results like:
 
 #+begin_src emacs-lisp :results output
-(setq divf 3110)
-(while (< divf 3120)
-  (princ (format "DIVF = %d :: Fs = %.12f\n" divf
-                 (/ (/ 500e6 (+ 162 (/ (float divf) 4096))) 64)))
-  (setq divf (1+ divf)))
+(let ((divf 3110))
+  (while (< divf 3120)
+    (princ (format "DIVF = %d :: Fs = %.12f\n" divf
+                   (/ (/ 500e6 (+ 162 (/ (float divf) 4096))) 64)))
+    (setq divf (1+ divf)))))
 #+end_src
 
 #+RESULTS:
@@ -76,6 +76,13 @@ DIVF = 3118 :: Fs = 47999.760001199997
 DIVF = 3119 :: Fs = 47999.688002027986
 #+end_example
 
+#+begin_src emacs-lisp
+(format "Resolution approx. 1/%.2f Hz" (/ 1. (- 48000.048000048 47999.976000012)))
+#+end_src
+
+#+RESULTS:
+: Resolution approx. 1/13.89 Hz
+
 This doesn't look too promising. Bearing in mind, however, that the
 target sample rates from serial output are just that --- targets,
 computed by applying the proportional adjustment to the integer
@@ -83,15 +90,15 @@ sampling rate (in this case 48 kHz) --- what sort of accuracy do we
 get via Teensy's 30-bit PLL4 dividers? E.g.
 
 #+begin_src emacs-lisp :results output
-(setq numerator 183999995)
-(while (< numerator 184000005)
-  (princ
-   (format "NUM = %d :: Fs = %.12f\n"
-           numerator
-           (* (/ 24e6 (lsh 1 8))          ;; 24 MHz XO, 2^8 wordsize
-              (/ (+ 29 (/ numerator 1e9)) ;; DIV + NUM / DENOM
-                 (* 3 19)))))             ;; SAI1 pre & post dividers
-  (setq numerator (1+ numerator)))
+(let ((numerator 183999995))
+  (while (< numerator 184000005)
+    (princ
+     (format "NUM = %d :: Fs = %.12f\n"
+             numerator
+             (* (/ 24e6 (lsh 1 8))          ;; 24 MHz XO, 2^8 wordsize
+                (/ (+ 29 (/ numerator 1e9)) ;; DIV + NUM / DENOM
+                   (* 3 19)))))             ;; SAI1 pre & post dividers
+    (setq numerator (1+ numerator)))))
 #+end_src
 
 #+RESULTS:
@@ -107,6 +114,13 @@ NUM = 184000002 :: Fs = 48000.000003289475
 NUM = 184000003 :: Fs = 48000.000004934212
 NUM = 184000004 :: Fs = 48000.000006578950
 #+end_example
+
+#+begin_src emacs-lisp
+(format "Resolution approx. 1/%.2f Hz" (/ 1. (- 48000. 47999.999998355)))
+#+end_src
+
+#+RESULTS:
+: Resolution approx. 1/607902.95 Hz
 
 It's /daft/ how much precision 30 bits permit.
 

@@ -282,3 +282,56 @@ DEADLINE: <2024-08-23 ven.>
 :ARCHIVE_TODO: DONE
 :END:
 - State "DONE"       from "TODO"       [2024-09-12 jeu. 10:21]
+
+* DONE [#B] Apply, again, for social security [12/12]
+:PROPERTIES:
+:ARCHIVE_TIME: 2025-01-07 mar. 11:46
+:ARCHIVE_FILE: ~/org/tasks.org
+:ARCHIVE_OLPATH: Tasks
+:ARCHIVE_CATEGORY: tasks
+:ARCHIVE_TODO: DONE
+:END:
+- State "DONE"       from "WAITING"    [2025-01-07 mar. 11:45]
+- State "WAITING"    from "DONE"       [2024-06-12 mer. 11:04] \\
+  Waiting for an update by post.
+- State "DONE"       from "TODO"       [2024-05-07 mar. 15:55]
+I have a case number with Ameli:
+
+*2024 0502 6443 39*
+
+I should quote that if I ever have to call them back.
+** DONE Fill out updated form S 1106a
+- State "DONE"       from "TODO"       [2024-05-07 mar. 10:44]
+** DONE Get updated /quittances de loyer/ from Foncia website
+- State "DONE"       from "TODO"       [2024-05-07 mar. 12:48]
+** DONE Print all documents
+- State "DONE"       from "TODO"       [2024-05-07 mar. 12:48]
+** DONE Get envelope
+- State "DONE"       from "TODO"       [2024-05-07 mar. 15:53]
+** DONE Take to post office and send, with a suivi
+- State "DONE"       from "TODO"       [2024-05-07 mar. 15:54]
+NB, sent via INSA's outgoing post.
+** DONE Call Ameli; check whether they've received my dossier
+- State "DONE"       from "TODO"       [2024-05-31 ven. 17:23]
+  They have, which is good. Except they received what they have on May
+  15th, which is, according to La Poste, two days prior to the arrival
+  of my second dossier. So did they receive (or finally begin to
+  process) the first one after a delay of over two months?
+** DONE Receive some kind of update via post?...
+- State "DONE"       from "WAITING"    [2024-06-17 lun. 09:22]
+** DONE Call Ameli again
+DEADLINE: [2024-06-18 mar.]
+- State "DONE"       from "TODO"       [2024-06-18 mar. 13:46]
+- Update sex;
+- Ask whether I can upload the /Déclaration sur l'Honneur de
+  Filiation/ rather than posting it.
+** DONE Update Mme Le Prince re. Ameli
+** DONE Receive another update via post
+- State "DONE"       from "WAITING"    [2024-08-14 mer. 11:03]
+** DONE Apply for Carte Vitale
+DEADLINE: <2024-09-16 lun.>
+Sent form, photo, and scan of titre de séjour.
+** DONE Recevive Carte Vitale
+
+- State "DONE"       from "WAITING"    [2025-01-07 mar. 11:45]
+- State "DONE"       from "TODO"       [2024-10-13 dim. 17:56]
