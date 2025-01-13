@@ -40,7 +40,7 @@ FileAppendLine("~/org/papers/sive-2025/data/191-ptp.csv", [ // e.g.
 #+end_src
 
 I took just over 600 measurements (10 mins' worth) for each pair of IP
-and test codition:
+and test condition:
 - Without PTP.
 - With PTP but simulating an unmanaged switch, by deactivating the PTP
   profile on the switch.
@@ -108,7 +108,7 @@ plotDrift("noptp", "$dir/noptp.png")
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-CvdCso/20241218T141125/noptp.png]]
+[[file:/tmp/babel-d9Lvr1/20241218T141125/noptp.png]]
 
 As one would expect, we see more-or-less linear drift, with two
 subscribers running fast (one, =...48.234=, significantly faster than
@@ -136,7 +136,7 @@ plotDrift("unmanaged", "$dir/unmanaged.png")
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-CvdCso/20241218T141125/unmanaged.png]]
+[[file:/tmp/babel-d9Lvr1/20241218T141125/unmanaged.png]]
 
 Unexpectedly, perhaps, we now see all three subscribers run fast, and
 by about the same degree.
@@ -149,7 +149,7 @@ by about the same degree.
 : -0.416667 ppm
 
 Less than half a part-per-million is pretty respectable... put another
-way, that's .4 \micro{}s/s, or one sample @48kHz every
+way, that's .4 \micro{}s/s, or one sample @48kHz every...
 
 #+begin_src emacs-lisp
 (format "%.1f s" (abs (/ 20 (* (/ -2.5e-4 600) 1e6))))
@@ -165,7 +165,7 @@ plotDrift("ptp", "$dir/ptp.png")
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-CvdCso/20241218T141125/ptp.png]]
+[[file:/tmp/babel-d9Lvr1/20241218T141125/ptp.png]]
 
 There's still some drift, but now we're talking! In the worst case,
 that of =...48.234=, we have:
@@ -193,3 +193,18 @@ display. The above combination of ~header-args~ and and function that
 accepts the path to which to save the figure was the only way I could
 get things to work. Ultimately the [[https://github.com/shg/ob-julia-vterm.el][Org Babel]] Julia package probably
 needs some work.
+
+* A note regarding Julia itself
+
+Tried to recreate the plots after a few weeks' delay... and it
+wouldn't work. I had to reinstall package dependencies, but =Plots=
+refused to install (incompatibility with updated openssl on
+Manjaro?). I uninstalled the packaged version of Julia, and installed
+the official release via
+
+#+begin_src shell :noeval
+curl -fsSL https://install.julialang.org | sh
+#+end_src
+
+and =Plots= installed fine. Nevertheless, I really need to bite the
+bullet at some point and start using Nix or Guix.
