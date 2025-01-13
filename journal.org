@@ -5542,3 +5542,56 @@ Opportunities/ ([[https://ccrma.stanford.edu/~rmichon/talks/HDR.pdf][slides]])
   the outlook is there.
   
 Entered on [2025-01-10 ven. 09:58]
+*** 2025-01-13 lundi
+**** =faust-ddsp=: Advik's PR & Next Steps                    :FAUST:DDSP:
+Remiss of me not to mention it sooner, but I've spent the past week
+dealing with Advik's GSoC pull request. This entailed [[https://github.com/hatchjaw/faust-ddsp/commit/74634dd9c9eb2013dfdfb40430054022178f48b8][removing some
+examples that didn't do anything useful or interesting]], then
+accepting the rest of the changes. I've since created a [[https://github.com/hatchjaw/faust-ddsp/tree/neural-networks][new branch]] and
+set about consolidating the ideas I've had since GSoC with Advik's
+work, and replacing his neural network proposal with something that's
+more composable/extensible.
+
+Is this a bit mean-spirited? Well, I intend to credit him where credit
+is indeed due, and in any case, his neural network wasn't addressing
+parameters properly --- for multiple layers of multiple neurons, the
+first weights/biases are always the ones whose values are updated and
+displayed in the UI, i.e. multiple neurons may call ~weights(1)~, when
+weights should in fact be uniquely indexed. It took a little while to
+find a way to route gradients deep into the network (without any help
+from widget modulation), but the [[https://github.com/hatchjaw/faust-ddsp/blob/806f891756a07005cd3227b6f624a41d73f0c4c4/examples/experiments/neural_network.dsp][example code]] I've produced is elegant
+enough in its concision; it suffices to describe a network of dense
+layers in terms of pairs of =neuronsPerLayer/weightsPerNeuron= values,
+e.g.:
+
+#+begin_src faust :results none
+LAYERSPEC = ((2, 1, 3, 2, 1, 3));
+#+end_src
+
+Additionally, I wrote a new ~df.paramOpt~ function, which, like the
+existing ~df.backprop~, encapsulates loss and gradient computation,
+and backpropagation. It moves the target signal out of the backprop
+circuit, however, makes less demands in terms of routing, and, most
+importantly, encourages moving parameters and inputs /out/ of the
+algorithm to be differentiated such that the more general
+pattern-matching scheme (e.g. via ~fwdADInN~) can be used, rather than
+the ~diff~ primitives. More /automatic/ this way, innit.
+
+Outstanding matters:
+- ~safediv~ (or just ~div~ as Advik called it) requires a couple of
+  ~select2~ primitives to correctly prevent division by zero; a smooth
+  approximation may be a better way to go.
+- Advik's [[https://github.com/hatchjaw/faust-ddsp/blob/275d625d8ed7eaa54481bf13ef89ac151d4d2f1d/examples/gain_scheduler.dsp][learning rate scheduler]] doesn't appear to work as intended;
+  not sure what's going on there.
+- I started pursuing the idea of separating =diff.lib= into separate
+  libraries:
+  + =autodiff.lib= containing the differentiable environment,
+    variables, primitives, etc.
+  + =mathopt.lib= containing mathematical optimization utilities ---
+    loss functions, activation functions, etc.
+  + =machinelearning.lib= containing neural network apparatus.
+  But separating things may not be straightforward; loss functions
+  need to be /aware/ of the differentiable environment to produce the
+  appropriate number of gradients, for example.
+
+Entered on [2025-01-13 lun. 18:38]
