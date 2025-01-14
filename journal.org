@@ -4852,7 +4852,7 @@ Interestingly, the device can act as a PTP master.
 Entered on [2024-11-29 ven. 17:09]
 **** Three Teensies                            :NETWORKEDAUDIO:TEENSY:PTP:
 OK, so it's been a long time coming, but I tried one clock authority
-and two suscribes and:
+and two suscribers and:
 - The PTP authority implementation works for multiple subscribers.
 - Subscribers seem to stay more closely-synchronised with each other
   than they do with the authority.

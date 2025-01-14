@@ -42,7 +42,9 @@ FileAppendLine("~/org/papers/sive-2025/data/191-ptp.csv", [ // e.g.
 I took just over 600 measurements (10 mins' worth) for each pair of IP
 and test condition:
 - Without PTP.
-- With PTP but simulating an unmanaged switch, by deactivating the PTP
+  + To clarify, PTP running, but no adjustment applied to subscriber
+    audio clocks.
+- With PTP, but simulating an unmanaged switch by deactivating the PTP
   profile on the switch.
 - With PTP.
 
