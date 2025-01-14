@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 # -*- mode: org -*-
 
-#+TITLE: What I've Been Up To Jan 2025
+#+TITLE: Recent Shenanigans
+#+subtitle: Jan 2025
 #+AUTHOR: Thomas Rushton
 
-#+options: overview
-#+OPTIONS: num:nil toc:1 ^:{} ':t
+#+startup: overview
+#+OPTIONS: num:t toc:1 ^:{} ':t
 #+OPTIONS: reveal_width:1400 reveal_height:1000 reveal_slide_number:c/t
 #+EXPORT_FILE_NAME: index
 #+REVEAL_ROOT: ../reveal.js
@@ -19,9 +20,12 @@
 #+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
 #+REVEAL_TITLE_SLIDE_BACKGROUND: #141414
 #+REVEAL_TITLE_SLIDE_EXTRA_ATTR: class="title-slide"
+#+property: header-args :output-dir ./images
 #+property: header-args:julia :session :exports results
-#+property: header-args:julia+ :output-dir "./images"
 #+property: header-args:julia+ :var dir="./images"
+#+property: header-args:latex :exports results :results file raw
+#+property: header-args:latex+ :imagemagick t :iminoptions -density 600
+#+property: header-args:latex+ :imoutoptions -geometry 1200 -flatten :fit t
 
 * About This Presentation                                          :noexport:
 
@@ -83,14 +87,23 @@ Describe how we're going to plot drift:
 #+begin_src julia :results none
 function plotDrift(dataCategory, plotFilepath)
     t41lastBytes = [191, 203, 234]
-    plot(legendtitle="IP address", yformatter=:scientific, size=(850, 475), margin=5Plots.mm)
-    xlabel!("Time (s)")
-    ylabel!("Offset (s)");
+    plot(legendtitle="IP address",
+         yformatter=:scientific,
+         size=(900, 500),
+         margin=5Plots.mm,
+         xlabel="Time (s)",
+         ylabel="Offset (s)",
+         xlabelfontsize=18,
+         ylabelfontsize=18,
+         tickfontsize=14,
+         legendfontsize=12,
+         legendtitlefontsize=14,
+         gridlinewidth=2);
     for b in t41lastBytes
         column = data[!, "$b-$dataCategory"]
         # Remove initial offset
         column .= column .- column[1]
-        plot!(column, label="...48.$b", linewidth=1.5)
+        plot!(column, label="...48.$b", linewidth=3)
     end
 
     savefig(plotFilepath)
@@ -99,26 +112,94 @@ end
 
 ** Sample-synchronous (almost) networked audio
 
+Aims:
 #+ATTR_REVEAL: :frag (appear)
-- Four Teensies
-  #+ATTR_REVEAL: :frag (appear)
-  + One acts as an audio server --- transmits a 1 Hz impulse train to
-    the network.
-    #+ATTR_REVEAL: :frag (appear)
-    * Also acts as a /clock authority/ --- transmits PTP sync messages
-      to the network.
-  + Three are audio clients --- they receive, buffer and reproduce the
-    impulse train signal.
-- Packets are timestamped
-  + Clients select the packet with timestamp closest to their current
-    ethernet clock time.
-  + ...
+- Establish an authoritative source of *time* and *audio data*.
+- Transmit time from the *clock authority* to any/all *clock subscribers*
+  via *Precision Time Protocol* (PTP).
+- Transmit audio data from the *audio server* to any/all *audio
+  clients* via multicast *User Datagram Protocol* (UDP).
+- The *clock authority* is (almost certainly) also the *audio server*.
 
 #+REVEAL: split
 
-#+header: :exports results :results file raw :file pulse-per-sec.png :output-dir images
-#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 1200 -flatten :fit t
-#+begin_src latex
+Challenges (non-exhaustive list):
+#+ATTR_REVEAL: :frag (appear)
+- Use PTP time correction to *condition the audio subsystem clock* of
+  connected clients.
+- Ensure that both the *rates* and *interrupt timing* of the client
+  audio systems are synchronised.
+  #+ATTR_REVEAL: :frag (appear)
+  + If rates are matched, but signal reproduction is offset, the
+    result is a *filter*.
+
+*** Test setup
+
+#+ATTR_REVEAL: :frag (appear)
+- Four Teensies
+  #+ATTR_REVEAL: :frag (appear)
+  + One audio server --- transmits a 1 Hz impulse train to the
+    network.
+    #+ATTR_REVEAL: :frag (appear)
+    * Also acts as a /clock authority/ --- transmits PTP /sync/ messages
+      to the network and responds to /delay request/ messages.
+  + Three audio clients --- respond to PTP /sync/ messages; send
+    /delay request/ messages.
+    #+ATTR_REVEAL: :frag (appear)
+    * Also receive, buffer and reproduce the impulse train audio
+      signal.
+- Packets are timestamped
+  + Clients reproduce the packet with timestamp closest to their
+    current ethernet clock time.
+
+#+REVEAL: split
+
+#+begin_src latex :file pulse-per-sec-1.png
+\begin{tikzpicture}  
+  \draw[ystep=2cm, xstep=3cm, gray, very thin] (-.9,-.9) grid (12.9,7.9);
+
+  \draw (6.25, -1.25) node {time \(\to\)};
+  
+  \draw[very thick,->] (-.5,6) node[anchor=east, inner sep=5mm] {Audio server} -- (12.5,6);
+  \foreach \t in {0,1,...,4}
+    \draw[very thick](3*\t,6) -- (3*\t,7) node[circle,fill,inner sep=.5mm] {};
+\end{tikzpicture}
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:./images/pulse-per-sec-1.png]]
+
+#+REVEAL: split
+
+#+begin_src latex :file pulse-per-sec-2.png
+\begin{tikzpicture}
+  \fill[black!10!white] (0,-.9) rectangle (1.75, 7.9)
+  node[gray!50!black,align=center,font=\scriptsize] at (.875,-.5) {Transmission\\interval}
+
+  \draw[black,thick,dotted,->] (0,7) -- (2.5,7)
+  node[font=\scriptsize,anchor=north-west,align=center,yshift=3mm] {Reproduction\\offset}
+  \draw[gray,thick,dotted] (2.5,7) -- (2.5,0);
+
+  \foreach \n in {1,2,3}
+  \draw[black,thick,dotted,->] (3*\n,7) -- (3*\n+2.5,7)
+  \draw[gray,thick,dotted] (3*\n+2.5,7) -- (3*\n+2.5,0);
+  
+  \draw[ystep=2cm, xstep=3cm, gray, very thin] (-.9,-.9) grid (12.9,7.9);
+
+  \draw (6.25, -1.25) node {time \(\to\)};
+  
+  \draw[very thick,->] (-.5,6) node[anchor=east, inner sep=5mm] {Audio server} -- (12.5,6);
+  \foreach \t in {0,1,...,4}
+    \draw[very thick](3*\t,6) -- (3*\t,7) node[circle,fill,inner sep=.5mm] {};
+\end{tikzpicture}
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:./images/pulse-per-sec-2.png]]
+
+#+REVEAL: split
+
+#+begin_src latex :file pulse-per-sec-3.png
 \begin{tikzpicture}
   \tikzset{ myblue/.style={blue!70!green!80!white},
     myorange/.style={orange!85!black},
@@ -131,40 +212,47 @@ end
   \fill[yellow!60!white] (1.75,-.9) rectangle (3.25, 5.25)
   node[yellow!50!black,align=center,font=\scriptsize] at (2.5,-.5) {Subscriber\\buffer}
 
-  \draw[black,thick,dotted,->] (0,7.25) -- (2.5,7.25)
-  node[font=\scriptsize,anchor=north-west,align=center,yshift=3mm] {Reproduction\\offset}; 
+  \draw[black,thick,dotted,->] (0,7) -- (2.5,7)
+  node[font=\scriptsize,anchor=north-west,align=center,yshift=3mm] {Reproduction\\offset}
+  \draw[gray,thick,dotted] (2.5,7) -- (2.5,0);
+
+  \foreach \n in {1,2,3}
+  \draw[black,thick,dotted,->] (3*\n,7) -- (3*\n+2.5,7)
+  \draw[gray,thick,dotted] (3*\n+2.5,7) -- (3*\n+2.5,0);
   
   \draw[ystep=2cm, xstep=3cm, gray, very thin] (-.9,-.9) grid (12.9,7.9);
 
   \draw (6.25, -1.25) node {time \(\to\)};
   
-  \draw[very thick,->] (-.5,6) node[anchor=east, inner sep=5mm] {Clock authority} -- (12.5,6);
+  \draw[very thick,->] (-.5,6) node[anchor=east, inner sep=5mm] {Audio server} -- (12.5,6);
   \foreach \t in {0,1,...,4}
     \draw[very thick](3*\t,6) -- (3*\t,7) node[circle,fill,inner sep=.5mm] {};
 
-  \draw[very thick,myblue,->] (-.5,4) node[anchor=east, inner sep=5mm] {Clock subscriber 1} -- (12.5,4);
+  \draw[very thick,myblue,->] (-.5,4) node[anchor=east, inner sep=5mm] {Audio client 1} -- (12.5,4);
   \foreach \t in {0,1,...,3}
     \draw[very thick,myblue](3*\t+2.5,4) -- (3*\t+2.5,5) node[circle,fill,inner sep=.5mm] {};
 
-  \draw[very thick,myorange,->] (-.5,2) node[anchor=east, inner sep=5mm] {Clock subscriber 2} -- (12.5,2);
+  \draw[very thick,myorange,->] (-.5,2) node[anchor=east, inner sep=5mm] {Audio client 2} -- (12.5,2);
   \foreach \t in {0,1,...,3}
     \draw[very thick,myorange](3*\t+2.5,2) -- (3*\t+2.5,3) node[circle,fill,inner sep=.5mm] {};
 
-  \draw[very thick,mygreen,->] (-.5,0) node[anchor=east, inner sep=5mm] {Clock subscriber 3} -- (12.5,0);
+  \draw[very thick,mygreen,->] (-.5,0) node[anchor=east, inner sep=5mm] {Audio client 3} -- (12.5,0);
   \foreach \t in {0,1,...,3}
     \draw[very thick,mygreen](3*\t+2.5,0) -- (3*\t+2.5,1) node[circle,fill,inner sep=.5mm] {};
 \end{tikzpicture}
 #+end_src
 #+attr_org: :width 400
 #+RESULTS:
-[[file:images/pulse-per-sec.png]]
+[[file:./images/pulse-per-sec-3.png]]
 
 *** Test Condition 1
 
 #+begin_quote
 PTP profile enabled ❌
 \\
-Audio clock adjustments ❌ 
+Audio clock adjustments ❌
+\\
+Demonstrates raw drift.
 #+end_quote
 
 #+begin_src julia :results file graphics :file noptp.png
@@ -181,6 +269,8 @@ plotDrift("noptp", "$dir/noptp.png")
 PTP profile enabled ❌
 \\
 Audio clock adjustments ✅
+\\
+Simulates the use of an unmanaged switch.
 #+end_quote
 
 #+begin_src julia :results file graphics :file unmanaged.png
@@ -197,6 +287,8 @@ plotDrift("unmanaged", "$dir/unmanaged.png")
 PTP profile enabled ✅
 \\
 Audio clock adjustments ✅
+\\
+Ideal setup.
 #+end_quote
 
 #+begin_src julia :results file graphics :file ptp.png
@@ -207,7 +299,25 @@ plotDrift("ptp", "$dir/ptp.png")
 #+RESULTS:
 [[file:./images/ptp.png]]
 
+*** Takeaways
+
+#+ATTR_REVEAL: :frag (appear)
+- The audio clock correction algorithm reduces audio clock drift from
+  ~6 ppm to *< 2 ppb*
+  #+ATTR_REVEAL: :frag (appear)
+  + 6 \micro{}s per sec \to 2 ns per sec.
+  + Context: 1 sample period @ 48 kHz \approx 20 \micro{}s.
+  + More context: AES guideline is 5% of the reference frame (1 \micro{}s @
+    48 kHz).
+- The remaining drift appears to be inversely correlated with the raw
+  drift.
+- Startup/interrupt synchronicity remains a challenge.
+- There's an uncomfortable reliance on the cheapest PTP-compliant
+  switch on the market.
+
 ** Neural networks in Faust
+
+(Never mind, another time.)
 
 * Publication(s)
 :PROPERTIES:
@@ -217,8 +327,11 @@ plotDrift("ptp", "$dir/ptp.png")
 
 ** SIVE Article
 
+#+ATTR_REVEAL: :frag (appear)n
 - Ran out of time.
-- Should've submitted something bad.
+- Should perhaps have submitted something bad and hoped for the best.
+- Ultimately, making up results leaves me feeling a little
+  uncomfortable.
 
 * Other Activities
 :PROPERTIES:
@@ -228,9 +341,11 @@ plotDrift("ptp", "$dir/ptp.png")
 
 ** Time Off
 
-I actually took some over Xmas/New Year.
+I did no work whatsoever over Xmas/New Year.
 
 ** WECAM
+
+Weekend-long hackathon/médiation at the /Maison des Mathématiques/, 24-26 Jan.
 
 * Next Steps
 :PROPERTIES:
@@ -238,16 +353,14 @@ I actually took some over Xmas/New Year.
 :reveal_extra_attr: class="title-slide"
 :END:
 
-** California
-
 #+ATTR_REVEAL: :frag (appear)
-- Faust workshop at CCRMA
-- Help?
-
-** Teensy + PTP = 🦾🦾
-
-#+ATTR_REVEAL: :frag (appear)
-- Get a networked, synced demo working
-- Timestamped packets?
-- Long-term, Teensy doesn't have enough memory to be the audio
-  server...
+- Fix the remaining clock drift.
+- Find a reliable way to sync audio interrupts.
+- Document work; make an early start preparing to submit to SMC
+  (deadline March 3rd) and IS^{2} (deadline July).
+- At some point, find the time to feed my findings back to the Teensy
+  community.
+  + Tell Jurek?...
+- Also find time to write more on Faust DDSP with a submission to AES
+  /International Conference on Artificial Intelligence and Machine
+  Learning for Audio/ in mind (deadline Feb 28th).
