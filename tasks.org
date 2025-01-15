@@ -1,28 +1,30 @@
 # Don't add a timestamp for TODO state
 #+SEQ_TODO: TODO(t) STARTED(s!) WAITING(w@) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
-# =C-c C-t= to change sequence
+
+#+begin_quote
+=C-c C-t= to change sequence.
+=C-c C-x C-a= to archive.
+#+end_quote
 
 * Tasks
 ** TODO Prepare Emeraude presentation
 DEADLINE: <2025-02-03 lun.>
-** TODO Read Yann's Widget Modulation paper
-DEADLINE: <2024-09-13 ven.>
-** TODO Ask Maxime again about practicalities of using his DAC with Teensy or the Pi
-DEADLINE: <2024-09-13 ven.>
 ** TODO Prepare PhD meeting presentation
-DEADLINE: <2025-01-14 lun. ++1m>
+DEADLINE: <2025-02-24 lun. ++1m>
 :PROPERTIES:
-:LAST_REPEAT: [2024-10-28 lun. 14:50]
+:LAST_REPEAT: [2025-01-15 mer. 20:20]
 :END:
 
+- State "DONE"       from "TODO"       [2025-01-15 mer. 20:20]
 - State "DONE"       from "TODO"       [2024-10-28 lun. 14:50]
 - State "DONE"       from "TODO"       [2024-07-10 mer. 13:32]
 ** TODO Read Papers
-DEADLINE: <2024-09-16 lun.>
 *** TODO Wierstorf thesis
+DEADLINE: <2025-01-19 dim.>
 *** TODO Ritsch: AOO
 *** TODO Carôt: latency-optimized soundcards
 *** TODO Meier et al.: The JamBerry
+*** TODO Yann's Widget Modulation paper
 
 ** STARTED [#B] Start French Language MOOC
 

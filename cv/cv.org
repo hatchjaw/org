@@ -253,25 +253,29 @@ Music/Drama Technician, Parrs Wood High School, Manchester, UK,
 
 * Publications
 
-T. A. Rushton, R. Michon, S. Serafin, T. Risset, S. Letz, "Networked
-Microcontrollers for Accessible, Distributed Spatial Audio", /under review/.
+T. A. Rushton, 2024, [[https://hal.science/hal-04846518/document#page=17][Differentiable DSP In Faust]], /Proceedings of the
+International Faust Conference (IFC-24)/.
 
-T. A. Rushton, R. Michon, S. Letz, 2023, "[[https://inria.hal.science/hal-04169238/document][A Microcontroller-Based
-Network Client Towards Distributed Spatial Audio]]", /Proceedings of
+T. A. Rushton, R. Michon, S. Serafin, T. Risset, S. Letz, 2024, [[https://www.frontiersin.org/journals/virtual-reality/articles/10.3389/frvir.2024.1391987/][Networked
+Microcontrollers for Accessible, Distributed Spatial Audio]],
+/Frontiers in Virtual Reality, 5/.
+
+T. A. Rushton, R. Michon, S. Letz, 2023, [[https://inria.hal.science/hal-04169238/document][A Microcontroller-Based
+Network Client Towards Distributed Spatial Audio]], /Proceedings of
 the 2023 Sound and Music Computing Conference (SMC-23)/.
 
-T. A. Rushton, P. R. Kantan, 2022, "[[https://seafile.zfn.uni-bremen.de/f/94b7758744164b4e9988/][A Real-time Embodied Sonification
-Model to Convey Temporal Asymmetry During Running]]", /Proceedings of
+T. A. Rushton, P. R. Kantan, 2022, [[https://seafile.zfn.uni-bremen.de/f/94b7758744164b4e9988/][A Real-time Embodied Sonification
+Model to Convey Temporal Asymmetry During Running]], /Proceedings of
 the 7th Interactive Sonification Workshop (ISon)/.
 - Winner: /Best Student Paper/.
 
-T. A. Rushton, D. Overholt, 2022, "[[https://vbn.aau.dk/files/497197288/d20.pdf][The Springamajig: A Flexible
-Digital Musical Instrument]]", /19th Sound and Music Computing
-Conference, SMC 2022/.
+T. A. Rushton, D. Overholt, 2022, [[https://vbn.aau.dk/files/497197288/d20.pdf][The Springamajig: A Flexible Digital
+Musical Instrument]], /19th Sound and Music Computing Conference, SMC
+2022/.
 
-G. V. K. Gustafsson, M. Timossi, T. A. Rushton, 2022, "[[https://vbn.aau.dk/en/publications/kuplen-a-hands-on-physical-model][Kuplen: A
-Hands-On Physical Model]]", /19th Sound and Music Computing
-Conference, SMC 2022/.
+G. V. K. Gustafsson, M. Timossi, T. A. Rushton, 2022, [[https://vbn.aau.dk/en/publications/kuplen-a-hands-on-physical-model][Kuplen: A
+Hands-On Physical Model]], /19th Sound and Music Computing Conference,
+SMC 2022/.
 
 * Emacs setup                                                      :noexport:
 
