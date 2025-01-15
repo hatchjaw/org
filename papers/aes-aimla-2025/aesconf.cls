@@ -194,13 +194,13 @@
 	\setfoot[][
 		\begin{tabular}[t]{c}%
 			AES \ifx\AESConferenceNumber\empty\else\AESConferenceNumber\fi\iftoggle{convention}{Convention}{\AESConferencePrefix\ifx\AESConferenceType\empty Conference\else\AESConferenceType\fi\ on \AESConferenceTopic}\ifx\AESConferenceLocation\empty\else, \AESConferenceLocation\fi\\\AESConferenceDate\\%
-			Page \thepage\ of \pageref{LastPage}%
+			Page \thepage\ of \lastpage@lastpage%\pageref{LastPage}%
 		\end{tabular}%
 	][] % even
 		{}{%
 		  \begin{tabular}[t]{c}%
 			AES \ifx\AESConferenceNumber\empty\else\AESConferenceNumber\fi\iftoggle{convention}{Convention}{\AESConferencePrefix\ifx\AESConferenceType\empty Conference\else\AESConferenceType\fi\ on \AESConferenceTopic}\ifx\AESConferenceLocation\empty\else, \AESConferenceLocation\fi\\\AESConferenceDate\\%
-			Page \thepage\ of \pageref{LastPage}%
+			Page \thepage\ of \lastpage@lastpage%\pageref{LastPage}%
 		\end{tabular}%
 	}{} % odd
 }

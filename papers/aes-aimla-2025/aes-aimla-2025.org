@@ -68,6 +68,7 @@ More useful stuff
 
 #+begin_src latex
 \usepackage{hyperref}
+\hypersetup{hidelinks}
 \usepackage[noabbrev,capitalise]{cleveref}
 #+end_src
 
