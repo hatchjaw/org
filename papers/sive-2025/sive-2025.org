@@ -87,7 +87,7 @@ Remember to tangle, =C-c C-v t=.
 ** Fundamentals
 
 #+begin_src latex
-\ProvidesPackage{sive2025}[2025/12/09 v0.1 Bundling SIVE2025 LaTeX style]
+\ProvidesPackage{sive2025}[2024/12/09 v0.1 Bundling SIVE2025 LaTeX style]
 #+end_src
 
 ** Packages
@@ -581,8 +581,6 @@ existed as a company for over twenty years ---
 * Local Variables                                                  :noexport:
 
 - Set up =sive2025= document class, based on =vgtc=.
-
-
 
 # Local Variables:
 # eval:   (add-to-list 'org-latex-classes '("sive2025"
