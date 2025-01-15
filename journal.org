@@ -5473,9 +5473,9 @@ Entered on [2024-12-18 mer. 13:20]
 **** Conference submission deadlines                             :WRITING:
 I should target the following:
 
-- [[https://aes2.org/contributions/2025-1st-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio-call-for-contributions/][AES AI/audio]]: February 28th
-- [[https://smc25.iem.at/call/][SMC]]: March 3rd
-- [[https://internetofsounds2025.ieee-is2.org/][IS2]]: July 1st
+- [[https://aes2.org/contributions/2025-1st-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio-call-for-contributions/][AES AI/audio]]: February 28th (4-10 pages, EasyChair).
+- [[https://smc25.iem.at/call/][SMC]]: March 3rd (4-8 pages, EasyChair).
+- [[https://internetofsounds2025.ieee-is2.org/][IS2]]: July 1st (5-10 pages, EasyChair).
 
 This means I can probably safely return to practical work until the
 end of this month.
@@ -5595,3 +5595,57 @@ Outstanding matters:
   appropriate number of gradients, for example.
 
 Entered on [2025-01-13 lun. 18:38]
+*** 2025-01-15 mercredi
+**** Emeraude Thèsards                              :MEETING:PRESENTATION:
+***** Benjamin
+- Dual number arithmetic in Julia.
+- Operator overloading via /multiple dispatch/.
+- There's a =ForwardDiff= package in Julia already; but important to
+  understand how it all works by /reinventing the wheel/.
+- Nonetheless, Benjamin has a package in progress that produces
+  numerical partial derivatives in forward mode.
+- Also working on a tape-based reverse mode implementation.
+- Been reading about WaveNet and investigating Neural Amp Modeler.
+
+***** Romain
+- Slides from progress meeting with Florent & Anastasia.
+- People using 8-bit integer formats for ML without loss of accuracy.
+- Quantization Aware Training (QAT) --- aware of quantization of the
+  number format.
+- Moving on with doctoral training... /Méthodes et techniques de la
+  pédagogie universitaire/ in progress.
+- LNS: there's always a gap around zero; this is where
+  subnormals/denormals come in.
+  + Vanishing gradient problem is related to this!
+  + For \(b > 1\) and \(LNS(b, m, l)\) (\(m\), MSB) the gap is \(d =
+    2\cdot{}b^{-2^{m}}\), e.g.
+    #+begin_src emacs-lisp
+(let* ((m 4)
+       (b 2)
+       (d (* 2 (expt b (- (expt 2 m))))))
+  (princ d))
+    #+end_src
+
+    #+RESULTS:
+    : 3.0517578125e-05
+
+  + Other bases, e.g. \(b = 3\) may give smaller \(d\), but at the
+    expense of less resolution for higher numbers.
+- In LNS, multiplication is cheap but addition is expensive ---
+  because logarithmic.
+- Looking at QAT now; LeNet on LNS... eventually running things on
+  FPGA.
+
+***** Orégane
+- Trolling his own company into being useful/responsible.
+- NVidia stuff using FP16 or BF16 ("Brain Float").
+- 8-bit formats too; E5M2/E4M3 (Exponent/Mantissa).
+- Recreating 32-bit numbers with 16-bit requires a representation that
+  /more than doubles/ the number of bits used in order to recreate the
+  desired *range* and *precision*.
+- This is typically achieved on GPU in software; Orégane has convinced
+  his company of the benefit of implementing this in hardware.
+- Paper submitted to ARITH; patent submitted too... the latter might
+  not go anywhere.
+
+Entered on [2025-01-15 mer. 10:16]

@@ -6,7 +6,7 @@
 #+AUTHOR: Thomas Rushton
 
 #+startup: overview
-#+OPTIONS: num:t toc:1 ^:{} ':t
+#+OPTIONS: num:nil toc:1 ^:{} ':t
 #+OPTIONS: reveal_width:1400 reveal_height:1000 reveal_slide_number:c/t
 #+EXPORT_FILE_NAME: index
 #+REVEAL_ROOT: ../reveal.js
@@ -114,17 +114,18 @@ end
 
 Aims:
 #+ATTR_REVEAL: :frag (appear)
-- Establish an authoritative source of *time* and *audio data*.
+- Establish an authoritative source of *time* and *audio data* in a
+  computer network.
 - Transmit time from the *clock authority* to any/all *clock subscribers*
   via *Precision Time Protocol* (PTP).
 - Transmit audio data from the *audio server* to any/all *audio
   clients* via multicast *User Datagram Protocol* (UDP).
 - The *clock authority* is (almost certainly) also the *audio server*.
 
-#+REVEAL: split
+*** Challenges (non-exhaustive)
 
-Challenges (non-exhaustive list):
 #+ATTR_REVEAL: :frag (appear)
+- /PTP time \ne Audio time./
 - Use PTP time correction to *condition the audio subsystem clock* of
   connected clients.
 - Ensure that both the *rates* and *interrupt timing* of the client
@@ -136,21 +137,30 @@ Challenges (non-exhaustive list):
 *** Test setup
 
 #+ATTR_REVEAL: :frag (appear)
-- Four Teensies
+- Four Teensy 4.1 nodes
   #+ATTR_REVEAL: :frag (appear)
-  + One audio server --- transmits a 1 Hz impulse train to the
-    network.
+  + One audio server --- transmits an audio signal -- 1 Hz impulse
+    train -- to the network.
     #+ATTR_REVEAL: :frag (appear)
     * Also acts as a /clock authority/ --- transmits PTP /sync/ messages
       to the network and responds to /delay request/ messages.
   + Three audio clients --- respond to PTP /sync/ messages; send
     /delay request/ messages.
     #+ATTR_REVEAL: :frag (appear)
-    * Also receive, buffer and reproduce the impulse train audio
+    * Also receive, buffer, and reproduce the impulse train audio
       signal.
-- Packets are timestamped
+- Packets are timestamped.
   + Clients reproduce the packet with timestamp closest to their
-    current ethernet clock time.
+    current ethernet clock time...
+
+#+REVEAL: split
+
+We assume that the PTP algorithm just /works/, i.e. under reasonable
+conditions, clients' PTP timers are synchronised to within ~100 ns.
+
+#+attr_org: :width 500
+#+attr_html: :width 1280
+[[./capture-l2ptp.png]]
 
 #+REVEAL: split
 
@@ -245,6 +255,10 @@ Challenges (non-exhaustive list):
 #+RESULTS:
 [[file:./images/pulse-per-sec-3.png]]
 
+#+ATTR_REVEAL: :frag (appear)
+If client audio rates and interrupts are synchronised, this should
+work pretty well.
+
 *** Test Condition 1
 
 #+begin_quote
@@ -307,11 +321,12 @@ plotDrift("ptp", "$dir/ptp.png")
   #+ATTR_REVEAL: :frag (appear)
   + 6 \micro{}s per sec \to 2 ns per sec.
   + Context: 1 sample period @ 48 kHz \approx 20 \micro{}s.
-  + More context: AES guideline is 5% of the reference frame (1 \micro{}s @
+  + More context: AES guideline is "5% of the reference frame" (1 \micro{}s @
     48 kHz).
-- The remaining drift appears to be inversely correlated with the raw
+- The remaining drift appears to be /inversely correlated/ with the raw
   drift.
-- Startup/interrupt synchronicity remains a challenge.
+  + Possible to address this with a proportional-integral controller?
+- Startup/interrupt synchronicity remains a difficulty.
 - There's an uncomfortable reliance on the cheapest PTP-compliant
   switch on the market.
 
@@ -319,7 +334,7 @@ plotDrift("ptp", "$dir/ptp.png")
 
 (Never mind, another time.)
 
-* Publication(s)
+* Publications
 :PROPERTIES:
 :reveal_background: #141414
 :reveal_extra_attr: class="title-slide"
@@ -330,7 +345,7 @@ plotDrift("ptp", "$dir/ptp.png")
 #+ATTR_REVEAL: :frag (appear)n
 - Ran out of time.
 - Should perhaps have submitted something bad and hoped for the best.
-- Ultimately, making up results leaves me feeling a little
+- Ultimately, however, making up results leaves me feeling a little
   uncomfortable.
 
 * Other Activities
@@ -341,11 +356,14 @@ plotDrift("ptp", "$dir/ptp.png")
 
 ** Time Off
 
-I did no work whatsoever over Xmas/New Year.
+I did no work whatsoever over Xmas/New Year 👏
 
 ** WECAM
 
-Weekend-long hackathon/médiation at the /Maison des Mathématiques/, 24-26 Jan.
+Weekend-long hackathon/médiation at the /Maison des Mathématiques/,
+24-26 Jan.
+
+Theme "Son et Musique". Perfect, right?..
 
 * Next Steps
 :PROPERTIES:
@@ -360,6 +378,7 @@ Weekend-long hackathon/médiation at the /Maison des Mathématiques/, 24-26 Jan.
   (deadline March 3rd) and IS^{2} (deadline July).
 - At some point, find the time to feed my findings back to the Teensy
   community.
+  #+ATTR_REVEAL: :frag (appear)
   + Tell Jurek?...
 - Also find time to write more on Faust DDSP with a submission to AES
   /International Conference on Artificial Intelligence and Machine
