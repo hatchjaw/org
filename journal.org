@@ -5476,6 +5476,9 @@ I should target the following:
 - [[https://aes2.org/contributions/2025-1st-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio-call-for-contributions/][AES AI/audio]]: February 28th (4-10 pages, EasyChair).
 - [[https://smc25.iem.at/call/][SMC]]: March 3rd (4-8 pages, EasyChair).
 - [[https://internetofsounds2025.ieee-is2.org/][IS2]]: July 1st (5-10 pages, EasyChair).
+  + There's also a satellite workshop, [[https://internetofsounds2025.ieee-is2.org/workshops/3rd-ieee-international-workshop-networked-immersive-audio][IEEE IWNIA]] (International
+    Workshop on Networked Immersive Audio): July 1st (5-10 pages,
+    EasyChair).
 
 This means I can probably safely return to practical work until the
 end of this month.
@@ -5597,6 +5600,14 @@ Outstanding matters:
 Entered on [2025-01-13 lun. 18:38]
 *** 2025-01-15 mercredi
 **** Emeraude Thèsards                              :MEETING:PRESENTATION:
+Honestly, not happy with how my presentation went, nor how I organised
+the meeting, which started late and overran, even though only four of
+us were present.
+
+Regarding the presentation, I'm going to have to spend /significantly/
+more time at some point, visualising the system of
+PTP-clock/audio-clock/audio-transmission interaction.
+
 ***** Benjamin
 - Dual number arithmetic in Julia.
 - Operator overloading via /multiple dispatch/.
@@ -5649,3 +5660,166 @@ Entered on [2025-01-13 lun. 18:38]
   not go anywhere.
 
 Entered on [2025-01-15 mer. 10:16]
+
+*** 2025-01-16 jeudi
+**** Delock 66045 LAN Adapter: driver installation & setup      :HARDWARE:
+Ok, so the USB ethernet dongle, which /may/ support PTP,
+arrived. ([[*Nando][Here]]'s some discussion of the chip on which it runs.)
+
+Just plugging the thing in and scrutinising it via =ethtool=, there's
+no evidence of hardware timestamping support:
+
+#+begin_example
+$ sudo ethtool -T enp4s0u2u3u3c2
+Time stamping parameters for enp4s0u2u3u3c2:
+Capabilities:
+	software-transmit
+	software-receive
+	software-system-clock
+PTP Hardware Clock: none
+Hardware Transmit Timestamp Modes: none
+Hardware Receive Filter Modes: none
+#+end_example
+
+***** Install the driver
+There's a diver for download on the [[https://www.asix.com.tw/en/product/USBEthernet/Super-Speed_USB_Ethernet/AX88279][product page]] for the ASIX AX88279
+ethernet chip. Expanding the archive, then, as instructed, in the Makefile, I
+set =ENABLE_PTP_FUNC= to =y=. Then running =make=...
+
+#+begin_example
+~/tmp/ASIX_USB_NIC_Linux_Driver_Source_v3.4.0 $ make
+make -C /lib/modules/6.6.65-1-MANJARO/build M=/home/tar/tmp/ASIX_USB_NIC_Linux_Driver_Source_v3.4.0 modules
+make[1]: Entering directory '/home/tar/tmp/ASIX_USB_NIC_Linux_Driver_Source_v3.4.0'
+make[1]: *** /lib/modules/6.6.65-1-MANJARO/build: No such file or directory.  Stop.
+make[1]: Leaving directory '/home/tar/tmp/ASIX_USB_NIC_Linux_Driver_Source_v3.4.0'
+make: *** [Makefile:75: all] Error 2
+#+end_example
+
+I need to install the Linux 6.6 headers:
+
+#+begin_src shell :noeval
+sudo pacman -Syu linux66-headers
+#+end_src
+
+Fine. =make= now produces, as promised, =ax_usb_nic.ko=. =sudo make
+install= copies it to
+/lib/modules/6.6.65-1-MANJARO/kernel/drivers/net/usb --- but doesn't
+"backup the built-in ax88179_178a driver if it exists." Weird.
+
+Anyway, so far it doesn't work; no change to what's returned by
+=ethtool=. Nothing but software timestamping available for now. I
+installed =linuxptp= (via pamac, but the repo is [[https://github.com/richardcochran/linuxptp][here]]) and tried
+establishing a master clock with software timestamping (=-S=) using L2
+transport (=-2=):
+
+#+begin_src shell :noeval
+sudo ptp4l -i enp4s0u2u3u3c2 -m -S -2
+#+end_src
+
+That successfully sets up a clock authority, but drift/offset reported
+by the [[*MikroTik Cloud Router Switch][Mikrotik]] [[*L2 PTP: Improved sync][switch]] is all over the place.
+
+***** Restart the machine
+Turns out this is what was required. Now =lsmod= reports:
+
+#+begin_src shell :results output :exports both
+lsmod | grep ax
+#+end_src
+
+#+RESULTS:
+: ax88179_178a           36864  0
+: usbnet                 61440  5 cdc_mbim,r8153_ecm,cdc_ncm,cdc_ether,ax88179_178a
+: ax_usb_nic            114688  0
+: mii                    16384  4 usbnet,ax_usb_nic,r8152,ax88179_178a
+
+which includes both the base driver (=ax88179_178a= I guess provided
+by the distro) and the ASIX driver (=ax_usb_nic=).
+
+Ethtool reports the rather more exciting:
+
+#+begin_example
+❯ ethtool -T enp4s0u2u3u3
+Time stamping parameters for enp4s0u2u3u3:
+Capabilities:
+        hardware-transmit
+        software-transmit
+        hardware-receive
+        software-receive
+        software-system-clock
+        hardware-raw-clock
+PTP Hardware Clock: 0
+Hardware Transmit Timestamp Modes:
+        off
+        on
+        onestep-sync
+        onestep-p2p
+Hardware Receive Filter Modes:
+        none
+        ptpv1-l4-event
+        ptpv1-l4-sync
+        ptpv1-l4-delay-req
+        ptpv2-l4-event
+        ptpv2-l4-sync
+        ptpv2-l4-delay-req
+        ptpv2-l2-event
+        ptpv2-l2-sync
+        ptpv2-l2-delay-req
+#+end_example
+
+And the router attests to a very low offset indeed:
+
+#+begin_example
+[admin@MikroTik] /system/ptp> monitor 0
+              name: ptp1
+          clock-id: D4:01:C3:FF:FE:3A:F7:BD
+         priority1: 255
+         priority2: 255
+           i-am-gm: no
+       gm-clock-id: 6C:6E:07:FF:FE:03:05:95
+      gm-priority1: 128
+      gm-priority2: 128
+   master-clock-id: 6C:6E:07:FF:FE:03:05:95
+        slave-port: ether1
+        freq-drift: -38828 ppb
+            offset: -9 ns
+  slave-port-delay: 561 ns
+#+end_example
+
+This is pretty good news.
+
+Incidentally, stopping and restarting ptp41, the router seems to be
+able to re-attain a good sync, unlike the situation where a Teensy
+acts as the clock authority. Why? Perhaps the =t41-ptp= clock
+authority imlementation sets up some faulty state when potential clock
+subscribers have been running longer than it has.
+
+***** Not out of the woods
+What I didn't expect to see was this:
+
+#+begin_example
+...
+ptp4l[2176.672]: timed out while polling for tx timestamp
+ptp4l[2176.672]: increasing tx_timestamp_timeout or increasing kworker priority may correct this issue, but a driver bug likely causes it
+ptp4l[2176.672]: port 1 (enp4s0u2u3u3): send sync failed
+ptp4l[2176.672]: port 1 (enp4s0u2u3u3): MASTER to FAULTY on FAULT_DETECTED (FT_UNSPECIFIED)
+ptp4l[2176.743]: port 1 (enp4s0u2u3u3): link down
+ptp4l[2176.743]: selected local clock 6c6e07.fffe.030595 as best master
+ptp4l[2176.743]: port 1 (enp4s0u2u3u3): assuming the grand master role
+ptp4l[2176.745]: port 1 (enp4s0u2u3u3): link up
+ptp4l[2176.786]: port 1 (enp4s0u2u3u3): FAULTY to LISTENING on INIT_COMPLETE
+ptp4l[2177.821]: port 1 (enp4s0u2u3u3): link down
+ptp4l[2177.821]: port 1 (enp4s0u2u3u3): LISTENING to FAULTY on FAULT_DETECTED (FT_UNSPECIFIED)
+...
+#+end_example
+
+Either the switch or the dongle (I suspect the latter) had become
+unresponsive; I couldn't access the switch's /Router OS/ to configure
+it. This happened without intervention having been left to run for a
+half hour or so.
+
+***** Time-Sensitive Networking (TSN) info
+There's some documentation [[https://tsn.readthedocs.io/timesync.html][here]]. I'll probably have to [[https://tsn.readthedocs.io/timesync.html#synchronizing-the-system-clock][synchronise the
+system clock]] with the PTP clock; then I should be able to send
+timestamped audio packets from my laptop.
+
+Entered on [2025-01-16 jeu. 11:44]

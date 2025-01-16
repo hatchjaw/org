@@ -8,7 +8,7 @@
 
 * Tasks
 ** TODO Prepare Emeraude presentation
-DEADLINE: <2025-02-03 lun.>
+DEADLINE: <2025-02-02 dim.>
 ** TODO Prepare PhD meeting presentation
 DEADLINE: <2025-02-24 lun. ++1m>
 :PROPERTIES:
