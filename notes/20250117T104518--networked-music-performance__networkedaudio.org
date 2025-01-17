@@ -1,0 +1,10 @@
+#+title:      Networked Music Performance
+#+date:       [2025-01-17 ven. 10:45]
+#+filetags:   :networkedaudio:
+#+identifier: 20250117T104518
+
+* Papers on this topic
+
+- Rottondi et al., 2016, /An Overview on Networked Music Performance
+  Technologies/. Survey.
+- [[denote:20250117T102838][Vignati et al.]], 2024, /Is Music in the Air?.../. Applications to 4G/5G.

@@ -1,0 +1,19 @@
+#+title:      Internet of Sounds/Musical Things
+#+date:       [2025-01-17 ven. 10:48]
+#+filetags:   :ios:networkedaudio:
+#+identifier: 20250117T104824
+
+Encompasses the so called:
+- Internet of Sounds (IoS)
+- Internet of Musical Things (IoMusT)
+- Internet of Audio Things (IoAuT)
+
+[[denote:20241013T170234][Notes]] from the 2023 symposium on the /Internet of Sounds/.
+
+* Papers on this topic
+
+- [[denote:20250117T102838][Is Music in the Air? Evaluating 4G and 5G
+  Support for the Internet of Musical Things]], Vignati et al. 2024.
+- [[denote:20250117T111744][The Internet of Sounds: Convergent Trends,
+  Insights, and Future Directions]], Turchet et al., 2023.
+- 

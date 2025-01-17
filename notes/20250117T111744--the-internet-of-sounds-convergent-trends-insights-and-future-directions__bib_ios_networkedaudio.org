@@ -1,0 +1,6 @@
+#+title:      The Internet of Sounds: Convergent Trends, Insights, and Future Directions
+#+date:       [2025-01-17 ven. 11:17]
+#+filetags:   :bib:ios:networkedaudio:
+#+identifier: 20250117T111744
+#+reference:  turchetInternet2023
+
