@@ -5823,3 +5823,144 @@ system clock]] with the PTP clock; then I should be able to send
 timestamped audio packets from my laptop.
 
 Entered on [2025-01-16 jeu. 11:44]
+
+*** 2025-01-17 vendredi
+**** Sync not working with the dongle                         :TEENSY:PTP:
+At present, I can't get Teensies to sync to the Delock dongle. Clock
+subscribers wind up with huge drift values, e.g. here's what one
+subscriber reports to serial:
+
+#+begin_example
+T2 Sync  receive timestamp=01.01.1970 00:41:41::432:106:223
+T2 Sync  receive timestamp=01.01.1970 00:41:41::629:020:783
+T1 Sync  send    timestamp=01.01.1970 00:41:41::629:032:480
+T3 Delay send    timestamp=01.01.1970 00:41:41::629:329:783
+T4 Delay receive timestamp=01.01.1970 00:41:41::629:348:315
+
+T2diff:196914560.000000 T1diff:1000257230.000000
+T2-T1:3617 T4-T3:18532
+Delay:3417ns Offset:-15314ns Drift:803136079ns 
+Coarse Filter NSPS:3218328568.020194
+#+end_example
+
+Or even...
+
+#+begin_example
+T4 Delay receive timestamp=01.01.1970 00:05:29::883:411:720
+
+T4 Delay receive timestamp=01.01.1970 00:05:29::883:402:850
+
+T2 Sync  receive timestamp=01.01.1970 00:05:29::535:324:746
+...
+T2 Sync  receive timestamp=01.01.1970 00:05:30::383:115:626
+T1 Sync  send    timestamp=01.01.1970 00:05:30::883:209:660
+T3 Delay send    timestamp=01.01.1970 00:05:30::383:320:826
+T2diff:847790880.000000 T1diff:1000021460.000000
+T2-T1:-500005805 T4-T3:-499917976
+Delay:-500006005ns Offset:-88229ns Drift:152227313ns 
+Coarse Filter NSPS:2276112583.737664
+#+end_example
+
+Taking the dongle out of the equation:
+
+#+begin_example
+T2 Sync  receive timestamp=01.01.1970 00:00:47::837:172:077
+T1 Sync  send    timestamp=01.01.1970 00:00:47::837:170:826
+T3 Delay send    timestamp=01.01.1970 00:00:47::837:763:553
+T4 Delay receive timestamp=01.01.1970 00:00:47::837:764:395
+
+T2diff:998936898.000000 T1diff:998936894.000000
+T2-T1:1246 T4-T3:842
+Delay:1046ns Offset:5ns Drift:-4ns 
+Fine   Filter NSPS:-7358.349982 C:-7360.849982 P(1.000000):-5.000000 I(0.500000):7.500000
+#+end_example
+
+There's an extra Sync message in the first example, and it's off by a
+couple of tenths of a second. What does wireshark say? Here's a
+representative packet capture, sans dongle:
+
+#+begin_example
+...
+3031	2.648590247	PjrcCom_14:30:a8	LLDP_Multicast	        PTPv2	60	Sync Message
+3032	2.648633707	PjrcCom_14:30:a8	LLDP_Multicast	        PTPv2	60	Follow_Up Message
+3033	2.648633773	PjrcCom_14:30:a8	LLDP_Multicast	        PTPv2	78	Announce Message
+3058	2.669591346	Routerboardc_3a:f7:bd	IEEEI&MSocie_00:00:00	PTPv2	60	Sync Message
+3332	2.910610941	Routerboardc_3a:f7:c5	IEEEI&MSocie_00:00:00	PTPv2	60	Delay_Req Message
+3333	2.910611143	PjrcCom_14:30:a8	LLDP_Multicast	        PTPv2	68	Delay_Resp Message
+3403	2.971373318	Routerboardc_3a:f7:c5	IEEEI&MSocie_00:00:00	PTPv2	60	Delay_Req Message
+3404	2.971373719	PjrcCom_14:30:a8	LLDP_Multicast	        PTPv2	68	Delay_Resp Message
+4058	3.547900647	Routerboardc_3a:f7:c6	IEEEI&MSocie_00:00:00	PTPv2	60	Sync Message
+4059	3.548503078	Routerboardc_3a:f7:c6	IEEEI&MSocie_00:00:00	PTPv2	90	Follow_Up Message
+4060	3.548503552	PjrcCom_14:30:ab	LLDP_Multicast	        PTPv2	60	Delay_Req Message
+4061	3.548889523	Routerboardc_3a:f7:c6	IEEEI&MSocie_00:00:00	PTPv2	68	Delay_Resp Message
+4176	3.648741410	PjrcCom_14:30:a8	LLDP_Multicast	        PTPv2	60	Sync Message
+...
+#+end_example
+
+=PjrcCom_14:30:xx= are, of course, Teensies. =Routerboardc_3a:f7:c6=
+is the MikroTik switch. =LLDP_Multicast= is /Link Local Multicast/
+(=01:80:C2:00:00:0E=, non-forwardable); =IEEEI&MSocie_00:00:00= is
+/Standard Ethernet Multicast/ (=01:1B:19:00:00:00=,
+forwardable). (Incidentally IEEE I&M is the /Instrumentation &
+Measurement Society/.)
+
+Interesting that both the clock-authority Teensy /and/ the router and
+sending sync and follow-up messages.
+
+Equivalent with the dongle:
+
+#+begin_example
+...
+195	8.848818768	CeLink_03:05:95	        IEEEI&MSocie_00:00:00	PTPv2	58	Sync Message
+196	8.849008264	CeLink_03:05:95	        IEEEI&MSocie_00:00:00	PTPv2	60	Sync Message
+197	8.849137157	CeLink_03:05:95	        IEEEI&MSocie_00:00:00	PTPv2	58	Follow_Up Message
+198	8.849304739	CeLink_03:05:95	        IEEEI&MSocie_00:00:00	PTPv2	60	Follow_Up Message
+199	8.849304878	PjrcCom_14:30:ab	LLDP_Multicast	        PTPv2	60	Delay_Req Message
+200	8.849304956	PjrcCom_14:30:a8	LLDP_Multicast	        PTPv2	60	Delay_Req Message
+201	8.849441740	CeLink_03:05:95	        IEEEI&MSocie_00:00:00   PTPv2	68	Delay_Resp Message
+202	8.849506844	CeLink_03:05:95	        IEEEI&MSocie_00:00:00   PTPv2	68	Delay_Resp Message
+203	8.849629804	CeLink_03:05:95	        IEEEI&MSocie_00:00:00   PTPv2	68	Delay_Resp Message
+204	8.849629999	CeLink_03:05:95	        IEEEI&MSocie_00:00:00   PTPv2	68	Delay_Resp Message
+205	8.850793142	Routerboardc_3a:f7:c5	IEEEI&MSocie_00:00:00	PTPv2	68	Delay_Resp Message
+206	8.850824478	Routerboardc_3a:f7:c6	IEEEI&MSocie_00:00:00	PTPv2	68	Delay_Resp Message
+207	8.961153962	Routerboardc_3a:f7:bd	IEEEI&MSocie_00:00:00	PTPv2	60	Delay_Req Message
+208	8.961350986	CeLink_03:05:95	        IEEEI&MSocie_00:00:00	PTPv2	68	Delay_Resp Message
+209	8.961518744	CeLink_03:05:95	        IEEEI&MSocie_00:00:00	PTPv2	68	Delay_Resp Message
+210	8.971856028	Routerboardc_3a:f7:c6	IEEEI&MSocie_00:00:00	PTPv2	78	Announce Message
+211	9.002018339	Routerboardc_3a:f7:c6	IEEEI&MSocie_00:00:00	PTPv2	60	Sync Message
+212	9.222938987	Routerboardc_3a:f7:bd	IEEEI&MSocie_00:00:00	PTPv2	60	Delay_Req Message
+213	9.223129692	CeLink_03:05:95	        IEEEI&MSocie_00:00:00	PTPv2	68	Delay_Resp Message
+214	9.223289596	CeLink_03:05:95	        IEEEI&MSocie_00:00:00	PTPv2	68	Delay_Resp Message
+215	9.223460944	Routerboardc_3a:f7:c5	IEEEI&MSocie_00:00:00	PTPv2	60	Sync Message
+221	9.848915803	CeLink_03:05:95	        IEEEI&MSocie_00:00:00	PTPv2	58	Sync Message
+...
+#+end_example
+
+=CeLink_03:05:95= is the ethernet dongle.
+
+This is carnage. Maybe it's down to the default =ptp4l= config not
+sufficing for my purposes. Or perhaps is a problem in the =t41-ptp=
+implementation --- perhaps it's too permissive in accepting sync
+messages (I imagine the authors did most of their testing against
+their own MCU or GPS clock authority).
+
+***** Both problems I just suggested: it's those
+OK, so one fix is to call =ptp4l= as:
+
+#+begin_src shell :noeval
+sudo ptp4l -m -2 -i enp4s0u2u3u3 --ptp_dst_mac=01:80:C2:00:00:0E
+#+end_src
+
+But the question remains: why is the =t41-ptp= clock-subscriber
+implementation checking for traffic with the MAC that =ptp4l=
+associates with P2P peer delay messages?
+
+Incidentally, with the above modification, we get a sync, and,
+alarmingly perhaps, sample rate correction is on the order of *20
+ppm*.
+
+***** Would it be worth checking out P2P mode at some point?
+[[https://blog.meinbergglobal.com/2013/09/19/end-end-versus-peer-peer/][Yes]]. And the whole [[https://help.mikrotik.com/docs/spaces/ROS/pages/64127015/Precision+Time+Protocol#PrecisionTimeProtocol-GeneralProperties][l2-forwardable vs l2-non-forwardable]] situation
+needs some attention too.
+
+Entered on [2025-01-17 ven. 17:26]
