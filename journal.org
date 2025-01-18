@@ -5938,7 +5938,7 @@ Equivalent with the dongle:
 
 =CeLink_03:05:95= is the ethernet dongle.
 
-This is carnage. Maybe it's down to the default =ptp4l= config not
+This is a bit messy. Maybe it's down to the default =ptp4l= config not
 sufficing for my purposes. Or perhaps is a problem in the =t41-ptp=
 implementation --- perhaps it's too permissive in accepting sync
 messages (I imagine the authors did most of their testing against
@@ -5961,6 +5961,90 @@ ppm*.
 
 ***** Would it be worth checking out P2P mode at some point?
 [[https://blog.meinbergglobal.com/2013/09/19/end-end-versus-peer-peer/][Yes]]. And the whole [[https://help.mikrotik.com/docs/spaces/ROS/pages/64127015/Precision+Time+Protocol#PrecisionTimeProtocol-GeneralProperties][l2-forwardable vs l2-non-forwardable]] situation
-needs some attention too.
+needs some attention too; support for making the distinction between
+those two was introduced in the latest version of MikroTik's Router OS
+(7.17).
 
 Entered on [2025-01-17 ven. 17:26]
+
+*** 2025-01-18 samedi
+**** Compatible PTP settings                                         :PTP:
+Turns out there are a couple of viable permutations. Plus I found a
+workaround for L2 PTP without having to muck about with
+=--ptp_dst_mac= (essentially mucking about with it on the router
+instead).
+
+***** L3 PTP
+- Teensy: build clock subscriber with ~l3PTP~ implementation.
+- =ptp4l=: run without the =-2= flag, i.e.
+#+begin_src shell :noeval
+sudo ptp4l -m -i enp4s0u2u3u3
+#+end_src
+- RouterOS: Transport: ipv4 (all other settings as before, i.e. Delay
+  Mode: e2e, Priority 1/2: 255, etc.)
+
+Set up like this, it's possible to get a sync over IPv4. Wireshark
+capture:
+
+#+begin_example
+...
+81	4.000920093	192.168.10.10	224.0.1.129	PTPv2	86	Sync Message
+82	4.001085533	192.168.10.10	224.0.1.129	PTPv2	86	Follow_Up Message
+86	4.182851833	192.168.10.1	224.0.1.129	PTPv2	86	Sync Message
+87	4.183188010	192.168.10.1	224.0.1.129	PTPv2	118	Follow_Up Message
+88	4.183221329	192.168.48.168	224.0.1.129	PTPv2	86	Delay_Req Message
+89	4.183424841	192.168.10.10	224.0.1.129	PTPv2	96	Delay_Resp Message
+90	4.183963213	192.168.10.1	224.0.1.129	PTPv2	96	Delay_Resp Message
+91	4.264119183	192.168.10.1	224.0.1.129	PTPv2	106	Announce Message
+92	4.274334463	192.168.10.1	224.0.1.129	PTPv2	86	Sync Message
+93	4.274883959	192.168.10.1	224.0.1.129	PTPv2	118	Follow_Up Message
+94	4.274884107	192.168.48.171	224.0.1.129	PTPv2	86	Delay_Req Message
+95	4.275143475	192.168.10.10	224.0.1.129	PTPv2	96	Delay_Resp Message
+96	4.275429127	192.168.10.1	224.0.1.129	PTPv2	96	Delay_Resp Message
+100	4.991221636	192.168.10.10	224.0.1.129	PTPv2	106	Announce Message
+101	5.000950158	192.168.10.10	224.0.1.129	PTPv2	86	Sync Message
+...
+#+end_example
+
+=192.168.10.10= is the ethernet interface (i.e. the dongle); =...10.1=
+is the switch; the others are Teensies.
+
+Sometimes it's a bit flaky, like L2 without the =--ptp_dst_mac= flag,
+and subscribers don't achieve a lock.
+
+***** L2 PTP
+- Teensy: build with ~l2PTP~ implementation.
+- =ptp4l=: run with the =-2= flag; no need for the =--ptp_dst_mac=
+  flag.
+- RouterOS: Transport: l2-non-forwardable.
+
+This last point keeps sync messages from =Routerboardc_3a:f7:c6f= out
+of the way, and they don't confuse the clock subscribers as a result.
+
+#+begin_example
+...
+189	9.017478151	CeLink_03:05:95	        IEEEI&MSocie_00:00:00	PTPv2	58	Sync Message
+190	9.017634776	CeLink_03:05:95	        IEEEI&MSocie_00:00:00	PTPv2	58	Follow_Up Message
+191	9.618965772	Routerboardc_3a:f7:c5	LLDP_Multicast	        PTPv2	60	Sync Message
+192	9.619657564	Routerboardc_3a:f7:c5	LLDP_Multicast	        PTPv2	90	Follow_Up Message
+193	9.619657760	PjrcCom_14:30:a8	IEEEI&MSocie_00:00:00	PTPv2	60	Delay_Req Message
+194	9.619730432	CeLink_03:05:95	        IEEEI&MSocie_00:00:00	PTPv2	68	Delay_Resp Message
+195	9.620216862	Routerboardc_3a:f7:c5	LLDP_Multicast	        PTPv2	68	Delay_Resp Message
+196	9.660404862	Routerboardc_3a:f7:c6	LLDP_Multicast	        PTPv2	60	Sync Message
+197	9.660957292	Routerboardc_3a:f7:c6	LLDP_Multicast	        PTPv2	90	Follow_Up Message
+198	9.660957545	PjrcCom_14:30:ab	IEEEI&MSocie_00:00:00	PTPv2	60	Delay_Req Message
+199	9.661159467	CeLink_03:05:95	        IEEEI&MSocie_00:00:00	PTPv2	68	Delay_Resp Message
+200	9.661553308	Routerboardc_3a:f7:c6	LLDP_Multicast	        PTPv2	68	Delay_Resp Message
+202	9.791831426	Routerboardc_3a:f7:bd	LLDP_Multicast	        PTPv2	60	Delay_Req Message
+203	9.792017682	CeLink_03:05:95	        IEEEI&MSocie_00:00:00	PTPv2	68	Delay_Resp Message
+207	10.001115694	CeLink_03:05:95	        IEEEI&MSocie_00:00:00	PTPv2	78	Announce Message
+208	10.017696451	CeLink_03:05:95	        IEEEI&MSocie_00:00:00	PTPv2	58	Sync Message
+...
+#+end_example
+
+Seems more reliable this way than with IPv4.
+
+=t41-ptp= doesn't respond well at all to a change of clock authority,
+however.
+
+Entered on [2025-01-18 sam. 19:18]
