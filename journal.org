@@ -2271,43 +2271,43 @@ Christof maintains the Audio Over OSC (AOO) project.
 
 ***** Meeting
 - AOO originated with Winfried Ritsch's work on /message based audio
-  systems/
-- Christof began working on AOO (v2) in 2020
-- Development has been slow, but approaching a stable release
-- Projects already using the alpha version
-- Not much literature out there on AOO; maybe a paper next year
+  systems/.
+- Christof began working on AOO (v2) in 2020.
+- Development has been slow, but approaching a stable release.
+- Projects already using the alpha version.
+- Not much literature out there on AOO; maybe a paper next year.
   + [[https://lac.linuxaudio.org/2014/papers/36.pdf][Winfried Ritsch's paper]] (LAC 2014)
   + [[https://www.soundingfuture.com/en/article/aoo-low-latency-peer-peer-audio-streaming-and-messaging][Article in Sounding Future]] (2024)
 - AOO designed for flexibility, multiple usecases, spatial audio
-  entirely possible
-- different codecs supported
-  + Raw PCM (for LAN)
-  + Opus (WAN,low bandwidth)
+  entirely possible.
+- different codecs supported.
+  + Raw PCM (for LAN).
+  + Opus (WAN,low bandwidth).
   + Soon: [[https://qoaformat.org/][QOA]] ("Quite OK Audio" Format) — Fast, Lossy compression
-- Running on ESP32
+- Running on ESP32.
   + Code: [[https://git.iem.at/ressi/esp32_aoo_test]]
 - The second "O" in AOO is a bit of a lie...
-  + control data is OSC, but audio transmitted as binary data
+  + control data is OSC, but audio transmitted as binary data.
   + BUT messages can be embedded in the audio stream at
-    sample-accurate position
+    sample-accurate position.
     * This entails a variable packet size!
     * AOO fragments packets itself, respecting the MTU of the
-      transmission medium
+      transmission medium.
     * Host audio system & network stream are separated (via
-      intermediate buffer? Need to investigate)
-- AOO implements packet-control mechanisms, such as re-send
-- [[https://sonobus.net/][SonoBus]] project uses AOO's C++ API
+      intermediate buffer? Need to investigate).
+- AOO implements packet-control mechanisms, such as re-send.
+- [[https://sonobus.net/][SonoBus]] project uses AOO's C++ API.
 - No multicast model; like JackTrip, AOO is pseudo-connectionful, and
-  thread-based; peer-to-peer model
-  + Connectionless is on the roadmap (maybe)
-- No sync-focused implementations to speak of yet
+  thread-based; peer-to-peer model.
+  + Connectionless is on the roadmap (maybe).
+- No sync-focused implementations to speak of yet.
   + BUT users have requested timestamps embedded in the audio stream,
-    so this functionality is already available
+    so this functionality is already available.
   + Look for ~kAooEventStreamTime~; =aoo_events.h= and
-    =aoo_receive.cpp= in the codebase
+    =aoo_receive.cpp= in the codebase.
 
 ***** Other resources
-- [[https://drive.google.com/drive/folders/1Q2DRcb0xTf_doTtv3dRSVqFm9iltPXwG][Recent presentation on AOO]] + Pd patches
+- [[https://drive.google.com/drive/folders/1Q2DRcb0xTf_doTtv3dRSVqFm9iltPXwG][Recent presentation on AOO]] + Pd patches.
   + [[https://docs.google.com/presentation/d/188OlFnJTD2fEn2gdGAmfI7w7UTVNmCRc80KIkUrTbsQ/edit?usp=sharing][slides]] imported into Google slides.
 - [[https://medias.ircam.fr/x68e59d_audio-over-osc][Ircam presentation]]
 - [[http://christofressi.com/][Christof's personal site]]
@@ -6013,7 +6013,9 @@ Sometimes it's a bit flaky, like L2 without the =--ptp_dst_mac= flag,
 and subscribers don't achieve a lock.
 
 ***** L2 PTP
-- Teensy: build with ~l2PTP~ implementation.
+- Teensy: build with ~l2PTP~ implementation, with ~dstmac~ in
+  ~l2PTP::sendPTPMessage~ set to =01:1B:19:00:00:00=,
+  i.e. =LLDP_Multicast=.
 - =ptp4l=: run with the =-2= flag; no need for the =--ptp_dst_mac=
   flag.
 - RouterOS: Transport: l2-non-forwardable.
@@ -6048,3 +6050,51 @@ Seems more reliable this way than with IPv4.
 however.
 
 Entered on [2025-01-18 sam. 19:18]
+
+*** 2025-01-20 lundi
+**** AOO Investigation                                    :NETWORKEDAUDIO:
+I need to set up an audio server. Rather than write yet another (bad)
+one, I'm interested to see whether [[*Meeting: Christof Ressi][Audio Over OSC]] can help.
+
+I got hold of the [[https://git.iem.at/aoo/aoo][code]], and after bashing my head against a wall for
+a bit I got the =cpp_simple_peer= example to work by:
+
+- Running =aooserver=.
+- Running an instance of =cpp_simple_peer= with group =group1= and
+  user =user1=.
+- Running another instance of =cpp_simple_peer= with group =group1=
+  and user =user2=.
+
+Once they're both running, they swap audio streams and these are sent
+to my laptop's default audio output. Sample rate as 44.1 kHz; not sure
+why (the implementation uses PortAudio under the hood, so maybe
+config?).
+
+I don't know how =cpp_simple_sender= and =cpp_simple_receiver= are
+supposed to work in tandem. I see a load of TCP traffic in wireshark,
+but I don't hear any sound.
+
+I discovered the =pw-top= utility which is very useful, e.g.
+
+#+begin_example
+S   ID  QUANT   RATE    WAIT    BUSY   W/Q   B/Q  ERR FORMAT           NAME
+S   29      0      0    ---     ---   ---   ---     0                  Dummy-Driver
+S   30      0      0    ---     ---   ---   ---     0                  Freewheel-Driver
+S   53      0      0    ---     ---   ---   ---     0                  Midi-Bridge
+R   59    512  48000 313,5us  45,9us  0,03  0,00   45    S32LE 2 48000 alsa_output...
+R   75    512  48000  69,0us  29,2us  0,01  0,00    0    F32LE 2 48000  + Google Chrome
+R   83    900  48000  98,8us  10,9us  0,01  0,00    0    F32LE 2 48000  + Firefox
+R   99    900  48000 110,0us  10,5us  0,01  0,00    0    F32LE 2 48000  + Firefox
+R  125   1024  44100 132,0us 152,1us  0,01  0,01    0    F32P 64 44100  + alsa_playback.simple_peer
+R   94   1024  44100 132,0us 151,2us  0,01  0,01    0    F32P 64 44100  + alsa_playback.simple_peer
+R   60     64  48000 204,8us   1,7us  0,15  0,00   93    S32LE 2 48000 alsa_input...
+R  123     64  48000  24,3us   0,7us  0,02  0,00    0                   + PortAudio
+R   96   1024  44100 111,6us  48,2us  0,08  0,04    0    F32P 64 44100  + alsa_capture.simple_peer
+R   97     64  48000  17,2us   0,7us  0,01  0,00    0                   + PortAudio
+R  101   1024  44100 148,3us  47,6us  0,11  0,04    0    F32P 64 44100  + alsa_capture.simple_peer
+S   68      0      0    ---     ---   ---   ---     0                  bluez_midi.server
+S   46      0      0    ---     ---   ---   ---     0                  v4l2_input...
+S   67      0      0    ---     ---   ---   ---     0                  v4l2_input...
+#+end_example
+
+Entered on [2025-01-20 lun. 18:39]
