@@ -6101,83 +6101,105 @@ S   67      0      0    ---     ---   ---   ---     0                  v4l2_inpu
 Entered on [2025-01-20 lun. 18:39]
 *** 2025-01-22 mercredi
 **** Meeting: Romain                                 :MEETING:SUPERVISION:
-- They can hire me for 20 hours for the Son course. It starts with a
-  workshop. Quite a big class --- 90 students! --- divided into four
-  groups; three full-timers, 1 part-time (apprentices). Students are
-  /3 TC/ (bac+3); in practice it's their first year actually in
-  engineering school following two years of prépa.
+***** /Son/
+They can hire me for 20 hours for the /Son/ course. It starts with a
+workshop. Quite a big class --- 90 students! --- divided into four
+groups; three full-timers, 1 part-time (apprentices). Students are /3
+TC/ (bac+3); in practice it's their first year actually in engineering
+school following two years of prépa.
 
-  First sessions happen in amphi. Difficult to manage so many students
-  in one big room. First lecture Feb 10th (2-6 pm). Romain introudces
-  DSP on the Teensy in C++ (with Teensyduino by default); Yann usually
-  gives a Faust lecture at some point.
+First sessions happen in amphi. Difficult to manage so many students
+in one big room. First lecture Feb 10th (2-6 pm). Romain introudces
+DSP on the Teensy in C++ (with Teensyduino by default); Yann usually
+gives a Faust lecture at some point.
 
-  After lectures they do practical work. They can work from home, or
-  they can use the TC rooms, which are booked for this purpose; this
-  is where I can help Romain with TA-ing. Be cautious when confronted
-  with project idea questions; they have /two weeks/ (full-time) to do
-  the practical, but not enough time for an enormous endeavour.
+After lectures they do practical work. They can work from home, or
+they can use the TC rooms, which are booked for this purpose; this is
+where I can help Romain with TA-ing. Be cautious when confronted with
+project idea questions; they have /two weeks/ (full-time) to do the
+practical, but not enough time for an enormous endeavour.
 
-  They'll be using sensors. Emphasis can be whatever; DSP, hardware,
-  interfaces, etc. Hard to manage people who want to use FFTs; demands
-  the use of Teensy's hardware accelerators. There's an issue with
-  IFFT... mismatched numerical resolution? Thus noise?...
+They'll be using sensors. Emphasis can be whatever; DSP, hardware,
+interfaces, etc. Hard to manage people who want to use FFTs; demands
+the use of Teensy's hardware accelerators. There's an issue with
+IFFT... mismatched numerical resolution? Thus noise?...
 
-- France-Stanford Fund. Deadline March 3rd. Not a /huge/ amount to do
-  for the application, but I need to have a /project/ to
-  propose. First need to run the idea by Chris; need faculty to
-  sponsor the request (Nando isn't faculty). Don't send a ten-page
-  proposal; just a title and abstract will do. First things first,
-  *write to Chris*. "I'd like to be a visiting student/researcher" ---
-  there's a [[https://ccrma.stanford.edu/academics/visiting-student-researcher][program]] for that at CCRMA. Tell him what I'd like to work
-  on; need to frame it around auralization/spatial-audio/CAVIAR;
-  complicating matters is *Jurek* recently proposed something with a
-  little overlap.
+***** France-Stanford Fund
+Deadline March 3rd. Not a /huge/ amount to do for the application, but
+I need to have a /project/ to propose. First need to run the idea by
+Chris; need faculty to sponsor the request (Nando isn't
+faculty). Don't send a ten-page proposal; just a title and abstract
+will do. First things first, *write to Chris*. "I'd like to be a
+visiting student/researcher" --- there's a [[https://ccrma.stanford.edu/academics/visiting-student-researcher][program]] for that at
+CCRMA. Tell him what I'd like to work on; need to frame it around
+auralization/spatial-audio/CAVIAR; complicating matters is *Jurek*
+recently proposed something with a little overlap.
 
-  Necessary to ask for /the maximum/ ($10k) that the fund will
-  provide. Stanford is expensive; they'll take $5k of that.
+Necessary to ask for /the maximum/ ($10k) that the fund will
+provide. Stanford is expensive; they'll take $5k of that.
 
-  + Write title/abstract.
-  + Contact Jonathan Abel/Hassan about CAVIAR. "It'd be an interesting
-    use-case for my platform, and would make CAVIAR
-    portable/practical... would it make sense to you guys?"
-  + Write to Chris in parallel. He'll probably talk about an /official
-    proposal/.
-  + Then I'll need to send a proposal to Netty.
-  + /Then/ apply to France-Stanford.
+- Write title/abstract.
+- Contact Jonathan Abel/Hassan about CAVIAR. "It'd be an interesting
+  use-case for my platform, and would make CAVIAR
+  portable/practical... would it make sense to you guys?"
+- Write to Chris in parallel. He'll probably talk about an /official
+  proposal/.
+- Then I'll need to send a proposal to Netty.
+- /Then/ [[https://francestanford.stanford.edu/funding/visiting-student-researcher-fellowship][apply]] to France-Stanford.
 
-- Papers.
+***** Papers
+AES: emphasis on DSL aspect; what =faust-ddsp= allows us/Faust
+developers to do that they can't otherwise. AES people aren't computer
+scientists --- don't go overboard with detail; doesn't have to be
+heavy on formal semantics, etc.; high-level.
 
-  AES: emphasis on DSL aspect; what =faust-ddsp= allows
-  us/Faust developers to do that they can't otherwise. AES people
-  aren't computer scientists --- don't go overboard with detail;
-  doesn't have to be heavy on formal semantics, etc.; high-level.
+SMC: An update on distributed spatial audio, based on the SIVE
+paper. /I can connect my computer to some teensies and everything
+plays back in sync/. If I don't have a prototype by the time of the
+submission, it's OK as long as I know it's going to be possible by the
+summer...
 
-  SMC: An update on distributed spatial audio, based on the SIVE
-  paper. /I can connect my computer to some teensies and everything
-  plays back in sync/. If I don't have a prototype by the time of the
-  submission, it's OK as long as I know it's going to be possible by
-  the summer...
+IS2/IWNIA: Add RAM chip to Teensy, run convolutions. Auralization on
+the horizon. And/or ambisonics? Or CAVIAR?
 
-  IS2/IWNIA: Add RAM chip to Teensy, run convolutions. Auralization on
-  the horizon. And/or ambisonics? Or CAVIAR?
-
-  On thing to be careful of: what I'm doing is very technical
-  (engineering-focused); depending on what I want to do after the PhD,
-  things might look too technical for some places/people. Should aim
-  to have a couple of publications that emphasise research. Writing
-  about a tool is considered /engineering/ (technical). Write about a
-  method, that's /research/.
-  + E.g. a method for automatically distributing a DSP algorithm ---
-    this would be something at the level of the Faust compiler,
-    identifying whether, and if so to what extent, an algorithm can be
-    paralellised. This would constitute computer-science research.
-  + E.g. a perceptual study. E.g. simulating the introduction of some
-    drift or offset. At some point, write a paper on perceptual
-    evaluation of secondary-source asynchronicity. And/or comparison
-    with sample-dropping or resampling approaches. This would be a bit
-    more HCI-focused.
-
-- WECAM. Whatever... let's see what happens.
+On thing to be careful of: what I'm doing is very technical
+(engineering-focused); depending on what I want to do after the PhD,
+things might look too technical for some places/people. Should aim to
+have a couple of publications that emphasise research. Writing about a
+tool is considered /engineering/ (technical). Write about a method,
+that's /research/.
+- E.g. a method for automatically distributing a DSP algorithm ---
+  this would be something at the level of the Faust compiler,
+  identifying whether, and if so to what extent, an algorithm can be
+  paralellised. This would constitute computer-science research.
+- E.g. a perceptual study. E.g. simulating the introduction of some
+  drift or offset. At some point, write a paper on perceptual
+  evaluation of secondary-source asynchronicity. And/or comparison
+  with sample-dropping or resampling approaches. This would be a bit
+  more HCI-focused.
+  
+***** WECAM
+Whatever... let's see what happens.
 
 Entered on [2025-01-22 mer. 14:32]
+
+*** 2025-01-29 mercredi
+**** Teensy sync still not quite there         :NETWORKEDAUDIO:TEENSY:PTP:
+I think (hope) I've got I^{2}S (and interrupt) sync working reliably, by:
+- moving calls to ~Serial.print~ out of the way of time-sensitive
+  operations, like enabling up the audio PLL.
+- Adding an arbitrary wait to the power-up step, since that appears to
+  be the step that takes a non-deterministic period of time; now
+  clients wait a full 300,000 CPU cycles before proceeding.
+
+The above /might/ work, but I'm seeing a discrepancy between sync at
+the I^{2}S level, and significant async (\micro{}s-order) an the level of the
+analog output. Suggests I need to be careful about the timing of
+powering up the SGTL5000.
+
+Anyway, I was able to reach this stage by completely separating
+~AudioSystemManager~ from networking and packet-buffer-management
+logic. All good steps toward having a flexible system that's
+straightforward to test and experiment with.
+
+Entered on [2025-01-29 mer. 21:29]
