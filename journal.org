@@ -6203,3 +6203,181 @@ logic. All good steps toward having a flexible system that's
 straightforward to test and experiment with.
 
 Entered on [2025-01-29 mer. 21:29]
+*** 2025-01-30 jeudi
+**** More Teensy interrupt timing              :NETWORKEDAUDIO:TEENSY:PTP:
+I'm still seeing an intermittent I^{2}S offset of ~1 sample (~20 \micro{}s).
+
+I've been measuring how long things take when setting up the audio
+system:
+
+#+begin_example
+- Register setup took 3537 cycles (5895 ns).
+- Pin setup took 2099 cycles (3498 ns).
+- Clock setup took 320173 cycles (533621 ns).
+- I2S setup took 1464 cycles (2440 ns).
+- DMA setup took 657 cycles (1095 ns).
+- Audio shield setup took 247734659 cycles (412891072 ns).
+  - Begin took 3000011 cycles (5000018 ns).
+  - Init took 1670931 cycles (2784885 ns).
+  - Analog power took 278536 cycles (464226 ns).
+  - Digital power took 240000010 cycles (400000032 ns).
+  - Line out took 278582 cycles (464303 ns).
+  - Clock took 556960 cycles (928266 ns).
+  - Setup took 1392576 cycles (2320960 ns).
+- Audio stop took 49 cycles (81 ns).
+=== Setup took 248062638 cycles (413437728 ns).
+#+end_example
+
+In general, setup takes about that long; something on the order of
+413,437,000 ns (here a little higher), i.e. ~0.4 s. A huge chunk of
+that is the arbitrary wait for power to the digital parts of the
+SGTL5000. I replaced the call to ~delay(400)~ with a CPU cycle count
+check in the hope that this would be more reliable; from my modified
+=SGTL5000.cpp=:
+
+#+begin_src c++ :noeval
+write(CHIP_DIG_POWER, 0x0073); // power up all digital stuff
+// delay(400);
+while (ARM_DWT_CYCCNT - cycPostAnPwr < 240'000'000) {}
+#+end_src
+
+Audio shield aside, setup takes something on the order of
+
+#+begin_src emacs-lisp
+(let ((time (- 413437000 412890000)))
+  (format "%d ns\n%f s" time (/ time 1e9)))
+#+end_src
+
+#+RESULTS:
+: 547000 ns
+: 0.000547 s
+
+About half a millisecond. Most of /that/ is the arbitrary wait of
+300,000 cycles for the PLL to lock.
+
+#+begin_src c++ :noeval
+void AnalogAudioPllControlRegister::awaitLock() const
+{
+    const auto cycles{ARM_DWT_CYCCNT};
+    while (!(getValue() & CCM_ANALOG_PLL_AUDIO_LOCK)) {}
+    // Serial.printf("PLL4 lock took %" PRIu32 " cycles.\n", ARM_DWT_CYCCNT - cycles);
+    while (ARM_DWT_CYCCNT - cycles < 300000) {}
+}
+#+end_src
+
+I noticed that the lock tended to take on the order of 270,000 cycles,
+so I made sure that the above method would take about
+three-hundred-thousand to return. Anyway:
+
+#+begin_src emacs-lisp
+(format "%d cycles @ 600 MHz = %d ns" 300000 (* 300000 (/ 1e9 6e8)))
+#+end_src
+
+#+RESULTS:
+: 300000 cycles @ 600 MHz = 500000 ns
+
+That leaves odds and ends such as setting up the DMA controller (seems
+to consistently take 1095 ns).
+
+The matter I'm trying to address is interrupt-timing. When there's a
+good enough (< 100 ns) PTP lock, the clock subscriber starts its audio
+subsystem, e.g.
+
+#+begin_example
+Subscriber start audio clock 01.01.1970 02:17:42::999:999:880
+#+end_example
+
+Note well that the above timestamp is printed /after/ the clock is
+enabled (using a timestamp taken early in the 1588 timer interrupt
+callback).
+
+This actually entails /restarting/ it, since it is configured during
+~setup()~, then (at the time of writing) the PLL4 clock is both
+/disabled/ and /bypassed/ (but not powered down); the restart entails
+first enabling the clock, then /unbypassing/ it:
+
+#+begin_src c++ :noeval
+void AudioSystemManager::startClock() const
+{
+    s_FirstInterrupt = true;
+
+    m_AnalogAudioPllControlRegister.setEnable(true);
+    m_AnalogAudioPllControlRegister.setBypass(false);
+    //...
+#+end_src
+
+A little while later we get our first interrupt:
+
+#+begin_example
+First interrupt time: 01.01.1970 01:57:44::000:437:274
+#+end_example
+
+That's quite a bit later:
+
+#+begin_src emacs-lisp
+(format "%d ns" (- 1000437274 999999880))
+#+end_src
+
+#+RESULTS:
+: 437394 ns
+
+One /interesting/ thing about that interval is it's roughly the amount
+of time it took to configure the audio system, modulo one million.
+
+#+begin_src emacs-lisp
+(% 413437728 1000000)
+#+end_src
+
+#+RESULTS:
+: 437728
+
+But I guess that could be a coincidence. Anway, for the run that
+generated the above first interrupt time for one clock subscriber, I
+got the following for the other two that I was testing:
+
+#+begin_example
+First interrupt time: 01.01.1970 02:17:43::000:457:365
+#+end_example
+#+begin_example
+First interrupt time: 01.01.1970 01:57:40::000:457:768
+#+end_example
+
+20 \micro{}s later, and, sure enough, in the /Waveforms/ logic view, those
+two subscribers were about that interval behind the first one.
+
+My guess is there's some kind of clock /latching/ problem, i.e. a
+subscriber may miss the LR select clock and wind up waiting till the
+next sample time to get going.
+
+Ideas:
+- A little delay to maybe help subscribers /latch/ to the right sample
+  (seems suspect):
+#+begin_src c++ :noeval
+void AudioSystemManager::startClock() const
+{
+    s_FirstInterrupt = true;
+
+    const auto cycles1{ARM_DWT_CYCCNT};
+    m_AnalogAudioPllControlRegister.setEnable(true);
+    while (ARM_DWT_CYCCNT - cycles1 < 12500) {}
+    m_AnalogAudioPllControlRegister.setBypass(false);
+#+end_src
+- Check the first interrupt time against a selection of approved
+  values; disable/enable audio if there's too great a delta.
+  + This would entail moving some logic to ~loop~ and probably keeping
+    a static ~firstInterruptTime~ member in ~AudioSystemManager~.
+- Maybe power-up is the important, time-sensitive thing... so find a
+  way to power up at a predictable time...
+
+***** Addendum
+Well I thought I'd cracked it. The interrupt schronisation part at
+least. Turns out I can witness /many/ consecutive runs for which
+client audio systems start up in sync, feel myself believing that I've
+solved that problem... and then that one-sample offset will
+re-appear. I'm not even seeing the offset reflected in =First
+interrupt time= reports any more. I don't think this is just about
+starting the clock; perhaps there's something in the DMA, or the SAI
+FIFO, that I have to deal with (consult chapter 38 of the reference
+manual).
+
+Entered on [2025-01-30 jeu. 15:09]
