@@ -6381,3 +6381,100 @@ FIFO, that I have to deal with (consult chapter 38 of the reference
 manual).
 
 Entered on [2025-01-30 jeu. 15:09]
+
+*** 2025-01-31 vendredi
+**** Reading Teensy's PTP timer                               :TEENSY:PTP:
+The check I've been using, taken from =PTPMaster.ino= (from
+=t14-ptp=), on the /channel compare value/ (TCCR) and
+~timespec.tv_nsec~, has been bothering me. Essentially it boils down
+to:
+
+#+begin_src c++ :noeval
+    if (ts.tv_nsec < 100 * 1000 * 1000 && t > 900 * 1000 * 1000) {
+        interrupt_s = ts.tv_sec - 1;
+    } else {
+        interrupt_s = ts.tv_sec;
+    }
+#+end_src
+
+What's this for? And does it mean I'm reading the timer incorrectly
+elsewhere?
+
+***** Investigation
+Both the /master/ and /slave/ implementations configure pin 24 with
+IOMUX mode 6
+
+#+begin_src c++ :noeval
+IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_12 = 6;
+#+end_src
+
+From §11.6.5 of the iMXRT1060 reference manual:
+
+#+begin_quote
+MUX_MODE
+
+MUX Mode Select Field.  Select one of iomux modes to be used for pad:
+GPIO_AD_B0_12.
+
+000 ALT0...
+...
+110 ALT6 — Select mux mode: ALT6 mux port: ENET_1588_EVENT1_OUT of
+instance: enet
+#+end_quote
+
+From §41.4 of the manual, specifically the table on ENET External
+Signals:
+
+#+begin_quote
+1588_EVENT_OUT
+
+Capture/compare block input/output event bus signal. When configured
+for capture and a rising edge is detected, the current timer value
+is latched and transferred into the corresponding ENET_TCCRn
+register for inspection by software. When *configured for compare*, the
+corresponding signal 1588_EVENT is asserted for one cycle *when the
+timer reaches the compare value programmed in register ENET_TCCRn*. An
+interrupt or DMA request can be triggered if the corresponding bit in
+ENET_TCSRn[TIE] or ENET_TCSRn[TDRE] is set. NOTE: ENET_1588_EVENT0_OUT
+has a *programmable output width*, see IOMUXC_GPR[CLK_STRET CH],
+delayed one clock cycle in relation to all other EVENTx_OUT signals.
+#+end_quote
+
+And indeed, in the code:
+
+#+begin_src c++ :noeval
+qindesign::network::EthernetIEEE1588.setChannelCompareValue(1, NS_PER_S-60);
+qindesign::network::EthernetIEEE1588.setChannelMode(1, ...TimerChannelModes::kPulseHighOnCompare);
+qindesign::network::EthernetIEEE1588.setChannelOutputPulseWidth(1, 25);
+#+end_src
+
+So the TCCR1 (§41.5.1.96) is configured for compare (at 1e9 - 60 ns,
+perhaps because "The compare occurs one 1588 clock cycle after the
+IEEE 1588 Counter increments past the compare value in the 1588 clock
+domain."), and TCSR1 (§41.5.1.95) is configured to pulse high on compare
+with a pulse width of 25 (range is 1-32). Additionally, in my
+subscriber implementation, I have
+
+#+begin_src c++ :noeval
+qindesign::network::EthernetIEEE1588.setChannelInterruptEnable(1, true);
+#+end_src
+
+which configures TCSR1 to enable an interrupt (on the compare event),
+which I can use to inspect the PTP algorithm and adjust the audio
+clock accordingly.
+
+Why the offset of 60 ns? I'm not sure. With that offset, the channel
+compare value is always reported as 999,999,880. Maybe Schleusner and
+co. meant to /add/ 60 ns (which does indeed yield a channel compare
+value of 0), since they later subtract 60 from the channel compare
+value, before taking its modulo with 1e9.
+
+***** Conclusion
+So this check is just about assigning the correct second to the
+interrupt timestamp, as derived from the channel compare value; it
+isn't actually of material concern elsewhere, for my purposes, because
+I'm using the ~enet_ieee1588_read_timer~ function, which reads
+directly from the ~ENET_ATVR~ register and the ~ieee1588Seconds~
+global variable when setting up the provided timespec.
+
+Entered on [2025-01-31 ven. 10:10]
