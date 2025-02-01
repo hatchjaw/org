@@ -6478,3 +6478,49 @@ directly from the ~ENET_ATVR~ register and the ~ieee1588Seconds~
 global variable when setting up the provided timespec.
 
 Entered on [2025-01-31 ven. 10:10]
+
+** 2025-02 février
+*** 2025-02-01 samedi
+**** I2S Sync                                            :HARDWARE:TEENSY:
+The good news: I'm pretty sure I've solved the problem of
+synchronising I^{2}S across multiple Teensies. This entailed writing a
+hardware abstraction layer for the SAI1 control and configuration
+registers (to build up some manner of understanding of what they're
+all for, as much as anything), and moving the updates that enable the
+transmiter/receiver and the bit clock and FIFO/DMA interaction to my
+~AudioSystemManager::startClock~ method, which now looks like this:
+
+#+begin_src c++ :noeval
+void AudioSystemManager::startClock()
+{
+    m_AnalogAudioPllControlRegister.setPowerDown(false);
+    m_AnalogAudioPllControlRegister.setBypass(false);
+    m_AnalogAudioPllControlRegister.setEnable(true);
+
+    m_SAI1TransmitControlRegister.setBitClockEnable(true);
+    m_SAI1TransmitControlRegister.setFIFORequestDMAEnable(true);
+    m_SAI1TransmitControlRegister.setTransmitterEnable(true);
+    m_SAI1ReceiveControlRegister.setBitClockEnable(true);
+    m_SAI1ReceiveControlRegister.setReceiverEnable(true);
+
+    m_AudioShield.enable();
+    m_AudioShield.volume(m_Config.k_Volume);
+
+    s_FirstInterrupt = true;
+}
+#+end_src
+
+So the audio PLL is powered up and its clock unbypassed and enabled,
+the SAI1 transmitter and receiver are enabled, and the audio shield
+configured and powered up. Remaining ppb drift, and occasional failure
+of the PTP client to lock to the clock authority aside, the result is
+a near-perfect sync.
+
+The bad news: analog output from the SGTL5000 codec is /not/
+synchronised; there can be as much as 15 \micro{}s offset. Presumably there's
+some internal buffering going on, or some awkward delay caused by
+updating registers over I2C (with the =Wire= library). I tried moving
+the call to ~m_AudioShield.enable~ before bringing PLL4 online, but to
+no avail. Likely another deep-dive required at some point.
+
+Entered on [2025-02-01 sam. 17:11]
