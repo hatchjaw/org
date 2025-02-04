@@ -6524,3 +6524,118 @@ the call to ~m_AudioShield.enable~ before bringing PLL4 online, but to
 no avail. Likely another deep-dive required at some point.
 
 Entered on [2025-02-01 sam. 17:11]
+*** 2025-02-03 lundi
+**** Réunion Emeraude                               :MEETING:PRESENTATION:
+***** Xiao Peng
+- A /graph invariant/ is a property that remains unchanged under
+  /isomorphisms/.
+- \(G\) and \(G'\) are isomorphic if there exists a permutation \(\pi\)
+  such that \(A_{G}\pi = \pi(A_{G})\).
+- Aim is to generate graphs, minimising the number of isomorphs (or
+  duplicates, essentially) generated.
+- There is a /canonical code/ that describes a graph in terms of the
+  adjacency of its vertices.
+
+***** Me
+- Went fine I guess. Slow the fuck down, man.
+- Tanguy made the pertinent observation that I should interact with
+  people who are using state-of-the-art, centralised systems; look in
+  detail at the costs, the capabilities, etc.
+- Tanugy also mentioned that Maxime may be able to consult on codec
+  capabilities (and to tell us the difference between a VCO and a
+  VCXO).
+- Florent (much later in the day) opined that it was difficult to
+  follow the various units I employed; millimetres, nanoseconds,
+  samples... he suggested (when speaking of time, at least, I guess)
+  that I pick one and stick with that. What would help in this
+  instance is a nice visualisation of:
+  + Sampling an analog signal (sampling rate, sample period).
+  + PTP time exchange (nanoseconds).
+  + Digital to analog conversion, reproduction (propagation time,
+    propagation distance per sample offset).
+
+Entered on [2025-02-03 lun. 09:27]
+**** SGTL5000 register investigation
+Saw Maxime at lunch, described the situation regarding I^{2}S sync being
+let down by asynchronicity at the level of the codec. Interested, he
+offered to come and take a look. I demonstrated I^{2}S being synced to
+within a few tens of nanoseconds, but analog output being 12-13 \micro{}s out
+of sync, repeatedly rebooting the teensies to yield different
+offsets. We verified the timing setup with the logic analyser (he
+explained a little about how to read one of those scary-looking clock
+diagrams that one encounters in chip reference manuals); he made the
+suggestion of using one Teensy to drive two codecs in parallel to see
+whether it really is a matter of nondeterministic behaviour.
+
+We landed somehow on the matter of hard vs. soft power cycling. This
+put me in mind of a situation last year in which I was updating my
+code for configuring PLL4 and finding that what might work after a
+reboot would not after a hard power cycle (so this has become
+something that I check periodically). We tried a few hard power cycles
+and, each time, the logic analyser reported analog output in sync.
+
+There's a very good chance, then, that a soft power cycle (e.g. via my
+=reboot.sh= script) doesn't clear all the expected registers. So,
+let's see.
+
+***** Register values
+
+| Register          | Hard reboot | Soft reboot |
+|-------------------+-------------+-------------|
+| CHIP_DIG_POWER    |           0 |          73 |
+| CHIP_CLK_CONTROL  |           8 |           8 |
+| CHIP_I2S_CTRL     |          10 |          30 |
+| CHIP_SSS_CTRL     |          10 |          10 |
+| CHIP_ADCDAC_CTRL  |           0 |        323C |
+| CHIP_DAC_VOL      |        3C3C |        3C3C |
+| CHIP_PAD_STRENGTH |        555F |        555F |
+| etc...            |             |             |
+
+~CHIP_DIG_POWER~ stands out immediately as being problematic
+(~CHIP_ADCDAC_CTRL~ is less so since it deals with volume
+settings). From the SGTL5000 reference manual:
+
+CHIP_DIG_POWER 0X0002
+| BITS | FIELD           | RW | RESET | DEFINITION                  |
+|------+-----------------+----+-------+-----------------------------|
+| 15:7 | RSVD            | RO |   0x0 |                             |
+|    6 | ADC_POWERUP     | RW |   0x0 | 0x0 = Disable; 0x1 = Enable |
+|    5 | DAC_POWERUP     | RW |   0x0 | 0x0 = Disable; 0x1 = Enable |
+|    4 | DAP_POWERUP     | RW |   0x0 | 0x0 = Disable; 0x1 = Enable |
+|  3:2 | RSVD            | RW |   0x0 |                             |
+|    1 | I2S_OUT_POWERUP | RW |   0x0 | 0x0 = Disable; 0x1 = Enable |
+|    0 | I2S_IN_POWERUP  | RW |   0x0 | 0x0 = Disable; 0x1 = Enable |
+
+So, 0X0073 corresponds with everything being powered up. In principle,
+it should be effective to write =0x0000= to that register on startup
+to make sure that power is down.
+
+I tried doing this in a ~begin~ method, called from
+~AudioSystemManager::begin~, but that didn't eradicate the
+offset. Calling ~SGTL5000::enable~ from
+~AudioSystemManager::startClock~ seems to do the trick. I don't like
+overloading that method with too many register settings, nor the
+arbitrary CPU-cycle-count delays I'm using, but it's an improvement.
+
+Another option (Maxime's suggestion) would be to find a way (via
+=tytools=?) to power the codec down /before/ issuing a reset command.
+
+That said, for three clients I see the following in the startup
+reports:
+
+#+begin_example
+Subscriber start audio clock 01.01.1970 04:33:31::000:000:000
+First interrupt time: 01.01.1970 04:33:31::032:510:877
+
+Subscriber start audio clock 01.01.1970 04:33:31::000:000:000
+First interrupt time: 01.01.1970 04:33:31::032:510:351
+
+Subscriber start audio clock 01.01.1970 04:33:30::000:000:000
+First interrupt time: 01.01.1970 04:33:30::032:510:655
+#+end_example
+
+According to each clock subscriber's understanding of the PTP time
+reference, that's /32.5 ms/ to start up audio, but with a spread
+(seconds discounted) of only half a microsecond.
+
+Entered on [2025-02-03 lun. 16:59]

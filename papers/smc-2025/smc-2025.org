@@ -1,0 +1,143 @@
+# -*- Mode: org -*-
+# -*- coding: utf-8 -*-
+
+#+title: Something Something Distributed Synchronous Something
+#+author: Thomas Rushton
+
+#+startup: overview
+#+export_file_name: out/smc-2025
+#+options: toc:nil num:3 date:nil author:nil
+#+latex_class: smc-2025
+#+bibliography: smc2025bib.bib
+#+cite_export: bibtex
+#+latex_header_extra: \RequirePackage[]{./out/smc-2025}
+
+#+begin_abstract
+The abstract should be placed at the top left column and should contain about 150-200 words.
+#+end_abstract
+
+* LaTeX Setup                                                      :noexport:
+:PROPERTIES:
+:header-args: :tangle out/smc-2025.sty :results silent
+:END:
+
+** Provide the package
+
+#+begin_src latex
+\ProvidesPackage{smc-2025}[2025/01/15 v0.1 Bundling SMC 2025 style]
+#+end_src
+
+** Packages
+
+The main smc2025 package.
+
+#+begin_src latex
+\usepackage{smc2025}
+#+end_src
+
+Modern replacement for =subfigure=
+
+#+begin_src latex
+\usepackage[caption=false, font=footnotesize]{subfig}
+#+end_src
+
+Extended list environemnts
+
+#+begin_src latex
+\usepackage{paralist}
+#+end_src
+
+Hyperref companion
+
+#+begin_src latex
+\usepackage[figure,table]{hypcap}
+#+end_src
+
+#+begin_src latex
+\usepackage[english]{babel}
+#+end_src
+
+** Line numbers
+
+The following command enables line numbers and it is meant for Review
+only. It must be removed/commented out for Camera Ready version.
+
+#+begin_src latex
+\pagewiselinenumbers
+#+end_src
+
+** Authors & Affiliations
+
+#+begin_src latex
+\author[1,2]{\mbox{\firstname{Thomas}\lastname{Rushton}}}
+\author[1,2]{\mbox{\firstname{Romain}\lastname{Michon}}}
+\author[1,2]{\mbox{\firstname{Tanguy}\lastname{Risset}}}
+\affil[1]{\institution{Inria}\city{Villeurbanne}\country{France}\affiliationtype{Research}}
+\affil[2]{\institution{INSA Lyon}\city{Villeurbanne}\country{France}\affiliationtype{University}}
+#+end_src
+
+** Wrap up
+
+#+begin_src latex
+\completesetup
+#+end_src
+
+* Introduction
+
+This template includes all the information about formatting
+manuscirpts for the SMC 2025 Conference. Please, use \LaTeX{}
+templates when preparing your submission.  Please follow these
+guidelines to give the final proceedings a professional look.  If you
+have any questions, you may contact the SMC 2025 organizers.  This
+template can be downloaded from the SMC 2025 web site:
+[[https://smc25.iem.at/call/scientific/]]
+	
+Changes for 2021 version (maintained in the 2025 version):
+- Line numbering for Review purposes (Please turn it off for Camera
+  Ready)
+- Support of non latin alphabets for authors (see template for
+  guidelines)
+- Support of structured names for authors (firstname, middlename,
+  lastname, generation, phonetic variants, email, orcid)
+- Semistructured affiliation support (labunit, department,
+  institution, streetaddress, city, state, postcode, country)
+- Explicit mapping for affiliations and authors (Based on authoblk)
+
+* Page size and format
+
+The SMC 2025 proceedings will be formatted as portrait _A4-size papers
+(21.0 cm x 29.7 cm)_. All material on each page should fit within a
+rectangle of 17.2 cm x 25.2 cm, centered on the page, beginning 2.0 cm
+from the top of the page and ending with 2.5 cm from the bottom. The
+left and right margins should be 1.9 cm. The text should be in two
+8.2 cm columns with a 0.8 cm gutter. All text must be in a two-column
+format, and justified.  The maximum allowed length is *8 pages*
+(for both lecture and poster presentations). However, a length of
+*6 pages* is _strongly encouraged_.
+
+* Citations
+
+All bibliographical references should be listed at the end, inside a
+section named "REFERENCES". References must be numbered in order of
+appearance. You should avoid listing references that do not appear in
+the text.  Reference numbers in the text should appear within square
+brackets, such as in [cite:@Someone:00] or [cite:@Someone:00;
+@Someone:04; @Someone:09]. The reference format is the standard IEEE
+one. We highly recommend you use BibTeX to generate the reference
+list.
+
+#+print_bibliography:
+  
+* Local Variables                                                  :noexport:
+
+# Local Variables:
+# eval:   (add-to-list 'org-latex-classes '("smc-2025"
+# "\\documentclass{article}
+# [NO-DEFAULT-PACKAGES]"
+# ("\\section{%s}" . "\\section*{%s}")
+# ("\\subsection{%s}" . "\\subsection*{%s}")
+# ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+# ("\\paragraph{%s}" . "\\paragraph*{%s}")
+# ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+# End:
+

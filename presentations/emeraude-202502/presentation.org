@@ -58,6 +58,7 @@ Then navigate to [[http://localhost:8000/emeraude-202502/]].
 
 #+REVEAL: split
 
+#+attr_org: :width 300
 [[./images/melab.jpg]]
 
 Multisensory Experience Lab, AAU Copenhagen, 64 channels.
@@ -127,6 +128,9 @@ Douglas Adams, /The Hitchhiker's Guide to the Galaxy/
 
 In the absence of an authoritative source of time, all time is
 illusory.
+
+#+ATTR_REVEAL: :frag t
+...and all space is nonsense.
 
 ** Clock drift
 
@@ -229,9 +233,14 @@ Clock Authority                                                            Clock
 
 Proportional-Integral controller applied to \(\text{Offset}\):
 
-\begin{equation}
-\text{Adjust} = \text{Drift} + K_{P}\text{Offset} + K_{I}\int\text{Offset}
-\end{equation}
+# \begin{equation}
+# \text{Adjust} = \text{Drift} + K_{P}\text{Offset} + K_{I}\int\text{Offset}
+# \end{equation}
+
+#+attr_html: :style margin-bottom: 0
+\(\text{Adjust} = \text{Drift} + \)
+#+attr_html: :style margin-top: 0
+[[./images/pi.png]]
 
 Resulting adjustment used to alter the per-cycle increment of the
 dedicated timer.
@@ -350,7 +359,7 @@ m_SAI1ReceiveControlRegister.setReceiverEnable(true);
 :PROPERTIES:
 :reveal_background: #141414
 :reveal_extra_attr: class="title-page"
-:END:the
+:END:
 
 ** 
 
@@ -372,6 +381,7 @@ m_SAI1ReceiveControlRegister.setReceiverEnable(true);
 
 #+REVEAL: split
 
+#+attr_org: :width 300
 [[./images/logic.png]]
 
 Three clients reproducing a stereo unipolar sawtooth signal with one
@@ -380,6 +390,7 @@ channel.
 
 #+REVEAL: split
 
+#+attr_org: :width 300
 [[./images/scope.png]]
 
 Two of the clients from the previous capture; probes attached to left
