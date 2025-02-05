@@ -6639,3 +6639,56 @@ reference, that's /32.5 ms/ to start up audio, but with a spread
 (seconds discounted) of only half a microsecond.
 
 Entered on [2025-02-03 lun. 16:59]
+
+*** 2025-02-05 mercredi
+**** SON planning                                       :MEETING:TEACHING:
+TP/TD sessions are not mandatory. Four rooms used in parallel; we need
+to move from room and ask if anyone needs help. 20 students per room,
+but not all will show up.
+
+Group G4 are the /apprentices/; nicer, as a rule, but less good.
+
+If they want to use sensors, they need to buy their own.
+
+They can focus on DSP or on programming. Thery're graded on overall
+effort/endeavour, but they needn't necessarily create a cool physical
+prototype. Students rarely fail, but some 10s and 11s get doled out.
+
+Entered on [2025-02-05 mer. 10:59]
+**** CCRMA Application                                             :VISIT:
+No word from Jonathan Abel re. CAVIAR, but Chris Chafe agreed to
+sponsor my /Visiting Student Researcher/ application.
+
+OK... lots to do here.
+
+CCRMA [[https://ccrma.stanford.edu/academics/visiting-student-researcher][requirements]]:
+
+- Decide when I want to go. Line it up with one of the 2025-26
+  /quarters/. [[https://studentservices.stanford.edu/calendar/academic-dates/future-academic-calendars][Here]] are the dates, but I guess either Winter (Jan 5th —
+  March 20th) or Spring (March 30th — June 10th). Leave a few days
+  either side.
+  + [[https://en.wikipedia.org/wiki/Stanford,_California#Climate][Weather]] wouldn't be /terrible/ Jan-Mar, but, as Romain said,
+    better conditions for being outdoors Mar-Jun.
+- Write a letter to Netty, with the dates, and a summary of the work I
+  want to do. "This is your opportunity to explain why conducting your
+  research is mutually beneficial for both you and for CCRMA."
+- Visiting Student Researcher form. The link on the requirements page
+  is broken.
+- Biographic pages of my passport.
+- SEVIS DS2019 [[http://ccrma.stanford.edu/info/3.%20SEVIS_DS2019_request.pdf][Form]].
+
+France-Stanford application portal is [[https://stanfordglobalstudies.slideroom.com/][here]]. Requirements ([[https://francestanford.stanford.edu/sites/francestanford/files/media/file/visiting_student_researcher_fellowship_guidelines_2025-26.pdf][pdf]]):
+
+- A letter to France-Stanford's director, describing my research
+  project and plans. This letter should identify Chris as my
+  sponsor. Indicate the length of my visit. 1-2 pages.
+- Letter of endorsement from my sponsor. Chris asked me to draft
+  this. 1-2 pages.
+- CV.
+- "Unofficial academic transcript".
+- Budget requested. Ten grand?
+- "Budget details", 1 page.
+
+Assuming all goes well, I'll need a [[https://travel.state.gov/content/travel/en/us-visas/study/exchange.html][J-1 visa]].
+
+Entered on [2025-02-05 mer. 18:26]

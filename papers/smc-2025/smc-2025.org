@@ -53,8 +53,16 @@ Hyperref companion
 \usepackage[figure,table]{hypcap}
 #+end_src
 
+Use this if english is the only language/alphabet used in the document
+
 #+begin_src latex
 \usepackage[english]{babel}
+#+end_src
+
+I'd prefer to use cleveref.
+
+#+begin_src latex
+\usepackage[noabbrev]{cleveref}
 #+end_src
 
 ** Line numbers
@@ -115,6 +123,40 @@ format, and justified.  The maximum allowed length is *8 pages*
 (for both lecture and poster presentations). However, a length of
 *6 pages* is _strongly encouraged_.
 
+* Floats and Equations 
+
+** Equations
+
+Equations sholud be placed on separated lines and numbered. The number
+should be on the right side, in parentheses.
+
+#+NAME: eq:BP
+\begin{equation}
+r = \sqrt[13]{3}
+\end{equation}
+
+Always refer to equations like this: "Cref:eq:BP is of
+particular interest because..."
+
+** Figures, Tables and Captions
+
+#+name: tab:example
+#+caption: Table captions should be placed below the table, like this.
+#+attr_latex: :align |l|l| :placement [t]
+|-------------+---------------|
+| String Name | Numeric Value |
+|-------------+---------------|
+| Moin! SMC   |          2025 |
+|-------------+---------------|
+
+Always refer to tables and figures in the main text, for example:
+"see Cref:fig:example and Cref:tab:example".
+
+#+name: fig:example
+#+caption: Figure captions should be placed below the figure, exactly like this.
+#+attr_latex: :placement [t] :width 0.6\columnwidth
+[[./figure.pdf]]
+
 * Citations
 
 All bibliographical references should be listed at the end, inside a
@@ -139,5 +181,6 @@ list.
 # ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
 # ("\\paragraph{%s}" . "\\paragraph*{%s}")
 # ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+# eval:   (setq org-latex-caption-above nil)
 # End:
 
