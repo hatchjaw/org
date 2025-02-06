@@ -6655,7 +6655,7 @@ effort/endeavour, but they needn't necessarily create a cool physical
 prototype. Students rarely fail, but some 10s and 11s get doled out.
 
 Entered on [2025-02-05 mer. 10:59]
-**** CCRMA Application                                             :VISIT:
+**** CCRMA Application                                    :PLANNING:VISIT:
 No word from Jonathan Abel re. CAVIAR, but Chris Chafe agreed to
 sponsor my /Visiting Student Researcher/ application.
 
@@ -6692,3 +6692,140 @@ France-Stanford application portal is [[https://stanfordglobalstudies.slideroom.
 Assuming all goes well, I'll need a [[https://travel.state.gov/content/travel/en/us-visas/study/exchange.html][J-1 visa]].
 
 Entered on [2025-02-05 mer. 18:26]
+**** Parts-per-billion drift                                  :TEENSY:PTP:
+I should be writing, but I fancied having a crack at the remaining
+drift after applying the nsps PTP adjustment as a ratio to Teensy's
+sample rate (well, its fractional phase locked loop numerator
+register).
+
+I started trying to implement a proportional-integral controller, but
+didn't do a great job of it (the resulting ratio kept increasing). I
+decided that since the adjustment is already subject to a
+PI-controller, that I was probably on the wrong track. Thinking about
+it, there's a difference between how the adjustment is used for PTP
+--- as a periodic augmented/diminished per-cycle timer increment ---
+and how it's used for the audio sample rate --- as a multiplier to a
+frequency. For the PTP timer, it's sort of like a resampler; insted of
+incrementing 40 ns per cycle, every \(n\) cycles, we increment by 41
+or 39 depending on the polarity of the adjustment. E.g.
+
+#+begin_src elisp
+(let* ((nsps 1e9) ; 1 billion nanoseconds per seecond
+       (enetTimer 25e6) ; 25 Mhz
+       (adjust 12500) ; nanoseconds
+       (increment 41) ; since 1234 >= 0
+       (interval (round (/ enetTimer adjust)))
+       (tick 0)
+       (nsCounted 0))
+  (while (< tick enetTimer)
+    (setq nsCounted (if (eq (% tick interval) 0)
+                        (+ nsCounted increment)
+                      (+ nsCounted 40)))
+    (setq tick (1+ tick)))
+  (format "Increment %d ns every %.0f cycles\nTotal ns: %d" increment interval nsCounted))
+#+end_src
+
+#+RESULTS:
+: Increment 41 ns every 2000 cycles
+: Total ns: 1000012500
+
+How about applying a similar idea to the audio clock? The sample
+period at 48 kHz is
+
+#+begin_src emacs-lisp
+(format "%f ns" (/ 1e9 48000))
+#+end_src
+
+#+RESULTS:
+: 20833.333333 ns
+
+For the same adjustment as above (clock-subscriber running slow)
+
+#+begin_src emacs-lisp
+(let* ((nsps 1e9)
+       (adjust 12500)
+       (totalNs (+ nsps adjust))
+       (fs 48000)
+       (samplePeriod (/ nsps fs))
+       (fsExact (/ totalNs samplePeriod)))
+  (format "Target sample rate: %f" fsExact))
+#+end_src
+
+#+RESULTS:
+: Target sample rate: 48000.600000
+
+That should be easy enough to achieve via the [[denote:20240821T132619][clock divider equation]] I
+derived.
+
+#+begin_src emacs-lisp
+(let* ((Dd 1e9)
+       (fsExact 48000.6)
+       (sai1 (* 3 19))
+       (Ds 29)
+       (XO 24e6)
+       (Dn (* (/ Dd 1e6)
+              (- (/ (* (lsh 1 8) fsExact sai1)
+                    (/ XO 1e6))
+                 (* 1e6 Ds)))))
+  (format "Numerator: %f" Dn))
+#+end_src
+
+#+RESULTS:
+: Numerator: 184364799.999997
+
+OK, close. Rounding error maybe.
+
+In fact, it's rounding error that I started to consider. E.g. for an
+adjustment of 16260 (1000016260 ns) I was seeing a reported target
+sample rate of 48000.78050, when one would expect to see
+
+#+begin_src emacs-lisp
+(let* ((nsps 1e9)
+       (fs 48000)
+       (samplePeriod (/ nsps fs))
+       (adjust 16260)
+       (fsExact (/ (+ nsps adjust) samplePeriod)))
+  (format "Target Fs: %f" fsExact))
+#+end_src
+
+#+RESULTS:
+: Target Fs: 48000.780480
+
+Maybe there really is some rounding error.
+
+/Maybe/ I could be adjust the denominator instead of/as well as the
+numerator.
+
+Then again, maybe the ~290 ns (measured) it takes to calculate and set
+the new numerator is throwing off the application of the resulting
+value anyway. (Although, wouldn't that just wind up as a reasonably
+predictable offset every time the numerator is recalculated?) I tried
+some magic numbers as ratios applied to the nsps adjustment, and
+landed on this:
+
+#+begin_src c++ :noeval
+audioSystemManager.adjustClock(ptp.getAdjust() * .998333333);
+#+end_src
+
+Now we're drifting something like a microsecond over twenty minutes in
+the most egregious case. Might be good enough (for now). I still feel
+like there should be some factor of the average drift that should be
+applied... but I don't know how to do it yet. Maybe a PI-controller
+really is the way to go...
+
+Entered on [2025-02-05 mer. 19:59]
+**** Email exchange with Nando                                     :INSPO:
+Nando says he's still interested in hearing how things develop. He
+also more-or-less confirmed what I was more-or-less convinced of
+anyway, which is that PTP time isn't going to affect audio interface
+timing. An interface has its own XO, so, unless it's possible to set
+the interface's audio clock as accurately as I can the Teensy's
+(unlikely), it'll drift relative to PTP, and any timestamps I attempt
+are going to be wishful at best, and possibly complete garbage.
+
+Still, I should have another go at getting system time to track PTP
+(with =pmc= and =phc2sys=) so I can use the TAI clock to generate
+timestamps (or a one-off first-packet timestamp) rather than the PTP
+timer itself, which requires root access.
+
+Entered on [2025-02-05 mer. 21:32]

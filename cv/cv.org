@@ -100,8 +100,10 @@ A non-exhaustive selection, but enough for this vita.
 
 *** Fonts
 
-All available for download for free... names may have to be changed to
-match what you have in =~/.local/share/fonts=.
+All available for download (Minion and Myriad are "widely available,
+from Adobe" says Healy; Minion can be found [[https://font.download/font/minion-pro][here]], for example). names
+may have to be changed to match what you have in
+=~/.local/share/fonts=.
 
 #+begin_src latex
 \setromanfont[Mapping={tex-text}, 

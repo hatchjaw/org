@@ -7,8 +7,9 @@
 #+end_quote
 
 * Tasks
-** TODO Prepare Emeraude presentation
+** DONE Prepare Emeraude presentation
 DEADLINE: <2025-02-02 dim.>
+- State "DONE"       from "TODO"       [2025-02-05 mer. 20:05]
 ** TODO Prepare PhD meeting presentation
 DEADLINE: <2025-02-24 lun. ++1m>
 :PROPERTIES:
