@@ -1206,7 +1206,7 @@ automatic differentiation in the \F{} language itself.
 # ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
 # ("\\paragraph{%s}" . "\\paragraph*{%s}")
 # ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-# eval:   (setq org-latex-pdf-process '("latexmk -f -pdf -%latex \
-# -interaction=nonstopmode -shell-escape -output-directory=%o %f"))
-# eval:   (setq org-latex-src-block-backend 'listings)
+# org-latex-pdf-process: ("latexmk -f -pdf -%latex \
+#   -interaction=nonstopmode -shell-escape -output-directory=%o %f")
+# org-latex-src-block-backend: listings
 # End:

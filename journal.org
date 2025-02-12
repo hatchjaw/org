@@ -6661,35 +6661,74 @@ sponsor my /Visiting Student Researcher/ application.
 
 OK... lots to do here.
 
-CCRMA [[https://ccrma.stanford.edu/academics/visiting-student-researcher][requirements]]:
+***** CCRMA
+[[https://ccrma.stanford.edu/academics/visiting-student-researcher][Requirements]]:
+****** DONE Decide when I want to go.
+:LOGBOOK:
+- State "DONE"       from              [2025-02-12 mer. 17:56]
+:END:
+Line it up with one of the 2025-26 /quarters/. [[https://studentservices.stanford.edu/calendar/academic-dates/future-academic-calendars][Here]] are the dates, but
+I guess either Winter (Jan 5th — March 20th) or Spring (March 30th —
+June 10th). Leave a few days either side. [[https://en.wikipedia.org/wiki/Stanford,_California#Climate][Weather]] wouldn't be
+/terrible/ Jan-Mar, but, as Romain said, better conditions for being
+outdoors Mar-Jun. 
+****** DONE Write a letter to Netty
+:LOGBOOK:
+- State "DONE"       from              [2025-02-12 mer. 17:58]
+:END:
+...with the dates, and a summary of the work I want to do. "This is
+your opportunity to explain why conducting your research is mutually
+beneficial for both you and for CCRMA."
+****** CANCELLED Visiting Student Researcher form.
+:LOGBOOK:
+- State "CANCELLED"  from              [2025-02-12 mer. 17:58]
+:END:
+The link on the requirements page is broken --- turns out this form is
+no longer required.
+****** DONE Biographic pages of my passport.
+:LOGBOOK:
+- State "DONE"       from              [2025-02-12 mer. 17:59]
+:END:
 
-- Decide when I want to go. Line it up with one of the 2025-26
-  /quarters/. [[https://studentservices.stanford.edu/calendar/academic-dates/future-academic-calendars][Here]] are the dates, but I guess either Winter (Jan 5th —
-  March 20th) or Spring (March 30th — June 10th). Leave a few days
-  either side.
-  + [[https://en.wikipedia.org/wiki/Stanford,_California#Climate][Weather]] wouldn't be /terrible/ Jan-Mar, but, as Romain said,
-    better conditions for being outdoors Mar-Jun.
-- Write a letter to Netty, with the dates, and a summary of the work I
-  want to do. "This is your opportunity to explain why conducting your
-  research is mutually beneficial for both you and for CCRMA."
-- Visiting Student Researcher form. The link on the requirements page
-  is broken.
-- Biographic pages of my passport.
-- SEVIS DS2019 [[http://ccrma.stanford.edu/info/3.%20SEVIS_DS2019_request.pdf][Form]].
+****** WAITING SEVIS DS2019 [[http://ccrma.stanford.edu/info/3.%20SEVIS_DS2019_request.pdf][Form]].
+:LOGBOOK:
+- State "WAITING"    from              [2025-02-12 mer. 17:59] \\
+  This is probably the form Nette mentioned the /Non-Degree Admissions
+  folks/ will send me, but check at some point if it's not clear.
+:END:
 
-France-Stanford application portal is [[https://stanfordglobalstudies.slideroom.com/][here]]. Requirements ([[https://francestanford.stanford.edu/sites/francestanford/files/media/file/visiting_student_researcher_fellowship_guidelines_2025-26.pdf][pdf]]):
+***** France-Stanford Institute
+Remember to refer to it as the /France-Stanford Institute for
+Interdisciplinary Studies/. F-S Fund Application portal is
+[[https://stanfordglobalstudies.slideroom.com/][here]]. Requirements ([[https://francestanford.stanford.edu/sites/francestanford/files/media/file/visiting_student_researcher_fellowship_guidelines_2025-26.pdf][pdf]]):
 
-- A letter to France-Stanford's director, describing my research
-  project and plans. This letter should identify Chris as my
-  sponsor. Indicate the length of my visit. 1-2 pages.
-- Letter of endorsement from my sponsor. Chris asked me to draft
-  this. 1-2 pages.
-- CV.
-- "Unofficial academic transcript".
-- Budget requested. Ten grand?
-- "Budget details", 1 page.
+****** TODO A letter to France-Stanford's director
+...describing my research project and plans. This letter should
+identify Chris as my sponsor. Indicate the length of my visit. 1-2
+pages.
 
-Assuming all goes well, I'll need a [[https://travel.state.gov/content/travel/en/us-visas/study/exchange.html][J-1 visa]].
+****** TODO Letter of endorsement from my sponsor.
+Chris asked me to draft this. 1-2 pages.
+
+****** TODO CV
+****** TODO "Unofficial academic transcript"
+****** TODO Budget requested.
+Ten grand?
+
+****** TODO "Budget details"
+1 page.
+
+Assuming all goes well, I'll need a [[https://travel.state.gov/content/travel/en/us-visas/study/exchange.html][J-1 visa]]. Update: Nette adds:
+
+#+begin_quote
+We'll be requesting a short-term (less than 6 months) J1 visa for you,
+which (at the moment...) allows entry into the US up to 30 days prior
+to the start of your appointment, and you may remain in the US for up
+to 30 days after the end, so it is quite flexible, and does not carry
+the 24 month bar that the long-term J scholar visa has.
+#+end_quote
+
+That sounds great, and like she has that part under control.
 
 Entered on [2025-02-05 mer. 18:26]
 **** Parts-per-billion drift                                  :TEENSY:PTP:
@@ -6829,3 +6868,17 @@ timestamps (or a one-off first-packet timestamp) rather than the PTP
 timer itself, which requires root access.
 
 Entered on [2025-02-05 mer. 21:32]
+*** 2025-02-11 mardi
+**** Meeting: Romain                                 :MEETING:SUPERVISION:
+- Up to me what time I apply to visit CCRMA.
+  + Spring quarter more likely to be writing-focused.
+  + Winter likely to be more practical.
+  + Weather obviously better in spring...
+  + Not necessarily going to make more technical progress there; more
+    the applications.
+  + Perhaps the later the better, that being the case.
+  + So, change dates, send letter to Nette, request link to form.
+  + Talk to Maxime about France-Stanford preparations --- budget, etc.
+- Drafts for papers a week in advance of deadlines, please.
+  
+Entered on [2025-02-11 mar. 11:07]

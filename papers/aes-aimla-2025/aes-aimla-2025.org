@@ -247,7 +247,7 @@ tellus.
 * Local Variables                                                  :noexport:
 
 # Local Variables:
-# eval:   (add-to-list 'org-latex-classes '("aes-aimla-2025"
+# org-latex-classes: (("aes-aimla-2025"
 # "\\documentclass[conference,peer-reviewed,blind-review]{aesconf}
 # [NO-DEFAULT-PACKAGES]"
 # ("\\section{%s}" . "\\section*{%s}")

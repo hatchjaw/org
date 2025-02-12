@@ -54,7 +54,7 @@ Now give this block the usual =C-c C-x C-l=.
     child { node [circle, draw, fill=yellow!30] {4} }};
 \end{tikzpicture}
 
-Naturally, best to add the above to =init.el=.
+Naturally, best to add the above to =init.el=, or as a file-local variable.
 
 * Resources
 

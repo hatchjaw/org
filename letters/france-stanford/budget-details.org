@@ -28,10 +28,10 @@
 #+latex: \begin{letter}{Nette Worthey\\ CCRMA\\ Department of Music\\ Stanford University\\ Stanford, CA 94305-8181 USA}
 #+latex: \opening{Dear Ms. Worthey,}
 
-I am writing to you to express my wish to spend the period beginning
-April 1 2026 and ending June 30 2026 as a Visiting Student Researcher
-at CCRMA. Granted the opportunity, I would like to carry out
-developments on my doctoral research under the title /Distributed
+I am writing to you to express my wish to spend the Winter 2025-26
+quarter --- January 5 to March 20, 2026 --- as a Visiting Student
+Researcher at CCRMA. Granted the opportunity, I would like to carry
+out developments on my doctoral research under the title /Distributed
 audio systems for immersive audio and virtual acoustics/.
 
 My work on distributed audio began in 2022 as an internship project in
@@ -92,7 +92,7 @@ time in considering my application, and I hope very much to be able to
 join you in California in 2026.
 
 #+latex: \closing{Yours sincerely,}
-#+latex: \vspace{.5cm}
+#+latex: \vspace{1cm}
 #+print_bibliography: :heading none
 #+latex: \end{letter}
 

@@ -1,0 +1,42 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+
+#+title: Letter to the director of the France-Stanford Center
+#+title: For Interdisciplinary Studies
+#+author: Thomas Rushton
+#+options: title:nil author:nil toc:nil
+#+language: en
+#+export_file_name: out/director-letter
+
+#+latex_compiler: xelatex
+#+cite_export: biblatex
+#+latex_class: scrlttr2
+#+latex_header: \usepackage{fontspec}
+#+latex_header: \setromanfont{MinionPro-Regular}
+#+latex_header: \usepackage[british]{babel}
+#+latex_header: \KOMAoptions{fromalign=right,fromrule=aftername,fromemail,enlargefirstpage,foldmarks=false,backaddress=false,bibliography=oldstyle}
+#+latex_header: \setplength{toaddrwidth}{90mm}
+#+latex_header: \setkomavar{subject}{Proposed visit to the Centre for Computer Research in Music and Acoustics (CCRMA) at Stanford University}
+#+latex_header: \setkomavar{fromname}{Thomas Rushton}
+#+latex_header: \setkomavar{fromemail}[\Email\enskip]{\href{mailto:thomas.rushton@inria.fr}{thomas.rushton@inria.fr}}
+#+latex_header: \setkomavar{fromaddress}{18 Rue Pierre Blanc\\ 69100 Lyon\\ France}
+#+latex_header: \usepackage{hyperref}
+#+latex_header: \hypersetup{hidelinks}
+#+latex_header: \usepackage{microtype}
+
+#+latex: \begin{letter}{Fiona Griffiths\\ France-Stanford Center For Interdisciplinary Studies\\ Stanford University\\ Stanford, CA 94305-8181 USA}
+#+latex: \opening{Dear Ms. Griffiths,}
+
+
+
+#+latex: \closing{Yours sincerely,}
+#+latex: \vspace{1cm}
+#+print_bibliography: :heading none
+#+latex: \end{letter}
+
+* Local variables                                                  :noexport:
+
+# Local Variables:
+# org-latex-classes: (("scrlttr2" "\\documentclass{scrlttr2}
+# [NO-DEFAULT-PACKAGES]"))
+# End:

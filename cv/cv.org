@@ -282,8 +282,7 @@ SMC 2022/.
 * Emacs setup                                                      :noexport:
 
 # Local Variables:
-# eval:   (add-to-list 'org-latex-classes '("cv"
-# "\\documentclass[11pt]{scrartcl}
+# org-latex-classes: (("cv" "\\documentclass[11pt]{scrartcl}
 # [NO-DEFAULT-PACKAGES]"
 # ("\\section{%s}" . "\\section*{%s}")
 # ("\\subsection{%s}" . "\\subsection*{%s}")
