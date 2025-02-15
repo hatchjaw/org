@@ -11,12 +11,12 @@ Begin with the general FIR filter, adapted from
 y[n] = \sum_{k=0}^{M-1}x_{k}s[n-k]
 \end{equation}
 
-#+begin_quote
+#+begin_notes
 Typically \(b_{k}\) is used for filter coefficients, and \(x\) for the
 input signal, but, for consistency's sake (with other autodiff
 examples), since \(\mathbf{x}\) is our parameter vector, \(x_{k}\) are
 our coefficients, and \(s\) the input signal.
-#+end_quote
+#+end_notes
 
 We can express \(y = y[n]\) as a function of a vector of independent
 variables \(\mathbf{v}\):

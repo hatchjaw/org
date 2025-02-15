@@ -6,10 +6,11 @@
 
 #+startup: overview
 #+export_file_name: out/aes-aimla-2025
-#+options: toc:nil num:3 date:nil author:nil title:nil
+#+options: toc:nil num:5 H:5 date:nil author:nil title:nil
 #+latex_class: aes-aimla-2025
 #+bibliography: refs.bib
-#+cite_export: natbib
+# Might have to revert to natbib...
+#+cite_export: biblatex
 #+latex_header_extra: \RequirePackage[]{./out/aes-aimla-2025}
 
 #+begin_export latex
@@ -53,15 +54,30 @@ Natbib is used for more control on citations. You can use other modern
 bibliography packages but please try to match the provided style.
 
 #+begin_src latex
-\usepackage[numbers,square]{natbib}
+%% \usepackage[numbers,square]{natbib}
 #+end_src
 
-These are useful for different purposes.
+"These are useful for different purposes."
 
 #+begin_src latex
 \usepackage{booktabs}
 \usepackage{color}
 \usepackage{url}
+#+end_src
+
+Maths stuff.
+
+Why it's necessary to use a negative top margin is... mysterious.
+
+#+begin_src latex
+\usepackage{mdframed}
+\mdfsetup{skipabove=0pt,
+  skipbelow=0pt,
+  linewidth=.5pt,
+  innertopmargin=-10pt
+}
+\usepackage{amsmath}
+\usepackage{stmaryrd}
 #+end_src
 
 More useful stuff
@@ -70,6 +86,34 @@ More useful stuff
 \usepackage{hyperref}
 \hypersetup{hidelinks}
 \usepackage[noabbrev,capitalise]{cleveref}
+#+end_src
+
+Listings. I should consider using [[https://www.reddit.com/r/emacs/comments/lbkmmz/the_best_syntax_highlighting_in_a_pdf_youll_see_a/][engrave-faces]] instead.
+
+#+begin_src latex
+\usepackage{color}
+\usepackage{listings}
+\definecolor{mygrey}{rgb}{0.96,0.96,0.96}
+\lstset{
+  tabsize=4,
+  basicstyle=\ttfamily,
+  backgroundcolor=\color{mygrey},
+  captionpos=b,
+  breaklines=true,
+  framexleftmargin=2pt,
+  framexrightmargin=2pt,
+  framextopmargin=2pt,
+  framexbottommargin=2pt,
+  frame=tb,
+  framerule=0pt,
+}
+\usepackage{inconsolata}
+#+end_src
+
+Faust SVG figures:
+
+#+begin_src latex
+\usepackage[inkscapelatex=false]{svg}
 #+end_src
 
 ** Figures
@@ -123,7 +167,194 @@ Short title should describe your topic but not be too long.
 
 * Introduction
 
-Introduce to the topic.
+Differentiable programming via automatic differentiation (AD) is the
+bedrock upon which gradient-based mathematical optimisation techniques
+lie, and forms the basis for current approaches to machine
+learning. Differentiability of the primitive operators of a
+programming language permits the creation of programs that are
+end-to-end differentiable with respect to their input variables;
+coupled with a loss function --- also composed of differentiable
+primitives --- such a program can produce gradients, which, when
+backpropagated as update-values to the input variables, cause those
+inputs to approach target values, reducing the value returned by the
+loss function, etc., etc. Differentiable digital signal processing
+(DDSP) is concerned with the creation and application of
+differentiable signal processors 
+
+Having previously demontstrated that DDSP is possible in the Faust
+language, here we extend to a more general AD syntax and an
+accompanying set of programmatic conventions. We show that IIR filters
+can be made differentiable in Faust and their coefficients optimised
+via gradient descent. We also demonstrate that neural network
+structures can be created in a composable, extensible fashion in
+Faust, pointing the way toward an audio-focused ecosystem for the
+development of solutions to problems based on machine learning
+approaches. Though imposing a particular syntactic approach,
+dispensing with support for certain features of the Faust language, we
+contend that such restrictions are comparable with those posed by
+established automatic differentiation and machine learning
+frameworks.
+
+** Motivation
+
+Just as Python-based machine learning frameworks such as PyTorch and
+JAX permit users to perform automatic differentiation on arbitrary
+code, the same should ideally be true of an equivalent Faust-based
+framework. [So, actually this isn't entirely the case; one has to
+write code in a particular style for JAX/PyTorch to handle it.]
+
+Automatic differentiation at the level of the Faust language is
+predicated on the use of Faust's /pattern-matching/ abstraction;
+pattern-matching is... and can be thought of as something akin to the
+operator overloading approach that is possible in languages such as
+Python and C++. A pattern-matching definition is indistinguishable
+from that of a function, but takes advantage of the fact that a
+function may receive, as a parameter, a programmatic expression. For
+example a forward-mode differentiable addition primitive, acting on
+dual signals \(U = \lang{}u, \nabla{}u\rang, V = \lang{}v, \nabla{}v\rang\), may be created by defining
+a function that accepts the addition operator as a parameter, and
+produces, in parallel, the addition primitive's primal output,
+\(u+v\), and its gradients, \(\nabla{}u+\nabla{}v\):
+
+#+caption: Definition of a differentiable addition primitive in the
+#+caption: Faust language.
+#+begin_src faust :noeval
+diff(+) = interleave(vars.N + 1, 2)
+    : +,par(i, vars.N, +);
+#+end_src
+
+Here, the function ~interleave~ ensures that the primal signals and
+their respective partial derivatives are delivered to the addition
+operations in the appropriate order: \(u, v, \frac{\partial{}u}{\partial{}x_{1}},
+\frac{\partial{}v}{\partial{}x_{1}},\dots,\frac{\partial{}u}{\partial{}x_{N}}, \frac{\partial{}v}{\partial{}x_{N}}\) (see
+cref:fig:diffadd).
+
+#+begin_src faust :results file svg :file images/diffadd.svg :exports results
+N = 2;
+distribute(0, q, 0) = par(i, q, _);
+distribute(p, q, 0) = par(i, p, !),par(j, q, _);
+distribute(0, q, r) = par(i, q, _),par(j, r, !);
+distribute(p, q, r) = par(i, p, !),par(j, q, _),par(k, r, !);
+interleave(R, C) = par(i, R * C, _) <: par(r, R, par(c, C, distribute(r, 1, R - r - 1)));
+diff(+) = interleave(N + 1, 2) : +,par(i, N, +);
+U = 1 <: par(i, 12, +) :> _,_,_;
+V = 1 <: par(i, 12, -) :> _,_,_;
+process = U,V : diff(+);
+#+end_src
+#+attr_latex: :width \linewidth
+#+name: fig:diffadd
+#+caption: Differentiable addition primitive applied to a system with
+#+caption: two differentiable input variables.
+#+RESULTS:
+[[file:images/diffadd.svg]]
+
+
+
+Pattern matching imposes certain limitations, however.
+
+**** Signal routing
+:PROPERTIES:
+:UNNUMBERED:
+:END:
+Faust's ~route~ primitive cannot be pattern-matched, which precludes
+the transformation of arbitrary signal routing expressions. Such
+expressions can, however, be recreated via judicious use of the
+/identity/ and /cut/ primitives, which are differentiable.
+
+**** User interface primitives
+:PROPERTIES:
+:UNNUMBERED:
+:END:
+
+**** Functions and lambda abstractions
+:PROPERTIES:
+:UNNUMBERED:
+:END:
+
+Functions themselves cannot be used as patterns, thus it is not
+possible to
+
+The observation has been made that the relative structures of neural
+networks and digital filters bear striking similarities
+[cite:@kuznetsovDifferentiable2020]
+
+* A General Pattern Matching Scheme for Differentiating Faust Programs
+
+Faust is based on a /block-diagram algebra/
+[cite:@orlareySyntactical2004]. In this algebra, a given block
+diagram, \(D\), is comprised of a primitive block, \(P\), or the
+composition of two block diagrams via a composition operator, \(\diamond\),
+according to the syntactic rule[fn:1]
+
+#+NAME: eq:syntax
+\begin{equation}
+D = P \;|\; (D_{1} \diamond D_{2})\;,
+\end{equation}
+where \(\diamond\) is one of the sequential (:), parallel (,), split (<:),
+merge (:>), or recursive (\(\sim\)) composition operators. Prior work
+demonstrated the creation of differentiable Faust programs via the
+composition of differentiated primitive blocks
+[cite:@rushtonDifferentiable2024], thus, using \(\Delta(\cdot)\) to denote
+derivative transformation, the syntactic rule for differentiation in
+Faust was
+
+#+NAME: eq:badDiffSyntax
+\begin{equation}
+\Delta(D) = \Delta(P) \diamond \Delta(P) \diamond \dots \diamond \Delta(P)\;.
+\end{equation}
+While effective in facilitating differentiable programming, this
+syntax imposed an undesirable verbosity. Our ideal syntactic rule
+should be a direct transformation of cref:eq:syntax:
+
+#+NAME: eq:idealDiffSyntax
+\begin{equation}
+\Delta(D) = \Delta(P) \;|\; \Delta(D_{1} \diamond D_{2}) \;.
+\end{equation}
+The aim is to permit the programmer to subject an entire Faust program
+to automatic differentiation in a single command, minimising the
+amount of re-writing required to ready their code for
+transformation. This would render a great proportion of existing Faust
+code differentiable, and, in doing so, prepare that wealth of material
+for prospective use in optimisation problems, and machine learning
+applications. In order to achieve such an outcome, it is necessary to
+provide differentiation rules for the five composition operators,
+taking into account their arithmetical significance, if any, in a
+block diagram to which they contribute.
+
+** Differentiable Block-Diagram Compositions
+
+To define syntactic rules for the derivatives of Faust's composition
+operators, 
+
+*** satehusntah
+
+- Sequential composition is equivalent to application of the identity
+  function, thus its derivative is trivial.
+- Blocks in parallel composition share no common signals; parallel
+  block diagrams are essentially entirely separate and independent,
+  thus the derivative of parellel composition is trivial.
+- Split composition duplicates signals. This does not imply
+  multiplication
+- Recursive composition looks like it might have some effect since it
+  introduces a delay; we can show, however, that differentiation is
+  time-invariant.
+
+#+name: fig:ad-rules
+#+caption: Forward mode automatic differentiation rules for Faust's composition operators.
+\begin{figure}
+  \begin{mdframed}
+    \begin{gather*}
+      \Delta_{f}(A : B) = \Delta_{f}(A) : \Delta_{f}(B) \\
+      \Delta_{f}(A,B) = \Delta_{f}(A),\Delta_{f}(B) \\
+      \Delta_{f}(A <: B) = \Delta_{f}(A) <: \Delta_{f}(B) \\
+      \Delta_{f}(A :> B) = \Delta_{f}(A : E) : F_{1},\dots,F_{i_{B}} : \Delta_{f}(B)\;,\quad \\
+        E = \texttt{interleave}(i_{B}, k)\;,\quad \\
+        F_{j} = s_{1},\dots,s_{k(N+1)} :> s_{1},\dots,s_{N+1}\;,\quad \\
+        k = \frac{o_{A}}{i_{B}} \\
+      \Delta_{f}(A \sim B) = \Delta_{f}(A) \sim \Delta_{f}(B)
+    \end{gather*}
+  \end{mdframed}
+\end{figure}
 
 * Methods
 
@@ -244,6 +475,12 @@ tellus.
 
 #+print_bibliography:
 
+* Footnotes
+
+[fn:1] Orlarey [cite:@orlareySyntactical2004] includes the identity
+(_) and cut (!) blocks separately in this syntactic rule; here we will
+consider these as belonging to the set of primitive blocks.
+
 * Local Variables                                                  :noexport:
 
 # Local Variables:
@@ -255,4 +492,7 @@ tellus.
 # ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
 # ("\\paragraph{%s}" . "\\paragraph*{%s}")
 # ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+# org-latex-src-block-backend: listings
+# org-latex-pdf-process: ("latexmk -f -pdf -%latex \
+#   -interaction=nonstopmode -shell-escape -output-directory=%o %f")
 # End:
