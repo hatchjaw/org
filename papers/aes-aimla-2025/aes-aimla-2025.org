@@ -77,6 +77,7 @@ Why it's necessary to use a negative top margin is... mysterious.
   innertopmargin=-10pt
 }
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{stmaryrd}
 #+end_src
 
@@ -211,7 +212,7 @@ Python and C++. A pattern-matching definition is indistinguishable
 from that of a function, but takes advantage of the fact that a
 function may receive, as a parameter, a programmatic expression. For
 example a forward-mode differentiable addition primitive, acting on
-dual signals \(U = \lang{}u, \nabla{}u\rang, V = \lang{}v, \nabla{}v\rang\), may be created by defining
+dual signals \(U = \langle{}u, \nabla{}u\rangle, V = \langle{}v, \nabla{}v\rangle\), may be created by defining
 a function that accepts the addition operator as a parameter, and
 produces, in parallel, the addition primitive's primal output,
 \(u+v\), and its gradients, \(\nabla{}u+\nabla{}v\):
@@ -283,8 +284,8 @@ networks and digital filters bear striking similarities
 Faust is based on a /block-diagram algebra/
 [cite:@orlareySyntactical2004]. In this algebra, a given block
 diagram, \(D\), is comprised of a primitive block, \(P\), or the
-composition of two block diagrams via a composition operator, \(\diamond\),
-according to the syntactic rule[fn:1]
+composition of two block diagrams via a composition operator according
+to the syntactic rule[fn:1]
 
 #+NAME: eq:syntax
 \begin{equation}
@@ -303,16 +304,16 @@ Faust was
 \Delta(D) = \Delta(P) \diamond \Delta(P) \diamond \dots \diamond \Delta(P)\;.
 \end{equation}
 While effective in facilitating differentiable programming, this
-syntax imposed an undesirable verbosity. Our ideal syntactic rule
+syntax imposed an undesirable verbosity. Our preferred syntactic rule
 should be a direct transformation of cref:eq:syntax:
 
 #+NAME: eq:idealDiffSyntax
 \begin{equation}
 \Delta(D) = \Delta(P) \;|\; \Delta(D_{1} \diamond D_{2}) \;.
 \end{equation}
-The aim is to permit the programmer to subject an entire Faust program
-to automatic differentiation in a single command, minimising the
-amount of re-writing required to ready their code for
+The ideal outcome is to permit the programmer to subject an entire
+Faust program to automatic differentiation in a single expression,
+minimising the amount of re-writing required to ready their code for
 transformation. This would render a great proportion of existing Faust
 code differentiable, and, in doing so, prepare that wealth of material
 for prospective use in optimisation problems, and machine learning
@@ -324,17 +325,65 @@ block diagram to which they contribute.
 ** Differentiable Block-Diagram Compositions
 
 To define syntactic rules for the derivatives of Faust's composition
-operators, 
+operators entails analysing them as if they were themselves primitive
+blocks. To do this, we must first consider three of Faust's more
+unusual primitive operators for their differentiation rules; their
+derivatives will assist us in achieving differentiable compositions.
 
-*** satehusntah
+*** Identity Function
+
+Faust's identity function, notated \(\_\), is itself a primitive block,
+and in turn describes a connection between two blocks. The signal
+processor represented by the identity function obeys the following
+syntactic rule [cite:@orlareySyntactical2004]:
+
+#+NAME: eq:identity
+\begin{equation}
+  \begin{split}
+    \llbracket \_ \rrbracket &\;:\; \mathbb{S} \to \mathbb{S} \\
+    \llbracket \_ \rrbracket(s) &= (s)\;,
+  \end{split}
+\end{equation}
+which is to say that it receives one signal, \(s\) (a member of the
+set of all signals \(\mathbb{S}\), and returns that same signal
+unchanged. Faust signals are functions of time, \(t\); application of
+the identity function is analogous to multiplying \(s(t)\) by a
+constant signal of value \(1\). Supposing that \(s(x, t)\) is also a
+function of some input variable \(x\), its partial derivative with
+respect to \(x\) is
+
+#+NAME: eq:diffsig
+\begin{align}
+\frac{\partial{}}{\partial{}x}(1 \cdot s(x, t)) &= \frac{\partial{}}{\partial{}x}1 \cdot s(x,t) + \frac{\partial{}}{\partial{}x}s(x, t) \cdot 1 \nonumber \\
+  &= \frac{\partial{}}{\partial{}x}s(x, t)\;,
+\end{align}
+and the semantic rule for the differentiable identity function is thus
+
+#+NAME: eq:diffidentity
+\begin{equation}
+  \begin{split}
+    \llbracket \Delta(\_) \rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\
+    \llbracket \Delta(\_) \rrbracket(\langle{}s, \nabla{}s\rangle) &= (\langle{}s, \nabla{}s\rangle)\;.
+  \end{split}
+\end{equation}
+
+*** Differentiable Composition Operators
 
 - Sequential composition is equivalent to application of the identity
   function, thus its derivative is trivial.
 - Blocks in parallel composition share no common signals; parallel
   block diagrams are essentially entirely separate and independent,
   thus the derivative of parellel composition is trivial.
-- Split composition duplicates signals. This does not imply
-  multiplication
+- Split composition duplicates signals. A program consisting of a
+  single input variable, \(x\), split and passed to two processors
+  \(B\) and \(C\), each producing one output signal, \(y_{1}\) and
+  \(y_{2}\), has derivatives \(\frac{dy_{1}}{dx}\) and \(\frac{dy_{2}}{dx}\),
+  which, as with parallel composition, are independent. The question
+  is, for dual signals, does split composition apply effectively?
+- Merge entails summation. The number of summations is derived from
+  the ratio of the number of outputs, \(o_{A}\) of block diagram \(A\)
+  and the number of inputs, \(i_{B}\) of block diagram \(B\), routed
+  according to the rule from Orlarey...
 - Recursive composition looks like it might have some effect since it
   introduces a delay; we can show, however, that differentiation is
   time-invariant.
