@@ -295,9 +295,8 @@ where \(\diamond\) is one of the sequential (:), parallel (,), split (<:),
 merge (:>), or recursive (\(\sim\)) composition operators. Prior work
 demonstrated the creation of differentiable Faust programs via the
 composition of differentiated primitive blocks
-[cite:@rushtonDifferentiable2024], thus, using \(\Delta(\cdot)\) to denote
-derivative transformation, the syntactic rule for differentiation in
-Faust was
+[cite:@rushtonDifferentiable2024]; using \(\Delta(\cdot)\) to denote derivative
+transformation, the syntactic rule for differentiation in Faust was
 
 #+NAME: eq:badDiffSyntax
 \begin{equation}
@@ -326,8 +325,8 @@ block diagram to which they contribute.
 
 To define syntactic rules for the derivatives of Faust's composition
 operators entails analysing them as if they were themselves primitive
-blocks. To do this, we must first consider three of Faust's more
-unusual primitive operators for their differentiation rules; their
+blocks. To do this, we must first consider three of Faust's
+fundamental primitive operators for their differentiation rules; their
 derivatives will assist us in achieving differentiable compositions.
 
 *** Identity Primitive
@@ -383,17 +382,17 @@ The circumstances under which it is useful to compute a signal path
 only to discard it may at first appear obscure, until one considers
 that combinations of the identity and cut functions can be used to
 route signals between blocks [cite:@orlareySyntactical2004]. For
-example, a function \(\chi(M)\), that crosses \(M\) signals, such that
+example, a function \(\chi(M)\), that crosses \(M\) signals such that
 \(s_{1},\dots,s_{M}\) becomes \(s_{M},\dots,s_{1}\), can be expressed as
 
 #+NAME: eq:cross
 \begin{equation}
-\chi(M) = \Big\|_{l=0}^{M-1}\_ <: \Big\|_{l=0}^{M-1}\left(
-  \Big\|_{p=1}^{M-l-1}!,\_,\Big\|_{q=1}^{l}!
+\chi(M) = \big\|_{l=0}^{M-1}\_ <: \big\|_{l=0}^{M-1}\left(
+  \big\|_{p=1}^{M-l-1}!,\_,\big\|_{q=1}^{l}!
 \right)\;,
 \end{equation}
-where \(\|_{a=1}^{b}A\) is the parallel composition of block \(A\),
-\(b\) times. 
+where \(\|_{a=1}^{b}A\) denotes the parallel composition of block \(A\),
+\(b\) times.
 
 #+begin_src faust :results file svg :file images/cross.svg :exports both
 cutpq(0, q) = _,par(l, q, !);
@@ -456,10 +455,50 @@ that we can use the following syntactic rule for the differentiable
   \end{split}
 \end{equation}
 
+*** Sequential Composition
+
+The following block diagram expressions are arithmetically equivalent:
+
+#+NAME: eq:
+\begin{gather}
+D_{1} = A : B \\
+D_{2} = A : \Big\|_{l=1}^{o_{A}}\_ : B
+\end{gather}
+
+For given input signals, they will produce identical output
+signals. E.g. letting \(o_{A} = i_{B} = 2\):
+
+#+begin_src faust :noeval
+D1 = A : B;
+D2 = A : _,_ : B;
+#+end_src
+
+#+begin_src faust :results file svg :file images/seq1.svg :exports results
+N = 2;
+A = par(i, N, _) <: par(i, 10*N, +) :> par(i, N, _);
+B = par(i, N, _) <: par(i, 10*N, -) :> par(i, N, _);
+process = A : par(i, N, _) : B;
+#+end_src
+
+#+RESULTS:
+[[file:images/seq1.svg]]
+
+It is clear that sequential composition is indistinguishable from
+application of \(o_{A}\) parallel identity functions, so, using the
+semantic rule described in cref:eq:diffidentity we can state that
+
+#+NAME: eq:diffSeq
+\begin{align}
+\Delta(A : B) &= \Delta(A) : \big\|_{l=1}^{o_{A}}\Delta(\_) : \Delta(B) \nonumber \\
+  &= \Delta(A) : \Delta(B)\;.
+\end{align}
+
+*** Parallel Composition
+
+Block diagrams composed in parallel share no common signals
+
 *** Differentiable Composition Operators
 
-- Sequential composition is equivalent to application of the identity
-  function, thus its derivative is trivial.
 - Blocks in parallel composition share no common signals; parallel
   block diagrams are essentially entirely separate and independent,
   thus the derivative of parellel composition is trivial.
@@ -478,24 +517,28 @@ that we can use the following syntactic rule for the differentiable
   time-invariant.
 
 #+name: fig:ad-rules
-#+caption: Forward mode automatic differentiation rules for Faust's composition operators.
+#+caption: Automatic differentiation rules for Faust's composition operators,
+#+caption: plus supporting primitive operators. Use of \(\Delta(\texttt{mem})\) is
+#+caption: implicit in the definition of \(\Delta(A \sim B)\). \(N\) is the number of
+#+caption: input variables with respect to which partial derivatives are
+#+caption: calculated.
 \begin{figure}
   \begin{mdframed}
     \begin{gather*}
-      \Big\|_{l=1}^{L}D = D_{1},\dots,D_{L} \\
-      \Delta(\_) = \Big\|_{l=1}^{N+1}\_ \\
-        \Delta(!) = \Big\|_{l=1}^{N+1}! \\
-      \Delta(\texttt{mem}) = \Big\|_{l=1}^{N+1}\texttt{mem} \\
+      \big\|_{l=1}^{L}D = D_{1},\dots,D_{L} \\
+      \Delta(\_) = \big\|_{l=1}^{N+1}\_ \\
+        \Delta(!) = \big\|_{l=1}^{N+1}! \\
+      \Delta(\texttt{mem}) = \big\|_{l=1}^{N+1}\texttt{mem} \\
       \Delta(A : B) = \Delta(A) : \Delta(B) \\
       \Delta(A,B) = \Delta(A),\Delta(B) \\
       \Delta(A <: B) = \Delta(A) <: \Delta(B) \\
       \Delta(A \sim B) = \Delta(A) \sim \Delta(B) \\
       \Delta(A :> B) = \Delta(A <: E) : F : \Delta(B) \\
-        E = \Big\|_{m=0}^{i_{B}-1}\left(\Big\|_{n=1}^{k}\left(
-            \Big\|_{p=1}^{m}!,\_,\Big\|_{q=1}^{i_{B}-m-1}!
+        E = \big\|_{m=0}^{i_{B}-1}\left(\big\|_{n=1}^{k}\left(
+            \big\|_{p=1}^{m}!,\_,\big\|_{q=1}^{i_{B}-m-1}!
           \right)\right) \\
-        F = \Big\|_{l=1}^{i_{B}}\left(
-          \Big\|_{l=1}^{k(N+1)}\_ \;:>\; \Big\|_{l=1}^{N+1}\_
+        F = \big\|_{l=1}^{i_{B}}\left(
+          \big\|_{l=1}^{k(N+1)}\_ \;:>\; \big\|_{l=1}^{N+1}\_
         \right) \\
         k = \frac{o_{A}}{i_{B}}
     \end{gather*}
@@ -582,47 +625,6 @@ preferred result might require some tuning by hand.
 * Summary
 
 Summarize your work and conclude.
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum
-fermentum, libero nec scelerisque condimentum, libero mi porta dui,
-sit amet varius enim dui nec nisi. Suspendisse nulla nibh, lacinia in
-sapien at, tempus faucibus dolor. Cum sociis natoque penatibus et
-magnis dis parturient montes, nascetur ridiculus mus. Ut facilisis
-erat accumsan tempor faucibus. Suspendisse ac dolor id odio iaculis
-sodales. Mauris nec arcu non tellus luctus mollis at vitae
-mi. Curabitur posuere feugiat molestie. Curabitur ac lorem vel arcu
-gravida volutpat.
-
-Class aptent taciti sociosqu ad litora torquent per conubia nostra,
-per inceptos himenaeos. In lacus est, accumsan non dictum nec,
-volutpat non justo. Sed auctor scelerisque ante, vitae volutpat mauris
-elementum sit amet. Etiam interdum felis id dignissim imperdiet. Proin
-ullamcorper sit amet augue quis consequat. Nulla varius enim sed nisl
-tempus, a ultricies sem finibus. Ut vel purus malesuada, sagittis
-ligula ut, luctus velit. Suspendisse iaculis magna id est consectetur
-condimentum. Nulla facilisi. Lorem ipsum dolor sit amet, consectetur
-adipiscing elit. Fusce erat justo, auctor ut malesuada sed, ultrices
-eu odio. Integer vitae facilisis eros, sed dapibus lacus. Sed
-eleifend, risus ut congue tincidunt, nulla ipsum vestibulum diam, ut
-laoreet metus erat auctor nunc. Donec nisi diam, aliquam eget pharetra
-non, viverra non enim.
-
-Integer facilisis elit id mauris laoreet gravida. Etiam dictum auctor
-nibh, ac pharetra est aliquam et. Praesent a ligula ut turpis egestas
-cursus vel non ante. Nam varius facilisis urna eget finibus. Duis
-eleifend dui id lacus tempus aliquet. Praesent vel sodales
-dolor. Suspendisse potenti.
-
-Curabitur nisi felis, mollis non justo nec, sollicitudin ullamcorper
-lorem. Nunc mattis ullamcorper vestibulum. Aenean vitae turpis vel
-ipsum porttitor placerat. Etiam quis turpis quis nulla cursus
-rhoncus. Cum sociis natoque penatibus et magnis dis parturient montes,
-nascetur ridiculus mus. Sed auctor est sed vehicula dignissim. Sed vel
-sem eget odio sagittis pharetra ut eu ex. Nullam fermentum ipsum non
-lacinia sollicitudin. Vestibulum purus ex, volutpat rutrum velit
-vitae, pulvinar ullamcorper mi. Maecenas tristique turpis ut justo
-pellentesque, in hendrerit ligula commodo. Pellentesque eget dignissim
-tellus.
 
 #+print_bibliography:
 
