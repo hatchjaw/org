@@ -330,7 +330,7 @@ blocks. To do this, we must first consider three of Faust's more
 unusual primitive operators for their differentiation rules; their
 derivatives will assist us in achieving differentiable compositions.
 
-*** Identity Function
+*** Identity Primitive
 
 Faust's identity function, notated \(\_\), is itself a primitive block,
 and in turn describes a connection between two blocks. The signal
@@ -345,7 +345,7 @@ syntactic rule [cite:@orlareySyntactical2004]:
   \end{split}
 \end{equation}
 which is to say that it receives one signal, \(s\) (a member of the
-set of all signals \(\mathbb{S}\), and returns that same signal
+set of all signals \(\mathbb{S}\)), and returns that same signal
 unchanged. Faust signals are functions of time, \(t\); application of
 the identity function is analogous to multiplying \(s(t)\) by a
 constant signal of value \(1\). Supposing that \(s(x, t)\) is also a
@@ -364,6 +364,95 @@ and the semantic rule for the differentiable identity function is thus
   \begin{split}
     \llbracket \Delta(\_) \rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\
     \llbracket \Delta(\_) \rrbracket(\langle{}s, \nabla{}s\rangle) &= (\langle{}s, \nabla{}s\rangle)\;.
+  \end{split}
+\end{equation}
+
+*** Cut Primitive
+
+The cut function (!), terminates a signal; intuitively, the
+derivative of a termination is itself a termination:
+
+#+NAME: eq:cut
+\begin{equation}
+  \begin{split}
+    \llbracket \Delta(!) \rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}^{0} \\
+    \llbracket \Delta(!) \rrbracket(\langle{}s,\nabla{}s\rangle) &= ()\;.
+  \end{split}
+\end{equation}
+The circumstances under which it is useful to compute a signal path
+only to discard it may at first appear obscure, until one considers
+that combinations of the identity and cut functions can be used to
+route signals between blocks [cite:@orlareySyntactical2004]. For
+example, a function \(\chi(M)\), that crosses \(M\) signals, such that
+\(s_{1},\dots,s_{M}\) becomes \(s_{M},\dots,s_{1}\), can be expressed as
+
+#+NAME: eq:cross
+\begin{equation}
+\chi(M) = \Big\|_{l=0}^{M-1}\_ <: \Big\|_{l=0}^{M-1}\left(
+  \Big\|_{p=1}^{M-l-1}!,\_,\Big\|_{q=1}^{l}!
+\right)\;,
+\end{equation}
+where \(\|_{a=1}^{b}A\) is the parallel composition of block \(A\),
+\(b\) times. 
+
+#+begin_src faust :results file svg :file images/cross.svg :exports both
+cutpq(0, q) = _,par(l, q, !);
+cutpq(p, 0) = par(l, p, !),_;
+cutpq(p, q) =
+  par(l, p, !),cutpq(0, q);
+cross(M) = par(l, M, _)
+  <: par(l, M, cutpq(M-l-1, l));
+process = cross(3);
+#+end_src
+#+attr_latex: :width .8\linewidth
+#+RESULTS:
+[[file:images/cross.svg]]
+
+Whether constructions of this sort are differentiable as-is is
+dependent on the behaviour of the split composition operator; see
+cref:sec:split for further detail.
+
+*** Delay Primitive
+
+Faust in fact provides two primitives for delaying signals; here we
+will focus on the ~mem~ primitive, which represents a one-sample
+delay, and can be applied repeatedly in sequence to introduce delays
+of longer duration.
+
+#+begin_src faust :noeval
+// y = s[n - 10];
+process = seq(i, 10, mem);
+#+end_src
+
+A fixed delay can be represented as the convolution of a signal,
+\(s(x,t)\), with a time-shifted impulse,
+
+#+NAME: eq:delayAsConv
+\begin{equation}
+s(x, t-\tau) = s(x, t) \ast h(t)\;,\quad h(t) = \delta(t - \tau)\;.
+\end{equation}
+
+Taking the temporal-parametric Fourier transform of the derivative
+with respect to \(x\) of the convolution, using the convolution and
+differentiation properties of the Fourier transform
+[cite:@mcclellanSignal2003], yields
+
+#+NAME: eq:
+\begin{align}
+&\quad\;\mathcal{F}\left[\frac{\partial{}}{\partial{}x}\left(s(x,t) \ast h(t)\right)\right] \nonumber\\
+  &= j\omega_{x}S(j\omega_{x},j\omega_{t})H(j\omega_{t}) \\
+  &= \mathcal{F}\left[\frac{\partial{}}{\partial{}x}s(x,t)\right]\cdot\mathcal{F}\left[h(t)\right]\;,
+\end{align}
+which demontsrates that differentiation is time-invariant, and means
+that we can use the following syntactic rule for the differentiable
+~mem~ primitive:
+
+#+NAME: eq:diffmem
+\begin{equation}
+  \begin{split}
+    \llbracket \Delta(\texttt{mem}) \rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\
+    \llbracket \Delta(\texttt{mem}) \rrbracket(\langle{}s, \nabla{}s\rangle) &= (\langle{}y, \nabla{}y\rangle) \\
+    \langle{}y,\nabla{}y\rangle(t) &= \langle{}s,\nabla{}s\rangle(t-1)\;.
   \end{split}
 \end{equation}
 
@@ -393,17 +482,30 @@ and the semantic rule for the differentiable identity function is thus
 \begin{figure}
   \begin{mdframed}
     \begin{gather*}
-      \Delta_{f}(A : B) = \Delta_{f}(A) : \Delta_{f}(B) \\
-      \Delta_{f}(A,B) = \Delta_{f}(A),\Delta_{f}(B) \\
-      \Delta_{f}(A <: B) = \Delta_{f}(A) <: \Delta_{f}(B) \\
-      \Delta_{f}(A :> B) = \Delta_{f}(A : E) : F_{1},\dots,F_{i_{B}} : \Delta_{f}(B)\;,\quad \\
-        E = \texttt{interleave}(i_{B}, k)\;,\quad \\
-        F_{j} = s_{1},\dots,s_{k(N+1)} :> s_{1},\dots,s_{N+1}\;,\quad \\
-        k = \frac{o_{A}}{i_{B}} \\
-      \Delta_{f}(A \sim B) = \Delta_{f}(A) \sim \Delta_{f}(B)
+      \Big\|_{l=1}^{L}D = D_{1},\dots,D_{L} \\
+      \Delta(\_) = \Big\|_{l=1}^{N+1}\_ \\
+        \Delta(!) = \Big\|_{l=1}^{N+1}! \\
+      \Delta(\texttt{mem}) = \Big\|_{l=1}^{N+1}\texttt{mem} \\
+      \Delta(A : B) = \Delta(A) : \Delta(B) \\
+      \Delta(A,B) = \Delta(A),\Delta(B) \\
+      \Delta(A <: B) = \Delta(A) <: \Delta(B) \\
+      \Delta(A \sim B) = \Delta(A) \sim \Delta(B) \\
+      \Delta(A :> B) = \Delta(A <: E) : F : \Delta(B) \\
+        E = \Big\|_{m=0}^{i_{B}-1}\left(\Big\|_{n=1}^{k}\left(
+            \Big\|_{p=1}^{m}!,\_,\Big\|_{q=1}^{i_{B}-m-1}!
+          \right)\right) \\
+        F = \Big\|_{l=1}^{i_{B}}\left(
+          \Big\|_{l=1}^{k(N+1)}\_ \;:>\; \Big\|_{l=1}^{N+1}\_
+        \right) \\
+        k = \frac{o_{A}}{i_{B}}
     \end{gather*}
   \end{mdframed}
 \end{figure}
+
+*** notehusntaoheu
+
+Faust programs that adhere to these syntactic restrictions can be
+differentiated to abritrary degree.
 
 * Methods
 
