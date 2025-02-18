@@ -1,7 +1,7 @@
 # -*- Mode: org -*-
 # -*- coding: utf-8 -*-
 
-#+title: Something Something Faust Differentiable Something
+#+title: Faust Autodiff: Towards Domain Specific Machine Learning
 #+author: Thomas Rushton
 
 #+startup: overview
@@ -87,6 +87,8 @@ More useful stuff
 \usepackage{hyperref}
 \hypersetup{hidelinks}
 \usepackage[noabbrev,capitalise]{cleveref}
+%% \crefname{lstlisting}{listing}{listings}
+\Crefname{lstlisting}{Listing}{Listings}
 #+end_src
 
 Listings. I should consider using [[https://www.reddit.com/r/emacs/comments/lbkmmz/the_best_syntax_highlighting_in_a_pdf_youll_see_a/][engrave-faces]] instead.
@@ -157,7 +159,7 @@ If there are many authors, please use the form "First author et al."
 
 Short title should describe your topic but not be too long.
 #+begin_src latex
-\shorttitle{Something Something}
+\shorttitle{Faust Autodiff}
 #+end_src
 
 ** Bibliography
@@ -196,7 +198,73 @@ contend that such restrictions are comparable with those posed by
 established automatic differentiation and machine learning
 frameworks.
 
-** Motivation
+* The Faust Language
+
+Faust is a functional paradigm, domain specific language (DSL) for
+audio digital signal processing (DSP) [cite:@orlareyFAUST2009]. It is
+built atop a domain-agnostic /block diagram algebra/ (BDA)
+[cite:@orlareyAlgebra2002] that describes primitive operations (though
+the nature of these operations is not important at the level of the
+BDA), connected into graphs via a selection of /composition
+operators/. A textual language, Faust can, for example, define a
+diagram consisting of two blocks --- \(A\), with \(o_{A}\) outputs, and
+\(B\), with \(i_{B}\) inputs, \(o_{A} = i_{B} = 1\) --- composed in sequence,
+with code of the form
+#+begin_src faust :noexec
+process = A : B;
+#+end_src
+
+#+begin_src faust :results file svg :file images/seq-example.svg :exports results
+A = _ <: par(n, 20, -) :> _;
+B = _ <: par(n, 20, +) :> _;
+process = A : B;
+#+end_src
+#+name: fig:sequential
+#+caption: Sequential composition of Faust blocks.
+#+attr_latex: :width .666\linewidth
+#+RESULTS:
+[[file:images/seq-example.svg]]
+Conceptually, a given block diagram, \(D\) may undergo semantic
+transformation, notated \(\llbracket \cdot \rrbracket\), into a signal
+processor [cite:@orlareySyntactical2004]:
+#+NAME: eq:semanticTransformation
+\begin{equation}
+  \begin{split}
+    \llbracket D \rrbracket &\;:\; \mathbb{S}^{n} \to \mathbb{S}^{m} \\
+    \llbracket D \rrbracket(s_{1},\dots,s_{n}) &= (y_{1},\dots,y_{m}) \\
+    \mathbf{y}(t) &= h(\mathbf{s}(t))\;,
+  \end{split}
+\end{equation}
+where \(\mathbb{S}\) is the set of all signals, \(h\) is a
+mathematical function analogous to the operations and compositions of
+\(D\), and \(t\) is time. The signal processor receives a vector of
+input signals, \(\mathbf{s}\), and produces a vector of output signals
+\(\mathbf{y}\).
+
+** The Faust Ecosystem
+
+Faust is a highly optimised, compiled language [cite:@orlareyNew2020],
+with C++ as its default compilation target. One of the great strengths
+of the Faust ecosystem is the provision of support for a variety of
+additional backends, including LLVM [cite:@letzOverview2018],
+WebAssembly [cite:@letzCompiling2017], and Rust
+[cite:@gasterAudio2020], plus numerous software and hardware
+platforms. Faust code can be compiled for use in VST
+plugins[cite:@albouyFaust2017], for embedded systems
+[cite:@michonEmbedded2020] and FPGAs [cite:@cochardProgramming2024];
+it is used by artists and digital luthiers
+[cite:@michonFaust2020a;@rushtonSpringamajig2022;@hansenWeather2018],
+and features sophisticated libraries for wave digital filter modelling
+[cite:@roosenburgWave2021] and physical modelling synthesis
+[cite:@russoIntroducing2021;@michonFaust2018], amongst others.
+
+** Differentiable Programming in Faust
+
+In light of Faust's versatility, efficiency, and strengths, as a DSL,
+in tackling audio problems,
+
+- Faust2JAX
+- Faust DDSP, dual signals (set of)
 
 Just as Python-based machine learning frameworks such as PyTorch and
 JAX permit users to perform automatic differentiation on arbitrary
@@ -206,17 +274,18 @@ write code in a particular style for JAX/PyTorch to handle it.]
 
 Automatic differentiation at the level of the Faust language is
 predicated on the use of Faust's /pattern-matching/ abstraction;
-pattern-matching is... and can be thought of as something akin to the
-operator overloading approach that is possible in languages such as
-Python and C++. A pattern-matching definition is indistinguishable
-from that of a function, but takes advantage of the fact that a
-function may receive, as a parameter, a programmatic expression. For
-example a forward-mode differentiable addition primitive, acting on
-dual signals \(U = \langle{}u, \nabla{}u\rangle, V = \langle{}v, \nabla{}v\rangle\), may be created by defining
-a function that accepts the addition operator as a parameter, and
-produces, in parallel, the addition primitive's primal output,
-\(u+v\), and its gradients, \(\nabla{}u+\nabla{}v\):
+pattern-matching can be thought of as something akin to the operator
+overloading approach that is possible in languages such as Python and
+C++. A pattern-matching definition is indistinguishable from that of a
+function, but exlpoits the fact that a function may receive, as a
+parameter, a programmatic expression. For example a forward-mode
+differentiable addition primitive, acting on dual signals \(U = \langle{}u,
+\nabla{}u\rangle, V = \langle{}v, \nabla{}v\rangle\), may be created by defining a function that accepts
+the addition operator as a parameter, and produces, in parallel, the
+addition primitive's primal output, \(u+v\), and its gradients,
+\(\nabla{}u+\nabla{}v\):
 
+#+name: lst:diffAdd
 #+caption: Definition of a differentiable addition primitive in the
 #+caption: Faust language.
 #+begin_src faust :noeval
@@ -286,29 +355,26 @@ Faust is based on a /block-diagram algebra/
 diagram, \(D\), is comprised of a primitive block, \(P\), or the
 composition of two block diagrams via a composition operator according
 to the syntactic rule[fn:1]
-
 #+NAME: eq:syntax
 \begin{equation}
-D = P \;|\; (D_{1} \diamond D_{2})\;,
+D = P \;|\; (D_{1} \circ D_{2})\;,
 \end{equation}
-where \(\diamond\) is one of the sequential (:), parallel (,), split (<:),
-merge (:>), or recursive (\(\sim\)) composition operators. Prior work
-demonstrated the creation of differentiable Faust programs via the
+where \(\circ\) is one of the sequential (:), parallel (,), split (<:),
+merge (:>), or recursive (\(\sim\)) composition operators. The creation
+of differentiable Faust programs has been shown to be possible the
 composition of differentiated primitive blocks
 [cite:@rushtonDifferentiable2024]; using \(\Delta(\cdot)\) to denote derivative
 transformation, the syntactic rule for differentiation in Faust was
-
 #+NAME: eq:badDiffSyntax
 \begin{equation}
-\Delta(D) = \Delta(P) \diamond \Delta(P) \diamond \dots \diamond \Delta(P)\;.
+\Delta(D) = \Delta(P) \circ \Delta(P) \circ \dots \circ \Delta(P)\;.
 \end{equation}
 While effective in facilitating differentiable programming, this
 syntax imposed an undesirable verbosity. Our preferred syntactic rule
 should be a direct transformation of cref:eq:syntax:
-
 #+NAME: eq:idealDiffSyntax
 \begin{equation}
-\Delta(D) = \Delta(P) \;|\; \Delta(D_{1} \diamond D_{2}) \;.
+\Delta(D) = \Delta(P) \;|\; \Delta(D_{1} \circ D_{2}) \;.
 \end{equation}
 The ideal outcome is to permit the programmer to subject an entire
 Faust program to automatic differentiation in a single expression,
@@ -333,9 +399,8 @@ derivatives will assist us in achieving differentiable compositions.
 
 Faust's identity function, notated \(\_\), is itself a primitive block,
 and in turn describes a connection between two blocks. The signal
-processor represented by the identity function obeys the following
-syntactic rule [cite:@orlareySyntactical2004]:
-
+processor represented by the identity function adheres to the
+following semantic scheme [cite:@orlareySyntactical2004]:
 #+NAME: eq:identity
 \begin{equation}
   \begin{split}
@@ -350,14 +415,12 @@ the identity function is analogous to multiplying \(s(t)\) by a
 constant signal of value \(1\). Supposing that \(s(x, t)\) is also a
 function of some input variable \(x\), its partial derivative with
 respect to \(x\) is
-
 #+NAME: eq:diffsig
 \begin{align}
 \frac{\partial{}}{\partial{}x}(1 \cdot s(x, t)) &= \frac{\partial{}}{\partial{}x}1 \cdot s(x,t) + \frac{\partial{}}{\partial{}x}s(x, t) \cdot 1 \nonumber \\
   &= \frac{\partial{}}{\partial{}x}s(x, t)\;,
 \end{align}
 and the semantic rule for the differentiable identity function is thus
-
 #+NAME: eq:diffidentity
 \begin{equation}
   \begin{split}
@@ -370,7 +433,6 @@ and the semantic rule for the differentiable identity function is thus
 
 The cut function (!), terminates a signal; intuitively, the
 derivative of a termination is itself a termination:
-
 #+NAME: eq:cut
 \begin{equation}
   \begin{split}
@@ -381,35 +443,41 @@ derivative of a termination is itself a termination:
 The circumstances under which it is useful to compute a signal path
 only to discard it may at first appear obscure, until one considers
 that combinations of the identity and cut functions can be used to
-route signals between blocks [cite:@orlareySyntactical2004]. For
-example, a function \(\chi(M)\), that crosses \(M\) signals such that
-\(s_{1},\dots,s_{M}\) becomes \(s_{M},\dots,s_{1}\), can be expressed as
-
-#+NAME: eq:cross
+route signals between blocks [cite:@orlareySyntactical2004]. To
+interleave two groups of two signals, such that
+\(s_{1,1},s_{1,2},s_{2,1},s_{2,2}\) becomes \(s_{1,1},s_{2,1},s_{1,2},s_{2,2}\), one may write
+#+NAME: eq:interleave22
 \begin{equation}
-\chi(M) = \big\|_{l=0}^{M-1}\_ <: \big\|_{l=0}^{M-1}\left(
-  \big\|_{p=1}^{M-l-1}!,\_,\big\|_{q=1}^{l}!
-\right)\;,
+\_,\_,\_,\_ \;<:\; \_,!,\_,!,!,\_,!,\_\;.
+\end{equation}
+The general interleaving function, \(\chi(R,C)\), which interleaves \(C\)
+groups of \(R\) signals, may be expressed as
+#+NAME: eq:interleave
+\begin{equation}
+\chi(R,C) = \big\|_{l=1}^{R\times{}C}\_ <: \big\|_{m=0}^{R-1}\left(
+  \big\|_{n=1}^{C}\left(
+    \big\|_{p=1}^{m}!,\_,\big\|_{q=1}^{R-m-1}!
+  \right)
+\right)
 \end{equation}
 where \(\|_{a=1}^{b}A\) denotes the parallel composition of block \(A\),
-\(b\) times.
-
-#+begin_src faust :results file svg :file images/cross.svg :exports both
+\(b\) times (notated ~par(a, b, A)~ in Faust[fn:3]). \(\chi\) is used in
+cref:lst:diffAdd; here is its definition in code:
+#+begin_src faust :results file svg :file images/interleave.svg :exports code :noeval
 cutpq(0, q) = _,par(l, q, !);
 cutpq(p, 0) = par(l, p, !),_;
 cutpq(p, q) =
   par(l, p, !),cutpq(0, q);
-cross(M) = par(l, M, _)
-  <: par(l, M, cutpq(M-l-1, l));
-process = cross(3);
-#+end_src
-#+attr_latex: :width .8\linewidth
-#+RESULTS:
-[[file:images/cross.svg]]
 
-Whether constructions of this sort are differentiable as-is is
-dependent on the behaviour of the split composition operator; see
-cref:sec:split for further detail.
+interleave(R, C) = par(l, R * C, _)
+  <: par(m, R, par(n, C,
+       cutpq(m, R - m - 1)));
+#+end_src
+In principle, being constructed from the differentiable identity and
+cut primitives, \(\chi\) should in turn be differentiable. This is
+contingent, however, on the derivative behaviour of the split
+composition operator; see cref:sec:splitComposition for further
+detail.
 
 *** Delay Primitive
 
@@ -417,15 +485,12 @@ Faust in fact provides two primitives for delaying signals; here we
 will focus on the ~mem~ primitive, which represents a one-sample
 delay, and can be applied repeatedly in sequence to introduce delays
 of longer duration.
-
-#+begin_src faust :noeval
+#+begin_src faust :noeval :exports none
 // y = s[n - 10];
 process = seq(i, 10, mem);
 #+end_src
-
 A fixed delay can be represented as the convolution of a signal,
 \(s(x,t)\), with a time-shifted impulse,
-
 #+NAME: eq:delayAsConv
 \begin{equation}
 s(x, t-\tau) = s(x, t) \ast h(t)\;,\quad h(t) = \delta(t - \tau)\;.
@@ -435,7 +500,6 @@ Taking the temporal-parametric Fourier transform of the derivative
 with respect to \(x\) of the convolution, using the convolution and
 differentiation properties of the Fourier transform
 [cite:@mcclellanSignal2003], yields
-
 #+NAME: eq:
 \begin{align}
 &\quad\;\mathcal{F}\left[\frac{\partial{}}{\partial{}x}\left(s(x,t) \ast h(t)\right)\right] \nonumber\\
@@ -443,9 +507,8 @@ differentiation properties of the Fourier transform
   &= \mathcal{F}\left[\frac{\partial{}}{\partial{}x}s(x,t)\right]\cdot\mathcal{F}\left[h(t)\right]\;,
 \end{align}
 which demontsrates that differentiation is time-invariant, and means
-that we can use the following syntactic rule for the differentiable
+that we can use the following semantic scheme for the differentiable
 ~mem~ primitive:
-
 #+NAME: eq:diffmem
 \begin{equation}
   \begin{split}
@@ -457,36 +520,39 @@ that we can use the following syntactic rule for the differentiable
 
 *** Sequential Composition
 
-The following block diagram expressions are arithmetically equivalent:
-
-#+NAME: eq:
+For blocks \(A\) and \(B\) to be composable in sequence, \(o_{A}\) must
+be equal to \(i_{B}\).[fn:2] Consequently, the following block diagram
+expressions are arithmetically equivalent
 \begin{gather}
-D_{1} = A : B \\
-D_{2} = A : \Big\|_{l=1}^{o_{A}}\_ : B
+D_{1} = A : B \label{eq:seq} \\
+D_{2} = A : \Big\|_{l=1}^{o_{A}}\_ : B \label{eq:seqViaWire};\,
 \end{gather}
-
-For given input signals, they will produce identical output
-signals. E.g. letting \(o_{A} = i_{B} = 2\):
-
+and, letting \(o_{A} = i_{B} = 1\), it is clear that the following program
+is equivalent to the one depicted in cref:fig:sequential:
+#+name: lst:seqWithWire
+#+caption: Sequential composition of two Faust blocks interposed with
+#+caption: an identity block.
 #+begin_src faust :noeval
-D1 = A : B;
-D2 = A : _,_ : B;
+process = A : _ : B;
 #+end_src
+The mathematical analogy to sequential composition is that of function
+composition; imagining an input variable, \(x\), the program in
+cref:lst:seqWithWire can be notated
+#+NAME: eq:
+\begin{equation}
+y = (B \circ I \circ A)(x)\;,
+\end{equation}
+where \(I(A) = 1A\). Its derivative with respect to \(x\), then, is
+#+NAME: eq:
+\begin{align}
+\frac{dy}{dx} &= \frac{dy}{dB}\frac{dB}{dI}\frac{dI}{dA}\frac{dA}{dx} \\
+  &= \frac{dy}{dB}\frac{dB}{dI}(1)\frac{dA}{dx}
+\end{align}
 
-#+begin_src faust :results file svg :file images/seq1.svg :exports results
-N = 2;
-A = par(i, N, _) <: par(i, 10*N, +) :> par(i, N, _);
-B = par(i, N, _) <: par(i, 10*N, -) :> par(i, N, _);
-process = A : par(i, N, _) : B;
-#+end_src
-
-#+RESULTS:
-[[file:images/seq1.svg]]
-
-It is clear that sequential composition is indistinguishable from
-application of \(o_{A}\) parallel identity functions, so, using the
-semantic rule described in cref:eq:diffidentity we can state that
-
+Sequential composition is indistinguishable from application of \(o_{A}\)
+parallel identity functions, so, using cref:eq:seq,eq:seqViaWire and
+the semantic scheme described in cref:eq:diffidentity we can state
+that
 #+NAME: eq:diffSeq
 \begin{align}
 \Delta(A : B) &= \Delta(A) : \big\|_{l=1}^{o_{A}}\Delta(\_) : \Delta(B) \nonumber \\
@@ -495,13 +561,46 @@ semantic rule described in cref:eq:diffidentity we can state that
 
 *** Parallel Composition
 
-Block diagrams composed in parallel share no common signals
+Blocks composed in parallel share no common operations, as can be
+illustrated by an example:
+
+#+begin_src faust :noexec
+process = (x1 : A),(x2 : B) : +;
+#+end_src
+
+#+begin_src faust :results file svg :file images/par.svg :exports results
+x1 = sum(i, 10, 1);
+x2 = sum(i, 10, 2);
+A = _ <: par(i, 10, +) :> _;
+B = _ <: par(i, 10, -) :> _;
+f = _,_ <: par(i, 10, +) :> _;
+process = (x1 : A),(x2 : B) : f;
+#+end_src
+#+attr_latex: :width .75\linewidth
+#+RESULTS:
+[[file:images/par.svg]]
+This program features input variables \(x_{1}\) and \(x_{2}\), and produces
+one output signal, \(y = f(A(x_{1}), B(x_{2}))\). The derivative
+of \(y\) with respect to \(x_{i}\), via the chain rule, is
+#+NAME: eq:parDiff
+\begin{align}
+\frac{\partial{}y}{\partial{}x_{i}} &= \frac{\partial{}y}{\partial{}A}\frac{\partial{}A}{\partial{}x_{i}} + \frac{\partial{}y}{\partial{}B}\frac{\partial{}B}{\partial{}x_{i}}\;.
+\end{align}
+Clearly \(B\) has no depedency on \(x_{1}\) so the second additive term
+evaluates to zero, but more importantly \(A\) and \(B\) are
+arithmetically isolated from one-another, so \(\Delta(A,B) = \Delta(A),\Delta(B)\).
+
+*** Recursive Composition
+
+*** Split Composition
+:PROPERTIES:
+:CUSTOM_ID: sec:splitComposition
+:END:
+
+
 
 *** Differentiable Composition Operators
 
-- Blocks in parallel composition share no common signals; parallel
-  block diagrams are essentially entirely separate and independent,
-  thus the derivative of parellel composition is trivial.
 - Split composition duplicates signals. A program consisting of a
   single input variable, \(x\), split and passed to two processors
   \(B\) and \(C\), each producing one output signal, \(y_{1}\) and
@@ -531,8 +630,8 @@ Block diagrams composed in parallel share no common signals
       \Delta(\texttt{mem}) = \big\|_{l=1}^{N+1}\texttt{mem} \\
       \Delta(A : B) = \Delta(A) : \Delta(B) \\
       \Delta(A,B) = \Delta(A),\Delta(B) \\
-      \Delta(A <: B) = \Delta(A) <: \Delta(B) \\
       \Delta(A \sim B) = \Delta(A) \sim \Delta(B) \\
+      \Delta(A <: B) = \Delta(A) <: \Delta(B) \\
       \Delta(A :> B) = \Delta(A <: E) : F : \Delta(B) \\
         E = \big\|_{m=0}^{i_{B}-1}\left(\big\|_{n=1}^{k}\left(
             \big\|_{p=1}^{m}!,\_,\big\|_{q=1}^{i_{B}-m-1}!
@@ -562,25 +661,9 @@ Present results.
 
 Discuss the results.
 
-* Examples
+* Examples                                                         :noexport:
 
 Here are a few examples on LaTeX.
-
-** Citations
-
-Citations can be used as follows, [cite/t:@Pulkki1997:VBAPbase] created
-VBAP and DirAC [cite:@Pulkki2007:DirAC_JAES]. Notice the difference in
-the reference types allowed by natbib-package.
-
-** Equations
-
-Equations are used often in text and cref:eq:firsteq shows an example
-of this.
-
-#+NAME: eq:firsteq
-\begin{equation}
-\cos(2\alpha)=e^{j2\pi}-2\sin^{2}(\alpha)
-\end{equation}
 
 ** Tables & figures
 
@@ -622,13 +705,19 @@ preferred result might require some tuning by hand.
 #+attr_latex: :placement [t] :width 0.95\columnwidth
 [[./spectrogram.png]]
 
-* Summary
+* Conclusion
 
 Summarize your work and conclude.
 
 #+print_bibliography:
 
 * Footnotes
+[fn:3] Note that \(a\), the iterator index, starts from zero in
+Faust. (What works in code doesn't necessarily transfer well to the
+page.)
+
+[fn:2] This is true at the time of writing, but was not the case in
+Faust's early days [cite:@orlareySyntactical2004].
 
 [fn:1] Orlarey [cite:@orlareySyntactical2004] includes the identity
 (_) and cut (!) blocks separately in this syntactic rule; here we will
