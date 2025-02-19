@@ -75,6 +75,7 @@ Why it's necessary to use a negative top margin is... mysterious.
   skipbelow=0pt,
   linewidth=.5pt,
   innertopmargin=-10pt
+  innerleftmargin=0pt
 }
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -113,18 +114,19 @@ Listings. I should consider using [[https://www.reddit.com/r/emacs/comments/lbkm
 \usepackage{inconsolata}
 #+end_src
 
-Faust SVG figures:
-
-#+begin_src latex
-\usepackage[inkscapelatex=false]{svg}
-#+end_src
-
 ** Figures
 
 Graphics path.
 
 #+begin_src latex
 \graphicspath{{./}{figures/}}
+#+end_src
+
+Subcaptions & SVGs.
+
+#+begin_src latex
+\usepackage{subcaption}
+\usepackage[inkscapelatex=false]{svg}
 #+end_src
 
 ** Authors
@@ -200,6 +202,86 @@ frameworks.
 
 * The Faust Language
 
+#+begin_src faust :results file svg :file images/seq.svg :exports none
+A = _ <: par(n, 20, -) :> _;
+B = _ <: par(n, 20, +) :> _;
+process = A : B;
+#+end_src
+
+#+RESULTS:
+[[file:images/seq.svg]]
+
+#+begin_src faust :results file svg :file images/par.svg :exports none
+A = _ <: par(i, 20, +) :> _;
+B = _ <: par(i, 20, -) :> _;
+process = A,B;
+#+end_src
+
+#+RESULTS:
+[[file:images/par.svg]]
+
+#+begin_src faust :results file svg :file images/rec.svg :exports none
+A = _,_ <: par(i, 20, +) :> _;
+B = _ <: par(i, 20, -) :> _;
+process = A ~ B;
+#+end_src
+
+#+RESULTS:
+[[file:images/rec.svg]]
+
+#+begin_src faust :results file svg :file images/split.svg :exports none
+A = _ <: par(i, 20, +) :> _,_;
+B = _,_,_,_ <: par(i, 20, -) :> _;
+process = A <: B;
+#+end_src
+
+#+RESULTS:
+[[file:images/split.svg]]
+
+#+begin_src faust :results file svg :file images/merge.svg :exports none
+A = _ <: par(i, 20, +) :> _,_,_,_;
+B = _,_ <: par(i, 20, -) :> _;
+process = A :> B;
+#+end_src
+
+#+RESULTS:
+[[file:images/merge.svg]]
+
+#+name: fig:compositions
+#+caption: Example compositions of Faust blocks.
+\begin{figure*}[t]
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*22/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/seq}
+    \subcaption{Sequential.}
+    \label{fig:seq}
+  \end{minipage}
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*17/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/par}
+    \subcaption{Parallel.}
+    \label{fig:par}
+  \end{minipage}
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*19/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/rec}
+    \subcaption{Recursive.}
+    \label{fig:rec}
+  \end{minipage}
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*22/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/split}
+    \subcaption{Split.}
+    \label{fig:split}
+  \end{minipage}
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*22/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/merge}
+    \subcaption{Merge.}
+    \label{fig:merge}
+  \end{minipage}
+\end{figure*}
+
 Faust is a functional paradigm, domain specific language (DSL) for
 audio digital signal processing (DSP) [cite:@orlareyFAUST2009]. It is
 built atop a domain-agnostic /block diagram algebra/ (BDA)
@@ -207,26 +289,31 @@ built atop a domain-agnostic /block diagram algebra/ (BDA)
 the nature of these operations is not important at the level of the
 BDA), connected into graphs via a selection of /composition
 operators/. A textual language, Faust can, for example, define a
-diagram consisting of two blocks --- \(A\), with \(o_{A}\) outputs, and
-\(B\), with \(i_{B}\) inputs, \(o_{A} = i_{B} = 1\) --- composed in sequence,
-with code of the form
+diagram consisting of two blocks --- \(A\), with \(i_{A}\) inputs and
+\(o_{A}\) outputs, \(B\), with \(i_{B}\) inputs and \(o_{B}\) outputs, \(i_{A} =
+o_{A} = i_{B} = o_{B} = 1\) --- composed in sequence, with code of the form
+#+name: lst:seq
+#+caption: Sequential compostion of two Faust blocks.
 #+begin_src faust :noexec
 process = A : B;
 #+end_src
 
-#+begin_src faust :results file svg :file images/seq-example.svg :exports results
-A = _ <: par(n, 20, -) :> _;
-B = _ <: par(n, 20, +) :> _;
-process = A : B;
-#+end_src
-#+name: fig:sequential
-#+caption: Sequential composition of Faust blocks.
-#+attr_latex: :width .666\linewidth
 #+RESULTS:
-[[file:images/seq-example.svg]]
-Conceptually, a given block diagram, \(D\) may undergo semantic
-transformation, notated \(\llbracket \cdot \rrbracket\), into a signal
-processor [cite:@orlareySyntactical2004]:
+
+# #+begin_src faust :results file svg :file images/seq-example.svg :exports results
+# A = _ <: par(n, 20, -) :> _;
+# B = _ <: par(n, 20, +) :> _;
+# process = A : B;
+# #+end_src
+# #+name: fig:sequential
+# #+caption: Sequential composition of Faust blocks.
+# #+attr_latex: :width .666\linewidth
+# #+RESULTS:
+
+Conceptually, a given block diagram, \(D\) (see cref:fig:seq for its
+graphical depiction) may undergo semantic transformation, notated
+\(\llbracket \cdot \rrbracket\), into a signal processor
+[cite:@orlareySyntactical2004]:
 #+NAME: eq:semanticTransformation
 \begin{equation}
   \begin{split}
@@ -264,7 +351,9 @@ In light of Faust's versatility, efficiency, and strengths, as a DSL,
 in tackling audio problems,
 
 - Faust2JAX
+- Set of signals \(\mathbb{S}\), set of dual signals \(\mathbb{S}_{d}\)
 - Faust DDSP, dual signals (set of)
+- Introduce semantic rule for \(\Delta(D)\)
 
 Just as Python-based machine learning frameworks such as PyTorch and
 JAX permit users to perform automatic differentiation on arbitrary
@@ -408,18 +497,15 @@ following semantic scheme [cite:@orlareySyntactical2004]:
     \llbracket \_ \rrbracket(s) &= (s)\;,
   \end{split}
 \end{equation}
-which is to say that it receives one signal, \(s\) (a member of the
-set of all signals \(\mathbb{S}\)), and returns that same signal
-unchanged. Faust signals are functions of time, \(t\); application of
-the identity function is analogous to multiplying \(s(t)\) by a
-constant signal of value \(1\). Supposing that \(s(x, t)\) is also a
-function of some input variable \(x\), its partial derivative with
-respect to \(x\) is
+which is to say that it receives one signal, \(s\), and returns that
+same signal unchanged. Application of the identity function is
+analogous to multiplying \(s(t)\), a function of time, by a constant
+signal of value \(1\); supposing that \(s(t)\) is dependent on some
+input variable \(x\), its partial derivative with respect to \(x\) is
 #+NAME: eq:diffsig
-\begin{align}
-\frac{\partial{}}{\partial{}x}(1 \cdot s(x, t)) &= \frac{\partial{}}{\partial{}x}1 \cdot s(x,t) + \frac{\partial{}}{\partial{}x}s(x, t) \cdot 1 \nonumber \\
-  &= \frac{\partial{}}{\partial{}x}s(x, t)\;,
-\end{align}
+\begin{equation}
+\frac{\partial{}}{\partial{}x}(1 \cdot s(x, t)) = \frac{\partial{}}{\partial{}x}s(x, t)\;,
+\end{equation}
 and the semantic rule for the differentiable identity function is thus
 #+NAME: eq:diffidentity
 \begin{equation}
@@ -443,8 +529,8 @@ derivative of a termination is itself a termination:
 The circumstances under which it is useful to compute a signal path
 only to discard it may at first appear obscure, until one considers
 that combinations of the identity and cut functions can be used to
-route signals between blocks [cite:@orlareySyntactical2004]. To
-interleave two groups of two signals, such that
+route signals between blocks [cite:@orlareySyntactical2004]. For
+instance, interleave two groups of two signals, such that
 \(s_{1,1},s_{1,2},s_{2,1},s_{2,2}\) becomes \(s_{1,1},s_{2,1},s_{1,2},s_{2,2}\), one may write
 #+NAME: eq:interleave22
 \begin{equation}
@@ -484,18 +570,12 @@ detail.
 Faust in fact provides two primitives for delaying signals; here we
 will focus on the ~mem~ primitive, which represents a one-sample
 delay, and can be applied repeatedly in sequence to introduce delays
-of longer duration.
-#+begin_src faust :noeval :exports none
-// y = s[n - 10];
-process = seq(i, 10, mem);
-#+end_src
-A fixed delay can be represented as the convolution of a signal,
-\(s(x,t)\), with a time-shifted impulse,
+of longer duration. In general, a fixed delay can be represented as
+the convolution of a signal, \(s(x,t)\), with a time-shifted impulse,
 #+NAME: eq:delayAsConv
 \begin{equation}
 s(x, t-\tau) = s(x, t) \ast h(t)\;,\quad h(t) = \delta(t - \tau)\;.
 \end{equation}
-
 Taking the temporal-parametric Fourier transform of the derivative
 with respect to \(x\) of the convolution, using the convolution and
 differentiation properties of the Fourier transform
@@ -520,39 +600,32 @@ that we can use the following semantic scheme for the differentiable
 
 *** Sequential Composition
 
-For blocks \(A\) and \(B\) to be composable in sequence, \(o_{A}\) must
-be equal to \(i_{B}\).[fn:2] Consequently, the following block diagram
-expressions are arithmetically equivalent
+A mathematical analogy to the composition of blocks in sequence is
+function composition. Assuming an input variable, \(x\), a suitable
+mathematical expression for the program in cref:lst:seq is
+#+NAME: eq:composition
+\begin{equation}
+y = (B \circ A)(x)\;.
+\end{equation}
+In Faust, for \(A\) and \(B\) to be composable in this manner, \(o_{A}\)
+must be equal to \(i_{B}\).[fn:2] Consequently, the following block
+diagram expressions are arithmetically equivalent
 \begin{gather}
 D_{1} = A : B \label{eq:seq} \\
 D_{2} = A : \Big\|_{l=1}^{o_{A}}\_ : B \label{eq:seqViaWire};\,
 \end{gather}
 and, letting \(o_{A} = i_{B} = 1\), it is clear that the following program
-is equivalent to the one depicted in cref:fig:sequential:
-#+name: lst:seqWithWire
-#+caption: Sequential composition of two Faust blocks interposed with
-#+caption: an identity block.
+is equivalent to the one depicted in cref:fig:seq:
+# #+name: lst:seqWithWire
+# #+caption: Sequential composition of two Faust blocks interposed with
+# #+caption: an identity block.
 #+begin_src faust :noeval
 process = A : _ : B;
 #+end_src
-The mathematical analogy to sequential composition is that of function
-composition; imagining an input variable, \(x\), the program in
-cref:lst:seqWithWire can be notated
-#+NAME: eq:
-\begin{equation}
-y = (B \circ I \circ A)(x)\;,
-\end{equation}
-where \(I(A) = 1A\). Its derivative with respect to \(x\), then, is
-#+NAME: eq:
-\begin{align}
-\frac{dy}{dx} &= \frac{dy}{dB}\frac{dB}{dI}\frac{dI}{dA}\frac{dA}{dx} \\
-  &= \frac{dy}{dB}\frac{dB}{dI}(1)\frac{dA}{dx}
-\end{align}
-
-Sequential composition is indistinguishable from application of \(o_{A}\)
-parallel identity functions, so, using cref:eq:seq,eq:seqViaWire and
-the semantic scheme described in cref:eq:diffidentity we can state
-that
+The function composition \((B \circ I \circ A)(x)\), where \(I\) is the
+identity function, simplifies to the expression in
+cref:eq:composition.  Using this fact, cref:eq:seq,eq:seqViaWire, and
+the semantic scheme described in cref:eq:diffidentity,
 #+NAME: eq:diffSeq
 \begin{align}
 \Delta(A : B) &= \Delta(A) : \big\|_{l=1}^{o_{A}}\Delta(\_) : \Delta(B) \nonumber \\
@@ -561,36 +634,77 @@ that
 
 *** Parallel Composition
 
-Blocks composed in parallel share no common operations, as can be
-illustrated by an example:
+Blocks composed in parallel share no common operations, and do not
+influence one-another, arithemtically-speaking:
 
 #+begin_src faust :noexec
-process = (x1 : A),(x2 : B) : +;
+process = A,B;
 #+end_src
 
-#+begin_src faust :results file svg :file images/par.svg :exports results
-x1 = sum(i, 10, 1);
-x2 = sum(i, 10, 2);
-A = _ <: par(i, 10, +) :> _;
-B = _ <: par(i, 10, -) :> _;
-f = _,_ <: par(i, 10, +) :> _;
-process = (x1 : A),(x2 : B) : f;
-#+end_src
-#+attr_latex: :width .75\linewidth
-#+RESULTS:
-[[file:images/par.svg]]
-This program features input variables \(x_{1}\) and \(x_{2}\), and produces
-one output signal, \(y = f(A(x_{1}), B(x_{2}))\). The derivative
-of \(y\) with respect to \(x_{i}\), via the chain rule, is
-#+NAME: eq:parDiff
-\begin{align}
-\frac{\partial{}y}{\partial{}x_{i}} &= \frac{\partial{}y}{\partial{}A}\frac{\partial{}A}{\partial{}x_{i}} + \frac{\partial{}y}{\partial{}B}\frac{\partial{}B}{\partial{}x_{i}}\;.
-\end{align}
-Clearly \(B\) has no depedency on \(x_{1}\) so the second additive term
-evaluates to zero, but more importantly \(A\) and \(B\) are
-arithmetically isolated from one-another, so \(\Delta(A,B) = \Delta(A),\Delta(B)\).
+# #+begin_src faust :results file svg :file images/par.svg :exports results
+# A = _ <: par(i, 20, +) :> _;
+# B = _ <: par(i, 20, -) :> _;
+# process = A,B;
+# #+end_src
+# #+attr_latex: :width .5\linewidth
+# #+RESULTS:
+The above program, with \(i_{A} = i_{B} = 1\) (see cref:fig:par), features
+input variables \(x_{1}\) and \(x_{2}\), and produces two outputs, \(y_{1} =
+A(x_{1})\), \(y_{2} = B(x_{2}))\). In this example, \(y_{1}\) and \(y_{2}\) are
+essentially the outputs of separate block diagrams; thus \(\Delta(A,B) =
+\Delta(A),\Delta(B)\).
 
 *** Recursive Composition
+
+It is a long-established fact that recursive filters are
+differentiable [cite:@shynkAdaptive1989]. The derivative of the
+\(N\)-pole filter
+#+NAME: eq:all-pole
+\begin{equation}
+y(t) = s(t) + \sum_{l=1}^{N}x_{l}(t)y(t-l)
+\end{equation}
+with respect to coefficient \(x_{l}\) is itself a recursion:
+#+NAME: eq:all-pole-diff
+\begin{equation}
+\frac{\partial{}y(t)}{\partial{}x_{l}(t)} = y(t - l) + \sum_{m=1}^{N}x_{m}(t)\frac{\partial{}y(t-m)}{\partial{}x_{l}(t)}\;.
+\end{equation}
+Recursive composition in Faust, \(A \sim B\), introduces an implicit
+one-sample delay, indicated by the small square following block \(A\)
+in cref:fig:rec. Substituting an addition for \(A\) and an identity
+function for \(B\) produces a one-pole filter whose derivative, after
+cref:eq:all-pole-diff, is
+#+NAME: eq:one-pole-diff
+\begin{equation}
+\frac{dy(t)}{dx(t)} = y(t - 1) + x(t)\frac{dy(t-1)}{dx(t)}\;.
+\end{equation}
+
+# #+begin_src faust :results file svg :file images/rec.svg :exports results
+# A = _,_ <: par(i, 20, +) :> _;
+# B = _ <: par(i, 20, -) :> _;
+# process = A ~ B;
+# #+end_src
+# #+attr_latex: :width .6\linewidth
+# #+RESULTS:
+
+#+NAME: eq:
+\begin{equation}
+y = (A \circ B \circ M(y))(x)
+\end{equation}
+
+#+NAME: eq:
+\begin{equation}
+\frac{dy}{dx} = \frac{dy}{dA}\frac{dA}{dx} + \frac{dy}{dA}\frac{dA}{dB}\frac{dB}{dM}\frac{dM}{dy}\frac{dy}{dx}
+\end{equation}
+
+#+NAME: eq:
+\begin{align}
+y(t) &= s(x, t) + y(t - 1) \\
+\frac{dy}{dx}(t) &= \left(
+  \frac{dy}{du}\frac{du}{dx} + \frac{dy}{dv}\frac{dv}{dx}
+\right)(t)\\
+  u = &\;s(x, t),\quad v = y(t-1) \\
+  &= \frac{\partial{}s}{\partial{}x}(x,t) + \frac{dy}{dx}(t-1)
+\end{align}
 
 *** Split Composition
 :PROPERTIES:
@@ -617,32 +731,40 @@ arithmetically isolated from one-another, so \(\Delta(A,B) = \Delta(A),\Delta(B)
 
 #+name: fig:ad-rules
 #+caption: Automatic differentiation rules for Faust's composition operators,
-#+caption: plus supporting primitive operators. Use of \(\Delta(\texttt{mem})\) is
+#+caption: plus supporting primitive operators and routing expressions. Use of \(\Delta(\texttt{mem})\) is
 #+caption: implicit in the definition of \(\Delta(A \sim B)\). \(N\) is the number of
 #+caption: input variables with respect to which partial derivatives are
-#+caption: calculated.
-\begin{figure}
+#+caption: calculated. \(\chi\) is the signal-interleaving function.
+\begin{figure*}
   \begin{mdframed}
-    \begin{gather*}
-      \big\|_{l=1}^{L}D = D_{1},\dots,D_{L} \\
-      \Delta(\_) = \big\|_{l=1}^{N+1}\_ \\
-        \Delta(!) = \big\|_{l=1}^{N+1}! \\
-      \Delta(\texttt{mem}) = \big\|_{l=1}^{N+1}\texttt{mem} \\
-      \Delta(A : B) = \Delta(A) : \Delta(B) \\
-      \Delta(A,B) = \Delta(A),\Delta(B) \\
-      \Delta(A \sim B) = \Delta(A) \sim \Delta(B) \\
-      \Delta(A <: B) = \Delta(A) <: \Delta(B) \\
-      \Delta(A :> B) = \Delta(A <: E) : F : \Delta(B) \\
-        E = \big\|_{m=0}^{i_{B}-1}\left(\big\|_{n=1}^{k}\left(
-            \big\|_{p=1}^{m}!,\_,\big\|_{q=1}^{i_{B}-m-1}!
-          \right)\right) \\
+    \begin{minipage}[c]{\dimexpr\linewidth*18/40\relax}
+      \begin{gather}
+        \Delta(A : B) = \Delta(A) : \Delta(B) \\
+        \Delta(A,B) = \Delta(A),\Delta(B) \\
+        \Delta(A \sim B) = \Delta(A) \sim \Delta(B) \\
+        \Delta(A <: B) = \Delta(A) <: \Delta(B) \\
+        \Delta(A :> B) = \Delta\left(A <: \chi(i_{B},k)\right) : F : \Delta(B) \\
         F = \big\|_{l=1}^{i_{B}}\left(
           \big\|_{l=1}^{k(N+1)}\_ \;:>\; \big\|_{l=1}^{N+1}\_
         \right) \\
         k = \frac{o_{A}}{i_{B}}
-    \end{gather*}
+      \end{gather}
+    \end{minipage}
+    \begin{minipage}[c]{\dimexpr\linewidth*22/40\relax}
+      \begin{gather}
+        \big\|_{l=1}^{L}D = D_{1},\dots,D_{L} \\
+        \chi(r,c) = \big\|_{l=1}^{r\times{}c}\_ <: \big\|_{m=0}^{r-1}\left(
+          \big\|_{n=1}^{c}\left(
+            \big\|_{p=1}^{m}!,\_,\big\|_{q=1}^{r-m-1}!
+          \right)
+        \right) \\
+        \Delta(\_) = \big\|_{l=1}^{N+1}\_ \\
+          \Delta(!) = \big\|_{l=1}^{N+1}! \\
+        \Delta(\texttt{mem}) = \big\|_{l=1}^{N+1}\texttt{mem}
+      \end{gather}
+    \end{minipage}
   \end{mdframed}
-\end{figure}
+\end{figure*}
 
 *** notehusntaoheu
 
@@ -712,8 +834,8 @@ Summarize your work and conclude.
 #+print_bibliography:
 
 * Footnotes
-[fn:3] Note that \(a\), the iterator index, starts from zero in
-Faust. (What works in code doesn't necessarily transfer well to the
+[fn:3] Note that in Faust, \(a\), the iterator index, starts from
+zero. (What works in code does not necessarily transfer well to the
 page.)
 
 [fn:2] This is true at the time of writing, but was not the case in
