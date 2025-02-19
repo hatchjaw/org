@@ -5480,6 +5480,8 @@ I should target the following:
   + There's also a satellite workshop, [[https://internetofsounds2025.ieee-is2.org/workshops/3rd-ieee-international-workshop-networked-immersive-audio][IEEE IWNIA]] (International
     Workshop on Networked Immersive Audio): July 1st (5-10 pages,
     EasyChair).
+  + /And/ Cristina Rottondi recommended I propose a tutorial on Faust
+    DDSP.
 
 This means I can probably safely return to practical work until the
 end of this month.

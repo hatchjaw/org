@@ -439,6 +439,45 @@ networks and digital filters bear striking similarities
 
 * A General Pattern Matching Scheme for Differentiating Faust Programs
 
+#+name: fig:ad-rules
+#+caption: Automatic differentiation rules for Faust's composition operators,
+#+caption: plus supporting primitive operators and routing expressions. Use of \(\Delta(\texttt{mem})\) is
+#+caption: implicit in the definition of \(\Delta(A \sim B)\). \(N\) is the number of
+#+caption: input variables with respect to which partial derivatives are
+#+caption: calculated. \(\chi\) is the signal-interleaving function.
+\begin{figure*}
+  \begin{mdframed}
+    \begin{minipage}[c]{\dimexpr\linewidth*17/40\relax}
+      \begin{gather}
+        \Delta(A : B) = \Delta(A) : \Delta(B) \\
+        \Delta(A,B) = \Delta(A),\Delta(B) \\
+        \Delta(A \sim B) = \Delta(A) \sim \Delta(B) \\
+        \Delta(A <: B) = \Delta(A) <: \Delta(B) \\
+        \Delta(A :> B) = \Delta\left(A : \chi(i_{B},k)\right) : F : \Delta(B) \\
+        F = \big\|_{l=1}^{i_{B}}\left(
+          \big\|_{l=1}^{k(N+1)}\_ \;:>\; \big\|_{l=1}^{N+1}\_
+        \right) \\
+        k = \frac{o_{A}}{i_{B}}
+      \end{gather}
+    \end{minipage}
+    \begin{minipage}[c]{\dimexpr\linewidth*23/40\relax}
+      \begin{gather}
+        \textrm{Parallel composition, }\texttt{par(l, L, D)}\textrm{:} \nonumber \\
+        \big\|_{l=1}^{L}D = D_{1},\dots,D_{L} \\
+        \textrm{Signal interleaving function: }\nonumber \\
+        \chi(r,c) = \big\|_{l=1}^{r\times{}c}\_ <: \big\|_{m=0}^{r-1}\left(
+          \big\|_{n=1}^{c}\left(
+            \big\|_{p=1}^{m}!,\_,\big\|_{q=1}^{r-m-1}!
+          \right)
+        \right) \label{eq:interleave} \\
+        \Delta(\_) = \big\|_{l=1}^{N+1}\_ \\
+          \Delta(!) = \big\|_{l=1}^{N+1}! \\
+        \Delta(\texttt{mem}) = \big\|_{l=1}^{N+1}\texttt{mem}
+      \end{gather}
+    \end{minipage}
+  \end{mdframed}
+\end{figure*}
+
 Faust is based on a /block-diagram algebra/
 [cite:@orlareySyntactical2004]. In this algebra, a given block
 diagram, \(D\), is comprised of a primitive block, \(P\), or the
@@ -536,18 +575,8 @@ instance, interleave two groups of two signals, such that
 \begin{equation}
 \_,\_,\_,\_ \;<:\; \_,!,\_,!,!,\_,!,\_\;.
 \end{equation}
-The general interleaving function, \(\chi(R,C)\), which interleaves \(C\)
-groups of \(R\) signals, may be expressed as
-#+NAME: eq:interleave
-\begin{equation}
-\chi(R,C) = \big\|_{l=1}^{R\times{}C}\_ <: \big\|_{m=0}^{R-1}\left(
-  \big\|_{n=1}^{C}\left(
-    \big\|_{p=1}^{m}!,\_,\big\|_{q=1}^{R-m-1}!
-  \right)
-\right)
-\end{equation}
-where \(\|_{a=1}^{b}A\) denotes the parallel composition of block \(A\),
-\(b\) times (notated ~par(a, b, A)~ in Faust[fn:3]). \(\chi\) is used in
+The general interleaving function, \(\chi(r,c)\), which interleaves \(c\)
+groups of \(r\) signals, described in cref:fig:ad-rules, is used in
 cref:lst:diffAdd; here is its definition in code:
 #+begin_src faust :results file svg :file images/interleave.svg :exports code :noeval
 cutpq(0, q) = _,par(l, q, !);
@@ -670,14 +699,14 @@ with respect to coefficient \(x_{l}\) is itself a recursion:
 \end{equation}
 Recursive composition in Faust, \(A \sim B\), introduces an implicit
 one-sample delay, indicated by the small square following block \(A\)
-in cref:fig:rec. Substituting an addition for \(A\) and an identity
-function for \(B\) produces a one-pole filter whose derivative, after
+in cref:fig:rec. Substituting an addition for \(A\) (\(i_{A} = 2\)) and
+multiplication by a coefficient, \(x\), for \(B\) (\(i_{B} = 1\))
+produces a one-pole filter whose derivative, after
 cref:eq:all-pole-diff, is
 #+NAME: eq:one-pole-diff
 \begin{equation}
 \frac{dy(t)}{dx(t)} = y(t - 1) + x(t)\frac{dy(t-1)}{dx(t)}\;.
 \end{equation}
-
 # #+begin_src faust :results file svg :file images/rec.svg :exports results
 # A = _,_ <: par(i, 20, +) :> _;
 # B = _ <: par(i, 20, -) :> _;
@@ -685,26 +714,7 @@ cref:eq:all-pole-diff, is
 # #+end_src
 # #+attr_latex: :width .6\linewidth
 # #+RESULTS:
-
-#+NAME: eq:
-\begin{equation}
-y = (A \circ B \circ M(y))(x)
-\end{equation}
-
-#+NAME: eq:
-\begin{equation}
-\frac{dy}{dx} = \frac{dy}{dA}\frac{dA}{dx} + \frac{dy}{dA}\frac{dA}{dB}\frac{dB}{dM}\frac{dM}{dy}\frac{dy}{dx}
-\end{equation}
-
-#+NAME: eq:
-\begin{align}
-y(t) &= s(x, t) + y(t - 1) \\
-\frac{dy}{dx}(t) &= \left(
-  \frac{dy}{du}\frac{du}{dx} + \frac{dy}{dv}\frac{dv}{dx}
-\right)(t)\\
-  u = &\;s(x, t),\quad v = y(t-1) \\
-  &= \frac{\partial{}s}{\partial{}x}(x,t) + \frac{dy}{dx}(t-1)
-\end{align}
+Fuck
 
 *** Split Composition
 :PROPERTIES:
@@ -725,49 +735,7 @@ y(t) &= s(x, t) + y(t - 1) \\
   the ratio of the number of outputs, \(o_{A}\) of block diagram \(A\)
   and the number of inputs, \(i_{B}\) of block diagram \(B\), routed
   according to the rule from Orlarey...
-- Recursive composition looks like it might have some effect since it
-  introduces a delay; we can show, however, that differentiation is
-  time-invariant.
-
-#+name: fig:ad-rules
-#+caption: Automatic differentiation rules for Faust's composition operators,
-#+caption: plus supporting primitive operators and routing expressions. Use of \(\Delta(\texttt{mem})\) is
-#+caption: implicit in the definition of \(\Delta(A \sim B)\). \(N\) is the number of
-#+caption: input variables with respect to which partial derivatives are
-#+caption: calculated. \(\chi\) is the signal-interleaving function.
-\begin{figure*}
-  \begin{mdframed}
-    \begin{minipage}[c]{\dimexpr\linewidth*18/40\relax}
-      \begin{gather}
-        \Delta(A : B) = \Delta(A) : \Delta(B) \\
-        \Delta(A,B) = \Delta(A),\Delta(B) \\
-        \Delta(A \sim B) = \Delta(A) \sim \Delta(B) \\
-        \Delta(A <: B) = \Delta(A) <: \Delta(B) \\
-        \Delta(A :> B) = \Delta\left(A <: \chi(i_{B},k)\right) : F : \Delta(B) \\
-        F = \big\|_{l=1}^{i_{B}}\left(
-          \big\|_{l=1}^{k(N+1)}\_ \;:>\; \big\|_{l=1}^{N+1}\_
-        \right) \\
-        k = \frac{o_{A}}{i_{B}}
-      \end{gather}
-    \end{minipage}
-    \begin{minipage}[c]{\dimexpr\linewidth*22/40\relax}
-      \begin{gather}
-        \big\|_{l=1}^{L}D = D_{1},\dots,D_{L} \\
-        \chi(r,c) = \big\|_{l=1}^{r\times{}c}\_ <: \big\|_{m=0}^{r-1}\left(
-          \big\|_{n=1}^{c}\left(
-            \big\|_{p=1}^{m}!,\_,\big\|_{q=1}^{r-m-1}!
-          \right)
-        \right) \\
-        \Delta(\_) = \big\|_{l=1}^{N+1}\_ \\
-          \Delta(!) = \big\|_{l=1}^{N+1}! \\
-        \Delta(\texttt{mem}) = \big\|_{l=1}^{N+1}\texttt{mem}
-      \end{gather}
-    \end{minipage}
-  \end{mdframed}
-\end{figure*}
-
-*** notehusntaoheu
-
+  
 Faust programs that adhere to these syntactic restrictions can be
 differentiated to abritrary degree.
 
