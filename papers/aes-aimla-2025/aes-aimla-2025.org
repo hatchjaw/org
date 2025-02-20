@@ -250,19 +250,19 @@ process = A :> B;
 #+name: fig:compositions
 #+caption: Example compositions of Faust blocks.
 \begin{figure*}[t]
-  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*22/100\relax}
-    \centering
-    \includesvg[width=\textwidth]{images/seq}
-    \subcaption{Sequential.}
-    \label{fig:seq}
-  \end{minipage}
-  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*17/100\relax}
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*18/100\relax}
     \centering
     \includesvg[width=\textwidth]{images/par}
     \subcaption{Parallel.}
     \label{fig:par}
   \end{minipage}
-  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*19/100\relax}
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*20/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/seq}
+    \subcaption{Sequential.}
+    \label{fig:seq}
+  \end{minipage}
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*20/100\relax}
     \centering
     \includesvg[width=\textwidth]{images/rec}
     \subcaption{Recursive.}
@@ -353,7 +353,8 @@ in tackling audio problems,
 - Faust2JAX
 - Set of signals \(\mathbb{S}\), set of dual signals \(\mathbb{S}_{d}\)
 - Faust DDSP, dual signals (set of)
-- Introduce semantic rule for \(\Delta(D)\)
+- Introduce semantic rule for \(\Delta_{N}\llbracket D \rrbracket\)
+- Introduce parallel iteration \(\big\|_{l=1}^{L}D\)
 
 Just as Python-based machine learning frameworks such as PyTorch and
 JAX permit users to perform automatic differentiation on arbitrary
@@ -441,38 +442,43 @@ networks and digital filters bear striking similarities
 
 #+name: fig:ad-rules
 #+caption: Automatic differentiation rules for Faust's composition operators,
-#+caption: plus supporting primitive operators and routing expressions. Use of \(\Delta(\texttt{mem})\) is
-#+caption: implicit in the definition of \(\Delta(A \sim B)\). \(N\) is the number of
-#+caption: input variables with respect to which partial derivatives are
-#+caption: calculated. \(\chi\) is the signal-interleaving function.
+#+caption: plus supporting primitive operators and routing expressions. Use of
+#+caption: \(\Delta_{N}\llbracket \texttt{mem} \rrbracket\) is implicit in the
+#+caption: definition of \(\Delta_{N}\llbracket A \sim B\rrbracket\). \(N\) is the
+#+caption: number of input variables with respect to which partial derivatives are
+#+caption: calculated.
 \begin{figure*}
   \begin{mdframed}
-    \begin{minipage}[c]{\dimexpr\linewidth*17/40\relax}
+    \begin{minipage}[c]{\dimexpr\linewidth*18/40\relax}
       \begin{gather}
-        \Delta(A : B) = \Delta(A) : \Delta(B) \\
-        \Delta(A,B) = \Delta(A),\Delta(B) \\
-        \Delta(A \sim B) = \Delta(A) \sim \Delta(B) \\
-        \Delta(A <: B) = \Delta(A) <: \Delta(B) \\
-        \Delta(A :> B) = \Delta\left(A : \chi(i_{B},k)\right) : F : \Delta(B) \\
+        \Delta_{N}\llbracket A,B \rrbracket =
+          \Delta_{N}\llbracket A \rrbracket,\Delta_{N}\llbracket B \rrbracket \\
+        \Delta_{N}\llbracket A : B \rrbracket =
+          \Delta_{N}\llbracket A \rrbracket : \Delta_{N}\llbracket B \rrbracket \\
+        \Delta_{N}\llbracket A \sim B \rrbracket =
+          \Delta_{N}\llbracket A \rrbracket \sim \Delta_{N}\llbracket B \rrbracket \\
+        \Delta_{N}\llbracket A <: B \rrbracket =
+          \Delta_{N}\llbracket A \rrbracket <: \Delta_{N}\llbracket B \rrbracket \\
+        \Delta_{N}\llbracket A :> B \rrbracket =
+          \Delta_{N}\left\llbracket A : \chi(i_{B},k)\right\rrbracket : F : \Delta_{N}\llbracket B \rrbracket \\
         F = \big\|_{l=1}^{i_{B}}\left(
           \big\|_{l=1}^{k(N+1)}\_ \;:>\; \big\|_{l=1}^{N+1}\_
-        \right) \\
-        k = \frac{o_{A}}{i_{B}}
+        \right) \nonumber \\
+        k = \frac{o_{A}}{i_{B}} \nonumber
       \end{gather}
     \end{minipage}
-    \begin{minipage}[c]{\dimexpr\linewidth*23/40\relax}
+    \begin{minipage}[c]{\dimexpr\linewidth*22/40\relax}
       \begin{gather}
-        \textrm{Parallel composition, }\texttt{par(l, L, D)}\textrm{:} \nonumber \\
+        \textrm{Parallel iteration, }\texttt{par(l, L, D)}\textrm{:} \nonumber \\
         \big\|_{l=1}^{L}D = D_{1},\dots,D_{L} \\
         \textrm{Signal interleaving function: }\nonumber \\
-        \chi(r,c) = \big\|_{l=1}^{r\times{}c}\_ <: \big\|_{m=0}^{r-1}\left(
+        \chi(r,c) = \big\|_{l=1}^{r\times{}c}\_ <: \big\|_{m=0}^{r-1}
           \big\|_{n=1}^{c}\left(
             \big\|_{p=1}^{m}!,\_,\big\|_{q=1}^{r-m-1}!
-          \right)
-        \right) \label{eq:interleave} \\
-        \Delta(\_) = \big\|_{l=1}^{N+1}\_ \\
-          \Delta(!) = \big\|_{l=1}^{N+1}! \\
-        \Delta(\texttt{mem}) = \big\|_{l=1}^{N+1}\texttt{mem}
+          \right) \label{eq:interleave} \\
+        \Delta_{N}\llbracket \_ \rrbracket = \big\|_{l=1}^{N+1}\_ \\
+          \Delta_{N}\llbracket ! \rrbracket = \big\|_{l=1}^{N+1}! \\
+        \Delta_{N}\llbracket\texttt{mem}\rrbracket = \big\|_{l=1}^{N+1}\texttt{mem}
       \end{gather}
     \end{minipage}
   \end{mdframed}
@@ -485,24 +491,26 @@ composition of two block diagrams via a composition operator according
 to the syntactic rule[fn:1]
 #+NAME: eq:syntax
 \begin{equation}
-D = P \;|\; (D_{1} \circ D_{2})\;,
+D = P \;|\; (D_{1} \diamond D_{2})\;,
 \end{equation}
-where \(\circ\) is one of the sequential (:), parallel (,), split (<:),
-merge (:>), or recursive (\(\sim\)) composition operators. The creation
-of differentiable Faust programs has been shown to be possible the
-composition of differentiated primitive blocks
-[cite:@rushtonDifferentiable2024]; using \(\Delta(\cdot)\) to denote derivative
-transformation, the syntactic rule for differentiation in Faust was
+where \(\diamond\) is one of the sequential (:), parallel (,), split
+(<:), merge (:>), or recursive (\(\sim\)) composition operators. The
+creation of differentiable Faust programs has been shown to be
+possible the composition of differentiated primitive blocks
+[cite:@rushtonDifferentiable2024]; using \(\Delta_{N}\llbracket \cdot
+\rrbracket\) to denote derivative transformation with respect to \(N\)
+input variables, the syntactic rule for differentiation in Faust was
 #+NAME: eq:badDiffSyntax
 \begin{equation}
-\Delta(D) = \Delta(P) \circ \Delta(P) \circ \dots \circ \Delta(P)\;.
+\Delta_{N}\llbracket D \rrbracket = \Delta_{N}\llbracket P \rrbracket \diamond \Delta_{N}\llbracket P \rrbracket \diamond \dots \diamond \Delta_{N}\llbracket P \rrbracket\;.
 \end{equation}
 While effective in facilitating differentiable programming, this
 syntax imposed an undesirable verbosity. Our preferred syntactic rule
 should be a direct transformation of cref:eq:syntax:
 #+NAME: eq:idealDiffSyntax
 \begin{equation}
-\Delta(D) = \Delta(P) \;|\; \Delta(D_{1} \circ D_{2}) \;.
+\Delta_{N}\llbracket D \rrbracket
+  = \Delta_{N}\llbracket P \rrbracket \;|\; \Delta_{N}\llbracket D_{1} \diamond D_{2} \rrbracket \;.
 \end{equation}
 The ideal outcome is to permit the programmer to subject an entire
 Faust program to automatic differentiation in a single expression,
@@ -519,16 +527,16 @@ block diagram to which they contribute.
 
 To define syntactic rules for the derivatives of Faust's composition
 operators entails analysing them as if they were themselves primitive
-blocks. To do this, we must first consider three of Faust's
-fundamental primitive operators for their differentiation rules; their
-derivatives will assist us in achieving differentiable compositions.
+blocks. To do this, we must first consider some of Faust's fundamental
+primitive operators for their differentiation rules; their derivatives
+will assist us in achieving differentiable compositions.
 
 *** Identity Primitive
 
-Faust's identity function, notated \(\_\), is itself a primitive block,
-and in turn describes a connection between two blocks. The signal
-processor represented by the identity function adheres to the
-following semantic scheme [cite:@orlareySyntactical2004]:
+Faust's identity function, notated \(\_\), describes a connection
+between two blocks. The signal processor represented by the identity
+function adheres to the following semantic scheme
+[cite:@orlareySyntactical2004]:
 #+NAME: eq:identity
 \begin{equation}
   \begin{split}
@@ -543,14 +551,14 @@ signal of value \(1\); supposing that \(s(t)\) is dependent on some
 input variable \(x\), its partial derivative with respect to \(x\) is
 #+NAME: eq:diffsig
 \begin{equation}
-\frac{\partial{}}{\partial{}x}(1 \cdot s(x, t)) = \frac{\partial{}}{\partial{}x}s(x, t)\;,
+\frac{\partial{}}{\partial{}x}(I(s(x,t))) = \frac{\partial{}}{\partial{}x}(1 \cdot s(x, t)) = \frac{\partial{}}{\partial{}x}s(x, t)\;,
 \end{equation}
 and the semantic rule for the differentiable identity function is thus
 #+NAME: eq:diffidentity
 \begin{equation}
   \begin{split}
-    \llbracket \Delta(\_) \rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\
-    \llbracket \Delta(\_) \rrbracket(\langle{}s, \nabla{}s\rangle) &= (\langle{}s, \nabla{}s\rangle)\;.
+    \Delta_{N}\llbracket \_ \rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\
+    \Delta_{N}\llbracket \_ \rrbracket(\langle{}s, \nabla{}s\rangle) &= (\langle{}s, \nabla{}s\rangle)\;.
   \end{split}
 \end{equation}
 
@@ -561,8 +569,8 @@ derivative of a termination is itself a termination:
 #+NAME: eq:cut
 \begin{equation}
   \begin{split}
-    \llbracket \Delta(!) \rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}^{0} \\
-    \llbracket \Delta(!) \rrbracket(\langle{}s,\nabla{}s\rangle) &= ()\;.
+    \Delta_{N}\llbracket ! \rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}^{0} \\
+    \Delta_{N}\llbracket ! \rrbracket(\langle{}s,\nabla{}s\rangle) &= ()\;.
   \end{split}
 \end{equation}
 The circumstances under which it is useful to compute a signal path
@@ -570,7 +578,8 @@ only to discard it may at first appear obscure, until one considers
 that combinations of the identity and cut functions can be used to
 route signals between blocks [cite:@orlareySyntactical2004]. For
 instance, interleave two groups of two signals, such that
-\(s_{1,1},s_{1,2},s_{2,1},s_{2,2}\) becomes \(s_{1,1},s_{2,1},s_{1,2},s_{2,2}\), one may write
+\(s_{1,1},s_{1,2},s_{2,1},s_{2,2}\) becomes
+\(s_{1,1},s_{2,1},s_{1,2},s_{2,2}\), one may write
 #+NAME: eq:interleave22
 \begin{equation}
 \_,\_,\_,\_ \;<:\; \_,!,\_,!,!,\_,!,\_\;.
@@ -588,7 +597,7 @@ interleave(R, C) = par(l, R * C, _)
   <: par(m, R, par(n, C,
        cutpq(m, R - m - 1)));
 #+end_src
-In principle, being constructed from the differentiable identity and
+In principle, being constructed from the differentiable and identity
 cut primitives, \(\chi\) should in turn be differentiable. This is
 contingent, however, on the derivative behaviour of the split
 composition operator; see cref:sec:splitComposition for further
@@ -621,50 +630,17 @@ that we can use the following semantic scheme for the differentiable
 #+NAME: eq:diffmem
 \begin{equation}
   \begin{split}
-    \llbracket \Delta(\texttt{mem}) \rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\
-    \llbracket \Delta(\texttt{mem}) \rrbracket(\langle{}s, \nabla{}s\rangle) &= (\langle{}y, \nabla{}y\rangle) \\
+    \Delta_{N}\llbracket\texttt{mem}\rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\
+    \Delta_{N}\llbracket\texttt{mem}\rrbracket(\langle{}s, \nabla{}s\rangle) &= (\langle{}y, \nabla{}y\rangle) \\
     \langle{}y,\nabla{}y\rangle(t) &= \langle{}s,\nabla{}s\rangle(t-1)\;.
   \end{split}
 \end{equation}
 
-*** Sequential Composition
-
-A mathematical analogy to the composition of blocks in sequence is
-function composition. Assuming an input variable, \(x\), a suitable
-mathematical expression for the program in cref:lst:seq is
-#+NAME: eq:composition
-\begin{equation}
-y = (B \circ A)(x)\;.
-\end{equation}
-In Faust, for \(A\) and \(B\) to be composable in this manner, \(o_{A}\)
-must be equal to \(i_{B}\).[fn:2] Consequently, the following block
-diagram expressions are arithmetically equivalent
-\begin{gather}
-D_{1} = A : B \label{eq:seq} \\
-D_{2} = A : \Big\|_{l=1}^{o_{A}}\_ : B \label{eq:seqViaWire};\,
-\end{gather}
-and, letting \(o_{A} = i_{B} = 1\), it is clear that the following program
-is equivalent to the one depicted in cref:fig:seq:
-# #+name: lst:seqWithWire
-# #+caption: Sequential composition of two Faust blocks interposed with
-# #+caption: an identity block.
-#+begin_src faust :noeval
-process = A : _ : B;
-#+end_src
-The function composition \((B \circ I \circ A)(x)\), where \(I\) is the
-identity function, simplifies to the expression in
-cref:eq:composition.  Using this fact, cref:eq:seq,eq:seqViaWire, and
-the semantic scheme described in cref:eq:diffidentity,
-#+NAME: eq:diffSeq
-\begin{align}
-\Delta(A : B) &= \Delta(A) : \big\|_{l=1}^{o_{A}}\Delta(\_) : \Delta(B) \nonumber \\
-  &= \Delta(A) : \Delta(B)\;.
-\end{align}
-
 *** Parallel Composition
 
-Blocks composed in parallel share no common operations, and do not
-influence one-another, arithemtically-speaking:
+Blocks composed in parallel (see cref:fig:par for an example diagram,
+with \(i_{A} = o_{A} = i_{B} = o_{B} = 1\)) share no common
+operations, and do not influence one-another, arithemtically-speaking:
 
 #+begin_src faust :noexec
 process = A,B;
@@ -677,11 +653,48 @@ process = A,B;
 # #+end_src
 # #+attr_latex: :width .5\linewidth
 # #+RESULTS:
-The above program, with \(i_{A} = i_{B} = 1\) (see cref:fig:par), features
-input variables \(x_{1}\) and \(x_{2}\), and produces two outputs, \(y_{1} =
-A(x_{1})\), \(y_{2} = B(x_{2}))\). In this example, \(y_{1}\) and \(y_{2}\) are
-essentially the outputs of separate block diagrams; thus \(\Delta(A,B) =
-\Delta(A),\Delta(B)\).
+The outputs of such a program,
+\(y_{1},\dots,y_{o_{A}}\) and \(y_{o_{A}+1},\dots,y_{o_{A}+o_{B}}\), are
+essentially the outputs of separate block diagrams; thus
+\(\Delta_{N}\llbracket A,B \rrbracket = \Delta_{N}\llbracket A
+\rrbracket,\Delta_{N}\llbracket B \rrbracket\), and, more generally
+#+NAME: eq:diffpar
+\begin{equation}
+\Delta_{N}\left\llbracket\big\|_{l=1}^{L}D\right\rrbracket =
+  \big\|_{l=1}^{L}\Delta_{N}\llbracket D \rrbracket \;.
+\end{equation}
+
+*** Sequential Composition
+
+# A mathematical analogy to the composition of blocks in sequence is
+# function composition. Assuming an input variable, \(x\), a suitable
+# mathematical expression for the program in cref:lst:seq is
+# #+NAME: eq:composition
+# \begin{equation}
+# y = (B \circ A)(x)\;.
+# \end{equation}
+In Faust, for \(A\) and \(B\) to be composable in sequential fashion,
+\(o_{A}\) must be equal to \(i_{B}\).[fn:2] Consequently, the
+following block diagram expressions are arithmetically equivalent
+\begin{gather}
+D_{1} = A : B \label{eq:seq} \\
+D_{2} = A : \Big\|_{l=1}^{o_{A}}\_ : B \label{eq:seqViaWire};\,
+\end{gather}
+and, letting \(o_{A} = i_{B} = 1\), it is clear that the following program
+is equivalent to the one depicted in cref:lst:seq:
+# #+name: lst:seqWithWire
+# #+caption: Sequential composition of two Faust blocks interposed with
+# #+caption: an identity block.
+#+begin_src faust :noeval
+process = A : _ : B;
+#+end_src
+So, using cref:eq:seq,eq:seqViaWire, and the semantic scheme described
+in cref:eq:diffidentity,
+\begin{align}
+\Delta_{N}\llbracket A : B \rrbracket &= \Delta_{N}\llbracket A \rrbracket : \big\|_{l=1}^{o_{A}}\Delta_{N}\llbracket \_ \rrbracket :
+  \Delta_{N}\llbracket B \rrbracket \label{eq:diffseqwithwire} \\
+  &= \Delta_{N}\llbracket A \rrbracket : \Delta_{N}\llbracket B \rrbracket\;. \label{eq:diffseq}
+\end{align}
 
 *** Recursive Composition
 
@@ -714,27 +727,56 @@ cref:eq:all-pole-diff, is
 # #+end_src
 # #+attr_latex: :width .6\linewidth
 # #+RESULTS:
-Fuck
+
 
 *** Split Composition
 :PROPERTIES:
 :CUSTOM_ID: sec:splitComposition
 :END:
 
+Composing \(A\) and \(B\), \(i_{B} = ko_{A}\), with the split
+composition operator (see cref:fig:split) duplicates the output
+signals of \(A\), \(k\) times, passing each group of duplicates to
+\(B\), in order:
+#+NAME: eq:split
+\begin{equation}
+A <: B = A : \Big\|_{l=1}^{o_{A}}\__{\,l} <: \Big\|_{m=1}^{k}\Big\|_{l=1}^{o_{A}}\__{\,l} : B\;.
+\end{equation}
+Applying derivative transformation to both sides, and invoking
+cref:eq:diffseqwithwire,eq:diffseq,eq:diffpar, gives
+#+NAME: eq:diffsplit
+\begin{align}
+&\quad\;\Delta_{N}\llbracket A <: B \rrbracket \nonumber\\
+  &= \Delta_{N}\llbracket A \rrbracket :
+    \big\|_{l=1}^{o_{A}}\Delta_{N}\llbracket \__{\,l} \rrbracket <:
+    \big\|_{m=1}^{k}\big\|_{l=1}^{o_{A}}\Delta_{N}\llbracket \__{\,l} \rrbracket :
+    \Delta_{N}\llbracket B \rrbracket \nonumber \\
+  &= \Delta_{N}\llbracket A \rrbracket <: \Delta_{N}\llbracket B \rrbracket \;.
+\end{align}
+This proves, in turn, that the signal interleaving function (and all
+routings achieved via parallel composition of identity and cut
+functions) is differentiable:
+#+NAME: eq:diffinterleave
+\begin{equation}
+\begin{split}
+\Delta_{N}(\chi(r,&c)) = \big\|_{l=1}^{r\times{}c}\Delta_{N}\llbracket \_ \rrbracket <: \\
+  &\big\|_{m=0}^{r-1}\big\|_{n=1}^{c}\left(
+    \big\|_{p=1}^{m}\Delta_{N}\llbracket ! \rrbracket,\Delta_{N}\llbracket \_
+      \rrbracket,\big\|_{q=1}^{r-m-1}\Delta_{N}\llbracket ! \rrbracket
+  \right)
+\end{split}
+\end{equation}
 
+*** Merge Composition
 
 *** Differentiable Composition Operators
 
-- Split composition duplicates signals. A program consisting of a
-  single input variable, \(x\), split and passed to two processors
-  \(B\) and \(C\), each producing one output signal, \(y_{1}\) and
-  \(y_{2}\), has derivatives \(\frac{dy_{1}}{dx}\) and \(\frac{dy_{2}}{dx}\),
-  which, as with parallel composition, are independent. The question
-  is, for dual signals, does split composition apply effectively?
 - Merge entails summation. The number of summations is derived from
   the ratio of the number of outputs, \(o_{A}\) of block diagram \(A\)
   and the number of inputs, \(i_{B}\) of block diagram \(B\), routed
   according to the rule from Orlarey...
+
+** Limitations
   
 Faust programs that adhere to these syntactic restrictions can be
 differentiated to abritrary degree.
