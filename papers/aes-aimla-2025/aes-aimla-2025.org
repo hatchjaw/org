@@ -440,9 +440,9 @@ The observation has been made that the relative structures of neural
 networks and digital filters bear striking similarities
 [cite:@kuznetsovDifferentiable2020]
 
-* A General Pattern Matching Scheme for Differentiating Faust Programs
+* A General Scheme for Differentiating Faust Programs
 
-#+name: fig:ad-rules
+#+name: fig:diffRules
 #+caption: Automatic differentiation rules for Faust's composition operators,
 #+caption: plus supporting primitive operators and routing expressions. Use of
 #+caption: \(\Delta_{N}\llbracket \texttt{mem} \rrbracket\) is implicit in the
@@ -531,7 +531,7 @@ block diagram to which they contribute.
 To define syntactic rules for the derivatives of Faust's composition
 operators entails analysing them as if they were themselves primitive
 blocks. To do this, we must consider them in tandem with rules for
-some of Faust's fundamental primitive operators; thesey will assist us
+some of Faust's fundamental primitive operators; these will assist us
 in achieving differentiable compositions.
 
 *** Identity Primitive
@@ -549,10 +549,11 @@ following semantic scheme [cite:@orlareySyntactical2004]:
 It receives one signal and returns that same signal unchanged,
 analogous to multiplying it by a constant signal of value
 \(1\). In dual signal arithmetic, this is
-#+NAME: eq:
+#+NAME: eq:dualIdentity
 \begin{align}
-\langle{}s,\nabla{}s\rangle\langle{}1,\nabla1\rangle &= \left\langle{}s,\begin{bmatrix}\frac{\partial{}s}{\partial{}x_{1}}+0&\dots&\frac{\partial{}s}{\partial{}x_{N}}+0\end{bmatrix}^{T}\right\rangle\nonumber \\
-  &= \langle{}s,\nabla{}s\rangle\;,
+\langle{}s,\nabla{}s\rangle\langle{}1,\nabla1\rangle
+  = \langle{}1s, 1\nabla{}s + s\nabla{}1 \rangle
+  = \langle{}s,\nabla{}s\rangle\;,
 \end{align}
 and the semantic rule for the derivative of the identity function is
 thus
@@ -563,8 +564,8 @@ thus
     \Delta_{N}\llbracket \_ \rrbracket(\langle{}s, \nabla{}s\rangle) &= (\langle{}s, \nabla{}s\rangle)\;.
   \end{split}
 \end{equation}
-The dual signal \(\langle{}s,\nabla{}s\rangle\) being composed of one primal signal and
-\(N\) gradient signals, we can further state that
+The dual signal \(\langle{}s,\nabla{}s\rangle\) being composed of one
+primal signal and \(N\) gradient signals, we can further state that
 #+NAME: eq:diffidentity2
 \begin{equation}
   \Delta_{N}\llbracket \_ \rrbracket = \big\|_{l=1}^{N+1}\;\_\;.
@@ -668,13 +669,13 @@ of the cut function is
   \end{split}
 \end{equation}
 A general interleaving function, as used in cref:lst:diffAdd, can be
-written, using the cut and identity primitives, plus parallel and
-split composition (see cref:lst:interleave). Being composed from
-differentiable elements, it too is differentiable.
+written using the cut and identity primitives, plus parallel and split
+composition (see cref:lst:interleave). Comprising only differentiable
+elements, it too is differentiable.
 #+name: lst:interleave
 #+caption: A Faust function that interleaves \(c\) groups of \(r\)
-#+caption: signals into \(r\) groups of \(c\) signals (see cref:eq:interleave).
-#+attr_latex: :float t
+#+caption: signals into \(r\) groups of \(c\) signals. See cref:eq:interleave.
+#+attr_latex: :options float=ht
 #+begin_src faust :noeval
 interleave(r, c) = par(l, r * c, _)
   <: par(m, r, par(n, c,
@@ -688,6 +689,9 @@ with {
 #+end_src
 
 *** Delay Primitive
+:PROPERTIES:
+:CUSTOM_ID: sec:delay
+:END:
 
 Faust provides two primitives for delaying signals; here we will focus
 on the ~mem~ primitive, which, when composed in sequence with a
@@ -777,14 +781,14 @@ A :> B = A : \chi(i_{B},k) : \big\|_{l=1}^{i_{B}}\left(
 \right) : B\;.
 \end{equation}
 Clearly \(\Delta_{N}\llbracket A:>B \rrbracket\) cannot be defined
-recursively, however. For \(i_{B}=1\), cref:eq:expandedMerge reduces
-to \(A:>\_\), and the term in parenthesis can be handled
-separately thanks to the definitions in
+recursively, however. Note that for \(i_{B}=1\) the right hand side of
+cref:eq:expandedMerge reduces to \(A:>\_\), and the term in
+parenthesis can be handled separately thanks to the definitions in
 cref:eq:diffidentity2,eq:diffpar,
-#+NAME: eq:
+#+NAME: eq:mergeOntoOne
 \begin{equation}
 \Delta_{N}\llbracket \big\|_{l=1}^{L}\,\_ :> \_ \rrbracket
-  = \big\|_{l=1}^{L}\Delta_{N}\llbracket \_ \rrbracket :> \Delta_{N}\llbracket \_ \rrbracket
+  = \big\|_{l=1}^{L}\Delta_{N}\llbracket \_ \rrbracket :> \Delta_{N}\llbracket \_ \rrbracket\;.
 \end{equation}
 The order of signals is maintained, so the resulting dual signal is
 guaranteed to be of the form
@@ -792,8 +796,27 @@ guaranteed to be of the form
 For the full expression for differentiable merge composition, see
 cref:eq:diffmerge.
 
+** aeu
 
-** Limitations
+The rules for differentiating the composition operators are collected
+in cref:fig:diffRules. With the implementation of these rules via
+pattern matching, Faust programs can be recursively decomposed
+according to their composition operators, and re-composed in
+differentiable fashion. For example:
+#+NAME: eq:diffComposition
+\begin{equation}
+\begin{split}
+\Delta_{N}\llbracket (A,C):B \rrbracket
+  &= \Delta_{N}\llbracket A,C \rrbracket : \Delta_{N}\llbracket B \rrbracket \\
+  &= \Delta_{N}\llbracket A \rrbracket , \Delta_{N}\llbracket C \rrbracket : \Delta_{N}\llbracket B \rrbracket\;.
+\end{split}
+\end{equation}
+Moreover, programs consisting of differentiable primitives, such ~mem~
+(cref:sec:delay) or the addition operator (cref:lst:diffAdd), can be
+automatically differentiated to arbitrary order,
+\(\Delta_{N}\llbracket{\scriptstyle\Delta_{N}\llbracket\cdots}{\scriptscriptstyle\Delta_{N}\llbracket\cdot\rrbracket}{\scriptstyle\cdots\rrbracket}\rrbracket\).
+
+*** Limitations
   
 Faust programs that adhere to these syntactic restrictions can be
 differentiated to abritrary degree.
