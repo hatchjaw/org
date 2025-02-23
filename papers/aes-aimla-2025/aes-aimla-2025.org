@@ -253,31 +253,31 @@ process = A :> B;
   \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*18/100\relax}
     \centering
     \includesvg[width=\textwidth]{images/par}
-    \subcaption{Parallel.}
+    \subcaption{Parallel, \(A,B\)}
     \label{fig:par}
   \end{minipage}
   \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*20/100\relax}
     \centering
     \includesvg[width=\textwidth]{images/seq}
-    \subcaption{Sequential.}
+    \subcaption{Sequential, \(A:B\).}
     \label{fig:seq}
-  \end{minipage}
-  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*20/100\relax}
-    \centering
-    \includesvg[width=\textwidth]{images/rec}
-    \subcaption{Recursive.}
-    \label{fig:rec}
   \end{minipage}
   \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*22/100\relax}
     \centering
     \includesvg[width=\textwidth]{images/split}
-    \subcaption{Split.}
+    \subcaption{Split, \(A<:B\).}
     \label{fig:split}
+  \end{minipage}
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*20/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/rec}
+    \subcaption{Recursive, \(A\sim{}B\).}
+    \label{fig:rec}
   \end{minipage}
   \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*22/100\relax}
     \centering
     \includesvg[width=\textwidth]{images/merge}
-    \subcaption{Merge.}
+    \subcaption{Merge, \(A:>B\).}
     \label{fig:merge}
   \end{minipage}
 \end{figure*}
@@ -355,6 +355,8 @@ in tackling audio problems,
 - Faust DDSP, dual signals (set of)
 - Introduce semantic rule for \(\Delta_{N}\llbracket D \rrbracket\)
 - Introduce parallel iteration \(\big\|_{l=1}^{L}D\)
+- Very real sense in which machine learning problems are signal
+  processing problems
 
 Just as Python-based machine learning frameworks such as PyTorch and
 JAX permit users to perform automatic differentiation on arbitrary
@@ -455,14 +457,15 @@ networks and digital filters bear striking similarities
           \Delta_{N}\llbracket A \rrbracket,\Delta_{N}\llbracket B \rrbracket \\
         \Delta_{N}\llbracket A : B \rrbracket =
           \Delta_{N}\llbracket A \rrbracket : \Delta_{N}\llbracket B \rrbracket \\
-        \Delta_{N}\llbracket A \sim B \rrbracket =
-          \Delta_{N}\llbracket A \rrbracket \sim \Delta_{N}\llbracket B \rrbracket \\
         \Delta_{N}\llbracket A <: B \rrbracket =
           \Delta_{N}\llbracket A \rrbracket <: \Delta_{N}\llbracket B \rrbracket \\
+        \Delta_{N}\llbracket A \sim B \rrbracket =
+          \Delta_{N}\llbracket A \rrbracket \sim \Delta_{N}\llbracket B \rrbracket \\
         \Delta_{N}\llbracket A :> B \rrbracket =
-          \Delta_{N}\left\llbracket A : \chi(i_{B},k)\right\rrbracket : F : \Delta_{N}\llbracket B \rrbracket \\
+          \Delta_{N}\left\llbracket A : \chi(i_{B},k)\right\rrbracket : F : \Delta_{N}\llbracket B \rrbracket
+          \label{eq:diffmerge} \\
         F = \big\|_{l=1}^{i_{B}}\left(
-          \big\|_{l=1}^{k(N+1)}\_ \;:>\; \big\|_{l=1}^{N+1}\_
+          \big\|_{l=1}^{k}\Delta_{N}\llbracket\_\rrbracket :> \Delta_{N}\llbracket\_\rrbracket
         \right) \nonumber \\
         k = \frac{o_{A}}{i_{B}} \nonumber
       \end{gather}
@@ -527,33 +530,32 @@ block diagram to which they contribute.
 
 To define syntactic rules for the derivatives of Faust's composition
 operators entails analysing them as if they were themselves primitive
-blocks. To do this, we must first consider some of Faust's fundamental
-primitive operators for their differentiation rules; their derivatives
-will assist us in achieving differentiable compositions.
+blocks. To do this, we must consider them in tandem with rules for
+some of Faust's fundamental primitive operators; thesey will assist us
+in achieving differentiable compositions.
 
 *** Identity Primitive
 
 Faust's identity function, notated \(\_\), describes a connection
-between two blocks. The signal processor represented by the identity
-function adheres to the following semantic scheme
-[cite:@orlareySyntactical2004]:
+between two blocks. Treated as a signal processor, it, adheres to the
+following semantic scheme [cite:@orlareySyntactical2004]:
 #+NAME: eq:identity
 \begin{equation}
   \begin{split}
     \llbracket \_ \rrbracket &\;:\; \mathbb{S} \to \mathbb{S} \\
-    \llbracket \_ \rrbracket(s) &= (s)\;,
+    \llbracket \_ \rrbracket(s) &= (s)\;.
   \end{split}
 \end{equation}
-which is to say that it receives one signal, \(s\), and returns that
-same signal unchanged. Application of the identity function is
-analogous to multiplying \(s(t)\), a function of time, by a constant
-signal of value \(1\); supposing that \(s(t)\) is dependent on some
-input variable \(x\), its partial derivative with respect to \(x\) is
-#+NAME: eq:diffsig
-\begin{equation}
-\frac{\partial{}}{\partial{}x}(I(s(x,t))) = \frac{\partial{}}{\partial{}x}(1 \cdot s(x, t)) = \frac{\partial{}}{\partial{}x}s(x, t)\;,
-\end{equation}
-and the semantic rule for the differentiable identity function is thus
+It receives one signal and returns that same signal unchanged,
+analogous to multiplying it by a constant signal of value
+\(1\). In dual signal arithmetic, this is
+#+NAME: eq:
+\begin{align}
+\langle{}s,\nabla{}s\rangle\langle{}1,\nabla1\rangle &= \left\langle{}s,\begin{bmatrix}\frac{\partial{}s}{\partial{}x_{1}}+0&\dots&\frac{\partial{}s}{\partial{}x_{N}}+0\end{bmatrix}^{T}\right\rangle\nonumber \\
+  &= \langle{}s,\nabla{}s\rangle\;,
+\end{align}
+and the semantic rule for the derivative of the identity function is
+thus
 #+NAME: eq:diffidentity
 \begin{equation}
   \begin{split}
@@ -561,103 +563,21 @@ and the semantic rule for the differentiable identity function is thus
     \Delta_{N}\llbracket \_ \rrbracket(\langle{}s, \nabla{}s\rangle) &= (\langle{}s, \nabla{}s\rangle)\;.
   \end{split}
 \end{equation}
-
-*** Cut Primitive
-
-The cut function (!), terminates a signal; intuitively, the
-derivative of a termination is itself a termination:
-#+NAME: eq:cut
+The dual signal \(\langle{}s,\nabla{}s\rangle\) being composed of one primal signal and
+\(N\) gradient signals, we can further state that
+#+NAME: eq:diffidentity2
 \begin{equation}
-  \begin{split}
-    \Delta_{N}\llbracket ! \rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}^{0} \\
-    \Delta_{N}\llbracket ! \rrbracket(\langle{}s,\nabla{}s\rangle) &= ()\;.
-  \end{split}
-\end{equation}
-The circumstances under which it is useful to compute a signal path
-only to discard it may at first appear obscure, until one considers
-that combinations of the identity and cut functions can be used to
-route signals between blocks [cite:@orlareySyntactical2004]. For
-instance, interleave two groups of two signals, such that
-\(s_{1,1},s_{1,2},s_{2,1},s_{2,2}\) becomes
-\(s_{1,1},s_{2,1},s_{1,2},s_{2,2}\), one may write
-#+NAME: eq:interleave22
-\begin{equation}
-\_,\_,\_,\_ \;<:\; \_,!,\_,!,!,\_,!,\_\;.
-\end{equation}
-The general interleaving function, \(\chi(r,c)\), which interleaves \(c\)
-groups of \(r\) signals, described in cref:fig:ad-rules, is used in
-cref:lst:diffAdd; here is its definition in code:
-#+begin_src faust :results file svg :file images/interleave.svg :exports code :noeval
-cutpq(0, q) = _,par(l, q, !);
-cutpq(p, 0) = par(l, p, !),_;
-cutpq(p, q) =
-  par(l, p, !),cutpq(0, q);
-
-interleave(R, C) = par(l, R * C, _)
-  <: par(m, R, par(n, C,
-       cutpq(m, R - m - 1)));
-#+end_src
-In principle, being constructed from the differentiable and identity
-cut primitives, \(\chi\) should in turn be differentiable. This is
-contingent, however, on the derivative behaviour of the split
-composition operator; see cref:sec:splitComposition for further
-detail.
-
-*** Delay Primitive
-
-Faust in fact provides two primitives for delaying signals; here we
-will focus on the ~mem~ primitive, which represents a one-sample
-delay, and can be applied repeatedly in sequence to introduce delays
-of longer duration. In general, a fixed delay can be represented as
-the convolution of a signal, \(s(x,t)\), with a time-shifted impulse,
-#+NAME: eq:delayAsConv
-\begin{equation}
-s(x, t-\tau) = s(x, t) \ast h(t)\;,\quad h(t) = \delta(t - \tau)\;.
-\end{equation}
-Taking the temporal-parametric Fourier transform of the derivative
-with respect to \(x\) of the convolution, using the convolution and
-differentiation properties of the Fourier transform
-[cite:@mcclellanSignal2003], yields
-#+NAME: eq:
-\begin{align}
-&\quad\;\mathcal{F}\left[\frac{\partial{}}{\partial{}x}\left(s(x,t) \ast h(t)\right)\right] \nonumber\\
-  &= j\omega_{x}S(j\omega_{x},j\omega_{t})H(j\omega_{t}) \\
-  &= \mathcal{F}\left[\frac{\partial{}}{\partial{}x}s(x,t)\right]\cdot\mathcal{F}\left[h(t)\right]\;,
-\end{align}
-which demontsrates that differentiation is time-invariant, and means
-that we can use the following semantic scheme for the differentiable
-~mem~ primitive:
-#+NAME: eq:diffmem
-\begin{equation}
-  \begin{split}
-    \Delta_{N}\llbracket\texttt{mem}\rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\
-    \Delta_{N}\llbracket\texttt{mem}\rrbracket(\langle{}s, \nabla{}s\rangle) &= (\langle{}y, \nabla{}y\rangle) \\
-    \langle{}y,\nabla{}y\rangle(t) &= \langle{}s,\nabla{}s\rangle(t-1)\;.
-  \end{split}
+  \Delta_{N}\llbracket \_ \rrbracket = \big\|_{l=1}^{N+1}\;\_\;.
 \end{equation}
 
 *** Parallel Composition
 
-Blocks composed in parallel (see cref:fig:par for an example diagram,
-with \(i_{A} = o_{A} = i_{B} = o_{B} = 1\)) share no common
-operations, and do not influence one-another, arithemtically-speaking:
-
-#+begin_src faust :noexec
-process = A,B;
-#+end_src
-
-# #+begin_src faust :results file svg :file images/par.svg :exports results
-# A = _ <: par(i, 20, +) :> _;
-# B = _ <: par(i, 20, -) :> _;
-# process = A,B;
-# #+end_src
-# #+attr_latex: :width .5\linewidth
-# #+RESULTS:
-The outputs of such a program,
-\(y_{1},\dots,y_{o_{A}}\) and \(y_{o_{A}+1},\dots,y_{o_{A}+o_{B}}\), are
+Blocks composed in parallel (see cref:fig:par) do not influence
+one-another, arithemtically-speaking. The outputs of the program
+\(A,B\), \(y_{1},\dots,y_{o_{A}}\) and \(y_{o_{A}+1},\dots,y_{o_{A}+o_{B}}\), are
 essentially the outputs of separate block diagrams; thus
-\(\Delta_{N}\llbracket A,B \rrbracket = \Delta_{N}\llbracket A
-\rrbracket,\Delta_{N}\llbracket B \rrbracket\), and, more generally
+\(\Delta_{N}\llbracket A,B \rrbracket = \Delta_{N}\llbracket A \rrbracket,\Delta_{N}\llbracket
+B \rrbracket\), and, more generally
 #+NAME: eq:diffpar
 \begin{equation}
 \Delta_{N}\left\llbracket\big\|_{l=1}^{L}D\right\rrbracket =
@@ -666,73 +586,47 @@ essentially the outputs of separate block diagrams; thus
 
 *** Sequential Composition
 
-# A mathematical analogy to the composition of blocks in sequence is
-# function composition. Assuming an input variable, \(x\), a suitable
-# mathematical expression for the program in cref:lst:seq is
-# #+NAME: eq:composition
-# \begin{equation}
-# y = (B \circ A)(x)\;.
-# \end{equation}
-In Faust, for \(A\) and \(B\) to be composable in sequential fashion,
-\(o_{A}\) must be equal to \(i_{B}\).[fn:2] Consequently, the
-following block diagram expressions are arithmetically equivalent
-\begin{gather}
-D_{1} = A : B \label{eq:seq} \\
-D_{2} = A : \Big\|_{l=1}^{o_{A}}\_ : B \label{eq:seqViaWire};\,
-\end{gather}
-and, letting \(o_{A} = i_{B} = 1\), it is clear that the following program
-is equivalent to the one depicted in cref:lst:seq:
-# #+name: lst:seqWithWire
-# #+caption: Sequential composition of two Faust blocks interposed with
-# #+caption: an identity block.
-#+begin_src faust :noeval
-process = A : _ : B;
-#+end_src
-So, using cref:eq:seq,eq:seqViaWire, and the semantic scheme described
-in cref:eq:diffidentity,
+The application of a function, \(f\), to \(M\) dual signals garners a
+definiton of the multivariate chain rule:
+#+NAME: eq:dualchain
 \begin{align}
-\Delta_{N}\llbracket A : B \rrbracket &= \Delta_{N}\llbracket A \rrbracket : \big\|_{l=1}^{o_{A}}\Delta_{N}\llbracket \_ \rrbracket :
-  \Delta_{N}\llbracket B \rrbracket \label{eq:diffseqwithwire} \\
-  &= \Delta_{N}\llbracket A \rrbracket : \Delta_{N}\llbracket B \rrbracket\;. \label{eq:diffseq}
+\langle{}\mathbf{y},\nabla{}\mathbf{y}\rangle &= f(\langle{}s_{1},\nabla{}s_{1}\rangle,\dots,\langle{}s_{M},\nabla{}s_{M}\rangle) \\
+  &= \langle{}f(\mathbf{s}),\nabla(f(\mathbf{s}))\rangle \nonumber \\
+  &= \langle{}f(\mathbf{s}),\mathbf{J}_\mathbf{s}\nabla{}f(\mathbf{s})\rangle\;,
+\end{align}
+where \(\mathbf{J}_{\mathbf{s}}\), the Jacobian matrix of \(\mathbf{s}\),
+is an \(M\times{}N\) matrix whose \((k,i)^{\textrm{th}}\) entry is
+\(\frac{\partial{}s_{k}}{\partial{}x_{i}}\). In Faust, this is equivalent to differentiating
+the sequential composition of \(i_{B} = M\) identity functions with a
+block, \(B\), whose inputs are in fact implicit, i.e.:
+#+NAME: eq:diffseq1
+\begin{equation}
+\Delta_{N}\llbracket B \rrbracket = \Delta_{N}\llbracket \big\|_{l=1}^{i_{B}}\,\_ : B \rrbracket\;.
+\end{equation}
+The differentiable identity function in cref:eq:diffidentity2 gives us
+the following equivalence:
+#+NAME: eq:diffseq2
+\begin{equation}
+\big\|_{l=1}^{i_{B}}\big\|_{m=1}^{N+1 }\_ : \Delta_{N}\llbracket B \rrbracket =
+  \big\|_{l=1}^{i_{B}}\Delta_{N}\llbracket \_ \rrbracket : \Delta_{N}\llbracket B \rrbracket\;.
+\end{equation}
+Similarly, the \(o_{A} = M\) outputs of block \(A\) are implicit:
+#+NAME: eq:diffseq3
+\begin{equation}
+\Delta_{N}\llbracket A \rrbracket = \Delta_{N}\llbracket A : \big\|_{l=1}^{o_{A}}\,\_ \rrbracket =
+  \Delta_{N}\llbracket A \rrbracket : \big\|_{l=1}^{o_{A}}\Delta_{N}\llbracket\_\rrbracket\;.
+\end{equation}
+For blocks \(A\) and \(B\) to be composable in sequence (see
+cref:fig:seq), \(o_{A}\) must be equal to \(i_{B}\).[fn:2] Since both equal
+\(M\), we can conclude that
+#+NAME: eq:diffseq4
+\begin{align}
+\Delta_{N}\llbracket A : B \rrbracket &=
+ \Delta_{N}\llbracket A \rrbracket : \big\|_{l=1}^{M}\Delta_{N}\llbracket\_\rrbracket : \Delta_{N}\llbracket B \rrbracket \nonumber \\
+ &= \Delta_{N}\llbracket A \rrbracket : \Delta_{N}\llbracket B \rrbracket,\quad \forall A,B,\; o_{A} = i_{B}\;.
 \end{align}
 
-*** Recursive Composition
-
-It is a long-established fact that recursive filters are
-differentiable [cite:@shynkAdaptive1989]. The derivative of the
-\(N\)-pole filter
-#+NAME: eq:all-pole
-\begin{equation}
-y(t) = s(t) + \sum_{l=1}^{N}x_{l}(t)y(t-l)
-\end{equation}
-with respect to coefficient \(x_{l}\) is itself a recursion:
-#+NAME: eq:all-pole-diff
-\begin{equation}
-\frac{\partial{}y(t)}{\partial{}x_{l}(t)} = y(t - l) + \sum_{m=1}^{N}x_{m}(t)\frac{\partial{}y(t-m)}{\partial{}x_{l}(t)}\;.
-\end{equation}
-Recursive composition in Faust, \(A \sim B\), introduces an implicit
-one-sample delay, indicated by the small square following block \(A\)
-in cref:fig:rec. Substituting an addition for \(A\) (\(i_{A} = 2\)) and
-multiplication by a coefficient, \(x\), for \(B\) (\(i_{B} = 1\))
-produces a one-pole filter whose derivative, after
-cref:eq:all-pole-diff, is
-#+NAME: eq:one-pole-diff
-\begin{equation}
-\frac{dy(t)}{dx(t)} = y(t - 1) + x(t)\frac{dy(t-1)}{dx(t)}\;.
-\end{equation}
-# #+begin_src faust :results file svg :file images/rec.svg :exports results
-# A = _,_ <: par(i, 20, +) :> _;
-# B = _ <: par(i, 20, -) :> _;
-# process = A ~ B;
-# #+end_src
-# #+attr_latex: :width .6\linewidth
-# #+RESULTS:
-
-
 *** Split Composition
-:PROPERTIES:
-:CUSTOM_ID: sec:splitComposition
-:END:
 
 Composing \(A\) and \(B\), \(i_{B} = ko_{A}\), with the split
 composition operator (see cref:fig:split) duplicates the output
@@ -740,10 +634,10 @@ signals of \(A\), \(k\) times, passing each group of duplicates to
 \(B\), in order:
 #+NAME: eq:split
 \begin{equation}
-A <: B = A : \Big\|_{l=1}^{o_{A}}\__{\,l} <: \Big\|_{m=1}^{k}\Big\|_{l=1}^{o_{A}}\__{\,l} : B\;.
+A <: B = A : \big\|_{l=1}^{o_{A}}\,\__{\,l} <: \big\|_{m=1}^{k}\big\|_{l=1}^{o_{A}}\,\__{\,l} : B\;.
 \end{equation}
 Applying derivative transformation to both sides, and invoking
-cref:eq:diffseqwithwire,eq:diffseq,eq:diffpar, gives
+cref:eq:diffseq1,eq:diffseq2,eq:diffseq3, gives
 #+NAME: eq:diffsplit
 \begin{align}
 &\quad\;\Delta_{N}\llbracket A <: B \rrbracket \nonumber\\
@@ -753,28 +647,151 @@ cref:eq:diffseqwithwire,eq:diffseq,eq:diffpar, gives
     \Delta_{N}\llbracket B \rrbracket \nonumber \\
   &= \Delta_{N}\llbracket A \rrbracket <: \Delta_{N}\llbracket B \rrbracket \;.
 \end{align}
-This proves, in turn, that the signal interleaving function (and all
-routings achieved via parallel composition of identity and cut
-functions) is differentiable:
-#+NAME: eq:diffinterleave
+
+*** Cut Primitive
+
+The cut function (!) terminates a signal, and combinations of the cut
+and identity functions can be used to create complex signal routings.
+For instance, to interleave two groups of two signals, such that
+\(s_{1,1},s_{1,2},s_{2,1},s_{2,2}\) becomes \(s_{1,1},s_{2,1},s_{1,2},s_{2,2}\), one may write
+#+NAME: eq:interleave22
+\begin{equation}
+\_,\_,\_,\_ \;<:\; \_,!,\_,!,!,\_,!,\_\;.
+\end{equation}
+To differentiate an expression such as this, the appropriate
+accompaniment to cref:eq:diffidentity2,eq:diffsplit for the derivative
+of the cut function is
+#+NAME: eq:cut
+\begin{equation}
+  \begin{split}
+    \Delta_{N}\llbracket ! \rrbracket &= \big\|_{l=1}^{N+1}!\;.
+  \end{split}
+\end{equation}
+A general interleaving function, as used in cref:lst:diffAdd, can be
+written, using the cut and identity primitives, plus parallel and
+split composition (see cref:lst:interleave). Being composed from
+differentiable elements, it too is differentiable.
+#+name: lst:interleave
+#+caption: A Faust function that interleaves \(c\) groups of \(r\)
+#+caption: signals into \(r\) groups of \(c\) signals (see cref:eq:interleave).
+#+attr_latex: :float t
+#+begin_src faust :noeval
+interleave(r, c) = par(l, r * c, _)
+  <: par(m, r, par(n, c,
+       cutpq(m, r - m - 1)))
+with {
+  cutpq(0, q) = _,par(l, q, !);
+  cutpq(p, 0) = par(l, p, !),_;
+  cutpq(p, q) =
+    par(l, p, !),cutpq(0, q);
+};
+#+end_src
+
+*** Delay Primitive
+
+Faust provides two primitives for delaying signals; here we will focus
+on the ~mem~ primitive, which, when composed in sequence with a
+signal, applies a one-sample delay.  In general, a fixed delay can be
+represented as the convolution of a signal, \(s(x,t)\), with a
+time-shifted impulse,
+#+NAME: eq:delayAsConv
+\begin{equation}
+s(x, t-\tau) = s(x, t) \ast h(t)\;,\quad h(t) = \delta(t - \tau)\;.
+\end{equation}
+Taking the temporal-parametric Fourier transform of the derivative of
+the convolution with respect to \(x\), then using the convolution and
+differentiation properties of the transform
+[cite:@mcclellanSignal2003], yields
+#+NAME: eq:timeinvariantdiff
+\begin{align}
+&\quad\;\mathcal{F}\left[\frac{\partial{}}{\partial{}x}\left(s(x,t) \ast h(t)\right)\right] \nonumber\\
+  &= j\omega_{x}S(j\omega_{x},j\omega_{t})H(j\omega_{t}) \\
+  &= \mathcal{F}\left[\frac{\partial{}}{\partial{}x}s(x,t)\right]\cdot\mathcal{F}\left[h(t)\right]\;,
+\end{align}
+which demontsrates that differentiation is time-invariant, and allows
+us to deduce the convolution rule of differentiation --- to
+differentiate a convolution we need only differentiate one of the
+functions being convolved. Applied to dual numbers,
+#+NAME: eq:
+\begin{equation}
+\langle{}s,\nabla{}s\rangle\ast\langle{}h,\nabla{}h\rangle = \langle{}s\ast{}h, \nabla{}s\ast{}h\rangle\;,
+\end{equation}
+giving us the following semantic scheme:
+#+NAME: eq:diffmem
+\begin{equation}
+  \begin{split}
+    \Delta_{N}\llbracket\texttt{mem}\rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\
+    \Delta_{N}\llbracket\texttt{mem}\rrbracket(\langle{}s, \nabla{}s\rangle) &= (\langle{}y, \nabla{}y\rangle) \\
+    \langle{}y(t),\nabla{}y(t)\rangle &= \langle{}s(t-1),\nabla{}s(t-1)\rangle\;.
+  \end{split}
+\end{equation}
+
+*** Recursive Composition
+
+The differentiability of recursive filters is well-established
+[cite:@shynkAdaptive1989] --- the derivative of a recursion is itself
+recursive. To establish a differentiation rule for Faust's recursive
+composition operator (see cref:fig:rec), we can expand upon
+cref:eq:dualchain, introducing an inner function, \(g\), that acts
+upon a vector of past output signals:
+#+NAME: eq:dualrec
 \begin{equation}
 \begin{split}
-\Delta_{N}(\chi(r,&c)) = \big\|_{l=1}^{r\times{}c}\Delta_{N}\llbracket \_ \rrbracket <: \\
-  &\big\|_{m=0}^{r-1}\big\|_{n=1}^{c}\left(
-    \big\|_{p=1}^{m}\Delta_{N}\llbracket ! \rrbracket,\Delta_{N}\llbracket \_
-      \rrbracket,\big\|_{q=1}^{r-m-1}\Delta_{N}\llbracket ! \rrbracket
-  \right)
+\langle{}\mathbf{y}(t),&\nabla{}\mathbf{y}(t)\rangle = \bigg\langle{}f(\mathbf{s}(t),g(\mathbf{y}(t-1))), \\
+  &\mathbf{J}_{\mathbf{s}(t)}\frac{\partial{}f}{\partial{}\mathbf{s}(t)} +
+  \mathbf{J}_{\mathbf{y}(t-1)}\nabla{}g(\mathbf{y}(t-1))\frac{\partial{}f}{\partial{}g}\bigg\rangle\;.
 \end{split}
+\end{equation}
+For the case of a one-pole filter, this reduces to
+#+NAME: eq:one-pole
+\begin{equation}
+\langle{}y(t),\nabla{}y(t)\rangle = \langle{}s(t) + y(t-1),\nabla{}s(t) + \nabla{}y(t-1)}\rangle\;,
+\end{equation}
+which, comparing with cref:eq:diffmem, could just as readily be the
+end of the semantic scheme for the derivative of an impossible
+/unrolled/ recursion:
+#+NAME: eq:recSemantic
+\begin{equation}
+\Delta_{N}\llbracket \_,\texttt{mem} : + \rrbracket(\langle{}s,\nabla{}s\rangle,\langle{}y,\nabla{}y\rangle) = (\langle{}y,\nabla{}y\rangle)\;.
+\end{equation}
+This points to the fact that Faust's recursive composition operator
+introduces an implicit one sample delay, and acts like /sequential
+composition through time/, thus:
+#+NAME: eq:diffrec
+\begin{equation}
+\Delta_{N}\llbracket A \sim B \rrbracket = \Delta_{N}\llbracket A \rrbracket \sim \Delta_{N}\llbracket B \rrbracket
 \end{equation}
 
 *** Merge Composition
 
-*** Differentiable Composition Operators
+Merge composition (cref:fig:merge) entails summation
+[cite:@orlareySyntactical2004], thus the addition rule of
+differentiation must be obeyed when merging dual signals. A merge \(A
+:> B\), can be viewed as an interleaving of the outputs of \(A\) into
+\(i_{B}\) groups of \(k=o_{A}/i_{B}\) signals, followed by a merging of each
+group into one signal path:
+#+NAME: eq:expandedMerge
+\begin{equation}
+A :> B = A : \chi(i_{B},k) : \big\|_{l=1}^{i_{B}}\left(
+  \big\|_{m=1}^{k}\,\_ :> \_
+\right) : B\;.
+\end{equation}
+Clearly \(\Delta_{N}\llbracket A:>B \rrbracket\) cannot be defined
+recursively, however. For \(i_{B}=1\), cref:eq:expandedMerge reduces
+to \(A:>\_\), and the term in parenthesis can be handled
+separately thanks to the definitions in
+cref:eq:diffidentity2,eq:diffpar,
+#+NAME: eq:
+\begin{equation}
+\Delta_{N}\llbracket \big\|_{l=1}^{L}\,\_ :> \_ \rrbracket
+  = \big\|_{l=1}^{L}\Delta_{N}\llbracket \_ \rrbracket :> \Delta_{N}\llbracket \_ \rrbracket
+\end{equation}
+The order of signals is maintained, so the resulting dual signal is
+guaranteed to be of the form
+\(\left\langle{}\sum_{l=1}^{L}s_{l},\sum_{l=1}^{L}\nabla{}s_{l}\right\rangle\).
+For the full expression for differentiable merge composition, see
+cref:eq:diffmerge.
 
-- Merge entails summation. The number of summations is derived from
-  the ratio of the number of outputs, \(o_{A}\) of block diagram \(A\)
-  and the number of inputs, \(i_{B}\) of block diagram \(B\), routed
-  according to the rule from Orlarey...
 
 ** Limitations
   
