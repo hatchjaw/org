@@ -63,6 +63,8 @@ bibliography packages but please try to match the provided style.
 \usepackage{booktabs}
 \usepackage{color}
 \usepackage{url}
+\usepackage{tikz}
+\usetikzlibrary{positioning,calc,intersections}
 #+end_src
 
 Maths stuff.
@@ -98,9 +100,15 @@ Listings. I should consider using [[https://www.reddit.com/r/emacs/comments/lbkm
 \usepackage{color}
 \usepackage{listings}
 \definecolor{mygrey}{rgb}{0.96,0.96,0.96}
+\lstdefinelanguage{faust}{
+  morekeywords={process,with,environment},
+  morecomment=[l]{//},
+}
 \lstset{
   tabsize=4,
   basicstyle=\ttfamily,
+  lineskip=-.1em,
+  basewidth=0.55em,
   backgroundcolor=\color{mygrey},
   captionpos=b,
   breaklines=true,
@@ -109,9 +117,9 @@ Listings. I should consider using [[https://www.reddit.com/r/emacs/comments/lbkm
   framextopmargin=2pt,
   framexbottommargin=2pt,
   frame=tb,
-  framerule=0pt,
+  framerule=0pt
 }
-\usepackage{inconsolata}
+\usepackage[varqu,varl]{inconsolata}
 #+end_src
 
 ** Figures
@@ -181,10 +189,10 @@ end-to-end differentiable with respect to their input variables;
 coupled with a loss function --- also composed of differentiable
 primitives --- such a program can produce gradients, which, when
 backpropagated as update-values to the input variables, cause those
-inputs to approach target values, reducing the value returned by the
-loss function, etc., etc. Differentiable digital signal processing
-(DDSP) is concerned with the creation and application of
-differentiable signal processors 
+inputs to approach optimal values. Differentiable digital signal
+processing (DDSP) is concerned with the creation and application of
+differentiable signal processors to mathematical optimisation tasks,
+from the LMS algorithm to machine learning.
 
 Having previously demontstrated that DDSP is possible in the Faust
 language, here we extend to a more general AD syntax and an
@@ -303,7 +311,7 @@ processor [cite:@orlareySyntactical2004]:
 \begin{equation}
   \begin{split}
     \llbracket D \rrbracket &\;:\; \mathbb{S}^{n} \to \mathbb{S}^{m} \\
-    \llbracket D \rrbracket(s_{1},\dots,s_{n}) &= (y_{1},\dots,y_{m}) \\
+    \llbracket D \rrbracket(s_{1},\dots,s_{n}) &\to (y_{1},\dots,y_{m}) \\
     \mathbf{y}(t) &= h(\mathbf{s}(t))\;,
   \end{split}
 \end{equation}
@@ -339,7 +347,7 @@ to machine learning problems in the audio domain, via /DawDreamer/
 Faust code for gradient-based optimisation with the JAX Python
 library. JAX, and other well-known machine learning frameworks, such
 as TensorFlow and PyTorch, enable gradient-based optimisation
-approaches by way of /automatic differentiation/ (AD), a technique for
+approaches by way of /automatic differentiation/, a technique for
 computing the numerical outputs of both a mathematical expression (or,
 more commonly, a computer program) and its derivatives in parallel
 [cite:@rallArithmetic1986;@baydinAutomatic2018;@harrisonBrief2021].
@@ -350,9 +358,8 @@ which are themselves differentiable; a computer program consisting of
 differentiable primitives may be differentiated automatically,
 producing the desired /primal/ and /gradient/ numerical outputs for
 use in a gradient-based optimisation algorithm. The feasibility of
-differentiable programming, and thus differentiable digital signal
-processing (DDSP), in the Faust language has been demonstrated via the
-implementation of forward-mode AD primitives
+differentiable programming, and thus DDSP, in the Faust language has
+been demonstrated via the implementation of forward-mode AD primitives
 [cite:@rushtonDifferentiable2024].
 
 One way of framing forward mode AD is as an arithemitic of dual
@@ -371,15 +378,16 @@ the following semantic scheme:
 \begin{equation}
 \begin{split}
 \Delta_{N}\llbracket D \rrbracket &\;:\; \mathbb{S}_{d}^{M} \to \mathbb{S}_{d}^{P} \\
-\Delta_{N}\llbracket D \rrbracket(\langle{}s_{1},\nabla{}s_{1}\rangle,\dots&,\langle{}s_{M},\nabla{}s_{M}\rangle) \\
-&= (\langle{}y_{1},\nabla{}y_{1}\rangle,\dots,\langle{}y_{P},\nabla{}y_{P}\rangle) \\
-\langle\mathbf{y}(t),\mathbf{J}_{\mathbf{y}}(t)\rangle &= \langle{}h(\mathbf{s}(t)), \mathbf{J}_{{\mathbf{s}}}(t)\nabla{}h(\mathbf{s}(t))\rangle\;,
+\Delta_{N}\llbracket D \rrbracket(\langle{}s_{1},\nabla{}s_{1}\rangle,&\dots,\langle{}s_{M},\nabla{}s_{M}\rangle) \\
+&\to (\langle{}y_{1},\nabla{}y_{1}\rangle,\dots,\langle{}y_{P},\nabla{}y_{P}\rangle) \\
+\langle\mathbf{y}(t), \;\mathbf{J}_{\mathbf{y}}(t)\rangle &= \langle{}h(\mathbf{s}(t)), \;\mathbf{J}_{{\mathbf{s}}}(t)\mathbf{J}_{h}(t))\rangle\;,
 \end{split}
 \end{equation}
 where \(\Delta_{N}\llbracket \cdot \rrbracket\) indicates derivative
 transformation with respect to \(N\) input variables, and
-\(\mathbf{J}_{\mathbf{s}}\) and \(\mathbf{J}_{\mathbf{y}}\) are,
-respectively, \(M\times{}N\) and \(P\times{}N\) Jacobian matrices.
+\(\mathbf{J}_{\mathbf{y}}\), \(\mathbf{J}_{\mathbf{s}}\), and
+\(\mathbf{J}_{h}}\) are, respectively, \(N\times{}P\), \(N\times{}M\) and \(M\times{}P\)
+Jacobian matrices.
 
 AD primitives have been demonstrated in Faust using the language's
 pattern-matching abstraction
@@ -593,6 +601,70 @@ B \rrbracket\), and, more generally
 
 *** Sequential Composition
 
+#+name: fig:dualSec
+#+caption: \dots
+#+begin_export latex
+\pgfkeys{
+  /diffop/.cd,
+  faust/.initial=,
+  math/.initial=,
+}
+\newcommand\diffop[1]{
+  \pgfkeys{/diffop/.cd,#1}
+  \begin{scope}[
+    faustnode/.style={rectangle, thick, draw=black, minimum size=8mm}
+  ]
+    \draw[] (box) (0,0) rectangle (4.2,3.6)
+    
+    \node[faustnode](mul) at (3.2,.8) {\(\times\)}
+    \node[faustnode](dop)[above left=2mm and 6mm of mul]{\(\nabla\pgfkeysvalueof{/diffop/math}\)}
+    \node[faustnode](op)[above=3mm of dop]{\(\pgfkeysvalueof{/diffop/math}\)}
+    \node(label)[above right=37mm and 14mm of box]{\(\Delta_{N}\llbracket \pgfkeysvalueof{/diffop/faust} \rrbracket\)}
+
+    \draw[thick, ->] let \p{opw}=(op.west) in (0,\y{opw})--(op.west)
+    \draw[thick, ->] let \p{opw}=(op.west), \p{dopw}=(dop.west) in
+      (0,\y{opw})--+(.75,0)--(.75,\y{dopw})|-(dop.west)
+    \draw[thick, ->] let \p{ope}=(op.east) in (op.east)--(4.2,\y{ope})
+    \draw[thick, ->] let \p{mulw}=(mul.west) in (dop.east)--+(.3,0)|-(\x{mulw},.95)
+    \draw[thick, ->] let \p{mulw}=(mul.west) in (0,\y{mulw})--+(1.8,0)--+(1.8,-.15)|-+(\x{mulw},-.15)
+    \draw[thick, ->] let \p{mule}=(mul.east) in (mul.east)--(4.2,\y{mule})
+  \end{scope}
+}
+
+\begin{figure*}
+\centering
+\begin{tikzpicture}
+ \begin{scope}[xshift=-6.2cm]
+    \draw[thick, ->] (4.2,2.96)--(6.2,2.96)
+    \draw[thick, ->] (4.2,.8)--(6.2,.8)
+  \end{scope}
+  \diffop{faust=A,math=g}
+  \draw[thick, ->] (4.2,2.96)--(6.2,2.96)
+  \draw[thick, ->] (4.2,.8)--(6.2,.8)
+  \begin{scope}[xshift=6.2cm]
+    \diffop{faust=B,math=f}
+    \draw[thick, ->] (4.2,2.96)--(6.2,2.96)
+    \draw[thick, ->] (4.2,.8)--(6.2,.8)
+  \end{scope}
+\end{tikzpicture}
+\end{figure*}
+#+end_export
+
+Expading on the semantic scheme in cref:eq:diffSemantic,
+differentiable sequential composition \(\Delta_{N}\llbracket A : B
+\rrbracket\) is analogous to finding the derivative of the composition
+of /two/ functions, \(g\) and \(f\), of a vector of dual signals:
+#+NAME: eq:diffSeqSemantic
+\begin{equation}
+\begin{split}
+\Delta_{N}\llbracket A : B \rrbracket(\langle{}\mathbf{s}, &\;\mathbf{J}_{\mathbf{s}}\rangle)
+  \to (\langle{}\mathbf{y}, \;\mathbf{J}_{\mathbf{y}}\rangle) \\[5pt]
+\langle{}\mathbf{y}(t), \;\mathbf{J}_{\mathbf{y}}(t)\rangle
+  &= f(g(\langle\mathbf{s}(t), \;\mathbf{J}_{\mathbf{s}}(t)\rangle)) \\
+  &= \big\langle{}f(g(\mathbf{s}(t))), \;\mathbf{J}_{\mathbf{s}}(t)\mathbf{J}_{g}(t)\mathbf{J}_{f}(t)\big\rangle\;.
+\end{split}
+\end{equation}
+
 The application of a function, \(f\), to \(M\) dual signals garners a
 definiton of the multivariate chain rule:
 #+NAME: eq:dualchain
@@ -672,7 +744,7 @@ gives
 :CUSTOM_ID: sec:cut
 :END:
 
-The cut function (!) terminates a signal, and combinations of the cut
+The cut primitive (!) terminates a signal, and combinations of the cut
 and identity functions can be used to create complex signal routings.
 For instance, to interleave two groups of two signals, such that
 \(s_{1,1},s_{1,2},s_{2,1},s_{2,2}\) becomes \(s_{1,1},s_{2,1},s_{1,2},s_{2,2}\), one may write
@@ -682,7 +754,7 @@ For instance, to interleave two groups of two signals, such that
 \end{equation}
 To differentiate an expression such as this, the appropriate
 accompaniment to cref:eq:diffidentity2,eq:diffsplit for the derivative
-of the cut function is
+of the cut primitive is
 #+NAME: eq:cut
 \begin{equation}
   \begin{split}
@@ -699,8 +771,8 @@ elements, it too is differentiable.
 #+attr_latex: :options float=ht
 #+begin_src faust :noeval
 interleave(r, c) = par(l, r * c, _)
-  <: par(m, r, par(n, c,
-       cutpq(m, r - m - 1)))
+  <: par(m, r,
+       par(n, c, cutpq(m, r - m - 1)))
 with {
   cutpq(0, q) = _,par(l, q, !);
   cutpq(p, 0) = par(l, p, !),_;
@@ -762,9 +834,9 @@ upon a vector of past output signals:
 #+NAME: eq:dualrec
 \begin{equation}
 \begin{split}
-\langle{}\mathbf{y}(t),\,&\mathbf{J}_{\mathbf{y}}(t)\rangle = \bigg\langle{}f(\mathbf{s}(t),g(\mathbf{y}(t-1))), \\
+\langle{}\mathbf{y}(t),\,\mathbf{J}_{\mathbf{y}}&(t)\rangle = \bigg\langle{}f(\mathbf{s}(t),g(\mathbf{y}(t-1))), \\
   &\mathbf{J}_{\mathbf{s}}(t)\frac{\partial{}f}{\partial{}\mathbf{s}(t)} +
-  \mathbf{J}_{\mathbf{y}}(t-1)\nabla{}g(\mathbf{y}(t-1))\frac{\partial{}f}{\partial{}g}\bigg\rangle\;.
+  \mathbf{J}_{\mathbf{y}}(t-1)\mathbf{J}_{g}(t-1)\frac{\partial{}f}{\partial{}g}\bigg\rangle\;.
 \end{split}
 \end{equation}
 For the case of a one-pole filter, this reduces to
@@ -861,6 +933,31 @@ achieved differentiably with code such as in cref:lst:interleave.
 :PROPERTIES:
 :UNNUMBERED:
 :END:
+#+name: lst:diffInN
+#+caption: \dots
+#+attr_latex: :float t
+#+begin_src faust :noeval
+N = 3;
+
+H = ((sub,par(l, N - 1, _))
+  ~ (fir(N - 1))),par(l, N, _)
+  : _,si.block(N - 1),par(l, N, _)
+  : fir(N)
+with { 
+  sub = _,_ <: !,_,_,! : -;
+  fir(n) = (_ <: par(l, n, _)),par(l, n, _) 
+    : routes.interleave(n, 2) 
+    : par(i, n,
+          seq(m, i, mem),_ : *) 
+    :> _;
+};
+
+process = _,coeffs : d.diffInN(H, 1)
+with {
+    coeffs = par(i, 2 * N - 1,
+                 vars.var(i + 1));
+};
+#+end_src
 The obvious derivative transformation of a user interface element is
 to an input variable, i.e. a parameter for optimisation such as a
 weight in a neural network. Input variables must be identifiable so as
@@ -874,14 +971,14 @@ its parameters. For instance, to transform the slider ~hslider("x1", 0,
 minimum, maximum and step, it is necessary to write ~diff(hslider("x1",
 0, -1, 1, .01))~. Clearly, in the general case, this is not practical.
 
-The approach taken at the time of writing has been to move input
-variables outside of the general AD transformation, with a wrapper
-function used to indicate the number of input signals (whose gradients
-are zero vectors) and input variables received by the main body of the
-differentiated block diagram. Though imposing a certiain coding
-convention, we consider this comparable with the particular
-requirements imposed by PyTorch, TensorFlow, and JAX, with their
-respective dedicated datatypes for learnable parameters.
+The approach proposed is to move input variables out of the general AD
+transformation; a wrapper function is used to indicate the number of
+input signals (whose gradients are zero vectors) and input variables
+received by the main body of the differentiated block diagram (see
+cref:lst:diffInN). Though imposing a certiain coding convention, we
+consider this comparable with the particular requirements imposed by
+PyTorch, TensorFlow, and JAX, with their respective dedicated
+datatypes for learnable parameters.
 
 **** Lambda abstractions
 :PROPERTIES:
@@ -894,14 +991,6 @@ JAX permit users to perform automatic differentiation on arbitrary
 code, the same should ideally be true of an equivalent Faust-based
 framework. [So, actually this isn't entirely the case; one has to
 write code in a particular style for JAX/PyTorch to handle it.]
-
-* Methods
-
-Show your methods.
-
-* Results
-
-Present results.
 
 * Discussion
 
@@ -958,6 +1047,7 @@ Summarize your work and conclude.
 #+print_bibliography:
 
 * Footnotes
+
 [fn:4] \href{https://github.com/grame-cncm/faustlibraries/blob/65594336a3476d9a82a4df71e88c92f3e4b94821/routes.lib}{https://github.com/grame-cncm/faustlibraries/blob/master/routes.lib}
 
 [fn:3] Note that in Faust, \(a\), the iterator index, starts from
