@@ -619,7 +619,7 @@ B \rrbracket\), and, more generally
     \node[faustnode](mul) at (3.2,.8) {\(\times\)}
     \node[faustnode](dop)[above left=2mm and 6mm of mul]{\(\nabla\pgfkeysvalueof{/diffop/math}\)}
     \node[faustnode](op)[above=3mm of dop]{\(\pgfkeysvalueof{/diffop/math}\)}
-    \node(label)[above right=37mm and 14mm of box]{\(\Delta_{N}\llbracket \pgfkeysvalueof{/diffop/faust} \rrbracket\)}
+    \node(label)[above right=37mm and 15mm of box]{\(\Delta_{N}\llbracket \pgfkeysvalueof{/diffop/faust} \rrbracket\)}
 
     \draw[thick, ->] let \p{opw}=(op.west) in (0,\y{opw})--(op.west)
     \draw[thick, ->] let \p{opw}=(op.west), \p{dopw}=(dop.west) in
@@ -634,17 +634,27 @@ B \rrbracket\), and, more generally
 \begin{figure*}
 \centering
 \begin{tikzpicture}
- \begin{scope}[xshift=-6.2cm]
-    \draw[thick, ->] (4.2,2.96)--(6.2,2.96)
-    \draw[thick, ->] (4.2,.8)--(6.2,.8)
+ \begin{scope}[xshift=-5cm]
+    \node (primal) at (4,2.96) {\(\mathbf{s}\)}
+    \node (jacobian) at (4,.8) {\(\mathbf{J}_{\mathbf{s}}\)}
+    \draw[thick, ->] (primal.east)--(5,2.96)
+    \draw[thick, ->] (jacobian.east)--(5,.8)
   \end{scope}
+  
   \diffop{faust=A,math=g}
-  \draw[thick, ->] (4.2,2.96)--(6.2,2.96)
-  \draw[thick, ->] (4.2,.8)--(6.2,.8)
-  \begin{scope}[xshift=6.2cm]
+  \node (primal) at (5.6,2.96) {\(\mathbf{z} = g(\mathbf{s})\)}
+  \node (jacobian) at (5.6,.8) {\(\mathbf{J}_{\mathbf{z}} = \mathbf{J}_{\mathbf{s}}\mathbf{J}_{g}\)}
+  \draw[thick] (4.2,2.96)--(primal.west)
+  \draw[thick] (4.2,.8)--(jacobian.west)
+  \draw[thick, ->] (primal.east)--(7,2.96)
+  \draw[thick, ->] (jacobian.east)--(7,.8)
+  
+  \begin{scope}[xshift=7cm]
     \diffop{faust=B,math=f}
-    \draw[thick, ->] (4.2,2.96)--(6.2,2.96)
-    \draw[thick, ->] (4.2,.8)--(6.2,.8)
+    \node (primal) at (5.6,2.96) {\(\mathbf{y} = f(g(\mathbf{s}))\)}
+    \node (jacobian) at (5.6,.8) {\(\mathbf{J}_{\mathbf{y}} = \mathbf{J}_{\mathbf{s}}\mathbf{J}_{g}\mathbf{J}_{f}\)}
+    \draw[thick] (4.2,2.96)--(primal.west)
+    \draw[thick] (4.2,.8)--(jacobian.west)
   \end{scope}
 \end{tikzpicture}
 \end{figure*}
