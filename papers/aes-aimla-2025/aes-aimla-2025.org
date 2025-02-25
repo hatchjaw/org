@@ -601,8 +601,6 @@ B \rrbracket\), and, more generally
 
 *** Sequential Composition
 
-#+name: fig:dualSec
-#+caption: \dots
 #+begin_export latex
 \pgfkeys{
   /diffop/.cd,
@@ -612,53 +610,55 @@ B \rrbracket\), and, more generally
 \newcommand\diffop[1]{
   \pgfkeys{/diffop/.cd,#1}
   \begin{scope}[
-    faustnode/.style={rectangle, thick, draw=black, minimum size=8mm}
+    faustnode/.style={rectangle, thick, draw=black, minimum size=7mm}
   ]
-    \draw[] (box) (0,0) rectangle (4.2,3.6)
+    \draw[] (box) (0,0) rectangle (3.5,3)
     
-    \node[faustnode](mul) at (3.2,.8) {\(\times\)}
-    \node[faustnode](dop)[above left=2mm and 6mm of mul]{\(\nabla\pgfkeysvalueof{/diffop/math}\)}
-    \node[faustnode](op)[above=3mm of dop]{\(\pgfkeysvalueof{/diffop/math}\)}
-    \node(label)[above right=37mm and 15mm of box]{\(\Delta_{N}\llbracket \pgfkeysvalueof{/diffop/faust} \rrbracket\)}
+    \node[faustnode](mul) at (2.7,.7) {\(\times\)}
+    \node[faustnode](dop)[above left=0mm and 6mm of mul]{\(\nabla\pgfkeysvalueof{/diffop/math}\)}
+    \node[faustnode](op)[above=2mm of dop]{\(\pgfkeysvalueof{/diffop/math}\)}
+    \node(label)[above right=31mm and 11.5mm of box]{\(\Delta_{N}\llbracket \pgfkeysvalueof{/diffop/faust} \rrbracket\)}
 
     \draw[thick, ->] let \p{opw}=(op.west) in (0,\y{opw})--(op.west)
     \draw[thick, ->] let \p{opw}=(op.west), \p{dopw}=(dop.west) in
-      (0,\y{opw})--+(.75,0)--(.75,\y{dopw})|-(dop.west)
-    \draw[thick, ->] let \p{ope}=(op.east) in (op.east)--(4.2,\y{ope})
-    \draw[thick, ->] let \p{mulw}=(mul.west) in (dop.east)--+(.3,0)|-(\x{mulw},.95)
+      (0,\y{opw})--+(.5,0)--(.5,\y{dopw})|-(dop.west)
+    \draw[thick, ->] let \p{ope}=(op.east) in (op.east)--(3.5,\y{ope})
+    \draw[thick, ->] let \p{mulw}=(mul.west) in (dop.east)--+(.3,0)|-(\x{mulw},.9)
     \draw[thick, ->] let \p{mulw}=(mul.west) in (0,\y{mulw})--+(1.8,0)--+(1.8,-.15)|-+(\x{mulw},-.15)
-    \draw[thick, ->] let \p{mule}=(mul.east) in (mul.east)--(4.2,\y{mule})
+    \draw[thick, ->] let \p{mule}=(mul.east) in (mul.east)--(3.5,\y{mule})
   \end{scope}
 }
+#+end_export
 
+#+name: fig:dualSec
+#+caption: \dots
 \begin{figure*}
 \centering
 \begin{tikzpicture}
  \begin{scope}[xshift=-5cm]
-    \node (primal) at (4,2.96) {\(\mathbf{s}\)}
-    \node (jacobian) at (4,.8) {\(\mathbf{J}_{\mathbf{s}}\)}
-    \draw[thick, ->] (primal.east)--(5,2.96)
-    \draw[thick, ->] (jacobian.east)--(5,.8)
+    \node (primal) at (4,2.355) {\(\mathbf{s}\)}
+    \node (jacobian) at (4,.7) {\(\mathbf{J}_{\mathbf{s}}\)}
+    \draw[thick, ->] (primal.east)--(5,2.355)
+    \draw[thick, ->] (jacobian.east)--(5,.7)
   \end{scope}
   
   \diffop{faust=A,math=g}
-  \node (primal) at (5.6,2.96) {\(\mathbf{z} = g(\mathbf{s})\)}
-  \node (jacobian) at (5.6,.8) {\(\mathbf{J}_{\mathbf{z}} = \mathbf{J}_{\mathbf{s}}\mathbf{J}_{g}\)}
-  \draw[thick] (4.2,2.96)--(primal.west)
-  \draw[thick] (4.2,.8)--(jacobian.west)
-  \draw[thick, ->] (primal.east)--(7,2.96)
-  \draw[thick, ->] (jacobian.east)--(7,.8)
+  \node (primal) at (4.8,2.355) {\(\mathbf{z} = g(\mathbf{s})\)}
+  \node (jacobian) at (4.8,.7) {\(\mathbf{J}_{\mathbf{z}} = \mathbf{J}_{\mathbf{s}}\mathbf{J}_{g}\)}
+  \draw[thick] (3.5,2.355)--(primal.west)
+  \draw[thick] (3.5,.7)--(jacobian.west)
+  \draw[thick, ->] (primal.east)--(6.2,2.355)
+  \draw[thick, ->] (jacobian.east)--(6.2,.7)
   
-  \begin{scope}[xshift=7cm]
+  \begin{scope}[xshift=6.2cm]
     \diffop{faust=B,math=f}
-    \node (primal) at (5.6,2.96) {\(\mathbf{y} = f(g(\mathbf{s}))\)}
-    \node (jacobian) at (5.6,.8) {\(\mathbf{J}_{\mathbf{y}} = \mathbf{J}_{\mathbf{s}}\mathbf{J}_{g}\mathbf{J}_{f}\)}
-    \draw[thick] (4.2,2.96)--(primal.west)
-    \draw[thick] (4.2,.8)--(jacobian.west)
+    \node (primal) at (5,2.355) {\(\mathbf{y} = f(g(\mathbf{s}))\)}
+    \node (jacobian) at (5,.7) {\(\mathbf{J}_{\mathbf{y}} = \mathbf{J}_{\mathbf{s}}\mathbf{J}_{g}\mathbf{J}_{f}\)}
+    \draw[thick] (3.5,2.355)--(primal.west)
+    \draw[thick] (3.5,.7)--(jacobian.west)
   \end{scope}
 \end{tikzpicture}
 \end{figure*}
-#+end_export
 
 Expading on the semantic scheme in cref:eq:diffSemantic,
 differentiable sequential composition \(\Delta_{N}\llbracket A : B
