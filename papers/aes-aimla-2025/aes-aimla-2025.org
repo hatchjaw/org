@@ -121,6 +121,8 @@ Listings. I should consider using [[https://www.reddit.com/r/emacs/comments/lbkm
   frame=tb,
   framerule=0pt
 }
+\renewcommand\lstlistingname{List.}
+\renewcommand\lstlistlistingname{List.}
 \usepackage[varqu,varl]{inconsolata}
 #+end_src
 
@@ -331,10 +333,11 @@ of the Faust ecosystem is its /write once, run anywhere/ model; a
 variety of additional backends are supported, including LLVM
 [cite:@letzOverview2018], WebAssembly [cite:@letzCompiling2017], and
 Rust [cite:@gasterAudio2020], plus numerous software and hardware
-platforms. Faust code can be compiled for use in VST
-plugins[cite:@albouyFaust2017], for embedded systems
-[cite:@michonEmbedded2020] and FPGAs [cite:@cochardProgramming2024];
-it is used by artists and digital luthiers
+platforms. Faust code can be compiled for use in VST plugins
+[cite:@albouyFaust2017], for embedded systems
+[cite:@michonEmbedded2020] and \mbox{FPGAs}
+[cite:@cochardProgramming2024]; it is used by artists and digital
+luthiers
 [cite:@michonFaust2020a;@rushtonSpringamajig2022;@hansenWeather2018],
 and features sophisticated libraries for wave digital filter modelling
 [cite:@roosenburgWave2021] and physical modelling synthesis
@@ -634,7 +637,9 @@ B \rrbracket\), and, more generally
 #+end_export
 
 #+name: fig:dualSec
-#+caption: \dots
+#+caption: Sequential composition of differentiable Faust blocks \(A\)
+#+caption: and \(B\) is analogous to composition of differentiable
+#+caption: functions \(f\) and \(g\). 
 \begin{figure*}
 \centering
 \begin{tikzpicture}
@@ -875,46 +880,16 @@ expression for differentiable merge composition, see
 cref:eq:diffmerge.
 
 ** Summary
-
-#+name: lst:neuron
-#+caption: \dots
-#+attr_latex: :float t
-#+begin_src faust :noeval
-// diff.lib
-neuron(NINPUTS, activationFunction) =
-  routes.crossNM(NINPUTS + 1, NINPUTS)
-  : Y
-with {
-  WX = routes.interleave(NINPUTS, 2)
-    : sum(i, NINPUTS, *);
-  b = _;
-  Y = WX + b : activationFunction;
-};
-
-activations = environment {
-  sigmoid = *(-1) : 1 / (1 + exp);
-  //...
-}
-
-// neuron.dsp
-NW = 3; // Number of weights.
-
-process = par(i, NW + 1,
-      wb.var(i + 1)),par(i, NW, _)
-  : d.diffInM(
-    d.neuron(N, d.activations.sigmoid),
-  N)
-with {
-    wb = weightsAndBiases((1, NW));
-    d = df.env(wb);
-};
-#+end_src
+:PROPERTIES:
+:CUSTOM_ID: sec:summary
+:END:
 
 The rules for differentiating Faust's composition operators are
 collected in cref:fig:diffRules. With the implementation of these
 rules via pattern matching, Faust programs can be recursively
 decomposed according to their composition operators, and re-composed
-in differentiable fashion. For example:
+in differentiable fashion, satisfying the syntactic rule in
+cref:eq:idealDiffSyntax. For example:
 #+NAME: eq:diffComposition
 \begin{equation}
 \begin{split}
@@ -923,16 +898,61 @@ in differentiable fashion. For example:
   &= \Delta_{N}\llbracket A \rrbracket , \Delta_{N}\llbracket C \rrbracket : \Delta_{N}\llbracket B \rrbracket\;.
 \end{split}
 \end{equation}
-For example, an artificial neuron of the form \(y =
-\sigma(\mathbf{WX}+b)\), such as could be used in a binary classification
-problem, can be created as per cref:lst:neuron; derivative
-transformation occurs within the wrapper function
-~d.diffInM~. Moreover, algorithms of this sort, consisting of
+An artificial neuron of the form \(y = \sigma(\mathbf{wx}+b)\), such as
+could be used in a binary classification problem, can be created as
+per cref:lst:neuron. The code describes a neuron and sigmoid
+activation function in primal form, in a library file, =diff.lib=; the
+~dot~ function uses the familiar ~interleave~ to compute the dot
+product, \(\mathbf{wx}\); in =neuron.dsp=, differentiable weights and
+biases are created according to a network layer specification --- one
+pair of signals indicating one layer of one neuron with ~NW~ weights;
+the wrapper-function ~diffInN~ performs derivative transformation; its
+first ~NW~ inputs are considered input signals, \(\mathbf{s}\), the
+rest as input variables, \(\mathbf{x}\).
+
+Worthy of reflection is that algorithms of this sort, consisting of
 differentiable primitives, plus our now-differentiable composition
 operators, can be automatically differentiated to arbitrary order,
 \(\Delta_{N}\llbracket{\scriptstyle\Delta_{N}\llbracket
 \cdots}{\scriptscriptstyle\Delta_{N}\llbracket \cdot \rrbracket}{\scriptstyle \cdots
 \rrbracket}\rrbracket\).
+
+# #+attr_latex: :float t
+#+attr_latex: :options float=t
+#+name: lst:neuron
+#+caption: Excerpt from a differentiable artificial neuron
+#+caption: implementation. See cref:sec:summary for
+#+caption: detail.
+#+begin_src faust :noeval
+// diff.lib
+neuron(NINPUTS, activationFunction) =
+  WX + b : activationFunction;
+with {
+  WX = linalg.dot(NINPUTS);
+  b = _;
+};
+
+activations = environment {
+  sigmoid = *(-1) : 1 / (1 + exp);
+}
+
+linalg = environment {
+  dot(N) = interleave(N, 2)
+    : par(i, N, *) :> _;
+};
+
+// neuron.dsp
+NW = 3; // Number of weights.
+process = par(i, NW, _),
+  par(i, NW + 1, wb.var(i + 1))
+  : d.diffInN(neuron, NW)
+with {
+  wb = weightsAndBiases((1, NW));
+  d = df.env(wb);
+  neuron = d.neuron(NW,
+    d.activations.sigmoid);
+};
+#+end_src
 
 *** Limitations
 
@@ -984,38 +1004,6 @@ datatypes for learnable parameters.
 :UNNUMBERED:
 :END:
 
-#+name: lst:iir
-#+caption: \dots
-#+attr_latex: :float t
-#+begin_src faust :noeval
-N = 3; // filter order.
-
-// ...Set up AD vars & environment...
-
-// Differentiable TDF IIR filter.
-iir = ((sub,par(l, N - 1, _))
-  ~ (fir(N - 1))),par(l, N, _)
-  : _,par(l, N - 1, !),par(l, N, _)
-  : fir(N)
-with { 
-  sub = _,_ <: !,_,_,! : -;
-  fir(n) =
-    (_ <: par(l, n, _)),par(l, n, _) 
-    : routes.interleave(n, 2) 
-    : par(i, n,
-          seq(m, i, mem),_ : *) 
-    :> _;
-};
-
-// Send a signal input, and coef-
-// -ficients, to the diffed filter.
-process = _,coeffs : d.diffInN(iir, 1)
-with {
-    coeffs = par(i, 2 * N - 1,
-                 vars.var(i + 1));
-};
-#+end_src
-
 Perhaps the most problematic limitation posed is that of Faust's
 lambda abstractions, which can be neither pattern-matched, nor
 differentiated. The ~iir~ function in =filters.lib=, for example, is
@@ -1029,7 +1017,42 @@ kind --- in this case reversing signal order before applying some
 primitive operation --- are effectively matters of signal-routing and,
 as described in cref:sec:cut, can be recreated using differentiable
 primitives. See cref:lst:iir for a differentiable
-transposed-direct-form IIR filter implementation.
+transposed-direct-form IIR filter implementation; though reliant on
+some complex signal routing, particurlarly for directing coefficients
+to the feedforward (~fir(N)~) and feedback (~fir(N - 1)~) portions of
+the filter, it is structurally similar to the neuron implementation in
+cref:lst:neuron.
+
+# #+attr_latex: :float t
+#+attr_latex: :options float=t
+#+name: lst:iir
+#+caption: Excerpt from a differentiable IIR filter implementation.
+#+begin_src faust :noeval
+N = 3; // filter order.
+
+// ...Set up AD vars & environment...
+
+// Differentiable TDF IIR filter.
+iir = ((sub,par(l, N - 1, _))
+  ~ (fir(N - 1))),par(l, N, _)
+  : _,par(l, N - 1, !),par(l, N, _)
+  : fir(N)
+with { 
+  sub = _,_ <: !,_,_,! : -;
+  fir(n) =
+    (_ <: par(l, n, seq(m, l, mem))),
+      par(l, n, _) 
+    : linalg.dot(n);
+};
+
+// Send a signal input, and coef-
+// -ficients, to the diffed filter.
+process = _,coeffs : d.diffInN(iir, 1)
+with {
+    coeffs = par(i, 2 * N - 1,
+                 vars.var(i + 1));
+};
+#+end_src
 
 * Examples                                                         :noexport:
 
@@ -1077,7 +1100,11 @@ preferred result might require some tuning by hand.
 
 * Conclusion
 
-We did it.
+In this paper we have described a general scheme for differentiating
+Faust programs, and moving an important step closer to providing the
+means with which to tackle audio optimisation and machine learning
+problems with the domain-specific and cross-platform benefits of the
+Faust language.
 
 #+print_bibliography:
 

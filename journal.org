@@ -6884,3 +6884,17 @@ Entered on [2025-02-05 mer. 21:32]
 - Drafts for papers a week in advance of deadlines, please.
   
 Entered on [2025-02-11 mar. 11:07]
+*** 2025-02-26 mercredi
+**** Emeraude Thèsards
+AES paper: Orégane suggests either:
+- linking to code on an anonymous platform.
+- saying /artefacts deliverable on condition of acceptance/.
+
+Other stuff:
+- Romain had a paper accepted. Nice. Going to Texas.
+- Benjamin finished the Planche. Back to ML asap.
+- Orégane working on thesis. Not stressful, but it's draining.
+  + Worrying lack of responses regarding future postdoc position.
+- Bastien working on a paper for Compas'2025 on shift-and-add stuff.
+
+Entered on [2025-02-26 mer. 10:45]
