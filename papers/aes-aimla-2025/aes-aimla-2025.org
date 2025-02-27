@@ -8,8 +8,6 @@
 #+export_file_name: out/aes-aimla-2025
 #+options: toc:nil num:5 H:5 date:nil author:nil title:nil
 #+latex_class: aes-aimla-2025
-# #+bibliography: ../../references.bib
-# Might have to revert to natbib...
 #+cite_export: biblatex numeric,sorting=none,url=false,isbn=false
 #+latex_header_extra: \RequirePackage[]{./out/aes-aimla-2025}
 
@@ -22,7 +20,7 @@ Differentiable programming via automatic differentiation is the foundation
 for gradient-based optimisation techniques, and forms the basis for many current
 approaches to machine learning. Though well catered-for in general-purpose
 programming languages, a the availability of automatic differentiation in a
-domain-specific language (DSL) could support novel perspectives on optimisation
+domain-specific language (DSL) could provide novel perspectives on optimisation
 and machine learning problems in the field of audio. We present a general scheme
 for differentiable programming in the Faust programming language, a high-performance
 DSL tailored to audio synthesis and signal processing. Faust's rich ecosystem,
@@ -31,8 +29,6 @@ and machine learning applications on a multitude of platforms, from FPGAs to the
 \end{onecolabstract}
 ]
 #+end_export
-
-* About                                                            :noexport:
 
 * LaTeX Setup                                                      :noexport:
 :PROPERTIES:
@@ -59,21 +55,19 @@ Highly recommended package for better looking text automatically.
 \usepackage{microtype}
 #+end_src
 
-Natbib is used for more control on citations. You can use other modern
-bibliography packages but please try to match the provided style.
-
-#+begin_src latex
-%% \usepackage[numbers,square]{natbib}
-#+end_src
-
 "These are useful for different purposes."
 
 #+begin_src latex
 \usepackage{booktabs}
 \usepackage{color}
 \usepackage{url}
+#+end_src
+
+Diagrams.
+
+#+begin_src latex
 \usepackage{tikz}
-\usetikzlibrary{positioning,calc,intersections}
+\usetikzlibrary{positioning,calc}
 #+end_src
 
 Maths stuff.
@@ -133,8 +127,8 @@ Listings. I should consider using [[https://www.reddit.com/r/emacs/comments/lbkm
   numberstyle=\ttfamily\tiny\color{black!45!white},
   numbersep=4pt
 }
-\renewcommand\lstlistingname{List.}
-\renewcommand\lstlistlistingname{List.}
+%% \renewcommand\lstlistingname{List.}
+%% \renewcommand\lstlistlistingname{List.}
 \usepackage[varqu,varl]{inconsolata}
 #+end_src
 
@@ -228,19 +222,19 @@ availability of such methods hinges on the possibility of computing
 the derivatives of computer programs. In the field of machine learning
 in particular, automatic differentiation
 (AD)\nbsp[cite:@baydinAutomatic2018] has emerged as the dominant
-algorithmic differentiation paradigm. In AD, the primitive operations
+differentiable programming paradigm. In AD, the primitive operations
 of a programming language are defined differentiably, thus programs
 composed from those operations are in turn differentiable end-to-end
-with respect to their input variables.  Programs featuring
-differentiable loss functions figure in gradient descent algorithms,
-partial derivatives of the loss function being gradients, which, when
-backpropagated as update-values to the input variables, cause those
-inputs to approach optimal values. Differentiable digital signal
-processing (DDSP) is concerned with the creation of signal processors
-whose derivatives can be found, and their application to optimisation
-and learning tasks, from least mean squares (LMS)
-filtering\nbsp[cite:@alexandreExperimental2023] to differentiable audio
-synthesis\nbsp[cite:@engelDifferentiable2020].
+with respect to their input variables. In a gradient-based
+optimisation scenario, the partial derivatives of an algorithm
+terminating in a loss function constitute a gradient vector, which can
+be backpropagated, causing the algorithm's input variables, weights in
+a neural network perhaps, to approach optimal values. Techniques of
+this sort employed in the audio domain are referred to as
+/differentiable digital signal processing/
+(DDSP)\nbsp[cite:@hayesReview2024], and find applications from least mean
+squares (LMS) filtering\nbsp[cite:@alexandreExperimental2023] to
+differentiable audio synthesis\nbsp[cite:@engelDifferentiable2020].
 
 Building on previous work on AD in the Faust programming
 language\nbsp[cite:@rushtonDifferentiable2024], here we extend to a more
@@ -252,7 +246,7 @@ Faust language, we contend that these restrictions are comparable with
 those posed by established automatic differentiation and machine
 learning frameworks. With AD in Faust, it is possible to create
 differentiable IIR filters and neural network building blocks. Our
-work forms the basis for an audio-focused ecosystem for the
+work offers the basis for an audio-focused ecosystem for the
 development of solutions to problems based on machine learning.
 
 * The Faust Programming Language
@@ -459,7 +453,7 @@ output, \(s_{1}+s_{2}\), and its gradients, \(\nabla{}s_{1}+\nabla{}s_{2}\).
 diff(+) = interleave(N + 1, 2)
     : +,par(i, N, +);
 #+end_src
-A dual-signal addition operator implementation is given in in
+A dual-signal addition operator implementation is given in
 cref:lst:diffAdd; the function ~interleave~ ensures that the primal
 signals and their respective partial derivatives are delivered to the
 addition operations in the appropriate order: \(s_{1}, s_{2},
@@ -525,7 +519,7 @@ dynamic field of research.
 #+caption: definition of \(\Delta_{N}\llbracket A \sim B\rrbracket\). \(N\) is the
 #+caption: number of input variables with respect to which partial derivatives are
 #+caption: calculated.
-\begin{figure*}
+\begin{figure*}[t]
   \begin{mdframed}
     \begin{minipage}[c]{\dimexpr\linewidth*18/40\relax}
       \begin{gather}
@@ -696,7 +690,7 @@ B \rrbracket\), and, more generally
 #+caption: dual signals, \(f(g(\langle\mathbf{s},\,\mathbf{J}_{\mathbf{s}}\rangle))\), and
 #+caption: is thus equivalent to the sequential composition of the blocks following
 #+caption: separate derivative transformation.
-\begin{figure*}
+\begin{figure*}[t]
 \centering
 \begin{tikzpicture}
  \begin{scope}[xshift=-5cm]
@@ -972,8 +966,6 @@ the recursive derivative transformation; its first ~NW~ inputs are
 considered input signals, \(\mathbf{s}\), the rest as input variables,
 \(\mathbf{x}\).
 
-*Say something about availability of code*
-
 Worthy of reflection is that algorithms of this sort, consisting of
 differentiable primitives, plus our now-differentiable composition
 operators, can be automatically differentiated to arbitrary order,
@@ -1120,6 +1112,14 @@ with {
 };
 #+end_src
 
+** Applications
+
+A comprehensive treatment of potential applications for AD in Faust
+lies beyond the scope of this paper, as does a quantitative evaluation
+of the performance of the proposed implementation. Expanded versions
+of the examples in cref:lst:neuron and cref:lst:iir are, however,
+available online.[fn:5]
+
 * Conclusion
 
 In this paper we have described a general scheme for differentiating
@@ -1140,15 +1140,16 @@ explored.
 
 At the level of the Faust compiler, changes that would facilitate the
 transformation of elements of the language that currently elude
-pattern-matching could be of benefit here, and more generally within
-Faust. Moreover, this being a method rooted in the time-domain, recent
-developments in multi-rate processing within Faust programs could
-assist with frequency-domain and perceptually-informed measures of
-loss.
+pattern-matching could be of benefit here. Moreover, AD in Faust is a
+method rooted in the time-domain; recent developments in multi-rate
+processing within Faust programs could assist in tackling problems for
+which frequency-domain and perceptually-informed measures of loss are
+most appropriate.
 
 #+print_bibliography:
 
 * Footnotes
+[fn:5] [URLs to be entered here] 
 
 [fn:4] \href{https://github.com/grame-cncm/faustlibraries/blob/65594336a3476d9a82a4df71e88c92f3e4b94821/routes.lib}{https://github.com/grame-cncm/faustlibraries/blob/master/routes.lib}
 
