@@ -8,9 +8,9 @@
 #+export_file_name: out/aes-aimla-2025
 #+options: toc:nil num:5 H:5 date:nil author:nil title:nil
 #+latex_class: aes-aimla-2025
-#+bibliography: refs.bib
+# #+bibliography: ../../references.bib
 # Might have to revert to natbib...
-#+cite_export: biblatex
+#+cite_export: biblatex numeric,sorting=none,url=false,isbn=false
 #+latex_header_extra: \RequirePackage[]{./out/aes-aimla-2025}
 
 #+begin_export latex
@@ -18,7 +18,16 @@
 \maketitle % MANDATORY!
 
 \begin{onecolabstract}
-
+Differentiable programming via automatic differentiation is the foundation
+for gradient-based optimisation techniques, and forms the basis for many current
+approaches to machine learning. Though well catered-for in general-purpose
+programming languages, a the availability of automatic differentiation in a
+domain-specific language (DSL) could support novel perspectives on optimisation
+and machine learning problems in the field of audio. We present a general scheme
+for differentiable programming in the Faust programming language, a high-performance
+DSL tailored to audio synthesis and signal processing. Faust's rich ecosystem,
+coupled with a comprehensive AD implementation, could support audio optimisation
+and machine learning applications on a multitude of platforms, from FPGAs to the web.
 \end{onecolabstract}
 ]
 #+end_export
@@ -185,42 +194,68 @@ Short title should describe your topic but not be too long.
 \bibliographystyle{jaes}
 #+end_src
 
+* Bibliography Style                                               :noexport:
+:PROPERTIES:
+:header-args: :tangle out/biblatex.cfg :results silent
+:END:
+
+#+begin_src latex
+\AtEveryBibitem{
+  \clearfield{pages}
+  \clearfield{pagetotal}
+  \clearfield{edition}
+  \clearname{editor}
+  \clearfield{url}
+  \clearfield{urlyear}
+  \clearfield{doi}
+  \clearfield{eprintclass}
+  \clearfield{eventtitle}
+  \iffieldequalstr{entrykey}{alexandreExperimental2023}
+    {\clearlist{publisher}}
+    {}
+  \iffieldequalstr{entrykey}{albouyFaust2017}
+    {\clearlist{publisher}}
+    {}
+}
+#+end_src
+
+
 * Introduction
 
-Differentiable programming via automatic differentiation (AD) is the
-bedrock upon which gradient-based mathematical optimisation techniques
-lie, and forms the basis for current approaches to machine
-learning. Differentiability of the primitive operators of a
-programming language permits the creation of programs that are
-end-to-end differentiable with respect to their input variables;
-coupled with a loss function --- also composed of differentiable
-primitives --- such a program can produce gradients, which, when
+Gradient-based methods are ubiquitous in tackling a wide variety
+mathematical optimisation and machine learning problems, and the
+availability of such methods hinges on the possibility of computing
+the derivatives of computer programs. In the field of machine learning
+in particular, automatic differentiation
+(AD)\nbsp[cite:@baydinAutomatic2018] has emerged as the dominant
+algorithmic differentiation paradigm. In AD, the primitive operations
+of a programming language are defined differentiably, thus programs
+composed from those operations are in turn differentiable end-to-end
+with respect to their input variables.  Programs featuring
+differentiable loss functions figure in gradient descent algorithms,
+partial derivatives of the loss function being gradients, which, when
 backpropagated as update-values to the input variables, cause those
 inputs to approach optimal values. Differentiable digital signal
-processing (DDSP) is concerned with the creation and application of
-differentiable signal processors to mathematical optimisation tasks,
-from least mean squares (LMS)
+processing (DDSP) is concerned with the creation of signal processors
+whose derivatives can be found, and their application to optimisation
+and learning tasks, from least mean squares (LMS)
 filtering\nbsp[cite:@alexandreExperimental2023] to differentiable audio
 synthesis\nbsp[cite:@engelDifferentiable2020].
 
 Building on previous work on AD in the Faust programming
 language\nbsp[cite:@rushtonDifferentiable2024], here we extend to a more
-general AD syntax and an accompanying set of programmatic
-conventions. 
+general AD syntax and an accompanying set of programmatic conventions,
+demonstrating that arbitrary compositions of signal processing blocks
+can be made differentiable. Though imposing a particular structural
+approach, and dispensing with support for certain features of the
+Faust language, we contend that these restrictions are comparable with
+those posed by established automatic differentiation and machine
+learning frameworks. With AD in Faust, it is possible to create
+differentiable IIR filters and neural network building blocks. Our
+work forms the basis for an audio-focused ecosystem for the
+development of solutions to problems based on machine learning.
 
-
-We show that IIR filters can be made differentiable in
-Faust and their coefficients optimised via gradient descent. We also
-demonstrate that neural network structures can be created in a
-composable, extensible fashion in Faust, pointing the way toward an
-audio-focused ecosystem for the development of solutions to problems
-based on machine learning. Though imposing a particular syntactic
-approach, dispensing with support for certain features of the Faust
-language, we contend that such restrictions are comparable with those
-posed by established automatic differentiation and machine learning
-frameworks.
-
-* The Faust Language
+* The Faust Programming Language
 
 #+begin_src faust :results file svg :file images/seq.svg :exports none
 A = _ <: par(n, 20, -) :> _;
@@ -458,7 +493,7 @@ process = diff(_),diff(_) : diff(+);
 ** Motivation
 
 Considering the plethora of existing approaches to
-DDSP\nbsp[cite:@hayesReview2023], why pursue an implementation in Faust?
+DDSP\nbsp[cite:@hayesReview2024], why pursue an implementation in Faust?
 The availability of the Faust-to-JAX transpiler would appear to
 obviate such an endeavour, until one considers that the AD
 transformations facilitated by JAX lie the wrong side, as it were, of
@@ -637,19 +672,19 @@ B \rrbracket\), and, more generally
   \begin{scope}[
     faustnode/.style={rectangle, thick, draw=black, minimum size=7mm}
   ]
-    \draw[] (box) (0,0) rectangle (3.5,2.8)
+    \draw[] (0,0) rectangle (3.5,2.8);
     
-    \node[faustnode](mul) at (2.7,.7) {\(\times\)}
-    \node[faustnode](dop)[above left=-2mm and 6mm of mul]{\(\nabla\pgfkeysvalueof{/diffop/math}\)}
-    \node[faustnode](op)[above=2mm of dop]{\(\pgfkeysvalueof{/diffop/math}\)}
-    \node(label)[above right=28mm and 11.5mm of box]{\(\Delta_{N}\llbracket \pgfkeysvalueof{/diffop/faust} \rrbracket\)}
+    \node[faustnode](mul) at (2.7,.7) {\(\times\)};
+    \node[faustnode](dop)[above left=-2mm and 6mm of mul]{\(\nabla\pgfkeysvalueof{/diffop/math}\)};
+    \node[faustnode](op)[above=2mm of dop]{\(\pgfkeysvalueof{/diffop/math}\)};
+    \node(label)[above right=3mm and -5mm of op]{\(\Delta_{N}\llbracket \pgfkeysvalueof{/diffop/faust} \rrbracket\)};
 
-    \draw[thick, ->] let \p{opw}=(op.west) in (0,\y{opw}) -- (op.west)
-    \draw[thick, ->] let \p{opw}=(op.west), \p{dopw}=(dop.west) in (0,\y{opw}) -| (.5,\y{dopw}) |- (dop.west)
-    \draw[thick, ->] let \p{ope}=(op.east) in (op.east) -- (3.5,\y{ope})
-    \draw[thick, ->] let \p{mulw}=(mul.west) in (dop.east) --+ (.3,0) |- (\x{mulw},.9)
-    \draw[thick, ->] let \p{mulw}=(mul.west) in (0,\y{mulw}) --+ (.5,0) --+ (.5,-.15) |-+ (\x{mulw},-.15)
-    \draw[thick, ->] let \p{mule}=(mul.east) in (mul.east) -- (3.5,\y{mule})
+    \draw[thick, ->] let \p{opw}=(op.west) in (0,\y{opw}) -- (op.west);
+    \draw[thick, ->] let \p{opw}=(op.west), \p{dopw}=(dop.west) in (0,\y{opw}) -| (.5,\y{dopw}) |- (dop.west);
+    \draw[thick, ->] let \p{ope}=(op.east) in (op.east) -- (3.5,\y{ope});
+    \draw[thick, ->] let \p{mulw}=(mul.west) in (dop.east) --+ (.3,0) |- (\x{mulw},.9);
+    \draw[thick, ->] let \p{mulw}=(mul.west) in (0,\y{mulw}) --+ (.5,0) --+ (.5,-.15) |-+ (\x{mulw},-.15);
+    \draw[thick, ->] let \p{mule}=(mul.east) in (mul.east) -- (3.5,\y{mule});
   \end{scope}
 }
 #+end_export
@@ -665,26 +700,26 @@ B \rrbracket\), and, more generally
 \centering
 \begin{tikzpicture}
  \begin{scope}[xshift=-5cm]
-    \node (primal) at (4, 2.155) {\(\mathbf{s}\)}
-    \node (jacobian) at (4, .7) {\(\mathbf{J}_{\mathbf{s}}\)}
-    \draw[thick, ->] (primal.east)--(5, 2.155)
-    \draw[thick, ->] (jacobian.east)--(5, .7)
+    \node (primal) at (4, 2.155) {\(\mathbf{s}\)};
+    \node (jacobian) at (4, .7) {\(\mathbf{J}_{\mathbf{s}}\)};
+    \draw[thick, ->] (primal.east)--(5, 2.155);
+    \draw[thick, ->] (jacobian.east)--(5, .7);
   \end{scope}
   
   \diffop{faust=A,math=g}
-  \node (primal) at (4.8, 2.155) {\(\mathbf{z} = g(\mathbf{s})\)}
-  \node (jacobian) at (4.8, .7) {\(\mathbf{J}_{\mathbf{z}} = \mathbf{J}_{\mathbf{s}}\mathbf{J}_{g}\)}
-  \draw[thick] (3.5, 2.155)--(primal.west)
-  \draw[thick] (3.5, .7)--(jacobian.west)
-  \draw[thick, ->] (primal.east)--(6.2, 2.155)
-  \draw[thick, ->] (jacobian.east)--(6.2, .7)
+  \node (primal) at (4.8, 2.155) {\(\mathbf{z} = g(\mathbf{s})\)};
+  \node (jacobian) at (4.8, .7) {\(\mathbf{J}_{\mathbf{z}} = \mathbf{J}_{\mathbf{s}}\mathbf{J}_{g}\)};
+  \draw[thick] (3.5, 2.155)--(primal.west);
+  \draw[thick] (3.5, .7)--(jacobian.west);
+  \draw[thick, ->] (primal.east)--(6.2, 2.155);
+  \draw[thick, ->] (jacobian.east)--(6.2, .7);
   
   \begin{scope}[xshift=6.2cm]
     \diffop{faust=B,math=f}
-    \node (primal) at (5, 2.155) {\(\mathbf{y} = f(g(\mathbf{s}))\)}
-    \node (jacobian) at (5,.7) {\(\mathbf{J}_{\mathbf{y}} = \mathbf{J}_{\mathbf{s}}\mathbf{J}_{g}\mathbf{J}_{f}\)}
-    \draw[thick] (3.5, 2.155)--(primal.west)
-    \draw[thick] (3.5, .7)--(jacobian.west)
+    \node (primal) at (5, 2.155) {\(\mathbf{y} = f(g(\mathbf{s}))\)};
+    \node (jacobian) at (5,.7) {\(\mathbf{J}_{\mathbf{y}} = \mathbf{J}_{\mathbf{s}}\mathbf{J}_{g}\mathbf{J}_{f}\)};
+    \draw[thick] (3.5, 2.155)--(primal.west);
+    \draw[thick] (3.5, .7)--(jacobian.west);
   \end{scope}
 \end{tikzpicture}
 \end{figure*}
@@ -937,6 +972,8 @@ the recursive derivative transformation; its first ~NW~ inputs are
 considered input signals, \(\mathbf{s}\), the rest as input variables,
 \(\mathbf{x}\).
 
+*Say something about availability of code*
+
 Worthy of reflection is that algorithms of this sort, consisting of
 differentiable primitives, plus our now-differentiable composition
 operators, can be automatically differentiated to arbitrary order,
@@ -1086,17 +1123,28 @@ with {
 * Conclusion
 
 In this paper we have described a general scheme for differentiating
-Faust programs, moving an important step closer to providing the means
+Faust programs, moving an important step toward providing the means
 with which to tackle audio optimisation and machine learning problems
 with the domain-specific and cross-platform benefits of the Faust
 language.
 
 Many challenges and opportunities remain as impetus for further
-development of the work presented here.
+development of the work presented here. Having only been put to
+informal use to-date, the proposed AD approach should be subjected to
+application to real-world optimisation tasks, and assessed for its
+efficacy and efficiency. Beyond the correctness of the semantic
+scheme, being based on forward-mode AD, which, on paper, compares
+unfavourably with reverse-mode in terms of computational expense, its
+combination with the optimisations of the Faust compiler should be
+explored.
 
-- follow-up study on effectiveness/accuracy
-- frequency-domain loss
-- scheme for describing neural networks in Faust
+At the level of the Faust compiler, changes that would facilitate the
+transformation of elements of the language that currently elude
+pattern-matching could be of benefit here, and more generally within
+Faust. Moreover, this being a method rooted in the time-domain, recent
+developments in multi-rate processing within Faust programs could
+assist with frequency-domain and perceptually-informed measures of
+loss.
 
 #+print_bibliography:
 
