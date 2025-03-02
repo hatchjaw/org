@@ -9,17 +9,21 @@
 #+export_file_name: out/director-letter
 
 #+latex_compiler: xelatex
-#+cite_export: biblatex
+#+cite_export: biblatex numeric,isbn=false
 #+latex_class: scrlttr2
+#+latex_header: \usepackage{graphicx}
 #+latex_header: \usepackage{fontspec}
 #+latex_header: \setromanfont{MinionPro-Regular}
+#+latex_header: \setmonofont{Iosevka Comfy Motion}[Scale=.9]
 #+latex_header: \usepackage[british]{babel}
-#+latex_header: \KOMAoptions{fromalign=right,fromrule=aftername,fromemail,enlargefirstpage,foldmarks=false,backaddress=false,bibliography=oldstyle}
+#+latex_header: \KOMAoptions{fromalign=right,fromrule=aftername,fromemail,enlargefirstpage,foldmarks=false,backaddress=false,bibliography=oldstyle,fontsize=10.5pt}
 #+latex_header: \setplength{toaddrwidth}{90mm}
-#+latex_header: \setkomavar{subject}{Proposed visit to the Centre for Computer Research in Music and Acoustics (CCRMA) at Stanford University}
+#+latex_header: \setkomavar{subject}{Letter of application for the France-Stanford Institute's Visiting Student Researcher fellowship}
 #+latex_header: \setkomavar{fromname}{Thomas Rushton}
-#+latex_header: \setkomavar{fromemail}[\Email\enskip]{\href{mailto:thomas.rushton@inria.fr}{thomas.rushton@inria.fr}}
-#+latex_header: \setkomavar{fromaddress}{18 Rue Pierre Blanc\\ 69100 Lyon\\ France}
+#+latex_header: \setkomavar{fromemail}[\Email\enskip]{\href{mailto:thomas.rushton@inria.fr}{\texttt{thomas.rushton@inria.fr}}}
+#+latex_header: \setkomavar{fromaddress}{CITI Laboratory\\6 Av. des Arts\\69100 Villeurbanne, France}
+#+latex_header: \setplength{sigbeforevskip}{1em}
+#+latex_header: \setkomavar{signature}{\includegraphics[width=4cm]{signature}\\[.5em]\usekomavar{fromname}}
 #+latex_header: \usepackage{hyperref}
 #+latex_header: \hypersetup{hidelinks}
 #+latex_header: \usepackage{microtype}
@@ -27,14 +31,123 @@
 #+latex: \begin{letter}{Fiona Griffiths\\ France-Stanford Center For Interdisciplinary Studies\\ Stanford University\\ Stanford, CA 94305-8181 USA}
 #+latex: \opening{Dear Ms. Griffiths,}
 
+My name is Thomas Rushton and I am a PhD candidate at INSA Lyon,[fn:4]
+developing a thesis entitled /Enabling Distributed Spatial Audio/, and
+a member of the Embedded Programmable Audio Systems research team
+(Emeraude[fn:1]) of the French research organisation, Inria.[fn:2] I
+am writing to you to apply for your institute's Visiting Student
+Researcher fellowship. My wish is to spend a period corresponding
+roughly with the spring quarter of 2026 (the three months from 1 April
+to 30 June) as a visiting researcher at Stanford University's Center
+for Computer Research in Music and Acoustics (CCRMA[fn:3]), a position
+for which department chair Chris Chafe has agreed to act as sponsor.
 
+Originally from the UK, in 2009 I received a first class bachelor's
+degree in Music Technology from the University of Edinburgh. At that
+time, the course was led by CCRMA alumnus Michael Edwards, and I was
+deeply inspired by what I learned of the center's creative and
+technical legacy. Post-graduation I worked in music and the performing
+arts, and later as a software developer, but I retained the ambition
+to one day return to field of music technology. In 2021 I joined the
+Sound and Music Computing (SMC) master's degree program at Aalborg
+University's (AAU) campus in Copenhagen, Denmark, under the
+supervision of another CCRMA alumna, Stefania Serafin. It was during
+my time at AAU that I met my now thesis supervisor, Emeraude
+researcher Romain Michon. I sought out an internship with the Emeraude
+team in Lyon, which I undertook in the autumn of 2022; it was in this
+context that I began the work that now constitutes my PhD thesis.
+
+Systems for spatial and immersive audio must compute signals for
+numerous output channels, and are reliant on hardware capable of
+delivering those signals to a large number of loudspeakers. In effect,
+to create faithful, synthetic auditory environments, for multiple
+listeners and on a large scale, the more output channels (and
+loudspeakers) the better. State-of-the-art systems are typically
+centralised, requiring a great deal of computing power, and reliant on
+costly, proprietary audio hardware, characterised by limited
+scalability and modularity. The complexity and costs associated with
+such systems hinders accessibility, limiting opportunities for
+researchers and artists.
+
+My internship in Lyon saw me join the PLASMA[fn:7] associate research
+team, a joint-initiative between CCRMA and Emeraude. My task was to
+investigate whether, using a collection of low-cost microcontroller
+development boards,[fn:5] and CCRMA's open-source /JackTrip/[fn:6]
+networked audio system, a viable spatial audio system could be created
+in distributed fashion across a wired network. I developed a wave
+field synthesis (WFS) installation, which was demonstrated at the 2022
+/Programmable Audio Workshop/,[fn:8] and a paper on the topic was
+published the following year\nbsp[cite:@rushtonMicrocontrollerbased2023].
+Further work on this theme formed the basis for my master's thesis,
+which I later adapted for publication as a journal
+article\nbsp[cite:@rushtonNetworked2024]. I made a successful proposal to
+rejoin Emeraude, taking up a doctoral position with the team in
+November 2023 under the co-supervision of Romain and his colleague,
+Tanguy Risset.
+
+My efforts since then have been largely devoted to addressing the main
+technical problem associated with the distributed approach, that of
+/asynchronicity/. In the absence of a shared, authoritative source of
+time, the network of audio processors /drift/ relative to one-another
+and the integrity of the soundfield that they synthesise is
+impaired. Adapting the network Precision Time Protocol (PTP) as a
+mechanism for conditioning the timing of audio events, I have recently
+achieved a synchronous platform upon which immersive auditory
+environments can be created.
+
+The opportunity to study and conduct my research at CCRMA would
+represent a great honour, the fulfilment of a long-held ambition, and
+would allow me to benefit from the great wealth of expertise there in
+spatial and networked audio systems and digital signal processing. In
+turn, it would permit me to contribute directly to immersive audio
+projects at CCRMA such as the initiative to produce archæoacoustic
+recreations of the Chauvet-Pont-d'Arc Cave.[fn:9] Priorities for my
+research are 1) to explore refinements to the existing WFS
+implementation, and to pursue other target applications such as higher
+order ambisonics and the auralisation method that underpins
+archæoacoustics; 2) to investigate the automatic parallelisation of
+spatial audio algorithms as a powerful enhancement to the distributed
+approach that my work represents; 3) in light of the immersive
+applications of my work, to conduct a qualitative evaluation of its
+effectiveness in comparison with state-of-the-art technology at
+CCRMA. Furthermore, the availability of a scalable, open-source system
+for networked and immersive audio to composers and researchers at
+CCRMA would create fertile ground for novel collaborative work.
+
+Thank you for your time in considering my application. Should you have
+any questions, I remain at your disposal.
 
 #+latex: \closing{Yours sincerely,}
-#+latex: \vspace{1cm}
 #+print_bibliography: :heading none
 #+latex: \end{letter}
 
 * Local variables                                                  :noexport:
+
+* Footnotes
+
+[fn:9] https://ccrma.stanford.edu/chauvet/
+
+[fn:8] https://paw.grame.fr/2022/#rushton-talk.
+
+[fn:7] /Pushing the Limits of Audio Spatialization with eMerging
+Architectures/,
+[[https://ccrma.stanford.edu/~rmichon/talks/ccrma-oh-22.pdf]].
+
+[fn:6] https://jacktrip.github.io/jacktrip/.
+
+[fn:5] The /Teensy 4.1/ microcontroller development board,
+[[https://pjrc.com/teensy/]].
+
+[fn:4] /Institut national des sciences appliquées/, https://insa-lyon.fr.
+
+[fn:3] Pronounced "karma", https://ccrma.stanford.edu/.
+
+[fn:2] /Institut national de recherche en sciences et technologies du
+numérique/, https://inria.fr/.
+
+[fn:1] https://team.inria.fr/emeraude/.
+
+* Local Variables                                                  :noexport:
 
 # Local Variables:
 # org-latex-classes: (("scrlttr2" "\\documentclass{scrlttr2}

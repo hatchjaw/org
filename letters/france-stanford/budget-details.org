@@ -1,113 +1,72 @@
 # -*- coding: utf-8 -*-
 # -*- mode: org -*-
 
-#+title: CCRMA Visiting Student Researcher Application
+#+title: France-Stanford VSR Budget
 #+author: Thomas Rushton
 #+options: title:nil author:nil toc:nil
 #+language: en
-# #+date: {{{time(%A %e %B %Y)}}}
-#+export_file_name: out/ccrma-application
+#+export_file_name: out/budget
 
 #+latex_compiler: xelatex
-#+cite_export: biblatex
 #+latex_class: scrlttr2
-# #+latex_header: \usepackage[osf]{Baskervaldx}
-#+latex_header: \usepackage{fontspec}
+#+latex_header: \usepackage{graphicx,booktabs,fontspec}
 #+latex_header: \setromanfont{MinionPro-Regular}
 #+latex_header: \usepackage[british]{babel}
-#+latex_header: \KOMAoptions{fromalign=right,fromrule=aftername,fromemail,enlargefirstpage,foldmarks=false,backaddress=false,bibliography=oldstyle}
-#+latex_header: \setkomavar{subject}{Letter of proposal for the position of Visiting Student Researcher at CCRMA}
+#+latex_header: \KOMAoptions{fromalign=right,fromrule=aftername,fromemail,enlargefirstpage,foldmarks=false,backaddress=false,bibliography=oldstyle,fontsize=10.5pt}
+#+latex_header: \setplength{refvpos}{70mm}
+#+latex_header: \setkomavar{subject}{Estimated budget for Visiting Student Researcher position}
 #+latex_header: \setkomavar{fromname}{Thomas Rushton}
 #+latex_header: \setkomavar{fromemail}[\Email\enskip]{\href{mailto:thomas.rushton@inria.fr}{thomas.rushton@inria.fr}}
-#+latex_header: \setkomavar{fromaddress}{18 Rue Pierre Blanc\\ 69100 Lyon\\ France}
+#+latex_header: \setkomavar{fromaddress}{CITI Laboratory\\6 Av. des Arts\\69100 Villeurbanne, France}
+#+latex_header: \setplength{sigbeforevskip}{1em}
+#+latex_header: \setkomavar{signature}{\includegraphics[width=4cm]{signature}\\[.5em]\usekomavar{fromname}}
 #+latex_header: \usepackage{hyperref}
 #+latex_header: \hypersetup{hidelinks}
 #+latex_header: \usepackage{microtype}
-# #+latex_header: \defbibheading{letterbib}[\refname]{#1}
 
-#+latex: \begin{letter}{Nette Worthey\\ CCRMA\\ Department of Music\\ Stanford University\\ Stanford, CA 94305-8181 USA}
-#+latex: \opening{Dear Ms. Worthey,}
+#+latex: \begin{letter}{}
+#+latex: \opening{To whom it may concern,}
 
-I am writing to you to express my wish to spend the Winter 2025-26
-quarter --- January 5 to March 20, 2026 --- as a Visiting Student
-Researcher at CCRMA. Granted the opportunity, I would like to carry
-out developments on my doctoral research under the title /Distributed
-audio systems for immersive audio and virtual acoustics/.
+As an accompaniment to my application for the France-Stanford
+Institute's Visiting Student Researcher fellowship, please consider
+this estimate of expenses anticipated during my visit. Estimates are
+concerned with the proposed three-month period of 1 April to 30
+June 2026. Please consult the table below for details.
 
-My work on distributed audio began in 2022 as an internship project in
-Lyon, France for which I joined the PLASMA[fn:1] associate research
-team, a joint-initiative between CCRMA and the Emeraude team at
-Inria/INSA in Lyon. The aim of my intership was to explore whether,
-using a low-cost, microcontroller-based hardware platform[fn:2] and
-the /JackTrip/ open-source networked audio system, a viable spatial
-audio system could be created in distributed fashion across a wired
-local network. Centralised multichannel audio systems, such as spatial
-audio installations require, are costly and complex; an effective
-distributed alternative could democratise this otherwise exclusive
-area of research. A wave field synthesis (WFS) installation was
-developed, demonstrated at the 2022 /Programmable Audio
-Workshop/,[fn:3] and a paper on the topic published the following year
-[cite:@rushtonMicrocontrollerbased2023].
+#+attr_latex: :booktabs t :center t :align lrrr :float nil
+|--------------------------------+------------+-------------------+---------------|
+| *Item*                         | *Quantity* | *Unit cost (USD)* | *Total (USD)* |
+|--------------------------------+------------+-------------------+---------------|
+| Airfare                        |          2 |             1,000 | 2,000         |
+| Housing (monthly)              |          3 |             1,250 | 3,750         |
+| Food (monthly)                 |          3 |               500 | 1,500         |
+| Transportation (monthly)       |          3 |               100 | 300           |
+| Human Subject Costs            |         29 |                50 | 1,450         |
+|--------------------------------+------------+-------------------+---------------|
+| *Total Research Funding*       |            |                   | *9,000*       |
+|--------------------------------+------------+-------------------+---------------|
+| VSR Tuition Fee (three months) |            |                   | 4,000         |
+|--------------------------------+------------+-------------------+---------------|
+| *Grand Total*                  |            |                   | *13,000*      |
+|--------------------------------+------------+-------------------+---------------|
 
-I continued work on this topic for my master's thesis (which was later
-adapted and published as a journal article
-[cite:@rushtonNetworked2024]) and made a successful proposal to return
-to Lyon to take up a salaried doctoral postition with the Emeraude
-team, whom I rejoined in November 2023 under the supervision of Tanguy
-Risset and Romain Michon. My efforts since then have been largely
-devoted to addressing the main technical problem that beset the
-previous iterations of the technical implementation, that of
-/asynchronicity/. If nodes in a distributed spatial audio system are
-not synchronised, the integrity of the soundfield that they synthesise
-collectively will be impaired; prior work was /best-effort/ in nature,
-with nodes lacking an /authoritative source of time/.
+/Airfare/ refers to a return fare from Paris Charles de Gaulle to San
+Francisco, and includes train relay between Paris and my residence in
+Lyon, France. /Human Subject Costs/ represent compensation for
+experimental participants in the evaluation of a distributed spatial
+audio system. Compensation of this sort will be handled in accordance
+with appropriate ethical guidelines.[fn:1]
 
-Romain and I visited CCRMA in the autumn of 2024. During our visit, I
-demonstrated a prototype, sample-synchronous distributed audio system
-to professors Chafe and Lopez-Lezcano, the latter with whom I have
-shared subsequent developments. We are now at the stage where we have
-a promising, synchronous platform upon which to create immersive
-auditory environments. The system also exhibits the use of Precision
-Time Protocol (PTP) for time exchange, and for conditioning the timing
-of the audio systems on the distributed nodes, which, as an open
-source implementation, is not without its novelty.
+If you have any queries about the information presented here, please
+do not hesitate to contact me.
 
-Beyond the target distributed implementations of WFS and higher order
-ambisonics lies the possibility of turning the system under
-development to problems of virtual acoustics or /auralization/. The
-/PaleoAcoustics in Chauvet-Pont-d'Arc Cave/ project[fn:4] is something
-to which I would relish the chance to contribute. In light of the
-computational requirements that auralization poses --- the need to
-compute many impulse-response convolutions in real-time --- a
-distributed approach has the potential to provide greater aggregate
-computing power than its centralised counterpart; a given node need
-only compute the convolutions for the output channels over which it
-has responsibility. To support that end, an exploration of automatic
-parallelisation of spatial audio algorithms would be pertinent. A
-distributed approach could render auralization more accessible,
-scalable, and mobile.
-
-I would like to extend my thanks to you, and CCRMA faculty, for your
-time in considering my application, and I hope very much to be able to
-join you in California in 2026.
-
-#+latex: \closing{Yours sincerely,}
-#+latex: \vspace{1cm}
-#+print_bibliography: :heading none
+#+latex: \closing{Yours faithfully,}
 #+latex: \end{letter}
 
 * Footnotes
 
-[fn:4] [[https://ccrma.stanford.edu/chauvet/]]
-
-[fn:3] [[https://paw.grame.fr/2022/]] 
-
-[fn:2] The /Teensy 4.1/ microcontroller development board,
-[[https://pjrc.com/teensy]].
-
-[fn:1] /Pushing the Limits of Audio Spatialization with eMerging
-Architectures/,
-[[https://ccrma.stanford.edu/~rmichon/talks/ccrma-oh-22.pdf]].
+[fn:1]
+https://stanfordmedicine.box.com/shared/static/gpbjsk4avx04zqhtynetytiyi1o9py59.pdf
 
 * Local variables                                                  :noexport:
 

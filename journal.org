@@ -5474,8 +5474,8 @@ Entered on [2024-12-18 mer. 13:20]
 **** Conference submission deadlines                             :WRITING:
 I should target the following:
 
-- [[https://aes2.org/contributions/2025-1st-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio-call-for-contributions/][AES AI/audio]]: February 28th (4-10 pages, EasyChair).
-- [[https://smc25.iem.at/call/][SMC]]: March 3rd (4-8 pages, EasyChair).
+- [[https://aes2.org/contributions/2025-1st-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio-call-for-contributions/][AES AI/audio]]: February 28th (4-10 pages, [[https://easychair.org/account2/signin?l=7316581302252998218][EasyChair]]).
+- [[https://smc25.iem.at/call/][SMC]]: March 3rd (4-8 pages, [[https://easychair.org/account2/signin?l=8813818998001063168][EasyChair]]).
 - [[https://internetofsounds2025.ieee-is2.org/][IS2]]: July 1st (5-10 pages, EasyChair).
   + There's also a satellite workshop, [[https://internetofsounds2025.ieee-is2.org/workshops/3rd-ieee-international-workshop-networked-immersive-audio][IEEE IWNIA]] (International
     Workshop on Networked Immersive Audio): July 1st (5-10 pages,
@@ -6704,20 +6704,51 @@ Remember to refer to it as the /France-Stanford Institute for
 Interdisciplinary Studies/. F-S Fund Application portal is
 [[https://stanfordglobalstudies.slideroom.com/][here]]. Requirements ([[https://francestanford.stanford.edu/sites/francestanford/files/media/file/visiting_student_researcher_fellowship_guidelines_2025-26.pdf][pdf]]):
 
-****** TODO A letter to France-Stanford's director
+****** DONE Application form?
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-01 sam. 16:54]
+:END:
+I guess that's just the online form. Fingers crossed.
+
+****** DONE A letter to France-Stanford's director
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-01 sam. 15:19]
+:END:
 ...describing my research project and plans. This letter should
 identify Chris as my sponsor. Indicate the length of my visit. 1-2
 pages.
 
-****** TODO Letter of endorsement from my sponsor.
+****** DONE Letter of endorsement from my sponsor.
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-02-27 jeu. 17:47]
+:END:
 Chris asked me to draft this. 1-2 pages.
 
-****** TODO CV
-****** TODO "Unofficial academic transcript"
-****** TODO Budget requested.
+****** DONE CV
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-01 sam. 11:50]
+:END:
+
+****** DONE Letter of recommendation from home institution advisor
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-01 sam. 11:34]
+:END:
+
+****** DONE "Unofficial academic transcript"
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-01 sam. 11:50]
+:END:
+
+****** DONE Budget requested.
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-01 sam. 11:51]
+:END:
 Ten grand?
 
-****** TODO "Budget details"
+****** DONE "Budget details"
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-01 sam. 16:54]
+:END:
 1 page.
 
 Assuming all goes well, I'll need a [[https://travel.state.gov/content/travel/en/us-visas/study/exchange.html][J-1 visa]]. Update: Nette adds:

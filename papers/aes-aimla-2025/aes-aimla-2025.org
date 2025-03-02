@@ -19,7 +19,7 @@
 Differentiable programming via automatic differentiation is the foundation
 for gradient-based optimisation techniques, and forms the basis for many current
 approaches to machine learning. Though well catered-for in general-purpose
-programming languages, a the availability of automatic differentiation in a
+programming languages, the availability of automatic differentiation in a
 domain-specific language (DSL) could provide novel perspectives on optimisation
 and machine learning problems in the field of audio. We present a general scheme
 for differentiable programming in the Faust programming language, a high-performance
@@ -216,7 +216,7 @@ Short title should describe your topic but not be too long.
 
 * Introduction
 
-Gradient-based methods are ubiquitous in tackling a wide variety
+Gradient-based methods are ubiquitous in tackling a wide variety of
 mathematical optimisation and machine learning problems, and the
 availability of such methods hinges on the possibility of computing
 the derivatives of computer programs. In the field of machine learning
@@ -400,7 +400,7 @@ which are themselves differentiable; a computer program consisting of
 differentiable primitives may be differentiated automatically,
 producing the desired /primal/ and /gradient/ numerical outputs for
 use in a gradient-based optimisation algorithm. In this vein, a
-Faust-based LMS algorithm, running on FPGA, has been used for acoustic
+Faust-based LMS algorithm, [running on FPGA], has been used for acoustic
 control [cite:@alexandreExperimental2023], though the DDSP aspect of
 this work was limited to the particular application. The feasibility
 of a more general approach to DDSP in the Faust language has been
@@ -436,9 +436,9 @@ Jacobian matrices.
 
 AD primitives have been demonstrated in Faust using the language's
 pattern-matching
-abstraction\nbsp[cite:@rushtonDifferentiable2024]. Pattern-matching can be
+abstraction\nbsp[cite:@rushtonDifferentiable2024]. [Pattern-matching can be
 thought of as something akin to the operator overloading approach that
-is possible in languages such as Python and C++, and exploits the fact
+is possible in languages such as Python and C++,] and exploits the fact
 that a Faust function definition may receive, as a parameter, a
 programmatic expression. For example, a differentiable addition
 primitive, acting on dual signals \(\langle{}s_{1}, \nabla{}s_{1}\rangle,\langle{}s_{2}, \nabla{}s_{2}\rangle\), may be

@@ -280,12 +280,12 @@ significant barrier to research and innovation.
 
 Other, less conventional approaches are possible though, and have, in
 recent years, and in various forms, been attempted. From networked
-GPUs [cite:@bellochPerformance2021] and microcontrollers
-[cite:@rushtonNetworked2024] to DIY ambisonics domes
-[cite:@mitterhuberOttosonics2022] and frugal wave field synthesis
-arrays [cite:@michonMaking2023], efforts are underway to offer
-alternatives to the established order, bringing potential benefits, in
-terms of cost and scalability, with them. More than mere
+GPUs\nbsp[cite:@bellochPerformance2021] and
+microcontrollers\nbsp[cite:@rushtonNetworked2024] to DIY ambisonics
+domes\nbsp[cite:@mitterhuberOttosonics2022] and frugal wave field
+synthesis arrays\nbsp[cite:@michonMaking2023], efforts are underway to
+offer alternatives to the established order, bringing potential
+benefits, in terms of cost and scalability, with them. More than mere
 flash-in-the-pan hackerism, work of this sort aims to democratise
 access to scholarly and creative practice in the sphere of spatial
 audio.
@@ -308,16 +308,16 @@ some outstanding challenges and sharing our aims for future research.
 :END:
 
 The importance of sound in the immersive experience is
-well-established [cite:@aoesuthsanth]; if, however, the auditory
+well-established\nbsp[cite:@buckEffect2022]; if, however, the auditory
 aspect of virtual and extended reality remains comparatively neglected
-when considered alongside other sensory channels
-[cite:@serafinReflections2020], this may be ascribed, in part at
-least, to the complexity of, and expense associated with, [creating
+when considered alongside other sensory
+channels\nbsp[cite:@serafinReflections2020], this may be ascribed, in part
+at least, to the complexity of, and expense associated with, [creating
 immersive audio installations]. Large-scale, multichannel spatial
 audio systems are typically very expensive affairs, reliant on
-proprietary systems, costly hardware, specialist software and [etc.]
-[cite:@rushtonNetworked2024]. Particularly in the case of virtual
-acoustics [not really...], in which one may wish for numerous
+proprietary systems, costly hardware, specialist software and
+[etc.]\nbsp[cite:@rushtonNetworked2024]. Particularly in the case of
+virtual acoustics [not really...], in which one may wish for numerous
 participants to experience the same auditory environment, unencumbered
 by headsets and so on, an immersive acoustic environment is desirable,
 and yet may lie out of reach, for practial purposes. Thus the
@@ -357,9 +357,12 @@ research.
 : RPi cost: € 88.70
 : Teensy cost: € 47.81
 
-#+caption: Selected embedded computing platforms.
+#+name: tab:platforms
+#+caption: Selected embedded computing platforms listed with their
+#+caption: corresponding system on chip (SoC) and availaibility of
+#+caption: selected functionality.
 #+attr_latex: :float multicolumn :align lllllr
-| Platform         | Processor        | Memory      | Ethernet | PTP | Cost |
+| Platform         | SoC              | Memory      | Ethernet | PTP | Cost |
 |------------------+------------------+-------------+----------+-----+------|
 | Raspberry Pi CM5 | Broadcom BCM2712 | 2 GB SDRAM  | Yes      | Yes | € 89 |
 | Teensy 4.1       | NXP iMXRT1062    | 1024 KB RAM | Yes      | Yes | € 48 |

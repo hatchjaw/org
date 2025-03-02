@@ -62,8 +62,10 @@ for b in t41lastBytes
         df[!, "$b-$c"] = tmp
     end
 end
-CSV.write("./data/combined.csv", df, separator=',', header=true)
+CSV.write("./combined-data.csv", df, separator=',', header=true)
 #+end_src
+
+I gave the resulting file the =denote-rename-file= treatment.
 
 * Visualising the data
 

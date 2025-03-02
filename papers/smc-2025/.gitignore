@@ -1,2 +1,5 @@
 *.tex
 smc2025template.pdf
+figure.pdf
+/figures/*ptp*
+/data/unused
