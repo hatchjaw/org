@@ -15,7 +15,22 @@
 #+latex_header_extra: \RequirePackage[]{./out/smc-2025}
 
 #+begin_abstract
-The abstract should be placed at the top left column and should contain about 150-200 words.
+State-of-the-art systems for spatial and immersive audio lie beyond
+the reach of many potential users due to the financial and technical
+investments that they demand. The risks associated with buying into a
+closed, centralised system of inflexible hardware and specialist
+software mean that, although areas of considerable research interest
+in recent years, significant barriers-to-entry exist with regard to
+fields such as immersive audio and virtual acoustics via practical
+application of sound field synthesis techniques. It may be possible,
+however, to paralellise sound field synthesis algorithms and
+distribute them, subject to guarantees regarding the timing of
+distributed signal processors. Exploiting one of a number of low-cost
+embedded hardware platforms to have emerged over the past decade or
+so, and open-source software implementing the network Precision Time
+Protocol, we show that low-cost, networked audio devices can be
+synchronised to a degree sufficient to support time-sensitive audio
+applications.
 #+end_abstract
 
 * About                                                            :noexport:
@@ -265,15 +280,51 @@ environment is desirable, and yet may lie out of reach, for practial
 purposes. The exclusivity of multichannel audio systems has a chilling
 effect on research and creativity.
 
-- Why spatial audio?
-  - immersive auditory experiences, VR, virtual acoustics
-- What are typical systems like?
-  - MADI/AoE
-  - point-to-point vs... multicast
-- Why would an alternative be desirable?
-- What attempts have been made?
-  - Belloch et al., Devonport & Foss
-  - Frugal WFS, Ottosonics, DIY/maker community
+In simple terms, to serve a large listening area with the greatest
+possible fidelity, sound field synthesis
+algorithms\nbsp[cite:@ahrensAnalytic2012] such as wave field synthesis
+(WFS) and higher order ambisonics (HOA) call for large numbers of
+loudspeakers. To minimise spatial
+aliasing\nbsp[cite:@winterGeometric2018], WFS demands a dense array of
+secondary point sources; to the same end, ambisonics requires a number
+of speakers sufficient to reproduce spherical harmonics of higher
+order\nbsp[cite:@nicolSound2017]. Conventional systems for meeting these
+needs range from square arrays of 64-channels backed up by a single
+Mac Pro and multichannel audio digital interface (MADI)
+hardware\nbsp[cite:@graniGestural2016], to arrays of hundreds of speakers
+requiring clusters of powerful computers to provide
+DSP\nbsp[cite:@noisternigDispositif2012;@baalmanRenewed2007];[fn:9] in either
+case, conservative cost estimates on the order of hundreds of euros
+per channel may be reached\nbsp[cite:@rushtonNetworked2024].
+
+#+name: fig:wfs
+#+attr_org: :width 400
+#+attr_latex: :width \linewidth :float t
+#+caption: The holophonic illusion of primary-source Wave Field Synthesis
+#+caption: is created by applying an appropriate per-loudspeaker delay
+#+caption: (indicated by the dashed grey lines) to a virtual sound source.
+#+caption: Since the delays for each loudspeaker are independent, they can
+#+caption: computed in distributed fashion. The integrity of the
+#+caption: synthesised wavefront is contigent on synchronicity amongst the
+#+caption: group of distributed processors.
+[[file:./figures/WFS.drawio.png]]
+
+The rise of embedded computing, devices of the /internet of things/
+variety, and initiatives in the DIY and maker communities, have given
+rise to alternative approaches. With frugality in mind, a modular,
+FPGA-based WFS system has been demonstrated, programmed in Faust and
+using high-quality, low-cost audio codecs\nbsp[cite:@michonMaking2023]; a
+fully-costed DIY ambisonics dome, with 3D-printed speaker enclosures,
+is another recent contribution\nbsp[cite:@mitterhuberOttosonics2022].
+Both WFS and ambisonics have been attempted in distributed form, on
+GPUs\nbsp[cite:@bellochPerformance2021] and
+MCUs\nbsp[cite:@rushtonMicrocontrollerbased2023], with ambisonics further
+supported by the use of an MCU supporting the audio video bridging
+(AVB) protocol suite for audio processor
+synchronisation\nbsp[cite:@devonportDistribution2019].
+
+AoE democratised multichannel audio... ironic then that Dante and L-Acoustics...
+
 - Importance of synchronisation
 - How to synchronise?
 - The ideal platform: requirements
@@ -282,22 +333,33 @@ effect on research and creativity.
 What does it take synchronise playback on physically separate audio
 devices?\nbsp[cite:@friedtSynchronisation2023]
 
-At the risk of labouring the point, we remind the reader that whether
-one has a budget of millions, or are compelled to pursue a more frugal
-approach, decision-making around the not-inconsiderable endeavour of
-establishing a large-scale audio system for research, entertainment, or
-other purposes revolves around questions such as
-- How well does this technology work?
-- How much of a /sunk-cost/ does an installation based on this
-  technology represent?
-- Will this system still work in several years' time?
-
 ** Audio Over Ethernet
 
-Ethernet has, for the past twenty years or so, been the de facto
-standard for the transmission of multichannel digital
-audio\nbsp[cite:@bakkerIntroduction2014]. Audio over ethernet 
+Ethernet has, for the better part of the past twenty-five years, been
+the de facto standard for the transmission of multichannel digital
+audio\nbsp[cite:@bakkerIntroduction2014]. Audio over ethernet largely
+replaced prior analogue point-to-point systems
 [cite:@cochardEthernet2024]
+
+** Precision Time Protocol
+
+IEEE 1588, Precision Time Protocol (PTP), is an ethernet protocol for
+precise clock synchronisation between networked devices... Though
+often associated with more expensive networking equipment, support for
+PTP is offered by a number of low-cost MCUs and SoCs, including the Broadcom
+BCM2711/2712\nbsp[cite:@raspberrypiltd.BCM27112022], as found on the
+Raspberry Pi Compute Module 5\nbsp[cite:@raspberrypiltd.Raspberry2024],
+STM32H750IB\nbsp[cite:@stmicroelectronicsSTM32H750VB2023] (Daisy Seed),
+and NXP iMXRT1060 series\nbsp[cite:@nxpsemiconductorsIMX2021], the
+microcontroller utilised by the Teensy 4.1 development board. All of
+the above devices are supported by the Faust programming language via
+architecture files; =faust2alsa=, =faust2stm32=, and
+=faust2teensy=. In addition certain low-cost network switches, chief
+amongst these the MikroTik CRS326-24G-2S+ series, provide PTP suport.
+
+** The Importance of Synchronisation
+
+[cite:@lienhartImportance2003]
 
 ** Hardware Platforms
 
@@ -343,59 +405,31 @@ ethernet. A separate subset based on microcontroller (MCU)
 systems,[fn:6] prominent amongst these being the
 /Teensy/\nbsp[cite:@michonReal2019] (with an MCU from manufacturer
 NXP[fn:7]) and /Daisy/\nbsp[cite:@gasterAudio2020]
-(STMicroelectronics[fn:8]) development boards.
+(STMicroelectronics[fn:8]) development boards. Beyond matters of
+economy, connectivity, and low power-consumption, the attraction of
+such devices lies in the relative ease with which they can be
+programmed, each providing either an SDK, a selection of utility
+classes, or, in the case of ELS, compatibility with existing audio
+applications and plugins. Furthermore, it may be possible to produce
+compatible code in a higher level audio language such as Faust, in
+which case signal processing or audio synthesis code can be written
+once and compiled to run on a variety of
+platforms\nbsp[cite:@michonEmbedded2020].
 
-Additionally, many of these platforms are supported by the Faust
-programming language, meaning that DSP code can be written once and
-compiled to run on a variety of embedded platforms
-[cite:@michonEmbedded2020].
-
-The greater part of the difficulty in such a project lies not
-necessarily in the mathematics of sound field synthesis, nor in
-writing the code to implement SFS algorithms, but in finding suitable
-hardware on which to run the system. One may find, for example, a €30
-development board such as the Daisy Seed, well known to the DIY/maker
-audio community, well-appointed with memory, easily programmable with
-Faust, and /even possessing a SoC with PTP support/, but having no
-Ethernet PHY,[fn:2] and thus no way to connect it to a network. There
-is a sense in which, short of designing and manufacturing, at scale, a
-printed circuit board of one's own, the stars must align.
-
-** Precision Time Protocol
-
-IEEE 1588, Precision Time Protocol (PTP), is an ethernet protocol for
-precise clock synchronisation between networked devices... Though
-often associated with more expensive networking equipment, support for
-PTP is offered by a number of low-cost MCUs and SoCs, including the Broadcom
-BCM2711/2712\nbsp[cite:@raspberrypiltd.BCM27112022], as found on the
-Raspberry Pi Compute Module 5\nbsp[cite:@raspberrypiltd.Raspberry2024],
-STM32H750IB\nbsp[cite:@stmicroelectronicsSTM32H750VB2023] (Daisy Seed),
-and NXP iMXRT1060 series\nbsp[cite:@nxpsemiconductorsIMX2021], the
-microcontroller utilised by the Teensy 4.1 development board. All of
-the above devices are supported by the Faust programming language via
-architecture files; =faust2alsa=, =faust2stm32=, and
-=faust2teensy=. In addition certain low-cost network switches, chief
-amongst these the MikroTik CRS326-24G-2S+ series, provide PTP suport.
-
-** The Importance of Synchronisation
-
-[cite:@lienhartImportance2003]
-
-** Motivation
-
-#+name: fig:wfs
-#+attr_org: :width 400
-#+attr_latex: :width \linewidth
-#+caption: The holophonic illusion of primary-source Wave Field Synthesis
-#+caption: is created by applying an appropriate per-loudspeaker delay
-#+caption: (indicated by the dashed grey lines) to a virtual sound source.
-#+caption: Since the delays for each loudspeaker are independent, they can
-#+caption: computed in distributed fashion. The integrity of the
-#+caption: synthesised wavefront is contigent on synchronicity amongst the
-#+caption: group of distributed processors.
-[[file:./figures/WFS.drawio.png]]
-
-
+The particular requirements of the distributed spatial audio case,
+however, mean that not all such platforms, details of a selection of
+which are gathered in cref:tab:platforms, are suitable to the
+task. One may find, for example, that a sub-€30 development board such
+as the /Daisy Seed/, well-known to the DIY/maker audio community,
+well-appointed with memory, easily programmable in Faust, and /even
+possessing an MCU with PTP support/, has no Ethernet PHY,[fn:2] and
+thus cannot be connected to a network. The Raspberry Pi CM5, coupled
+with associated I/O board, offers ethernet connectivity as standard
+and is memory rich, but clock dividers...
+And the switch...
+  There is a sense in which,
+short of designing and manufacturing, at scale, a printed circuit
+board of one's own, the stars must align.
 
 * Implementation
 :PROPERTIES:
@@ -510,7 +544,7 @@ applicable to the audio subsystem.
 :END:
 
 To evaluate the proposed audio clock conditioning algorithm, a network
-of audio devices was subject to testing. The test procedure is given
+of devices was subject to testing. The test procedure is given
 in the section to follow; this is followed in turn by a discussion of
 the results yielded.
 
@@ -669,21 +703,29 @@ case. Once again, \texttt{x.x.48.234} displays the greatest
 asynchronicity; now, however, its \qty{1}{\micro\s} over ten minutes
 represents less than 1.7 parts per /billion/. At the end of the test,
 the three clients are are separated by an interval of just over
-\qty{1}{\micro\s}, corresponding to a propagation discrepancy of less than
-half a millimetre; we have improved from a scale comparable with the
-height of an adult human --- sufficient to obliterate the integrity of
-any attempt at sound field synthesis --- to an order of magnitude
-below that of the diameter of the eardrum.
+\qty{1}{\micro\s} (marginally outside the AES guideline of 5% of the
+reference frame) corresponding to a propagation discrepancy of
+less than half a millimetre; we have improved from a scale comparable
+with the height of an adult human --- sufficient to obliterate the
+integrity of any attempt at sound field synthesis --- to an order of
+magnitude below that of the diameter of the eardrum.
 
 Interestingly, and lending encouragement to the hope that further
 improvements are within reach, the remaining audio drift appears to be
 inversely proportional to the raw drift, with client
 \texttt{x.x.48.191} now tending very slightly fast, whereas previously
-it was lagging.
+it lagged behind.
 
-* Discussion
+* Conclusion and Future Work
+:PROPERTIES:
+:CUSTOM_ID: sec:conclusion
+:END:
 
-So, it works, etc...
+We have demonstrated the feasibility of using the precision time
+protocol to synchronise reproduction across a distributed array of
+audio processors using open-source software and low-cost
+hardware. This represents a key technological finding and will serve
+as impetus for future research on this topic.
 
 If one were to identify a /weak link/ in the proposed system, that
 might be the ethernet switch. Its manufacturer, Latvian enterprise
@@ -694,25 +736,42 @@ at the comparatively low price of around €200 at the time of writing
 expensive. To support more than a notional 48 output channels it would
 be necessary to daisy-chain switches; from a technical perspective, it
 is not known at the present time whether the PTP implementation on the
-MikroTik device can function effectively in such a configuration.
+MikroTik device can function effectively in such a configuration. We
+lie at the mercy of the market in this regard; an switch running on
+open-source software, and perhaps an FGPA, represents a long-term
+objective.
 
-* Conclusion and Future Work
-:PROPERTIES:
-:CUSTOM_ID: sec:conclusion
-:END:
+Besides establishing the cause of the remaining parts-per-billion
+drift and mitigating for it accordingly, future work will be concerned
+with extending to a system in which a general purpose computer can be
+used as the audio server, an MCU being unsuited to running software
+associated with established audio workflows. In prior work, we
+implemented an audio server and WFS controller in a digital audio
+workstation plugin; this approach should be adapted to the new
+model. A computer acting as an audio server in this way must also be a
+participant in PTP time exchange, so a cost-effective means to add PTP
+support, typically lacking in consumer-grade network interface
+controllers (such as one might find in a laptop computer), must be
+sought.
 
 One key area of research that we wish to explore in the future is that
 of virtual acoustics and auralization. The creation of virtual
 acoustic environments demands the execution of real-time
 impulse-response convolutions, which in turn imposes the requirement
 that a node in a distributed DSP system possess the computational
-power to perform such a convolution, the memory required to store the
-impulse respose, and sufficiently performant access to that memory for
-real-time processing. 
+power to perform such convolutions, the memory required to store the
+impulse resposes, and sufficiently performant access to that memory
+for real-time processing. It remains to be seen whether the current
+hardware platform can rise to these challenges; we will endeavour to
+find out. 
 
 #+print_bibliography:
 
 * Footnotes
+
+[fn:9] For the /logical conclusion/ to this technological story,
+consult HOLOPLOT's behemoth installation at /The Sphere/, Las Vegas:
+https://holoplot.com/insights/case-studies/msg-sphere-case-study.
 
 [fn:8] https://www.st.com/
 
