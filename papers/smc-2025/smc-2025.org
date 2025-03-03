@@ -153,7 +153,8 @@ I'm going to need some unitz.
 #+begin_src latex
 \usepackage{siunitx}
 \sisetup{
-  mode=match
+  mode=match,
+  per-mode=symbol
 }
 #+end_src
 
@@ -161,6 +162,13 @@ Inconsolata looks better.
 
 #+begin_src latex
 \usepackage{inconsolata}
+#+end_src
+
+I want to draw a diagram or two.
+
+#+begin_src latex
+\usepackage{tikz}
+\usetikzlibrary{positioning,fit,calc,arrows.meta,backgrounds}
 #+end_src
 
 ** Line numbers
@@ -235,30 +243,27 @@ cref:sec:impl we present some preliminary results based on the method
 outlined in cref:; we conclude, in cref:sec:conclusion by describing
 some outstanding challenges and sharing our aims for future research.
 
-
 * Background
 :PROPERTIES:
 :CUSTOM_ID: sec:bg
 :END:
 
 The importance of sound in the immersive experience is
-well-established\nbsp[cite:@buckEffect2022]; if, however, the auditory
+well-established\nbsp[cite:@geronazzoSonic2023]; if, however, the auditory
 aspect of virtual and extended reality remains comparatively neglected
 when considered alongside other sensory
 channels\nbsp[cite:@serafinReflections2020], this may be ascribed, in part
-at least, to the complexity of, and expense associated with, [creating
-immersive audio installations]. Large-scale, multichannel spatial
-audio systems are typically very expensive affairs, reliant on
-proprietary systems, costly hardware, specialist software and
-[etc.]\nbsp[cite:@rushtonNetworked2024]. Particularly in the case of
-virtual acoustics [not really...], in which one may wish for numerous
-participants to experience the same auditory environment, unencumbered
-by headsets and so on, an immersive acoustic environment is desirable,
-and yet may lie out of reach, for practial purposes. Thus the
-exclusivity of multichannel audio systems has a chilling effect on
-research.
-
-
+at least, to the complexity of, and expense associated with, immersive
+audio installations. Large-scale, multichannel spatial audio systems
+are typically very expensive, centralised installations, reliant on
+proprietary hardware and specialist software. Such systems scale
+poorly and demand significant computing power to serve DSP
+needs\nbsp[cite:@rushtonNetworked2024]. Particularly in the case where one
+wishes for numerous participants to share in a participatory auditory
+experience, unencumbered by headsets, an immersive acoustic
+environment is desirable, and yet may lie out of reach, for practial
+purposes. The exclusivity of multichannel audio systems has a chilling
+effect on research and creativity.
 
 - Why spatial audio?
   - immersive auditory experiences, VR, virtual acoustics
@@ -273,6 +278,28 @@ research.
 - How to synchronise?
 - The ideal platform: requirements
   - The switch too
+
+What does it take synchronise playback on physically separate audio
+devices?\nbsp[cite:@friedtSynchronisation2023]
+
+At the risk of labouring the point, we remind the reader that whether
+one has a budget of millions, or are compelled to pursue a more frugal
+approach, decision-making around the not-inconsiderable endeavour of
+establishing a large-scale audio system for research, entertainment, or
+other purposes revolves around questions such as
+- How well does this technology work?
+- How much of a /sunk-cost/ does an installation based on this
+  technology represent?
+- Will this system still work in several years' time?
+
+** Audio Over Ethernet
+
+Ethernet has, for the past twenty years or so, been the de facto
+standard for the transmission of multichannel digital
+audio\nbsp[cite:@bakkerIntroduction2014]. Audio over ethernet 
+[cite:@cochardEthernet2024]
+
+** Hardware Platforms
 
 #+begin_src emacs-lisp :exports none
 (let* ((usd-eur .96)
@@ -293,36 +320,35 @@ research.
 
 #+name: tab:platforms
 #+caption: Selected embedded computing platforms listed with their
-#+caption: corresponding system on chip (SoC), availaibility of
+#+caption: corresponding microcontroller (MCU) or system on chip (SoC), availaibility of
 #+caption: selected functionality, and approximate cost per unit.
 #+attr_latex: :float multicolumn :align lllllr :booktabs t
-| Platform         | SoC              | Memory      | Ethernet | PTP | Unit Cost |
-|------------------+------------------+-------------+----------+-----+-----------|
-| Raspberry Pi CM5 | Broadcom BCM2712 | 2 GB SDRAM  | Yes      | Yes | € 89      |
-| Teensy 4.1       | NXP iMXRT1062    | 1024 KB RAM | Yes      | Yes | € 48      |
-| Daisy Seed       | STM32H750IB      | 65 MB SDRAM | No       | Yes | € 25      |
+| Platform         | MCU/SoC                         | Memory       | Ethernet | PTP | Unit Cost |
+|------------------+---------------------------------+--------------+----------+-----+-----------|
+| Raspberry Pi CM5 | Broadcom BCM2712                | 2 GB SDRAM   | Yes      | Yes | € 89      |
+| Bela             | Texas Instruments Sitara AM3358 | 512 MB SDRAM | Yes      | Yes | € 190     |
+| Teensy 4.1       | NXP iMXRT1062                   | 1024 KB SRAM | Yes      | Yes | € 48      |
+| Daisy Seed       | STM32H750IB                     | 65 MB SDRAM  | No       | Yes | € 25      |
 
+The past decade or so has seen the emergence of a raft of low-cost,
+embedded hardware platforms, either providing audio support, or having
+audio as a key part of their /raison d'être/. Amongst these platforms
+are a selection based on Embedded Linux Systems (ELS) such as
+/Bela/\nbsp[cite:@mcphersonBela2017] and /Elk/\nbsp[cite:@turchetElk2021],
+companion boards for the BeagleBone Black[fn:4] and Raspeberry
+Pi[fn:5] respectively. These examples profit from the power of the
+underlying ELS, with a system-on-chip (SoC) providing a multicore CPU
+and peripherals such as memory and connectivity via, e.g., USB and
+ethernet. A separate subset based on microcontroller (MCU)
+systems,[fn:6] prominent amongst these being the
+/Teensy/\nbsp[cite:@michonReal2019] (with an MCU from manufacturer
+NXP[fn:7]) and /Daisy/\nbsp[cite:@gasterAudio2020]
+(STMicroelectronics[fn:8]) development boards.
 
-What does it take synchronise playback on physically separate audio
-devices?\nbsp[cite:@friedtSynchronisation2023]
-
-At the risk of labouring the point, we remind the reader that whether
-one has a budget of millions, or are compelled to pursue a more frugal
-approach, decision-making around the not-inconsiderable endeavour of
-establishing a large-scale audio system for research, entertainment, or
-other purposes revolves around questions such as
-- How well does this technology work?
-- How much of a /sunk-cost/ does an installation based on this
-  technology represent?
-- Will this system still work in several years' time?
-
-** Audio Over Ethernet
-
-Ethernet has, for the past twenty years or so, been the de facto
-standard for the transmission of multichannel digital audio
-\nbsp[cite:@bakkerIntroduction2014].
-
-** ???
+Additionally, many of these platforms are supported by the Faust
+programming language, meaning that DSP code can be written once and
+compiled to run on a variety of embedded platforms
+[cite:@michonEmbedded2020].
 
 The greater part of the difficulty in such a project lies not
 necessarily in the mathematics of sound field synthesis, nor in
@@ -330,20 +356,19 @@ writing the code to implement SFS algorithms, but in finding suitable
 hardware on which to run the system. One may find, for example, a €30
 development board such as the Daisy Seed, well known to the DIY/maker
 audio community, well-appointed with memory, easily programmable with
-Faust, and /even possessing a MCU with PTP support/, but having no
-Ethernet PHY,[fn:2] and thus no way to connect it to a network. There is a
-sense in which, short of designing an manufacturing --- at scale --- a
+Faust, and /even possessing a SoC with PTP support/, but having no
+Ethernet PHY,[fn:2] and thus no way to connect it to a network. There
+is a sense in which, short of designing and manufacturing, at scale, a
 printed circuit board of one's own, the stars must align.
 
 ** Precision Time Protocol
 
-PTP is a UDP-based protocol for precise clock synchronisation between
-networked devices... Though often associated with more expensive
-networking equipment, support for PTP is offered by a number of
-low-cost MCUs, including the Broadcom
+IEEE 1588, Precision Time Protocol (PTP), is an ethernet protocol for
+precise clock synchronisation between networked devices... Though
+often associated with more expensive networking equipment, support for
+PTP is offered by a number of low-cost MCUs and SoCs, including the Broadcom
 BCM2711/2712\nbsp[cite:@raspberrypiltd.BCM27112022], as found on the
-Raspberry Pi Compute Module 4\nbsp[cite:@raspberrypiltd.Raspberry2023] and
-5\nbsp[cite:@raspberrypiltd.Raspberry2024],
+Raspberry Pi Compute Module 5\nbsp[cite:@raspberrypiltd.Raspberry2024],
 STM32H750IB\nbsp[cite:@stmicroelectronicsSTM32H750VB2023] (Daisy Seed),
 and NXP iMXRT1060 series\nbsp[cite:@nxpsemiconductorsIMX2021], the
 microcontroller utilised by the Teensy 4.1 development board. All of
@@ -354,8 +379,11 @@ amongst these the MikroTik CRS326-24G-2S+ series, provide PTP suport.
 
 ** The Importance of Synchronisation
 
+[cite:@lienhartImportance2003]
+
 ** Motivation
 
+#+name: fig:wfs
 #+attr_org: :width 400
 #+attr_latex: :width \linewidth
 #+caption: The holophonic illusion of primary-source Wave Field Synthesis
@@ -373,6 +401,62 @@ amongst these the MikroTik CRS326-24G-2S+ series, provide PTP suport.
 :PROPERTIES:
 :CUSTOM_ID: sec:impl
 :END:
+
+#+name: fig:arch
+#+caption: Overview of the audio clock conditioning system.
+#+caption: The timing of a clock subscriber's subsystems is governed by a crystal oscillator (XO).
+#+caption: Clock subscribers exchange PTP packets with a clock authority, and run an algorithm that
+#+caption: determines the necessary adjustments to be made to a dedicated PTP timer, part of the
+#+caption: ethernet subsystem.
+#+caption: Those same adjustments are used to condition the timing of the audio subsystem by
+#+caption: modifying divider registers that control the output frequency produced by the audio
+#+caption: phase locked loop (PLL).
+#+attr_latex: :float t
+\begin{figure}[t]
+\centering
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{intermediate}
+\pgfsetlayers{background,intermediate,main}
+\begin{tikzpicture}[
+  node distance=10mm,
+  padded/.style={inner sep=2mm},
+  xtraPadded/.style={inner sep=4mm},
+  rounded/.style={rounded corners=2mm},
+  invert/.style={draw=black!66, fill=black!66, text=white}
+]
+  \node (sub) [align=left] {Clock\\Subscriber};
+  \node (xo) [draw, fill=white, right=of sub, padded, align=center] {24 MHz \\ XO};
+
+  \node (eth) [below left=20mm and 8mm of xo, align=center] {Ethernet\\Subsystem};
+  \node (timer) [invert, above=1mm of eth, padded, align=center] {PTP\\Timer};
+
+  \node (audio) [below right=20mm and 8mm of xo, align=center] {Audio\\Subsystem};
+  \node (pll) [invert, above=1mm of audio, padded, align=center] {Audio\\PLL};
+
+  \node (ptp) [draw, fill=white, below=25mm of xo, padded, align=center] {PTP\\Algorithm};
+
+  \begin{pgfonlayer}{intermediate}
+    \node (alleth) [draw, fill=white, rounded, fit={(eth) (timer)}, padded] {};
+    \node (allaudio) [draw, fill=white, rounded, fit={(audio) (pll)}, padded] {};
+  \end{pgfonlayer}
+
+  \begin{pgfonlayer}{background}
+    \node (subwrap) [draw=black!50, thick, fill=black!6, fit={(sub) (xo) (alleth) (allaudio) (ptp)}, xtraPadded] {};
+  \end{pgfonlayer}
+
+  \node (auth) [draw, below=14mm of ptp, align=center, padded] {Clock\\Authority};
+  \node [above=1mm of auth, align=center, font={\scriptsize\itshape}] {PTP\\packets};
+
+  \draw [-{Triangle[open]}] (xo.south) -- +(0, -.3) node [midway,below=1mm] {\scriptsize{\emph{clock signal}}} -| (timer.north);
+  \draw [-{Triangle[open]}] (xo.south) -- +(0, -.3) -| (pll.north);
+
+  \draw [dashed, -{Stealth}] (ptp.north) |- (timer.east) node [midway,above=-1mm] {\scriptsize{\emph{nsps adjustment}}};
+  \draw [dashed, -{Stealth}] (ptp.north) |- (pll.west);
+
+  \draw [dashdotted, -Latex] ([xshift=-5mm] auth.north) -- ([xshift=-5mm] ptp.south)
+  \draw [dashdotted, -Latex] ([xshift=5mm] ptp.south) -- ([xshift=5mm] auth.north);
+\end{tikzpicture}
+\end{figure}
 
 Teensy's 30-bit clock divider registers.
 
@@ -398,12 +482,12 @@ sampling frequency to be applied should be
        (nsps 1e9)
        (ratio (+ 1 (/ drift nsps)))
        (newfs (* fs ratio))
-       (frac-diff (/ 1. (- 48e3 newfs))))
+       (frac-diff (/ 1. (- newfs fs))))
   (format "Ratio: %.9f, new fs: %.9f Hz, fractional diff: 1/%.1f Hz" ratio newfs frac-diff))
 #+end_src
 
 #+RESULTS:
-: Ratio: 0.999999999, new fs: 47999.999952000 Hz, fractional diff: 1/20833.3 Hz
+: Ratio: 0.999999999, new fs: 47999.999952000 Hz, fractional diff: 1/-20833.3 Hz
 
 #+NAME: eq:fs-example
 \begin{align*}
@@ -411,12 +495,24 @@ f_{s} &= \num{48000}\left(1 + \frac{-1750}{\num{1e9}}\right) \\
   &= \num{48000} \times \num{0.999998925} \\
   &= \qty{47999.916}{\Hz}\;,
 \end{align*}
-or about \(\frac{1}{12}\)\unit{\Hz} slower. 
+or about \(\frac{1}{12}\)\unit{\Hz} slower. An adjustment of
+\qty{1}{\ns\per\s} at a nominal \qty{48}{\kHz} corresponds to about one
+twenty-one-thousandth of a cycle of the audio clock. 
+
+Being descended from the same internal reference clock --- a
+\qty{24}{\MHz} crystal oscillator --- we can be sure that conclusions
+drawn about the notion of time at the level of the PTP timer are also
+applicable to the audio subsystem.
 
 * Evaluation                         
 :PROPERTIES:
 :header-args: :session :exports none
 :END:
+
+To evaluate the proposed audio clock conditioning algorithm, a network
+of audio devices was subject to testing. The test procedure is given
+in the section to follow; this is followed in turn by a discussion of
+the results yielded.
 
 #+begin_src julia :results none
 using CSV, DataFrames, Plots, LaTeXStrings
@@ -494,7 +590,7 @@ plotDrift("ptp")
 #+caption: For details of the test procedure, see cref:sec:setup.
 \begin{figure*}[t]
     \subfloat[Without sampling frequency correction.]{\includegraphics[width=0.5\textwidth]{figures/noptp}\label{fig:noptp}}
-    \subfloat[With sampling frequency correction.]{\includegraphics[width=0.5\textwidth]{figures/ptp}\label{fig:ptp}}
+    \subfloat[With PTP-derived sampling frequency correction.]{\includegraphics[width=0.5\textwidth]{figures/ptp}\label{fig:ptp}}
 \end{figure*}
 
 # #+name: fig:fig
@@ -560,23 +656,24 @@ drift for the three clients relative to the server, with two running
 faster than the server, the other slightly slower. The client with IP
 address \texttt{x.x.48.234} exhibits the most significant drift,
 \sim\qty{4}{\ms} over the course of ten minutes equating to around 6.7
-ppm.[fn:3] Assuming a sound propagation speed of \qty{343}{\m\per\s},
-in a practical application the inter-client spread of approaching
-\qty{5}{\ms} at the end of the ten minutes would correspond with a
-propagation discrepancy of roughly \qty{1.72}{\m}.
+ppm.[fn:3] Assuming a sound propagation speed of \qty{343}{\m\per\s}
+in air at room temperature, in a practical application the
+inter-client spread of approaching \qty{5}{\ms} at the end of the ten
+minutes would correspond with a propagation discrepancy of roughly
+\qty{1.72}{\m}.
 
-Cref:fig:ptp is the equivalent plot for clients with sampling rate
-correction applied. While some drift remains, note that it is three
-orders of magnitude less severe than in the correction-free case. Once
-again, \texttt{x.x.48.234} displays the greatest asynchronicity; now,
-however, its \qty{1}{\micro\s} over ten minutes represents less than 1.7
-parts per /billion/. At the end of the test, the three clients are are
-separated by an interval of just over \qty{1}{\micro\s}, corresponding to a
-propagation discrepancy of less than half a millimetre; we have
-improved from a scale comparable with the height of an adult human ---
-sufficient to obliterate the integrity of any attempt at sound field
-synthesis --- to an order of magnitude below the diameter of the
-tympanic membrane.
+Cref:fig:ptp is the equivalent plot for clients with sampling
+frequency correction applied. While some drift remains, note that it
+is three orders of magnitude less severe than in the correction-free
+case. Once again, \texttt{x.x.48.234} displays the greatest
+asynchronicity; now, however, its \qty{1}{\micro\s} over ten minutes
+represents less than 1.7 parts per /billion/. At the end of the test,
+the three clients are are separated by an interval of just over
+\qty{1}{\micro\s}, corresponding to a propagation discrepancy of less than
+half a millimetre; we have improved from a scale comparable with the
+height of an adult human --- sufficient to obliterate the integrity of
+any attempt at sound field synthesis --- to an order of magnitude
+below that of the diameter of the eardrum.
 
 Interestingly, and lending encouragement to the hope that further
 improvements are within reach, the remaining audio drift appears to be
@@ -585,6 +682,8 @@ inversely proportional to the raw drift, with client
 it was lagging.
 
 * Discussion
+
+So, it works, etc...
 
 If one were to identify a /weak link/ in the proposed system, that
 might be the ethernet switch. Its manufacturer, Latvian enterprise
@@ -596,64 +695,6 @@ expensive. To support more than a notional 48 output channels it would
 be necessary to daisy-chain switches; from a technical perspective, it
 is not known at the present time whether the PTP implementation on the
 MikroTik device can function effectively in such a configuration.
-
-
-* Page size and format
-
-The SMC 2025 proceedings will be formatted as portrait _A4-size papers
-(21.0 cm x 29.7 cm)_. All material on each page should fit within a
-rectangle of 17.2 cm x 25.2 cm, centered on the page, beginning 2.0 cm
-from the top of the page and ending with 2.5 cm from the bottom. The
-left and right margins should be 1.9 cm. The text should be in two
-8.2 cm columns with a 0.8 cm gutter. All text must be in a two-column
-format, and justified.  The maximum allowed length is *8 pages*
-(for both lecture and poster presentations). However, a length of
-*6 pages* is _strongly encouraged_.
-
-* Floats and Equations 
-
-** Equations
-
-Equations sholud be placed on separated lines and numbered. The number
-should be on the right side, in parentheses.
-
-#+NAME: eq:BP
-\begin{equation}
-r = \sqrt[13]{3}
-\end{equation}
-
-Always refer to equations like this: "Cref:eq:BP is of
-particular interest because..."
-
-** Figures, Tables and Captions
-
-#+name: tab:example
-#+caption: Table captions should be placed below the table, like this.
-#+attr_latex: :align |l|l| :placement [t]
-|-------------+---------------|
-| String Name | Numeric Value |
-|-------------+---------------|
-| Moin! SMC   |          2025 |
-|-------------+---------------|
-
-Always refer to tables and figures in the main text, for example:
-"see Cref:fig:example and Cref:tab:example".
-
-#+name: fig:example
-#+caption: Figure captions should be placed below the figure, exactly like this.
-#+attr_latex: :placement [t] :width 0.6\columnwidth
-[[./figure.pdf]]
-
-* Citations
-
-All bibliographical references should be listed at the end, inside a
-section named "REFERENCES". References must be numbered in order of
-appearance. You should avoid listing references that do not appear in
-the text.  Reference numbers in the text should appear within square
-brackets, such as in\nbsp[cite:@Someone:00] or\nbsp[cite:@Someone:00;
-@Someone:04; @Someone:09]. The reference format is the standard IEEE
-one. We highly recommend you use BibTeX to generate the reference
-list.
 
 * Conclusion and Future Work
 :PROPERTIES:
@@ -669,17 +710,32 @@ power to perform such a convolution, the memory required to store the
 impulse respose, and sufficiently performant access to that memory for
 real-time processing. 
 
-
 #+print_bibliography:
 
 * Footnotes
+
+[fn:8] https://www.st.com/
+
+[fn:7] https://www.nxp.com/ 
+
+[fn:6] The distinction between an SoC and a MCU is not without its
+subtlety. The latter tend to be more spartan, with a single processor
+core, limited memory, and basic peripherals; the former may have
+multiple cores and can encompass MCUs to provide specific
+functionality. SoCs tend to run an operating system and be more
+expensive than MCUs which typically run /bare-metal/.
+
+[fn:5] https://www.raspberrypi.com/ 
+
+[fn:4] https://www.beagleboard.org/boards/beaglebone-black
+
 [fn:3] Which suggests that, for this collection of devices at least,
 the Teensy 4.1 uses a reasonably high-quality crystal oscillator.
 
-[fn:2] An ethernet PHY, or /physical layer interface/, facilitates the
-connection between a SoC and the physical LAN bus --- a twisted-pair
-cable or fiberoptic connection for
-example\nbsp[cite:@stmicroelectronicsSTM32H750VB2023].
+[fn:2] An ethernet PHY, or /physical layer interface/, typically takes
+the form of a dedicated chip, and facilitates the connection between a
+SoC and the physical LAN bus, a twisted-pair cable or fiberoptic
+connection for example\nbsp[cite:@stmicroelectronicsSTM32H750VB2023].
 
 [fn:1] Boosting hopes of the continued availability of their very
 useful ethernet switch, MikroTik has (according to its own reports)

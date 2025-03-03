@@ -101,18 +101,19 @@ would allow me to benefit from the great wealth of expertise there in
 spatial and networked audio systems and digital signal processing. In
 turn, it would permit me to contribute directly to immersive audio
 projects at CCRMA such as the initiative to produce archæoacoustic
-recreations of the Chauvet-Pont-d'Arc Cave.[fn:9] Priorities for my
-research are 1) to explore refinements to the existing WFS
-implementation, and to pursue other target applications such as higher
-order ambisonics and the auralisation method that underpins
-archæoacoustics; 2) to investigate the automatic parallelisation of
-spatial audio algorithms as a powerful enhancement to the distributed
-approach that my work represents; 3) in light of the immersive
-applications of my work, to conduct a qualitative evaluation of its
-effectiveness in comparison with state-of-the-art technology at
-CCRMA. Furthermore, the availability of a scalable, open-source system
-for networked and immersive audio to composers and researchers at
-CCRMA would create fertile ground for novel collaborative work.
+recreations of the Chauvet-Pont-d'Arc Cave.[fn:9] Research priorities
+for my visit will be 1) to explore refinements to the existing WFS
+implementation, plus other target applications such as higher order
+ambisonics and the auralisation techniques that underpin virtual
+acoustics; 2) to investigate the automatic parallelisation of spatial
+audio algorithms as a powerful enhancement to the distributed approach
+that my work represents; 3) in light of the immersive applications of
+my work, to conduct a qualitative evaluation of the system's
+effectiveness in comparison with state-of-the-art technology at CCRMA,
+with a study to be designed in advance of my visit. Furthermore, the
+availability of a scalable, open-source system for networked and
+immersive audio to composers and researchers at CCRMA would create
+fertile ground for novel collaborative work.
 
 Thank you for your time in considering my application. Should you have
 any questions, I remain at your disposal.

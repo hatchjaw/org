@@ -48,7 +48,8 @@ and test condition:
   profile on the switch.
 - With PTP.
 
-Finally, I combined these into one large CSV:
+Original data files are in =org/papers/sive-2025/data=. I combined
+these into one large CSV:
 
 #+begin_src julia :noeval
 using CSV, DataFrames
