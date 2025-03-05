@@ -7,7 +7,7 @@
 * Summary
 
 In this paper, the author(s) confront the problem of controlling the
-postition of sound sources in a spatial audio setting, making the
+position of sound sources in a spatial audio setting, making the
 claim that existing control interfaces are incapable of effecting
 precise, efficient control of source positions. Situating their work
 within the context of electroacoustic music, they go on to describe
@@ -19,44 +19,41 @@ system. The paper concludes by proposing some features for an ideal
 spatial audio control interface, comparing with the characteristics
 and affordances of some related prior NIME conference contributions.
 
-As a piece of scholarly work, it is rather hit-and-miss. The paper is
-largely well-written and well-referenced, and significant treatment is
-given to spatial audio, dimensionality of sound systems, and
-composition/performance/diffusion practice in electroacoustic
-music. It is not until page 4, however, that the reader is given a
-specific example of a tool for spatial audio control, and we wait
-until the final page for the proposed characteristics of an ideal
-control system. These characteristics are derived from the anecdotal
-observations of the author(s), not from relevant literature or
-composer/performer-focused study. There is no mention of established
-tools like the Soundscape Renderer (http://spatialaudio.net/ssr/),
-WFSCollider (https://gameoflife.nl/software/) or IRCAM SPAT
+The paper is largely well-written and well-referenced, and significant
+treatment is given to spatial audio, dimensionality of sound systems,
+and composition/performance/diffusion practice in electroacoustic
+music, but it is not until page 4 that the reader is given a specific
+example of a tool for spatial audio control. We wait until the final
+page for the proposed characteristics of an ideal control system,
+which are derived from the anecdotal observations of the author(s),
+not from relevant literature or composer/performer-focused
+study. There is no mention of established tools like the Soundscape
+Renderer (http://spatialaudio.net/ssr/), WFSCollider
+(https://gameoflife.nl/software/) or IRCAM SPAT
 (https://hal.science/hal-01247594/document), and, with regard to
 control interfaces, the decision to limit the field of enquiry
 exclusively to past NIME proceedings is problematic. The interface in
 reference [3], with its planar quadraphonic setup, is dismissed as not
 addressing immersive audio based on the assertion, in §3, that
 immersive sound is only possible on three-dimensional speaker arrays;
-reference [5], cited in support, doesn't corroborate this --- its
-"Immersive experiment" appears to use a stereo setup.
+reference [5], cited in support, doesn't corroborate this --- it
+describes immersion in more of a philosophical than a technical sense,
+and its /Immersive experiment/ appears to use a stereo setup.
 
 Though shedding light on some interesting challenges faced by
 electroacoustic performers and composers, ultimately this paper does
-not make a contribution commensurate with its length or stated aims.
+not make a contribution commensurate with its length or stated
+aims. For the above reasons I cannot recommend it for inclusion.
 
 * Notes
 
-- It is implied in §3 that immersive sound necessitates a
-  three-dimensional speaker array. Reference [5], cited in support,
-  doesn't corroborate this, nor does the book /Immersive Sound/, from
-  which reference [2] is taken. The interface in reference [3] is
-  later dismissed as not addressing immersive audio based on this.
 - Since the topic of generative AI is not under consideration, figure
   1 doesn't add anything substantive to the paper.
-- A hemisphere is not a "flat representation of a solid".
-- The radiation pattern for a loudspeaker is narrower for high
+- §3: The radiation pattern for a loudspeaker is narrower for high
   frequencies than it is for low frequencies, but under no
   circumstances is it a "very narrow sound beam".
+- §5: It is not clear how a hemisphere relates to "flat representation
+  of a solid".
 
 * Proofreading
 

@@ -17,7 +17,7 @@ which it is applied becomes a kind of resonator; a microphone captures
 the sound of scissor-work that is part of the manufacturing process.
 
 It would have been interesting to see the "script of actions" idea
-(§3.2) extended explicitly to that of a musical score. the performer
+(§3.2) extended explicitly to that of a musical score. The performer
 can be viewed as creating simultaneously a piece of music and the
 pattern for its recreation. One senses, reading the paper, that the
 feat of textile creation, and the effort that it requires, becomes
@@ -29,7 +29,8 @@ One drawback is the paucity of technical detail in §4 --- how were the
 scissor sounds processed, for example?
 
 Nonetheless, this is a nicely-constructed, well-written short paper
-and I support its acceptance.
+(with plenty of scope for quips with regard to this year's theme). I
+support its acceptance.
 
 * Notes
 

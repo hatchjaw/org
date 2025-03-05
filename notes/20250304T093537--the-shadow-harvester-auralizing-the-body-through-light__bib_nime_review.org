@@ -6,6 +6,57 @@
 
 * Summary
 
+The author of this paper suggests a musical performer's shadow as a
+source of control input for processing the sound produced by that same
+performer. This implies an embodied feedback loop, with interesting
+ramifications for performance practice, particularly from a movement
+analysis perspective. The paper goes into detail on the cultural
+significance of the shadow and silhouette in the arts throughout
+history, as a mode of personal expression or an avatar, with the
+symbolic resonance that that entails.
 
+In implementation, the shadow interface is created by back-lighting a
+musical performer (a violinist in this case) against a fabric screen
+equipped with light-sensors; embroidery hoops are attached to screen
+to act both as an aesthetic enhancement, and as a means to attach and
+conceal the wires connecting the sensors to a
+microcontroller. Movement analysis is derived from the work of Nusseck
+on instrumental and ancillary movements; the interplay of the
+necessary movements for music making and "independent" movements that
+the performer can use to interact with the interface gives rise to
+interesting creative outcomes.
+
+The observation, in §3, that modern motion capture systems generalise
+whereas (implicitly) the shadow is personal to the performer is a
+particularly pertinent one. The low-tech, DIY approach here, and the
+creative opportunities affords, is laudable.
+
+If the paper lacks at all, it is in terms of scant description of the
+musical aspect of the work. The reader is led to understand that some
+combination of sound generation and processing occurs, but no details
+are given, nor is any supplementary material provided with a
+performance example.
+
+Reference [1], cited in support of the assertion that extensive
+exploration /has/ been made of the use of shadow in digital musical
+instruments, does not appear to be concerned with DMIs at all ---
+Jacquemin et al. describe a dance performance with "music- and
+gesture-controlled generative graphics with silhouette capture".
+
+Certainly from the performer's perspective this work represents a good
+fit with this year's theme. I think the idea is strong enough to make
+up for the lack of technical and musical detail and I recommend it for
+acceptance.
 
 * Notes
+
+- Something feels awry, typographically; letter-spacing for most of
+  the sections appears to have been reduced, notable exceptions being
+  §3.3 and §5-6.
+- Also bibliographical entries are missing their square brackets.
+- In §3.1, "a microcontroller" is mentioned, and later "Arduino code"
+  without explicitly connecting the two.
+- §3.2: it appears the reference to [17] should in fact be [16]
+  (Nusseck).
+- /Auralization/ is an acoustic modelling technique, so /sonifying the
+  body/silhouette/ would be more accurate.
