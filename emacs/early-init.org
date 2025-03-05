@@ -1,0 +1,18 @@
+#+title: Emacs Early Init
+#+property: header-args :tangle ~/.emacs.d/early-init.el :noeval
+
+Set the default background colour to match ~bg1~ from
+the dark version of =spacemacs-theme=.
+https://github.com/nashamri/spacemacs-theme/blob/6c74684c4d55713c8359bedf1936e429918a8c33/spacemacs-theme.el#L108
+
+#+begin_src emacs-lisp
+(setq default-frame-alist '((background-color . "#292b2e")))
+#+end_src
+
+Don't show the menu, tool, or scroll bars.
+
+#+begin_src emacs-lisp
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+#+end_src

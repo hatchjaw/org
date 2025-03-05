@@ -1,0 +1,67 @@
+#+title:      On Controlling Spatial Audio
+#+date:       [2025-03-04 mar. 09:36]
+#+filetags:   :bib:nime:review:
+#+identifier: 20250304T093607
+#+reference:  anonControlling2025
+
+* Summary
+
+In this paper, the author(s) confront the problem of controlling the
+postition of sound sources in a spatial audio setting, making the
+claim that existing control interfaces are incapable of effecting
+precise, efficient control of source positions. Situating their work
+within the context of electroacoustic music, they go on to describe
+spatial audio in various dimensions, live spatial diffusion versus
+DAW-based automation of source positions, with an emphasis on
+compositional workflow, and the laborious nature of assigning
+trajectories to sound sources in a three dimensional spatialisation
+system. The paper concludes by proposing some features for an ideal
+spatial audio control interface, comparing with the characteristics
+and affordances of some related prior NIME conference contributions.
+
+As a piece of scholarly work, it is rather hit-and-miss. The paper is
+largely well-written and well-referenced, and significant treatment is
+given to spatial audio, dimensionality of sound systems, and
+composition/performance/diffusion practice in electroacoustic
+music. It is not until page 4, however, that the reader is given a
+specific example of a tool for spatial audio control, and we wait
+until the final page for the proposed characteristics of an ideal
+control system. These characteristics are derived from the anecdotal
+observations of the author(s), not from relevant literature or
+composer/performer-focused study. There is no mention of established
+tools like the Soundscape Renderer (http://spatialaudio.net/ssr/),
+WFSCollider (https://gameoflife.nl/software/) or IRCAM SPAT
+(https://hal.science/hal-01247594/document), and, with regard to
+control interfaces, the decision to limit the field of enquiry
+exclusively to past NIME proceedings is problematic. The interface in
+reference [3], with its planar quadraphonic setup, is dismissed as not
+addressing immersive audio based on the assertion, in §3, that
+immersive sound is only possible on three-dimensional speaker arrays;
+reference [5], cited in support, doesn't corroborate this --- its
+"Immersive experiment" appears to use a stereo setup.
+
+Though shedding light on some interesting challenges faced by
+electroacoustic performers and composers, ultimately this paper does
+not make a contribution commensurate with its length or stated aims.
+
+* Notes
+
+- It is implied in §3 that immersive sound necessitates a
+  three-dimensional speaker array. Reference [5], cited in support,
+  doesn't corroborate this, nor does the book /Immersive Sound/, from
+  which reference [2] is taken. The interface in reference [3] is
+  later dismissed as not addressing immersive audio based on this.
+- Since the topic of generative AI is not under consideration, figure
+  1 doesn't add anything substantive to the paper.
+- A hemisphere is not a "flat representation of a solid".
+- The radiation pattern for a loudspeaker is narrower for high
+  frequencies than it is for low frequencies, but under no
+  circumstances is it a "very narrow sound beam".
+
+* Proofreading
+
+- §4.2, page 3, line 323: "a pain of coordinates".
+- §4.3, p. 3, l. 369: "unbalances" \to "imbalances".
+- The construction "there is to", e.g. §4.4, p. 4, l. 402, "In
+  general, whenever there is to deal..." is unusual, perhaps
+  archaic. Consult https://books.google.com/ngrams/graph?content=there+is+to+consider%2Cit+is+necessary+to+consider&year_start=1800&year_end=2022&corpus=en&smoothing=3

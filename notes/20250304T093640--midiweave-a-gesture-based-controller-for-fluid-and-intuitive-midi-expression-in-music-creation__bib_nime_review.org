@@ -1,0 +1,15 @@
+#+title:      MIDIWeave: A Gesture-Based Controller for Fluid and Intuitive MIDI Expression in Music Creation
+#+date:       [2025-03-04 mar. 09:36]
+#+filetags:   :bib:nime:review:
+#+identifier: 20250304T093640
+#+reference:  anonMIDIWeave2025
+
+* Summary
+
+This paper describes a computer vision system for MIDI control.
+
+* Notes
+
+My sense is that this project does not present a novel
+technique. Computer vision for MIDI control has been demonstrated,
+arguably in a form just as capable, in two of this paper's main references.

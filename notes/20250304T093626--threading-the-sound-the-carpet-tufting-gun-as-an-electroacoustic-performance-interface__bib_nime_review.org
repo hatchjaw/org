@@ -1,0 +1,36 @@
+#+title:      Threading the Sound: The Carpet Tufting Gun as an Electroacoustic Performance Interface
+#+date:       [2025-03-04 mar. 09:36]
+#+filetags:   :bib:nime:review:
+#+identifier: 20250304T093626
+#+reference:  anonThreading2025
+
+* Summary
+
+The authors of this paper propose the use of the tufting gun, a
+handheld electrical device for carpet-making, as a novel musical
+interface. They draw interesting connections between the history of
+programmable machinery, the creative affordances and physical feedback
+provided by textile creation, and the methodical, effortful nature of
+working with the tufting gun in particular. Using piezo sensors, the
+tufting gun becomes a MIDI event-generator, and the fabric mesh to
+which it is applied becomes a kind of resonator; a microphone captures
+the sound of scissor-work that is part of the manufacturing process.
+
+It would have been interesting to see the "script of actions" idea
+(§3.2) extended explicitly to that of a musical score. the performer
+can be viewed as creating simultaneously a piece of music and the
+pattern for its recreation. One senses, reading the paper, that the
+feat of textile creation, and the effort that it requires, becomes
+ancillary to that of music-making; ultimately, there's a multimodality
+at play that could have been given greater emphasis, perhaps tying in
+with the weaving mnemonic practice idea alluded to in §2.
+
+One drawback is the paucity of technical detail in §4 --- how were the
+scissor sounds processed, for example?
+
+Nonetheless, this is a nicely-constructed, well-written short paper
+and I support its acceptance.
+
+* Notes
+
+- §2, the demonym for the city of Lyon is /Lyonnais(e)/.
