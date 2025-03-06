@@ -270,7 +270,9 @@ other grievous mathematical sin.
 
 ** Visual intuition
 
-Let \(v_{1}(x_{1}, x_{2}) = \sin(x_{1}(t))\), and \(x_{1}(t) = 2\pi{}t\).
+Let \(v_{1}(x_{1}, x_{2}) = \sin(x_{1}(t - v_{2}))\), and \(x_{1}(t) = 2\pi{}t\).
+
+[OK, this notation is bad; needs some attention.]
 
 #+begin_src python :session :results none :exports none
 import matplotlib.pyplot as plt
@@ -297,9 +299,9 @@ plt.tight_layout()
 plt.savefig(matplot_lib_filename)
 matplot_lib_filename
 #+end_src
-
+#+attr_org: :width 400
 #+RESULTS:
-[[file:/tmp/babel-rUyGqK/figureI3US2D.png]]
+[[file:/tmp/babel-Nu8usY/figure2ed84m.png]]
 
 - If \(v_{2}\) increases at the rate of increase of \(t\), \(v_{1}\) stays
   static. E.g. \(v_{2} = t - 0.1\) introduced at \(t = 0.1\):
@@ -316,9 +318,9 @@ plt.tight_layout()
 plt.savefig(matplot_lib_filename)
 matplot_lib_filename
 #+end_src
-
+#+attr_org: :width 400
 #+RESULTS:
-[[file:/tmp/babel-rUyGqK/figureqVssF8.png]]
+[[file:/tmp/babel-Nu8usY/figureWbNkXo.png]]
 
 - If \(v_{2}\) increases more slowly than the rate of increase of \(t\),
   \(v_{1}\) will be slowed down.  E.g. delay of \(v_{2} = \frac{t -
@@ -336,9 +338,9 @@ plt.tight_layout()
 plt.savefig(matplot_lib_filename)
 matplot_lib_filename
 #+end_src
-
+#+attr_org: :width 400
 #+RESULTS:
-[[file:/tmp/babel-rUyGqK/figureim0Ia1.png]]
+[[file:/tmp/babel-Nu8usY/figureqcJyI3.png]]
 
 - If \(v_{2}\) increases faster than the rate of increase of \(t\),
   \(v_{1}\) will /reverse/.  E.g. delay of \(v_{2} = 2(t - 0.4)\) introduced
@@ -356,9 +358,9 @@ plt.tight_layout()
 plt.savefig(matplot_lib_filename)
 matplot_lib_filename
 #+end_src
-
+#+attr_org: :width 400
 #+RESULTS:
-[[file:/tmp/babel-rUyGqK/figurefrdZgu.png]]
+[[file:/tmp/babel-Nu8usY/figureN0pSfb.png]]
 
 - If \(v_{2}\) decreases, \(v_{1}\) speeds up. E.g. \(v_{2} = 0.1\) at \(t =
   0.1\), decreasing until \(v = 0\) at \(t = 0.6\):
@@ -374,9 +376,9 @@ plt.tight_layout()
 plt.savefig(matplot_lib_filename)
 matplot_lib_filename
 #+end_src
-
+#+attr_org: :width 400
 #+RESULTS:
-[[file:/tmp/babel-rUyGqK/figureIAStJJ.png]]
+[[file:/tmp/babel-Nu8usY/figureU6ro6f.png]]
 
 - E.g. let \(v_{2}(x_{1}, x_{2}) = A\((1+sin(x_{2}(t))/2)\), \(x_{2}(t) = 2\pi{}tf_{m}\) and
   \(f_{m} = 10, A = 200\):
@@ -395,9 +397,9 @@ plt.tight_layout()
 plt.savefig(matplot_lib_filename)
 matplot_lib_filename
 #+end_src
-
+#+attr_org: :width 400
 #+RESULTS:
-[[file:/tmp/babel-rUyGqK/figureOJHvNf.png]]
+[[file:/tmp/babel-Nu8usY/figure7HouX2.png]]
 
 These are all /phase modulations/ of some variety or other. Maybe
 there's something in the phase response of a variable delay that could

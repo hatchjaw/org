@@ -1690,7 +1690,7 @@ Entered on [2024-06-02 dim. 14:53]
 **** GSoC: Mentor Welcome Talk                                      :GSoC:
 - "[Have] a chat with contributors 2-4 times a week".
   + Not a problem with Advik; Tyler also pretty engaged.
-  + *TODO Check in with Fay and Shehab tomorrow.*
+  + DONE Check in with Fay and Shehab tomorrow.
 - Encourage contributors to ask questions; but encourage them to guide
   the answer-finding process.
 - Host a "GSoC Welcome Meet" with all contributors & mentors.
@@ -3376,7 +3376,10 @@ until after the 1588 clock is established, but that seems
 unstable. Seems more reliable to start the audio subsystem during
 ~setup()~, but leave PLL4 bypassed.
 
-***** TODO Type up proper notes on nsps adjustment applied to PLL4
+***** DONE Type up proper notes on nsps adjustment applied to PLL4
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-06 jeu. 12:38]
+:END:
 
 Entered on [2024-08-29 jeu. 19:14]
 
@@ -4770,7 +4773,7 @@ Entered on [2024-11-25 lun. 16:31]
   + Idea: explore reinfocement learning + constraint programming.
   + Trying to match non-quantised coefs with RSCM coefs.
   + Investigating Kullback-Leibler divergence.
-    * *TODO send Bastien info on other measures of divergence.*
+    * DONE send Bastien info on other measures of divergence.
 - Bastien now allowed to teach... sort of? Yes, now a permanent
   teacher, not a "vacataire".
   + Been teaching /Archicture des Circuits/.
@@ -5474,8 +5477,8 @@ Entered on [2024-12-18 mer. 13:20]
 **** Conference submission deadlines                             :WRITING:
 I should target the following:
 
-- [[https://aes2.org/contributions/2025-1st-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio-call-for-contributions/][AES AI/audio]]: February 28th (4-10 pages, [[https://easychair.org/account2/signin?l=7316581302252998218][EasyChair]]).
-- [[https://smc25.iem.at/call/][SMC]]: March 3rd (4-8 pages, [[https://easychair.org/account2/signin?l=8813818998001063168][EasyChair]]).
+- [[https://aes2.org/contributions/2025-1st-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio-call-for-contributions/][AES AI/audio]]: +February 28th+ March 15th (4-10 pages, [[https://easychair.org/account2/signin?l=7316581302252998218][EasyChair]]).
+- [[https://smc25.iem.at/call/][SMC]]: March +3rd+ 12th (4-8 pages, [[https://easychair.org/account2/signin?l=8813818998001063168][EasyChair]]).
 - [[https://internetofsounds2025.ieee-is2.org/][IS2]]: July 1st (5-10 pages, EasyChair).
   + There's also a satellite workshop, [[https://internetofsounds2025.ieee-is2.org/workshops/3rd-ieee-international-workshop-networked-immersive-audio][IEEE IWNIA]] (International
     Workshop on Networked Immersive Audio): July 1st (5-10 pages,
@@ -6929,3 +6932,63 @@ Other stuff:
 - Bastien working on a paper for Compas'2025 on shift-and-add stuff.
 
 Entered on [2025-02-26 mer. 10:45]
+** 2025-03 mars
+*** 2025-03-06 jeudi
+**** Hello                                                     :BRAINDUMP:
+It's been a little while.
+***** What have I been up to?
+(And why haven't I been journalling?)
+
+I finished the AES paper on autodiff. I submitted my application to
+the France-Stanford Fund. I completed a paper on synchronous
+distributed audio for SMC. I wrote my reviews for this year's NIME
+conference. I probably didn't sleep or eat enough. In parallel I was
+helping with SON; the students had some really interesting ideas, and
+did some things with Teensy that I wasn't previously aware of, such as
+using it as a HID device and controlling it with a web app, or running
+an FFT/IFFT library on it.
+
+It emerges that the deadline for both conferences have been pushed
+back; AES AIMLA till the 15th, SMC till the 12th. So there's time for
+feedback and revisions, which I wasn't expecting. In practical terms I
+have until the 13th, pusique je suis en congé à partir du 14 mars.
+
+I was so busy, and commensurately stressed out, that I started
+ignoring my emails and stopped journalling, but I should be able to
+start doing both of those things again now. I guess. Well, I kind of
+like journalling/note-taking; I'm less into email.
+
+***** What's next?
+****** TODO Submit Inria /demande de cumul/ form
+Anouchka informs me (email 20/02/25) that this is a legal requirement; probably
+something I should've done around assisting with that PIR group last
+year. The form is [[https://inria.iterop.cloud/#tasks/view/all/list][here]]. I'm going to need some help.
+****** TODO Set things up to pay tax
+This won't take care of itself. I have an email draft with some of the
+details I think. Maybe ask Tina for help.
+****** TODO Revise AES paper
+A few comments to address here, from Tanguy (largely postiive), Yann
+(some notational disagreements, but "a nice paper") and Stéphane
+("Sois plus positif" en gros).
+
+Stéphane is (still!) a bit unconvinced by the rationale behind the
+derivative of recursion, so I'm toying with the idea of sharing the
+full derivation, with [cite:@shynkAdaptive1989] as a reference. Might
+take too long, who knows. I would like to update my autodiff notes,
+e.g. [[denote:20240819T103529][Derivative property of the Fourier transform]].
+****** TODO Revise SMC paper
+Tanguy made a couple of remarks, but once again was quite positive
+about the work.
+
+Refer to [[*Conference submission deadlines][submission info]] as necessary.
+***** Other stuff
+I would like to spend some time trying:
+- gnuplot (cf. Hagen Wierstorf's [[https://github.com/hagenw/phd-thesis][thesis]]).
+- to find out what's wrong with ob-julia-vterm.
+- guix/nix.
+- a C++ LSP in Emacs.
+
+(P.S. Wierstorf rarely commits at the weekend. How /northern
+European/.)
+
+Entered on [2025-03-06 jeu. 12:32]

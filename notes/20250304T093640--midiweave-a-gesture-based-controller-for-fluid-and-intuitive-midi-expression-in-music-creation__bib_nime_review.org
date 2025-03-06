@@ -15,7 +15,7 @@ musical practice is alluded to, as is that of responsiveness and
 effective mapping strategies. An accessible system, it uses a standard
 webcam for capture, and maps three distinct hand gestures to musical
 control parameters, essentially "stop MIDI transmission", "start MIDI
-Transmission", and an assignable, open-hand gesture for use with MIDI
+transmission", and an assignable, open-hand gesture for use with MIDI
 CC messages, the particular control change message being assignable
 via a slider. The proposed system was subjected to technical
 evaluation of its latency, and informal user testing.
@@ -23,7 +23,7 @@ evaluation of its latency, and informal user testing.
 The authors do not make a strong case for the novelty of their
 work. Computer vision-based controllers have been demonstrated
 previously, and are in fact referenced in this paper ([11, 18], the
-latter from last year's NIME conference). MIDIWeave prioritises the
+latter from last year's NIME proceedings). MIDIWeave prioritises the
 transmission of MIDI data over MuGeVI's OSC, but since OSC is widely
 supported and more flexible, and in light of MuGeVI's variety of
 use-cases, it is difficult to view MIDIWeave as an advancement of the
