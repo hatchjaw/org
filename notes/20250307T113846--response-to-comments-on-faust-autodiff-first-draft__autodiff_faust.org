@@ -1,0 +1,97 @@
+#+title:      Response to Comments on /Faust Autodiff/ First Draft
+#+date:       [2025-03-07 ven. 11:38]
+#+filetags:   :autodiff:faust:
+#+identifier: 20250307T113846
+#+latex_header: \usepackage{cancel,cleveref}
+#+latex_header_extra: \hypersetup{hidelinks}
+#+export_file_name: export/faust-autodiff
+#+cite_export: biblatex numeric,sorting=none
+
+* Preamble
+
+I'm writing this document to respond in detail to some of the comments
+raised. There are things I don't have space to cover in greater depth
+in the paper, and other things for which email doesn't serve well.
+
+The idea of differentiating Faust programs doesn't have much
+precedent, and some of my ideas and assumptions about how to discuss
+Faust, semantics, signals, etc. may not be perfectly correct. I hope
+by throwing a light on the situation we can reach agreements over
+notation and terminology.
+
+* Problem Regarding Semantic Schemes
+
+Yann takes issue with my use of \(t\) in, e.g. equations (1) and
+(2). These are modelled after the schemes in
+[cite:@orlareySyntactical2004], e.g. for the arithmetic primitives:
+
+#+NAME: eq:arithSemantic
+\begin{equation}
+\begin{split}
+\llbracket \star \rrbracket &: \mathbb{S}^{2} \to \mathbb{S} \\
+\llbracket \star \rrbracket(s_{1},s_{2}) &\to (y) \\
+y(t) &= s_{1}(t) \star s_{2}(t)\;.
+\end{split}
+\end{equation}
+For the AES paper, and in general to be able to discuss autodiff in
+the Faust language, I believe we need to be able to draw an analogy
+between the signal processor represented by the block diagram,
+\(D\),[fn:1] and the application of a mathematical function to a
+vector of input signals, producing in turn a vector of output signals:
+
+#+NAME: eq:blockSemantic
+\begin{equation}
+\begin{split}
+\llbracket D \rrbracket &: \mathbb{S}^{n} \to \mathbb{S}^{m} \\
+\llbracket D \rrbracket(s_{1},\dots,s_{n}) &\to (y_{1},\dots,y_{m}) \\
+\mathbf{y}(t) &= f(\mathbf{s}(t))\;,
+\end{split}
+\end{equation}
+or, to be a little more explicit about it,
+
+#+NAME: eq:functionOfVectors
+\begin{equation}
+\begin{bmatrix}
+y_{1}(t) \\ \vdots \\ y_{m}(t)
+\end{bmatrix} = f\left(\begin{bmatrix}
+s_{1}(t) \\ \vdots \\ s_{n}(t)
+\end{bmatrix}\right)
+\end{equation}
+I think amongst Yann's contentions is, for example, that the above
+doesn't hold for the ~@~ primitive. My position is that in this case
+cref:eq:functionOfVectors reduces to
+
+#+NAME: eq:delay1
+\begin{align}
+y(t) &= f\left(\begin{bmatrix}s_{1}(t) \\ s_{2}(t)\end{bmatrix}\right) \\
+  &= s_{1}(t - s_{2}(t))\;,
+\end{align}
+and, since a delay can be represented as convolution with a
+time-shifted impulse [cite:@mcclellanSignal2003],
+
+#+NAME: eq:2
+\begin{align}
+y(t) = s_{1}(t) \ast \delta(t - s_{2}(t))\;.
+\end{align}
+Of course, for ~mem~, \(s_{2}(t) = 1\, \forall t\).
+
+This representation is useful, necessary even, because, as I describe
+in the paper, convolution is differentiable and gives us nice
+differentiation rules for ~mem~ and \sim. I think the problem is, in
+attempting to explain the otherwise foreign idea of differentiation in
+Faust, I'm forcing mathematical notation and Faust semantic notitation
+into awkward collision; my hope is that you can all appreciate what
+I'm trying to express and, if necessary, suggest a notation that we
+can all agree on.
+
+* Differentiable Delay
+
+* Differentiable Recursion
+
+#+print_bibliography:
+
+* Footnotes
+
+[fn:1] I understand that preferred notation nowadays is \(C\) (for
+/circuit/); [cite:@orlareySyntactical2004] uses \(D\), however, and
+that's my primary reference for Faust syntax/semantics.

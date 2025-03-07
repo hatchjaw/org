@@ -147,7 +147,7 @@ Use this if english is the only language/alphabet used in the document
 I'd prefer to use cleveref.
 
 #+begin_src latex
-\usepackage[noabbrev]{cleveref}
+\usepackage[noabbrev,capitalise]{cleveref}
 #+end_src
 
 Fancy tables (remember ~:booktabs t~).
@@ -597,7 +597,7 @@ interrupts disabled, waiting until a PTP offset of less than
 hardware registers are set that activate I^{2}S processing, and power
 delivered to the device's audio codec.[fn:12]
 
-* Evaluation                         
+* Evaluation
 :PROPERTIES:
 :header-args: :session :exports none
 :CUSTOM_ID: sec:eval

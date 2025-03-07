@@ -6992,3 +6992,86 @@ I would like to spend some time trying:
 European/.)
 
 Entered on [2025-03-06 jeu. 12:32]
+*** 2025-03-07 vendredi
+**** AES AIMLA paper comments                                    :WRITING:
+***** Yann
+Yann isn't very happy about my use of \(t\) in the semantic
+schemes. Perhaps if I push back, explaining to the team what I mean,
+then he'll see it my way; might just be digging my own grave, however.
+****** TODO Mention pattern matching in intro
+****** TODO Be more positive in the intro
+****** TODO §2.2 mention ~environment~ and parameter enumeration
+****** TODO Add signal labels to figure 2
+****** TODO Add clarifying parenthesis to equations (23) and (38)
+****** TODO Clarify that \(J_{f} = \nabla{}f(\mathbf{s})\)
+****** TODO §4.1.3, speak specifically of /unapplied lambda abstractions/
+****** TODO A better description of pattern matching
+A good way to describe it is as a /source code transformation/
+***** Tanguy
+****** Suggests equation (14) could be easier to understand
+Says he'd prefer \(\Delta_{N}\llbracket D \rrbracket = \Delta_{N}\llbracket D_{1}
+\rrbracket \diamond \Delta_{N}\llbracket D_{2} \rrbracket\), but that wouldn't reflect
+that the previous version of =diff.lib= essentially only supported
+primal compositions of differentiated primitives, \(P\).
+****** Question about equation (35)
+I should reply with a clearer description of why, in equations
+(35-36), \(\mathbf{s}\) and associated terms disappear if there's no
+feedforward component, i.e. \(A\) in \(A ~ B\) has no inputs
+\(\mathbf{s}(t)\), only inputs \(\mathbf{y}(t-1)\).
+****** TODO Expand on caption of listing 3
+Clarify that this is the definition in code of \(\chi\), the interleaving
+function.
+****** He asks about variable delays
+I need to make it clear to the team that, while there's a strategy for
+variable delays, it's not perfect, and I omit it strategically for
+scope's sake.
+***** Stéphane
+"The new element is the more general approach to forward-mode
+AD. Tommy has had to create differentiable substitutes for uses of the
+~route~ primitive and unapplied lambda abstractions, which isn't
+ideal. It seems to me that [the paragraph in the intro about
+limitations of the current approach] is like giving up on the goal of
+having a totally generic system before we've even tried to get there!"
+****** TODO Remove all mention of limitations from the intro
+Save these for conclusion/known issues/future work.
+****** TODO Remember the non-Faust specialists in the audience
+Not essential to go into details of current blockers in §4.1.1, for
+example. Save that for the Faust community.
+****** TODO Dedicate some space to a parameter optimisation example
+...instead of going into detail on limitations. The real-time aspect
+is quite compelling.
+****** TODO Add a reference for representation of a delay as convolution
+Almost certainly [cite:@mcclellanSignal2003].
+****** Like Tanguy, he would benefit from a word on variable delays
+****** TODO Maybe mention BPTT
+...in the context of the "difficulties" around recursion in machine
+learning.
+****** He's "perturbé par autant de simplicité" wrt. recursion
+A bit of detail by email regarding the derivation might help.
+****** There's nothing about ~abs~
+I don't think I have space for that sort of thing.
+****** TODO Add a word in the intro about being able to compute higher-order derivatives
+
+Entered on [2025-03-07 ven. 09:52]
+**** SMC Comments                                                :WRITING:
+***** Tanguy
+***** Romain
+Entered on [2025-03-07 ven. 18:27]
+**** More Julia Trouble                                            :TOOLS:
+Post-submission, I ran some long-overdue updates on my
+system. =ob-julia-vterm= stopped working and I could no longer export
+my SMC paper. Here's the error:
+
+#+begin_example
+ERROR: Unable to load dependent library /home/tim/Julia/depot/juliaup/julia-1.11.3+0.x64.linux.gnu/bin/../lib/julia/libopenlibm.so
+Message:/home/tim/Julia/depot/juliaup/julia-1.11.3+0.x64.linux.gnu/bin/../lib/julia/libopenlibm.so: cannot enable executable stack as shared object requires: Invalid argument
+#+end_example
+
+And [[https://github.com/JuliaLang/julia/issues/57250#issuecomment-2633453430][here]]'s a workaround:
+
+#+begin_src shell :noexec
+sudo pamac install execstack
+execstack -c ~/.julia/juliaup/julia-[version]/lib/julia/libopenlibm.so
+#+end_src
+
+Entered on [2025-03-07 ven. 18:27]

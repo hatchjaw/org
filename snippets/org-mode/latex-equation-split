@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: equation with nested split
+# key: eqspl
+# --
+#+NAME: eq:$1
+\begin{equation}
+\begin{split}
+$0
+\end{split}
+\end{equation}
