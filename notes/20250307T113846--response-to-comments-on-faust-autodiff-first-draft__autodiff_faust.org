@@ -69,7 +69,7 @@ y(t) &= f\left(\begin{bmatrix}s_{1}(t) \\ s_{2}(t)\end{bmatrix}\right) \\
 and, since a delay can be represented as convolution with a
 time-shifted impulse [cite:@mcclellanSignal2003],
 
-#+NAME: eq:2
+#+NAME: eq:delay2
 \begin{align}
 y(t) = s_{1}(t) \ast \delta(t - s_{2}(t))\;.
 \end{align}
@@ -85,6 +85,15 @@ I'm trying to express and, if necessary, suggest a notation that we
 can all agree on.
 
 * Differentiable Delay
+
+There were a couple of questions about delays, so I'll go into more
+detail on those here --- in part to explain how differentiable delays
+are implemented at present, and perhaps also to spark ideas for future
+improvements.
+
+** Fixed Delay
+
+
 
 * Differentiable Recursion
 

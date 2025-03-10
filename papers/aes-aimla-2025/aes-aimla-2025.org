@@ -359,7 +359,7 @@ where \(\mathbb{S}\) is the set of all signals, \(f\) is a
 mathematical function analogous to the primitive operations and
 compositions of \(D\), and \(t\) is time. The signal processor
 receives a vector of input signals, \(\mathbf{s}\), and produces a
-vector of output signals \(\mathbf{y}\).
+vector of output signals, \(\mathbf{y}\).
 
 ** The Faust Ecosystem
 
@@ -605,7 +605,7 @@ in achieving differentiable compositions.
 *** Identity Primitive
 
 Faust's identity function, notated \(\_\), describes a connection
-between two blocks. Treated as a signal processor, it, adheres to the
+between two blocks. Treated as a signal processor, it adheres to the
 following semantic scheme\nbsp[cite:@orlareySyntactical2004]:
 #+NAME: eq:identity
 \begin{equation}

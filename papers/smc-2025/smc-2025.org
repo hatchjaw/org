@@ -22,7 +22,7 @@ closed, centralised system of inflexible hardware and specialist
 software mean that, although areas of considerable research interest
 in recent years, significant barriers-to-entry exist with regard to
 fields such as immersive audio and virtual acoustics via practical
-application of sound field synthesis techniques. It may be possible,
+application of sound field synthesis techniques. It is possible,
 however, to parallelise sound field synthesis algorithms and
 distribute them, subject to guarantees regarding the timing of
 distributed signal processors. Exploiting one of a number of low-cost
@@ -123,7 +123,6 @@ Modern replacement for =subfigure=
 
 #+begin_src latex
 \usepackage[caption=false, font=footnotesize]{subfig}
-%% \usepackage{subcaption}
 #+end_src
 
 Extended list environments
@@ -135,7 +134,8 @@ Extended list environments
 Hyperref companion
 
 #+begin_src latex
-\usepackage[figure,table]{hypcap}
+%% \usepackage[all]{hypcap}
+\usepackage{caption}
 #+end_src
 
 Use this if english is the only language/alphabet used in the document
@@ -267,10 +267,10 @@ The importance of sound in the immersive experience is
 well-established\nbsp[cite:@geronazzoSonic2023]; if, however, the auditory
 aspect of virtual and extended reality remains comparatively neglected
 when considered alongside other sensory
-channels\nbsp[cite:@serafinReflections2020], this may be ascribed, in part
-at least, to the complexity of, and expense associated with, immersive
-audio installations. Large-scale, multichannel spatial audio systems
-are typically very expensive, centralised installations, reliant on
+channels\nbsp[cite:@serafinReflections2020], this may be ascribed, in
+part, to the complexity and cost associated with immersive audio
+installations. Large-scale, multichannel spatial audio systems are
+typically very expensive, centralised installations, reliant on
 proprietary hardware and specialist software. Such systems scale
 poorly and demand significant computing power to serve DSP
 needs\nbsp[cite:@rushtonNetworked2024]. Particularly in the case where one
@@ -279,25 +279,6 @@ experience, unencumbered by headsets, an immersive acoustic
 environment is desirable, and yet may lie out of reach, for practical
 purposes. The exclusivity of multichannel audio systems has a chilling
 effect on research and creativity.
-
-In simple terms, to serve a large listening area with the greatest
-possible fidelity, sound field synthesis
-algorithms\nbsp[cite:@ahrensAnalytic2012] such as wave field synthesis
-(WFS) and higher order ambisonics (HOA) call for large numbers of
-loudspeakers. To minimise spatial aliasing, WFS demands a dense array
-of secondary point sources\nbsp[cite:@winterGeometric2018]; to achieve the
-same end, ambisonics requires a number of speakers sufficient to
-reproduce spherical harmonics of higher
-order\nbsp[cite:@nicolSound2017]. Conventional systems for meeting these
-needs range from square arrays of 64-channels backed up by a single
-Mac Pro and multichannel audio digital interface (MADI)
-hardware\nbsp[cite:@graniGestural2016], to arrays of hundreds of speakers
-requiring clusters of powerful computers to provide
-DSP\nbsp[cite:@noisternigDispositif2012;@baalmanRenewed2007];[fn:9] in
-either case, conservative cost estimates on the order of hundreds of
-euros per channel may be reached\nbsp[cite:@rushtonNetworked2024].
-
-** Frugal Approaches to Spatial Audio
 
 #+begin_src emacs-lisp :exports none
 (let* ((usd-eur .96)
@@ -319,14 +300,35 @@ euros per channel may be reached\nbsp[cite:@rushtonNetworked2024].
 #+name: tab:platforms
 #+caption: Selected embedded computing platforms listed with their
 #+caption: corresponding microcontroller (MCU) or system on chip (SoC), availaibility of
-#+caption: selected functionality, and approximate cost per unit.
+#+caption: selected functionality, and approximate cost per unit (rounded)
+#+caption: to the nearest Euro) as of March 2025.
 #+attr_latex: :float multicolumn :align lllllr :booktabs t
 | Platform         | MCU/SoC                         | Memory       | Ethernet | PTP | Unit Cost |
 |------------------+---------------------------------+--------------+----------+-----+-----------|
 | Raspberry Pi CM5 | Broadcom BCM2712                | 2 GB SDRAM   | Yes      | Yes | € 89      |
 | Bela             | Texas Instruments Sitara AM3358 | 512 MB SDRAM | Yes      | Yes | € 190     |
+| ESP32-LyraT      | ESP32-WROVER-B                  | 4 MB PSRAM   | Yes      | No  | € 21      |
 | Teensy 4.1       | NXP iMXRT1062                   | 1024 KB SRAM | Yes      | Yes | € 48      |
 | Daisy Seed       | STM32H750IB                     | 65 MB SDRAM  | No       | Yes | € 25      |
+
+In simple terms, to serve a large listening area with the greatest
+possible fidelity, sound field synthesis
+algorithms\nbsp[cite:@ahrensAnalytic2012] such as wave field synthesis
+(WFS) and higher order ambisonics (HOA) call for large numbers of
+loudspeakers. To minimise spatial aliasing, WFS demands a dense array
+of secondary point sources\nbsp[cite:@winterGeometric2018]; to achieve the
+same end, ambisonics requires a number of speakers sufficient to
+reproduce spherical harmonics of higher
+order\nbsp[cite:@nicolSound2017]. Conventional systems for meeting these
+needs range from square arrays of 64-channels backed up by a single
+Mac Pro and multichannel audio digital interface (MADI)
+hardware\nbsp[cite:@graniGestural2016], to arrays of hundreds of speakers
+requiring clusters of powerful computers to provide
+DSP\nbsp[cite:@noisternigDispositif2012;@baalmanRenewed2007];[fn:9] in
+either case, conservative cost estimates on the order of hundreds of
+euros per channel may be reached\nbsp[cite:@rushtonNetworked2024].
+
+** Frugal Approaches to Spatial Audio
 
 Progress in embedded computing, devices of the /internet of things/
 variety, and initiatives in the DIY and maker communities, have
@@ -343,17 +345,17 @@ profit from the power of the underlying ELS, with a system-on-chip
 connectivity via, e.g., USB and ethernet. A separate subset based on
 microcontroller (MCU) systems,[fn:6] prominent amongst these being the
 /Teensy/\nbsp[cite:@michonReal2019] (with an MCU from manufacturer
-NXP[fn:7]) and /Daisy/\nbsp[cite:@gasterAudio2020]
-(STMicroelectronics[fn:8]) development boards. Beyond matters of
-economy, connectivity, and low power-consumption, the attraction of
-such devices lies in the relative ease with which they can be
-programmed, each providing either an SDK, a selection of utility
-classes, or, in the case of ELS, compatibility with existing audio
-applications and plugins. Furthermore, it may be possible to produce
-compatible code in a higher level audio language such as Faust, in
-which case signal processing or audio synthesis code can be written
-once and compiled to run on a variety of
-platforms\nbsp[cite:@michonEmbedded2020].
+NXP[fn:7]), /Daisy/\nbsp[cite:@gasterAudio2020]
+(STMicroelectronics[fn:8]), and various /ESP32/
+[cite:@michonFaust2020] development boards. Beyond matters of economy,
+connectivity, and low power-consumption, the attraction of such
+devices lies in the relative ease with which they can be programmed,
+each providing either an SDK, a selection of utility classes, or, in
+the case of ELS, compatibility with existing audio applications and
+plugins. Furthermore, it may be possible to produce compatible code in
+a higher level audio language such as Faust, in which case signal
+processing or audio synthesis code can be written once and compiled to
+run on a variety of platforms\nbsp[cite:@michonEmbedded2020].
 
 With frugality in mind, a modular, FPGA-based WFS system has been
 demonstrated, programmed in Faust and using high-quality, low-cost
@@ -368,18 +370,6 @@ enhanced by the use of an MCU supporting the Audio Video Bridging
 synchronisation\nbsp[cite:@devonportDistribution2019].
 
 ** The Rise of Networked Audio
-
-#+name: fig:wfs
-#+attr_org: :width 400
-#+attr_latex: :width \linewidth :float t
-#+caption: The holophonic illusion of primary-source Wave Field Synthesis
-#+caption: is created by applying an appropriate per-loudspeaker delay
-#+caption: (indicated by the dashed grey lines) to a virtual sound source.
-#+caption: Since the delays for each loudspeaker are independent, they can
-#+caption: computed in distributed fashion. The integrity of the
-#+caption: synthesised wavefront is contingent on synchronicity amongst the
-#+caption: group of distributed processors.
-[[file:./figures/WFS.drawio.png]]
 
 Also pivotal in facilitating more economical methods of achieving
 immersive audio outcomes has been the emergence of ethernet as the de
@@ -430,68 +420,147 @@ with associated I/O board, offers ethernet connectivity as standard,
 plus PTP, and is memory rich, but its audio clock is not configurable
 in fine enough increments to effect adjustments on the order of
 nanoseconds per second (\unit{\ns\per\s}), such as time-sensitive
-audio applications such as WFS demand (see cref:fig:wfs).
+audio applications such as WFS demand (see cref:fig:wfs-ptp).
+
+#+name: fig:wfs-ptp
+#+attr_org: :width 400
+#+caption: An example distributed, synchronous WFS system.
+#+caption: A server delivers audio and control data to a collection of
+#+caption: MCU-based signal processors via an ethernet switch;
+#+caption: each MCU is informed of its position, and the position of the
+#+caption: virtual sound source;
+#+caption: MCU audio clocks are conditioned via PTP to match that of the server.
+#+caption: Synchronicity amongs the group of MCUs ensures the integrity
+#+caption: of the synthesised wavefront.
+\begin{figure}[t]
+\newcommand*{\wfsptpX}{4}
+\newcommand*{\wfsptpNumWaves}{5}
+\newcommand*{\wfsptpWaveSpace}{.89}
+\newcommand*{\wfsptpNumMCU}{8}
+\newcommand*{\wfsptpNumSecondary}{16}
+\definecolor{wfsptpWaveColour}{HTML}{4077D6}
+\definecolor{wfsptpCtrlColour}{HTML}{479955}
+\centering
+\begin{tikzpicture}[
+  ctrl/.style={densely dotted, wfsptpCtrlColour, line width=.2mm},
+  audio/.style={wfsptpWaveColour, densely dashdotted},
+  device/.style={draw, fill=black!10, font={\footnotesize}, rounded corners=1mm}
+]
+\draw (-\wfsptpX,-.5) rectangle (\wfsptpX,2);
+
+\begin{scope}
+  \clip (-\wfsptpX,-.5) rectangle (\wfsptpX,2);
+  \node [circle,draw,fill=black!33,thick] (primary) at (0,0) {};
+
+  \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,\wfsptpNumWaves}
+    \draw [thick, dashed, wfsptpWaveColour] (-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
+
+  \node [black!50, fill=white, align=center, font={\footnotesize\itshape}] at (-3.15, 0) {Virtual\\soundfield};
+  \node [below right=-1mm and -1mm of primary, font={\footnotesize\itshape}] {Virtual sound source};
+
+  \foreach \i [
+    evaluate=\i as \secondary using
+    -\wfsptpX+.25+(\i-1)*(2*\wfsptpX/\wfsptpNumSecondary)
+  ] in {1,...,\wfsptpNumSecondary} {
+    \node (\secondary) at (\secondary, 2) {};
+    %\draw [ctrl] (primary) -- (\secondary,2);
+  }
+
+  \draw [ctrl] (primary) -- (0, 2) node [midway, right=-1mm, font=\tiny] {$(x,y)$};
+\end{scope}
+
+\begin{scope}[
+  yshift=2cm,
+  cross/.pic = {
+    \draw[rotate = 45] (-#1,0) -- (#1,0);
+    \draw[rotate = 45] (0,-#1) -- (0, #1);
+  },
+  mcu/.pic = {
+    \node [device, inner xsep=1.5mm] {MCU};
+  },
+  speaker/.pic = {
+    \draw (-.11, 0) rectangle (.11, .06);
+    \draw (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
+  }
+]
+  \matrix [draw] at (-\wfsptpX+1, 1.2) {
+    \draw [-{Triangle[open]}, ctrl] (0,0) -- (.5,0) & \node [font=\tiny\itshape] {Control}; \\
+    \draw [-{Stealth}, audio] (0,0) -- (.5,0) & \node [font=\tiny\itshape] {Audio}; \\
+    \draw [-{Triangle}] (0,0) -- (.5,0) & \node [font=\tiny\itshape] {PTP}; \\
+  };
+
+  \node (authority) [device, inner xsep=1.5mm] at (0, .75) {Server};
+  \node (switch) [device, above=4.5mm of authority] {Switch};
+
+  \draw [-{Triangle[open]}, ctrl] ([xshift=-3mm] authority.north) -- ([xshift=-3mm] switch.south);
+  \draw [-{Stealth}, audio] (authority.north) -- (switch.south);
+  \draw [{Triangle}-{Triangle}] ([xshift=3mm] authority.north) -- ([xshift=3mm] switch.south);
+
+  \foreach \i [
+    evaluate=\i as \secondary using
+    -\wfsptpX+.25+(\i-1)*(2*\wfsptpX/\wfsptpNumSecondary)
+  ] in {1,...,\wfsptpNumSecondary} {
+    \pic at (\secondary, 0) {cross=2pt};
+
+    \ifnum\i=1
+      \draw [ctrl] (\secondary,0) -- +(0, .2) -| ([yshift=-3mm] authority.south);
+    \else
+      \ifnum\i=\wfsptpNumSecondary
+        \draw [-{Triangle[open]}, ctrl] (\secondary,0) -- +(0, .2) -| (authority.south);
+      \else
+        \draw [ctrl] (\secondary,0) -- +(0, .2);
+      \fi
+    \fi
+
+    \pic at (\secondary, 3.045) {speaker};
+  }
+
+  \draw [ctrl] (0, 0) -- (0, .2);
+
+  \foreach \i [
+    evaluate=\i as \xpos using -\wfsptpX+.5+(\i-1)*(2*\wfsptpX/\wfsptpNumMCU)
+  ] in {1,...,\wfsptpNumMCU} {
+    \pic at (\xpos, 2.825) {mcu};
+
+    \draw [-{Triangle[open]}, ctrl] (\xpos-.2, 2.2) -- (\xpos-.2, 2.6);
+    \draw [-{Stealth}, audio] (\xpos, 2.2) -- (\xpos, 2.6);
+
+    \ifnum\i=1
+      \draw [-{Triangle}] (switch.north) +(0, .325) -- (\xpos-.2, 2.2) (\xpos+.2, 2.2) -| (\xpos+.2, 2.6);
+    \else
+      \ifnum\i=\wfsptpNumMCU
+        \draw [{Triangle}-{Triangle}] (switch.north) -- +(0, .325) -| (\xpos+.2, 2.6);
+      \else
+        \draw [-{Triangle}] (\xpos+.2, 2.2) -- (\xpos+.2, 2.6);
+      \fi
+    \fi
+  }
+\end{scope}
+
+\begin{scope}[
+  yshift=3.25cm,
+  wavefronts/.pic={ % Tried to do this mathematically, but...
+    \foreach \pos/\rad in {0/.18, 1/.615, 2/1.03, 3/1.42, 4/1.78, 5/2.07, 6/2.295, 7/2.42}
+      \draw [black!25] (-\wfsptpX+.25+.5*\pos, 2) circle (\rad);
+  }
+]
+  \clip (-\wfsptpX, 2) rectangle (\wfsptpX,4.6);
+
+  \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,\wfsptpNumWaves}
+    \draw [thick, wfsptpWaveColour] (-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
+
+  \pic {wavefronts};
+  \pic [xscale=-1] {wavefronts};
+
+  \node [black!50, align=center, font={\footnotesize\itshape}] at (-3.15, 4) {Synthesised\\soundfield};
+\end{scope}
+\end{tikzpicture}
+\end{figure}
 
 * Implementation
 :PROPERTIES:
 :CUSTOM_ID: sec:impl
 :END:
-
-#+name: fig:arch
-#+caption: Overview of the audio clock conditioning system.
-#+caption: The timing of a clock subscriber's subsystems is governed by a crystal oscillator (XO).
-#+caption: Clock subscribers exchange PTP packets with a clock authority, and run an algorithm that
-#+caption: determines the necessary adjustments to be made to a dedicated PTP timer, part of the
-#+caption: ethernet subsystem.
-#+caption: Those same adjustments are used to condition the timing of the audio subsystem by
-#+caption: modifying divider registers that control the output frequency produced by the audio
-#+caption: phase locked loop (PLL).
-#+attr_latex: :float t
-\begin{figure}[t]
-\centering
-\pgfdeclarelayer{background}
-\pgfdeclarelayer{intermediate}
-\pgfsetlayers{background,intermediate,main}
-\begin{tikzpicture}[
-  node distance=10mm,
-  padded/.style={inner sep=2mm},
-  xtraPadded/.style={inner sep=4mm},
-  rounded/.style={rounded corners=2mm},
-  invert/.style={draw=black!66, fill=black!66, text=white}
-]
-  \node (sub) [align=left] {Clock\\Subscriber};
-  \node (xo) [draw, fill=white, right=of sub, padded, align=center] {24 MHz \\ XO};
-
-  \node (eth) [below left=20mm and 8mm of xo, align=center] {Ethernet\\Subsystem};
-  \node (timer) [invert, above=1mm of eth, padded, align=center] {PTP\\Timer};
-
-  \node (audio) [below right=20mm and 8mm of xo, align=center] {Audio\\Subsystem};
-  \node (pll) [invert, above=1mm of audio, padded, align=center] {Audio\\PLL};
-
-  \node (ptp) [draw, fill=white, below=25mm of xo, padded, align=center] {PTP\\Algorithm};
-
-  \begin{pgfonlayer}{intermediate}
-    \node (alleth) [draw, fill=white, rounded, fit={(eth) (timer)}, padded] {};
-    \node (allaudio) [draw, fill=white, rounded, fit={(audio) (pll)}, padded] {};
-  \end{pgfonlayer}
-
-  \begin{pgfonlayer}{background}
-    \node (subwrap) [draw=black!50, thick, fill=black!6, fit={(sub) (xo) (alleth) (allaudio) (ptp)}, xtraPadded] {};
-  \end{pgfonlayer}
-
-  \node (auth) [draw, below=14mm of ptp, align=center, padded] {Clock\\Authority};
-  \node [above=1mm of auth, align=center, font={\scriptsize\itshape}] {PTP\\packets};
-
-  \draw [-{Triangle[open]}] (xo.south) -- +(0, -.3) node [midway,below=1mm] {\scriptsize{\emph{clock signal}}} -| (timer.north);
-  \draw [-{Triangle[open]}] (xo.south) -- +(0, -.3) -| (pll.north);
-
-  \draw [dashed, -{Stealth}] (ptp.north) |- (timer.east) node [midway,above=-1mm] {\scriptsize{\emph{nsps adjustment}}};
-  \draw [dashed, -{Stealth}] (ptp.north) |- (pll.west);
-
-  \draw [dashdotted, -Latex] ([xshift=-5mm] auth.north) -- ([xshift=-5mm] ptp.south)
-  \draw [dashdotted, -Latex] ([xshift=5mm] ptp.south) -- ([xshift=5mm] auth.north);
-\end{tikzpicture}
-\end{figure}
 
 Exact synchronisation in a distributed audio scenario is of paramount
 importance\nbsp[cite:@lienhartImportance2003]; what, then, does it take to
@@ -596,6 +665,61 @@ interrupts disabled, waiting until a PTP offset of less than
 \qty{100}{\ns} is achieved; at that point the audio clock is enabled,
 hardware registers are set that activate I^{2}S processing, and power
 delivered to the device's audio codec.[fn:12]
+
+#+name: fig:arch
+#+caption: Overview of the audio clock conditioning system.
+#+caption: The timing of a clock subscriber's subsystems is governed by a crystal oscillator (XO).
+#+caption: Clock subscribers exchange PTP packets with a clock authority, and run an algorithm that
+#+caption: determines the necessary adjustments to be made to a dedicated PTP timer, part of the
+#+caption: ethernet subsystem.
+#+caption: Those same adjustments are used to condition the timing of the audio subsystem by
+#+caption: modifying divider registers that control the output frequency produced by the audio
+#+caption: phase locked loop (PLL).
+\begin{figure}[t]
+\centering
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{intermediate}
+\pgfsetlayers{background,intermediate,main}
+\begin{tikzpicture}[
+  node distance=10mm,
+  padded/.style={inner sep=2mm},
+  xtraPadded/.style={inner sep=4mm},
+  rounded/.style={rounded corners=2mm},
+  invert/.style={draw=black!66, fill=black!66, text=white}
+]
+  \node (sub) [align=left] {Clock\\Subscriber};
+  \node (xo) [draw, fill=white, right=of sub, padded, align=center] {24 MHz \\ XO};
+
+  \node (eth) [below left=20mm and 8mm of xo, align=center] {Ethernet\\Subsystem};
+  \node (timer) [invert, above=1mm of eth, padded, align=center] {PTP\\Timer};
+
+  \node (audio) [below right=20mm and 8mm of xo, align=center] {Audio\\Subsystem};
+  \node (pll) [invert, above=1mm of audio, padded, align=center] {Audio\\PLL};
+
+  \node (ptp) [draw, fill=white, below=25mm of xo, padded, align=center] {PTP\\Algorithm};
+
+  \begin{pgfonlayer}{intermediate}
+    \node (alleth) [draw, fill=white, rounded, fit={(eth) (timer)}, padded] {};
+    \node (allaudio) [draw, fill=white, rounded, fit={(audio) (pll)}, padded] {};
+  \end{pgfonlayer}
+
+  \begin{pgfonlayer}{background}
+    \node (subwrap) [draw=black!50, thick, fill=black!6, fit={(sub) (xo) (alleth) (allaudio) (ptp)}, xtraPadded] {};
+  \end{pgfonlayer}
+
+  \node (auth) [draw, below=14mm of ptp, align=center, padded] {Clock\\Authority};
+  \node [above=1mm of auth, align=center, font={\scriptsize\itshape}] {PTP\\packets};
+
+  \draw [-{Triangle[open]}] (xo.south) -- +(0, -.3) node [midway,below=1mm] {\scriptsize{\emph{clock signal}}} -| (timer.north);
+  \draw [-{Triangle[open]}] (xo.south) -- +(0, -.3) -| (pll.north);
+
+  \draw [dashed, -{Stealth}] (ptp.north) |- (timer.east) node [midway,above=-1mm] {\scriptsize{\emph{nsps adjustment}}};
+  \draw [dashed, -{Stealth}] (ptp.north) |- (pll.west);
+
+  \draw [dashdotted, -Latex] ([xshift=-5mm] auth.north) -- ([xshift=-5mm] ptp.south);
+  \draw [dashdotted, -Latex] ([xshift=5mm] ptp.south) -- ([xshift=5mm] auth.north);
+\end{tikzpicture}
+\end{figure}
 
 * Evaluation
 :PROPERTIES:
@@ -823,6 +947,7 @@ find out.
 #+print_bibliography:
 
 * Footnotes
+
 [fn:12] Code for the proposed implementation can be found at
 https://github.com/hatchjaw/teensy-audiosync/.
 
@@ -874,4 +999,5 @@ existed as a company for over twenty years ---
 # ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
 # ("\\paragraph{%s}" . "\\paragraph*{%s}")
 # ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+# org-cite-global-bibliography: nil
 # End:

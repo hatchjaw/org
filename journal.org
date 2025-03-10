@@ -7051,11 +7051,69 @@ A bit of detail by email regarding the derivation might help.
 ****** There's nothing about ~abs~
 I don't think I have space for that sort of thing.
 ****** TODO Add a word in the intro about being able to compute higher-order derivatives
+***** Me
+****** TODO Check dimensions of Jacobians
+Might need to transpose those; I've been treating them as being
+composed of columns of gradient vectors, but I think those should
+[[https://math.stackexchange.com/questions/336640/gradient-and-jacobian-row-and-column-conventions][actually]] be rows.
+***** Romain
+****** TODO Typo
+"Input variables must be identifiable so as create the appropriate" ->
+as to?
+****** TODO Fix discrepancies in title capitalisation
+****** TODO Fix URL appearance in footnote 3
+****** TODO §4.1.3 mention that unapplied lambdas aren't widely used
+****** TODO Future work to be expanded (space allowing)
+****** TODO Revisit references for uniformity
 
 Entered on [2025-03-07 ven. 09:52]
 **** SMC Comments                                                :WRITING:
 ***** Tanguy
+****** DONE Maybe mention ESP32 in table 2 and §2.2
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-09 dim. 13:04]
+:END:
+While the [[https://www.espressif.com/sites/default/files/documentation/esp32-wrover-b_datasheet_en.pdf][ESP32-WROVER-B]], SoC for the (discontinued) LyraT, doesn't
+appear to support PTP, the LyraT-Mini's [[https://www.espressif.com/sites/default/files/documentation/esp32-wrover-e_esp32-wrover-ie_datasheet_en.pdf][ESP32-WROVER-E]] does (§5.2.13
+/Ethernet MAC Interface/.
+****** DONE Overhaul figure 1
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-10 lun. 17:23]
+:END:
+"Represent what is enabled by your result: the system with the clock
+authority server : just replacing WFS by MCU in the figure and have
+the router, the server and the ethernet connections appearing."
+****** He found my FPGA-switch remark interesting
+and goes as far as to suggest we meet with people from ENS to discuss
+feasibility.
 ***** Romain
+****** TODO Change the title?
+****** TODO Revisit the intro
+It's too "abstract" at the beginning, then not exhaustive enough in
+the second part. Would be nice to have a sentence on the fact that
+spatial audio systems are used in industry as well as academia.
+****** TODO Break long sentence into two
+"The risks of buying into a closed, centralised system..."
+****** DONE It /is/ possible to parallelise SFS algorithms
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-09 dim. 13:17]
+:END:
+****** DONE First sectence of §2 is too long
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-09 dim. 13:19]
+:END:
+****** TODO "they can [be] computed in distributed fashion"
+****** TODO Maybe specify dates for prices in table 1
+****** DONE Be consistent about terminating comma in "i.e." and "e.g."
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-09 dim. 13:14]
+:END:
+Actually, I think I am. Romain suggests comma after both, but Stack
+Exchange offers [[https://english.stackexchange.com/questions/16172/should-i-always-use-a-comma-after-e-g-or-i-e][a more nuanced view]].
+****** TODO Global vision
+Talk about how the system would work from a practical standpoint in
+§5. Mention multicast and DAW/laptop-based control system.
+
 Entered on [2025-03-07 ven. 18:27]
 **** More Julia Trouble                                            :TOOLS:
 Post-submission, I ran some long-overdue updates on my
