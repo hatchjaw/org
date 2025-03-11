@@ -7087,13 +7087,23 @@ the router, the server and the ethernet connections appearing."
 and goes as far as to suggest we meet with people from ENS to discuss
 feasibility.
 ***** Romain
-****** TODO Change the title?
-****** TODO Revisit the intro
+****** CANCELLED Change the title?
+:LOGBOOK:
+- State "CANCELLED"  from "TODO"       [2025-03-10 lun. 17:52]
+:END:
+****** DONE Revisit the intro
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-11 mar. 15:22]
+:END:
 It's too "abstract" at the beginning, then not exhaustive enough in
 the second part. Would be nice to have a sentence on the fact that
 spatial audio systems are used in industry as well as academia.
-****** TODO Break long sentence into two
-"The risks of buying into a closed, centralised system..."
+****** CANCELLED Break long sentence into two
+:LOGBOOK:
+- State "CANCELLED"  from "TODO"       [2025-03-10 lun. 17:41]
+:END:
+"The risks of buying into a closed, centralised system..." --- It
+doesn't break easily, so I just simplified the wording a little.
 ****** DONE It /is/ possible to parallelise SFS algorithms
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2025-03-09 dim. 13:17]
@@ -7102,17 +7112,27 @@ spatial audio systems are used in industry as well as academia.
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2025-03-09 dim. 13:19]
 :END:
-****** TODO "they can [be] computed in distributed fashion"
-****** TODO Maybe specify dates for prices in table 1
+****** DONE "they can [be] computed in distributed fashion"
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-10 lun. 17:52]
+:END:
+****** DONE Maybe specify dates for prices in table 1h
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-10 lun. 17:42]
+:END:
 ****** DONE Be consistent about terminating comma in "i.e." and "e.g."
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2025-03-09 dim. 13:14]
 :END:
 Actually, I think I am. Romain suggests comma after both, but Stack
 Exchange offers [[https://english.stackexchange.com/questions/16172/should-i-always-use-a-comma-after-e-g-or-i-e][a more nuanced view]].
-****** TODO Global vision
+****** CANCELLED Global vision
+:LOGBOOK:
+- State "CANCELLED"  from "TODO"       [2025-03-11 mar. 11:16]
+:END:
 Talk about how the system would work from a practical standpoint in
-§5. Mention multicast and DAW/laptop-based control system.
+§5. Mention multicast and DAW/laptop-based control system.  -> I've
+already done this.
 
 Entered on [2025-03-07 ven. 18:27]
 **** More Julia Trouble                                            :TOOLS:
@@ -7133,3 +7153,27 @@ execstack -c ~/.julia/juliaup/julia-[version]/lib/julia/libopenlibm.so
 #+end_src
 
 Entered on [2025-03-07 ven. 18:27]
+*** 2025-03-11 mardi
+**** Réunion Emeraude                               :MEETING:PRESENTATION:
+- Romin to submit ANR project, /"Disrupting Immersive Sound With Distributed
+  FPGAs"/.
+- New director at GRAME, https://www.nadiaratsimandresy.com/.
+- "SHS" and interdisciplinary collaborations; proximity with GRAME;
+  concerts for LACS and JIM (June).
+- /Barre de son 2/ --- collaboration with composer for Inria Grenoble
+  showroom.
+- Emeraude facing increasing /high-computation needs/ --- Syfala
+  (hardware synthesis), Holigrail (GPU), FaustIDE (cloud), etc.
+- Strong need for a permanent engineer with specific skills.
+  + Pierre has these skills, and would be very difficult to replace.
+  + We hope he can be hired as SED engineer.
+
+***** Louis Ledoux
+https://bynaryman.github.io/
+- Dark silicon & power wall: push for specialised over general-purpose
+  computing.
+- Memory wall: gap between processor speeds and memory latency.
+- Most effort/energy goes into communication, i.e. moving data, not
+  into computation.
+
+Entered on [2025-03-11 mar. 10:02]

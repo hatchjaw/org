@@ -1,7 +1,7 @@
 # -*- Mode: org -*-
 # -*- coding: utf-8 -*-
 
-#+title: All Together Now: A Synchronous Platform for Distributed Spatial Audio
+#+title: /All Together Now/: A Synchronous Platform for Distributed Spatial Audio
 #+author: Thomas Rushton
 
 #+startup: overview
@@ -21,15 +21,15 @@ investments that they demand. The risks associated with buying into a
 closed, centralised system of inflexible hardware and specialist
 software mean that, although areas of considerable research interest
 in recent years, significant barriers-to-entry exist with regard to
-fields such as immersive audio and virtual acoustics via practical
-application of sound field synthesis techniques. It is possible,
-however, to parallelise sound field synthesis algorithms and
-distribute them, subject to guarantees regarding the timing of
-distributed signal processors. Exploiting one of a number of low-cost
-embedded hardware platforms to have emerged over the past decade, and
-open-source software implementing the network Precision Time Protocol,
-we show that low-cost, networked audio devices can be synchronised to
-a degree sufficient to support time-sensitive audio applications.
+immersive audio and virtual acoustics via practical application of
+sound field synthesis techniques. It is possible, however, to
+parallelise sound field synthesis algorithms and distribute them,
+subject to guarantees regarding the timing of distributed signal
+processors. Exploiting one of a number of low-cost embedded hardware
+platforms to have emerged over the past decade, and open-source
+software implementing the network Precision Time Protocol, we show
+that low-cost, networked audio devices can be synchronised to a degree
+sufficient to support time-sensitive audio applications.
 #+end_abstract
 
 * About                                                            :noexport:
@@ -243,7 +243,8 @@ synthesis arrays\nbsp[cite:@michonMaking2023], efforts are underway to
 offer alternatives to the established order, bringing potential
 benefits, in terms of cost and scalability, with them. Work of this
 sort aims to democratise access to scholarly and creative practice in
-the sphere of spatial audio.
+the sphere of spatial audio; commercial interests, too, could benefit
+from broader adoption of systems with improved accessibility.
 
 In this paper, we present recent advancements to our work on
 distributed spatial audio, the latest steps on the road toward an
@@ -253,10 +254,10 @@ cref:sec:bg we discuss prior work in distributed and frugal spatial
 audio and outline the key challenges associated with audio in a
 distributed context; in cref:sec:impl we present approach to
 establishing an all-important /authoritative source of time/ in that
-context; in cref:sec:eval we present some preliminary results based
-on the method outlined in cref:sec:impl; we conclude, in cref:sec:conclusion
-by describing some outstanding challenges and sharing our aims for
-future research.
+context; in cref:sec:eval we present some preliminary results based on
+the method outlined in cref:sec:impl; we conclude, in
+cref:sec:conclusion by describing some outstanding challenges and
+sharing our aims for future research.
 
 * Background
 :PROPERTIES:
@@ -300,7 +301,7 @@ effect on research and creativity.
 #+name: tab:platforms
 #+caption: Selected embedded computing platforms listed with their
 #+caption: corresponding microcontroller (MCU) or system on chip (SoC), availaibility of
-#+caption: selected functionality, and approximate cost per unit (rounded)
+#+caption: selected functionality, and approximate cost per unit (rounded
 #+caption: to the nearest Euro) as of March 2025.
 #+attr_latex: :float multicolumn :align lllllr :booktabs t
 | Platform         | MCU/SoC                         | Memory       | Ethernet | PTP | Unit Cost |
@@ -424,14 +425,17 @@ audio applications such as WFS demand (see cref:fig:wfs-ptp).
 
 #+name: fig:wfs-ptp
 #+attr_org: :width 400
-#+caption: An example distributed, synchronous WFS system.
+#+caption: The holophonic effect of primary-source WFS is created by
+#+caption: applying appropriate per-loudspeaker delays to a virtual sound
+#+caption: source; delays are independent and can be computed in distributed
+#+caption: fashion.
 #+caption: A server delivers audio and control data to a collection of
 #+caption: MCU-based signal processors via an ethernet switch;
 #+caption: each MCU is informed of its position, and the position of the
 #+caption: virtual sound source;
 #+caption: MCU audio clocks are conditioned via PTP to match that of the server.
-#+caption: Synchronicity amongs the group of MCUs ensures the integrity
-#+caption: of the synthesised wavefront.
+#+caption: Synchronicity amongst the group of MCUs is necessary to ensure the
+#+caption: integrity of the synthesised wavefront.
 \begin{figure}[t]
 \newcommand*{\wfsptpX}{4}
 \newcommand*{\wfsptpNumWaves}{5}
@@ -450,7 +454,7 @@ audio applications such as WFS demand (see cref:fig:wfs-ptp).
 
 \begin{scope}
   \clip (-\wfsptpX,-.5) rectangle (\wfsptpX,2);
-  \node [circle,draw,fill=black!33,thick] (primary) at (0,0) {};
+  \node [circle,draw=wfsptpWaveColour,fill=wfsptpWaveColour!50,thick] (primary) at (0,0) {};
 
   \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,\wfsptpNumWaves}
     \draw [thick, dashed, wfsptpWaveColour] (-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
@@ -466,7 +470,7 @@ audio applications such as WFS demand (see cref:fig:wfs-ptp).
     %\draw [ctrl] (primary) -- (\secondary,2);
   }
 
-  \draw [ctrl] (primary) -- (0, 2) node [midway, right=-1mm, font=\tiny] {$(x,y)$};
+  \draw [ctrl] node [above right=.1mm, font=\tiny] {$(x,y)$} (primary) -- (0, 2);
 \end{scope}
 
 \begin{scope}[
@@ -484,9 +488,9 @@ audio applications such as WFS demand (see cref:fig:wfs-ptp).
   }
 ]
   \matrix [draw] at (-\wfsptpX+1, 1.2) {
-    \draw [-{Triangle[open]}, ctrl] (0,0) -- (.5,0) & \node [font=\tiny\itshape] {Control}; \\
-    \draw [-{Stealth}, audio] (0,0) -- (.5,0) & \node [font=\tiny\itshape] {Audio}; \\
-    \draw [-{Triangle}] (0,0) -- (.5,0) & \node [font=\tiny\itshape] {PTP}; \\
+    \draw [-{Triangle[open]}, ctrl] (0,0) -- (.5,0); & \node [font=\tiny\itshape] {Control}; \\
+    \draw [-{Stealth}, audio] (0,0) -- (.5,0); & \node [font=\tiny\itshape] {Audio}; \\
+    \draw [-{Triangle}] (0,0) -- (.5,0); & \node [font=\tiny\itshape] {PTP}; \\
   };
 
   \node (authority) [device, inner xsep=1.5mm] at (0, .75) {Server};
@@ -609,13 +613,13 @@ packets between a clock authority and a clock subscriber, the latter,
 assuming a symmetrical transmission path, has enough information to
 calculate its offset from the former, producing a figure in
 nanoseconds by which, for a given second, it must adjust its ethernet
-timer. Taking this nanoseconds-per-second adjustment, and assuming
-that ethernet and audio clocks are derived from the same clock source,
+timer. Taking this \unit{\ns\per\s} adjustment, and assuming that
+ethernet and audio clocks are derived from the same clock source,
 i.e. the XO (a safe assumption in the case of the iMXRT1062; see
 cref:fig:arch), achieving sample rate parity is a relatively simple
-case of applying the \unit{\ns\per\s} adjustment, \(a\), to the
-nominal sampling frequency, \(f_{s}\), to produce a target sampling
-frequency, \(\hat{f}_{s}\)
+case of applying the adjustment, \(a\), to the nominal sampling
+frequency, \(f_{s}\), to produce a target sampling frequency,
+\(\hat{f}_{s}\)
 
 #+NAME: eq:fine-num-1
 \begin{equation}
@@ -656,15 +660,15 @@ six-hundred-thousand.
 Sampling frequency conditioning alone will not suffice in achieving
 synchronous output; if clients start their respective audio subsystems
 on boot and simply apply sampling frequency adjustments once PTP time
-exchange begins, it is vanishingly unlikely that I^{2}S interrupts,
-moments at which samples are requested by the audio subsystem, will
+exchange begins, it is vanishingly unlikely that I^{2}S interrupts ---
+moments at which samples are requested by the audio subsystem --- will
 correspond. The solution is to wait until a PTP lock is achieved
-before starting the audio subsystem clock; on device startup, we
-configure the audio subsystem, but leave the audio clock and audio
-interrupts disabled, waiting until a PTP offset of less than
-\qty{100}{\ns} is achieved; at that point the audio clock is enabled,
-hardware registers are set that activate I^{2}S processing, and power
-delivered to the device's audio codec.[fn:12]
+before starting the audio subsystem clock at the client side; on
+device startup, we configure the audio subsystem, but leave the audio
+clock and audio interrupts disabled, waiting until a PTP offset of
+less than \qty{100}{\ns} is achieved; at that point the audio clock is
+enabled, hardware registers are set that activate I^{2}S processing, and
+power delivered to the device's audio codec.[fn:12]
 
 #+name: fig:arch
 #+caption: Overview of the audio clock conditioning system.
@@ -831,7 +835,7 @@ plotDrift("ptp")
 :END:
 
 Four MCUs, one running as clock authority, three as clock subscribers,
-were connected to the MikroTik CRS326-24G-2S+IN ethernet switch, which
+were connected to a MikroTik CRS326-24G-2S+IN ethernet switch, which
 was configured to act as a PTP boundary clock. The clock authority
 also acted as an audio server, generating a \qty{1}{\Hz} impulse train
 and sending packets of audio data, timestamped \qty{1}{\ms} later than
