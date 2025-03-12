@@ -233,8 +233,8 @@ f(t) \ast \delta'(t - k) &= \int^{\infty}_{-\infty}f(t - \tau)\delta'(\tau - k)\
 \end{align}
 
 #+begin_quote
-(One might expect the result to be negative, but apparently computing
-\(du\) entails applying the chain rule to \(u\).)
+One might expect the result to be negative, but apparently computing
+\(du\) entails applying the chain rule to \(u\), i.e. \(\frac{d}{d\tau}(t-\tau)\frac{d}{d\tau}f(t-\tau)\).
 #+end_quote
 
 So, applying the result of eqref:eq:conv-with-shifted-deriv-impulse to

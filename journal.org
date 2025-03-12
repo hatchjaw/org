@@ -7001,7 +7001,10 @@ then he'll see it my way; might just be digging my own grave, however.
 ****** TODO Mention pattern matching in intro
 ****** TODO Be more positive in the intro
 ****** TODO §2.2 mention ~environment~ and parameter enumeration
-****** TODO Add signal labels to figure 2
+****** DONE Add signal labels to figure 2
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-12 mer. 14:10]
+:END:
 ****** TODO Add clarifying parenthesis to equations (23) and (38)
 ****** TODO Clarify that \(J_{f} = \nabla{}f(\mathbf{s})\)
 ****** TODO §4.1.3, speak specifically of /unapplied lambda abstractions/
@@ -7018,7 +7021,10 @@ I should reply with a clearer description of why, in equations
 (35-36), \(\mathbf{s}\) and associated terms disappear if there's no
 feedforward component, i.e. \(A\) in \(A ~ B\) has no inputs
 \(\mathbf{s}(t)\), only inputs \(\mathbf{y}(t-1)\).
-****** TODO Expand on caption of listing 3
+****** DONE Expand on caption of listing 3
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-12 mer. 14:17]
+:END:
 Clarify that this is the definition in code of \(\chi\), the interleaving
 function.
 ****** He asks about variable delays
@@ -7057,11 +7063,20 @@ Might need to transpose those; I've been treating them as being
 composed of columns of gradient vectors, but I think those should
 [[https://math.stackexchange.com/questions/336640/gradient-and-jacobian-row-and-column-conventions][actually]] be rows.
 ***** Romain
-****** TODO Typo
+****** DONE Typo
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-12 mer. 14:21]
+:END:
 "Input variables must be identifiable so as create the appropriate" ->
 as to?
-****** TODO Fix discrepancies in title capitalisation
-****** TODO Fix URL appearance in footnote 3
+****** DONE Fix discrepancies in title capitalisation
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-12 mer. 14:22]
+:END:
+****** DONE Fix URL appearance in footnote 3
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-12 mer. 14:27]
+:END:
 ****** TODO §4.1.3 mention that unapplied lambdas aren't widely used
 ****** TODO Future work to be expanded (space allowing)
 ****** TODO Revisit references for uniformity

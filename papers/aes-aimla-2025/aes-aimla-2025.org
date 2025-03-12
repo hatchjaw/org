@@ -8,7 +8,7 @@
 #+export_file_name: out/aes-aimla-2025
 #+options: toc:nil num:5 H:5 date:nil author:nil title:nil
 #+latex_class: aes-aimla-2025
-#+cite_export: biblatex numeric,sorting=none,url=false,isbn=false
+#+cite_export: biblatex numeric,sorting=none,url=false,isbn=false,giveninits
 #+latex_header_extra: \RequirePackage[]{./out/aes-aimla-2025}
 
 #+begin_export latex
@@ -127,8 +127,8 @@ Listings. I should consider using [[https://www.reddit.com/r/emacs/comments/lbkm
   numberstyle=\ttfamily\tiny\color{black!45!white},
   numbersep=4pt
 }
-%% \renewcommand\lstlistingname{List.}
-%% \renewcommand\lstlistlistingname{List.}
+\renewcommand\lstlistingname{Lst.}
+\renewcommand\lstlistlistingname{Lst.}
 \usepackage[varqu,varl]{inconsolata}
 #+end_src
 
@@ -184,9 +184,18 @@ Short title should describe your topic but not be too long.
 
 ** Bibliography
 
-#+begin_src latex
+Natbib is used for more control on citations. You can use other modern
+bibliography packages but please try to match the provided style.
+
+#+begin_src latex :tangle nil
+\usepackage[numbers,square]{natbib}
+#+end_src
+
+#+begin_src latex :tangle nil
 \bibliographystyle{jaes}
 #+end_src
+
+I switched to biblatex (hence no tangle).
 
 * Bibliography Style                                               :noexport:
 :PROPERTIES:
@@ -211,8 +220,9 @@ Short title should describe your topic but not be too long.
     {\clearlist{publisher}}
     {}
 }
-#+end_src
 
+\DeclareNameAlias{author}{last-first}
+#+end_src
 
 * Introduction
 
@@ -463,7 +473,7 @@ for the primal operation, and a further \(N\) additions in parallel,
 which we can notate \(\big\|_{l=1}^{N} +\), for computing partial
 derivatives.
 
-#+begin_src faust :results file svg :file images/diffadd.svg :exports results
+#+begin_src faust :results silent :file images/diffadd.svg :exports none
 N = 2;
 distribute(0, q, 0) = par(i, q, _);
 distribute(p, q, 0) = par(i, p, !),par(j, q, _);
@@ -476,13 +486,40 @@ diff(_) = par(i, N+1, _);
 // B = 1 <: par(i, 12, -) :> _,_,_;
 process = diff(_),diff(_) : diff(+);
 #+end_src
+
+#+begin_src emacs-lisp :results file :file images/diffaddannotated.svg :exports results
+(let* ((file "./images/diffadd.svg")
+       (svg (xml-parse-file file)))
+  (svg-text svg "s1" :x "4" :y "49" :font-size "5")
+  (svg-path svg '((moveto ((2 . 61.5)))
+                  (lineto ((.5 . 58) (3.5 . 58)))
+                  (lineto ((2 . 61.5)) :relative nil))
+            :fill "none"
+            :stroke "black"
+            :stroke-linecap "square"
+            :stroke-width ".35")
+  (svg-text svg "s1{" :x "3.5" :y "61.5" :font-size "5")
+  (svg-text svg "s2" :x "4" :y "73.5" :font-size "5")
+  (svg-path svg '((moveto ((2 . 85.25)))
+                  (lineto ((.5 . 81.75) (3.5 . 81.75)))
+                  (lineto ((2 . 85.25)) :relative nil))
+            :fill "none"
+            :stroke "black"
+            :stroke-linecap "square"
+            :stroke-width ".35")
+  (svg-text svg "s2{" :x "3.5" :y "85.5" :font-size "5")
+  (with-temp-buffer
+    (xml-print svg)
+    (buffer-string)))
+#+end_src
 #+attr_latex: :width .75\linewidth :float t
+#+attr_org: :width 300
 #+name: fig:diffadd
 #+caption: Differentiable addition primitive applied to dual signals
 #+caption: \(\langle{}s_{1}, \nabla{}s_{1}\rangle,\langle{}s_{2}, \nabla{}s_{2}\rangle\); implicit input variable
 #+caption: vector \(\mathbf{x}\) of length \(N = 2\).
 #+RESULTS:
-[[file:images/diffadd.svg]]
+[[file:images/diffaddannotated.svg]]
 
 ** Motivation
 
@@ -809,8 +846,9 @@ written using the cut and identity primitives, plus parallel and split
 composition (see cref:lst:interleave). Comprising only differentiable
 elements, it too is differentiable.
 #+name: lst:interleave
-#+caption: A Faust function that interleaves \(c\) groups of \(r\)
-#+caption: signals into \(r\) groups of \(c\) signals. See cref:eq:interleave.
+#+caption: A Faust function, \(\chi(r,c)\) (see cref:eq:interleave for its
+#+caption: mathematical definition), that interleaves \(c\) groups of \(r\)
+#+caption: signals into \(r\) groups of \(c\) signals.
 #+attr_latex: :options float=ht
 #+begin_src faust :noeval
 interleave(r, c) = par(l, r * c, _)
@@ -1018,7 +1056,7 @@ Although the described scheme renders a great deal of existing Faust
 code differentiable, certain primitives and language constructs
 cannot, at present, be subjected to AD.
 
-*** Route primitive
+*** Route Primitive
 
 Faust's ~route~ primitive cannot be pattern-matched, which precludes
 the derivative transformation of arbitrary signal routing expressions
@@ -1028,12 +1066,12 @@ can be recreated via judicious use of the identity and cut primitives,
 and common routing tasks like interleaving can be achieved
 differentiably with code such as in cref:lst:interleave.
 
-*** User interface primitives
+*** User Interface Primitives
 
 The obvious derivative transformation of a user interface element is
 to an input variable, i.e. a parameter for optimisation such as a
 weight in a neural network. Input variables must be identifiable so as
-create the appropriate corresponding dual signal,
+to create the appropriate corresponding dual signal,
 \(\big\langle{}x_{i},\begin{bmatrix}0 & \cdots & \frac{\partial{}x_{i}}{\partial{}x_{i}} & \cdots & 0\end{bmatrix}^{T}\big\rangle\).
 
 Though matchable in principle, to perform a derivative transformation
@@ -1053,7 +1091,7 @@ consider this comparable with the particular requirements imposed by
 PyTorch, TensorFlow, and JAX, with their respective dedicated
 datatypes for learnable parameters.
 
-*** Lambda abstractions
+*** Lambda Abstractions
 :PROPERTIES:
 :CUSTOM_ID: sec:lambda
 :END:
@@ -1151,7 +1189,8 @@ most appropriate.
 * Footnotes
 [fn:5] [URLs to be entered here] 
 
-[fn:4] \href{https://github.com/grame-cncm/faustlibraries/blob/65594336a3476d9a82a4df71e88c92f3e4b94821/routes.lib}{https://github.com/grame-cncm/faustlibraries/blob/master/routes.lib}
+[fn:4]
+\url{https://github.com/grame-cncm/faustlibraries/blob/65594336a3476d9a82a4df71e88c92f3e4b94821/routes.lib}
 
 [fn:3] Note that in Faust, \(a\), the iterator index, starts from
 zero. (What works in code does not necessarily transfer well to the
