@@ -6998,17 +6998,39 @@ Entered on [2025-03-06 jeu. 12:32]
 Yann isn't very happy about my use of \(t\) in the semantic
 schemes. Perhaps if I push back, explaining to the team what I mean,
 then he'll see it my way; might just be digging my own grave, however.
-****** TODO Mention pattern matching in intro
-****** TODO Be more positive in the intro
-****** TODO §2.2 mention ~environment~ and parameter enumeration
+****** DONE Mention pattern matching in intro
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-13 jeu. 11:08]
+:END:
+****** DONE Be more positive in the intro
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-13 jeu. 11:08]
+:END:
+****** DONE §2.2 mention ~environment~ and parameter enumeration
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-13 jeu. 10:59]
+:END:
 ****** DONE Add signal labels to figure 2
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2025-03-12 mer. 14:10]
 :END:
-****** TODO Add clarifying parenthesis to equations (23) and (38)
-****** TODO Clarify that \(J_{f} = \nabla{}f(\mathbf{s})\)
-****** TODO §4.1.3, speak specifically of /unapplied lambda abstractions/
-****** TODO A better description of pattern matching
+****** DONE Add clarifying parenthesis to equations (23) and (38)
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-12 mer. 17:00]
+:END:
+Spacing around composition operators increased to improve legibility. 
+****** DONE Clarify that \(J_{f} = \nabla{}f(\mathbf{s})\)
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-13 jeu. 09:47]
+:END:
+****** DONE §4.1.3, speak specifically of /unapplied lambda abstractions/
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-13 jeu. 11:18]
+:END:
+****** DONE A better description of pattern matching
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-13 jeu. 10:59]
+:END:
 A good way to describe it is as a /source code transformation/
 ***** Tanguy
 ****** Suggests equation (14) could be easier to understand
@@ -7038,7 +7060,10 @@ AD. Tommy has had to create differentiable substitutes for uses of the
 ideal. It seems to me that [the paragraph in the intro about
 limitations of the current approach] is like giving up on the goal of
 having a totally generic system before we've even tried to get there!"
-****** TODO Remove all mention of limitations from the intro
+****** DONE Remove all mention of limitations from the intro
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-13 jeu. 11:36]
+:END:
 Save these for conclusion/known issues/future work.
 ****** TODO Remember the non-Faust specialists in the audience
 Not essential to go into details of current blockers in §4.1.1, for
@@ -7046,19 +7071,31 @@ example. Save that for the Faust community.
 ****** TODO Dedicate some space to a parameter optimisation example
 ...instead of going into detail on limitations. The real-time aspect
 is quite compelling.
-****** TODO Add a reference for representation of a delay as convolution
+****** DONE Add a reference for representation of a delay as convolution
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-12 mer. 16:41]
+:END:
 Almost certainly [cite:@mcclellanSignal2003].
 ****** Like Tanguy, he would benefit from a word on variable delays
-****** TODO Maybe mention BPTT
+****** CANCELLED Maybe mention BPTT
+:LOGBOOK:
+- State "CANCELLED"  from "TODO"       [2025-03-12 mer. 16:41]
+:END:
 ...in the context of the "difficulties" around recursion in machine
 learning.
 ****** He's "perturbé par autant de simplicité" wrt. recursion
 A bit of detail by email regarding the derivation might help.
 ****** There's nothing about ~abs~
 I don't think I have space for that sort of thing.
-****** TODO Add a word in the intro about being able to compute higher-order derivatives
+****** DONE Add a word in the intro about being able to compute higher-order derivatives
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-13 jeu. 11:33]
+:END:
 ***** Me
-****** TODO Check dimensions of Jacobians
+****** DONE Check dimensions of Jacobians
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-13 jeu. 11:18]
+:END:
 Might need to transpose those; I've been treating them as being
 composed of columns of gradient vectors, but I think those should
 [[https://math.stackexchange.com/questions/336640/gradient-and-jacobian-row-and-column-conventions][actually]] be rows.
@@ -7077,9 +7114,15 @@ as to?
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2025-03-12 mer. 14:27]
 :END:
-****** TODO §4.1.3 mention that unapplied lambdas aren't widely used
+****** DONE §4.1.3 mention that unapplied lambdas aren't widely used
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-13 jeu. 11:18]
+:END:
 ****** TODO Future work to be expanded (space allowing)
-****** TODO Revisit references for uniformity
+****** DONE Revisit references for uniformity
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-12 mer. 16:40]
+:END:
 
 Entered on [2025-03-07 ven. 09:52]
 **** SMC Comments                                                :WRITING:
