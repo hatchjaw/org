@@ -7065,10 +7065,16 @@ having a totally generic system before we've even tried to get there!"
 - State "DONE"       from "TODO"       [2025-03-13 jeu. 11:36]
 :END:
 Save these for conclusion/known issues/future work.
-****** TODO Remember the non-Faust specialists in the audience
+****** DONE Remember the non-Faust specialists in the audience
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-13 jeu. 17:00]
+:END:
 Not essential to go into details of current blockers in §4.1.1, for
 example. Save that for the Faust community.
-****** TODO Dedicate some space to a parameter optimisation example
+****** DONE Dedicate some space to a parameter optimisation example
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-13 jeu. 21:22]
+:END:
 ...instead of going into detail on limitations. The real-time aspect
 is quite compelling.
 ****** DONE Add a reference for representation of a delay as convolution
@@ -7118,7 +7124,10 @@ as to?
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2025-03-13 jeu. 11:18]
 :END:
-****** TODO Future work to be expanded (space allowing)
+****** DONE Future work to be expanded (space allowing)
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-03-13 jeu. 21:23]
+:END:
 ****** DONE Revisit references for uniformity
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2025-03-12 mer. 16:40]

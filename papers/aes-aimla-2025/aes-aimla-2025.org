@@ -182,7 +182,7 @@ e-mail address
 
 If there are many authors, please use the form "First author et al."
 #+begin_src latex
-\lastnames{Rushton, Orlarey, Michon, and Risset}
+\lastnames{Rushton et al.}
 #+end_src
 
 Short title should describe your topic but not be too long.
@@ -1123,15 +1123,15 @@ with input signals, to the wrapper function ~diffInN~.
 #+name: lst:iir
 #+caption: Excerpt from a differentiable IIR filter implementation.
 #+begin_src faust :noeval
-N = 3; // filter order.
+N = 2; // filter order.
 
 // ...Set up AD vars & environment...
 
 // Differentiable TDF IIR filter.
-iir = ((sub,par(l, N - 1, _))
-  ~ (fir(N - 1))),par(l, N, _)
-  : _,par(l, N - 1, !),par(l, N, _)
-  : fir(N)
+iir = ((sub,par(l, N, _))
+  ~ (fir(N))),par(l, N + 1, _)
+  : _,par(l, N, !),par(l, N + 1, _)
+  : fir(N + 1)
 with { 
   sub = _,_ <: !,_,_,! : -;
   fir(n) =
@@ -1144,7 +1144,7 @@ with {
 // to the differentiated filter.
 process = _,coeffs : d.diffInN(iir, 1)
 with {
-    coeffs = par(i, 2 * N - 1,
+    coeffs = par(i, 2 * N + 1,
                  vars.var(i + 1));
 };
 #+end_src
@@ -1152,10 +1152,16 @@ with {
 ** Applications
 
 A comprehensive treatment of potential applications for AD in Faust
-lies beyond the scope of this paper, as does a quantitative evaluation
-of the performance of the proposed implementation. Expanded versions
-of the examples in cref:lst:neuron and cref:lst:iir are, however,
-available online.[fn:5]
+lies beyond the scope of this paper; expanded versions of the examples
+in cref:lst:neuron and cref:lst:iir are, however, available
+online[fn:5] and can be run in Faust's web IDE[fn:6]. The examples
+illustrate that comparing, via a differentiable loss function, the
+output of a signal processor with hidden parameters against that of an
+algorithm whose parameters are learnable, and backpropagating the
+resulting gradients, learnable parameters can be optimised in real
+time. In the case of the IIR filter, coefficients could in principle
+be optimised against output produced by a `black box' filter, and the
+results generated and visualised in a uniquely intuitive manner.
 
 * Conclusion
 
@@ -1186,7 +1192,10 @@ most appropriate.
 #+print_bibliography:
 
 * Footnotes
-[fn:5] [URLs to be entered here] 
+
+[fn:6] \url{https://faustide.grame.fr/}
+
+[fn:5] \url{https://codeberg.org/hatchjaw/aes-faust-ddsp}
 
 [fn:4]
 \url{https://github.com/grame-cncm/faustlibraries/blob/65594336a3476d9a82a4df71e88c92f3e4b94821/routes.lib}

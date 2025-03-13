@@ -1,6 +1,8 @@
 #+title: Emacs Early Init
 #+property: header-args :tangle ~/.emacs.d/early-init.el :noeval
 
+* Appearance
+
 Set the default background colour to match ~bg1~ from
 the dark version of =spacemacs-theme=.
 https://github.com/nashamri/spacemacs-theme/blob/6c74684c4d55713c8359bedf1936e429918a8c33/spacemacs-theme.el#L108

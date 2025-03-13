@@ -1,0 +1,107 @@
+#+title: Emacs Config
+#+property: header-args :tangle ~/.emacs.d/org-init.el :noeval
+
+I aim to migrate my existing config, managed with [[https://www.chezmoi.io/][chezmoi]], to this
+file. In the meantime, I tangle it to file that I then load from
+=init.el=. For more config, see [[file:early-init.org][early init]].
+
+* Inspo
+
+- https://codeberg.org/mehrad/.emacs.d
+
+* Emacs Itself
+
+#+begin_src emacs-lisp
+(use-package emacs
+  :ensure nil
+  :init
+  (setq-default
+#+end_src
+
+** Default mode & scratch message
+
+Use Org Mode by default.
+
+#+begin_src emacs-lisp
+   major-mode 'org-mode
+   initial-major-mode 'org-mode
+#+end_src
+
+A cheery, informative message for the scratch buffer.
+
+#+begin_src emacs-lisp
+   initial-scratch-message "\
+,#+begin_quote
+This buffer is for notes that are not saved. it is in Org-mode so all
+Org keybindings work. For example, to create a code block, use ~C-c
+C-,~, and select a language. Enter ~C-c C-c~ and the result will be
+inserted below the source block.
+,#+end_quote
+
+"
+#+end_src
+
+** Finish up
+
+Close ~setq~ and ~use-package~.
+
+#+begin_src emacs-lisp
+))
+#+end_src
+
+* Org Mode
+
+#+begin_src emacs-lisp
+(use-package org
+  :ensure nil
+  :config
+#+end_src
+
+** Initial Folding State
+
+I like to fold everything by default; this can be overridden with,
+e.g., ~#+startup: nofold~.
+
+#+begin_src emacs-lisp
+(setq org-startup-folded 'fold)
+#+end_src
+
+** Finish up
+
+#+begin_src emacs-lisp
+)
+#+end_src
+
+* Appearance
+
+#+begin_src emacs-lisp
+(custom-set-faces
+#+end_src
+
+** Org mode
+
+Add some extra contrast to source blocks.
+
+#+begin_src emacs-lisp
+'(org-block-begin-line ((t (:inherit org-block-begin-line
+                                     :extend t
+                                     :underline nil))))
+'(org-block-end-line ((t (:inherit org-block-end-line
+                                   :extend t
+                                   :overline nil
+                                   :underline nil))))
+#+end_src
+
+** Flyspell
+
+Make spelling errors really pop.
+
+#+begin_src emacs-lisp
+'(flyspell-incorrect ((t (:inverse-video t))))
+#+end_src
+
+** Finish up
+
+#+begin_src emacs-lisp
+)
+#+end_src
