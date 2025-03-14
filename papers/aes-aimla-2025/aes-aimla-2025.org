@@ -1103,21 +1103,15 @@ in =filters.lib=, for example. Implemented in
 transposed-direct-form\nbsp[cite:@smithIntroduction2008], ~iir~ is defined
 with the unapplied lambda abstraction ~ma.sub~, which accepts two
 arguments, ~x~ and ~y~, and returns the result ~y-x~. Attempting
-\(\Delta_{N}\llbracket \texttt{sub} \rrbracket\), the function is essentially
-treated as a numerical constant, and given a vector of zeros as its
-gradient. Fortunately, constructions of this kind --- in this case
-reversing signal order before applying some primitive operation ---
-are effectively matters of signal-routing and, as described in
-cref:sec:cut, can be recreated using differentiable primitives.
+\(\Delta_{N}\llbracket \texttt{sub} \rrbracket\), the abstraction is
+essentially treated as a numerical constant, and given a vector of
+zeros as its gradient. Fortunately, constructions of this kind --- in
+this case reversing signal order before applying some primitive
+operation --- are effectively matters of signal-routing and, as
+described in cref:sec:cut, can be recreated using differentiable
+primitives.
 
-See cref:lst:iir for a differentiable transposed-direct-form IIR
-filter implementation; though reliant on some complex signal routing,
-particularly for directing coefficients to the feedback (~fir(N - 1)~,
-line 7) and feedforward (~fir(N)~, line 9) portions of the filter, it
-is structurally similar to the neuron implementation in
-cref:lst:neuron; parameters, in this case filter coefficients, are
-defined outside of the differentiable environment, and passed, along
-with input signals, to the wrapper function ~diffInN~.
+** Applications & Outlook
 
 #+attr_latex: :options float=t, numbers=left, xleftmargin=12pt, framexleftmargin=12pt
 #+name: lst:iir
@@ -1149,19 +1143,43 @@ with {
 };
 #+end_src
 
-** Applications
+Despite the above limitations, and beyond the example given in
+cref:lst:neuron, the AD system described here can be put to practical
+use. A differentiable transposed-direct-form IIR filter implemenation
+is given in cref:lst:iir; though reliant on some careful signal
+routing, particularly for directing coefficients to the feedback
+(~fir(N - 1)~, line 7) and feedforward (~fir(N)~, line 9) portions of
+the filter, it circumvents the obstacles to differentiability posed by
+its counterpart in =filters.lib=. Structurally, it is similar to the
+neuron implementation in cref:lst:neuron; parameters, in this case
+learnable filter coefficients, are defined outside of the
+differentiable environment, and passed, along with an input signal, to
+the wrapper function ~diffInN~. An expanded version of this example
+(plus that given in cref:lst:neuron) is available online[fn:5] and can
+be run in Faust's web IDE.[fn:6] Comparing, via a differentiable loss
+function, the output of the filter against that of an equivalent
+filter with fixed, /hidden/ parameters, and backpropagating the
+resulting gradients, the learnable parameters can be optimised in real
+time. The approach generalises to filters of higher order and those
+described by metaparameters such as cutoff frequency, and the length
+of multiple hidden delay lines can be found by optimisation against a
+differentiable FIR filterbank; these examples point the way to a
+variety of real-time adaptive processing applications.
 
-A comprehensive treatment of potential applications for AD in Faust
-lies beyond the scope of this paper; expanded versions of the examples
-in cref:lst:neuron and cref:lst:iir are, however, available
-online[fn:5] and can be run in Faust's web IDE[fn:6]. The examples
-illustrate that comparing, via a differentiable loss function, the
-output of a signal processor with hidden parameters against that of an
-algorithm whose parameters are learnable, and backpropagating the
-resulting gradients, learnable parameters can be optimised in real
-time. In the case of the IIR filter, coefficients could in principle
-be optimised against output produced by a `black box' filter, and the
-results generated and visualised in a uniquely intuitive manner.
+Though demonstrated with /known/ algorithms, in principle the above
+could be extended to optimisation against a target `black box' filter,
+granted that both target and estimate receive the same input
+signal. This hints, however, at another limitation of the current
+approach --- Faust is primarily concerned with time-domain operations,
+thus loss is computed in the time domain on a per-sample basis (albeit
+with the possibility of taking a running-average of recent sample
+values, for example).
+
+# - Real-time filter optimisation; more flexible than that previously
+  # demonstrated.
+# - Deferred-time learning via an architecture file.
+# - Time-domain limitation; multirate processing on the way;
+  # frequency-domain optimisation.
 
 * Conclusion
 
