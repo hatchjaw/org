@@ -1078,24 +1078,24 @@ can be recreated via judicious use of the identity and cut primitives;
 common routing tasks like interleaving can be achieved differentiably
 with code such as in cref:lst:interleave.
 
-User interface primitives, such as sliders and buttons, are matchable
-in principle, but in practice, ~hslider("x1", 0, -1, 1, .01)~, whose
-parameters are a string identifier, initial value, minimum, maximum
-and step, must be matched verbatim; clearly, in the general case, this
-is not practical. The obvious derivative transformation of a user
-interface element is to an input variable, i.e. a parameter for
-optimisation such as a weight in a neural network. Input variables
-must be identifiable so as to create the appropriate corresponding
-dual signal, \(\big\langle{}x_{i},\begin{bmatrix}0 & \cdots & \frac{\partial{}x_{i}}{\partial{}x_{i}}
-& \cdots & 0\end{bmatrix}^{T}\big\rangle\). The approach proposed is to move
-input variables out of the general AD transformation; a wrapper
-function is used to indicate the number of input signals (whose
-gradients are zero vectors) and input variables received by the main
-body of the differentiated block diagram (see
-cref:lst:neuron,lst:iir). Though imposing a certain coding convention,
-we consider this comparable with the particular requirements imposed
-by PyTorch, TensorFlow, and JAX, with their respective dedicated
-datatypes for learnable parameters.
+User interface primitives (sliders and buttons, for example) are
+matchable in principle, but in practice, ~hslider("x1", 0, -1, 1,
+.01)~, whose parameters are a string identifier, initial value,
+minimum, maximum and step, must be matched verbatim; clearly, in the
+general case, this is not practical. The obvious derivative
+transformation of a user interface element is to an input variable,
+i.e. a parameter for optimisation such as a weight in a neural
+network. Input variables must be identifiable so as to create the
+appropriate corresponding dual signal,
+\(\big\langle{}x_{i},\begin{bmatrix}0 & \cdots & \frac{\partial{}x_{i}}{\partial{}x_{i}} & \cdots &
+0\end{bmatrix}^{T}\big\rangle\). The approach proposed is to move input
+variables out of the general AD transformation; a wrapper function is
+used to indicate the number of input signals (whose gradients are zero
+vectors) and input variables received by the main body of the
+differentiated block diagram (see cref:lst:neuron,lst:iir). Though
+imposing a certain coding convention, we consider this comparable with
+the particular requirements imposed by PyTorch, TensorFlow, and JAX,
+with their respective dedicated datatypes for learnable parameters.
 
 Though not a frequently-employed feature of the language, unapplied
 lambda abstractions appear in some key definitions, the ~iir~ function
@@ -1148,8 +1148,8 @@ cref:lst:neuron, the AD system described here can be put to practical
 use. A differentiable transposed-direct-form IIR filter implemenation
 is given in cref:lst:iir; though reliant on some careful signal
 routing, particularly for directing coefficients to the feedback
-(~fir(N - 1)~, line 7) and feedforward (~fir(N)~, line 9) portions of
-the filter, it circumvents the obstacles to differentiability posed by
+(~fir(N)~, line 7) and feedforward (~fir(N + 1)~, line 9) portions of
+the filter, it overcomes the obstacles to differentiability posed by
 its counterpart in =filters.lib=. Structurally, it is similar to the
 neuron implementation in cref:lst:neuron; parameters, in this case
 learnable filter coefficients, are defined outside of the
@@ -1159,27 +1159,32 @@ the wrapper function ~diffInN~. An expanded version of this example
 be run in Faust's web IDE.[fn:6] Comparing, via a differentiable loss
 function, the output of the filter against that of an equivalent
 filter with fixed, /hidden/ parameters, and backpropagating the
-resulting gradients, the learnable parameters can be optimised in real
-time. The approach generalises to filters of higher order and those
-described by metaparameters such as cutoff frequency, and the length
-of multiple hidden delay lines can be found by optimisation against a
+resulting gradients, learnable parameters can be optimised in real
+time. This generalises to filters of higher order and those described
+by metaparameters such as cutoff frequency, and the length of multiple
+hidden delay lines can be found by optimisation against a
 differentiable FIR filterbank; these examples point the way to a
 variety of real-time adaptive processing applications.
 
 Though demonstrated with /known/ algorithms, in principle the above
-could be extended to optimisation against a target `black box' filter,
+could be extended to optimisation against a target /black box/ filter,
 granted that both target and estimate receive the same input
 signal. This hints, however, at another limitation of the current
 approach --- Faust is primarily concerned with time-domain operations,
 thus loss is computed in the time domain on a per-sample basis (albeit
 with the possibility of taking a running-average of recent sample
-values, for example).
-
-# - Real-time filter optimisation; more flexible than that previously
-  # demonstrated.
-# - Deferred-time learning via an architecture file.
-# - Time-domain limitation; multirate processing on the way;
-  # frequency-domain optimisation.
+values, for example). For phase-invariant and perceptually-informed
+optimisation scenarios, frequency-domain loss computation is required;
+the recent introduction of multi-rate processing to the Faust language
+means that spectral signal analysis may soon be feasible. Developments
+of this sort would improve the feasibiliy of taking on larger-scale,
+typically deferred-time problems such neural audio synthesis. These
+call for generalisation to a corpus of training data (rather than
+optimisation to a small number of input variables); with that end in
+mind, the example in cref:lst:neuron should be extended to a general
+neural network structure, and a supporting infrastructure created for
+delivering training data and capturing weights and biases for
+real-time inference.
 
 * Conclusion
 
@@ -1187,25 +1192,21 @@ In this paper we have described a general scheme for differentiating
 Faust programs, moving an important step toward providing the means
 with which to tackle audio optimisation and machine learning problems
 with the domain-specific and cross-platform benefits of the Faust
-language.
+language. A variety of time-domain, gradient-based optimisation
+problems can be tackled in Faust, with results produced in real-time.
 
 Many challenges and opportunities remain as impetus for further
 development of the work presented here. Having only been put to
-informal use to-date, the proposed AD approach should be subjected to
-application to real-world optimisation tasks, and assessed for its
-efficacy and efficiency. Beyond the correctness of the semantic
+informal use to-date, the proposed AD approach should be assessed for
+its efficacy and efficiency. Beyond the correctness of the semantic
 scheme, being based on forward-mode AD, which, on paper, compares
 unfavourably with reverse-mode in terms of computational expense, its
 combination with the optimisations of the Faust compiler should be
-explored.
-
-At the level of the Faust compiler, changes that would facilitate the
-transformation of elements of the language that currently elude
-pattern matching could be of benefit here. Moreover, AD in Faust is a
-method rooted in the time-domain; recent developments in multi-rate
-processing within Faust programs could assist in tackling problems for
-which frequency-domain and perceptually-informed measures of loss are
-most appropriate.
+explored. At the level of the Faust compiler, changes that would
+facilitate the transformation of elements of the language that
+currently elude pattern matching would be of benefit here, as would
+further development of Faust's adaptability to frequency domain
+processing.
 
 #+print_bibliography:
 
