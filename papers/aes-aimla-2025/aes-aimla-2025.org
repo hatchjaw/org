@@ -1145,7 +1145,7 @@ with {
 
 Despite the above limitations, and beyond the example given in
 cref:lst:neuron, the AD system described here can be put to practical
-use. A differentiable transposed-direct-form IIR filter implemenation
+use. A differentiable transposed-direct-form IIR filter implementation
 is given in cref:lst:iir; though reliant on some careful signal
 routing, particularly for directing coefficients to the feedback
 (~fir(N)~, line 7) and feedforward (~fir(N + 1)~, line 9) portions of
@@ -1177,7 +1177,7 @@ values, for example). For phase-invariant and perceptually-informed
 optimisation scenarios, frequency-domain loss computation is required;
 the recent introduction of multi-rate processing to the Faust language
 means that spectral signal analysis may soon be feasible. Developments
-of this sort would improve the feasibiliy of taking on larger-scale,
+of this sort would improve the feasibility of taking on larger-scale,
 typically deferred-time problems such neural audio synthesis. These
 call for generalisation to a corpus of training data (rather than
 optimisation to a small number of input variables); with that end in
