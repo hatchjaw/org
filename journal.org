@@ -7244,3 +7244,78 @@ https://bynaryman.github.io/
   into computation.
 
 Entered on [2025-03-11 mar. 10:02]
+
+*** 2025-03-25 mardi
+**** Meeting: Romain                                 :MEETING:SUPERVISION:
+- Being a senior academic can be a pain in the arse. Lots to read and
+  write.
+- My plan for the next couple of weeks:
+  + SMC reviews.
+  + Finish AES supplementary material.
+  + Work toward a demo (in the humanities building).
+- My technical contributions should be done with /by the end of this
+  year/.
+- Use the RAM chips; try convolutions; autoparallelisation.
+- CSI coming up, but maybe don't worry too much about that. No action
+  to be taken just yet.
+- Stop working on DDSP.
+
+***** CSI
+Actually, I should send an email (to Romain, Tanguy, Jens, and Leo)
+with proposed dates for my CSI.
+  
+Entered on [2025-03-25 mar. 10:00]
+
+*** 2025-03-30 dimanche
+**** Updating NXP Software Tools                                   :TOOLS:
+I installed these via =pamac=. AUR packages exist for the following
+
+- linkserver
+- mcuxpresso-config-tools
+- mcuxpresso-ide
+
+but since a login is required to download the .deb.bin packages,
+automatic updates aren't possible. To update, download the package (at
+the appropriate version) and copy it to the same directory as
+=PKGBUILD=, i.e. =/var/tmp/pamac-build-$(whoami)/[package-name]=
+
+Entered on [2025-03-30 dim. 18:54]
+*** 2025-03-31 lundi
+**** Faust Support for Intellij IDEs                         :FAUST:TOOLS:
+The past week or so haven't been the most productive of my life to
+date. Far from indolent, however, I've been working on (yet another)
+side-project: =intellij-faust=, a /custom language support/ plugin for
+Intellij IDEs. The need for this (if any) may be obviated by a good
+GSoC Language Server Protocol project, but in wrestling with this
+endeavour I've learnt a fair bit about Faust syntax and the libraries,
+and programming language grammars and parsing/lexing in general.
+
+***** Features implemeted so far
+- File type recognition.
+- BNF grammar, lexer --- but no error recovery.
+  + Frankly this is where most of the work has gone, but it forms the
+    basis for a lot of other features; it's an investment.
+- Syntax highlighting.
+- Automatic commenter.
+- Code folding.
+- Brace/parenthesis-matching.
+- Automatic Quote insertion (which almost works I guess).
+
+***** Resources
+- Intellij Platform Plugin SDK [[https://plugins.jetbrains.com/docs/intellij/custom-language-support.html][documentation]]
+- The JetBrains Grammar-Kit IDE [[https://github.com/JetBrains/Grammar-Kit][plugin]] and Gradle [[https://plugins.jetbrains.com/docs/intellij/tools-gradle-grammar-kit-plugin.html][extension]].
+  + Its readme links to a selection of projects that are based upon
+    it, including...
+- =intellij-rust=, which (while deprecated in favour of the
+  /RustRover/ IDE) appears to implement just about every custom
+  language support feature in the SDK --- a fine [[https://github.com/intellij-rust/intellij-rust][source]] of
+  inspiration.
+  + =matlab-Intellj-plugin= is also pretty [[https://github.com/kornilova203/matlab-IntelliJ-plugin][useful]].
+- There's some unofficial documentation for (some of) the SDK classes,
+  e.g. [[https://dploeger.github.io/intellij-api-doc/com/intellij/lang/PsiBuilder.html][here]].
+- And a fun pair of articles on language plugin development [[https://dev.to/pyltsinm/how-to-write-your-own-language-plugin-for-idea-part-1-mfd][here]] and
+  [[https://dev.to/pyltsinm/how-to-write-your-own-language-plugin-for-idea-part-2-50g5][here]].
+- The [[https://suif.stanford.edu/dragonbook/][Dragon Book]] (Aho, Lam, Sethi & Ullman's /Compilers: Principles,
+  Techniques, and Tools/) looks kind of interesting.
+
+Entered on [2025-03-31 lun. 14:25]
