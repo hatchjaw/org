@@ -6959,14 +6959,27 @@ start doing both of those things again now. I guess. Well, I kind of
 like journalling/note-taking; I'm less into email.
 
 ***** What's next?
-****** TODO Submit Inria /demande de cumul/ form
+****** CANCELLED Submit Inria /demande de cumul/ form
+:LOGBOOK:
+- State "CANCELLED"  from "TODO"       [2025-04-04 ven. 15:59]
+:END:
 Anouchka informs me (email 20/02/25) that this is a legal requirement; probably
 something I should've done around assisting with that PIR group last
 year. The form is [[https://inria.iterop.cloud/#tasks/view/all/list][here]]. I'm going to need some help.
-****** TODO Set things up to pay tax
+
+Update: I decided to ignore it and wait to see whether I get in trouble.
+****** DONE Set things up to pay tax
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-04-04 ven. 16:00]
+:END:
 This won't take care of itself. I have an email draft with some of the
 details I think. Maybe ask Tina for help.
-****** TODO Revise AES paper
+
+Update: never mind; sent to sip.lyon2@dgfip.finances.gouv.fr
+****** DONE Revise AES paper
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-04-04 ven. 16:00]
+:END:
 A few comments to address here, from Tanguy (largely postiive), Yann
 (some notational disagreements, but "a nice paper") and Stéphane
 ("Sois plus positif" en gros).
@@ -6976,7 +6989,10 @@ derivative of recursion, so I'm toying with the idea of sharing the
 full derivation, with [cite:@shynkAdaptive1989] as a reference. Might
 take too long, who knows. I would like to update my autodiff notes,
 e.g. [[denote:20240819T103529][Derivative property of the Fourier transform]].
-****** TODO Revise SMC paper
+****** DONE Revise SMC paper
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-04-04 ven. 16:00]
+:END:
 Tanguy made a couple of remarks, but once again was quite positive
 about the work.
 
@@ -7319,3 +7335,27 @@ and programming language grammars and parsing/lexing in general.
   Techniques, and Tools/) looks kind of interesting.
 
 Entered on [2025-03-31 lun. 14:25]
+
+** 2025-04 avril
+*** 2025-04-07 mardi
+**** Meeting: Romain                                 :MEETING:SUPERVISION:
+- Might be a while before I hear from France-Stanford (Maxime
+  corroborates); chill.
+- Get an abstract to [[https://www.i3da2025.org/][I3DA]] (Immersive and 3D Audio) by April 15th.
+  + About what, though? In principle I've no shortage of potential
+    next steps; the paper deadline is June 15th, so I should select
+    something I think I can complete by then.
+- SMC has given me three difficult papers --- two ML-related, one
+  misc, all a little way outside of my wheelhouse.
+  
+Entered on [2025-04-08 mar. 09:33]
+*** 2025-04-08 mardi
+**** Réunion Emeraude                                            :MEETING:
+- Presentation by some Inria admin types.
+- Peyrusse, seminaire; Benjamin & I to give talks on autodiff in
+  Faust.
+  + Not 100% clear whether it's 30 min each, or whether we're sharing
+    the time.
+  + Benjamin and I to meet next Thursday (17/04, 13h) to discuss.
+    
+Entered on [2025-04-08 mar. 10:47]

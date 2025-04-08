@@ -1,0 +1,6 @@
+#+title:      Vision Transformer Based Skin Color Classification in Music Album Cover Artwork
+#+date:       [2025-04-05 sam. 15:32]
+#+filetags:   :bib:review:smc:
+#+identifier: 20250405T153234
+#+reference:  lopezVision2025
+

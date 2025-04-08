@@ -105,3 +105,7 @@ Make spelling errors really pop.
 #+begin_src emacs-lisp
 )
 #+end_src
+
+* TODO Use ~setopt~ for ~defcustom~ variables
+
+...so any assigned callbacks are invoked ([[https://emacsredux.com/blog/2025/04/06/goodbye-setq-hello-setopt/][source]]).
