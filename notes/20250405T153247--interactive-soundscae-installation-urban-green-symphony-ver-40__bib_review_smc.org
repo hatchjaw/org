@@ -1,6 +1,0 @@
-#+title:      Interactive Soundscae Installation "Urban Green Symphony" Ver. 4.0
-#+date:       [2025-04-05 sam. 15:32]
-#+filetags:   :bib:review:smc:
-#+identifier: 20250405T153247
-#+reference:  yanInteractive2025
-

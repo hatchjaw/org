@@ -4,3 +4,56 @@
 #+identifier: 20250405T153234
 #+reference:  lopezVision2025
 
+* Gist
+
+They took a dataset of album covers (Billboard, US music industry) and
+investigated which of three skin colour categories ("light", "medium",
+"dark") is associated with a variety of musical genres. They address
+the idea of "correct" classification, which is a bit of a thorny
+issue... In any case, it's interesting that some depicted skin tones
+were identified as lighter or darker than a human viewer might assess
+them, accounting for the artist- or genre-preconceptions that such a
+viewer might have. There's also the question of representation over
+time, with a reported increase in representation of "dark" skin tones
+over the period covered by the dataset. "Medium" skin tones appear to
+show a slight decrease in frequency --- not the increase that the
+authors infer in §6.
+
+There's some ambiguity over whether we're dealing with artist
+depictions, or just whomever happens to be on the cover (a model, the
+artist's father in the case of Drake, for example). That sort of
+muddies the waters I think.
+
+* Review
+
+** Summary
+
+** Observations
+
+The prevalence of the "medium" skin tone class in covers associated
+with the Rock and Roll genre isn't especially surprising when one
+considers the history and origins of that genre.
+
+The analysis, at the end of §5.2, on the topic of the /marketability/
+of skin colour is an interesting one (and one that perhaps intesects
+with traditional technological/photographic bias toward light skin
+tones; see [1]) and one senses that there is much scope for further
+analysis of the dataset(s) to investigate this and related topics. The
+authors are on shaky ground, however, when they attempt to generalise
+from the example of Drake to "genres like Hip Hop" --- certainly it
+would be interesting to explore whether in fact Hip Hop artists are
+less inclined to present themselves as lighter-skinned than artists of
+other genres, but the example of Drake (two of whose album covers
+don't feature images of the artist) doesn't support this idea. Futher,
+that artist's "real life" (or rather /photographic/) appearance, and
+their cultural and personal identity are not by any means equivalent.
+
+** Proofreading
+
+- §5.1, p. 4, ll. 100--101: "...would have been too time consuming."
+- §5.1-5.2, p. 5, ll. 1--34: There appears to be a runaway hyperlink
+  (to huggingface.co), affecting this entire column.
+
+** References
+
+[1] https://www.imatest.com/wp-content/uploads/2025/03/Borek_IQSP-4391_EI2025_Proceedings.pdf

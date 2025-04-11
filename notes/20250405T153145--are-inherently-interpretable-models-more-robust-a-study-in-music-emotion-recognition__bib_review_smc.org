@@ -2,5 +2,63 @@
 #+date:       [2025-04-05 sam. 15:31]
 #+filetags:   :bib:review:smc:
 #+identifier: 20250405T153145
-#+reference:  hoedtAre
+#+reference:  hoedtAre2025
 
+* Gist
+
+So, they're taking emotion-annotated audio excerpts, running them
+through an algorithm (basic iterative method, BIM) to introduce
+spectral distortions that, while perhaps unproblematic for a human
+listener, maximise the loss reported by an Audio-to-Emotion (A2E)
+neural network. They aim to demonstrate that robustness to such
+"adversarial perturbations" can be impoved by
+- introducing a /bottleneck/ layer to an A2E network, where
+  /mid-level/ features are identified (A2Mid2E, or A2M2E)
+- training a black box model (A2B2E) on adversarially-perturbed data
+  (aA2B2E) (in addition to clean data?).
+  #+begin_quote §3.4
+...we obtain our robust models by optimising on a clean batch first,
+perturbing said batch by means of an adversarial attack, and then
+optimising on the according adversarial batch. We do so every n^{th}
+epoch of the training process.
+  #+end_quote
+
+Plots in figure 4 look pretty underwhelming, frankly; A2B2E does very
+poorly with adversarial input, and while the other two fare better,
+they're still a long way off the predictions for clean
+input. Apparently for affects not presented graphically (/anger,
+energy/), results are better than for those given as examples
+(/tension, tender/); perhaps one good, one bad would've make things
+clearer. By contrast, robustness results in figure 3 look really good,
+so what am I missing?...
+
+The key observation is that A2M2E models exhibit robustness comparable
+with aA2E and aA2B2E models, without the need to train on adversarial
+data, which is good news, efficiency-wise.
+
+* Review
+
+** Summary
+
+The authors of this paper investigate the role of interpretable and
+adversarialy-aware training on the robustness of machine learning
+models for music information retrieval, with specific regard to music
+emotion recognition.
+
+
+
+** Observations
+
+- §2: The conflation of the qualitative term "expectation" and the
+  quantitative term "gradient" serves only to confuse and obfuscate. A
+  system's gradient is specifically a vector of partial derivatives of
+  its output with respect to a vector of input variables.
+
+** Proofreading
+
+- §2, p. 2, l. 48: "[20] propose" -> "Yang et al. [20] propose" or
+  something like that; please don't use a citation number as the
+  subject of a clause.
+- §4.1, p. 4, l. 74: "model performances" -> "model performance".
+- §5, p. 6, l. 74: "exhibit similar robustness to..." or "exhibit robustness
+  similar to...".

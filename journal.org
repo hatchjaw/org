@@ -7403,6 +7403,7 @@ Tanguy asked if I'd like to help with some teaching in
 November/December --- the /CRO/ course, which is "C Langauge and
 Programming Roots". I said yes, naturally. The course is in French, of
 course, so I'll have my work cut out. Anyway, the course Moodle is
-[[https://moodle.insa-lyon.fr/course/view.php?id=5199][here]], and Tanguy sent me an email with assignment corrections.
+[[https://moodle.insa-lyon.fr/course/view.php?id=5199][here]], and Tanguy sent me an email with assignment corrections
+attached.
 
 Entered on [2025-04-09 mer. 17:20]
