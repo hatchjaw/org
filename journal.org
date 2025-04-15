@@ -7431,10 +7431,31 @@ Then a month to write about it, while preparing for my CSI, the
 séminaire, IS^{2}... Anyway:
 
 ****** Title
-/Distributed auralization something something/
+/Virtual Acoustics in a Distributed Setting: A Feasibility Study/
 ****** Abstract
-
+Due to their cost and complexity, large scale systems for spatial
+audio and virtual acoustics remain beset by barriers to
+accessibility. Spatial audio algorithms can be parallelised, however,
+and distributed amongst a network of synchronised, low-cost
+microcontroller devices, each peforming signal processing for two
+output channels. Powerful as modern embedded audio devices can be,
+however, they remain resource constraied, particularly with regard to
+memory, which, for buffering, delay lines, and impulse response
+access, is an essential resource. Here, we investigate the
+capabilities and limitations of one such embedded platform, and its
+potential for application to virtual acoustics in a distributed
+computational setting. We demonstrate that, with certain caveats, this
+platform can serve as the basis for virtual acoustics installations at
+significantly reduced cost-per-channel when compared with
+state-of-the-art systems. The proposed distributed system is modular,
+and scalable by small increments, rendering it mobile and adaptable to
+a variety of potential auralisation applications.
 ****** Keywords
--
+- Virtual Acoustics
+- Distributed Computing
+- Networked Audio
+- Microcontroller
+
+OK, it is done. Let's see how far that gets me.
 
 Entered on [2025-04-15 mar. 15:56]
