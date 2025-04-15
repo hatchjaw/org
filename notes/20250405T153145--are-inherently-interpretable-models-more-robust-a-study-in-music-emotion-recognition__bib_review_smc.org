@@ -11,7 +11,7 @@ through an algorithm (basic iterative method, BIM) to introduce
 spectral distortions that, while perhaps unproblematic for a human
 listener, maximise the loss reported by an Audio-to-Emotion (A2E)
 neural network. They aim to demonstrate that robustness to such
-"adversarial perturbations" can be impoved by
+"adversarial perturbations" can be improved by
 - introducing a /bottleneck/ layer to an A2E network, where
   /mid-level/ features are identified (A2Mid2E, or A2M2E)
 - training a black box model (A2B2E) on adversarially-perturbed data
@@ -41,18 +41,53 @@ data, which is good news, efficiency-wise.
 ** Summary
 
 The authors of this paper investigate the role of interpretable and
-adversarialy-aware training on the robustness of machine learning
+adversarially-aware training on the robustness of machine learning
 models for music information retrieval, with specific regard to music
-emotion recognition.
+emotion recognition (audio-to-emotion, A2E). Their "adversarial
+perturbations" are essentially distortions of the frequency-domain
+representation of a given audio signal that /maximise/ the value
+returned by a system's loss function (within some \epsilon-bound) rather than
+minimising it; presumably such perturbations, like their analogues in
+image recognition (e.g. reference [24]), would be insufficient to
+trouble a human observer, but may cause a music emotion recognition
+model to return spurious results (it would be interesting to hear an
+example, or see before-and-after spectrograms). The authors posit
+that, rather than training an emotion recognition model on adversarial
+examples (aA2E) in an attempt to improve its robustness, it may be
+just as effective (and possibly more so) to instead introduce a
+/bottleneck layer/ to a neural network where mid-level musical
+features are identified prior to final emotion classification
+(A2M2E). This hints at a reduction in computational expense in model
+training, though the authors tempt a rebound effect by suggesting "the
+bottleneck model could be further improved via adversarial training".
 
+Figure 3 is more persuasive of the effectiveness of the A2M2E approach
+than figure 4, though this may be in part down to the choice to
+illustrate, in the latter, predictions for two comparatively subtle
+affects in the form of "tension" and "tender[ness]". As the authors
+observe, perhaps "different emotions are easier / harder to perturb."
+This being said, it appears that even the A2M2E model is significantly
+negatively impacted in its predictions by adversarial input, albeit
+markedly less so than A2E, or its structurally similar counterpart,
+A2B2E, for which loss is not computed at the bottleneck layer. Greater
+detail could have been provided in §4.4 on the ramifications of the
+post-perturbation results in figure 4 lying in some cases far outside
+of the [0, 1] range for clean test data; sure, the MAE delta is
+reduced by A2M2E, but are the results usable? For that matter, a
+concrete example or two of instances in which it might be desirable or
+necessary to try to classify perturbed input data (captured in a noisy
+environment, perhaps?) would have been appreciated.
 
+Nevertheless, this work is well-written and well-referenced, and may
+indeed be of interest to the MIR community; I support its acceptance.
 
 ** Observations
 
-- §2: The conflation of the qualitative term "expectation" and the
-  quantitative term "gradient" serves only to confuse and obfuscate. A
+- §2: The conflation of the qualitative term "explanation" and the
+  mathematical term "gradient" serves only to confuse and obfuscate. A
   system's gradient is specifically a vector of partial derivatives of
-  its output with respect to a vector of input variables.
+  its output with respect to a vector of input variables. Cited
+  reference [6] doesn't make this conflation.
 
 ** Proofreading
 

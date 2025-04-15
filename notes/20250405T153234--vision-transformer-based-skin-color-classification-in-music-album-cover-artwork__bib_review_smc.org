@@ -7,53 +7,94 @@
 * Gist
 
 They took a dataset of album covers (Billboard, US music industry) and
-investigated which of three skin colour categories ("light", "medium",
-"dark") is associated with a variety of musical genres. They address
-the idea of "correct" classification, which is a bit of a thorny
-issue... In any case, it's interesting that some depicted skin tones
-were identified as lighter or darker than a human viewer might assess
-them, accounting for the artist- or genre-preconceptions that such a
-viewer might have. There's also the question of representation over
-time, with a reported increase in representation of "dark" skin tones
-over the period covered by the dataset. "Medium" skin tones appear to
-show a slight decrease in frequency --- not the increase that the
-authors infer in §6.
+investigated which of three skin colour categories is associated with
+a variety of musical genres. They address the idea of "correct"
+classification, which is a bit of a thorny issue, what with lighting
+and image processing, etc. Representation of people of colour is more
+associated with certain genres than others, and has increased in
+general over time; we could have guessed both of those observations,
+but perhaps there's some value in taking humans out of the loop and
+classifying thousands of album covers in one sweep of an algorithm.
+
+It's highly problematic that they chose to break the 10-category Monk
+Skin Tone (MST) scale down they way they did, into "light", "medium"
+and "dark", where "light" occupies points 1-3, "medium" 4-5, and
+"dark" /the remaining five points/. They give a one-sentence
+justification for this:
+#+begin_quote
+Given the similarity in tones, to avoid annotation errors, we divided
+the scale into groups that are visually distinct.
+#+end_quote
+"Visually distinct" according to what criterion? So, annotation errors
+are more important than cultural identity? Beyond that, identifying as
+a person of colour goes a little way beyond a hex code.
+
+The trouble is there are some interesting observations here. Some
+depicted skin tones were identified as lighter or darker than a human
+viewer might assess them, which speaks to political and commercial
+decisions on the part of certain artists, or genre conventions.
 
 There's some ambiguity over whether we're dealing with artist
 depictions, or just whomever happens to be on the cover (a model, the
 artist's father in the case of Drake, for example). That sort of
-muddies the waters I think.
+muddies the waters I think. They don't address this problem till §5.2,
+and don't comment on how this might affect the results.
 
 * Review
 
 ** Summary
 
-** Observations
+The authors of this paper present an investigation of the US Billboard
+dataset of album covers for links between skin colour and musical
+genre, and representation of people of colour over time. Existing
+machine learning models, trained on established datasets, were used
+for face and skin colour detection. The authors observe 1)
+genre-related skin tone associations, 2) increase in representation of
+people of colour over time, and 3) potential links between skin tone
+depiction and commercial factors.
 
-The prevalence of the "medium" skin tone class in covers associated
-with the Rock and Roll genre isn't especially surprising when one
-considers the history and origins of that genre.
+The first two high-level observations are unsurprising, and, in light
+of the origins and history of the genre, so is the link between
+artists of colour and the Rock and Roll genre (counter to the authors'
+assertion in §5.2). Of greater potential interest is
+/misclassification/, i.e. model classification differing from human
+expectation, which speaks to the political and commercial statement
+that an album cover represents and could, given appropriate treatment,
+shed a quantitative light on challenges faced by artists of colour
+throughout the history of popular music.
 
-The analysis, at the end of §5.2, on the topic of the /marketability/
-of skin colour is an interesting one (and one that perhaps intesects
-with traditional technological/photographic bias toward light skin
-tones; see [1]) and one senses that there is much scope for further
-analysis of the dataset(s) to investigate this and related topics. The
-authors are on shaky ground, however, when they attempt to generalise
-from the example of Drake to "genres like Hip Hop" --- certainly it
-would be interesting to explore whether in fact Hip Hop artists are
-less inclined to present themselves as lighter-skinned than artists of
-other genres, but the example of Drake (two of whose album covers
-don't feature images of the artist) doesn't support this idea. Futher,
-that artist's "real life" (or rather /photographic/) appearance, and
-their cultural and personal identity are not by any means equivalent.
+The problem is that this is not, in my view, an appropriate treatment
+of the subject at hand. I acknowledge the fact that the authors
+express an awareness of the ethical problems associated with machine
+learning-based skin colour classification, and I believe they have
+good intentions in expressing their hope for the positive role that
+their work could play in emphasising the cultural impact of artists of
+colour. I am concerned, however, that the 3-2-5
+("light"-"medium"-"dark") split of the Monk scale on the basis that
+those groupings are "visually distinct" is subjective at best, and, in
+fact, rather problematic. Perhaps more than a single sentence
+justifying this decision would have been constructive. Regardless, the
+authors should remember that whether an individual identifies as a
+person of colour lies beyond the question of the colour of their
+skin. The spectrum of cultural identity --- and this is a question of
+identity, not simply skin colour --- is not reducible to a series of
+hex codes.
 
-** Proofreading
+In §5.2, the authors touch on the idea that misclassification may be
+reflective of a conscious decision on the part of an artist to portray
+themselves as lighter skinned than they are in "real life". They say
+nothing, however, of the historical technological/photographical bias
+toward light skin tones (consider the phenomenon of the /Shirley
+Card/), nor, by extension, the fact that a photograph may be just as
+unrepresentative of an individual's "real" skin colour as an album
+cover image. They also attempt to generalise from one artist (Drake)
+to artist portrayal in "genres like Hip Hop". The question of how
+artists choose (or are compelled) to present themselves is a very
+interesting one, but it is also one of great depth that requires a
+more serious treatment than can be given in a couple of sentences, a
+treatment that takes into account the historical, cultural, and
+sociological factors at play.
 
-- §5.1, p. 4, ll. 100--101: "...would have been too time consuming."
-- §5.1-5.2, p. 5, ll. 1--34: There appears to be a runaway hyperlink
-  (to huggingface.co), affecting this entire column.
-
-** References
-
-[1] https://www.imatest.com/wp-content/uploads/2025/03/Borek_IQSP-4391_EI2025_Proceedings.pdf
+Finally, though dealing with computation, and tangentially with music,
+this paper is of tenuous relevance to SMC research. For this and the
+above reasons I submit an evaluation of 'strong reject'.

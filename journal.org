@@ -7392,8 +7392,8 @@ is why, although I'd set things up more-or-less correctly, definitions
 weren't appearing in Structure View.
 
 The deadline for GSoC proposals was yesterday. The guy who wanted to
-work on the [[https://www.bespokesynth.com/][Bespoke]] integration, and whom Stéphane was happy to work
-with, failed to submit his proposal on time --- he thought he didn't
+work on the [[https://www.bespokesynth.com/][Bespoke]] integration, and with whom Stéphane was happy to
+work, failed to submit his proposal on time --- he thought he didn't
 have to do it himself (i.e. that we'd do it for him?!). Anyway, that
 leaves Ryan on the LSP, and Facundo on CLAP support. We have 19
 further proposals (which I intend to go through) and potentially
@@ -7407,3 +7407,34 @@ course, so I'll have my work cut out. Anyway, the course Moodle is
 attached.
 
 Entered on [2025-04-09 mer. 17:20]
+*** 2025-04-15 mardi
+**** Reviews, I3DA                                        :REVIEW:WRITING:
+So one of my SMC papers was kind of racist (see the [[denote:20250405T153234][review]]). I'm quite
+frustrated that it's taken until today to finish reviewing all three,
+but the problematic nature of the paper in question introduced an
+additional burden. Now that I submit my 'hard reject' (-3), I am able
+to see (which I wish I couldn't) that the other reviewer to have
+submitted to-date gave the paper an 'accept' (+2). I don't imagine
+I've heard the end of this one.
+
+***** I3DA
+It's the day of the deadline for abstracts, so let's write one. I'm
+leaning toward auralisation, but is that too ambitious? A month or so
+to revamp the implementation(s) (embedded and plugin) /and/:
+- introduce the possibility of transmitting impulse responses to the
+  multicast group.
+- assess storage and retrieval capabilities of the Teensy platform
+  vis-à-vis said IRs.
+- actually implement a spatialisation algorithm that uses the IRs.
+
+Then a month to write about it, while preparing for my CSI, the
+séminaire, IS^{2}... Anyway:
+
+****** Title
+/Distributed auralization something something/
+****** Abstract
+
+****** Keywords
+-
+
+Entered on [2025-04-15 mar. 15:56]

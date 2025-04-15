@@ -1,0 +1,136 @@
+#+title:      Interactive Soundscape Installation "Urban Green Symphony" Ver. 4.0
+#+date:       [2025-04-05 sam. 15:32]
+#+filetags:   :bib:review:smc:
+#+identifier: 20250405T153247
+#+reference:  yanInteractive2025
+
+* Gist
+
+So, this is version 4 of an interactive sound installation centred on
+notions at the intersection of green space, noise pollution and
+wellbeing. RAVE is involved, and a LeapMotion as a source of control
+data.
+
+Authors dismiss HOA (which they describe poorly) as their
+spatialisation method of choice in favour of VBAP, but their
+implementation appears to be some manner of quadraphonic setup, not
+VBAP.
+
+For the control system, two gesture types are described: open right
+hand and closed right hand. That's rather limited, frankly.
+
+There's no evaluation, beyond stating that the system creates a
+"deeply immersive and multisensory experience" and a "harmonious and
+engaging experience". They say future plans involve user experience
+experiments, but it's Ver. 4, guys; why haven't you gotten around to
+it yet? I can't access any of the cited prior iterations ("Urban Green
+Symphony" doesn't return results on Scholar) to see whether those
+feature evaluation of any kind.
+
+It really isn't made clear what sound this thing makes, beyond that it
+converts environmental sounds into music. What sort of music? (Ref
+[24] says classical, but that's not indicated here!)
+
+This paper is, however, a really good fit for the "Auditory
+Landscapes" theme.
+
+* Review
+
+** Summary
+
+The authors present the latest developments of their interactive
+soundscape installation, "Urban Green Symphony", emphasising the
+addition of an audio spatialisation mechanism. Their system consists
+of a screen, displaying a map of areas of greenspace in one of three
+urban environments, a LeapMotion sensor, for capturing two types of
+gestural control input (open/closed hand), and a PureData
+urban/greenspace soundscape generator, integrating a RAVE-based model
+for transforming urban noise into musical sound. The work serves to
+highlight the role of urban greenspace in mitigating noise pollution
+and supporting residents' psychological wellbeing.
+
+The rationale behind their decision to use VBAP over higher order
+ambisonics is described, with reference to the work of Gandemer et
+al., who observed that experimental participants were better able to
+perceive the trajectories of virtual sound sources created via VBAP
+than HOA. The authors used their spatialisation system to create a
+selection of pre-made sound trajectories roughly corresponding with
+the shape of greenspace distribution in their target urban
+environments, producing an interesting symmetry between the physical
+world and their auditory environment. The paper is indeed a good fit
+for the theme of "Auditory Landscapes", but it is not without its
+problems, from questionable reasoning surrounding the choice of
+spatialisation algorithm, to a lack of detail regarding the sonic
+nature of their installation, to the absence of any manner of
+evaluation.
+
+The assertion that HOA "can drive up to 42 speakers simultaneously"
+appears to be a misconception based on Gandemer et al. having used a
+system of 42 loudspeakers for their work --- this number is not an
+upper bound. Whereas HOA is a sound field synthesis technique, the
+chosen quadraphonic spatialisation setup is /periphonic/ in nature;
+this being so, it is not clear how the sound source trajectories
+depicted in figures 2, 4, and 6 are achieved (nor what the "larger
+circle" and "smaller circle" are in §5.3). If the numbers in the
+right-hand 'pd_sound_track' parts of figures 2, 4, and 6 are to be
+believed, then their implementation is a "global panning technique",
+not a "local" one as suggested in §5.2.
+
+One could see the word "Symphony" in the title and intuit that the
+RAVE model is trained on excerpts of classical music, but this is not
+made at all clear in the text. One is left wondering what manner of
+new musical experience is afforded by the system. If it /is/ based on
+classical music, what bearing does this necessarily have on the topic
+of wellbeing?
+
+Besides the paper associated with reference [24], I had difficulty
+finding much information about prior iterations of the work, whether
+it had previously been formally evaluated, how (and how well) it works
+in practice, what it sounds like, etc. Google Scholar yields no
+results for "Urban Green Symphony", and my sense is that there is an
+issue of linguistic/cultural bias at play here, for which the authors
+cannot be held accountable. That being said, and particularly given
+the immersive nature of the system, supplementary material such as a
+video demonstration would have clarified matters considerably. This
+holds for the control system also; the two-gesture system described
+seems very limited, an under-exploitation of the LeapMotion device.
+
+The authors don't make a strong case for the novelty of their work ---
+there is considerable material in the NIME proceedings, for example,
+on gestural control, including that of spatial audio systems (e.g.,
+see /New Interfaces for Spatial Musical Expression/
+[cite:@bukvicNew2020]). The lack of a formal evaluation for this, the
+fourth iteration of the authors' system, means there's little to be
+concluded here in terms of its efficacy and expressivity, nor how well
+it addresses its purpose as a reflection on the wellbeing benefits of
+urban greenspace. For these reasons I submit an evaluation of
+'weak reject'.
+
+** Observations
+
+- DDSP isn't a /machine learning model/ in the commonly-used sense of
+  the term; rather it's a general term to describe DSP algorithms
+  composed of differentiable primitive operations. If the authors are
+  referring to Engel et al.'s timbre transfer algorithm (named "DDSP"
+  by its authors), they should include a citation.
+  
+** Proofreading
+
+- §1, §2, §3, §3.1, §4: Repeated use of "of the creation" in section
+  headings; these could be reduced to, e.g. "Research Methods", or
+  "Devices Used"
+- §2.2, p. 1, l. 62: "[4]emphasized" -> "[4] emphasized". Similar on
+  l. 76 ([6]).
+- §2.3, p. 2, l. 10: "participants 'active" -> "participants' active".
+- §3.2, p. 2, l. 48: "businesses—its" -> "businesses — its";
+  "``magnetism''—stems" -> "``magnetism'' — stems".
+- §3.2, p. 2, l. 53: Since there are multiple authors, "Considering
+  the authors'".
+- §4.1, p. 3, l. 11: Citations [16][17][18] should be rendered within
+  one set of brackets; \cite{ref1}\cite{ref2}\cite{ref3} ->
+  \cite{ref1, ref2, ref3}. Similar in §4.5 ([25][26]) and §5.2
+  ([29][30][31]).
+- §4.2, p. 3, ll. 34--35: "RAVE(Realtime" -> "RAVE (Realtime";
+  "Autoencoder)model" -> "Autoencoder) model".
+- §4.4, p. 3, l 81: "The [nn~] acts" -> "The [nn~]
+  Pd external acts".
