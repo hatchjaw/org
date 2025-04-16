@@ -8,6 +8,18 @@ file. In the meantime, I tangle it to file that I then load from
 * Inspo
 
 - https://codeberg.org/mehrad/.emacs.d
+- https://protesilaos.com/emacs/dotemacs
+
+* Global modes
+
+** Visual line mode
+
+I work (or aim to) with buffers whose lines aren't so long that they
+need to wrap, so I disable =visual-line-mode=.
+
+#+begin_src emacs-lisp
+(global-visual-line-mode -1)
+#+end_src
 
 * Emacs Itself
 
@@ -41,9 +53,21 @@ inserted below the source block.
 "
 #+end_src
 
+** Line truncation
+
+I'm not a fan of continuation lines; if a line is longer than the
+viewport allows, I'll move the cursor to the right.
+
+#+begin_src emacs-lisp
+    truncate-lines t
+#+end_src
+
+If necessary, I can toggle from truncation to continuation with =C-x x
+t=.
+
 ** Finish up
 
-Close ~setq~ and ~use-package~.
+Close ~setq-default~ and ~use-package~.
 
 #+begin_src emacs-lisp
 ))
@@ -74,11 +98,13 @@ e.g., ~#+startup: nofold~.
 
 * Appearance
 
+** Custom faces
+
 #+begin_src emacs-lisp
 (custom-set-faces
 #+end_src
 
-** Org mode
+*** Org mode
 
 Add some extra contrast to source blocks.
 
@@ -92,7 +118,7 @@ Add some extra contrast to source blocks.
                                    :underline nil))))
 #+end_src
 
-** Flyspell
+*** Flyspell
 
 Make spelling errors really pop.
 
@@ -100,7 +126,9 @@ Make spelling errors really pop.
 '(flyspell-incorrect ((t (:inverse-video t))))
 #+end_src
 
-** Finish up
+*** Finish up
+
+Close ~custom-set-faces~.
 
 #+begin_src emacs-lisp
 )

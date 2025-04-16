@@ -7345,6 +7345,7 @@ Entered on [2025-03-31 lun. 14:25]
   + About what, though? In principle I've no shortage of potential
     next steps; the paper deadline is June 15th, so I should select
     something I think I can complete by then.
+  + Anyway, the paper template can be found [[https://www.i3da2025.org/call-for-papers/#submit_paper][here]].
 - SMC has given me three difficult papers --- two ML-related, one
   misc, all a little way outside of my wheelhouse.
   
@@ -7408,14 +7409,14 @@ attached.
 
 Entered on [2025-04-09 mer. 17:20]
 *** 2025-04-15 mardi
-**** Reviews, I3DA                                        :REVIEW:WRITING:
+**** SMC Reviews, I3DA                                    :REVIEW:WRITING:
 So one of my SMC papers was kind of racist (see the [[denote:20250405T153234][review]]). I'm quite
-frustrated that it's taken until today to finish reviewing all three,
-but the problematic nature of the paper in question introduced an
-additional burden. Now that I submit my 'hard reject' (-3), I am able
-to see (which I wish I couldn't) that the other reviewer to have
-submitted to-date gave the paper an 'accept' (+2). I don't imagine
-I've heard the end of this one.
+frustrated that it's taken until today to finish reviewing all
+three,[fn:2025041501] but the problematic nature of the paper in
+question introduced an additional burden. Now that I submit my 'hard
+reject' (-3), I am able to see (which I wish I couldn't) that the
+other reviewer to have submitted to-date gave the paper an 'accept'
+(+2). I don't imagine I've heard the end of this one.
 
 ***** I3DA
 It's the day of the deadline for abstracts, so let's write one. I'm
@@ -7458,4 +7459,169 @@ a variety of potential auralisation applications.
 
 OK, it is done. Let's see how far that gets me.
 
+***** Footnotes
+[fn:2025041501] Even with the help of [[https://notebooklm.google.com/][notebooklm]]... or maybe in spite
+of that "help" since it appears to have been prompted to be, with
+regard to uploaded papers, a condescending sycophant.
+
 Entered on [2025-04-15 mar. 15:56]
+
+*** 2025-04-16 mercredi
+**** GSoC Proposals                                                 :GSoC:
+***** Backend for MOJO --- Vijeta Priya
+Engaged with us on Discord; proposal iterated a couple of times;
+showed limited imagination, however (some of my suggestions wound up
+in the proposal word-for-word), and doesn't identify a mentor from the
+MOJO community. 26-page proposal; some LLM garbage. Since the
+faustideas brief deals with performance, for once this is an
+appropriate consideration.
+
+There's some prototype code, and a "benchmarking report" [[https://drive.google.com/drive/folders/1Rw3A8mB6rGoRYQ9UlTAqkRMl6AeN7_JR][here]].
+
+A 🤷‍♂️, I guess.
+
+***** Developing Modular Synthesis using Widget Modulation --- Eslam Wageh Samer
+Another prospective contributor who put a fair deal of effort into
+making contact and asking for feedback. It's a good proposal (if
+long/rambling), and it's accompanied by a working prototype, albeit
+with pre-compiled modules.
+
+Eslam clearly comes into this with no knowledge of Faust prior to a
+couple of months ago, but he has shown great initiative. Tellingly, he
+doesn't come from a modular synthesis background (nor anything
+audio-related as far as his proposal indicates). Unlikely to be
+accepted, furthermore, as Yann would have to mentor, and the view is
+his time can't be spared for this.
+
+Another 🤷‍♂️.
+
+***** Faust LSP --- carn181 (Ryan Varghese)
+Already accepted; Discord chat created.
+
+Previously created a RISC-V [[https://github.com/carn181/tree-sitter-riscv][tree-sitter]] and basic [[https://github.com/carn181/riscv-lsp-vscode][LSP VS Code
+extension]]. Also some basic [[https://github.com/carn181/syriac-input][Emacs]] [[https://github.com/carn181/garshuni-mlm][packages]]. Musician. Karl Hiner (whose
+blog [[https://karlhiner.com/jupyter_notebooks/intro_to_digital_filters][slaps]]), creator of tree-sitter-faust, agreed to mentor.
+
+That's a ✅, in any case.
+
+***** Faust programming by examples --- kunxal (P Kunal Kumar)
+I'm not aware of Kunal having reached out on Discord. Proposal has
+some nice ideas, like gamifying /programming by examples/ and
+permitting reverse input --- i.e. code-to-timeline. Not enough here,
+beyond enthusiasm, to trouble my conscience. ❌
+
+***** Faust programming by examples --- Siddharth Doshi
+Siddharth was in touch for feedback, but is another one that took my
+suggestions and incorporated them verbatim in his proposal. He did,
+however, create a [[https://github.com/Siddhuuuu/Faust-Programming-by-Examples-Prototype][prototype]] that works well enough to demonstrate the
+basic principle, and appears to understand the motivation behind the
+project. Problem is this is a huge, open-ended, Elody-like affair, and
+Yann probably can't be permitted to devote the time. 🤷‍♂️
+
+***** faust2clap: Support for CLAP format --- Facundo Franchino
+Decent proposal, aware of the motivation and related work. Undergrad,
+Argentinian, studying in York. Fun [[https://facundofranchino.com/][website]]. Entrepreneurial,
+self-promotional attitude; how much of this is hot air? 
+
+We shall see. Stéphane is on board and found a co-mentor: ✅ is the
+verdict.
+***** HS-Faust: Haskell DSL for DSP via Faust Signal API --- Divit Mittal
+What is this? A way to use Haskell as a language for interacting with
+Faust's signal API? Repo [[https://github.com/DivitMittal/hs-faust][here]]. "This allows one to define Faust signal
+processing graphs within Haskell and compile them using the Faust
+infrastructure."
+
+Frankly this is unhinged. I think this kid probably has talent, but
+there's nothing in the proposal that tells me why he thinks it's a
+good idea. ❌
+
+***** Integrated Faust Language Server and Formatting Extension for VS Code --- M Arslan Sherazi
+First (well, second after Ryan I guess) of a number to propose on this
+topic.
+
+Insulting. For once I wish they'd used an LLM. ❌
+
+***** Integrated Faust Language Server and Formatting Extension for VS Code --- Navneet Verma
+Three pages. Can you say "seamlessly integrates"? Topics: "Vision,
+Robotics, Cloud, Graphics, Web, Machine Learning"... maybe they meant
+things they've heard of. Anyway ❌
+
+***** Integrated Faust Language Server and Formatting Extension for VS Code --- Ayush Sonkar
+"Seamless experience". No, that's unfair. This one's trash because
+it's three pages with no description of what an LSP actually is.  ❌
+
+***** Integrated Faust Language Server and Formatting Extension for VS Code --- Abishek J Nair
+Awareness of tree-sitter-faust; mentions the web IDE and its
+shortcomings; went as far as to setup a skeleton [[https://github.com/hea7hen/faust-langserver-extension-prototype][repo]]. Not really a
+complete proposal, however. ❌
+
+***** Integrated Faust Language Server and Formatting Extension for VS Code --- Bhupendra kumawat
+Sensible keywords... but "seamless integration with VS Code" and
+"seamlessly connects the LSP and the formatter". Three-pager, no
+mentor, no contact, etc., etc. ❌
+
+***** Integrated Faust Language Server and Formatting Extension for VS Code --- AditaMishra
+Nearly the best of a bad sub-bunch... but with some (probably
+LLM-generated) placeholder/template text left lying around:
+#+begin_quote
+5. Your Qualifications and Skills:
+I possess a strong foundation in programming principles and have experience in the following
+areas relevant to this project:
+• Faust Programming: [Describe your experience with Faust, including any projects or
+coursework you've undertaken. Highlight your understanding of its syntax and core
+concepts.]
+#+end_quote
+Breaks my heart a little; this kid clearly tried to put at least some
+things in their own words. ❌
+
+***** Integration in Audiokinetic Wwise --- pmelaudev (Paschalis Melissas)
+Audio middleware for game development. Masters level applicant, audio
+background, /impenetrable/ [[https://github.com/pasquale90/mthesis][thesis]], but some decent looking projects
+elsewhere. Acknowledges in his proposal that he ought to have said
+hello on Discord. Honestly, this is strong; I think it could be a
+goer. Lack of a mentor hurts it; am I prepared to step up? 🤷‍♂️
+
+***** Integration in BELA --- Hsin Wen
+Hsin said "Hello Sir, I would appreciate any feedback you could
+provide on my proposal. Thank you!" I almost want to say yes on that
+basis alone.
+
+Anyway, Hsin doesn't have a Bela. Had to be prompted to describe Bela
+and Faust and any sort of background to the project following a
+context-free first draft. Honestly, looks like a good candidate, and,
+being London-based, may have encountered Bela organically, as it
+were. Can't see it working, or a mentor being found for it. ❌/🤷‍♂️
+
+***** Integration in Surge --- Drishan Gogoi
+No community engagement. Minimal background/motivation. LLM says:
+emoji bulletpoints, "Seamless integration", "Testing &
+Optimization". ❌
+
+***** Intergration of Faust Web Audio Library into Cables.gl --- Sharvari Jadhav
+It's been done. ❌
+
+***** ofxFaust - Integration in openFrameworks --- Alex Hojin Park
+This isn't bad; Alex has some audio background, made a couple of
+merged PRs against the /of/ documentation site... but only names
+Stéphane as prospective mentor. No real background/motivation
+described. Pity. ❌/🤷‍♂️
+
+***** PluginGuiMagic architecture (GRAME) --- Princy Patwa
+Solid, honest. Not bad really. Just... /carré/. Better than most of
+the other ❌'s but probably still in that camp.
+
+***** Proposal for Faust Language Server and VS Code Extension Development --- Mohammed Ashar Khan
+Little of substance here. ❌
+
+***** Support for CLAP format --- Priyanshuwu
+Quite good. Engaged with us during the proposal period, made a couple
+of LLM-supported Faust PRs. Bit of a nuisance, tbh. Interest in audio
+though; seems to understand what's at play. But Facundo has it, so ❌
+
+Entered on [2025-04-16 mer. 10:17]
+**** Inria PhD meeting with Julie Marchesi & Emma De Reboul      :MEETING:
+- CSI: send scan of student card and CSI report to srh-lys@inria.fr
+- Ask Solène about Inria integrity training.
+- Consider talking to Mme Le Prince about a dentist appointment.
+
+Entered on [2025-04-16 mer. 10:27]
