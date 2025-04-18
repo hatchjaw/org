@@ -7625,3 +7625,52 @@ Entered on [2025-04-16 mer. 10:17]
 - Consider talking to Mme Le Prince about a dentist appointment.
 
 Entered on [2025-04-16 mer. 10:27]
+*** 2025-04-17 jeudi
+**** MIDI 2.0                                                :INSPO:AUDIO:
+The long-promised dawn of MIDI 2.0 remains just round the corner as
+ever. That being said (courtesy of the Linux-audio-dev mailing list),
+improved support is indeed gathering pace on all the major
+platforms. Courtesy of the Linux-audio-dev mailing list for
+highlighting it, there's a little [[https://midi.org/latest-midi-2-0-developments-in-apple-google-linux-and-microsoft-operating-systems][article and video]] on midi.org.
+
+There's [[https://developer.apple.com/documentation/coremidi/incorporating-midi-2-into-your-apps][stuff]] on MIDI 2 on the Apple developer site. On the Linux
+side, there's chat about it being possible to easily set up embedded
+devices as USB MIDI 2 devices.
+
+Entered on [2025-04-17 jeu. 11:05]
+**** Internet of Sounds Journal special issue              :INSPO:WRITING:
+Via the internet-of-sounds network, I'm aware that there's to be a
+special issue on "[[https://www.springeropen.com/collections/spios][Signal Processing for the Internet of Sounds]]" in the
+[[https://asmp-eurasipjournals.springeropen.com/][EURASIP Journal on Audio, Speech, and Music Processing]]. Deadline is
+June 11th, so it's very, /very/ unlikely.
+
+That being said, relevant topics include parallelisation, spatial
+audio for IoS, embedded audio, distributed audio, etc.
+
+Gloria Dal Santo just had [[https://asmp-eurasipjournals.springeropen.com/articles/10.1186/s13636-025-00401-w][something]] published in that journal, fwiw.
+
+Entered on [2025-04-17 jeu. 11:19]
+**** Meeting: Benjamin
+Peyrusse stuff:
+- Benjamin to introduce dual numbers, but from more of a computational
+  perspective...
+  + so I could do numbers \to dual numbers \to dual numbers
+    of dual numbers, i.e. higher-order derivatives.
+  + Differentiable compositions
+  + Higher-order derivatives
+  + Examples: lowpass, impulse response... neural network.
+
+Entered on [2025-04-17 jeu. 12:35]
+*** 2025-04-18 vendredi
+**** Latest on =intellij-faust=                           :INTELLIJ:FAUST:
+Finally, finally got /run configurations/ working in their most basic
+form. It's possible to summon the Faust compiler against a given input
+file via a run configuration, just like one would with a Kotlin or C++
+build, albeit in a stripped-down form.
+
+As a reminder, I should replace file-based indexing with stub
+indexing. [[https://github.com/JetBrains/Grammar-Kit/blob/master/HOWTO.md#35-stub-indices-support][Here]]'s some info on how to approach that via =grammar-kit=.
+
+Entered on [2025-04-18 ven. 15:32]
+  
+  [[file:~/org/journal.org::*Faust Support for Intellij IDEs][Faust Support for Intellij IDEs]]
