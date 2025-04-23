@@ -7674,3 +7674,224 @@ indexing. [[https://github.com/JetBrains/Grammar-Kit/blob/master/HOWTO.md#35-stu
 Entered on [2025-04-18 ven. 15:32]
   
   [[file:~/org/journal.org::*Faust Support for Intellij IDEs][Faust Support for Intellij IDEs]]
+**** Delock ethernet dongle problems                            :HARDWARE:
+Here I am trying to use the dongle, but =ethtool= says it has no
+timestamping capability. This suggests the driver is missing or out of
+date or something. I downloaded the latest version, but when I try to
+=make= I find that the result of...
+#+begin_src shell :results output :exports both
+uname -r
+#+end_src
+
+#+RESULTS:
+: 6.6.84-1-MANJARO
+
+... and the most recent directory in =/lib/modules=, don't match.
+#+begin_src shell :results output :exports both
+ls -l /lib/modules
+#+end_src
+
+#+RESULTS:
+: total 8
+: drwxr-xr-x 3 root root 4096  4 mars  09:37 6.6.65-1-MANJARO
+: drwxr-xr-x 5 root root 4096 18 avril 16:52 6.6.85-2-MANJARO
+
+(for the record, at the time of writing these return
+=6.6.84-1-MANJARO= and =6.6.85-2-MANJARO= respectively.
+
+Looks like a restart is required.
+
+***** Post-restart: =modprobe=
+Now, the kernel version number is a consistent =6.6.85-2-MANJARO=. I
+forgot, however, to set ~ENABLE_PTP_FUNC~ to ~y~ in the
+makefile. Uninstalling, cleaning, setting that variable, /then/
+following the readme instructions properly, we have:
+
+#+begin_src shell :noexec
+make
+sudo make install
+sudo modprobe ax_usb_nic
+#+end_src
+
+=modprobe= adds (or removes, with the =r= flag) the module to the
+kernel without necessitating a restart.
+
+Now we have:
+#+begin_src shell :results output :exports both
+ethtool -T enp85s0u2u3u1
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Time stamping parameters for enp85s0u2u3u1:
+Capabilities:
+	hardware-transmit
+	software-transmit
+	hardware-receive
+	software-receive
+	software-system-clock
+	hardware-raw-clock
+PTP Hardware Clock: 1
+Hardware Transmit Timestamp Modes:
+	off
+	on
+	onestep-sync
+	onestep-p2p
+Hardware Receive Filter Modes:
+	none
+	ptpv1-l4-event
+	ptpv1-l4-sync
+	ptpv1-l4-delay-req
+	ptpv2-l4-event
+	ptpv2-l4-sync
+	ptpv2-l4-delay-req
+	ptpv2-l2-event
+	ptpv2-l2-sync
+	ptpv2-l2-delay-req
+#+end_example
+
+👍
+
+Entered on [2025-04-18 ven. 17:31]
+  
+  [[file:~/org/journal.org::*Delock 66045 LAN Adapter: driver installation & setup][Delock 66045 LAN Adapter: driver installation & setup]]
+
+*** 2025-04-21 lundi
+**** What lies +beneath+ ahead?                        :WRITING:BRAINDUMP:
+***** Séminaire Emeraude: May 15th-17th
+Presentation on DDSP to prepare; notes on recent meeting with Benjamin
+[[*Meeting: Benjamin][here]].
+***** CSI: May 27th
+I'm to deliver documentation by May 13th. Instructions [[http://edinfomaths.universite-lyon.fr/en/thesis/thesis-follow][here]].
+***** I3DA: June 15th
+Notification of abstract acceptance will be made on April 30th. See
+the [[https://www.i3da2025.org/][conference website]].
+***** IS2/IEEE AWNIA: July 1st
+Like I3DA, this is [[https://internetofsounds2025.ieee-is2.org/][one]] (well, [[https://internetofsounds2025.ieee-is2.org/workshops/3rd-ieee-international-workshop-networked-immersive-audio][two]], or three if you count the DDSP
+[[https://internetofsounds2025.ieee-is2.org/workshops/3rd-ieee-international-workshop-networked-immersive-audio][workshop/tutorial]]) for which I need some actual results.
+***** Bonus: SMC/AES-AIMLA?
+Depends on acceptance. I guess a poster for SMC; I think a video for
+AES (can't remember where I saw that... might've been another
+conference). SMC annoncements are made on teh 28th of this month. AES
+verdicts aren't released till June 16th.
+
+Entered on [2025-04-21 lun. 17:21]
+*** 2025-04-22 mardi
+**** Chat with Yann                                 :INSPO:NETWORKEDAUDIO:
+Yann asked me what I'm working on; I explained that I'm trying to get
+back into the networked audio situation.
+
+- He mentioned that Tanguy and Jean-Marie Gorce were trying to achieve
+  something similar to what I'm working on a few years ago, but based
+  on radio rather than ethernet.
+  + But ethernet is ubiquitous; could one create a bidirectional,
+    low-cost system based on radio? [cite:@lienhartImportance2003;
+    @kiselevWHISPER2017] are radio-based, and I see Arduino radio
+    TX/RX boards for a handful of € apiece...
+- Wouldn't it be nice to daisy-chain the Teensies?
+  + Yes, but then they'd have to be reading incoming data /and/
+    passing it on, as transparently as possible. There are two ENET
+    subsystems on the NXP IMXRT1062, but only one ethernet PHY on the
+    Teensy board.
+- If transmission were unidirectional, and all clients were reading
+  from one /wire/, as it were, one could more-or-less take for granted
+  that reception was synchronous. Then one could use buffer fill-level
+  as a measure of drift.
+  + But then you'd only have resolution of, at best, 1 sample (as far
+    as I can see), and, in a packet-based transmission system, likely
+    much coarser than that.
+
+Worth reflecting on the above, nonetheless. And I really must get
+around to asking related questions on the Teensy forum, in addition to
+posting about my work to-date, and the supporting work by
+[cite:@schleusnerSubMicrosecond2024].
+  
+Entered on [2025-04-22 mar. 18:40]
+*** 2025-04-23 mercredi
+**** PTP Setup; System Clock Sync                                    :PTP:
+I'm really not sure at this stage whether I'm doing things right, but,
+let's see, I have:
+- =ptp41= running
+  #+begin_src shell :results output :exports both
+sudo ptp41 -m -2 -i enp85s0u2u3u1
+  #+end_src
+- I did nothing to speak of with =pmc=
+  #+begin_src shell :noexec
+❯ sudo pmc -u -b 0 "GET CURRENT_DATA_SET"
+sending: GET CURRENT_DATA_SET
+        6c6e07.fffe.030595-0 seq 0 RESPONSE MANAGEMENT CURRENT_DATA_SET 
+                stepsRemoved     0
+                offsetFromMaster 0.0
+                meanPathDelay    0.0
+  #+end_src
+which is to say the machine whose MAC ends 03:05:95 (i.e. the Delock
+dongle), is the master clock right now.
+- Attempting to set the system clock to match the PTP clock, =phc2sys=
+  reports the following:
+  #+begin_src shell :noexec
+❯ sudo phc2sys -m -s enp85s0u2u3u1 -c CLOCK_REALTIME -w
+phc2sys[63154.952]: CLOCK_REALTIME phc offset   3887514 s0 freq   +8525 delay 482982
+phc2sys[63155.956]: CLOCK_REALTIME phc offset   3859769 s1 freq  -19195 delay 431388
+phc2sys[63156.959]: CLOCK_REALTIME phc offset    104308 s2 freq  +85113 delay 532763
+phc2sys[63157.963]: CLOCK_REALTIME phc offset     27877 s2 freq  +39975 delay 538869
+phc2sys[63158.965]: CLOCK_REALTIME phc offset    -52894 s2 freq  -32433 delay 387954
+phc2sys[63159.968]: CLOCK_REALTIME phc offset     37443 s2 freq  +42035 delay 492379
+phc2sys[63160.971]: CLOCK_REALTIME phc offset    -13072 s2 freq   +2753 delay 390775
+phc2sys[63161.974]: CLOCK_REALTIME phc offset     31370 s2 freq  +43274 delay 520288
+phc2sys[63162.977]: CLOCK_REALTIME phc offset    -46635 s2 freq  -25320 delay 428014
+phc2sys[63163.980]: CLOCK_REALTIME phc offset     38599 s2 freq  +45923 delay 460589
+phc2sys[63164.983]: CLOCK_REALTIME phc offset      5585 s2 freq  +24489 delay 460682
+...
+  #+end_src
+  but offset never converges (perhaps because we're trying to set a
+  software clock?). In fact, it appears that the system clock isn't
+  updated. Running
+  #+begin_src shell :noeval
+❯ sudo phc_ctl enp85s0u2u3u1 get
+phc_ctl[63569.191]: clock time is 1745415069.946199320 or Wed Apr 23 15:31:09 2025
+  #+end_src
+  yields a time that's 37 seconds (the TAI-UTC offset) ahead of what's
+  reported by the system (in the main window task bar clock for
+  example).
+
+***** pmc
+It turns out that to get help on =pmc= commands, it's necessary to
+send "help" as a command, e.g.
+
+#+begin_src shell :noexec
+❯ sudo pmc -u -b 0 -t 1 "help"
+
+        [action] USER_DESCRIPTION
+        [action] DEFAULT_DATA_SET
+        [action] CURRENT_DATA_SET
+        [action] PARENT_DATA_SET
+...
+#+end_src
+
+Entered on [2025-04-23 mer. 15:13]
+**** Long-term Audio Sync                      :NETWORKEDAUDIO:TEENSY:PTP:
+At the server side, when timestamping packets, reading from the PTP
+clock --- in software --- isn't viable; under such an approach,
+outgoing packets should be timestamped at the physical layer (just
+like PTP packets) otherwise, while the average transmission interval
+might be somewhat reliable, there will certainly be significant
+deviations from that average. In any case, since the server's audio
+clock isn't being conditioned like the clients' are, the result is
+buffer overflow/underrun at the client side.
+
+To test this, I tried PTP-timestamping the first packet transmitted,
+then just adding 2666666 (ns) to the timestamp of each subsequent
+packet. The result is that, while clients stay closely synced with
+each other, they drift relative to the server. Since they all appear
+to run faster than the server, they eventually underrun. This might
+take a long time, so perhaps not all is lost; it's a problem
+nonetheless.
+
+I find myself considering, once again, the Teensy-USB-audio-device
+approach. It would also be nice to decouple packet size from buffer
+size. I also need to change from sample- to channel-interleaved
+format. There's no reason, per-se, that packets should necessarily
+carry a power-of-two number of frames; like AOO, packets should be
+arbitrarily fragmentable.
+
+Entered on [2025-04-23 mer. 18:31]
