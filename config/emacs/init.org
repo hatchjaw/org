@@ -65,6 +65,15 @@ viewport allows, I'll move the cursor to the right.
 If necessary, I can toggle from truncation to continuation with =C-x x
 t=.
 
+** Shell
+
+Make sure shell commands run interactively, so profile/config gets
+loaded and thus the correct ~PATH~.
+
+#+begin_src emacs-lisp
+    shell-command-switch "-ic"
+#+end_src
+
 ** Finish up
 
 Close ~setq-default~ and ~use-package~.

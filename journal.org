@@ -7888,10 +7888,99 @@ take a long time, so perhaps not all is lost; it's a problem
 nonetheless.
 
 I find myself considering, once again, the Teensy-USB-audio-device
-approach. It would also be nice to decouple packet size from buffer
-size. I also need to change from sample- to channel-interleaved
-format. There's no reason, per-se, that packets should necessarily
-carry a power-of-two number of frames; like AOO, packets should be
-arbitrarily fragmentable.
+approach; but how to get that to work at 48 kHz? It would also be nice
+to decouple packet size from buffer size. I also need to change from
+sample- to channel-interleaved format. There's no reason, per-se, that
+packets should necessarily carry a power-of-two number of frames; like
+AOO, packets should be arbitrarily fragmentable.
 
 Entered on [2025-04-23 mer. 18:31]
+*** 2025-04-24 jeudi
+**** Romain B: Preparation for ARITH                        :PRESENTATION:
+- Could give more of an intro; something more personable.
+- Slow down a little.
+- /Faithful rounding/ was a little unclear.
+- Relevance domains? (slide 9)
+- 14, could be clearer on significance/meaning of results.
+
+***** Pronunciation/orthography
+- "Approached" ("apprawched")
+- "Array" (rhotic R)
+- "Additionally" ("addishnly")
+- "n equal three" -> "n equals three"
+- "after the comma" -> "after the decimal point" (slide 12)
+- "scientific writing" -> "scientific representation"
+- "let me go step by step on the equation" -> "through the equation"
+- 13, "factored out of the square root"
+- "nineteen-hundred fifty-nine" -> "nineteen fifty-nine" (16)
+- 17, "shit and add" 😅
+- "naïve" -> "naive" (consistence)
+- "...makes CORDIC only the practical solution" -> "the only practical
+  solution"
+
+Entered on [2025-04-24 jeu. 10:06]
+
+*** 2025-04-25 vendredi
+**** Audio Server Problems                           :NETWORKEDAUDIO:JUCE:
+At least half the time, Ananas is throwing a segfault. As far as I can
+recall, it didn't used to do this. It happens in
+~AudioTransportSource::getNextAudioBlock()~ when the next block of the
+~masterSource~ member is requested. Here's the typical trail of ~DBG~
+messages:
+
+#+begin_example
+...
+About to try to read from the FIFO
+FIFO waiting for samples.
+Checking readiness...
+0 samples available
+Copying from transport to buffer.
+
+Process finished with exit code 139 (interrupted by signal 11:SIGSEGV)
+#+end_example
+
+And a run that was unafflicted by the segfault:
+
+#+begin_example
+...
+About to try to read from the FIFO
+FIFO waiting for samples.
+Checking readiness...
+0 samples available
+Copying from transport to buffer.
+Passing buffer to Ananas server.
+Writing to FIFO.
+Notifying send thread.
+Checking readiness...
+128 samples available
+FIFO done waiting. About to read from FIFO.
+Sent the packet.
+...
+#+end_example
+
+Potential causes:
+- Something related to a recent system update? Manjaro/Linux kernel or
+  library stuff?
+- My ill-informed used of scoped locks, mutexes, or condition
+  variables?
+
+Infuriatingly, I didn't take notes at the time re. why I switched from
+~juce::WaitableEvent~ to ~std::condition_variable~; something to do
+with the former not triggering reliably? ~juce::WaitableEvent~ uses
+~std::condition_variable~ under the hood; perhaps I should try
+switching back?
+
+Commenting out ~AnanasServer::getNextAudioBlock~ in ~MainComponent~
+appears to prevent the segfault, which makes sense since it means that
+the condition variable is sat there waiting forever.
+
+***** Resolution!
+With the caveat that I can't be 100% certain, I think it was a problem
+with changing audio device setup. Basically I don't call
+~AudioTransportSource::prepareToPlay~ or ~AnanasServer::prepareToPlay~
+until the expected number of frames per block is as I expect it;
+otherwise I think the outgoing packet is initialised, then later
+resized, and that can sometimes result in memory that's sufficiently
+mangled to cause a segfault.
+
+Entered on [2025-04-25 ven. 15:27]
