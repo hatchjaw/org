@@ -105,6 +105,17 @@ e.g., ~#+startup: nofold~.
 )
 #+end_src
 
+* Window-switching
+
+Let's try the =ace-window= package.
+
+#+begin_src emacs-lisp
+(use-package ace-window
+  :ensure t
+  :config
+  (global-set-key (kbd "M-o") 'ace-window))
+#+end_src
+
 * Appearance
 
 ** Custom faces

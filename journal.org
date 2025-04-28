@@ -7230,7 +7230,7 @@ Message:/home/tim/Julia/depot/juliaup/julia-1.11.3+0.x64.linux.gnu/bin/../lib/ju
 
 And [[https://github.com/JuliaLang/julia/issues/57250#issuecomment-2633453430][here]]'s a workaround:
 
-#+begin_src shell :noexec
+#+begin_src shell :noeval
 sudo pamac install execstack
 execstack -c ~/.julia/juliaup/julia-[version]/lib/julia/libopenlibm.so
 #+end_src
@@ -7707,7 +7707,7 @@ forgot, however, to set ~ENABLE_PTP_FUNC~ to ~y~ in the
 makefile. Uninstalling, cleaning, setting that variable, /then/
 following the readme instructions properly, we have:
 
-#+begin_src shell :noexec
+#+begin_src shell :noeval
 make
 sudo make install
 sudo modprobe ax_usb_nic
@@ -7816,7 +7816,7 @@ let's see, I have:
 sudo ptp41 -m -2 -i enp85s0u2u3u1
   #+end_src
 - I did nothing to speak of with =pmc=
-  #+begin_src shell :noexec
+  #+begin_src shell :noeval
 ❯ sudo pmc -u -b 0 "GET CURRENT_DATA_SET"
 sending: GET CURRENT_DATA_SET
         6c6e07.fffe.030595-0 seq 0 RESPONSE MANAGEMENT CURRENT_DATA_SET 
@@ -7828,7 +7828,7 @@ which is to say the machine whose MAC ends 03:05:95 (i.e. the Delock
 dongle), is the master clock right now.
 - Attempting to set the system clock to match the PTP clock, =phc2sys=
   reports the following:
-  #+begin_src shell :noexec
+  #+begin_src shell :noeval
 ❯ sudo phc2sys -m -s enp85s0u2u3u1 -c CLOCK_REALTIME -w
 phc2sys[63154.952]: CLOCK_REALTIME phc offset   3887514 s0 freq   +8525 delay 482982
 phc2sys[63155.956]: CLOCK_REALTIME phc offset   3859769 s1 freq  -19195 delay 431388
@@ -7858,7 +7858,7 @@ phc_ctl[63569.191]: clock time is 1745415069.946199320 or Wed Apr 23 15:31:09 20
 It turns out that to get help on =pmc= commands, it's necessary to
 send "help" as a command, e.g.
 
-#+begin_src shell :noexec
+#+begin_src shell :noeval
 ❯ sudo pmc -u -b 0 -t 1 "help"
 
         [action] USER_DESCRIPTION
@@ -7976,11 +7976,308 @@ the condition variable is sat there waiting forever.
 
 ***** Resolution!
 With the caveat that I can't be 100% certain, I think it was a problem
-with changing audio device setup. Basically I don't call
-~AudioTransportSource::prepareToPlay~ or ~AnanasServer::prepareToPlay~
-until the expected number of frames per block is as I expect it;
-otherwise I think the outgoing packet is initialised, then later
-resized, and that can sometimes result in memory that's sufficiently
-mangled to cause a segfault.
+with changing audio device setup. Basically the solution is to avoid
+calling ~AudioTransportSource::prepareToPlay~ or
+~AnanasServer::prepareToPlay~ until the expected number of frames per
+block is as I expect it; otherwise I think the outgoing packet is
+initialised, then later resized; meanwhile the audio thread is waiting
+to write the original block size's worth of frames to the
+buffer. Writing 512 frames to a buffer with a size of 128 can
+/sometimes/ result in memory that's sufficiently mangled to cause a
+segfault.
 
 Entered on [2025-04-25 ven. 15:27]
+
+*** 2025-04-27 dimanche
+**** Audio packet format                           :ANANAS:NETWORKEDAUDIO:
+To interlave or not to interleave?
+
+Currently, Ananas /does/, which is to say that packets are of the
+following format:
+
+|---------------------------|
+| Header                    |
+|---------------------------|
+| Frame 1                   |
+| channel 1, channel 2, ... |
+|---------------------------|
+| Frame 2                   |
+| channel 1, channel 2, ... |
+|---------------------------|
+| ...                       |
+
+By way of comparison, NetJUCE just concatenated the data for each
+channel, like so:
+
+|-------------------------|
+| Header                  |
+|-------------------------|
+| Channel 1               |
+| sample 1, sample 2, ... |
+|-------------------------|
+| Channel 2               |
+| sample 1, sample 2, ... |
+|-------------------------|
+| ...                     |
+
+From the JUCE side, altering the format (from interleaved to not) is a
+trivial case of switching from ~juce::AudioData::Interleaved~ to
+~juce::AudioData::NonInterleaved~ when declaring the desired
+~juce::AudioData::ConverterInstance~ (and altering the logic for
+converting samples and writing them to a ~uint8_t*~ destination).
+
+At the Teensy side, things are a little more complicated. Essentially,
+the I^{2}S interface expects to receive interleaved audio data... and the
+~AnanasServer~ implementation at that side receives an interleaved
+stream of audio data, which it simply copies to the outgoing packet
+as-is (~AudioServer::processAudio()~):
+
+#+begin_src c++
+// Write incoming buffer to a packet in the packet buffer.
+memcpy(txPacket.data, buffer, numSamples * numChannels * sizeof(int16_t));
+#+end_src
+
+Is there necessarily any need to switch to non-interleaved at the
+client side? I was thinking it would be a good idea, since that would
+decouple the abstract ~AudioProcessor::processAudio()~ from the I^{2}S
+interface, but I'm no longer sure. A Teensy is unlikely to act as the
+audio server, even if I go down the USB audio device route (in which
+case it would just, ideally, dictate audio rate to the desktop
+machine).
+
+Is there any advantage to interleaving when it comes to packet
+fragmentation? It's probably no more than a design choice, but say
+there are eight channels, and a packet holds a nominal 1500 bytes;
+each sample is two bytes, each frame is 16 bytes; ignoring the header
+for a sec:
+
+#+begin_src emacs-lisp
+(let* ((mtu 1500.0)
+       (bytesPerSample 2)
+       (numChannels 8)
+       (bytesPerFrame (* bytesPerSample numChannels))
+       (framesPerPacket (floor (/ mtu bytesPerFrame))))
+  (format "%d frames per packet" framesPerPacket))
+#+end_src
+
+#+RESULTS:
+: 93 frames per packet
+
+Fine. Server-side, writing that many frames to a packet is possibly
+marginally easier than calculating /how many channels can be written
+to the packet at an arbitrary block size/, i.e. perhaps one keeps an
+intermediate buffer, and a per-packet byte-countdown. Either way, I
+think putting meaningful timestamps in arbitrarily-fragmented packets
+is going to be a bit of a challenge.
+
+Entered on [2025-04-27 dim. 16:21]
+*** 2025-04-28 lundi
+**** Time, time, time, time, time                                    :PTP:
+Alright, =phc2sys= isn't going to be any help to me, I don't think.
+
+To [[https://linuxptp.nwtime.org/documentation/phc2sys/][recap]]:
+
+#+begin_quote
+phc2sys is a program which synchronizes two or more clocks in the
+system. Typically, it is used to synchronize the system clock to a PTP
+hardware clock (PHC), which itself is synchronized by the ptp4l
+program.
+#+end_quote
+
+My use-case is not the typical one, insofar as the Delock dongle, the
+switch, and the Teensies are all counting from the Unix epoch when
+they start up; this is to say that my "authoritative source of time"
+(be it the dongle, the switch, or a Teensy) is running fifty-five
+years slow.
+
+Attempting to sync the system clock (=-c CLOCK_REALTIME=) to something
+(=-s enp85s0u2u3u1=) in the very early seventies...
+
+#+begin_src shell :noeval
+sudo phc2sys -s enp85s0u2u3u1 -c CLOCK_REALTIME -w -m
+#+end_src
+
+results in, e.g.:
+
+#+begin_example
+...
+phc2sys[164740.710]: CLOCK_REALTIME phc offset -2656469781 s2 freq -100000000 delay 479445
+phc2sys[164741.712]: CLOCK_REALTIME phc offset -2656513062 s2 freq -100000000 delay 423154
+phc2sys[164742.716]: CLOCK_REALTIME phc offset -2656453903 s2 freq -100000000 delay 581436
+phc2sys[164743.720]: clockcheck: clock jumped backward or running slower than expected!
+phc2sys[164743.720]: CLOCK_REALTIME phc offset -5587814982 s0 freq -100000000 delay 468789
+phc2sys[164744.724]: CLOCK_REALTIME phc offset -5587767039 s2 freq -99826137 delay 594245
+phc2sys[164745.727]: CLOCK_REALTIME phc offset -5587935212 s2 freq -100000000 delay 516522
+...
+#+end_example
+
+I.e. a lock is never achieved.
+
+If I attempt to use the system clock as the source:
+
+#+begin_src shell :noeval
+sudo phc2sys -s CLOCK_REALTIME -c enp85s0u2u3u1 -w -m
+#+end_src
+
+I see the following output:
+
+#+begin_example
+...
+phc2sys[163660.749]: enp85s0u2u3u1 sys offset -891786520 s2 freq -100000000 delay 328641
+phc2sys[163661.752]: enp85s0u2u3u1 sys offset -669158461 s2 freq -100000000 delay 357971
+phc2sys[163662.755]: enp85s0u2u3u1 sys offset -446168085 s2 freq -100000000 delay 430705
+phc2sys[163663.758]: enp85s0u2u3u1 sys offset -223276487 s2 freq -100000000 delay 434661
+phc2sys[163664.761]: enp85s0u2u3u1 sys offset   -169617 s2 freq +83180527 delay 351178
+phc2sys[163665.764]: enp85s0u2u3u1 sys offset  18768645 s2 freq +100000000 delay 321847
+phc2sys[163666.766]: enp85s0u2u3u1 sys offset  18794683 s2 freq +100000000 delay 339190
+...
+phc2sys[163678.799]: enp85s0u2u3u1 sys offset  18835115 s2 freq +100000000 delay 550386
+phc2sys[163679.802]: enp85s0u2u3u1 sys offset  18930552 s2 freq +100000000 delay 369837
+phc2sys[163680.805]: enp85s0u2u3u1 sys offset -3564295263 s2 freq -100000000 delay 442019
+phc2sys[163681.807]: enp85s0u2u3u1 sys offset -3341692909 s2 freq -100000000 delay 312034
+phc2sys[163682.810]: enp85s0u2u3u1 sys offset -3119159769 s2 freq -100000000 delay 449463
+phc2sys[163683.812]: enp85s0u2u3u1 sys offset -2896268347 s2 freq -100000000 delay 317654
+phc2sys[163684.815]: enp85s0u2u3u1 sys offset -2673683409 s2 freq -100000000 delay 438819
+...
+#+end_example
+
+which is to say that attempting to condition the PTP clock to the
+system clock results in dramatic frequency-oscillations (or maybe
+numerical overflow somewhere). Sort of makes sense, since the system
+clock is probably really low-res...
+
+Thing is I don't really want to condition the PTP clock this way; I
+guess it'd be nice to have a *one-time update* that brings my local
+PTP environment screaming into the 2020's, but after that it doesn't
+matter as long as the network follows one predictable, reliable time
+source.
+
+So, how to proceed?
+
+***** This afternoon's attempts
+
+The closest I've come to synchronising the PTP and system clocks is as
+follows:
+
+- Run a Teensy as clock authority (with highest priority in the network).
+  + Using the following script, I can generate a number of seconds
+    since the Unix epoch to a time of my choosing (e.g. today at
+    17:03:00)
+    
+    #+begin_src emacs-lisp
+  (let ((now (decode-time)))
+    (setcar now 0)
+    (setcar (cdr now) 03)
+    (setcar (cdr (cdr now)) 17)
+    (format "Seconds since the Unix epoch: %d" (time-convert (encode-time now) 'integer)))
+    #+end_src
+
+    #+RESULTS:
+    : Seconds since the Unix epoch: 1745852580
+
+    which I can paste into the ~onLinkState~ callback in the clock
+    authority's ~setup()~ function and set the inital 1588 timer
+    value:
+    
+    #+begin_src c++
+  if (state) {
+    ptp.begin();
+    const timespec t{1745852580, 0};
+    qindesign::network::EthernetIEEE1588.writeTimer(t);
+    //...
+    #+end_src
+    
+- Sync the Delock adapter to the Teensy via the switch.
+  + L2(-non-forwardable), E2E.
+    
+- Run =ptp4l= with a modified version of gPTP config
+  
+  #+begin_src 
+[global]
+gmCapable		1
+priority1		255
+priority2		255
+assume_two_step	1
+path_trace_enabled	1
+network_transport	L2
+delay_mechanism	E2E
+  #+end_src
+  
+  #+begin_src shell :noeval
+sudo ptp4l -m -f ~/devel/linuxptp/configs/gPTPE2E.cfg -i enp85s0u2u3u1
+  #+end_src
+  
+  Default priority is [128, 128], so this helps get the dongle out of
+  the way, as it were. Otherwise I might use
+  
+  #+begin_src shell :noeval
+sudo ptp4l -m -2 -i enp85s0u2u3u1
+  #+end_src
+  
+  + =ptp4l= (eventually) syncs to the Teensy; the switch does so much
+    more rapidly.
+    
+- I've experimented with using =pmc= as per the [[https://tsn.readthedocs.io/timesync.html#synchronizing-the-system-clock][Linux TSN docs]]:
+  
+  #+begin_src shell :noeval
+sudo pmc -u -b 0 -t 1 "SET GRANDMASTER_SETTINGS_NP clockClass 248 \
+        clockAccuracy 0xfe offsetScaledLogVariance 0xffff \
+        currentUtcOffset 37 leap61 0 leap59 0 currentUtcOffsetValid 1 \
+        ptpTimescale 1 timeTraceable 1 frequencyTraceable 0 \
+        timeSource 0xa0"
+  #+end_src
+  
+  but to no appreciable avail.
+  
+- I can check the time as reported by the system (=CLOCK_REALTIME=)
+  and the PTP clock (=/dev/ptpN= or =enpXX...=) via
+  
+  #+begin_src shell :noeval
+sudo phc_ctl CLOCK_REALTIME get
+  #+end_src
+  
+  and
+  
+  #+begin_src shell :noeval
+sudo phc_ctl /dev/ptp2 get
+  #+end_src
+  
+  and likely find that they're at least a few seconds apart.
+  
+- Finally, I try =phc2sys=, e.g.
+  
+  #+begin_src shell :noeval
+sudo phc2sys -s enp85s0u2u3u1 -c CLOCK_REALTIME -w -m
+  #+end_src
+  
+  or the equivalent automatic config:
+  
+  #+begin_src shell :noeval
+sudo phc2sys -a -r -m
+  #+end_src
+  
+  but what I tend to see is a failure to converge:
+  
+  #+begin_example
+phc2sys[178495.418]: reconfiguring after port state change
+phc2sys[178495.419]: selecting enp85s0u2u3u1 as domain source clock
+phc2sys[178495.419]: selecting CLOCK_REALTIME for synchronization
+phc2sys[178495.422]: CLOCK_REALTIME phc offset 41397366730 s0 freq  -17664 delay 448442
+phc2sys[178496.424]: CLOCK_REALTIME phc offset 41397344224 s1 freq  -40120 delay 365278
+phc2sys[178497.427]: CLOCK_REALTIME phc offset 41389124376 s2 freq +100000000 delay 518762
+... [offset steadly decreases...]
+phc2sys[178528.498]: CLOCK_REALTIME phc offset 37937325908 s2 freq +100000000 delay 366364
+phc2sys[178529.500]: clockcheck: clock jumped forward or running faster than expected!
+phc2sys[178529.500]: CLOCK_REALTIME phc offset 41295523063 s0 freq +100000000 delay 375098
+phc2sys[178530.503]: CLOCK_REALTIME phc offset 41184152555 s2 freq -100000000 delay 404077
+phc2sys[178531.506]: CLOCK_REALTIME phc offset 41275063813 s2 freq +100000000 delay 380758
+  #+end_example
+  
+(Interestingly, I've got music playing in a web browser and it stutters
+for a few seconds when =phc2sys= starts.)
+
+***** Resources
+There's a nice [[https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/6/html/deployment_guide/ch-configuring_ptp_using_ptp4l][guide to PTP in general]] on the Red Hat docs
+site. Perhaps poring over that will yield further leads.
+
+Entered on [2025-04-28 lun. 13:50]
