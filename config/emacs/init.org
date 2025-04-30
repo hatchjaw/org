@@ -113,7 +113,8 @@ Let's try the =ace-window= package.
 (use-package ace-window
   :ensure t
   :config
-  (global-set-key (kbd "M-o") 'ace-window))
+  (global-set-key (kbd "M-o") 'ace-window)
+  (setq aw-dispatch-always t))
 #+end_src
 
 * Appearance

@@ -6025,6 +6025,8 @@ and subscribers don't achieve a lock.
 - =ptp4l=: run with the =-2= flag; no need for the =--ptp_dst_mac=
   flag.
 - RouterOS: Transport: l2-non-forwardable.
+  + NB. in case of garbage (Teensy receiving messages from both the
+    router /and/ the dongle), try l2-forwardable.
 
 This last point keeps sync messages from =Routerboardc_3a:f7:c6f= out
 of the way, and they don't confuse the clock subscribers as a result.
@@ -8167,13 +8169,13 @@ follows:
     #+begin_src emacs-lisp
   (let ((now (decode-time)))
     (setcar now 0)
-    (setcar (cdr now) 03)
+    (setcar (cdr now) 24)
     (setcar (cdr (cdr now)) 17)
     (format "Seconds since the Unix epoch: %d" (time-convert (encode-time now) 'integer)))
     #+end_src
 
     #+RESULTS:
-    : Seconds since the Unix epoch: 1745852580
+    : Seconds since the Unix epoch: 1745940240
 
     which I can paste into the ~onLinkState~ callback in the clock
     authority's ~setup()~ function and set the inital 1588 timer
@@ -8281,3 +8283,193 @@ There's a nice [[https://docs.redhat.com/en/documentation/red_hat_enterprise_lin
 site. Perhaps poring over that will yield further leads.
 
 Entered on [2025-04-28 lun. 13:50]
+**** SMC Paper Accepted                                          :WRITING:
+As usual I'm too nervous to read the feedback in detail, but it
+received a 3, a 2, and another 2, which is rather good. I feel quite
+relieved.
+
+The reviewers found a couple of typos! (And one cast shade on my
+title!) Camera-ready version due on June 2nd.
+
+***** Addendum
+My I3DA abstract was accepted too. By way of a reminder, the deadline
+is June 15th.
+
+Entered on [2025-04-28 lun. 18:58]
+
+*** 2025-04-29 mardi
+**** NTP was getting in the way                                      :PTP:
+=phc2sys= entries to the effect /clockcheck: clock jumped forward or
+running faster than expected!/ were because PTP and NTP were fighting
+over the system clock (nothing to do with numerical wraparound or
+anything like that). Per the TSN [[https://tsn.readthedocs.io/timesync.html#confirm-ntp-is-not-running][instructions]], it's necessary to make
+sure that NTP isn't running:
+
+#+begin_src shell :noeval
+timedatectl set-ntp false
+#+end_src
+
+/Probably/ worthwhile resetting that to ~true~ when not running PTP.
+
+Anyway, now =phc2sys= produces the following manner of output:
+
+#+begin_example
+phc2sys[202328.830]: reconfiguring after port state change
+phc2sys[202328.830]: selecting enp85s0u2u3u1 as domain source clock
+phc2sys[202328.830]: selecting CLOCK_REALTIME for synchronization
+phc2sys[202328.832]: CLOCK_REALTIME phc offset   1300515 s0 freq  -35188 delay 333124
+phc2sys[202329.834]: CLOCK_REALTIME phc offset   1368012 s1 freq  +32180 delay 363422
+phc2sys[202330.837]: CLOCK_REALTIME phc offset      7414 s2 freq  +39594 delay 438018
+phc2sys[202331.840]: CLOCK_REALTIME phc offset    -12433 s2 freq  +21971 delay 473469
+phc2sys[202332.843]: CLOCK_REALTIME phc offset    -58924 s2 freq  -28250 delay 409873
+phc2sys[202333.845]: CLOCK_REALTIME phc offset    -38587 s2 freq  -25590 delay 330397
+phc2sys[202334.847]: CLOCK_REALTIME phc offset     18334 s2 freq  +19755 delay 364852
+phc2sys[202335.849]: CLOCK_REALTIME phc offset     -7300 s2 freq    -379 delay 365280
+phc2sys[202336.851]: CLOCK_REALTIME phc offset      -556 s2 freq   +4175 delay 338046
+phc2sys[202337.854]: CLOCK_REALTIME phc offset     72679 s2 freq  +77243 delay 445849
+phc2sys[202338.857]: CLOCK_REALTIME phc offset     22188 s2 freq  +48556 delay 501844
+phc2sys[202339.860]: CLOCK_REALTIME phc offset    -10117 s2 freq  +22907 delay 529120
+phc2sys[202340.863]: CLOCK_REALTIME phc offset    -88281 s2 freq  -58292 delay 377027
+phc2sys[202341.865]: CLOCK_REALTIME phc offset    -25725 s2 freq  -22220 delay 360119
+...
+#+end_example
+
+but it doesn't appear to converge to anything closer than something on
+the order of \pm{}tens of microseconds. Perhaps because the system clock
+for my particular machine is really bad; perhaps only adjustable to
+microsecond resolution.
+
+Anyway, bloody hell, =ptp4l= takes a long time (minutes) to converge
+if I, say, restart the clock-authority Teensy with a new starting 1588
+timer value. Now, there's a chance that I simply haven't configured
+=ptp4l= properly to handle large jumps, but my sense is that the PTP
+standard (or =ptp4l= in particular) isn't designed for precisely this
+manner of time-based skulduggery, i.e. small adjustments fine, large
+ones not (/except/ on startup --- goes for both =ptp4l= and
+=phc2sys=); it runs with accurate time in mind, not with synchronous
+audio as a priority. So maybe I need to tack away from that approach.
+
+Anyway, the driver for the Delock interface (or perhaps for the Dell
+dock) isn't well-enough written to survive a sleep/wake cycle. Ffs.
+
+Entered on [2025-04-29 mar. 16:01]
+*** 2025-04-30 mercredi
+**** Teensy: USB audio device and PTP clock authority :NETWORKEDAUDIO:TEENSY:PTP:
+I figured I'd give it another go, at 44.1 kHz. For a while I was
+wondering /why the bloody hell is the clients' read position updating
+every second?/ and then I remembered that 128/44,100 into 1 isn't a nice
+number.
+
+#+begin_src emacs-lisp
+(let ((nsps 1e9)
+      (bufferFrames 128.0)
+      (samplingRate 44100.0))
+  (format "Nanoseconds per buffer: %f\nBuffers per second: %f"
+        (* nsps (/ bufferFrames samplingRate))
+        (/ samplingRate bufferFrames)))
+#+end_src
+
+#+RESULTS:
+: Nanoseconds per buffer: 2902494.331066
+: Buffers per second: 344.531250
+
+Unlike 128/48000, for which the result is at least /real/
+
+#+begin_src emacs-lisp
+(let ((nsps 1e9)
+      (bufferFrames 128.0)
+      (samplingRate 48000.0))
+  (format "Nanoseconds per buffer: %f\nBuffers per second: %f"
+        (* nsps (/ bufferFrames samplingRate))
+        (/ samplingRate bufferFrames)))
+#+end_src
+
+#+RESULTS:
+: Nanoseconds per buffer: 2666666.666667
+: Buffers per second: 375.000000
+
+and, at the default buffer size, we have a whole number of buffers per
+second, which is why starting up the audio subsystem /on the PTP timer
+interrupt/ works.
+
+Anyway, running at 44.1 kHz, with one Teensy as a USB audio device and
+PTP clock authority (for the other Teensies, the switch, and the
+computer, the latter via =ptp4l=), it's possible to achieve a sync if
+clients start up /at the same time/ i.e. on the same per-second PTP
+timer interrupt (probably after calling =reboot.sh=, which results in
+closely-aligned startup). After a long time running, a given client
+reports the following:
+
+#+begin_example
+IP: 192.168.48.171 | MAC: 04:E9:E5:14:30:AB | SN: 13231790
+Clock Subscriber - Frames/Fs: 128/44100 (44099.7149585422012024)
+PLL4 DIV: 28, NUM: 223817573, DENOM: 1000000000; SAI1 PRED: 3, PODF: 20
+Packets received: 1430256 Average reception interval: 2.902492e+06 ns
+Read index: 22, Write index: 6, Num packets available: 34
+Packet offset: -823109 ns, Sample offset: -36
+#+end_example
+
+That /Num packets available/ figure of 34 (occasionally 33) has been
+steady throughout the run, and the /Average reception interval/ is
+close to the /Nanoseconds per buffer/ figure above. This is in part
+thanks to calling
+
+#+begin_src c++
+setup.outputDeviceName = "Teensy Audio, USB Audio; Front output / input";
+#+end_src
+
+in the Ananas server's ~MainComponent~ constructor, i.e. using the
+Teensy as Ananas's output audio device (the success of which seems to
+hinge on /not/ using the Teensy as the output device for the system as
+a whole), and
+
+#+begin_src c++
+prevTime += 2902494; // 1e9 * 128/44100
+header.timestamp = prevTime;
+#+end_src
+
+in ~AnanasPacket::writeHeader()~, manually bumping the packet
+timestamp each time by the expected number of nanoseconds.
+
+In short (and subject to finding a way to ditch =ptp4l=) I think this
+approach could work, but of course we'll have to switch to 48 kHz. I
+made a start on creating some modified versions of Teensy's
+=usb_audio.h=, =usb_desc.h=, etc., but due to the way the Teensy
+toolchain is compiled, this isn't a goer. In =cores/teensy4/Makefile=
+we have
+
+#+begin_src makefile
+C_FILES := $(wildcard *.c)
+CPP_FILES := $(wildcard *.cpp)
+OBJS := $(C_FILES:.c=.o) $(CPP_FILES:.cpp=.o)
+#+end_src
+
+and in =usb.c=, stuff like this:
+
+#+begin_src c
+case 0x81A2: // GET_CUR (wValue=0, wIndex=interface, wLength=len)
+      if (setup.wLength >= 3) {
+              endpoint0_buffer[0] = 44100 & 255;
+              endpoint0_buffer[1] = 44100 >> 8;
+              endpoint0_buffer[2] = 0;
+              endpoint0_transmit(endpoint0_buffer, 3, 0);
+              return;
+      }
+      break;
+#+end_src
+
+Those hardcoded instances of ~44100~ look awfully suspect.
+
+I [[https://github.com/hatchjaw/teensy-cores][forked]] Paul Stoffregen's Teensy cores repository, and will
+endeavour to do one or more of the following:
+- hard-code it to support 48 kHz.
+- make it so that ~AUDIO_SAMPLE_RATE_EXACT~ is used instead.
+  + this would have ramifications for the Teensy audio library, which
+    is managed via a separate [[https://github.com/PaulStoffregen/Audio][repository]].
+- create a stripped-down version of the core libraries with Ananas in
+  mind.
+  - perhaps extending my HAL approach to the whole thing.
+  - that sounds like way too much work; I should just rewrite it in
+    Rust.
+
+Entered on [2025-04-30 mer. 17:03]
