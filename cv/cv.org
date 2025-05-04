@@ -260,7 +260,7 @@ Music/Drama Technician, Parrs Wood High School, Manchester, UK,
 T. A. Rushton, R. Michon, T. Risset, 2025, All Together Now: A
 Synchronous Platform for Distributed Spatial Audio, /Proceedings of
 the 22^{nd} Sound and Music Computing Conference/ (accepted; to be
-published June 2025).
+published July 2025).
 
 T. A. Rushton, 2024, [[https://hal.science/hal-04846518/document#page=17][Differentiable DSP In Faust]], /Proceedings of the
 International Faust Conference (IFC-24)/.
