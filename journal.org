@@ -8468,8 +8468,108 @@ endeavour to do one or more of the following:
     is managed via a separate [[https://github.com/PaulStoffregen/Audio][repository]].
 - create a stripped-down version of the core libraries with Ananas in
   mind.
-  - perhaps extending my HAL approach to the whole thing.
-  - that sounds like way too much work; I should just rewrite it in
+  + perhaps extending my HAL approach to the whole thing.
+  + that sounds like way too much work; I should just rewrite it in
     Rust.
 
 Entered on [2025-04-30 mer. 17:03]
+** 2025-05 mai
+*** 2025-05-04 dimanche
+**** 48 kHz USB Audio with the Teensy              :NETWORKEDAUDIO:TEENSY:
+(Following up on my previously-stated aims) I took the following
+approach instead:
+
+- Copy the bare essentials from
+  =~/.platformio/packages/framework-arduinoteensy= to
+  =audiosync/framework-arduinoteensy=; specifically, =cores/teensy4=,
+  =package.json= (and other metadata), and a selection of libraries
+  (Audio, Wire, SerialFlash, etc.).
+- Add the following to =platformio.ini=
+  #+begin_example toml
+[env]
+...
+platform_packages = framework-arduinoteensy @ symlink://./framework-arduinoteensy
+...
+  #+end_example
+- Replace hard-coded references to 44100, etc. with
+  ~AUDIO_SAMPLE_RATE_EXACT~.
+
+I also changed the ~PRODUCT_NAME~ (and ~PRODUCT_NAME_LEN~) macro in
+=usb_desc.h= to 'Teensy Ananas'.
+
+My computer could see the available USB audio device, and (using the
+only helpful command line utility I could find) I was able to confirm
+that Teensy reported its sampling rate capability as 48 kHz.
+
+#+begin_src shell :results output :exports both
+pactl list short sinks
+#+end_src
+
+#+RESULTS:
+: 57	alsa_output.pci-0000_00_1f.3.analog-stereo	PipeWire	s32le 2ch 48000Hz	SUSPENDED
+: 785	alsa_output.usb-Generic_USB_Audio_200901010001-00.HiFi__Line__sink	PipeWire	s24le 2ch 48000Hz	SUSPENDED
+: 786	alsa_output.usb-Generic_USB_Audio_200901010001-00.HiFi__Headphones__sink	PipeWire	s24le 2ch 48000Hz	RUNNING
+: 823	alsa_output.usb-Teensyduino_Teensy_Ananas_13231990-01.analog-stereo	PipeWire	s16le 2ch 48000Hz	SUSPENDED
+
+For posterity, that's
+#+begin_example
+: 823	alsa_output.usb-Teensyduino_Teensy_Ananas_13231990-01.analog-stereo	PipeWire	s16le 2ch 48000Hz	SUSPENDED
+#+end_example
+
+***** Slow transmission
+Audio output at Teensy's side was... slow, and discontinuous,
+however. And a PTP client reported an average packet reception
+interval of 2,850,000 ns. There are some troubling magic numbers in
+=usb_audio.cpp=, but in the end what sorted out that problem was
+bumping ~AUDIO_TX_SIZE~ and ~AUDIO_RX_SIZE~ in =usb_desc.h= from 180
+to 200 (as a guess). That 180 appears to suggest that Teensy operates
+as a low-speed device, sending (non-micro)frames on a per-millisecond
+basis:
+
+#+begin_src emacs-lisp
+(let* ((fs 44100)
+       (framesInOneMs (/ fs 1000))
+       (numChannels 2)
+       (bytesPerSample 2)
+       (bytesPerUSBFrame (* bytesPerSample numChannels framesInOneMs)))
+  (format "Bytes per USB frame: %f" bytesPerUSBFrame))
+#+end_src
+
+#+RESULTS:
+: Bytes per USB frame: 176.000000
+
+And the equivalent for 48 kHz?
+
+#+begin_src emacs-lisp
+(* 2 2 48)
+#+end_src
+
+#+RESULTS:
+: 192
+
+So 200 bytes (which is an upper bound; a given frame may not
+necessarily be full) was a decent guess. I think I'll leave the
+headroom as it is.
+
+***** USB/PTP drift
+I was seeing a steady drift in the "Packet offset" (and "Sample
+offset") reported by the client. It emerged that this was actually due
+to my taking a shortcut in bumping the outgoing header timestamp. The
+packet interval at 128 frames is \(2,666,666.\dot{6}\) ns, and I
+wasn't taking account of those two-thirds of a nanosecond after the
+decimal point. Much better now.
+
+***** Still drifting somehow?
+I witnessed some troubling decreases in the clients' "Num packets
+available" values, e.g. a run starting with 37 packets available and
+this decreasing to nothing, i.e. the buffer underrunning, suggesting
+slow transmission from the computer to the USB-Audio Teensy. I decided
+that this might be related to the magic numbers in =usb_audio.cpp=;
+indeed, decreasing the ~target~ values toward the top of
+~usb_audio_transmit_callback()~ and increasing the
+~feedback_accumulator~ bump in ~update()~, introduced when the "PC
+[is] sending too slow", from 3500 to 3800 (approximately proportional
+to the sampling rate increase). Anecdotally, those changes appear to
+have had a positive impact.
+
+Entered on [2025-05-04 dim. 14:30]
