@@ -155,6 +155,130 @@ Close ~custom-set-faces~.
 )
 #+end_src
 
+* Org Mode
+
+#+begin_src emacs-lisp
+(use-package org
+  :ensure nil
+  :config
+#+end_src
+
+** Structure templates
+
+*** Shell
+
+#+begin_src emacs-lisp
+(add-to-list 'org-structure-template-alist
+             '("b" . "src shell :results output :exports both"))
+(add-to-list 'org-structure-template-alist
+             '("B" . "src shell :noeval"))
+#+end_src
+
+*** R
+
+Feels like I'm very unlikely to use these...
+
+#+begin_src emacs-lisp
+(add-to-list 'org-structure-template-alist
+             '("r" . "src R :results output :session *R* :exports both"))
+(add-to-list 'org-structure-template-alist
+             '("R" . "src R :results output graphics :file (org-babel-temp-file \"figure\" \".png\") :exports both :width 600 :height 400 :session *R*"))
+(add-to-list 'org-structure-template-alist
+             '("RR" . "src R :results output graphics :file  (org-babel-temp-file (concat (file-name-directory (or load-file-name buffer-file-name)) \"figure-\") \".png\") :exports both :width 600 :height 400 :session *R*"))
+#+end_src
+
+*** Python
+
+#+begin_src emacs-lisp
+(add-to-list 'org-structure-template-alist
+             '("p" . "src python :results output :exports both"))
+(add-to-list 'org-structure-template-alist
+             '("P" . "src python :results output :session :exports both"))
+(add-to-list 'org-structure-template-alist
+             '("PP" . "src python :results file :session :var matplot_lib_filename=(org-babel-temp-file \"figure\" \".png\") :exports both
+import matplotlib.pyplot as plt
+
+import numpy
+x=numpy.linspace(-15,15)
+plt.figure(figsize=(10,5))
+plt.plot(x,numpy.cos(x)/x)
+plt.tight_layout()
+
+plt.savefig(matplot_lib_filename)
+matplot_lib_filename"))
+#+end_src
+
+*** Emacs Lisp
+
+#+begin_src emacs-lisp
+(add-to-list 'org-structure-template-alist
+             '("m" . "src emacs-lisp"))
+#+end_src
+
+*** Graphviz
+
+Do I really need this one? [[https://graphviz.org/gallery/][Graphviz]] is ghastly.
+
+#+begin_src emacs-lisp
+(add-to-list 'org-structure-template-alist
+             '("g" . "src dot :results output graphics :file \"/tmp/graph.pdf\" :exports both
+digraph G  {
+node [color=black,fillcolor=white,shape=rectangle,style=filled,fontname=\"Helvetica\"];
+A[label=\"A\"]
+B[label=\"B\"]
+A->B
+}"))
+#+end_src
+
+*** Faust
+
+#+begin_src emacs-lisp
+(add-to-list 'org-structure-template-alist
+	     '("f" . "src faust"))
+(add-to-list 'org-structure-template-alist
+	     '("fh" . "src faust :results html :exports both :tab svg :sizes 0,100"))
+(add-to-list 'org-structure-template-alist
+	     '("fs" . "src faust :results file svg :file process.svg :exports both"))
+#+end_src
+
+I really need to do something at some point (in =ob-faust=) about that
+whole ~file svg~ situation.
+
+*** Julia
+
+#+begin_src emacs-lisp
+(add-to-list 'org-structure-template-alist
+	     '("j" . "src julia"))
+(add-to-list 'org-structure-template-alist
+	     '("J" . "src julia :session :results output"))
+(add-to-list 'org-structure-template-alist
+	     '("JJ" . "src julia :session :results file graphics :file plot.png :output-dir figs"))
+#+end_src
+
+*** typst
+
+#+begin_src emacs-lisp
+(add-to-list 'org-structure-template-alist '("t" . "export typst"))
+#+end_src
+
+** Conclude
+
+Close ~use-package org~
+
+#+begin_src emacs-lisp
+)
+#+end_src
+
+** Export
+
+*** Typst
+
+#+begin_src emacs-lisp
+(use-package ox-typst
+  :ensure t
+  :after org)
+#+end_src
+
 * TODO Use ~setopt~ for ~defcustom~ variables
 
 ...so any assigned callbacks are invoked ([[https://emacsredux.com/blog/2025/04/06/goodbye-setq-hello-setopt/][source]]).
