@@ -122,8 +122,6 @@ any questions, I remain at your disposal.
 #+print_bibliography: :heading none
 #+latex: \end{letter}
 
-* Local variables                                                  :noexport:
-
 * Footnotes
 
 [fn:9] https://ccrma.stanford.edu/chauvet/

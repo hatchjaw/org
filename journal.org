@@ -8573,3 +8573,38 @@ to the sampling rate increase). Anecdotally, those changes appear to
 have had a positive impact.
 
 Entered on [2025-05-04 dim. 14:30]
+
+*** 2025-05-06 mardi
+**** CSI Progress Report                                 :WRITING:ORGMODE:
+I'm working on the documentation (due May 13th) for my upcoming CSI
+(May 27th, 8 a.m.). Interesting as it is to see how far I've come with
+Org Mode (I hadn't finished the /Reproducible Research/ MOOC this time
+last year), for LaTeX export, I'm troubled by the restrictions
+stipulated by the =classicthesis/arsclassica= template (based on
+=scrarctl=), specifically regarding typefaces --- the sans serif font
+it uses for headings is ghastly. More generally, I'm troubled by the
+fact that I've yet to devote the time to developing a consistent style
+across my CV, reports, and presentations (though incorporating the
+font [[https://fonts.adobe.com/fonts/minion][Minion]] into the latter could help).
+
+This being so, I flirted momentarily with [[https://typst.app/][typst]], installing the
+relevant [[https://github.com/jmpunkt/ox-typst][Org Mode exporter]]. Immediate impressions: /gosh, it compiles
+quickly, and looks nice/; later: /Why doesn't my PdF have a title? Oh,
+the Org title only winds up as metadata by default?/. I don't know why
+I imagined otherwise, but, just like LaTeX, one needs to go
+[[https://typst.app/universe][template-hunting]]. A point in favour of typst: works with .bib
+files. Against: not possible to have your .bib file(s) outside of the
+project root; possible to change the root at the command line
+(e.g. =--root ../..=); =ox-typst= sets =--root= (which can't be
+specified more than once), and doesn't expose a way to override it;
+only sensible workaround I can think of is
+~org-cite-global-bibliography: nil~ (in Local Variables),
+~#+bibliography: my.bib~, and a symlink to the out-of-dir bib
+file. Another point against: typst uses its own maths syntax; Org Mode
+is rather LaTeX-centric when it comes to maths; there are a couple of
+[[https://github.com/jmpunkt/ox-typst?tab=readme-ov-file#math][options]] when it comes to adapting to this situation.
+
+***** Resources
+- [[https://badnoise.net/TypeRip/][TypeRip]], for downloading Adobe fonts (in .ttf format).
+
+Entered on [2025-05-06 mar. 14:32]

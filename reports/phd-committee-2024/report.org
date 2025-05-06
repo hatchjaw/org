@@ -224,8 +224,8 @@ throughout the summer.
 - [[https://sites.google.com/site/rsdwinterschool/home][GDR RSD / ASF Winter School on Distributed Systems & Networks]],
   5-9 February 2024, Le Pleynet.
 
-- [[https://www.fun-mooc.fr/en/courses/reproducible-research-methodological-principles-transparent-scie/][Reproducible research: methodological principles for transparent
-  science]], MOOC.
+- [[https://www.fun-mooc.fr/en/courses/reproducible-research-methodological-principles-transparent-scie/][Reproducible
+  research: methodological principles for transparent science]], MOOC.
 
 ** Reviews
 
