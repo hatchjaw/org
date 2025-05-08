@@ -1,0 +1,334 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+
+#+title: Enabling Distributed Spatial Audio
+#+subtitle: Individual Follow-up Committee: Year 2
+#+author: Thomas Rushton
+#+date: May 2025
+
+#+options: toc:nil num:1
+#+bibliography: references.bib
+
+# LaTeX
+#+export_file_name: out/report-latex
+#+cite_export: biblatex
+#+latex_class: report
+#+latex_header: \RequirePackage[]{report-style}
+#+latex_compiler: xelatex
+
+# Typst
+# #+export_file_name: out/report-typst
+# #+cite_export: typst ieee
+
+#+begin_src shell :results none :exports none
+ln -s ../../../references.bib out/references.bib
+#+end_src
+
+#+begin_export typst
+#import "@preview/ilm:1.4.1": *
+
+#set text(lang: "en", font: "Minion Pro", number-type: "old-style")
+
+#context [
+  #show: ilm.with(
+    title: text(hyphenate: false)[#document.title],
+    author: document.author.first(),
+    date: datetime(year: 2025, month: 05, day: 01),
+    date-format: "[month repr:long] [year repr:full]",
+    abstract: "Individual Follow-up Committee: Year 2",
+    table-of-contents: none,
+    external-link-circle: false,
+  )
+]
+
+#show link: set text(fill: rgb("#880000"))
+
+#set par(justify: true)
+#+end_export
+
+* Latex Setup                                                      :noexport:
+:PROPERTIES:
+:HEADER-ARGS: :tangle out/report-style.sty :results silent
+:END:
+
+** Basics
+
+#+begin_src latex
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{report-style}[2025/05/04 v0.1 Bundling Report LaTeX style]
+#+end_src
+
+** Packages
+
+Hm. Looks like these packages come from the example [[https://www.latextemplates.com/template/arsclassica-article][here]].
+
+#+begin_src latex
+\RequirePackage{subfig}
+\RequirePackage[
+  subfig,
+  beramono,
+  eulermath,
+  pdfspacing
+]{classicthesis}
+\RequirePackage{arsclassica}
+\RequirePackage{hyperref}
+\RequirePackage{fontspec}
+\RequirePackage{enumitem} % Required for manipulating the whitespace between and within lists
+\RequirePackage{subfig} % Required for creating figures with multiple parts (subfigures)
+\RequirePackage{amsmath,amssymb,amsthm} % For including math equations, theorems, symbols, etc
+\RequirePackage{varioref} % More descriptive referencing
+#+end_src
+
+** Typography
+
+Reduce the default font size by half a point.
+
+#+begin_src latex
+\KOMAoptions{fontsize=10.5pt}
+#+end_src
+
+Reduce the size of the date.
+
+#+begin_src latex
+\setkomafont{date}{\normalsize}
+#+end_src
+
+Use Minion for both main and "sans" fonts.
+
+#+begin_src latex
+\setmainfont[Mapping={tex-text}, 
+  Numbers={OldStyle},
+  Ligatures={Common},
+  %% Extension=.otf,
+  %% UprightFont=*-Regular,
+  %% ItalicFont= *-It,
+  %% BoldFont= *-Bold,
+  %% BoldItalicFont = *-BoldIt
+]{MinionPro-Regular}
+
+\setsansfont[Mapping=tex-text,
+  Ligatures={Common},
+  Numbers={OldStyle},
+  %% Extension=.otf,
+  %% UprightFont=MyriadPro-Regular,
+  %% ItalicFont=MyriadPro-CondIt,
+  %% BoldFont=MyriadPro-Semibold,
+  %% BoldItalicFont=MyriadPro-SemiboldIt,
+]{MinionPro-Regular}
+#+end_src
+
+Scale Iosevka to more-or-less match Minion.
+
+#+begin_src latex
+\setmonofont[Mapping=tex-text,Scale=0.9]{Iosevka Comfy Motion}
+#+end_src
+
+** Bibliography
+
+#+begin_src latex
+\PassOptionsToPackage{%
+  %backend=biber,bibencoding=utf8, %instead of bibtex
+%   backend=bibtex8,bibencoding=ascii,%
+  language=auto,
+  style=numeric-comp,
+  %style=authoryear-comp, % Author 1999, 2010
+  %bibstyle=authoryear,dashed=false, % dashed: substitute rep. author with ---
+  % sorting=nyt, % name, year, title
+  sorting=none,
+  maxbibnames=10, % default: 3, et al.
+  natbib=true, % natbib compatibility mode (\citep and \citet still work)
+  url=false,
+  doi=false,
+  isbn=false
+}{biblatex}
+#+end_src
+
+* Work Undertaken
+
+In preparation for last year's individual follow-up committee, I
+expressed the intention to continue work with the Raspberry Pi
+hardware platform, to explore a software-based Precision Time Protocol
+(PTP, IEEE 1588) implementation, and to return to the design of
+distributed spatial audio algorithms. Perhaps unsurprisingly, the
+first two of these intentions fell victim to changes of circumstance
+and understanding of the problem space, and the third has lain
+unexplored.
+
+Shortly after last years committee, I had two key meetings. The first,
+with [[https://christofressi.com/][Christof Ressi]], maintainer of [[https://github.com/essej/aoo][Audio Over OSC]] (AOO),[fn:1]
+provided some ideas regarding the structure and operation of my
+system's networked audio server. It is a pity that, beyond a
+decade-old paper on /message based audio/\nbsp[cite:@ritschMessage2014],
+no significant literature has emerged from the AOO project.
+
+The second meeting was with [[https://www.femto-st.fr/fr/personnel-femto/jeanmichelfriedt][Jean-Michel Friedt]], researcher at the
+FEMTO-ST laboratory in Besançon and an expert in time-sensitive
+computing. He discouraged my supervisors and I from pursuing another
+of our potential lines of investigation --- that of sharing a clock
+signal over a physical link in parallel with the network link --- and
+shared an article that he had written on the topic of synchronising
+Raspberry Pi Compute Modules via PTP\nbsp[cite:@friedtNetwork2023]. It
+emerged, however, that Jean-Michel's approach entailed making physical
+modifications to the devices, which I deemed a barrier to
+accessibility.
+
+** Development of a Sample-Synchronous, Distributed Audio Platform
+
+Jean-Michel spoke positively of the idea of pursuing a PTP-based
+approach, specifically one taking advantage of hardware possessing
+support for physical-layer timestamping. I investigated the
+capabilities of the Raspberry Pi (Compute Module 5) and Teensy 4.1 in
+terms of scope for adjusting the speed of their respective audio
+clocks, with a view to using some characteristic of such a clock (a
+periodic hardware interrupt, for example) as a stand-in for PTP. At
+this point in time, I was of the understanding that PTP-compliant
+hardware was prohibitively expensive, and that Teensy (or rather its
+NXP IMXRT1062 microcontroller) did not provide PTP support.
+
+I posted on the Teensy forum in July, yielding one response pointing
+me toward a project called /[[https://github.com/ddrown/teensy-ntp][teensy-ntp]]/, which (though dealing
+primarily with the lower-resolution /Network Time Protocol/), revealed
+that the IMXRT1060 series features an IEEE 1588 hardware timer. The
+functionality of this timer is unused in the core Teensy codebase, and
+examples provided by NXP use FreeRTOS (as opposed to the bare-metal,
+Arduino-like Teensy libraries). I had the exceedingly good fortune,
+while searching for an NXP application note on using the chip's PTP
+timer, to find a paper, published just months prior, demonstrating a
+bare-metal implementation [cite:@schleusnerSubMicrosecond2024]. I
+adapted thi s
+
+*** Journal Article Published
+
+Meanwhile, I was readying an article based on my master's thesis (and
+the basis for my current work on distributed/networked audio) for
+publication in the journal /Frontiers in Virtual Reality/. A
+successful outcome was reached in November 2024
+[cite:@rushtonNetworked2024].
+
+** Differentiable DSP in Faust
+
+* Outlook & Prospects
+
+** Practical Applications of the Proposed System
+
+*** Virtual Acoustics/Auralisation
+
+*** Automatic Parallelisation of DSP Algorithms
+
+*** Preparation for Perceptual Study
+
+** Paper/Article Submission Targets
+
+Subject to minor revisions, I will be presenting a paper, entitled
+/All Together Now: A Synchronous Platform for Distributed Spatial
+Audio/ at the 22^{nd} Sound and Music Computing Conference ([[https://smc25.iem.at/][SMC]], July
+10th-12th, Graz, Austria).
+
+I await a verdict on a submission to the 2025 AES International
+Conference on Artificial Intelligence and Machine Learning for Audio
+([[https://aes2.org/event-extra/2025-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio/][AES AIMLA]], September 8th-10th, London, UK), entitled /Faust Autodiff:
+Towards Audio Domain-Specific Machine Learning/.
+
+Upcoming submission opportunities include:
+
+- EURASIP Journal on Audio, Speech and Music Processing, collection on
+  [[https://www.springeropen.com/collections/spios][Signal Processing for the Internet of Sounds]] --- deadline *June
+  11^{th} 2025*.
+- International Conference on Immersive and 3D Audio ([[https://www.i3da2025.org/][I3DA]]) ---
+  abstract accepted under the title /Virtual Acoustics in a
+  Distributed Setting: A Feasibility Study/; full paper deadline *June
+  15^{th} 2025*.
+- Internet of Sounds Symposium ([[https://internetofsounds2025.ieee-is2.org/][IS^{2}]]) --- deadline *July 1^{st}
+  2025*.
+  + Also features a satellite workshop on /Networked Immersive Audio/.
+  + I have also been encouraged (by a member of the organising
+    committee) to propose a tutorial on DDSP in Faust.
+    
+* Other Activities
+
+** Google Summer of Code (GSoC)
+
+Faust received four contributor slots in 2024, and I co-mentored all
+four projects, including one concerned with building on my initial
+work on Faust DDSP. This level of involvement was greater than I ought
+to have committed to; I intend to take a less active role in
+GSoC 2025.
+
+** CCRMA Visit
+
+Romain Michon and I visited the Center for Computer Research in Music
+and Acoustics ([[https://ccrma.stanford.edu/][CCRMA]]) at Stanford University at the end of
+October 2024. For CCRMA's [[https://ccrma.stanford.edu/events/faust-day-2024][Faust Day 2024]], I had the honour of
+delivering an introductory Faust workshop and, as part of Romain's
+broader Faust presentation, I gave an overview of the DDSP project.
+
+I also had the opportunity to demonstrate my synchronous, distributed
+audio system to interested parties at CCRMA, stakeholders in the
+now-concluded [[https://team.inria.fr/emeraude/plasma/][PLASMA Associate Research Team]] (and its successor,
+MIRAGES). I have since maintained correspondence with Prof. Fernando
+Lopez-Lezcano, who has a particular interest in networked and
+time-sensitive audio applications.
+
+*** Visiting Student Researcher application
+
+In early March of this year, I submitted an application for a Visiting
+Student Researcher position at CCRMA for the three months April-June
+2026; department Chair, Prof. Chris Chafe, has agreed to act as
+sponsor. A positive outcome hinges on financial support; a funding
+application to the [[https://francestanford.stanford.edu/][France-Stanford Institute for Interdisciplinary
+Studies]] is currently under consideration and I expect to receive a
+response at some point over the coming month.
+
+** Training
+
+I have undertaken sixty-eight hours of doctoral training to-date,
+including the following, completed since last year's committee
+meeting:
+
+- [[https://www.fun-mooc.fr/en/courses/reproducible-research-methodological-principles-transparent-scie/][Reproducible
+  research: methodological principles for transparent science]], MOOC
+  (24 hours).
+  
+- French as a Foreign Language, June-November 2024 (20
+  hours). Courtesy of Inria, I received lessons with an instructor
+  from the agency /Wissen International/.
+
+This year's SMC summer school, /[[https://smc25.iem.at/summer-school/][The auditory gardener: creating
+Ambisonic landscapes]]/, appears to be of significant relevance to my
+work; I hope to have the opportunity to attend.
+  
+** Reviews
+
+I served as a reviewer for this year's [[https://nime2025.org/][New Interfaces for Music
+Expression]] and SMC conferences, and the journal [[https://link.springer.com/journal/779][Personal and
+Ubiquitous Computing]] (Springer).
+
+** Teaching
+
+I completed 20 hours teaching assistance for /Traitement de Signal
+pour le Son / Audio Signal Processing/, a 3TC course at INSA.
+
+#+print_bibliography:
+
+
+* Footnotes
+
+[fn:1] AOO adopts a peer-to-peer model, and is thus not ideal for use
+in a distributed context. It is a mature project, however, and serves
+as the audio server for the [[https://sonobus.net/][SonoBus]] streaming system.
+
+* Emacs Setup                                                      :noexport:
+
+# Local Variables:
+# org-latex-classes: (("report" "\\documentclass[
+# a4paper,oneside,headinclude,footinclude,BCOR=5mm,
+# numbers=noenddot,cleardoublepage=empty,tablecaptionabove
+# ]{scrartcl}
+# [NO-DEFAULT-PACKAGES]"
+# ("\\section{%s}" . "\\section*{%s}")
+# ("\\subsection{%s}" . "\\subsection*{%s}")
+# ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+# ("\\paragraph{%s}" . "\\paragraph*{%s}")
+# ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+# org-cite-global-bibliography: nil
+# End:
