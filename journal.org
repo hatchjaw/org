@@ -2162,6 +2162,7 @@ challenges, etc.
 - Does the RPi 5 support PTP like the CM4? Only [[https://www.canuckaudiomart.com/forum/viewtopic.php?t=66865][anecdotal suggestions]]
   that this is the case;
 - How much does a 32-port PTP switch cost? Less than a grand?
+  + [[https://github.com/jclark/rpi-cm4-ptp-guide/blob/main/switches.md][Yes, some come in less expensive than that]].
 - Tanguy suggests developing something with hardware PTP support if
   it's provided, with software as a fallback.
 

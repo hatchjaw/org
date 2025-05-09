@@ -6,7 +6,7 @@
 #+author: Thomas Rushton
 #+date: May 2025
 
-#+options: toc:nil num:1
+#+options: toc:nil num:2
 #+bibliography: references.bib
 
 # LaTeX
@@ -77,6 +77,7 @@ Hm. Looks like these packages come from the example [[https://www.latextemplates
 \RequirePackage{subfig} % Required for creating figures with multiple parts (subfigures)
 \RequirePackage{amsmath,amssymb,amsthm} % For including math equations, theorems, symbols, etc
 \RequirePackage{varioref} % More descriptive referencing
+\RequirePackage{cleveref}
 #+end_src
 
 ** Typography
@@ -84,7 +85,7 @@ Hm. Looks like these packages come from the example [[https://www.latextemplates
 Reduce the default font size by half a point.
 
 #+begin_src latex
-\KOMAoptions{fontsize=10.5pt}
+\KOMAoptions{fontsize=10pt}
 #+end_src
 
 Reduce the size of the date.
@@ -139,14 +140,19 @@ Scale Iosevka to more-or-less match Minion.
   natbib=true, % natbib compatibility mode (\citep and \citet still work)
   url=false,
   doi=false,
-  isbn=false
+  isbn=false,
+  giveninits=true,
 }{biblatex}
+#+end_src
+
+#+begin_src latex :tangle out/biblatex.cfg
+\AtEveryBibitem{\clearfield{eventtitle}}
 #+end_src
 
 * Work Undertaken
 
 In preparation for last year's individual follow-up committee, I
-expressed the intention to continue work with the Raspberry Pi
+expressed the intention to continue work with the Raspberry Pi (RPi)
 hardware platform, to explore a software-based Precision Time Protocol
 (PTP, IEEE 1588) implementation, and to return to the design of
 distributed spatial audio algorithms. Perhaps unsurprisingly, the
@@ -176,48 +182,116 @@ accessibility.
 
 Jean-Michel spoke positively of the idea of pursuing a PTP-based
 approach, specifically one taking advantage of hardware possessing
-support for physical-layer timestamping. I investigated the
-capabilities of the Raspberry Pi (Compute Module 5) and Teensy 4.1 in
-terms of scope for adjusting the speed of their respective audio
-clocks, with a view to using some characteristic of such a clock (a
-periodic hardware interrupt, for example) as a stand-in for PTP. At
-this point in time, I was of the understanding that PTP-compliant
-hardware was prohibitively expensive, and that Teensy (or rather its
-NXP IMXRT1062 microcontroller) did not provide PTP support.
+support for physical-layer timestamping. At this point in time, I was
+of the understanding that PTP-compliant hardware was prohibitively
+expensive, that Teensy (or rather its NXP IMXRT1062 microcontroller
+(MCU)) did not provide PTP support, and that the Teensy and RPi audio
+clocks, though adjustable at runtime, were of resolution too coarse
+for accurate frequency exchange.
 
-I posted on the Teensy forum in July, yielding one response pointing
-me toward a project called /[[https://github.com/ddrown/teensy-ntp][teensy-ntp]]/, which (though dealing
-primarily with the lower-resolution /Network Time Protocol/), revealed
-that the IMXRT1060 series features an IEEE 1588 hardware timer. The
-functionality of this timer is unused in the core Teensy codebase, and
-examples provided by NXP use FreeRTOS (as opposed to the bare-metal,
-Arduino-like Teensy libraries). I had the exceedingly good fortune,
-while searching for an NXP application note on using the chip's PTP
-timer, to find a paper, published just months prior, demonstrating a
-bare-metal implementation [cite:@schleusnerSubMicrosecond2024]. I
-adapted thi s
+Seeking ideas, I posted on the Teensy forum, yielding a response
+pointing me toward a project called /[[https://github.com/ddrown/teensy-ntp][teensy-ntp]]/, which (though
+dealing primarily with the lower-resolution /Network Time Protocol/)
+revealed that the IMXRT1060 series features a configurable IEEE 1588
+hardware timer. The functionality of this timer is unused in the core
+Teensy codebase, and examples provided by NXP use FreeRTOS (as opposed
+to the bare-metal, Arduino-like Teensy libraries). I had the
+exceedingly good fortune, while searching for an NXP application note
+on using the MCU's PTP timer, to find a paper, published just months
+prior, demonstrating a bare-metal implementation
+[cite:@schleusnerSubMicrosecond2024].
+
+Adapting this implementation to condition the timing of the audio
+subsystem took some time; reverse-engineering the existing Teensy
+audio subsystem code, and comparing with the MCU reference manual, I
+established a means to take PTP timer adjustments and apply these to
+the device's I^{2}S clock. Crucially, I discovered that, unlike the RPi,
+whose Broadcom system-on-chip provides 12-bit GPIO clock divider
+registers (resolution of around 1/14 Hz at a sampling frequency of 48
+kHz), the Teensy's MCU features a dedicated audio clock with 30-bit
+resolution (1/600,000 Hz). I determined appropriate conditions for
+synchronous, distributed audio startup, and reduced relative clock
+drift by three orders of magnitude, to within 2 parts per billion
+(\sim1.7 nanoseconds-per-second).
+
+Initially, devices were connected directly, limiting the network to
+two nodes --- one /clock authority/ and one /clock subscriber/. Via a
+[[https://github.com/jclark/rpi-cm4-ptp-guide/blob/main/switches.md][guide to PTP]] for the RPi CM4 I found a €199, 24-port ethernet switch,
+and discussions with Nils Tonnat and Fernando Lopez-Lezcano at the
+Centre for Computer Research in Music and Acoustics (CCRMA) at
+Stanford University led me toward a €30 USB ethernet adapter with PTP
+support. With these devices in hand, I was able to use a general
+purpose computer as both an audio server and as an authoritative
+source of PTP time --- the irony being that the computer's audio
+system timing remained /unconditioned/, the computer drifting relative
+to itself, essentially. Doing away with the ethernet adapter, I now
+run one MCU as a USB audio device[fn:2] --- dictating audio timing on
+the general purpose computer --- /and/ as the PTP clock authority ---
+dictating audio timing to other MCUs on the network.
 
 *** Journal Article Published
 
-Meanwhile, I was readying an article based on my master's thesis (and
-the basis for my current work on distributed/networked audio) for
-publication in the journal /Frontiers in Virtual Reality/. A
-successful outcome was reached in November 2024
-[cite:@rushtonNetworked2024].
+In parallel with the above, I was readying an article based on my
+master's thesis (and the basis for my current work) for publication in
+the journal /Frontiers in Virtual Reality/. A successful outcome was
+reached in November 2024 [cite:@rushtonNetworked2024].
 
 ** Differentiable DSP in Faust
 
+An initiative upon which I began work as a contributor to Faust's
+involvement in the 2023 edition of Google Summer of Code, provision
+for the means to write differentiable code in Faust, has proven to be
+a fruitful, if time-consuming side-project. Having the aim of
+providing support for tackling gradient-based optimisation problems,
+including those under the broad banner of machine learning, it has
+been the basis for one conference publication
+[cite:@rushtonDifferentiable2024] and one further paper that is
+currently under review (see cref:sec:papers).
+
 * Outlook & Prospects
 
-** Practical Applications of the Proposed System
+To date, the vast majority of my work has been on the synchronous,
+distributed audio aspect of the technical side of my thesis topic. I
+am now at the stage where we have a potentially useful, accessible
+platform for practical applications and evaluation.
 
-*** Virtual Acoustics/Auralisation
+** Spatial Audio & Virtual Acoustics
 
-*** Automatic Parallelisation of DSP Algorithms
+The distributed Wave Field Synthesis implementation, developed as part
+of the internship that preceded work on my master's thesis, remains
+the only spatial audio application of my work; preparing it for use
+with the new system will require some adaptation.
 
-*** Preparation for Perceptual Study
+I have been talking about attempting a distributed ambisonics
+algorithm for over two years now. The extent to which such an
+algorithm can in fact be parallelised remains unknown to me, as does
+the Teensy platform's capacity for acting as a real-time ambisonics
+decoder.
+
+Perhaps the ultimate goal from a technical standpoint is to introduce
+virtual acoustics techniques as a complement to the spatial audio
+component. This will entail establishing the capabilities of the
+memory-constrained MCU platform for performing real-time
+impulse-response convolutions. Memory on the Teensy can be extended by
+up to 16 MB, enough to store a couple of minutes' worth of 16-bit IRs;
+whether this additional memory is performant enough to support
+audio-rate processing remains to be seen.
+
+** Automatic Parallelisation of DSP Algorithms
+
+** Preparation for Perceptual Study
+
+** Mitigation for Remaining Clock Drift
+
+As alluded to above, some ppb. clock drift remains. Technical
+evaluation has revealed (for one quartet of Teensy devices) roughly 1
+\micro{}s relative drift over ten minutes, or one sample (\sim20 \micro{}s) in around
+three hours. That drift is a 
 
 ** Paper/Article Submission Targets
+:PROPERTIES:
+:CUSTOM_ID: sec:papers
+:END:
 
 Subject to minor revisions, I will be presenting a paper, entitled
 /All Together Now: A Synchronous Platform for Distributed Spatial
@@ -239,10 +313,9 @@ Upcoming submission opportunities include:
   Distributed Setting: A Feasibility Study/; full paper deadline *June
   15^{th} 2025*.
 - Internet of Sounds Symposium ([[https://internetofsounds2025.ieee-is2.org/][IS^{2}]]) --- deadline *July 1^{st}
-  2025*.
-  + Also features a satellite workshop on /Networked Immersive Audio/.
-  + I have also been encouraged (by a member of the organising
-    committee) to propose a tutorial on DDSP in Faust.
+  2025*. This event also features a satellite workshop on /Networked
+  Immersive Audio/, and I have been encouraged (by a member of the
+  organising committee) to propose a tutorial on Faust DDSP.
     
 * Other Activities
 
@@ -299,19 +372,24 @@ work; I hope to have the opportunity to attend.
   
 ** Reviews
 
-I served as a reviewer for this year's [[https://nime2025.org/][New Interfaces for Music
-Expression]] and SMC conferences, and the journal [[https://link.springer.com/journal/779][Personal and
+I served as a reviewer for this year's New Interfaces for Music
+Expression ([[https://nime2025.org/][NIME]]) and SMC conferences, and the journal [[https://link.springer.com/journal/779][Personal and
 Ubiquitous Computing]] (Springer).
 
 ** Teaching
 
-I completed 20 hours teaching assistance for /Traitement de Signal
-pour le Son / Audio Signal Processing/, a 3TC course at INSA.
+I completed 20 hours' teaching assistance for /Traitement de Signal
+pour le Son / Audio Signal Processing/, a 3TC (undergraduate, final
+year) course at INSA.
 
 #+print_bibliography:
 
 
 * Footnotes
+[fn:2] This entailed modifying Teensy's USB driver to permit running
+at 48 kHz, a much more convenient frequency for time-sensitive audio
+than Teensy's default 44.1 kHz, since power-of-two audio block sizes
+of 128 and below, are divisors of 48,000.
 
 [fn:1] AOO adopts a peer-to-peer model, and is thus not ideal for use
 in a distributed context. It is a mature project, however, and serves
