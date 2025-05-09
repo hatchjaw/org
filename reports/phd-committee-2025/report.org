@@ -146,86 +146,86 @@ Scale Iosevka to more-or-less match Minion.
 #+end_src
 
 #+begin_src latex :tangle out/biblatex.cfg
-\AtEveryBibitem{\clearfield{eventtitle}}
+\AtEveryBibitem{
+  \clearfield{eventtitle}
+  %% \clearfield{pages}
+}
 #+end_src
 
 * Work Undertaken
 
 In preparation for last year's individual follow-up committee, I
 expressed the intention to continue work with the Raspberry Pi (RPi)
-hardware platform, to explore a software-based Precision Time Protocol
-(PTP, IEEE 1588) implementation, and to return to the design of
-distributed spatial audio algorithms. Perhaps unsurprisingly, the
-first two of these intentions fell victim to changes of circumstance
-and understanding of the problem space, and the third has lain
-unexplored.
+hardware platform in preference to the Teensy 4.1 (T41), to explore a
+software-based Precision Time Protocol (PTP, IEEE 1588)
+implementation, and to return to the design of distributed spatial
+audio algorithms. Perhaps unsurprisingly, the first two of these
+intentions fell victim to changes of circumstance and understanding of
+the problem space, and the third has lain unexplored.
 
-Shortly after last years committee, I had two key meetings. The first,
-with [[https://christofressi.com/][Christof Ressi]], maintainer of [[https://github.com/essej/aoo][Audio Over OSC]] (AOO),[fn:1]
+Shortly after last year's committee, I had two key meetings. The
+first, with [[https://christofressi.com/][Christof Ressi]], maintainer of [[https://github.com/essej/aoo][Audio Over OSC]] (AOO),
 provided some ideas regarding the structure and operation of my
 system's networked audio server. It is a pity that, beyond a
 decade-old paper on /message based audio/\nbsp[cite:@ritschMessage2014],
-no significant literature has emerged from the AOO project.
-
-The second meeting was with [[https://www.femto-st.fr/fr/personnel-femto/jeanmichelfriedt][Jean-Michel Friedt]], researcher at the
-FEMTO-ST laboratory in Besançon and an expert in time-sensitive
-computing. He discouraged my supervisors and I from pursuing another
-of our potential lines of investigation --- that of sharing a clock
-signal over a physical link in parallel with the network link --- and
-shared an article that he had written on the topic of synchronising
-Raspberry Pi Compute Modules via PTP\nbsp[cite:@friedtNetwork2023]. It
-emerged, however, that Jean-Michel's approach entailed making physical
+no significant literature has emerged from the AOO project. The second
+meeting was with [[https://www.femto-st.fr/fr/personnel-femto/jeanmichelfriedt][Jean-Michel Friedt]], researcher at the FEMTO-ST
+laboratory in Besançon and an expert in time-sensitive computing. He
+discouraged my supervisors and I from pursuing another of our
+potential lines of investigation --- that of sharing a clock signal
+over a physical link in parallel with the network link --- and shared
+an article that he had written on the topic of synchronising RPi
+Compute Modules via PTP\nbsp[cite:@friedtNetwork2023]. It emerged,
+however, that Jean-Michel's approach entailed making physical
 modifications to the devices, which I deemed a barrier to
 accessibility.
 
 ** Development of a Sample-Synchronous, Distributed Audio Platform
 
-Jean-Michel spoke positively of the idea of pursuing a PTP-based
-approach, specifically one taking advantage of hardware possessing
-support for physical-layer timestamping. At this point in time, I was
-of the understanding that PTP-compliant hardware was prohibitively
-expensive, that Teensy (or rather its NXP IMXRT1062 microcontroller
-(MCU)) did not provide PTP support, and that the Teensy and RPi audio
-clocks, though adjustable at runtime, were of resolution too coarse
-for accurate frequency exchange.
+Following the meeting with Jean-Michel, I was of the understanding
+that PTP-compliant hardware was prohibitively expensive, that the T41
+--- or rather its NXP IMXRT1062 microcontroller (MCU) --- did not
+provide PTP support, and that the T41 and RPi audio clocks, though
+adjustable at runtime, were of resolution too coarse for accurate
+sampling frequency exchange.
 
 Seeking ideas, I posted on the Teensy forum, yielding a response
 pointing me toward a project called /[[https://github.com/ddrown/teensy-ntp][teensy-ntp]]/, which (though
 dealing primarily with the lower-resolution /Network Time Protocol/)
 revealed that the IMXRT1060 series features a configurable IEEE 1588
 hardware timer. The functionality of this timer is unused in the core
-Teensy codebase, and examples provided by NXP use FreeRTOS (as opposed
-to the bare-metal, Arduino-like Teensy libraries). I had the
-exceedingly good fortune, while searching for an NXP application note
-on using the MCU's PTP timer, to find a paper, published just months
-prior, demonstrating a bare-metal implementation
-[cite:@schleusnerSubMicrosecond2024].
+T41 codebase, and examples provided by NXP use FreeRTOS (as opposed to
+the bare-metal, Arduino-like Teensy libraries). I had the exceedingly
+good fortune, while searching for an NXP application note on using the
+MCU's PTP timer, to discover a conference paper, published just months
+prior, demonstrating a bare-metal
+implementation\nbsp[cite:@schleusnerSubMicrosecond2024].
 
-Adapting this implementation to condition the timing of the audio
-subsystem took some time; reverse-engineering the existing Teensy
-audio subsystem code, and comparing with the MCU reference manual, I
-established a means to take PTP timer adjustments and apply these to
-the device's I^{2}S clock. Crucially, I discovered that, unlike the RPi,
-whose Broadcom system-on-chip provides 12-bit GPIO clock divider
-registers (resolution of around 1/14 Hz at a sampling frequency of 48
-kHz), the Teensy's MCU features a dedicated audio clock with 30-bit
-resolution (1/600,000 Hz). I determined appropriate conditions for
-synchronous, distributed audio startup, and reduced relative clock
-drift by three orders of magnitude, to within 2 parts per billion
-(\sim1.7 nanoseconds-per-second).
+Adapting this implementation to condition audio timing, I
+reverse-engineered the existing T41 audio subsystem code and,
+comparing with the MCU reference manual, I established a means to take
+PTP timer adjustments and apply these to the device's I^{2}S
+clock. Crucially, I discovered that, unlike the RPi, whose Broadcom
+system-on-chip provides 12-bit GPIO clock divider registers
+(resolution of around 1/14 Hz at a sampling frequency of 48 kHz), the
+T41's MCU features a dedicated audio clock with 30-bit resolution
+(1/600,000 Hz). I determined appropriate conditions for synchronous,
+distributed audio startup, and reduced relative clock drift by three
+orders of magnitude, to within 2 parts per billion (\sim1.7
+nanoseconds-per-second).
 
 Initially, devices were connected directly, limiting the network to
 two nodes --- one /clock authority/ and one /clock subscriber/. Via a
-[[https://github.com/jclark/rpi-cm4-ptp-guide/blob/main/switches.md][guide to PTP]] for the RPi CM4 I found a €199, 24-port ethernet switch,
-and discussions with Nils Tonnat and Fernando Lopez-Lezcano at the
-Centre for Computer Research in Music and Acoustics (CCRMA) at
+[[https://github.com/jclark/rpi-cm4-ptp-guide/blob/main/switches.md][guide to PTP]] for the RPi CM4 I found a suitable €199, 24-port ethernet
+switch, and discussions with Nils Tonnat and Fernando Lopez-Lezcano at
+the Centre for Computer Research in Music and Acoustics (CCRMA) at
 Stanford University led me toward a €30 USB ethernet adapter with PTP
 support. With these devices in hand, I was able to use a general
 purpose computer as both an audio server and as an authoritative
 source of PTP time --- the irony being that the computer's audio
 system timing remained /unconditioned/, the computer drifting relative
 to itself, essentially. Doing away with the ethernet adapter, I now
-run one MCU as a USB audio device[fn:2] --- dictating audio timing on
+run one MCU as a USB audio device[fn:1] --- dictating audio timing on
 the general purpose computer --- /and/ as the PTP clock authority ---
 dictating audio timing to other MCUs on the network.
 
@@ -244,9 +244,9 @@ for the means to write differentiable code in Faust, has proven to be
 a fruitful, if time-consuming side-project. Having the aim of
 providing support for tackling gradient-based optimisation problems,
 including those under the broad banner of machine learning, it has
-been the basis for one conference publication
-[cite:@rushtonDifferentiable2024] and one further paper that is
-currently under review (see cref:sec:papers).
+been the basis for one conference
+publication\nbsp[cite:@rushtonDifferentiable2024] and one further paper
+that is currently under review (see cref:sec:papers).
 
 * Outlook & Prospects
 
@@ -257,36 +257,52 @@ platform for practical applications and evaluation.
 
 ** Spatial Audio & Virtual Acoustics
 
-The distributed Wave Field Synthesis implementation, developed as part
+A distributed Wave Field Synthesis implementation, developed as part
 of the internship that preceded work on my master's thesis, remains
-the only spatial audio application of my work; preparing it for use
-with the new system will require some adaptation.
-
-I have been talking about attempting a distributed ambisonics
-algorithm for over two years now. The extent to which such an
-algorithm can in fact be parallelised remains unknown to me, as does
-the Teensy platform's capacity for acting as a real-time ambisonics
-decoder.
+the only spatial audio application of my work. It has been my wish for
+over two years now to attempt a distributed ambisonics algorithm; the
+extent to which such an algorithm can in fact be parallelised remains
+unknown to me, as does the T41 platform's capacity for acting as a
+real-time ambisonics decoder. On the subject of parallelisation, the
+development of an /autoparallelisation/ option for the Faust compiler
+would be more elegant than the manual approach taken for the WFS
+implementation, and may have applications to other signal processing
+algorithms.
 
 Perhaps the ultimate goal from a technical standpoint is to introduce
 virtual acoustics techniques as a complement to the spatial audio
 component. This will entail establishing the capabilities of the
 memory-constrained MCU platform for performing real-time
-impulse-response convolutions. Memory on the Teensy can be extended by
+impulse-response convolutions. Memory on the T41 can be extended by
 up to 16 MB, enough to store a couple of minutes' worth of 16-bit IRs;
 whether this additional memory is performant enough to support
 audio-rate processing remains to be seen.
 
-** Automatic Parallelisation of DSP Algorithms
-
-** Preparation for Perceptual Study
-
 ** Mitigation for Remaining Clock Drift
 
 As alluded to above, some ppb. clock drift remains. Technical
-evaluation has revealed (for one quartet of Teensy devices) roughly 1
-\micro{}s relative drift over ten minutes, or one sample (\sim20 \micro{}s) in around
-three hours. That drift is a 
+evaluation has revealed (for one quartet of T41 devices) a maximum
+asynchronicity of around 1 \micro{}s after ten minutes; assuming linear
+drift, that suggests one sample (\sim20 \micro{}s) in around three hours. That
+order of drift is a vast improvement over the unconditioned case, but
+it remains troublesome and its cause and a suitable remediation must
+be sought.
+
+** Evaluation
+
+The technical nature of my work to-date places limits on its scholarly
+value. To address this shortcoming, I am conscious of the need to
+devise an appropriate scheme for perceptual or usability
+evaluation. The aim should not be to evaluate the effectiveness of a
+given spatial audio or auralisation algorithm primarily, but rather to
+establish whether such an algorithm running on the proposed
+distributed system compares favourably with something operating on its
+centralised counterpart. This could be in terms of perceived sound
+field integrity, or, given the likely complexity of the system when
+deployed on a large scale, ease of use. I am attracted to the
+accessibility aspect of the project, so finding a suitable way to
+gauge this formally is something to which I intend to pay further
+attention.
 
 ** Paper/Article Submission Targets
 :PROPERTIES:
@@ -321,26 +337,22 @@ Upcoming submission opportunities include:
 
 ** Google Summer of Code (GSoC)
 
-Faust received four contributor slots in 2024, and I co-mentored all
-four projects, including one concerned with building on my initial
-work on Faust DDSP. This level of involvement was greater than I ought
-to have committed to; I intend to take a less active role in
-GSoC 2025.
+I co-mentored all four of Faust's 2024 GSoC projects, including one
+concerned with building on my initial work on Faust DDSP. This level
+of involvement was greater than I ought to have committed to; I intend
+to take a less active role this year.
 
 ** CCRMA Visit
 
-Romain Michon and I visited the Center for Computer Research in Music
-and Acoustics ([[https://ccrma.stanford.edu/][CCRMA]]) at Stanford University at the end of
-October 2024. For CCRMA's [[https://ccrma.stanford.edu/events/faust-day-2024][Faust Day 2024]], I had the honour of
-delivering an introductory Faust workshop and, as part of Romain's
-broader Faust presentation, I gave an overview of the DDSP project.
-
-I also had the opportunity to demonstrate my synchronous, distributed
-audio system to interested parties at CCRMA, stakeholders in the
-now-concluded [[https://team.inria.fr/emeraude/plasma/][PLASMA Associate Research Team]] (and its successor,
-MIRAGES). I have since maintained correspondence with Prof. Fernando
-Lopez-Lezcano, who has a particular interest in networked and
-time-sensitive audio applications.
+Romain Michon and I visited CCRMA the end of October 2024. For CCRMA's
+[[https://ccrma.stanford.edu/events/faust-day-2024][Faust Day 2024]], I had the honour of delivering an introductory Faust
+workshop and, as part of Romain's broader Faust presentation, I gave
+an overview of the DDSP project. I also had the opportunity to
+demonstrate my synchronous, distributed audio system to interested
+parties at CCRMA, stakeholders in the MIRAGES associate research
+team. I have since maintained correspondence with Prof. Lopez-Lezcano,
+who has a particular interest in networked and time-sensitive audio
+applications.
 
 *** Visiting Student Researcher application
 
@@ -386,14 +398,11 @@ year) course at INSA.
 
 
 * Footnotes
-[fn:2] This entailed modifying Teensy's USB driver to permit running
-at 48 kHz, a much more convenient frequency for time-sensitive audio
-than Teensy's default 44.1 kHz, since power-of-two audio block sizes
-of 128 and below, are divisors of 48,000.
 
-[fn:1] AOO adopts a peer-to-peer model, and is thus not ideal for use
-in a distributed context. It is a mature project, however, and serves
-as the audio server for the [[https://sonobus.net/][SonoBus]] streaming system.
+[fn:1] This entailed modifying T41's USB driver to permit running at
+48 kHz, a much more convenient frequency for time-sensitive audio than
+T41's default 44.1 kHz, since power-of-two audio block sizes of 128
+and below, are divisors of 48,000.
 
 * Emacs Setup                                                      :noexport:
 
