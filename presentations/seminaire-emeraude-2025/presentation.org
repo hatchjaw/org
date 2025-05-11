@@ -1,0 +1,710 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+
+#+TITLE: Faust Autodiff
+#+AUTHOR: Thomas Rushton
+
+# Change to num:nil when done editing
+#+options: num:t toc:nil
+#+options: reveal_width:1500 reveal_height:1000
+#+export_file_name: index
+#+property: header-args:css :results none :exports none :tangle ./emeraude2025.css
+#+property: header-args:js :results none :exports none :tangle ./emeraude2025.js
+#+reveal_root: ../reveal.js
+#+reveal_theme: white_contrast_compact_verbatim_headers
+#+reveal_trans: slide
+# So org-re-reveal doesn't load MathJax automatically
+#+reveal_mathjax_url:
+#+reveal_min_scale: 1.0
+#+reveal_max_scale: 1.0
+#+reveal_extra_options: hash: true, fragmentInURL: true
+#+reveal_title_slide: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
+#+reveal_extra_scripts: ("./emeraude2025.js")
+#+reveal_extra_css: emeraude2025.css
+
+* About This Presentation                                          :noexport:
+
+This =org= file describes my presentation for the 2025 Emeraude
+Séminaire in Peyrusse.
+
+** Dependencies
+
+- =org-re-reveal= ([[https://gitlab.com/oer/org-re-reveal/-/tree/main][gitlab]]), which enables export support from Org to [[https://revealjs.com/][Reveal.js]].
+- =ob-faust= ([[https://github.com/hatchjaw/ob-faust][github]]), which adds (basic) support for Faust to Org Babel.
+- Emacs =faust-mode=, modified slightly to fix syntax highlighting in
+  source blocks.
+  + One of these days I should submit a PR.
+
+** Running the Presentation
+
+Tangle, then, from the reveal.js directory (=../reveal.js=), run:
+
+#+begin_src shell :noeval :exports code
+npm start -- --root=../
+#+end_src
+
+Then navigate to [[http://localhost:8000/seminaire-emeraude-2025/]].
+
+* CSS                                                              :noexport:
+
+Make a symlink to =~/org/fonts=.
+
+#+begin_src emacs-lisp :results none :export none :eval yes
+(dired-make-relative-symlink "../../fonts" "fonts" t)
+#+end_src
+
+Define some fonts. Useful info [[https://www.digitalocean.com/community/tutorials/how-to-load-and-use-custom-fonts-with-css#loading-a-self-hosted-font-with-font-face][here]].
+
+#+begin_src css
+@font-face {
+    font-family: "MyMinion";
+    src:
+        local("MinionPro-Regular"),
+        url("fonts/minionpro/MinionPro-Regular.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-It.otf") format("opentype");
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-Semibold.otf") format("opentype");
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-Bold.otf") format("opentype");
+    font-weight: 800;
+    font-style: normal;
+}
+#+end_src
+
+Now override some of reveal's variables to use those fonts.
+
+#+begin_src css
+:root {
+    --r-main-font: "MyMinion";
+    --r-main-font-size: 42px;
+    --r-heading-font: "MyMinion";
+    --r-code-font: "Iosevka Comfy Motion";
+    --r-heading-text-transform: none;
+}
+#+end_src
+
+Decorate my h2's.
+
+#+begin_src css
+.stack h2, .stack h3 {
+    text-decoration: underline 3px #bbb;
+}
+#+end_src
+
+Use old style numbers.
+
+#+begin_src css
+body {
+    font-variant-numeric: oldstyle-nums;
+}
+#+end_src
+
+A handy class or two.
+
+#+begin_src css
+.caption {
+    font-size: .6em;
+}
+#+end_src
+
+Big equations
+
+#+begin_src css
+.big-eqn {
+    font-size: 1.5em;
+}
+#+end_src
+
+Some old stuff that I might not need.
+
+#+begin_src css :tangle no
+.org-src-container > pre {
+    padding: 1em;
+    width: 66.6%;
+}
+
+.title-page > h2 {
+    color: #ededed;
+}
+
+.faust-editor-wrap {
+    font-size: 2rem;
+}
+#+end_src
+
+* JS                                                               :noexport:
+
+So I can use \(\lBrack\) and \(\rBrack\), I need
+[[https://www.npmjs.com/package/@amermathsoc/mathjax-unicode-math][mathjax-unicode-math]]. This doesn't appear to work with the current
+stable version of MathJax (3.2.2), so I'm using the 4.0.0 beta (see
+[[./package.json]]).
+
+#+begin_src js
+MathJax = {
+    loader: {
+        load: ["[unicodeMath]/unicode-math.js"],
+        paths: {unicodeMath: "./node_modules/@amermathsoc/mathjax-unicode-math/browser"}
+    },
+    tex: {
+        packages: {"[+]": ["unicode-math"]}
+    },
+    startup: {
+        ready: async () => {
+            MathJax.startup.defaultReady();
+            await MathJax.startup.promise;
+            console.log('MathJax initial typesetting complete');
+            window.setTimeout(async () => {
+                console.log("Typesetting dynamic content");
+                await xSquared();
+            }, 100);
+        }
+    }
+};
+
+(() => {
+    const script = document.createElement("script");
+    script.src = "./node_modules/mathjax/tex-svg.js";
+    script.async = true;
+    document.head.appendChild(script);
+})();
+#+end_src
+
+#+RESULTS:
+
+* Agenda
+
+#+ATTR_REVEAL: :frag (appear)
+- Differentiation
+- Automatic differentiation in Faust
+- Differentiable compositions
+- Higher-order derivatives
+- Reverse mode autodiff?
+
+** Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_quote
+"Backpropagation and gradient-based optimization are behind virtually
+all recent successes in machine learning..." --- Baydin\nbsp{}et\nbsp{}al.
+#+end_quote
+
+#+attr_html: :class caption
+Automatic Differentiation in Machine Learning: a Survey (2018)
+
+** Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_quote
+"Backpropagation and gradient-based optimization are behind virtually
+all recent successes in machine learning..." --- Baydin\nbsp{}et\nbsp{}al.
+#+end_quote
+
+#+attr_html: :class caption
+Automatic Differentiation in Machine Learning: a Survey (2018)
+
+#+begin_quote
+"Before the autodiff revolution, researchers and practitioners needed
+to manually implement the gradient of the functions they wished to
+optimize." --- Blondel & Roulet
+#+end_quote
+
+#+attr_html: :class caption
+The Elements of Differentiable Programming (2024)
+
+** Motivation 
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_quote
+"[Differentiable DSP has been] applied to... instrument modelling,
+synthesiser sound matching, speech synthesis and voice
+transformation... audio effect modelling, automatic mixing and
+intelligent music production, and filter design." --- Hayes et al.
+#+end_quote
+
+#+attr_html: :class caption
+A review of differentiable digital signal processing for music and
+speech synthesis (2024)
+
+** Origins
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate data-auto-animate-restart
+:END:
+
+#+ATTR_REVEAL: :frag t
+Google Summer of Code, summer 2023.
+#+ATTR_REVEAL: :frag t
+Faust compiler; signal stage.
+#+ATTR_REVEAL: :frag t
+Results: underwhelming.
+
+** Origins
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+Resumed, early 2024.
+#+ATTR_REVEAL: :frag t
+Faust language; pattern matching.
+#+ATTR_REVEAL: :frag t
+Results: more interesting.
+
+** Developments
+
+GSoC again, 2024.
+#+ATTR_REVEAL: :frag t
+Presented at IFC.
+#+ATTR_REVEAL: :frag t
+AES paper under review.
+
+* Differentiation
+
+#+attr_html: :class big-eqn
+\begin{equation}
+f'(x) = \lim_{h\to0}\frac{f(x + h) - f(x)}{h}
+\end{equation}
+
+#+REVEAL: split
+
+#+begin_export html
+<div id="xSquaredContainer">
+  <div>
+    <div>
+      <canvas id="xSquaredCanvas"></canvas>
+      <canvas id="secantCanvas"></canvas>
+    </div>
+    <div>
+      <label for="xSquared-xValue">\(x\)</label>
+      <input type="range" id="xSquared-x" min=-2 max=2 value=0 step=.001 />
+      <span id="xSquared-xValue" class="sliderValue"></span>
+    </div>
+    <div>
+      <label for="xSquared-hValue">\(h\)</label>
+      <input type="range" id="xSquared-h" min=.01 max=2 value=2 step=.001 />
+      <span id="xSquared-hValue" class="sliderValue"></span>
+    </div>
+  </div>
+  <div id="xSquaredMath">
+    <p style="padding-bottom: 2em;">\(f(x) = x^{2}\)</p>
+    <div id="xSquaredDynamicMath">
+    </div>
+  </div>
+</div>
+#+end_export
+
+#+REVEAL: split data-auto-animate data-auto-animate-unmatched=false
+
+#+attr_html: :class big-eqn
+\begin{equation}
+f'(x) = \lim_{h\to0}\frac{f(x + h) - f(x)}{h}
+\end{equation}
+
+#+REVEAL: split data-auto-animate data-auto-animate-unmatched=false
+
+#+attr_html: :class big-eqn
+\begin{equation}
+f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
+\end{equation}
+
+** CSS & JS for this section                                       :noexport:
+
+#+begin_src css
+#xSquaredContainer {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+#xSquaredContainer > div:nth-child(2) {
+    width: 45%;
+}
+
+#xSquaredCanvas {
+    position: absolute;
+}
+
+#xSquaredDynamicMath {
+    position: absolute;
+    left: 55%;
+}
+
+.sliderValue {
+    display: inline-block;
+    width: 2.5em;
+    text-align: right;
+}    
+#+end_src
+
+Constants
+
+#+begin_src js
+const SVG = {};
+
+const CANVAS = {
+    WIDTH: 900,
+    HEIGHT: 600,
+    PADDING: 25
+};
+
+const AXES = {
+    WIDTH: 600,
+    X: {
+        ZERO: 300,
+        INDICATOR: {
+            WIDTH: 3,
+            HEIGHT: 10
+        }
+    },
+    Y: {
+        ZERO: CANVAS.HEIGHT - CANVAS.PADDING - 50,
+    }
+};
+
+const X = {
+    MIN: -2,
+    MAX: 2,
+    LEN: 1000
+};
+
+X.STEP = (X.MAX-X.MIN)/X.LEN;
+#+end_src
+
+A vector for the independent variable \(x\):
+
+#+begin_src js
+const xVec = Array.from({length: X.LEN + 1}, (_,x) => X.MIN + x * X.STEP);
+#+end_src
+
+#+begin_src js
+const xSquared = async () => {
+    const f = x => x * x;
+    const yVec = xVec.map(x => ({x: x, y: f(x)}));
+    const yMax = Math.max(...yVec.map(y => y.y));
+
+    //await MathJax.startup.promise;
+    const xml = new XMLSerializer();
+    const tex2imageSrc = tex => "data:image/svg+xml;base64, " +
+          window.btoa(unescape(encodeURIComponent(
+              xml.serializeToString(MathJax.tex2svg(tex).firstElementChild)
+          )));
+#+end_src
+
+Define the axes and the static plot of \(f(x)\):
+
+#+begin_src js
+    const staticLayer = {
+        canvas: document.getElementById("xSquaredCanvas"),
+
+        visualiser: ctx => ({
+            drawAxis: {
+                x: () => {
+                    ctx.beginPath();
+                    ctx.moveTo(CANVAS.PADDING, AXES.Y.ZERO);
+                    ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING, AXES.Y.ZERO);
+                    ctx.stroke();
+                    // Arrow
+                    ctx.beginPath();
+                    ctx.moveTo(CANVAS.WIDTH - CANVAS.PADDING, AXES.Y.ZERO);
+                    ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING - 10, AXES.Y.ZERO - 5);
+                    ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING - 10, AXES.Y.ZERO + 5);
+                    ctx.closePath();
+                    ctx.fill();
+                },
+                y: () => {
+                    ctx.beginPath();
+                    ctx.moveTo(AXES.X.ZERO, CANVAS.PADDING);
+                    ctx.lineTo(AXES.X.ZERO, CANVAS.HEIGHT - CANVAS.PADDING);
+                    ctx.stroke();
+                    // Arrow
+                    ctx.beginPath();
+                    ctx.moveTo(AXES.X.ZERO, CANVAS.PADDING);
+                    ctx.lineTo(AXES.X.ZERO - 5, CANVAS.PADDING + 10);
+                    ctx.lineTo(AXES.X.ZERO + 5, CANVAS.PADDING + 10);
+                    ctx.closePath();
+                    ctx.fill();
+                    // Label
+                    ctx.drawImage(SVG.FX, AXES.X.ZERO - 60, CANVAS.PADDING,
+                                 SVG.FX.naturalWidth * 1.5,
+                                 SVG.FX.naturalHeight * 1.5);
+                }
+            },
+
+            drawFunction: () => {
+                ctx.beginPath();
+                ctx.moveTo(
+                    CANVAS.PADDING + (yVec[0].x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - yVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                );
+                yVec.forEach(p => ctx.lineTo(
+                    CANVAS.PADDING + (p.x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                ));
+                ctx.strokeStyle = "blue";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            },
+        }),
+
+        async init() {
+            if (this.canvas.getContext) {
+                this.canvas.setAttribute("width", CANVAS.WIDTH);
+                this.canvas.setAttribute("height", CANVAS.HEIGHT);
+
+                let img = new Image();
+                img.src = tex2imageSrc("f(x)");
+                await img.decode();
+                SVG.FX = img;
+
+                const v = this.visualiser(this.canvas.getContext("2d"));
+                v.drawAxis.x();
+                v.drawAxis.y();
+                v.drawFunction();
+            }
+        }
+    };
+#+end_src
+
+Define the dynamic part of the plot --- the secant and axis
+indicators. Slope \(m\) found as \(m = \frac{f(x + h) - f(x)}{h}\);
+secant line found as \(m(x - x_{1}) + y_{1}\).
+
+#+begin_src js
+    const dynamicLayer = {
+        canvas: document.getElementById("secantCanvas"),
+        xSlider: {
+            element: document.getElementById("xSquared-x"),
+            valSpan: document.getElementById("xSquared-xValue")
+        },
+        hSlider: {
+            element: document.getElementById("xSquared-h"),
+            valSpan: document.getElementById("xSquared-hValue"),
+            prevValue: 0
+        },
+        math: document.getElementById("xSquaredDynamicMath"),
+
+        visualiser: ctx => ({
+            drawIndicators: (x, h) => {
+                const drawXIndicator = (x, y) => ctx.fillRect(
+                    CANVAS.PADDING - (AXES.X.INDICATOR.WIDTH / 2) + (x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    y - AXES.X.INDICATOR.HEIGHT / 2,
+                    AXES.X.INDICATOR.WIDTH,
+                    AXES.X.INDICATOR.HEIGHT
+                );
+
+                const drawFxIndicator = (x, y) => {
+                    const indicatorWidth = 6;
+                    ctx.beginPath();
+                    ctx.arc(
+                        CANVAS.PADDING + (x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                        CANVAS.PADDING + (yMax - y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax,
+                        indicatorWidth,
+                        0, 2 * Math.PI
+                    );
+                    ctx.fill();
+                };
+
+                const drawSVG = (img, x, y, scale) => {
+                    const w = img.naturalWidth * scale;
+                    const h = img.naturalHeight * scale;
+                    const xPos = CANVAS.PADDING - w / 2 +
+                          (x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN);
+                    const yPos = CANVAS.PADDING + (yMax - y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax;
+                    ctx.drawImage(img, xPos, yPos, w, h);
+                };
+
+                drawXIndicator(x, AXES.Y.ZERO);
+                drawXIndicator(x + h, AXES.Y.ZERO);
+
+                drawFxIndicator(x, f(x));
+                drawFxIndicator(x + h, f(x + h));
+
+                drawSVG(SVG.X, x, -.08, 1.5);
+                drawSVG(SVG.XPLUSH, x + h, -.2, 1.5);
+            },
+
+            drawSecant: (x, h) => {
+                const slope = (f(x + h) - f(x)) / h;
+                const ySecVec = xVec.map(xVal => ({x: xVal, y: slope * (xVal - x) + f(x)}));
+                ctx.beginPath();
+                ctx.moveTo(
+                    CANVAS.PADDING + (ySecVec[0].x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - ySecVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                );
+                ySecVec.forEach(p => ctx.lineTo(
+                    CANVAS.PADDING + (p.x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                ));
+                ctx.strokeStyle = "green";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            },
+
+            clear: () => ctx.clearRect(0, 0, CANVAS.WIDTH, CANVAS.HEIGHT),
+            
+            draw(x, h) {
+                this.drawIndicators(x, h);
+                this.drawSecant(x, h);
+            },
+            
+            redraw(x, h) {
+                this.clear();
+                this.draw(x, h)
+            }
+        }),
+
+        async init() {
+            if (this.canvas.getContext) {
+                this.canvas.setAttribute("width", CANVAS.WIDTH);
+                this.canvas.setAttribute("height", CANVAS.HEIGHT);
+                
+                let img = new Image();
+                img.src = tex2imageSrc("x");
+                await img.decode();
+                SVG.X = img;
+                
+                img = new Image();
+                img.src = tex2imageSrc("x + h");
+                await img.decode();
+                SVG.XPLUSH = img;
+
+                const x = Number(this.xSlider.element.value);
+                const h = Number(this.hSlider.element.value);                
+                const v = this.visualiser(this.canvas.getContext("2d"));
+                v.draw(x, h);
+
+                const updateMath = async () => {
+                    const x = Number(this.xSlider.element.value);
+                    const h = Number(this.hSlider.element.value);
+                    const xx = f(x);
+                    const xhxh = f(x + h);
+                    const fprimex = (xhxh - xx) / h;
+                    const mx = fprimex / x;
+
+                    MathJax.typesetClear([this.math, this.xSlider.valSpan, this.hSlider.valSpan]);
+                    this.math.innerHTML = `$$
+    \\begin{align}
+        f'(x) &\\approx \\frac{f(x + h) - f(x)}{h} \\\\[10pt]
+          &\\approx \\frac{${xhxh.toFixed(2)} - ${xx.toFixed(2)}}{${h}} = ${fprimex.toFixed(2)} \\\\[10pt]
+          &\\approx ${isFinite(mx) ? mx.toFixed(2) + "x" : "\\infty{}"}
+    \\end{align}
+    $$`;
+                    this.xSlider.valSpan.innerHTML = `\\(${x.toFixed(2)}\\)`;
+                    this.hSlider.valSpan.innerHTML = `\\(${h.toFixed(2)}\\)`;
+                    await MathJax.typesetPromise([this.math, this.xSlider.valSpan, this.hSlider.valSpan]);
+                };
+
+                updateMath();
+
+                this.xSlider.element && this.xSlider.valSpan &&
+                    this.xSlider.element.addEventListener("input", async ({target: {value: val}}) => {
+                        v.redraw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
+                        await updateMath();
+                    });
+
+                this.hSlider.element && this.hSlider.valSpan &&
+                    this.hSlider.element.addEventListener("input", async ({target: {value: val}}) => {
+                        // Avoid division by zero!
+                        if (val == 0) {
+                            val = this.hSlider.prevValue > val ? -.01 : .01;
+                            this.hSlider.element.value = val;
+                        }
+                        this.hSlider.prevValue = val;
+                        v.redraw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
+                        await updateMath();
+                    });
+            }
+        }
+    };
+#+end_src
+
+Initialise the layers:
+
+#+begin_src js
+    await staticLayer.init();
+    await dynamicLayer.init();
+};
+#+end_src
+
+* Yo
+
+This =org= *file* /describes/ my presentation for the 2024 International
+Faust Conference.
+
+\(\lBrack + \rBrack\)
+
+\(\unicode{x27e6} + \unicode{x27e7}\)
+
+* ?
+:PROPERTIES:
+:reveal_extra_attr: data-transition="fade"
+:END:
+
+hi
+#+NAME: eq:
+\begin{equation}
+y = f(x) + g(x)
+\end{equation}
+
+** oestnuhsa
+:PROPERTIES:
+:reveal_extra_attr: data-transition="fade"
+:END:
+
+test
+
+#+REVEAL: split data-transition="fade"
+
+hello
+
+* !
+:PROPERTIES:
+:reveal_extra_attr: data-transition="fade"
+:END:
+
+another test
+
+* snhteaousnthueonth
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate data-auto-animate-id="one"
+:END:
+
+- one
+- three
+
+* snhteaousnthueonth
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate data-auto-animate-id="one"
+:END:
+
+- one
+- two
+- three
+
+* Emacs Setup                                                      :noexport:
+
+# Local Variables:
+# org-re-reveal-pdfseparatefragments: nil
+# End:

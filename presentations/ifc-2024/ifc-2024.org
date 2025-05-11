@@ -1218,5 +1218,5 @@ Add a hook to run =npm= before export:
 # (interactive)
 # (message "building js...")
 # (shell-command-to-string "npm run build")))
-# eval: (setq org-re-reveal-pdfseparatefragments nil)
+# org-re-reveal-pdfseparatefragments: nil
 # End:
