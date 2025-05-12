@@ -197,6 +197,7 @@ MathJax = {
             window.setTimeout(async () => {
                 console.log("Typesetting dynamic content.");
                 await xSquared();
+                numericalExample();
             }, 100);
         }
     }
@@ -256,7 +257,7 @@ optimize." --- Blondel & Roulet
 #+attr_html: :class caption
 The Elements of Differentiable Programming (2024)
 
-** Motivation 
+** Motivation
 :PROPERTIES:
 :reveal_extra_attr: data-auto-animate
 :END:
@@ -271,6 +272,32 @@ intelligent music production, and filter design." --- Hayes et al.
 #+attr_html: :class caption
 A review of differentiable digital signal processing for music and
 speech synthesis (2024)
+
+** Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_quote
+"[Differentiable DSP has been] applied to... instrument modelling,
+synthesiser sound matching, speech synthesis and voice
+transformation... audio effect modelling, automatic mixing and
+intelligent music production, and filter design." --- Hayes et al.
+#+end_quote
+
+#+attr_html: :class caption
+A review of differentiable digital signal processing for music and
+speech synthesis (2024)
+
+#+begin_quote
+"This illustrates the strong parallel between RNNs and IIR filters ---
+they are both recursive systems that operate element-by-element on a
+sequence of numerical data, storing information in their internal
+states..." --- Kuznetsov et al.
+#+end_quote
+
+#+attr_html: :class caption
+Differentiable IIR Filters for Machine Learning Applications (2020)
 
 ** Origins
 :PROPERTIES:
@@ -308,33 +335,12 @@ AES paper under review.
 :reveal_extra_attr: data-auto-animate
 :END:
 
-#+begin_quote
-"This illustrates the strong parallel between RNNs and IIR filters ---
-they are both recursive systems that operate element-by-element on a
-sequence of numerical data, storing information in their internal
-states..." --- Kuznetsov et al.
-#+end_quote
-
-#+attr_html: :class caption
-Differentiable IIR Filters for Machine Learning Applications (2020)
-
-** More Motivation
-:PROPERTIES:
-:reveal_extra_attr: data-auto-animate
-:END:
-
+#+ATTR_REVEAL: :frag t
 A new arithemetical domain.
 #+ATTR_REVEAL: :frag t
 Pushes the limits of the language.
 
 * Differentiation
-
-#+REVEAL: split
-
-#+attr_html: :class big-eqn
-\begin{equation}
-f'(x) = \lim_{h\to0}\frac{f(x + h) - f(x)}{h}
-\end{equation}
 
 #+REVEAL: split
 
@@ -378,13 +384,6 @@ f'(x) = \lim_{h\to0}\frac{f(x + h) - f(x)}{h}
 f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
 \end{equation}
 
-#+REVEAL: split data-transition="fade"
-
-#+attr_html: :class huge-eqn
-\begin{equation}
-f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
-\end{equation}
-
 \(\dot{x}\) --- Newton's notation for the derivative.
 
 \(\varepsilon\) --- a /nilpotent symbol/: \(\quad\varepsilon \neq
@@ -418,10 +417,10 @@ f(x + \varepsilon\dot{x}) &= f(x) + \varepsilon\dot{x}f'(x) \\
 
 #+begin_export html
 <p class="fragment">This is a <span style="color:blue;">DUAL</span> <span style="color:green;">NUMBER</span>.</p>
-<p class="fragment">The first component is the <span style="color:blue;">PRIMAL</span> expression; the second is the <span style="color:green;">TANGENT</span>.</p>
+<p class="fragment">The first component is the <span style="color:blue;">PRIMAL</span>; the second is the <span style="color:green;">TANGENT</span>.</p>
 #+end_export
 
-** CSS & JS for the x^{2 }plot                                        :noexport:
+** CSS & JS for the x^{2} plot                                         :noexport:
 
 #+begin_src css
 #xSquaredContainer {
@@ -748,9 +747,7 @@ Initialise the layers:
 (u + \varepsilon\dot{u}) + (v + \varepsilon\dot{v}) &= {\color{blue} u + v} + {\color{green} \varepsilon(\dot{u} + \dot{v})} \\[.5em]
 (u + \varepsilon\dot{u}) - (v + \varepsilon\dot{v}) &= {\color{blue} u - v} + {\color{green} \varepsilon(\dot{u} - \dot{v})} \\[.5em]
 (u + \varepsilon\dot{u}) \times (v + \varepsilon\dot{v}) &= {\color{blue} uv} + {\color{green} \varepsilon(u\dot{v} + v\dot{u})} \\[.5em]
-(u + \varepsilon\dot{u}) \div (v + \varepsilon\dot{v}) &= (u + \varepsilon\dot{u})\frac{1}{(v + \varepsilon\dot{v})} \\
-  &= (u + \varepsilon\dot{u})\left(\frac{1}{v} - \varepsilon\frac{\dot{v}}{v^{2}}\right) \\
-  &= {\color{blue} \frac{u}{v}} + {\color{green} \varepsilon\left(\frac{v\dot{u} - u\dot{v}}{v^{2}}\right)}
+(u + \varepsilon\dot{u}) \div (v + \varepsilon\dot{v}) &= {\color{blue} \frac{u}{v}} + {\color{green} \varepsilon\left(\frac{v\dot{u} - u\dot{v}}{v^{2}}\right)}
 \end{align}
 
 ** Dual Number Arithmetic
@@ -778,34 +775,6 @@ e^{(u + \varepsilon\dot{u})} &= {\color{blue} e^{u}} + {\color{green} \varepsilo
 :reveal_extra_attr: data-auto-animate
 :END:
 
-/The chain rule/
-
-#+ATTR_REVEAL: :frag t
-\begin{align}
-f(g(x + \varepsilon\dot{x})) &= f(g(x) + \varepsilon\dot{x}g'(x)) \\
-  &= f(w + \varepsilon\dot{w})\;,\quad w = g(x)\;,\quad \dot{w} = \dot{x}g'(x) \\
-  &= f(w) + \varepsilon\dot{w}f'(w) \\
-  &= {\color{blue} f(g(x))} + {\color{green} \varepsilon\dot{x}g'(x)f'(g(x))}
-\end{align}
-
-#+ATTR_REVEAL: :frag t
-#+attr_html: :style padding-top: 1em
-E.g. let \(g(x) = \sin(x)\) and \(f(v) = v^{2}\):
-
-#+ATTR_REVEAL: :frag t
-\begin{align}
-\sin^{2}(x + \varepsilon\dot{x}) &= \sin^{2}(x) + \varepsilon\dot{x}\cos(x)2v \\
-  &= {\color{blue} \sin^{2}(x)} + {\color{green} \varepsilon2\sin(x)\cos(x)}
-\end{align}
-
-** Dual Number Arithmetic
-:PROPERTIES:
-:reveal_extra_attr: data-auto-animate
-:END:
-
-A change of notation...
-
-#+ATTR_REVEAL: :frag t
 #+attr_html: :class big-eqn
 \begin{equation}
 ({\color{blue} u} + {\color{green} \varepsilon\dot{u}}) \to \langle {\color{blue} u}, {\color{green} u'} \rangle
@@ -817,6 +786,306 @@ A change of notation...
 UV = \langle {\color{blue} u}, {\color{green} u'} \rangle\langle {\color{blue} v}, {\color{green} v'} \rangle
   = \langle {\color{blue} uv}, {\color{green} uv' + vu'} \rangle
 \end{equation}
+
+** Automatic Differentiation
+
+Compute the primal and tangent of \((x + 1)(x - 2)\).
+
+#+ATTR_REVEAL: :frag t
+Independent variable, \(X = \langle {\color{blue} x}, {\color{green} 1}
+\rangle\). Constant, \(C = \langle {\color{blue} c}, {\color{green} 0} \rangle\).
+
+#+begin_export html
+<div id="dualExample" class="fragment">
+  <div>
+    <label for="dualX">\(x\)</label>
+    <input type="range" id="dualX" min=-2 max=2.75 value=0 step=.01 />
+  </div>
+  <div id="dualNumerical">
+  </div>
+  <canvas id="dualPlotStatic"></canvas>
+  <canvas id="dualPlotDynamic"></canvas>
+</div>
+#+end_export
+
+*** Define the dual number class                                   :noexport:
+
+#+begin_src js
+class Dual {
+    constructor(primal, tangent) {
+        this.primal = primal;
+        this.tangent = tangent;
+    }
+
+    toString() {
+        return `\\langle{\\color{blue}${this.primal.toFixed(2)}},{\\color{green}${this.tangent.toFixed(2)}}\\rangle`;
+    }
+
+    add(d) {
+        return new Dual(this.primal + d.primal, this.tangent + d.tangent);
+    }
+
+    sub(d) {
+        return new Dual(this.primal - d.primal, this.tangent - d.tangent);
+    }
+
+    mul(d) {
+        return new Dual(this.primal * d.primal, this.primal * d.tangent + d.primal * this.tangent);
+    }
+};
+#+end_src
+
+*** Function for the numerical example                             :noexport:
+
+#+begin_src js
+const numericalExample = async () => {
+#+end_src
+
+*** Canvas                                                         :noexport:
+
+#+begin_src js
+    const CANVAS = { WIDTH: 550, HEIGHT: 550, PADDING: 0 };
+    const AXES = { X: { ZERO: CANVAS.WIDTH / 2 },
+                   Y: { ZERO: CANVAS.HEIGHT - 250 } };
+    const X = { LEN: 1000, MIN: -2.5, MAX: 2.5};
+    X.STEP = (X.MAX - X.MIN) / X.LEN;
+#+end_src
+
+*** Vectors, constants, input variables, output function           :noexport:
+
+#+begin_src js
+    const xVec = Array.from({length: X.LEN + 1}, (_,x) => X.MIN + x * X.STEP);
+    const C1 = new Dual(1, 0);
+    const C2 = new Dual(2, 0);
+    const f = x => x.add(C1).mul(x.sub(C2));
+    const yVec = xVec.map(x => ({x: x, y: f(new Dual(x, 1)).primal}));
+    const yMax = 3.5;//Math.max(...yVec.map(y => y.y));
+#+end_src
+
+*** DOM elements to target                                         :noexport:
+
+#+begin_src js    
+    const math = document.getElementById("dualNumerical");
+    const slider = document.getElementById("dualX");
+#+end_src
+
+*** Static plot; axes and f(x)                                     :noexport:
+
+#+begin_src js
+    const plot = {
+        staticLayer: {
+            canvas: document.getElementById("dualPlotStatic"),
+
+            drawAxis: {
+                x: ctx => {
+                    ctx.beginPath();
+                    ctx.moveTo(0, AXES.Y.ZERO);
+                    ctx.lineTo(CANVAS.WIDTH, AXES.Y.ZERO);
+                    ctx.stroke();
+                    // Arrow
+                    ctx.beginPath();
+                    ctx.moveTo(CANVAS.WIDTH, AXES.Y.ZERO);
+                    ctx.lineTo(CANVAS.WIDTH - 10, AXES.Y.ZERO - 5);
+                    ctx.lineTo(CANVAS.WIDTH - 10, AXES.Y.ZERO + 5);
+                    ctx.closePath();
+                    ctx.fill();
+                },
+                y: ctx => {
+                    ctx.beginPath();
+                    ctx.moveTo(AXES.X.ZERO, 0);
+                    ctx.lineTo(AXES.X.ZERO, CANVAS.HEIGHT);
+                    ctx.stroke();
+                    // Arrow
+                    ctx.beginPath();
+                    ctx.moveTo(AXES.X.ZERO, 0);
+                    ctx.lineTo(AXES.X.ZERO - 5, 10);
+                    ctx.lineTo(AXES.X.ZERO + 5, 10);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            },
+
+            drawFunction: ctx => {
+                ctx.beginPath();
+                ctx.moveTo(
+                    CANVAS.PADDING + (yVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - yVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                );
+                yVec.forEach(p => ctx.lineTo(
+                    CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                ));
+                ctx.strokeStyle = "blue";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            },
+
+            init() {
+                if (this.canvas.getContext) {
+                    this.canvas.setAttribute("width", CANVAS.WIDTH);
+                    this.canvas.setAttribute("height", CANVAS.HEIGHT);
+
+                    const ctx = this.canvas.getContext("2d");
+                    this.drawAxis.x(ctx);
+                    this.drawAxis.y(ctx);
+                    this.drawFunction(ctx);
+                }
+            }
+        },
+#+end_src
+
+*** Dynamic plot; f(x) indicator and tangent                       :noexport:
+
+#+begin_src js
+        dynamicLayer: {
+            canvas: document.getElementById("dualPlotDynamic"),
+
+            artist: ctx => ({
+                clear: () => ctx.clearRect(0, 0, CANVAS.WIDTH, CANVAS.HEIGHT),
+
+                drawTangent: x => {
+                    const slope = f(new Dual(x, 1)).tangent;
+                    const yTanVec = xVec.map(xVal => ({x: xVal, y: slope * (xVal - x) + f(new Dual(x, 1)).primal}));
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        CANVAS.PADDING + (yTanVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                        CANVAS.PADDING + (yMax - yTanVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                    );
+                    yTanVec.forEach(p => ctx.lineTo(
+                        CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                        CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                    ));
+                    ctx.strokeStyle = "green";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                },
+
+                drawIntersection: x => {
+                    const indicatorWidth = 6;
+                    ctx.beginPath();
+                    ctx.arc(
+                        CANVAS.PADDING + (x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                        CANVAS.PADDING + (yMax - f(new Dual(x, 1)).primal) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax,
+                        indicatorWidth,
+                        0, 2 * Math.PI
+                    );
+                    ctx.fill();
+                },
+                
+                draw(x) {
+                    this.drawTangent(x);
+                    this.drawIntersection(x);
+                },
+                
+                redraw(x) {
+                    this.clear();
+                    this.draw(x);
+                }
+            }),
+
+            async init() {
+                if (this.canvas.getContext) {
+                    this.canvas.setAttribute("width", CANVAS.WIDTH);
+                    this.canvas.setAttribute("height", CANVAS.HEIGHT);
+
+                    return this.artist(this.canvas.getContext("2d"));
+                }
+            }
+        }
+    };
+#+end_src
+
+*** Typeset math update callback                                   :noexport:
+
+#+begin_src js
+    const updateMath = async () => {
+        const x = new Dual(Number(slider.value), 1);
+        
+        MathJax.typesetClear([math]);
+        math.innerHTML = `\\begin{align}
+& ( ${x} + ${C1} )( ${x} - ${C2} ) \\\\[.5em]
+=& ${x.add(C1)} ${x.sub(C2)} \\\\[.5em]
+=& ${f(x)}
+\\end{align}`
+        await MathJax.typesetPromise([math]);
+    };
+#+end_src
+
+*** Setup and input variable change event listener                 :noexport:
+
+#+begin_src js
+    await updateMath();
+    plot.staticLayer.init();
+    const d = await plot.dynamicLayer.init();
+    d.draw(Number(slider.value));
+
+    slider.addEventListener("input", async ({target: {value}}) => {
+        await updateMath();
+        await d.redraw(Number(value));
+    });
+};
+#+end_src
+
+*** Some CSS                                                       :noexport:
+
+#+begin_src css
+#dualExample {
+    position: relative;
+    padding-bottom: 1em;
+}
+
+#dualExample > canvas {
+    position: absolute;
+    top: -5%;
+    opacity: .4;
+    z-index: -100;
+}
+#+end_src
+
+** Tangent \to Gradient
+
+#+attr_html: :class big-eqn
+\begin{equation}
+\langle {\color{blue} u},{\color{green} u'} \rangle \to \langle {\color{blue} u}, {\color{green} \nabla{}u} \rangle
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :class big-eqn
+\begin{equation}
+\nabla{}u = \begin{bmatrix}\frac{\partial{}u}{\partial{}x_{1}} \\ \vdots \\ \frac{\partial{}u}{\partial{}x_{N}}\end{bmatrix}
+\end{equation}
+
+** Gradient \to Jacobian
+
+#+attr_html: :class big-eqn
+\begin{equation}
+\langle {\color{blue} u}, {\color{green} \nabla{}u} \rangle \to \langle {\color{blue} \mathbf{u}},{\color{green} \mathbf{J_{u}}} \rangle
+\end{equation}
+
+\begin{equation}
+\mathbf{u} = \begin{bmatrix}u_{1} \\ \vdots \\ u_{M}\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+\mathbf{J_{u}} = \begin{bmatrix}
+  \frac{\partial{}u_{1}}{\partial{}x_{1}} & \cdots & \frac{\partial{}u_{1}}{\partial{}x_{N}} \\
+  \vdots & \ddots & \vdots \\
+  \frac{\partial{}u_{M}}{\partial{}x_{1}} & \cdots & \frac{\partial{}u_{M}}{\partial{}x_{N}} \\
+\end{bmatrix}
+\end{equation}
+
+* Differentiable Faust Primitives
+
+* Differentiable Faust Programs
+
+* Hessians and Beyond...
+
+
+
+
+
+
+
 
 * Yo
 
