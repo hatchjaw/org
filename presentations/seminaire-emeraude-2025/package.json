@@ -12,7 +12,6 @@
     "vite": "^6.3.5"
   },
   "dependencies": {
-    "@amermathsoc/mathjax-unicode-math": "^2.0.1",
-    "mathjax": "^4.0.0-beta.4"
+    "mathjax": "^3.2.2"
   }
 }

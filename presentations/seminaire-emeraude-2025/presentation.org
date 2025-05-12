@@ -132,6 +132,10 @@ Big equations
 .big-eqn {
     font-size: 1.5em;
 }
+
+.huge-eqn {
+    font-size: 2em;
+}
 #+end_src
 
 Some old stuff that I might not need.
@@ -153,27 +157,45 @@ Some old stuff that I might not need.
 
 * JS                                                               :noexport:
 
-So I can use \(\lBrack\) and \(\rBrack\), I need
+So I can use \(\lBrack\) and \(\rBrack\), I tried using
 [[https://www.npmjs.com/package/@amermathsoc/mathjax-unicode-math][mathjax-unicode-math]]. This doesn't appear to work with the current
-stable version of MathJax (3.2.2), so I'm using the 4.0.0 beta (see
-[[./package.json]]).
+stable version of MathJax (3.2.2, bottom half of brackets lopped off),
+so I tried MathJax 4.0.0-beta.4.
+
+4.0.0-beta.4 is the most recent version that permits performant
+dynamic typesetting, but, for SVG, it doesn't reproduce \(\quad\) and
+other spacing commands as expected.
 
 #+begin_src js
+// Not ideal to do it this way (better to read package.json somehow)
+// but better than changing things by hand below.
+MATHJAX4 = false;
+
 MathJax = {
-    loader: {
-        load: ["[unicodeMath]/unicode-math.js"],
-        paths: {unicodeMath: "./node_modules/@amermathsoc/mathjax-unicode-math/browser"}
-    },
     tex: {
-        packages: {"[+]": ["unicode-math"]}
+        macros: {
+            sembrack: [MATHJAX4 ? "\\unicode{x27e6}\\! #1 \\!\\unicode{x27e7}" : "[\\![#1]\\!]", 1],
+            diffbrack: ["\\Delta_{N}\\sembrack{#1}", 1],
+        }
+    },
+    options: {
+        enableMenu: false
     },
     startup: {
         ready: async () => {
             MathJax.startup.defaultReady();
+            
             await MathJax.startup.promise;
-            console.log('MathJax initial typesetting complete');
+            console.log('MathJax initial typesetting complete.');
+
+            // These work without a timeout for MathJax 4.0.0-beta.7.
+            // console.log("Typesetting dynamic content.");
+            // await xSquared();
+            
+            // This timeout is the only reliable way I've found to
+            // avoid MathJax 4.0.0-beta.4  `Retry` errors.
             window.setTimeout(async () => {
-                console.log("Typesetting dynamic content");
+                console.log("Typesetting dynamic content.");
                 await xSquared();
             }, 100);
         }
@@ -182,7 +204,7 @@ MathJax = {
 
 (() => {
     const script = document.createElement("script");
-    script.src = "./node_modules/mathjax/tex-svg.js";
+    script.src = `./node_modules/mathjax${MATHJAX4 ? "" : "/es5"}/tex-svg.js`;
     script.async = true;
     document.head.appendChild(script);
 })();
@@ -281,7 +303,33 @@ Presented at IFC.
 #+ATTR_REVEAL: :frag t
 AES paper under review.
 
+** More Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_quote
+"This illustrates the strong parallel between RNNs and IIR filters ---
+they are both recursive systems that operate element-by-element on a
+sequence of numerical data, storing information in their internal
+states..." --- Kuznetsov et al.
+#+end_quote
+
+#+attr_html: :class caption
+Differentiable IIR Filters for Machine Learning Applications (2020)
+
+** More Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+A new arithemetical domain.
+#+ATTR_REVEAL: :frag t
+Pushes the limits of the language.
+
 * Differentiation
+
+#+REVEAL: split
 
 #+attr_html: :class big-eqn
 \begin{equation}
@@ -304,7 +352,7 @@ f'(x) = \lim_{h\to0}\frac{f(x + h) - f(x)}{h}
     </div>
     <div>
       <label for="xSquared-hValue">\(h\)</label>
-      <input type="range" id="xSquared-h" min=.01 max=2 value=2 step=.001 />
+      <input type="range" id="xSquared-h" min=-1 max=2 value=2 step=.001 />
       <span id="xSquared-hValue" class="sliderValue"></span>
     </div>
   </div>
@@ -316,21 +364,64 @@ f'(x) = \lim_{h\to0}\frac{f(x + h) - f(x)}{h}
 </div>
 #+end_export
 
-#+REVEAL: split data-auto-animate data-auto-animate-unmatched=false
+#+REVEAL: split data-transition="slide-in fade-out"
 
-#+attr_html: :class big-eqn
+#+attr_html: :class huge-eqn
 \begin{equation}
 f'(x) = \lim_{h\to0}\frac{f(x + h) - f(x)}{h}
 \end{equation}
 
-#+REVEAL: split data-auto-animate data-auto-animate-unmatched=false
+#+REVEAL: split data-transition="fade"
 
-#+attr_html: :class big-eqn
+#+attr_html: :class huge-eqn
 \begin{equation}
 f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
 \end{equation}
 
-** CSS & JS for this section                                       :noexport:
+#+REVEAL: split data-transition="fade"
+
+#+attr_html: :class huge-eqn
+\begin{equation}
+f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
+\end{equation}
+
+\(\dot{x}\) --- Newton's notation for the derivative.
+
+\(\varepsilon\) --- a /nilpotent symbol/: \(\quad\varepsilon \neq
+0\;,\quad\varepsilon^{2} = 0\)
+
+#+REVEAL: split data-transition="fade"
+
+#+attr_html: :class huge-eqn
+\begin{equation}
+\varepsilon\dot{x}f'(x) = f(x + \varepsilon\dot{x}) - f(x)
+\end{equation}
+
+#+REVEAL: split data-transition="fade"
+
+#+attr_html: :class huge-eqn
+\begin{equation}
+f(x + \varepsilon\dot{x}) = f(x) + \varepsilon\dot{x}f'(x)
+\end{equation}
+
+#+REVEAL: split data-transition="fade"
+
+\begin{equation}
+\textrm{Let}\; f(x) = x
+\end{equation}
+
+#+attr_html: :class huge-eqn
+\begin{align}
+f(x + \varepsilon\dot{x}) &= f(x) + \varepsilon\dot{x}f'(x) \\ 
+  &= {\color{blue} x} + {\color{green} \varepsilon\dot{x}}
+\end{align}
+
+#+begin_export html
+<p class="fragment">This is a <span style="color:blue;">DUAL</span> <span style="color:green;">NUMBER</span>.</p>
+<p class="fragment">The first component is the <span style="color:blue;">PRIMAL</span> expression; the second is the <span style="color:green;">TANGENT</span>.</p>
+#+end_export
+
+** CSS & JS for the x^{2 }plot                                        :noexport:
 
 #+begin_src css
 #xSquaredContainer {
@@ -338,7 +429,7 @@ f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
     justify-content: space-evenly;
 }
 
-#xSquaredContainer > div:nth-child(2) {
+#xSquaredMath {
     width: 45%;
 }
 
@@ -348,7 +439,7 @@ f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
 
 #xSquaredDynamicMath {
     position: absolute;
-    left: 55%;
+    left: 63%;
 }
 
 .sliderValue {
@@ -366,7 +457,7 @@ const SVG = {};
 const CANVAS = {
     WIDTH: 900,
     HEIGHT: 600,
-    PADDING: 25
+    PADDING: 5
 };
 
 const AXES = {
@@ -648,6 +739,85 @@ Initialise the layers:
 };
 #+end_src
 
+** Dual Number Arithmetic
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{align}
+(u + \varepsilon\dot{u}) + (v + \varepsilon\dot{v}) &= {\color{blue} u + v} + {\color{green} \varepsilon(\dot{u} + \dot{v})} \\[.5em]
+(u + \varepsilon\dot{u}) - (v + \varepsilon\dot{v}) &= {\color{blue} u - v} + {\color{green} \varepsilon(\dot{u} - \dot{v})} \\[.5em]
+(u + \varepsilon\dot{u}) \times (v + \varepsilon\dot{v}) &= {\color{blue} uv} + {\color{green} \varepsilon(u\dot{v} + v\dot{u})} \\[.5em]
+(u + \varepsilon\dot{u}) \div (v + \varepsilon\dot{v}) &= (u + \varepsilon\dot{u})\frac{1}{(v + \varepsilon\dot{v})} \\
+  &= (u + \varepsilon\dot{u})\left(\frac{1}{v} - \varepsilon\frac{\dot{v}}{v^{2}}\right) \\
+  &= {\color{blue} \frac{u}{v}} + {\color{green} \varepsilon\left(\frac{v\dot{u} - u\dot{v}}{v^{2}}\right)}
+\end{align}
+
+** Dual Number Arithmetic
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+Truncated Taylor series expansion at \(\varepsilon\dot{x} = 0\):
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+f(x + \varepsilon\dot{x}) = f(x) + \varepsilon\dot{x}f'(x) +
+  \cancel{(\varepsilon\dot{x})^{2}\frac{f''(x)}{2}} + \cancel{(\varepsilon\dot{x})^{3}\frac{f'''(x)}{6}} + \cdots
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+\begin{align}
+\sin(u + \varepsilon\dot{u}) &= {\color{blue} \sin(u)} + {\color{green} \varepsilon\dot{u}\cos(u)} \\[.5em]
+\ln(u + \varepsilon\dot{u}) &= {\color{blue} \ln(u)} + {\color{green} \varepsilon\dot{u}\frac{1}{u}} \\[.5em]
+e^{(u + \varepsilon\dot{u})} &= {\color{blue} e^{u}} + {\color{green} \varepsilon\dot{u}e^{u}}
+\end{align}
+
+** Dual Number Arithmetic
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+/The chain rule/
+
+#+ATTR_REVEAL: :frag t
+\begin{align}
+f(g(x + \varepsilon\dot{x})) &= f(g(x) + \varepsilon\dot{x}g'(x)) \\
+  &= f(w + \varepsilon\dot{w})\;,\quad w = g(x)\;,\quad \dot{w} = \dot{x}g'(x) \\
+  &= f(w) + \varepsilon\dot{w}f'(w) \\
+  &= {\color{blue} f(g(x))} + {\color{green} \varepsilon\dot{x}g'(x)f'(g(x))}
+\end{align}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :style padding-top: 1em
+E.g. let \(g(x) = \sin(x)\) and \(f(v) = v^{2}\):
+
+#+ATTR_REVEAL: :frag t
+\begin{align}
+\sin^{2}(x + \varepsilon\dot{x}) &= \sin^{2}(x) + \varepsilon\dot{x}\cos(x)2v \\
+  &= {\color{blue} \sin^{2}(x)} + {\color{green} \varepsilon2\sin(x)\cos(x)}
+\end{align}
+
+** Dual Number Arithmetic
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+A change of notation...
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :class big-eqn
+\begin{equation}
+({\color{blue} u} + {\color{green} \varepsilon\dot{u}}) \to \langle {\color{blue} u}, {\color{green} u'} \rangle
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :class big-eqn
+\begin{equation}
+UV = \langle {\color{blue} u}, {\color{green} u'} \rangle\langle {\color{blue} v}, {\color{green} v'} \rangle
+  = \langle {\color{blue} uv}, {\color{green} uv' + vu'} \rangle
+\end{equation}
+
 * Yo
 
 This =org= *file* /describes/ my presentation for the 2024 International
@@ -655,7 +825,15 @@ Faust Conference.
 
 \(\lBrack + \rBrack\)
 
-\(\unicode{x27e6} + \unicode{x27e7}\)
+\(\unicode{x27e6}\! + \!\unicode{x27e7}\)
+
+\(\llbracket + \rrbracket\)
+
+\(\Delta_{N}[\![\cdot]\!]\)
+
+\(\sembrack{+}\)
+
+\(\diffbrack{+}\)
 
 * ?
 :PROPERTIES:
