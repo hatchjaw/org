@@ -89,7 +89,7 @@ export default defineConfig({
 });
 #+end_src
 
-Wait till Reveal.js is ready before loading ~faust-editor~; other wise
+Wait till Reveal.js is ready before loading ~faust-editor~; otherwise
 Split's parent element may not yet have a size, and the tab buttons
 will hang over the edge.
 

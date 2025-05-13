@@ -2,16 +2,7 @@
   "name": "seminaire-emeraude-2025",
   "version": "0.0.1",
   "description": "Dynamic content support for my presentation for the 2025 team seminar.",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "vite": "^6.3.5"
-  },
   "dependencies": {
-    "mathjax": "^3.2.2"
+      "mathjax": "^3.2.2"
   }
 }

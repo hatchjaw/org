@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # -*- mode: org -*-
 
-#+TITLE: Faust Autodiff
+#+TITLE: What Difference Does It Make?
+#+subtitle: Automatic Differentiation in Faust
 #+AUTHOR: Thomas Rushton
 
 # Change to num:nil when done editing
@@ -47,11 +48,13 @@ Then navigate to [[http://localhost:8000/seminaire-emeraude-2025/]].
 
 * CSS                                                              :noexport:
 
-Make a symlink to =~/org/fonts=.
+** Symlink to =~/org/fonts=.
 
 #+begin_src emacs-lisp :results none :export none :eval yes
 (dired-make-relative-symlink "../../fonts" "fonts" t)
 #+end_src
+
+** Typography
 
 Define some fonts. Useful info [[https://www.digitalocean.com/community/tutorials/how-to-load-and-use-custom-fonts-with-css#loading-a-self-hosted-font-with-font-face][here]].
 
@@ -90,7 +93,7 @@ Define some fonts. Useful info [[https://www.digitalocean.com/community/tutorial
 }
 #+end_src
 
-Now override some of reveal's variables to use those fonts.
+Now override some of reveal's variables.
 
 #+begin_src css
 :root {
@@ -102,7 +105,9 @@ Now override some of reveal's variables to use those fonts.
 }
 #+end_src
 
-Decorate my h2's.
+*** Headings
+
+Decorate my h2's and h3's.
 
 #+begin_src css
 .stack h2, .stack h3 {
@@ -110,7 +115,15 @@ Decorate my h2's.
 }
 #+end_src
 
-Use old style numbers.
+*** Figures
+
+#+begin_src css
+.reveal figure {
+    margin-top: 0;
+}
+#+end_src
+
+*** Use old style numbers
 
 #+begin_src css
 body {
@@ -118,7 +131,17 @@ body {
 }
 #+end_src
 
-A handy class or two.
+But not in code blocks
+
+#+begin_src css
+.reveal pre {
+    font-variant-numeric: normal;
+}
+#+end_src
+
+*** Font size utility classes
+
+Captions
 
 #+begin_src css
 .caption {
@@ -138,14 +161,23 @@ Big equations
 }
 #+end_src
 
-Some old stuff that I might not need.
+** Code blocks
 
-#+begin_src css :tangle no
-.org-src-container > pre {
+Improve code block appearance.
+
+#+begin_src css
+.reveal pre {
     padding: 1em;
     width: 66.6%;
+    box-shadow: none;
+    background: #efefef;
+    font-size: .7em;
 }
+#+end_src
 
+** Some old stuff that I might not need.
+
+#+begin_src css :tangle no
 .title-page > h2 {
     color: #ededed;
 }
@@ -156,6 +188,8 @@ Some old stuff that I might not need.
 #+end_src
 
 * JS                                                               :noexport:
+
+** MathJax
 
 So I can use \(\lBrack\) and \(\rBrack\), I tried using
 [[https://www.npmjs.com/package/@amermathsoc/mathjax-unicode-math][mathjax-unicode-math]]. This doesn't appear to work with the current
@@ -174,7 +208,12 @@ MATHJAX4 = false;
 MathJax = {
     tex: {
         macros: {
-            sembrack: [MATHJAX4 ? "\\unicode{x27e6}\\! #1 \\!\\unicode{x27e7}" : "[\\![#1]\\!]", 1],
+            sembrack: [
+                MATHJAX4 ?
+                    "\\unicode{x27e6}\\! #1 \\!\\unicode{x27e7}" :
+                    "\\left[\\!\\left[\\,#1\\,\\right]\\!\\right]",
+                1
+            ],
             diffbrack: ["\\Delta_{N}\\sembrack{#1}", 1],
         }
     },
@@ -211,8 +250,6 @@ MathJax = {
 })();
 #+end_src
 
-#+RESULTS:
-
 * Agenda
 
 #+ATTR_REVEAL: :frag (appear)
@@ -220,7 +257,6 @@ MathJax = {
 - Automatic differentiation in Faust
 - Differentiable compositions
 - Higher-order derivatives
-- Reverse mode autodiff?
 
 ** Motivation
 :PROPERTIES:
@@ -299,6 +335,15 @@ states..." --- Kuznetsov et al.
 #+attr_html: :class caption
 Differentiable IIR Filters for Machine Learning Applications (2020)
 
+** Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+A new arithemetical domain.
+#+ATTR_REVEAL: :frag t
+Pushes the limits of the language.
+
 ** Origins
 :PROPERTIES:
 :reveal_extra_attr: data-auto-animate data-auto-animate-restart
@@ -329,16 +374,6 @@ GSoC again, 2024.
 Presented at IFC.
 #+ATTR_REVEAL: :frag t
 AES paper under review.
-
-** More Motivation
-:PROPERTIES:
-:reveal_extra_attr: data-auto-animate
-:END:
-
-#+ATTR_REVEAL: :frag t
-A new arithemetical domain.
-#+ATTR_REVEAL: :frag t
-Pushes the limits of the language.
 
 * Differentiation
 
@@ -505,76 +540,76 @@ const xSquared = async () => {
 Define the axes and the static plot of \(f(x)\):
 
 #+begin_src js
-    const staticLayer = {
-        canvas: document.getElementById("xSquaredCanvas"),
+const staticLayer = {
+    canvas: document.getElementById("xSquaredCanvas"),
 
-        visualiser: ctx => ({
-            drawAxis: {
-                x: () => {
-                    ctx.beginPath();
-                    ctx.moveTo(CANVAS.PADDING, AXES.Y.ZERO);
-                    ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING, AXES.Y.ZERO);
-                    ctx.stroke();
-                    // Arrow
-                    ctx.beginPath();
-                    ctx.moveTo(CANVAS.WIDTH - CANVAS.PADDING, AXES.Y.ZERO);
-                    ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING - 10, AXES.Y.ZERO - 5);
-                    ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING - 10, AXES.Y.ZERO + 5);
-                    ctx.closePath();
-                    ctx.fill();
-                },
-                y: () => {
-                    ctx.beginPath();
-                    ctx.moveTo(AXES.X.ZERO, CANVAS.PADDING);
-                    ctx.lineTo(AXES.X.ZERO, CANVAS.HEIGHT - CANVAS.PADDING);
-                    ctx.stroke();
-                    // Arrow
-                    ctx.beginPath();
-                    ctx.moveTo(AXES.X.ZERO, CANVAS.PADDING);
-                    ctx.lineTo(AXES.X.ZERO - 5, CANVAS.PADDING + 10);
-                    ctx.lineTo(AXES.X.ZERO + 5, CANVAS.PADDING + 10);
-                    ctx.closePath();
-                    ctx.fill();
-                    // Label
-                    ctx.drawImage(SVG.FX, AXES.X.ZERO - 60, CANVAS.PADDING,
-                                 SVG.FX.naturalWidth * 1.5,
-                                 SVG.FX.naturalHeight * 1.5);
-                }
-            },
-
-            drawFunction: () => {
+    visualiser: ctx => ({
+        drawAxis: {
+            x: () => {
                 ctx.beginPath();
-                ctx.moveTo(
-                    CANVAS.PADDING + (yVec[0].x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-                    CANVAS.PADDING + (yMax - yVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
-                );
-                yVec.forEach(p => ctx.lineTo(
-                    CANVAS.PADDING + (p.x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-                    CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
-                ));
-                ctx.strokeStyle = "blue";
-                ctx.lineWidth = 2;
+                ctx.moveTo(CANVAS.PADDING, AXES.Y.ZERO);
+                ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING, AXES.Y.ZERO);
                 ctx.stroke();
+                // Arrow
+                ctx.beginPath();
+                ctx.moveTo(CANVAS.WIDTH - CANVAS.PADDING, AXES.Y.ZERO);
+                ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING - 10, AXES.Y.ZERO - 5);
+                ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING - 10, AXES.Y.ZERO + 5);
+                ctx.closePath();
+                ctx.fill();
             },
-        }),
-
-        async init() {
-            if (this.canvas.getContext) {
-                this.canvas.setAttribute("width", CANVAS.WIDTH);
-                this.canvas.setAttribute("height", CANVAS.HEIGHT);
-
-                let img = new Image();
-                img.src = tex2imageSrc("f(x)");
-                await img.decode();
-                SVG.FX = img;
-
-                const v = this.visualiser(this.canvas.getContext("2d"));
-                v.drawAxis.x();
-                v.drawAxis.y();
-                v.drawFunction();
+            y: () => {
+                ctx.beginPath();
+                ctx.moveTo(AXES.X.ZERO, CANVAS.PADDING);
+                ctx.lineTo(AXES.X.ZERO, CANVAS.HEIGHT - CANVAS.PADDING);
+                ctx.stroke();
+                // Arrow
+                ctx.beginPath();
+                ctx.moveTo(AXES.X.ZERO, CANVAS.PADDING);
+                ctx.lineTo(AXES.X.ZERO - 5, CANVAS.PADDING + 10);
+                ctx.lineTo(AXES.X.ZERO + 5, CANVAS.PADDING + 10);
+                ctx.closePath();
+                ctx.fill();
+                // Label
+                ctx.drawImage(SVG.FX, AXES.X.ZERO - 60, CANVAS.PADDING,
+                              SVG.FX.naturalWidth * 1.5,
+                              SVG.FX.naturalHeight * 1.5);
             }
+        },
+
+        drawFunction: () => {
+            ctx.beginPath();
+            ctx.moveTo(
+                CANVAS.PADDING + (yVec[0].x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                CANVAS.PADDING + (yMax - yVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+            );
+            yVec.forEach(p => ctx.lineTo(
+                CANVAS.PADDING + (p.x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+            ));
+            ctx.strokeStyle = "blue";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        },
+    }),
+
+    async init() {
+        if (this.canvas.getContext) {
+            this.canvas.setAttribute("width", CANVAS.WIDTH);
+            this.canvas.setAttribute("height", CANVAS.HEIGHT);
+
+            let img = new Image();
+            img.src = tex2imageSrc("f(x)");
+            await img.decode();
+            SVG.FX = img;
+
+            const v = this.visualiser(this.canvas.getContext("2d"));
+            v.drawAxis.x();
+            v.drawAxis.y();
+            v.drawFunction();
         }
-    };
+    }
+};
 #+end_src
 
 Define the dynamic part of the plot --- the secant and axis
@@ -582,159 +617,159 @@ indicators. Slope \(m\) found as \(m = \frac{f(x + h) - f(x)}{h}\);
 secant line found as \(m(x - x_{1}) + y_{1}\).
 
 #+begin_src js
-    const dynamicLayer = {
-        canvas: document.getElementById("secantCanvas"),
-        xSlider: {
-            element: document.getElementById("xSquared-x"),
-            valSpan: document.getElementById("xSquared-xValue")
-        },
-        hSlider: {
-            element: document.getElementById("xSquared-h"),
-            valSpan: document.getElementById("xSquared-hValue"),
-            prevValue: 0
-        },
-        math: document.getElementById("xSquaredDynamicMath"),
+const dynamicLayer = {
+    canvas: document.getElementById("secantCanvas"),
+    xSlider: {
+        element: document.getElementById("xSquared-x"),
+        valSpan: document.getElementById("xSquared-xValue")
+    },
+    hSlider: {
+        element: document.getElementById("xSquared-h"),
+        valSpan: document.getElementById("xSquared-hValue"),
+        prevValue: 0
+    },
+    math: document.getElementById("xSquaredDynamicMath"),
 
-        visualiser: ctx => ({
-            drawIndicators: (x, h) => {
-                const drawXIndicator = (x, y) => ctx.fillRect(
-                    CANVAS.PADDING - (AXES.X.INDICATOR.WIDTH / 2) + (x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-                    y - AXES.X.INDICATOR.HEIGHT / 2,
-                    AXES.X.INDICATOR.WIDTH,
-                    AXES.X.INDICATOR.HEIGHT
-                );
+    visualiser: ctx => ({
+        drawIndicators: (x, h) => {
+            const drawXIndicator = (x, y) => ctx.fillRect(
+                CANVAS.PADDING - (AXES.X.INDICATOR.WIDTH / 2) + (x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                y - AXES.X.INDICATOR.HEIGHT / 2,
+                AXES.X.INDICATOR.WIDTH,
+                AXES.X.INDICATOR.HEIGHT
+            );
 
-                const drawFxIndicator = (x, y) => {
-                    const indicatorWidth = 6;
-                    ctx.beginPath();
-                    ctx.arc(
-                        CANVAS.PADDING + (x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-                        CANVAS.PADDING + (yMax - y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax,
-                        indicatorWidth,
-                        0, 2 * Math.PI
-                    );
-                    ctx.fill();
-                };
-
-                const drawSVG = (img, x, y, scale) => {
-                    const w = img.naturalWidth * scale;
-                    const h = img.naturalHeight * scale;
-                    const xPos = CANVAS.PADDING - w / 2 +
-                          (x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN);
-                    const yPos = CANVAS.PADDING + (yMax - y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax;
-                    ctx.drawImage(img, xPos, yPos, w, h);
-                };
-
-                drawXIndicator(x, AXES.Y.ZERO);
-                drawXIndicator(x + h, AXES.Y.ZERO);
-
-                drawFxIndicator(x, f(x));
-                drawFxIndicator(x + h, f(x + h));
-
-                drawSVG(SVG.X, x, -.08, 1.5);
-                drawSVG(SVG.XPLUSH, x + h, -.2, 1.5);
-            },
-
-            drawSecant: (x, h) => {
-                const slope = (f(x + h) - f(x)) / h;
-                const ySecVec = xVec.map(xVal => ({x: xVal, y: slope * (xVal - x) + f(x)}));
+            const drawFxIndicator = (x, y) => {
+                const indicatorWidth = 6;
                 ctx.beginPath();
-                ctx.moveTo(
-                    CANVAS.PADDING + (ySecVec[0].x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-                    CANVAS.PADDING + (yMax - ySecVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                ctx.arc(
+                    CANVAS.PADDING + (x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax,
+                    indicatorWidth,
+                    0, 2 * Math.PI
                 );
-                ySecVec.forEach(p => ctx.lineTo(
-                    CANVAS.PADDING + (p.x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-                    CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
-                ));
-                ctx.strokeStyle = "green";
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            },
+                ctx.fill();
+            };
 
-            clear: () => ctx.clearRect(0, 0, CANVAS.WIDTH, CANVAS.HEIGHT),
+            const drawSVG = (img, x, y, scale) => {
+                const w = img.naturalWidth * scale;
+                const h = img.naturalHeight * scale;
+                const xPos = CANVAS.PADDING - w / 2 +
+                      (x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN);
+                const yPos = CANVAS.PADDING + (yMax - y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax;
+                ctx.drawImage(img, xPos, yPos, w, h);
+            };
+
+            drawXIndicator(x, AXES.Y.ZERO);
+            drawXIndicator(x + h, AXES.Y.ZERO);
+
+            drawFxIndicator(x, f(x));
+            drawFxIndicator(x + h, f(x + h));
+
+            drawSVG(SVG.X, x, -.08, 1.5);
+            drawSVG(SVG.XPLUSH, x + h, -.2, 1.5);
+        },
+
+        drawSecant: (x, h) => {
+            const slope = (f(x + h) - f(x)) / h;
+            const ySecVec = xVec.map(xVal => ({x: xVal, y: slope * (xVal - x) + f(x)}));
+            ctx.beginPath();
+            ctx.moveTo(
+                CANVAS.PADDING + (ySecVec[0].x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                CANVAS.PADDING + (yMax - ySecVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+            );
+            ySecVec.forEach(p => ctx.lineTo(
+                CANVAS.PADDING + (p.x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+            ));
+            ctx.strokeStyle = "green";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        },
+
+        clear: () => ctx.clearRect(0, 0, CANVAS.WIDTH, CANVAS.HEIGHT),
+        
+        draw(x, h) {
+            this.drawIndicators(x, h);
+            this.drawSecant(x, h);
+        },
+        
+        redraw(x, h) {
+            this.clear();
+            this.draw(x, h)
+        }
+    }),
+
+    async init() {
+        if (this.canvas.getContext) {
+            this.canvas.setAttribute("width", CANVAS.WIDTH);
+            this.canvas.setAttribute("height", CANVAS.HEIGHT);
             
-            draw(x, h) {
-                this.drawIndicators(x, h);
-                this.drawSecant(x, h);
-            },
+            let img = new Image();
+            img.src = tex2imageSrc("x");
+            await img.decode();
+            SVG.X = img;
             
-            redraw(x, h) {
-                this.clear();
-                this.draw(x, h)
-            }
-        }),
+            img = new Image();
+            img.src = tex2imageSrc("x + h");
+            await img.decode();
+            SVG.XPLUSH = img;
 
-        async init() {
-            if (this.canvas.getContext) {
-                this.canvas.setAttribute("width", CANVAS.WIDTH);
-                this.canvas.setAttribute("height", CANVAS.HEIGHT);
-                
-                let img = new Image();
-                img.src = tex2imageSrc("x");
-                await img.decode();
-                SVG.X = img;
-                
-                img = new Image();
-                img.src = tex2imageSrc("x + h");
-                await img.decode();
-                SVG.XPLUSH = img;
+            const x = Number(this.xSlider.element.value);
+            const h = Number(this.hSlider.element.value);                
+            const v = this.visualiser(this.canvas.getContext("2d"));
+            v.draw(x, h);
 
+            const updateMath = async () => {
                 const x = Number(this.xSlider.element.value);
-                const h = Number(this.hSlider.element.value);                
-                const v = this.visualiser(this.canvas.getContext("2d"));
-                v.draw(x, h);
+                const h = Number(this.hSlider.element.value);
+                const xx = f(x);
+                const xhxh = f(x + h);
+                const fprimex = (xhxh - xx) / h;
+                const mx = fprimex / x;
 
-                const updateMath = async () => {
-                    const x = Number(this.xSlider.element.value);
-                    const h = Number(this.hSlider.element.value);
-                    const xx = f(x);
-                    const xhxh = f(x + h);
-                    const fprimex = (xhxh - xx) / h;
-                    const mx = fprimex / x;
-
-                    MathJax.typesetClear([this.math, this.xSlider.valSpan, this.hSlider.valSpan]);
-                    this.math.innerHTML = `$$
+                MathJax.typesetClear([this.math, this.xSlider.valSpan, this.hSlider.valSpan]);
+                this.math.innerHTML = `$$
     \\begin{align}
         f'(x) &\\approx \\frac{f(x + h) - f(x)}{h} \\\\[10pt]
-          &\\approx \\frac{${xhxh.toFixed(2)} - ${xx.toFixed(2)}}{${h}} = ${fprimex.toFixed(2)} \\\\[10pt]
-          &\\approx ${isFinite(mx) ? mx.toFixed(2) + "x" : "\\infty{}"}
+          &\\approx \\frac{${xhxh.toFixed(3)} - ${xx.toFixed(3)}}{${h}} = ${fprimex.toFixed(3)} \\\\[10pt]
+          &\\approx ${isFinite(mx) ? mx.toFixed(3) + "x" : "\\infty{}"}
     \\end{align}
     $$`;
-                    this.xSlider.valSpan.innerHTML = `\\(${x.toFixed(2)}\\)`;
-                    this.hSlider.valSpan.innerHTML = `\\(${h.toFixed(2)}\\)`;
-                    await MathJax.typesetPromise([this.math, this.xSlider.valSpan, this.hSlider.valSpan]);
-                };
+                this.xSlider.valSpan.innerHTML = `\\(${x.toFixed(3)}\\)`;
+                this.hSlider.valSpan.innerHTML = `\\(${h.toFixed(3)}\\)`;
+                await MathJax.typesetPromise([this.math, this.xSlider.valSpan, this.hSlider.valSpan]);
+            };
 
-                updateMath();
+            updateMath();
 
-                this.xSlider.element && this.xSlider.valSpan &&
-                    this.xSlider.element.addEventListener("input", async ({target: {value: val}}) => {
-                        v.redraw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
-                        await updateMath();
-                    });
+            this.xSlider.element && this.xSlider.valSpan &&
+                this.xSlider.element.addEventListener("input", async ({target: {value: val}}) => {
+                    v.redraw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
+                    await updateMath();
+                });
 
-                this.hSlider.element && this.hSlider.valSpan &&
-                    this.hSlider.element.addEventListener("input", async ({target: {value: val}}) => {
-                        // Avoid division by zero!
-                        if (val == 0) {
-                            val = this.hSlider.prevValue > val ? -.01 : .01;
-                            this.hSlider.element.value = val;
-                        }
-                        this.hSlider.prevValue = val;
-                        v.redraw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
-                        await updateMath();
-                    });
-            }
+            this.hSlider.element && this.hSlider.valSpan &&
+                this.hSlider.element.addEventListener("input", async ({target: {value: val}}) => {
+                    // Avoid division by zero!
+                    if (val == 0) {
+                        val = this.hSlider.prevValue > val ? -.01 : .01;
+                        this.hSlider.element.value = val;
+                    }
+                    this.hSlider.prevValue = val;
+                    v.redraw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
+                    await updateMath();
+                });
         }
-    };
+    }
+};
 #+end_src
 
 Initialise the layers:
 
 #+begin_src js
-    await staticLayer.init();
-    await dynamicLayer.init();
+await staticLayer.init();
+await dynamicLayer.init();
 };
 #+end_src
 
@@ -844,185 +879,185 @@ const numericalExample = async () => {
 *** Canvas                                                         :noexport:
 
 #+begin_src js
-    const CANVAS = { WIDTH: 550, HEIGHT: 550, PADDING: 0 };
-    const AXES = { X: { ZERO: CANVAS.WIDTH / 2 },
-                   Y: { ZERO: CANVAS.HEIGHT - 250 } };
-    const X = { LEN: 1000, MIN: -2.5, MAX: 2.5};
-    X.STEP = (X.MAX - X.MIN) / X.LEN;
+const CANVAS = { WIDTH: 550, HEIGHT: 550, PADDING: 0 };
+const AXES = { X: { ZERO: CANVAS.WIDTH / 2 },
+               Y: { ZERO: CANVAS.HEIGHT - 250 } };
+const X = { LEN: 1000, MIN: -2.5, MAX: 2.5};
+X.STEP = (X.MAX - X.MIN) / X.LEN;
 #+end_src
 
 *** Vectors, constants, input variables, output function           :noexport:
 
 #+begin_src js
-    const xVec = Array.from({length: X.LEN + 1}, (_,x) => X.MIN + x * X.STEP);
-    const C1 = new Dual(1, 0);
-    const C2 = new Dual(2, 0);
-    const f = x => x.add(C1).mul(x.sub(C2));
-    const yVec = xVec.map(x => ({x: x, y: f(new Dual(x, 1)).primal}));
-    const yMax = 3.5;//Math.max(...yVec.map(y => y.y));
+const xVec = Array.from({length: X.LEN + 1}, (_,x) => X.MIN + x * X.STEP);
+const C1 = new Dual(1, 0);
+const C2 = new Dual(2, 0);
+const f = x => x.add(C1).mul(x.sub(C2));
+const yVec = xVec.map(x => ({x: x, y: f(new Dual(x, 1)).primal}));
+const yMax = 3.5;//Math.max(...yVec.map(y => y.y));
 #+end_src
 
 *** DOM elements to target                                         :noexport:
 
 #+begin_src js    
-    const math = document.getElementById("dualNumerical");
-    const slider = document.getElementById("dualX");
+const math = document.getElementById("dualNumerical");
+const slider = document.getElementById("dualX");
 #+end_src
 
 *** Static plot; axes and f(x)                                     :noexport:
 
 #+begin_src js
-    const plot = {
-        staticLayer: {
-            canvas: document.getElementById("dualPlotStatic"),
+const plot = {
+    staticLayer: {
+        canvas: document.getElementById("dualPlotStatic"),
 
-            drawAxis: {
-                x: ctx => {
-                    ctx.beginPath();
-                    ctx.moveTo(0, AXES.Y.ZERO);
-                    ctx.lineTo(CANVAS.WIDTH, AXES.Y.ZERO);
-                    ctx.stroke();
-                    // Arrow
-                    ctx.beginPath();
-                    ctx.moveTo(CANVAS.WIDTH, AXES.Y.ZERO);
-                    ctx.lineTo(CANVAS.WIDTH - 10, AXES.Y.ZERO - 5);
-                    ctx.lineTo(CANVAS.WIDTH - 10, AXES.Y.ZERO + 5);
-                    ctx.closePath();
-                    ctx.fill();
-                },
-                y: ctx => {
-                    ctx.beginPath();
-                    ctx.moveTo(AXES.X.ZERO, 0);
-                    ctx.lineTo(AXES.X.ZERO, CANVAS.HEIGHT);
-                    ctx.stroke();
-                    // Arrow
-                    ctx.beginPath();
-                    ctx.moveTo(AXES.X.ZERO, 0);
-                    ctx.lineTo(AXES.X.ZERO - 5, 10);
-                    ctx.lineTo(AXES.X.ZERO + 5, 10);
-                    ctx.closePath();
-                    ctx.fill();
-                }
-            },
-
-            drawFunction: ctx => {
+        drawAxis: {
+            x: ctx => {
                 ctx.beginPath();
-                ctx.moveTo(
-                    CANVAS.PADDING + (yVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-                    CANVAS.PADDING + (yMax - yVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
-                );
-                yVec.forEach(p => ctx.lineTo(
-                    CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-                    CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
-                ));
-                ctx.strokeStyle = "blue";
-                ctx.lineWidth = 2;
+                ctx.moveTo(0, AXES.Y.ZERO);
+                ctx.lineTo(CANVAS.WIDTH, AXES.Y.ZERO);
                 ctx.stroke();
+                // Arrow
+                ctx.beginPath();
+                ctx.moveTo(CANVAS.WIDTH, AXES.Y.ZERO);
+                ctx.lineTo(CANVAS.WIDTH - 10, AXES.Y.ZERO - 5);
+                ctx.lineTo(CANVAS.WIDTH - 10, AXES.Y.ZERO + 5);
+                ctx.closePath();
+                ctx.fill();
             },
-
-            init() {
-                if (this.canvas.getContext) {
-                    this.canvas.setAttribute("width", CANVAS.WIDTH);
-                    this.canvas.setAttribute("height", CANVAS.HEIGHT);
-
-                    const ctx = this.canvas.getContext("2d");
-                    this.drawAxis.x(ctx);
-                    this.drawAxis.y(ctx);
-                    this.drawFunction(ctx);
-                }
+            y: ctx => {
+                ctx.beginPath();
+                ctx.moveTo(AXES.X.ZERO, 0);
+                ctx.lineTo(AXES.X.ZERO, CANVAS.HEIGHT);
+                ctx.stroke();
+                // Arrow
+                ctx.beginPath();
+                ctx.moveTo(AXES.X.ZERO, 0);
+                ctx.lineTo(AXES.X.ZERO - 5, 10);
+                ctx.lineTo(AXES.X.ZERO + 5, 10);
+                ctx.closePath();
+                ctx.fill();
             }
         },
+
+        drawFunction: ctx => {
+            ctx.beginPath();
+            ctx.moveTo(
+                CANVAS.PADDING + (yVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                CANVAS.PADDING + (yMax - yVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+            );
+            yVec.forEach(p => ctx.lineTo(
+                CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+            ));
+            ctx.strokeStyle = "blue";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        },
+
+        init() {
+            if (this.canvas.getContext) {
+                this.canvas.setAttribute("width", CANVAS.WIDTH);
+                this.canvas.setAttribute("height", CANVAS.HEIGHT);
+
+                const ctx = this.canvas.getContext("2d");
+                this.drawAxis.x(ctx);
+                this.drawAxis.y(ctx);
+                this.drawFunction(ctx);
+            }
+        }
+    },
 #+end_src
 
 *** Dynamic plot; f(x) indicator and tangent                       :noexport:
 
 #+begin_src js
-        dynamicLayer: {
-            canvas: document.getElementById("dualPlotDynamic"),
+    dynamicLayer: {
+        canvas: document.getElementById("dualPlotDynamic"),
 
-            artist: ctx => ({
-                clear: () => ctx.clearRect(0, 0, CANVAS.WIDTH, CANVAS.HEIGHT),
+        artist: ctx => ({
+            clear: () => ctx.clearRect(0, 0, CANVAS.WIDTH, CANVAS.HEIGHT),
 
-                drawTangent: x => {
-                    const slope = f(new Dual(x, 1)).tangent;
-                    const yTanVec = xVec.map(xVal => ({x: xVal, y: slope * (xVal - x) + f(new Dual(x, 1)).primal}));
-                    ctx.beginPath();
-                    ctx.moveTo(
-                        CANVAS.PADDING + (yTanVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-                        CANVAS.PADDING + (yMax - yTanVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
-                    );
-                    yTanVec.forEach(p => ctx.lineTo(
-                        CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-                        CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
-                    ));
-                    ctx.strokeStyle = "green";
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                },
+            drawTangent: x => {
+                const slope = f(new Dual(x, 1)).tangent;
+                const yTanVec = xVec.map(xVal => ({x: xVal, y: slope * (xVal - x) + f(new Dual(x, 1)).primal}));
+                ctx.beginPath();
+                ctx.moveTo(
+                    CANVAS.PADDING + (yTanVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - yTanVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                );
+                yTanVec.forEach(p => ctx.lineTo(
+                    CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                ));
+                ctx.strokeStyle = "green";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            },
 
-                drawIntersection: x => {
-                    const indicatorWidth = 6;
-                    ctx.beginPath();
-                    ctx.arc(
-                        CANVAS.PADDING + (x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
-                        CANVAS.PADDING + (yMax - f(new Dual(x, 1)).primal) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax,
-                        indicatorWidth,
-                        0, 2 * Math.PI
-                    );
-                    ctx.fill();
-                },
-                
-                draw(x) {
-                    this.drawTangent(x);
-                    this.drawIntersection(x);
-                },
-                
-                redraw(x) {
-                    this.clear();
-                    this.draw(x);
-                }
-            }),
+            drawIntersection: x => {
+                const indicatorWidth = 6;
+                ctx.beginPath();
+                ctx.arc(
+                    CANVAS.PADDING + (x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - f(new Dual(x, 1)).primal) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax,
+                    indicatorWidth,
+                    0, 2 * Math.PI
+                );
+                ctx.fill();
+            },
 
-            async init() {
-                if (this.canvas.getContext) {
-                    this.canvas.setAttribute("width", CANVAS.WIDTH);
-                    this.canvas.setAttribute("height", CANVAS.HEIGHT);
+            draw(x) {
+                this.drawTangent(x);
+                this.drawIntersection(x);
+            },
 
-                    return this.artist(this.canvas.getContext("2d"));
-                }
+            redraw(x) {
+                this.clear();
+                this.draw(x);
+            }
+        }),
+
+        async init() {
+            if (this.canvas.getContext) {
+                this.canvas.setAttribute("width", CANVAS.WIDTH);
+                this.canvas.setAttribute("height", CANVAS.HEIGHT);
+
+                return this.artist(this.canvas.getContext("2d"));
             }
         }
-    };
+    }
+};
 #+end_src
 
 *** Typeset math update callback                                   :noexport:
 
 #+begin_src js
-    const updateMath = async () => {
-        const x = new Dual(Number(slider.value), 1);
-        
-        MathJax.typesetClear([math]);
-        math.innerHTML = `\\begin{align}
+const updateMath = async () => {
+    const x = new Dual(Number(slider.value), 1);
+    
+    MathJax.typesetClear([math]);
+    math.innerHTML = `\\begin{align}
 & ( ${x} + ${C1} )( ${x} - ${C2} ) \\\\[.5em]
 =& ${x.add(C1)} ${x.sub(C2)} \\\\[.5em]
 =& ${f(x)}
 \\end{align}`
-        await MathJax.typesetPromise([math]);
-    };
+    await MathJax.typesetPromise([math]);
+};
 #+end_src
 
 *** Setup and input variable change event listener                 :noexport:
 
 #+begin_src js
-    await updateMath();
-    plot.staticLayer.init();
-    const d = await plot.dynamicLayer.init();
-    d.draw(Number(slider.value));
+await updateMath();
+plot.staticLayer.init();
+const d = await plot.dynamicLayer.init();
+d.draw(Number(slider.value));
 
-    slider.addEventListener("input", async ({target: {value}}) => {
-        await updateMath();
-        await d.redraw(Number(value));
-    });
+slider.addEventListener("input", async ({target: {value}}) => {
+    await updateMath();
+    await d.redraw(Number(value));
+});
 };
 #+end_src
 
@@ -1055,100 +1090,443 @@ const numericalExample = async () => {
 \nabla{}u = \begin{bmatrix}\frac{\partial{}u}{\partial{}x_{1}} \\ \vdots \\ \frac{\partial{}u}{\partial{}x_{N}}\end{bmatrix}
 \end{equation}
 
+* Differentiable Faust Primitives
+
+** Identity Primitive
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_html: :style width: 6.5em
+#+begin_src faust :results file svg :file images/identity.svg :exports both
+process = _;
+#+end_src
+#+attr_org: :width 100
+#+attr_html: :width 300
+#+RESULTS:
+[[file:images/identity.svg]]
+
+** Identity Primitive
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_org: :width 100
+#+attr_html: :width 300
+[[file:images/identity.svg]]
+
+Semantic scheme:
+
+\begin{align}
+  \sembrack{\_} \;&:\; \mathbb{S} \to \mathbb{S} \\[5pt]
+  \sembrack{\_}(s)& \to (s)
+\end{align}
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+y(t) = s(t)\cdot{}1 = s(t)
+\end{equation}
+
+** Identity Primitive
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+In dual signal arithmetic:
+
+\begin{equation}
+\langle{}s,\nabla{}s\rangle \in \mathbb{S}_{d}, \quad \mathbb{S}_{d} = \mathbb{S}^{N+1}
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :style margin-top: 2em
+\begin{equation}
+\langle{}s,\nabla{}s\rangle\langle{}1,\nabla1\rangle = \langle{}1s, 1\nabla{}s + s\nabla{}1 \rangle = \langle{}s,\nabla{}s\rangle
+\end{equation}
+
+** Identity Primitive
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\(\diffbrack{\cdot}_{}\)
+
+Derivative transformation with respect to \(N\) input variables.
+
+#+ATTR_REVEAL: :frag t
+\begin{align}
+  \diffbrack{\_} \;&:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\[5pt]
+  \diffbrack{\_}(\langle s,\nabla{}s \rangle)& \to (\langle s,\nabla{}s \rangle)
+\end{align}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :style margin-top: 2em
+\begin{equation}
+\diffbrack{\_}
+  \;=\; \left[\!\!\left[ \overbrace{\_\,,\dots,\_}^{N+1 }\right]\!\!\right]
+  \;=\; \left[\!\!\left[ {\Big\|_{l=1}^{N+1}\;\_}\, \right]\!\!\right]
+\end{equation}
+
+** Identity Primitive
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_src faust :results file svg :file images/diffidentity.svg :exports both
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(_);
+#+end_src
+#+attr_org: :width 100
+#+attr_html: :width 300
+#+ATTR_REVEAL: :frag t
+#+RESULTS:
+[[file:images/diffidentity.svg]]
+
+** Identity Primitive
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+In the differentiable environment in =diff.lib=...
+
+#+attr_html: :style width: 18em
+#+begin_src faust
+env(vars) = environment {
+  ···
+  diff(_) = par(i, vars.N + 1, _);
+  ···
+};
+#+end_src
+
+** Unary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate data-auto-animate-restart
+:END:
+
+\begin{align}
+\diffbrack{U} \;&:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\[5pt]
+\diffbrack{U}(\langle s,\nabla{}s \rangle)& \to (\langle y,\nabla{}y \rangle)
+\end{align}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :style margin-top: 2em
+\begin{align}
+\langle y,\nabla{}y \rangle &= U(\langle s,\nabla{}s \rangle) \\
+  &= \langle U(s), \nabla{}s\,U'(s) \rangle
+\end{align}
+
+** Unary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{equation}
+\exp(\langle s,\nabla{}s \rangle) = \langle \exp(s), \nabla{}s\exp(s) \rangle
+\end{equation}
+
+#+attr_html: :style width: 11.5em
+#+begin_src faust :noeval :exports code
+process = d.diff(exp);
+#+end_src
+
+#+begin_src faust :results file svg :file images/diffunary1.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(exp);
+#+end_src
+#+attr_org: :width 200
+#+attr_html: :width 800
+#+RESULTS:
+[[file:images/diffunary1.svg]]
+
+** Unary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{equation}
+\cos(\langle s,\nabla{}s \rangle) = \langle \cos(s), -\nabla{}s\sin(s) \rangle
+\end{equation}
+
+#+attr_html: :style width: 11.5em
+#+begin_src faust :noeval :exports code
+process = d.diff(cos);
+#+end_src
+
+#+begin_src faust :results file svg :file images/diffunary2.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(cos);
+#+end_src
+#+attr_org: :width 200
+#+attr_html: :width 800
+#+RESULTS:
+[[file:images/diffunary2.svg]]
+
+** Unary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+In =diff.lib=...
+
+#+attr_html: :style width: 40em
+#+begin_src faust
+env(vars) = environment {
+  ···
+  diff(cos) = diffcos with { diffcos = unary(cos, (*(-1),sin : *)); };
+  ···
+} with {
+  unary(primal, tangent) = routing : primal,par(i, vars.N, tangent)
+  with {
+    routing = ...
+  };
+  ···
+};
+#+end_src
+** Unary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+What about ~mem~?
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+\langle{}s,\nabla{}s\rangle\ast\langle{}h,\nabla{}h\rangle = \langle{}s\ast{}h, \nabla{}s\ast{}h\rangle
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+  \begin{split}
+    \diffbrack{\mathrm{mem}} &\;:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\[5pt]
+    \diffbrack{\mathrm{mem}}(\langle{}s, \nabla{}s\rangle) &\to (\langle{}y, \nabla{}y\rangle) \\[5pt]
+    \langle{}y(t),\nabla{}y(t)\rangle &= \langle{}s(t-1),\nabla{}s(t-1)\rangle
+  \end{split}
+\end{equation}
+
+#+begin_src faust :results file svg :file images/diffmem.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(mem);
+#+end_src
+#+attr_org: :width 200
+#+attr_html: :width 300
+#+ATTR_REVEAL: :frag t
+#+RESULTS:
+[[file:images/diffmem.svg]]
+
+** Binary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate data-auto-animate-restart
+:END:
+
+\begin{align}
+\diffbrack{B} \;&:\; \mathbb{S}^{2}_{d} \to \mathbb{S}_{d} \\[5pt]
+\diffbrack{B}(\langle s_{1},\nabla{}s_{1} \rangle,\langle &s_{2},\nabla{}s_{2} \rangle) \to (\langle y,\nabla{}y \rangle)
+\end{align}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :style margin-top: 2em
+\begin{align}
+\langle y,\nabla{}y \rangle &= B(\langle s_{1},\nabla{}s_{1} \rangle,\langle s_{2},\nabla{}s_{2} \rangle) \\
+  &= \left\langle B(s_{1},s_{2}), \nabla{}s_{1}\frac{\partial{}B}{\partial{}s_{1}}+\nabla{}s_{2}\frac{\partial{}B}{\partial{}s_{2}} \right\rangle
+\end{align}
+
+** Binary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_html: :style width: 10.5em
+#+begin_src faust :noeval :exports code
+process = d.diff(*);
+#+end_src
+
+#+begin_src faust :results file svg :file images/diffbinary1.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(*);
+#+end_src
+#+attr_org: :width 200
+#+attr_html: :width 1400
+#+RESULTS:
+[[file:images/diffbinary1.svg]]
+
+** Binary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_html: :style width: 10.5em
+#+begin_src faust :noeval :exports code
+process = d.diff(+);
+#+end_src
+
+#+begin_src faust :results file svg :file images/diffbinary2.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(+);
+#+end_src
+#+attr_org: :width 200
+#+attr_html: :width 1400
+#+RESULTS:
+[[file:images/diffbinary2.svg]]
+
+#+begin_src faust :noeval :exports code
+diff(+) = diffadd with { diffadd = binary(+, (_,!,!,_ : +)); };
+#+end_src
+
+** Binary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_html: :style width: 10.5em
+#+begin_src faust :noeval :exports code
+process = d.diff(+);
+#+end_src
+
+#+begin_src faust :results file svg :file images/diffaddalt.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = routes.interleave(vars.N + 1, 2) : +,par(i, vars.N, +);
+#+end_src
+#+attr_org: :width 200
+#+attr_html: :width 450
+#+RESULTS:
+[[file:images/diffaddalt.svg]]
+
+#+attr_html: :style width: 23em
+#+begin_src faust :noeval :exports code
+diff(+) = diffadd
+with {
+  diffadd = routes.interleave(vars.N + 1, 2)
+            : +,par(i, vars.N, +);
+};
+#+end_src
+
+** Binary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_html: :style width: 10.5em
+#+begin_src faust :noeval :exports code
+process = d.diff(@);
+#+end_src
+
+#+begin_src faust :results file svg :file images/diffdelay.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(@);
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 1400
+#+RESULTS:
+[[file:images/diffdelay.svg]]
+
 ** Gradient \to Jacobian
 
 #+attr_html: :class big-eqn
 \begin{equation}
-\langle {\color{blue} u}, {\color{green} \nabla{}u} \rangle \to \langle {\color{blue} \mathbf{u}},{\color{green} \mathbf{J_{u}}} \rangle
+\langle {\color{blue} s}, {\color{green} \nabla{}s} \rangle \to \langle {\color{blue} \mathbf{s}},{\color{green} \mathbf{J_{s}}} \rangle
 \end{equation}
 
 \begin{equation}
-\mathbf{u} = \begin{bmatrix}u_{1} \\ \vdots \\ u_{M}\end{bmatrix}
+\langle {\color{blue} \mathbf{s}},{\color{green} \mathbf{J_{s}}} \rangle =
+  \langle {\color{blue} s_{1}},{\color{green} \nabla{}s_{1}} \rangle,\dots,\langle {\color{blue} s_{M}},{\color{green} \nabla{}s_{M}} \rangle
 \end{equation}
 
 \begin{equation}
-\mathbf{J_{u}} = \begin{bmatrix}
-  \frac{\partial{}u_{1}}{\partial{}x_{1}} & \cdots & \frac{\partial{}u_{1}}{\partial{}x_{N}} \\
+\mathbf{J_{s}} = \begin{bmatrix}
+  \frac{\partial{}s_{1}}{\partial{}x_{1}} & \cdots & \frac{\partial{}s_{1}}{\partial{}x_{N}} \\
   \vdots & \ddots & \vdots \\
-  \frac{\partial{}u_{M}}{\partial{}x_{1}} & \cdots & \frac{\partial{}u_{M}}{\partial{}x_{N}} \\
+  \frac{\partial{}s_{M}}{\partial{}x_{1}} & \cdots & \frac{\partial{}s_{M}}{\partial{}x_{N}} \\
 \end{bmatrix}
 \end{equation}
 
-* Differentiable Faust Primitives
+** Differentiable Circuits
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{equation}
+  \begin{split}
+    \diffbrack{C} &\;:\; \mathbb{S}_{d}^{M} \to \mathbb{S}_{d}^{P} \\[5pt]
+    \diffbrack{C}(\langle{} \mathbf{s},\mathbf{J_{s}} \rangle) &\to (\langle{} \mathbf{y},\mathbf{J_{y}} \rangle) \\[5pt]
+    \langle\mathbf{y}(t), \;\mathbf{J}_{\mathbf{y}}(t)\rangle &= \langle{}f(\mathbf{s}(t)), \;\mathbf{J}_{f}(t)\mathbf{J}_{{\mathbf{s}}}(t)\rangle
+  \end{split}
+\end{equation}
+
+** saonetuh
+
+#+begin_src faust :results file svg :file images/diffpar.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff((*,sin));
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 1400
+#+RESULTS:
+[[file:images/diffpar.svg]]
+
+** aosntehusntaoeh
+
+#+begin_src faust :results file svg :file images/diffseq.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff((* : sin));
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 1500
+#+RESULTS:
+[[file:images/diffseq.svg]]
 
 * Differentiable Faust Programs
 
 * Hessians and Beyond...
-
-
-
-
-
-
-
-
-* Yo
-
-This =org= *file* /describes/ my presentation for the 2024 International
-Faust Conference.
-
-\(\lBrack + \rBrack\)
-
-\(\unicode{x27e6}\! + \!\unicode{x27e7}\)
-
-\(\llbracket + \rrbracket\)
-
-\(\Delta_{N}[\![\cdot]\!]\)
-
-\(\sembrack{+}\)
-
-\(\diffbrack{+}\)
-
-* ?
-:PROPERTIES:
-:reveal_extra_attr: data-transition="fade"
-:END:
-
-hi
-#+NAME: eq:
-\begin{equation}
-y = f(x) + g(x)
-\end{equation}
-
-** oestnuhsa
-:PROPERTIES:
-:reveal_extra_attr: data-transition="fade"
-:END:
-
-test
-
-#+REVEAL: split data-transition="fade"
-
-hello
-
-* !
-:PROPERTIES:
-:reveal_extra_attr: data-transition="fade"
-:END:
-
-another test
-
-* snhteaousnthueonth
-:PROPERTIES:
-:reveal_extra_attr: data-auto-animate data-auto-animate-id="one"
-:END:
-
-- one
-- three
-
-* snhteaousnthueonth
-:PROPERTIES:
-:reveal_extra_attr: data-auto-animate data-auto-animate-id="one"
-:END:
-
-- one
-- two
-- three
 
 * Emacs Setup                                                      :noexport:
 
