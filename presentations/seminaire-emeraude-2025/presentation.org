@@ -48,7 +48,7 @@ Then navigate to [[http://localhost:8000/seminaire-emeraude-2025/]].
 
 * CSS                                                              :noexport:
 
-** Symlink to =~/org/fonts=.
+** Symlink to =~/org/fonts=
 
 #+begin_src emacs-lisp :results none :export none :eval yes
 (dired-make-relative-symlink "../../fonts" "fonts" t)
@@ -175,17 +175,6 @@ Improve code block appearance.
 }
 #+end_src
 
-** Some old stuff that I might not need.
-
-#+begin_src css :tangle no
-.title-page > h2 {
-    color: #ededed;
-}
-
-.faust-editor-wrap {
-    font-size: 2rem;
-}
-#+end_src
 
 * JS                                                               :noexport:
 
@@ -1497,6 +1486,12 @@ process = d.diff(@);
 :reveal_extra_attr: data-auto-animate
 :END:
 
+
+** Differentiable Compositions
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
 \begin{equation}
   \diffbrack{C_{1},C_{2}} = \diffbrack{C_{1}},\diffbrack{C_{2}}
 \end{equation}
@@ -1750,7 +1745,48 @@ process = d.diff(d.diff(d.diff(sin)));
 #+RESULTS:
 [[file:images/diffdiffsin.svg]]
 
-* A Brief Demo...
+* A Brief Demonstration...
+
+** Second order autodiff (in the web IDE)                          :noexport:
+
+#+begin_src faust
+import("stdfaust.lib");
+import("diff.lib");
+
+N = 2;
+
+vars1(V) = environment {
+    // Count the variables.
+    N = outputs(V);
+    // Retrieve a variable by index i.
+    var(i) = ba.take(i, V),pds(N, i)
+    with {
+        // Compute partial derivatives of
+        // variable x_i.
+        pds(N, i) = par(j, N, i-1==j);
+    };
+};
+
+X = vars1(par(i, N, hslider("x%i", 0, -10, 10, 1)));
+d = df.env(X);
+
+f = ^(2),_ : *;
+
+x1 = hslider("[0]x1", 0, -10, 10, 1),1,0,1,0,0,0,0,0;
+x2 = hslider("[1]x2", 0, -10, 10, 1),0,1,0,0,0,1,0,0;
+
+process = x1,x2
+    : d.diff(d.diff(f))
+    : (_ <: attach(hbargraph("[2]y = x1^2 * x2", -100, 100))),
+    (_ <: attach(hbargraph("[3]dy/dx1 = 2*x1*x2", -100, 100))),
+    (_ <: attach(hbargraph("[4]dy/dx2 = x1^2", -100, 100))),
+    (_ <: attach(hbargraph("[5]dy/dx1 = 2*x1*x2", -100, 100))),
+    (_ <: attach(hbargraph("[6]dyy/dx1x1 = 2*x2", -100, 100))),
+    (_ <: attach(hbargraph("[7]dyy/dx1x2 = 2*x1", -100, 100))),
+    (_ <: attach(hbargraph("[8]dy/dx2 = x1^2", -100, 100))),
+    (_ <: attach(hbargraph("[9]dyy/dx2x1 = 2*x1", -100, 100))),
+    (_ <: attach(hbargraph("[10]dyy/dx2x2 = 0", -100, 100)));
+#+end_src
 
 * Emacs Setup                                                      :noexport:
 

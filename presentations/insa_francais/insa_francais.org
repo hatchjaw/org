@@ -4,14 +4,14 @@
 #+TITLE: Spatialisation du son sur systèmes distribués
 #+AUTHOR: Thomas Rushton
 
-#+OPTIONS: num:nil toc:1 ^:{} ':t
-#+OPTIONS: reveal_width:1200 reveal_height:800 reveal_slide_number:c/t
+#+OPTIONS: num:nil toc:1
+#+OPTIONS: reveal_width:1500 reveal_height:1000 reveal_slide_number:c/t
 #+LANGUAGE: fr
 #+EXPORT_FILE_NAME: index
 #+REVEAL_ROOT: ../reveal.js
-#+REVEAL_THEME: white
+#+REVEAL_THEME: white_contrast_compact_verbatim_headers
 #+REVEAL_TRANS: slide
-#+REVEAL_PLUGINS: (math)
+#+property: header-args:css :results none :exports none :tangle ./style.css
 #+REVEAL_EXTRA_CSS: style.css
 #+REVEAL_MIN_SCALE: 1.0
 #+REVEAL_MAX_SCALE: 1.0
@@ -39,6 +39,88 @@ npm start -- --root=../
 
 Ensuite, naviguez vers [[localhost:8000/insa_francais/]].
 
+* CSS/JS                                                           :noexport:
+
+** Lien symbolique vers =~/org/fonts=
+
+#+begin_src emacs-lisp :results none :export none :eval yes
+(dired-make-relative-symlink "../../fonts" "fonts" t)
+#+end_src
+
+** Typographie
+
+*** Polices
+
+#+begin_src css
+@font-face {
+    font-family: "MyMinion";
+    src:
+        local("MinionPro-Regular"),
+        url("fonts/minionpro/MinionPro-Regular.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-It.otf") format("opentype");
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-Semibold.otf") format("opentype");
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-Bold.otf") format("opentype");
+    font-weight: 800;
+    font-style: normal;
+}
+#+end_src
+
+Remplacer certaines variables de reveal.js
+
+#+begin_src css
+:root {
+    --r-main-font: "MyMinion";
+    --r-main-font-size: 42px;
+    --r-heading-font: "MyMinion";
+    --r-code-font: "Iosevka Comfy Motion";
+    --r-heading-text-transform: none;
+}
+#+end_src
+
+*** Décorer mes rubriques
+
+#+begin_src css
+.stack h2, .stack h3 {
+    text-decoration: underline 3px #bbb;
+}
+#+end_src
+
+*** Utiliser les anciens numéros
+
+#+begin_src css
+body {
+    font-variant-numeric: oldstyle-nums;
+}
+#+end_src
+
+** Corriger 
+
+#+begin_src css
+.title-slide > h2 {
+    color: #ededed;
+}
+#+end_src
 
 * À propos de moi
 
@@ -51,7 +133,7 @@ Ensuite, naviguez vers [[localhost:8000/insa_francais/]].
   + Musicien, technicien
   + Programmeur informatique
   + Développeur d'applications web
-- MSc Informatique du Son et de la Musique, l'Universié d'Aalborg
+- MSc Informatique du Son et de la Musique, l'Université d'Aalborg
   (Copenhague) 2023
   #+ATTR_REVEAL: :frag (appear)
   + Stage, Inria/Emeraude, Villeurbanne, 2022
@@ -62,7 +144,7 @@ Ensuite, naviguez vers [[localhost:8000/insa_francais/]].
 :reveal_extra_attr: class="title-slide"
 :END:
 
-** Synthèse du Champ d'Onde (WFS)
+** Synthèse du Champ d'Ondes (WFS)
 
 [[./images/wfs1.svg]]
 
