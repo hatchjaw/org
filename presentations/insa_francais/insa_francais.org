@@ -5,7 +5,7 @@
 #+AUTHOR: Thomas Rushton
 
 #+OPTIONS: num:nil toc:1
-#+OPTIONS: reveal_width:1500 reveal_height:1000 reveal_slide_number:c/t
+#+OPTIONS: reveal_width:1400 reveal_height:1000 reveal_slide_number:c/t
 #+LANGUAGE: fr
 #+EXPORT_FILE_NAME: index
 #+REVEAL_ROOT: ../reveal.js
@@ -16,8 +16,11 @@
 #+REVEAL_MIN_SCALE: 1.0
 #+REVEAL_MAX_SCALE: 1.0
 #+REVEAL_EXTRA_OPTIONS: hash: true, fragmentInURL: true
-#+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
-#+REVEAL_TITLE_SLIDE_BACKGROUND: #141414
+#+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%s</h2><h3>%a</h3><div class="logos">
+#+REVEAL_TITLE_SLIDE: <img src="images/insa.svg" height="100">
+#+REVEAL_TITLE_SLIDE: <img src="images/inria.svg" height="100">
+#+REVEAL_TITLE_SLIDE: <img src="images/citi.png" height="100"></div>
+#+REVEAL_TITLE_SLIDE_BACKGROUND: #fff
 #+REVEAL_TITLE_SLIDE_EXTRA_ATTR: class="title-slide"
 
 * À propos de cette présentation                                   :noexport:
@@ -39,7 +42,7 @@ npm start -- --root=../
 
 Ensuite, naviguez vers [[localhost:8000/insa_francais/]].
 
-* CSS/JS                                                           :noexport:
+* CSS                                                              :noexport:
 
 ** Lien symbolique vers =~/org/fonts=
 
@@ -114,11 +117,21 @@ body {
 }
 #+end_src
 
-** Corriger 
+** Corriger la couleur des rubriques sur les diapositives de titre
 
 #+begin_src css
 .title-slide > h2 {
     color: #ededed;
+}
+#+end_src
+
+** Ameliorer de la mise on page des images de la diapositive de titre
+
+#+begin_src css
+.title-slide > .logos {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 3em;
 }
 #+end_src
 
@@ -140,12 +153,14 @@ body {
 
 * Son spatial distribué
 :PROPERTIES:
-:reveal_background: #141414
+:reveal_background: #282828
 :reveal_extra_attr: class="title-slide"
 :END:
 
-** Synthèse du Champ d'Ondes (WFS)
+** Synthèse du champ d'ondes (WFS)
 
+#+attr_org: :width 400
+#+attr_html: :width 900
 [[./images/wfs1.svg]]
 
 Objectif : synthètiser un front d'onde à l'aide de sources sonores
@@ -156,13 +171,32 @@ secondaires
 
 * L'état de l'art
 :PROPERTIES:
-:reveal_background: #141414
+:reveal_background: #282828
 :reveal_extra_attr: class="title-slide"
 :END:
 
 ** IRCAM, Paris
 
-[[./images/ircam1.png]] [[./images/ircam2.png]]
+#+begin_src css :exports none
+.ircam {
+    display: flex;
+    justify-content: space-around;
+}
+#+end_src
+
+#+begin_export html
+<div class="ircam">
+#+end_export
+
+#+attr_html: :height 400
+[[./images/ircam1.png]]
+
+#+attr_html: :height 400
+[[./images/ircam2.png]]
+
+#+begin_export html
+</div>
+#+end_export
 
 [[https://www.ircam.fr/projects/pages/systeme-wfs-et-ambisonique-a-lespace-de-projection][Espace de Projection]], 339 haute-parleurs
 
@@ -180,12 +214,18 @@ WellenFeld H 104, 2700 haute-parleurs
 
 * Motivation
 :PROPERTIES:
-:reveal_background: #141414
-:reveal_extra_attr: class="title-slide"
+:reveal_background: #282828
+:reveal_extra_attr: class="title-slide" data-auto-animate
 :END:
 
-** Motivation
+* Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:UNNUMBERED: notoc
+:END:
 
+#+attr_org: :width 400
+#+attr_html: :width 900
 [[./images/wfs2.svg]]
 
 Les systèmes de spatialisation du son sont typiquement centralisés
@@ -193,23 +233,30 @@ Les systèmes de spatialisation du son sont typiquement centralisés
 #+ATTR_REVEAL: :frag t
 Beaucoup de canaux de sortie audio --- chers, exclusifs
 
-#+REVEAL: split
+* Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:UNNUMBERED: notoc
+:END:
 
+#+attr_org: :width 400
+#+attr_html: :width 900
 [[./images/wfs3.svg]]
 
 Mais WFS est /parallélisable/
 
-On pourra distribuer le travail
+#+ATTR_REVEAL: :frag t
+On peut /distribuer/ le travail
 
 #+ATTR_REVEAL: :frag t
-On pourrait créer un système plus accessible
+On pourrait créer un système plus /accessible/
 
 #+ATTR_REVEAL: :frag t
 La /synchronisation/ sera important
 
 * Défis
 :PROPERTIES:
-:reveal_background: #141414
+:reveal_background: #282828
 :reveal_extra_attr: class="title-slide"
 :END:
 
@@ -231,6 +278,8 @@ Un réseau de données d'audio, de contrôle et de chronométrage
 Si la synchronisation n'est pas assurée...
 
 #+ATTR_REVEAL: :frag t
+#+attr_html: :width 900
+#+attr_org: :width 400
 [[./images/wfs4.svg]]
 
 * Merci de votre attention 🔊
