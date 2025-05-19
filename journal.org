@@ -8609,3 +8609,33 @@ is rather LaTeX-centric when it comes to maths; there are a couple of
 - [[https://badnoise.net/TypeRip/][TypeRip]], for downloading Adobe fonts (in .ttf format).
 
 Entered on [2025-05-06 mar. 14:32]
+
+*** 2025-05-17 samedi
+**** Peyrusse: Romain M.                                    :PRESENTATION:
+- Maxime P. defended thesis; recently added companion website for
+  experiment reproduction.
+  + Created /Polyphonics/ startup with support of Inria Startup
+    Incubator.
+  + Working with /Music Unit/ (Paris) on a binaural implementation.
+  + New Syfala board under development.
+- Ethernet FPGA transmission stabilised in Syfala.
+  + /Space Bar/ (second-iteration DIY FPGA WFS device) deployed at
+    Inria showroom in Grenoble.
+- Apparently I've released the "most precise distributed spatial audio
+  system ever".
+- Remi Jeunehomme had a paper accepted at SMC on his intership work.
+- FPGA ambisonics dome, based on the same PCB as the /Space Bar/,
+  working with a decoder based on /Ambitools/ (Faust).
+  + Created by PIR students + Pierre.
+- +PLASMA+ MIRAGES associate research team; Emeraude + CCRMA.
+  + €10k/year for 3 years.
+  + Modeling & Immersive Rendering of Archaeoacoustics in Grotto
+    Environments.
+  + Stanford does modeling; Emeraude does rendering.
+- Outlook: AI & embedded sound systems
+  + Remi Guillote internship; AI for reverb modeling.
+  + Audio processing on NPU (N for /neural/) [[https://www.st.com/en/microcontrollers-microprocessors/stm32n6-series.html][STM32N6]] ([[https://www.st.com/en/evaluation-tools/stm32n6570-dk.html][demo board]]).
+  + ERC proposal.
+  + Syfala goes ASIC (via [[https://tinytapeout.com/][tinytapeout]]).
+  
+Entered on [2025-05-17 sam. 09:07]
