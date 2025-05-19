@@ -74,12 +74,30 @@ loaded and thus the correct ~PATH~.
     shell-command-switch "-ic"
 #+end_src
 
-** Finish up
-
-Close ~setq-default~ and ~use-package~.
+Close ~setq-default~.
 
 #+begin_src emacs-lisp
-))
+  )
+#+end_src
+
+** Key bindings
+
+*** Ibuffer
+
+Use [[https://www.emacswiki.org/emacs/IbufferMode][Ibuffer]] instead of [[https://www.emacswiki.org/emacs/BufferMenu][BufferMenu]]; the former behaves rather more like
+dired; one can, e.g. =%n [regexp] [ret] t k= to filter on buffers
+whose names match =regexp= (then =g= to reset).
+
+#+begin_src emacs-lisp
+  (global-set-key (kbd "C-x C-b") 'ibuffer)
+#+end_src
+
+** Finish up
+
+Close ~use-package~.
+
+#+begin_src emacs-lisp
+)
 #+end_src
 
 * Org Mode
@@ -164,7 +182,6 @@ Close ~custom-set-faces~.
 #+end_src
 
 ** Structure templates
-
 *** Shell
 
 #+begin_src emacs-lisp
