@@ -1,0 +1,451 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+
+#+TITLE: Enabling Distributed Spatial Audio
+#+SUBTITLE: Thesis Committee --- Year 2
+#+AUTHOR: Thomas Rushton
+
+#+options: num:t toc:nil
+#+options: reveal_width:1500 reveal_height:1000 reveal_slide_number:c/t
+#+export_file_name: index
+#+property: header-args:css :results none :exports none :tangle ./style.css
+#+reveal_root: ../reveal.js
+#+reveal_theme: white_contrast_compact_verbatim_headers
+#+reveal_trans: slide
+#+reveal_plugins: (math)
+#+reveal_extra_css: style.css
+#+reveal_min_scale: 1.0
+#+reveal_max_scale: 1.0
+#+reveal_extra_options: hash: true, fragmentInURL: true
+#+reveal_title_slide: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
+#+reveal_title_slide_background: #141414
+#+reveal_title_slide_extra_attr: class="title-slide"
+
+* About This Presentation                                          :noexport:
+
+This =org= file describes my presentation for my second year /Comité de
+Suivi Individuel/, to be held on May 27th 2025.
+
+** Dependencies
+
+- =org-re-reveal= ([[https://gitlab.com/oer/org-re-reveal/-/tree/main][gitlab]]), which enables export support from Org to [[https://revealjs.com/][Reveal.js]].
+
+** Running the Presentation
+
+From the reveal.js directory (=../reveal.js=), run:
+
+#+begin_src shell :noeval :exports code
+npm start -- --root=../
+#+end_src
+
+Then navigate to [[http://localhost:8000/csi-year2]].
+
+* CSS                                                              :noexport:
+** Symlink to =~/org/fonts=
+
+#+begin_src emacs-lisp :results none :export none :eval yes
+(dired-make-relative-symlink "../../fonts" "fonts" t)
+#+end_src
+
+** Typography
+
+Define some fonts. Useful info [[https://www.digitalocean.com/community/tutorials/how-to-load-and-use-custom-fonts-with-css#loading-a-self-hosted-font-with-font-face][here]].
+
+#+begin_src css
+@font-face {
+    font-family: "MyMinion";
+    src:
+        local("MinionPro-Regular"),
+        url("fonts/minionpro/MinionPro-Regular.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-It.otf") format("opentype");
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-Semibold.otf") format("opentype");
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-Bold.otf") format("opentype");
+    font-weight: 800;
+    font-style: normal;
+}
+#+end_src
+
+Now override some of reveal's variables.
+
+#+begin_src css
+:root {
+    --r-main-font: "MyMinion";
+    --r-main-font-size: 42px;
+    --r-heading-font: "MyMinion";
+    --r-code-font: "Iosevka Comfy Motion";
+    --r-heading-text-transform: none;
+}
+#+end_src
+
+*** Headings
+
+Decorate my h2's and h3's.
+
+#+begin_src css
+.stack h2, .stack h3 {
+    text-decoration: underline 3px #bbb;
+}
+#+end_src
+
+*** Figures
+
+#+begin_src css
+.reveal figure {
+    margin-top: 0;
+}
+#+end_src
+
+*** Use old style numbers
+
+#+begin_src css
+body {
+    font-variant-numeric: oldstyle-nums;
+}
+#+end_src
+
+But not in code blocks
+
+#+begin_src css
+.reveal pre {
+    font-variant-numeric: normal;
+}
+#+end_src
+
+*** Font size utility classes
+
+Captions
+
+#+begin_src css
+.caption {
+    font-size: .6em;
+}
+#+end_src
+
+Big equations
+
+#+begin_src css
+.big-eqn {
+    font-size: 1.5em;
+}
+
+.huge-eqn {
+    font-size: 2em;
+}
+#+end_src
+
+** Code blocks
+
+Improve code block appearance.
+
+#+begin_src css
+.reveal pre {
+    padding: 1em;
+    width: 66.6%;
+    box-shadow: none;
+    background: #efefef;
+    font-size: .7em;
+}
+#+end_src
+
+* About Me
+
+#+ATTR_REVEAL: :frag (appear)
+- Name: Thomas Albert Rushton
+- Born: Manchester, UK, 1985
+- BMus Music Technology, The University of Edinburgh, 2009
+- Employment
+  #+ATTR_REVEAL: :frag (appear)
+  + Performing arts technician
+  + Musician, bicycle mechanic
+  + Computer programmer, print industry
+  + Web application developer
+  + Contractor, Freelancer
+- MSc Sound & Music Computing, Aalborg University (Copenhagen) 2023
+  #+ATTR_REVEAL: :frag (appear)
+  + Internship, Inria/Emeraude, 2022
+
+* Distributed Spatial Audio
+:PROPERTIES:
+:reveal_background: #141414
+:reveal_extra_attr: class="title-slide"
+:END:
+
+** Wave Field Synthesis
+[[./images/wfs1.svg]]
+
+Synthesise a wavefront via secondary point sources
+
+#+ATTR_REVEAL: :frag t
+/Holophony/
+
+** Motivation
+
+[[./images/wfs2.svg]]
+
+WFS systems are typically centralised, /in situ/ installations
+
+#+ATTR_REVEAL: :frag t
+Lots of output channels --- costly
+#+ATTR_REVEAL: :frag t
+€150-250/channel
+
+#+REVEAL: split
+
+[[./images/wfs3.svg]]
+
+WFS is /parallelisable/
+
+What if we could distribute the work?
+
+#+ATTR_REVEAL: :frag t
+/Timing/ will be important
+
+** A Distributed Alternative
+
+#+begin_quote
+"A distributed system is a collection of independent entities that
+cooperate to solve a problem that cannot be individually solved."
+#+end_quote
+#+begin_export html
+<small>
+#+end_export
+Kshemkalyani & Singhal, 2011, /Distributed Computing: Principles,
+Algorithms, and Systems/.
+#+begin_export html
+</small>
+#+end_export
+
+#+ATTR_REVEAL: :frag (appear)
+- Scalabale, with no performance penalty
+- Modular: entities act independently
+- Reduced cost-per-channel; incrementally extensible
+- *Improved accessibility*
+
+** Requirements
+
+#+ATTR_REVEAL: :frag (appear)
+- A source of audio and control data
+  #+ATTR_REVEAL: :frag (appear)
+  + General purpose computer
+  + Standalone software/audio plugin
+- A means of transmission
+  #+ATTR_REVEAL: :frag (appear)
+  + Ethernet is the standard for multichannel audio
+  + UDP --- basis for OSC, RTP, PTP
+  + AVB/AES67 --- suites of technical standards
+- A collection of recipients for that data
+  #+ATTR_REVEAL: :frag (appear)
+  + Low-cost, programmable computing platform
+  + Support for audio and ethernet
+- An authoritative source of time
+  #+ATTR_REVEAL: :frag (appear)
+  + PTP... but enabled hardware increases costs
+  + Possible as a software implementation?
+
+* Prior Work
+:PROPERTIES:
+:reveal_background: #141414
+:reveal_extra_attr: class="title-slide"
+:END:
+
+** First Iteration
+
+#+ATTR_REVEAL: :frag (appear)
+- Based on the /Teensy 4.1/ microcontroller development board
+- Served by standalone control software
+- Audio server: JackTrip
+  #+ATTR_REVEAL: :frag (appear)
+  + Unicast only
+  + Based on JACK: not truly cross-platform
+
+#+REVEAL: split
+
+#+ATTR_HTML: :width 750px
+[[./images/paw.jpg]]
+
+T. A. Rushton, R. Michon, S. Letz, 2023, "A Microcontroller-Based
+Network Client Towards Distributed Spatial Audio", /Proceedings of
+the 2023 Sound and Music Computing Conference (SMC-23)/.
+
+** Second Iteration
+
+#+ATTR_REVEAL: :frag (appear)
+- Teensy 4.1
+- VST plugin
+- Bespoke multicast server
+
+#+REVEAL: split
+
+#+ATTR_HTML: :width 1000px
+[[./images/system_overview.jpg]]
+
+#+REVEAL: split
+
+T. A. Rushton, R. Michon, S. Serafin, T. Risset, S. Letz, "Networked
+Microcontrollers for Accessible, Distributed Spatial Audio", /under
+review/.
+
+* Challenges
+:PROPERTIES:
+:reveal_background: #141414
+:reveal_extra_attr: class="title-slide"
+:END:
+
+** Time
+
+/Jitter/ and /clock drift/
+
+#+ATTR_REVEAL: :frag t
+Neither prior system featured a truly authoritative source of time
+
+#+ATTR_REVEAL: :frag t
+Time inferred from the rate of network transmission
+
+#+ATTR_REVEAL: :frag t
+Jitter compensation via a /delay-locked loop/
+
+#+ATTR_REVEAL: :frag t
+Clock drift compensation via PLL adjustments
+
+#+REVEAL: split
+
+Clients synchronised to ~500 \micro{}s, dependent on:
+#+ATTR_REVEAL: :frag (appear)
+- Sampling rate \rightarrow sample period
+- Buffer size
+  #+ATTR_REVEAL: :frag t
+  + Dictates channel count, jitter sensitivity
+- Jitter buffer r/w delta
+
+#+ATTR_REVEAL: :frag t
+Assuming $c =$ 343 m/s, up to ~17 cm propagation discrepancy
+
+#+ATTR_REVEAL: :frag t
+[[./images/wfs4.svg]]
+
+#+REVEAL: split
+
+Clients /experience/ clock drift and jitter differently
+
+#+ATTR_REVEAL: :frag t
+Relative inter-client temporal movement may cause audible phasing
+
+#+REVEAL: split
+#+ATTR_HTML: :width 750px
+[[./images/subjective.png]]
+
+Perhaps not sufficient to completely undermine the holophonic effect
+
+
+** Potential Solutions
+:PROPERTIES:
+:reveal_background: #141414
+:reveal_extra_attr: class="title-slide"
+:END:
+
+** Clock Conditioning
+
+[[./images/conditioning1.svg]]
+
+Server sends audio and clock data over the network
+#+ATTR_REVEAL: :frag t
+Client clocks are /conditioned/ to follow the server
+
+#+REVEAL: split
+
+#+ATTR_HTML: :width 700px
+[[./images/ptpflow.png]]
+
+John C. Edison, 2005, "IEEE 1588 Basics", /Proceedings of the 2005
+Conference on IEEE 1588 Standard for a Precision Clock Synchronization
+Protocol for Networked Measurement and Control Systems/.
+
+#+REVEAL: split
+
+[[./images/conditioning2.svg]]
+
+Audio and system clocks derived from the same crystal oscillator, but
+distinct
+
+#+ATTR_REVEAL: :frag (appear)
+- Is it possible to count ticks of the server's audio clock?
+- If so, can this be done in cross-platform fashion?
+- For a software PTP implementation, how do we cope with the chaos of
+  the network?
+
+** Clock Sharing
+
+[[./images/sharing.svg]]
+
+#+ATTR_REVEAL: :frag (appear)
+- Audio timing governed by a device whose audio clock we can access, and share with all clients
+- Demands an extra cable per client
+- Amplification of the clock signal
+
+** Other Challenges
+
+#+ATTR_REVEAL: :frag t
+Difficult to develop and test
+#+ATTR_REVEAL: :frag t
+Certain fundamental assumptions of digital audio can no longer be
+taken for granted
+#+ATTR_REVEAL: :frag t
+E.g. even with a shared clock, how do we synchronise interrupts?
+  
+* Outlook
+:PROPERTIES:
+:reveal_background: #141414
+:reveal_extra_attr: class="title-slide"
+:END:
+
+** Establish Authoritative Source of Time
+
+#+ATTR_REVEAL: :frag (appear)
+- Identify candidate hardware platform
+  #+ATTR_REVEAL: :frag (appear)
+  + Bare-metal Raspberry Pi --- Circle
+  + Better audio quality
+  + More memory; longer jitter buffer; improved scalability
+  + Can its clock be adjusted on the fly?
+  + Can it be run as an audio interface?
+  + Availability less of an issue; old models may suffice
+  + No UDP multicast (yet)
+  + No =faust2circle= (yet)
+- Make progress with software PTP...
+- ...Or pursure clock sharing
+
+** Then...
+
+#+ATTR_REVEAL: :frag (appear)
+- Improve software systems
+  + Integrity of server and client implementations
+  + Documentation, installation, workflow
+  + Optimise reproducibility, accessibility
+- Explore extensions to WFS
+- Parallelisability of ambisonics
+
+* Thank you
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:

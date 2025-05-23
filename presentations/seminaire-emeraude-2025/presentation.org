@@ -175,7 +175,6 @@ Improve code block appearance.
 }
 #+end_src
 
-
 * JS                                                               :noexport:
 
 ** MathJax
