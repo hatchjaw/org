@@ -125,7 +125,7 @@ body {
 }
 #+end_src
 
-** Ameliorer de la mise on page des images de la diapositive de titre
+** Ameliorer de la mise en page des images de la diapositive de titre principale
 
 #+begin_src css
 .title-slide > .logos {
@@ -139,19 +139,21 @@ body {
 
 #+ATTR_REVEAL: :frag (appear)
 - Nom : Thomas Albert Rushton
-- Né : Manchester, Royaume-Uni, 1985
-- BMus Technologie Musicale, l'Université d'Édimbourg, 2009
+- Né : Manchester, Royaume-Uni, 1985 📼
+- Licence en technologie musicale, Université d'Édimbourg, 2009 🏴󠁧󠁢󠁳󠁣󠁴󠁿
 - Travail
   #+ATTR_REVEAL: :frag (appear)
-  + Musicien, technicien
-  + Programmeur informatique
-  + Développeur d'applications web
-- MSc Informatique du Son et de la Musique, l'Université d'Aalborg
-  (Copenhague) 2023
+  + Musicien, technicien 🎸
+  + Programmeur informatique 🖥️
+  + Développeur d'applications web 🌐
+- MSc informatique du son et de la musique, Université d'Aalborg
+  (Copenhague) 2023 🇩🇰
   #+ATTR_REVEAL: :frag (appear)
-  + Stage, Inria/Emeraude, Villeurbanne, 2022
+  + Stage, Inria/Emeraude, Villeurbanne, 2022 🔊
+- Actuellement : doctorant, INSA Lyon/Inria/Emeraude
+  + Sujet de thèse : « Spatialisation du son sur systèmes distribués »
 
-* Son spatial distribué
+* Son spatial
 :PROPERTIES:
 :reveal_background: #282828
 :reveal_extra_attr: class="title-slide"
@@ -202,6 +204,7 @@ secondaires
 
 ** TU Berlin
 
+#+attr_html: :width 1200
 [[./images/tu-berlin.webp]]
 
 WellenFeld H 104, 2700 haute-parleurs
