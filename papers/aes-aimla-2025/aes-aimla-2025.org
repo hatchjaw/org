@@ -356,7 +356,7 @@ language, Faust can, for example, define a diagram consisting of two
 blocks, \(A\) and \(B\), composed in sequence, with code of the form
 #+name: lst:seq
 #+caption: Sequential composition of two Faust blocks.
-#+begin_src faust :noexec
+#+begin_src faust :noeval
 process = A : B;
 #+end_src
 

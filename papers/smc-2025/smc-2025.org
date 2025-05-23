@@ -13,6 +13,7 @@
 # bibtex-compatible file for this paper.
 #+cite_export: bibtex
 #+latex_header_extra: \RequirePackage[]{./out/smc-2025}
+#+property: header-args:julia :eval no-export
 
 #+begin_abstract
 State-of-the-art systems for spatial and immersive audio lie beyond
@@ -35,8 +36,18 @@ sufficient to support time-sensitive audio applications.
 * About                                                            :noexport:
 
 Org file describing a paper for submission to the 2025 Sound and Music
-Computing conference. Submit on [[https://easychair.org/account2/signin?l=8813818998001063168][EasyChair]] by March 3rd.
+Computing conference. Submit on [[https://easychair.org/account2/signin?l=8813818998001063168][EasyChair]] by March +3rd+ 12th 2025.
 
+** It was accepted!
+
+Submit camera-ready version by June 2nd 2025.
+
+** Dependencies
+
+- Julia 1.11.3
+- =julia-vterm= and =ob-julia-vterm= Emacs packages
+  + See [[file:~/org/config/emacs/init.org::*vterm][notes in Emacs config]] if Julia stuff stops working.
+  
 ** What's the cost per channel again?
 
 Excluding the cost of a computer, speakers and cables:
@@ -102,7 +113,7 @@ E.g. -4 ms drift over the course of 600 seconds,
 
 * LaTeX Setup                                                      :noexport:
 :PROPERTIES:
-:header-args: :tangle out/smc-2025.sty :results silent
+:header-args: :tangle out/smc-2025.sty :results silent :noeval
 :END:
 
 ** Provide the package
@@ -190,7 +201,9 @@ I want to draw a diagram or two.
 The following command enables line numbers and it is meant for Review
 only. It must be removed/commented out for Camera Ready version.
 
-#+begin_src latex
+*** DONE Remove line numbers for camera-ready version
+
+#+begin_src latex :tangle no
 \pagewiselinenumbers
 #+end_src
 
@@ -252,11 +265,11 @@ accessible, scalable multichannel audio system with the strength to
 stand as a viable alternative to the commercial state-of-the-art. In
 cref:sec:bg we discuss prior work in distributed and frugal spatial
 audio and outline the key challenges associated with audio in a
-distributed context; in cref:sec:impl we present approach to
+distributed context; in cref:sec:impl we present our approach to
 establishing an all-important /authoritative source of time/ in that
 context; in cref:sec:eval we present some preliminary results based on
 the method outlined in cref:sec:impl; we conclude, in
-cref:sec:conclusion by describing some outstanding challenges and
+cref:sec:conclusion, by describing some outstanding challenges and
 sharing our aims for future research.
 
 * Background
@@ -264,8 +277,8 @@ sharing our aims for future research.
 :CUSTOM_ID: sec:bg
 :END:
 
-The importance of sound in the immersive experience is
-well-established\nbsp[cite:@geronazzoSonic2023]; if, however, the auditory
+The importance of sound in the immersive experience is well
+established\nbsp[cite:@geronazzoSonic2023]; if, however, the auditory
 aspect of virtual and extended reality remains comparatively neglected
 when considered alongside other sensory
 channels\nbsp[cite:@serafinReflections2020], this may be ascribed, in
@@ -300,9 +313,9 @@ effect on research and creativity.
 
 #+name: tab:platforms
 #+caption: Selected embedded computing platforms listed with their
-#+caption: corresponding microcontroller (MCU) or system on chip (SoC), availaibility of
+#+caption: corresponding microcontroller (MCU) or system on chip (SoC), availability of
 #+caption: selected functionality, and approximate cost per unit (rounded
-#+caption: to the nearest Euro) as of March 2025.
+#+caption: to the nearest euro) as of March 2025.
 #+attr_latex: :float multicolumn :align lllllr :booktabs t
 | Platform         | MCU/SoC                         | Memory       | Ethernet | PTP | Unit Cost |
 |------------------+---------------------------------+--------------+----------+-----+-----------|
@@ -349,7 +362,7 @@ microcontroller (MCU) systems,[fn:6] prominent amongst these being the
 NXP[fn:7]), /Daisy/\nbsp[cite:@gasterAudio2020]
 (STMicroelectronics[fn:8]), and various /ESP32/
 [cite:@michonFaust2020] development boards. Beyond matters of economy,
-connectivity, and low power-consumption, the attraction of such
+connectivity, and modest power requirements, the attraction of such
 devices lies in the relative ease with which they can be programmed,
 each providing either an SDK, a selection of utility classes, or, in
 the case of ELS, compatibility with existing audio applications and
@@ -420,8 +433,9 @@ thus cannot be connected to a network. The Raspberry Pi CM5, coupled
 with associated I/O board, offers ethernet connectivity as standard,
 plus PTP, and is memory rich, but its audio clock is not configurable
 in fine enough increments to effect adjustments on the order of
-nanoseconds per second (\unit{\ns\per\s}), such as time-sensitive
-audio applications such as WFS demand (see cref:fig:wfs-ptp).
+nanoseconds per second (\unit{\ns\per\s}), a level of precision that
+time-sensitive audio applications such as WFS demand (see
+cref:fig:wfs-ptp).
 
 #+name: fig:wfs-ptp
 #+attr_org: :width 400
@@ -589,9 +603,9 @@ accessibility that will be given no further consideration here. The
 second approach is to exploit the functionality of the audio subsystem
 of the SoC or MCU, which typically provides a hardware timer, derived
 from the XO, and adjustable via a phase locked loop (PLL), to govern
-the audio sampling rate. The PLL is configurable via hardware
-registers representing dividers to be applied to the XO frequency to
-achieve the desired sampling frequency.
+the audio sampling rate\nbsp[cite:@carotGNSSbased2019]. The PLL is
+configurable via hardware registers representing dividers to be
+applied to the XO frequency to achieve the desired sampling frequency.
 
 Whereas the Raspberry Pi's SoC provides only 12-bits of clock divider
 resolution, perhaps owing to the fact that it is an all-purpose device
@@ -615,45 +629,58 @@ calculate its offset from the former, producing a figure in
 nanoseconds by which, for a given second, it must adjust its ethernet
 timer. Taking this \unit{\ns\per\s} adjustment, and assuming that
 ethernet and audio clocks are derived from the same clock source,
-i.e. the XO (a safe assumption in the case of the iMXRT1062; see
-cref:fig:arch), achieving sample rate parity is a relatively simple
-case of applying the adjustment, \(a\), to the nominal sampling
-frequency, \(f_{s}\), to produce a target sampling frequency,
-\(\hat{f}_{s}\)
+i.e. the device's \qty{24}{\MHz} XO (a safe assumption in the case of
+the iMXRT1062; see cref:fig:arch), achieving sample rate parity is a
+relatively simple case of applying the adjustment, \(a\), expressed in
+seconds, to the nominal sampling frequency, \(f_{s}\), to produce a
+target sampling frequency, \(\hat{f}_{s}\), such that
 
 #+NAME: eq:fine-num-1
 \begin{equation}
-\hat{f}_{s} = f_{s}\left(1 + \frac{a}{\num{1e9}}\right)\;.
+\hat{f}_{s} = f_{s}\left(1 + a\right)\;.
 \end{equation}
 For example, should a clock subscriber, running at a nominal
-\qty{48}{\kHz}, drift fast over a given second by \qty{1750}{\nano\s},
-the new sampling frequency to be applied should be
+\qty{48}{\kHz}, drift fast over a given second by \qty{1750}{\nano\s}
+(\qty{1.75e-6}{\s}), the new sampling frequency to be applied should
+be
 
 #+begin_src emacs-lisp :exports none
-(let* ((fs 48e3)
-       (drift -1)
+(let* ((driftns -1750)
+       (fs 48e3)       
        (nsps 1e9)
-       (ratio (+ 1 (/ drift nsps)))
+       (drift (* driftns (/ 1 nsps)))
+       (ratio (+ 1 drift))
        (newfs (* fs ratio))
        (frac-diff (/ 1. (- newfs fs))))
   (format "Ratio: %.9f, new fs: %.9f Hz, fractional diff: 1/%.1f Hz" ratio newfs frac-diff))
 #+end_src
 
 #+RESULTS:
-: Ratio: 0.999999999, new fs: 47999.999952000 Hz, fractional diff: 1/-20833.3 Hz
+: Ratio: 0.999998250, new fs: 47999.916000000 Hz, fractional diff: 1/-11.9 Hz
 
 #+NAME: eq:fs-example
 \begin{align*}
-\hat{f}_{s} &= \num{48000}\left(1 + \frac{-1750}{\num{1e9}}\right) \\
+\hat{f}_{s} &= \num{48000}\left(1 - \num{1.75e-6}\right) \\
   &= \num{48000} \times \num{0.999998925} \\
   &= \qty{47999.916}{\Hz}\;,
 \end{align*}
 or about \(\frac{1}{12}\)\unit{\Hz} slower. An adjustment of
-\qty{1}{\ns\per\s} at a nominal \qty{48}{\kHz} corresponds to about
-one twenty-one-thousandth of a cycle of the audio clock. Whereas the
-Broadcom BCM2712 offers around \(\frac{1}{14}\)\unit{\Hz} resolution
-at this frequency, the iMXRT1062 provides better than one in
-six-hundred-thousand.
+\qty{1}{\ns\per\s} at a nominal \qty{48}{\kHz} corresponds to
+approximately one twenty-one-thousandth of a cycle of the audio
+clock. Whereas the Broadcom BCM2712 offers around
+\(\frac{1}{14}\)\unit{\Hz} resolution at this frequency, the iMXRT1062
+provides better than one in six-hundred-thousand.
+
+Note that the XO of the clock authority is manufactured to the same
+tolerance and stability specifications as those of the clock
+subscribers; none of these components produces a /true/ \qty{24}{\MHz}
+clock frequency. It would be entirely possible to synchronise the
+clock authority to a PPS signal registered by a GPS receiver
+[cite:@schleusnerSubMicrosecond2024], but this of course implies the
+availability of a GPS signal, which, in an indoor context for
+instance, is far from guaranteed [cite:@carotGNSSbased2019]. We
+consider the device designated as the clock authority as being a
+sufficiently reliable source of time for our purposes.
 
 ** Reproduction Simultaneity
 
@@ -810,47 +837,30 @@ plotDrift("ptp")
     \subfloat[With PTP-derived sampling frequency correction.]{\includegraphics[width=0.5\textwidth]{figures/ptp}\label{fig:ptp}}
 \end{figure*}
 
-# #+name: fig:fig
-# #+caption: plots of....
-# #+begin_figure*
-# #+name: fig:sfig1
-# #+attr_latex: :options {0.4\textwidth}
-# #+caption: Hi
-# #+begin_subfigure
-# #+attr_latex: :width 0.4\textwidth
-# [[./figures/noptp.png]]
-# #+end_subfigure
-# #+name: fig:sfig2
-# #+attr_latex: :options {0.4\textwidth}
-# #+caption: Yo
-# #+begin_subfigure
-# #+attr_latex: :width 0.4\textwidth
-# [[./figures/ptp.png]]
-# #+end_subfigure
-# #+end_figure*
-
 ** Measurement Setup
 :PROPERTIES:
 :CUSTOM_ID: sec:setup
 :END:
 
 Four MCUs, one running as clock authority, three as clock subscribers,
-were connected to a MikroTik CRS326-24G-2S+IN ethernet switch, which
-was configured to act as a PTP boundary clock. The clock authority
-also acted as an audio server, generating a \qty{1}{\Hz} impulse train
-and sending packets of audio data, timestamped \qty{1}{\ms} later than
-the measured instant of transmission, to the network on a multicast
-UDP address; additionally, the clock authority stored the outgoing
-packets in a ring buffer for reproduction by its own audio
-subsystem. Clock subscribers joined the multicast group, acting as
-audio clients, receiving audio packets from the server and writing
-these to their own respective ring buffers. On audio system startup,
-server and clients selected the audio packet timestamped closest to
-the instantaneous time reported by their own PTP reference clock;
-subsequently, all MCUs reproduced packets sequentially.
+were connected via \qty{50}{\cm} CAT5E ethernet cables to a MikroTik
+CRS326-24G-2S+IN ethernet switch, which was configured to act as a PTP
+boundary clock. The clock authority also acted as an audio server,
+generating a \qty{1}{\Hz} impulse train and sending packets of audio
+data, timestamped \qty{1}{\ms} later than the measured instant of
+transmission, to the network on a multicast UDP address; additionally,
+the clock authority stored the outgoing packets in a ring buffer for
+reproduction by its own audio subsystem. Clock subscribers joined the
+multicast group, acting as audio clients, receiving audio packets from
+the server and writing these to their own respective ring buffers. On
+audio system startup, server and clients selected the audio packet
+timestamped closest to the instantaneous time reported by their own
+PTP reference clock; subsequently, all MCUs reproduced packets
+sequentially.
 
-A digital logic analyser (Digilent Analog Discovery 2) was connected
-to the I^{2}S data pin of each MCU, and accompanying software (Digilent
+A digital logic analyser (Digilent Analog Discovery 2, with a sampling
+frequency of \qty{100}{\MHz}\hspace{-.25em} [fn:13]) was connected to the
+I^{2}S data pin of each MCU, and accompanying software (Digilent
 /WaveForms/ v. 3.23.4) used for data capture; the software's /Logic/
 mode was used, and set up to trigger a capture when the
 server/clock-authority reproduced an impulse. At each capture, the
@@ -871,32 +881,32 @@ cref:fig:results. In the absence of any manner of sampling frequency
 correction, cref:fig:noptp essentially reports raw, quasi-linear clock
 drift for the three clients relative to the server, with two running
 faster than the server, the other slightly slower. The client with IP
-address \texttt{x.x.48.234} exhibits the most significant drift,
+address ~x.x.48.234~ exhibits the most significant drift,
 \sim\qty{4}{\ms} over the course of ten minutes equating to around 6.7
-ppm.[fn:3] Assuming a sound propagation speed of \qty{343}{\m\per\s}
-in air at room temperature, in a practical application the
-inter-client spread of approaching \qty{5}{\ms} at the end of the ten
-minutes would correspond with a propagation discrepancy of roughly
-\qty{1.72}{\m}.
+parts per million.[fn:3] Assuming a sound propagation speed of
+\qty{343}{\m\per\s} in air at room temperature, in a practical
+application the inter-client spread of approaching \qty{5}{\ms} at the
+end of the ten minutes would correspond with a propagation discrepancy
+of roughly \qty{1.72}{\m}.
 
 Cref:fig:ptp is the equivalent plot for clients with sampling
 frequency correction applied. While some drift remains, note that it
 is three orders of magnitude less severe than in the correction-free
-case. Once again, \texttt{x.x.48.234} displays the greatest
+case. Once again, ~x.x.48.234~ displays the greatest
 asynchronicity; now, however, its \qty{1}{\micro\s} over ten minutes
 represents less than 1.7 parts per /billion/. At the end of the test,
-the three clients are are separated by an interval of just over
+the three clients are separated by an interval of just over
 \qty{1}{\micro\s} (marginally outside the AES guideline of 5% of the
-reference frame) corresponding to a propagation discrepancy of
-less than half a millimetre; we have improved from a scale comparable
-with the height of an adult human --- sufficient to obliterate the
+reference frame) corresponding to a propagation discrepancy of less
+than half a millimetre; we have improved from a scale comparable with
+the height of an adult human --- sufficient to obliterate the
 integrity of any attempt at sound field synthesis --- to an order of
 magnitude below that of the diameter of the eardrum.
 
 Interestingly, and lending encouragement to the hope that further
 improvements are within reach, the remaining audio drift appears to be
 inversely proportional to the raw drift, with client
-\texttt{x.x.48.191} now tending very slightly fast, whereas previously
+~x.x.48.191~ now tending very slightly fast, whereas previously
 it lagged behind.
 
 * Conclusion and Future Work
@@ -907,7 +917,8 @@ it lagged behind.
 We have demonstrated the feasibility of using the precision time
 protocol to synchronise reproduction across a distributed array of
 audio processors using open-source software and low-cost
-hardware. This represents a key technological finding and will serve
+hardware. With distributed audio devices now producing output /all
+together/, this represents a key technological finding and will serve
 as impetus for future research on this topic.
 
 If one were to identify a /weak link/ in the proposed system, that
@@ -922,7 +933,7 @@ technical perspective, it is not known at the present time whether the
 PTP implementation on the MikroTik device can function effectively in
 such a configuration. We lie at the mercy of the market in this
 regard; an switch running on open-source software, and perhaps an
-FGPA, represents a long-term objective.
+FPGA, represents a long-term objective.
 
 Besides establishing the cause of the remaining parts-per-billion
 drift and mitigating for it accordingly, future work will be concerned
@@ -951,6 +962,7 @@ find out.
 #+print_bibliography:
 
 * Footnotes
+[fn:13] https://digilent.com/reference/test-and-measurement/analog-discovery-2/specifications
 
 [fn:12] Code for the proposed implementation can be found at
 https://github.com/hatchjaw/teensy-audiosync/.
@@ -959,8 +971,8 @@ https://github.com/hatchjaw/teensy-audiosync/.
 
 [fn:10] https://www.audinate.com/ 
 
-[fn:9] For the /logical conclusion/ to this technological story, look
-no further than HOLOPLOT's behemoth installation at /The Sphere/, Las
+[fn:9] For the logical conclusion to this technological story, look no
+further than HOLOPLOT's behemoth installation at /The Sphere/, Las
 Vegas:
 https://holoplot.com/insights/case-studies/msg-sphere-case-study.
 
