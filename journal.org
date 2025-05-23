@@ -8639,3 +8639,182 @@ Entered on [2025-05-06 mar. 14:32]
   + Syfala goes ASIC (via [[https://tinytapeout.com/][tinytapeout]]).
   
 Entered on [2025-05-17 sam. 09:07]
+*** 2025-05-20 mardi
+**** SMC paper revisions                                         :WRITING:
+***** Reviewer 1
+Score: 3 (strong accept)
+****** DONE Replace "Euro" with "euro" in table 1 caption
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-05-20 mar. 17:30]
+:END:
+****** CANCELLED Page 5, line 34: "an FPGA" \to "a FPGA"
+:LOGBOOK:
+- State "CANCELLED"  from "TODO"       [2025-05-20 mar. 17:30]
+:END:
+It turns out I misspelled FPGA ("FGPA"). With that fixed, the
+convention appears to be "an" (see most of the uses in the [[https://en.wikipedia.org/wiki/Field-programmable_gate_array][Wikipedia
+article]]).
+****** DONE Add suggested references
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-05-22 jeu. 17:22] \\
+  I included a reference to 'GNSS-based Sound Card Synchronization'.
+:END:
+They are useful papers, one of which (an Alexander Carôt number)
+actually uses an NXP device. I'm a little disappointed I didn't find
+them myself.
+***** Reviewer 2
+Score: 2 (accept)
+****** DONE Maybe remove "All Together Now" from the title
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-05-21 mer. 17:06] \\
+  I decided to add a few words in the conclusion including the phrase
+  /all together/.
+:END:
+Either get rid, or mention these words in the text (without it coming
+across as forced or pretentious).
+****** DONE Enhance description of experimental setup
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-05-21 mer. 10:45]
+:END:
+#+begin_quote
+distance between the various MCU and the switch, resolution of the
+analyzer, etc. It should be reproducible by others.
+#+end_quote
+****** DONE P. 1, l. 57: our approach
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-05-20 mar. 17:51]
+:END:
+****** DONE P. 1, l. 60: in Section 5,
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-05-20 mar. 17:49]
+:END:
+****** DONE P. 1, l. 65: well established
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-05-20 mar. 17:48]
+:END:
+****** DONE P. 2, l. 26: power consumption \to power requirements
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-05-20 mar. 17:45]
+:END:
+****** DONE P. 3, l. 69: \(\hat{f}_{s}\), such that
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-05-20 mar. 17:42]
+:END:
+****** DONE P. 4, l. 74: are are
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-05-20 mar. 17:45]
+:END:
+***** Reviewer 3
+Score: 2 (accept)
+#+begin_quote
+[I]'m not entirely sure, why in the sampling-rate adjusted experiment
+(as seen in Fig.3b) the clients still have a general drift (albeit
+small). shouldn't they perform a "random walk" centered around the
+target samplerate instead?
+#+end_quote
+****** DONE Equation (1): change units for \(a\) from ns to s
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-05-21 mer. 10:18]
+:END:
+Hm, this one is slightly awkward. Suggestion followed
+nonetheless.
+****** DONE "availaibility" \to "availability"
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-05-20 mar. 17:40]
+:END:
+
+Entered on [2025-05-20 mar. 17:26]
+*** 2025-05-21 mercredi
+**** PIR: Faust Widget Modulation                           :PRESENTATION:
+- History of analog synths; Moog, Eurorack, etc.
+- Widget modulation in Faust.
+- The group created "Source modules" and "Transformation modules"...
+- Attempted to recreate the sound of the TB-303, 808 kick, etc.
+
+Sadly there was too much that I couldn't understand (slides & talk
+given in French).
+
+Entered on [2025-05-21 mer. 14:06]
+**** PIR: Algorithms for an FPGA-Based Spatial Audio Dome   :PRESENTATION:
+- Goal: create a low-cost 3D immersive sound experience using a
+  loudspeker dome and an FPGA.
+- Use Faust & Syfala.
+- Implement ambisonics; test the encoder/decoder.
+- Ambisonics
+  + Models a soundfield in a spherical zone delimited by loudspeakers.
+  + Spherical harmonics.
+  + Sonud field is a sum of spherical spatial functions.
+  + Order is improtant; higher order, greater detail.
+  + For each order, \(2n + 1\) extra degrees (output channels) needed.
+  + Virtual sound sources... plane waves... multiple sources, etc.
+  + Fractional orders possible, apparetly; order 3.5 more detailed
+    than order 3 (but less than 4) --- how many speakers needed?
+  + Encorder/decoder adaptable to the number of speakers.
+- FPGA
+  + Reprogrammable processor.
+  + Contains a great number of logic gates...
+  + Optimised to specific task.
+  + Applications (came after "why use...") doesn't need a whole
+    slide...
+    * High-frequency trading, Aerospace, Embedded audio.
+  + Why use one for the dome?
+    * Ultra low-latency.
+    * Parallelisation of computation.
+    * Hardware connectivity...
+    * Reconfigurable/reprogrammable.
+    * Chepaer, more flexible than an an ASIC.
+- dsp chain
+  + Soruce audio \to encoder (PC) \to ethernet \to decoder (FPGA)
+    * What's going on with the text/maths to the right of slide 19?
+      Too small, dim, illegible.
+  + Used Jack to patch an audio source to the encoder, which piped
+    signals to the Syfala Jack client.
+- Code/maths
+  + Sound and angular position (azimuth/elevation) \to encoder \to vector
+    of ambisonics channels.
+    * Fix those spelling error indicators in your code...
+  + Ambisonics channels \to decoder \to output signals.
+  + Code examples rather pointless; too small; nothing to lead the
+    eye.
+
+Entered on [2025-05-21 mer. 15:03]
+*** 2025-05-23 vendredi
+**** Meeting: Romain                                 :MEETING:SUPERVISION:
+- Keep SMC paper paragraph on GPS stuff.
+- Don't necessarily do everything the reviewers say.
+- SMC arrangements made.
+- Got to move the speakers out of Humanities room 210.
+  + for JIMLAC, but also because INSA is going to refurbish the
+    building.
+  + Romain wants to move them just before JIMLAC; week of June 16th.
+  + Special event, midweek, ICCART; they need an 8-channel setup, but
+    we also need some to give out.
+  + Use the atelier after SMC for system tests. I'm going need access
+    to CITI over the summer.
+  + For I3DA, just see if I can find out whether the RAM chips are
+    viable.
+  + I^{2}S tutorial --- intro to Faust; give short project ideas; 90 mins
+    is probably too short, so the three hour slot is the one to aim
+    for. Oh, I actually don't need to have the materials ready till
+    October. People maybe don't actually want to think, so spoonfeed
+    them.
+  + Maybe CCRMA won't work out; hard to say whether Stanford might
+    follow Harvard's lead (this morning's news) and ban/reduce intake
+    of foreign students.
+  + École Centrale for testing, maybe? Romain to ask Pierre Lecomte.
+
+Entered on [2025-05-23 ven. 09:56]
+**** Inria's Scientific Subscriptions                         :LITERATURE:
+Inria provides access to a large [[https://numin.inria.fr/portal/g/:spaces:71lwaa/base_de_connaissance/notes/3383?translation=en][collection]] of paywalled titles;
+JSTOR, IEEE Xplore, etc. One option for accessing these is to add a
+system-wide proxy:
+
+Réseau \to Serveur mandataire \to https://ist-proxy.inria.fr/pac/proxy.pac
+
+This poses the annoyance of browsers (and Zotero) requesting basic
+authentication for /any/ (e.g.) IEEE URL. The alternative is a browser
+extension, [[https://clickandread.inist.fr/][Click & Read]], which, as of right now, I'm trying instead.
+***** Resources
+- "[[https://numin.inria.fr/portal/g/:spaces:71lwaa/base_de_connaissance/notes/3752?translation=en][Access scientific subscriptions]]" documentation on Numin.
+
+Entered on [2025-05-23 ven. 10:22]
