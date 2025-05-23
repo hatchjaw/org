@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-# -*- mode: org -*-
-
 #+TITLE: What Difference Does It Make?
 #+subtitle: Automatic Differentiation in Faust
 #+AUTHOR: Thomas Rushton

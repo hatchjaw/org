@@ -1,6 +1,3 @@
-# -*- Mode: org -*-
-# -*- coding: utf-8 -*-
-
 #+title: Faust Autodiff: Towards Audio Domain-Specific Machine Learning
 #+author: Thomas Rushton
 

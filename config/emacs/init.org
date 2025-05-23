@@ -2,8 +2,13 @@
 #+property: header-args :tangle ~/.emacs.d/org-init.el :noeval
 
 I aim to migrate my existing config, managed with [[https://www.chezmoi.io/][chezmoi]], to this
-file. In the meantime, I tangle it to file that I then load from
+file. In the meantime, I tangle it to a file that I then load from
 =init.el=. For more config, see [[file:early-init.org][early init]].
+
+#+begin_notes
+It's already clear that I'm going to have to devise a better structure
+for this file at some point (see [[*Inspo][Inspo]]).
+#+end_notes
 
 * Inspo
 
@@ -116,7 +121,109 @@ whatever approach pio takes, but ten minutes looking around my system
 for ~.platformio/penv/bin~ being added to the PATH yielded nothing
 fruitful. There's nothing relevant in =/etc/profile.d=.
 
+** Aesthetics
+
+*** Title Bar
+
+No buffer name in the title bar:
+
+#+begin_src emacs-lisp
+  (setq-default frame-title-format nil)
+#+end_src
+
+*** Frame Border
+
+Let's let the visual space breath a little bit.
+
+#+begin_src emacs-lisp
+  (add-to-list 'default-frame-alist '(internal-border-width . 8))
+#+end_src
+
+*** Fonts
+
+Define variable and fixed pitch fonts.
+
+#+begin_src emacs-lisp
+  ;; (set-face-attribute 'variable-pitch nil :family "Minion Pro" :height 130)
+  ;; (set-face-attribute 'variable-pitch nil :family "EB Garamond" :height 130)
+  (set-face-attribute 'variable-pitch nil :family "Cantarell" :height 125)
+  (set-face-attribute 'fixed-pitch nil :family "Iosevka Comfy Motion" :height 110)
+#+end_src
+
+Make sure comments are always rendered with fixed pitch, even in Org
+mode, where they'd otherwise be variable pitch.
+
+#+begin_src emacs-lisp
+  (set-face-attribute 'font-lock-comment-face nil :inherit 'fixed-pitch)
+#+end_src
+
 ** Close ~use-package emacs~
+
+#+begin_src emacs-lisp
+)
+#+end_src
+
+* Writing
+
+** Olivetti
+
+[[https://github.com/rnkn/olivetti][This minor mode]] centers text.
+
+#+begin_src emacs-lisp
+(use-package olivetti
+  :ensure t
+  :defer t
+  :bind
+  ("C-c o" . olivetti-mode)
+#+end_src
+
+Use /fringes/ to balance the text body (as opposed to margins).
+
+#+begin_src emacs-lisp
+  :config
+  (setq olivetti-style t)
+#+end_src
+
+Automatically switch to olivetti mode for Org and Markdown.
+
+#+begin_src emacs-lisp
+  :hook
+  (org-mode . olivetti-mode)
+  (markdown-mode . olivetti-mode)
+  (help-mode . olivetti-mode)
+#+end_src
+
+And we're done.
+
+#+begin_src emacs-lisp
+)
+#+end_src
+
+* Spelling
+
+#+begin_src emacs-lisp
+(use-package flyspell
+  :ensure nil
+  :config
+#+end_src
+
+** Dictionary
+
+Be sure to use a British English dictionary by default.
+
+#+begin_src emacs-lisp
+  (setq ispell-dictionary "en_GB")
+#+end_src
+
+** Error appearance
+
+Improve the visual prominence of spelling errors.
+
+#+begin_src emacs-lisp
+  (set-face-attribute 'flyspell-incorrect nil :inverse-video t)
+#+end_src
+
+** [End spelling]
 
 #+begin_src emacs-lisp
 )
@@ -217,40 +324,34 @@ e.g., ~#+startup: nofold~.
 #+end_src
 
 ** Typography
-:PROPERTIES:
-:header-args: :tangle no
-:END:
 
-This part isn't doing enough of what I'd like, so I'm not tangling it
-for the time being.
+*** Default font
 
-** Use a variable pitch font by default
+Use a variable pitch font by default.
 
 #+begin_src emacs-lisp
   (add-hook 'org-mode-hook 'variable-pitch-mode)
 #+end_src
 
-** Allow lines to wrap
+*** Allow lines to wrap
 
 #+begin_src emacs-lisp
   (add-hook 'org-mode-hook 'visual-line-mode t)
 #+end_src
 
-** Actually, don't show emphasis markers
+*** Don't show emphasis markers
+
+These can always be revealed with =C-c e=.
 
 #+begin_src emacs-lisp
   (setq org-hide-emphasis-markers t)
 #+end_src
 
-** Use fixed pitch for a variety of Org Mode elements
+*** Fixed pitch font
 
-The main things that won't stick here are ~org-block-begin-line~ and
-~org-block-end-line~.
+Use fixed pitch for a variety of Org Mode elements.
 
 #+begin_src emacs-lisp
-  (set-face-attribute 'variable-pitch nil :family "EB Garamond" :height 130)
-
-  (set-face-attribute 'fixed-pitch nil :family "Iosevka Comfy Motion" :height 110)
   (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
   (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
   (set-face-attribute 'org-formula nil :inherit 'fixed-pitch)
@@ -263,30 +364,8 @@ The main things that won't stick here are ~org-block-begin-line~ and
   (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
   (set-face-attribute 'org-drawer nil :inherit 'fixed-pitch)
   (set-face-attribute 'org-property-value nil :inherit 'fixed-pitch)
-#+end_src
-
-#+begin_src emacs-lisp :tangle no
-  (custom-theme-set-faces
-   'user
-   '(variable-pitch ((t (:family "EB Garamond" :height 130))))
-   '(fixed-pitch ((t (:family "Iosevka Comfy Motion" :height 110))))
-   '(org-block ((t (:inherit fixed-pitch))))
-   '(org-code ((t (:inherit (shadow fixed-pitch)))))
-   ;; '(org-document-info ((t (:foreground "dark orange"))))
-   '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
-   '(org-indent ((t (:inherit (org-hide fixed-pitch)))))
-   ;; '(org-link ((t (:foreground "royal blue" :underline t))))
-   '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-   '(org-block-begin-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-   '(org-block-end-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-   ;; '(org-block-begin-line ((t (:inherit org-meta-line))))
-   ;; '(org-block-end-line ((t (:inherit org-block-begin-line))))
-   '(org-property-value ((t (:inherit fixed-pitch))) t)
-   '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-   ;; '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
-   '(org-table ((t (:inherit fixed-pitch))))
-   '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
-   '(org-verbatim ((t (:inherit (shadow fixed-pitch))))))
+  (set-face-attribute 'org-document-info-keyword nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-tag nil :inherit '(shadow fixed-pitch) :weight 'bold :height 1.0)
 #+end_src
 
 ** Structure templates
@@ -475,43 +554,6 @@ Let's try the =ace-window= package.
   :config
   (global-set-key (kbd "M-o") 'ace-window)
   (setq aw-dispatch-always t))
-#+end_src
-
-* Appearance
-** Custom faces
-
-#+begin_src emacs-lisp
-(custom-set-faces
-#+end_src
-
-*** Org mode
-
-Add some extra contrast to source blocks.
-
-#+begin_src emacs-lisp
-'(org-block-begin-line ((t (:inherit org-block-begin-line
-                                     :extend t
-                                     :underline nil))))
-'(org-block-end-line ((t (:inherit org-block-end-line
-                                   :extend t
-                                   :overline nil
-                                   :underline nil))))
-#+end_src
-
-Maybe the above would be better [[*Emacs Itself][above]]...
-
-*** Flyspell
-
-Make spelling errors really pop.
-
-#+begin_src emacs-lisp
-'(flyspell-incorrect ((t (:inverse-video t))))
-#+end_src
-
-** Close ~custom-set-faces~
-
-#+begin_src emacs-lisp
-)
 #+end_src
 
 * TODO Use ~setopt~ for ~defcustom~ variables
