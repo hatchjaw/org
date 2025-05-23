@@ -9,6 +9,8 @@ file. In the meantime, I tangle it to file that I then load from
 
 - https://codeberg.org/mehrad/.emacs.d
 - https://protesilaos.com/emacs/dotemacs
+- https://zzamboni.org/post/beautifying-org-mode-in-emacs/
+- https://github.com/SophieBosio/.emacs.d
 
 * Global modes
 
@@ -27,30 +29,29 @@ need to wrap, so I disable =visual-line-mode=.
 (use-package emacs
   :ensure nil
   :init
-  (setq-default
-#+end_src
+  #+end_src
 
 ** Default mode & scratch message
 
 Use Org Mode by default.
 
 #+begin_src emacs-lisp
-   major-mode 'org-mode
-   initial-major-mode 'org-mode
+ (setq-default major-mode 'org-mode)
+ (setq-default initial-major-mode 'org-mode)
 #+end_src
 
 A cheery, informative message for the scratch buffer.
 
 #+begin_src emacs-lisp
-   initial-scratch-message "\
+  (setq-default initial-scratch-message "\
 ,#+begin_quote
-This buffer is for notes that are not saved. it is in Org-mode so all
+This buffer is for notes that are not saved. It is in Org-mode so all
 Org keybindings work. For example, to create a code block, use ~C-c
 C-,~, and select a language. Enter ~C-c C-c~ and the result will be
 inserted below the source block.
 ,#+end_quote
 
-"
+")
 #+end_src
 
 ** Line truncation
@@ -59,7 +60,7 @@ I'm not a fan of continuation lines; if a line is longer than the
 viewport allows, I'll move the cursor to the right.
 
 #+begin_src emacs-lisp
-    truncate-lines t
+  (setq-default truncate-lines t)
 #+end_src
 
 If necessary, I can toggle from truncation to continuation with =C-x x
@@ -71,13 +72,7 @@ Make sure shell commands run interactively, so profile/config gets
 loaded and thus the correct ~PATH~.
 
 #+begin_src emacs-lisp
-    shell-command-switch "-ic"
-#+end_src
-
-Close ~setq-default~.
-
-#+begin_src emacs-lisp
-  )
+    (setq-default shell-command-switch "-ic")
 #+end_src
 
 ** Key bindings
@@ -92,12 +87,116 @@ whose names match =regexp= (then =g= to reset).
   (global-set-key (kbd "C-x C-b") 'ibuffer)
 #+end_src
 
-** Finish up
+** Path
 
-Close ~use-package~.
+Emacs "[[https://www.reddit.com/r/emacs/comments/10tcu73/comment/j7665bx/][inherits the environment from the program that launched it]]",
+so if certain PATH elements are shell-specific (bash, fish, etc.),
+those might not be loaded. I.e. launching Emacs from Alacritty (fish)
+=exec-path= yields
+
+| ~/.pyenv/plugins/pyenv-virtualenv/shims | ~/.pyenv/shims | ~/.nix-profile/bin | /nix/var/nix/profiles/default/bin | /usr/local/bin | /usr/bin | /usr/bin/site_perl | /usr/bin/vendor_perl | /usr/bin/core_perl | /usr/local/sbin | /var/lib/flatpak/exports/bin | ~/.local/bin | /usr/lib/jvm/default/bin | ~/.platformio/penv/bin | /usr/lib/emacs/30.1/x86_64-pc-linux-gnu |
+
+which includes =~/.local/bin=, as desired/expected. Launching from
+GNOME's Activites/Overview, instead:
+
+| ~/.platformio/penv/bin | /usr/local/bin | /usr/bin | /usr/bin/site_perl | /usr/bin/vendor_perl | /usr/bin/core_perl | /usr/lib/emacs/30.1/x86_64-pc-linux-gnu |
+
+There's a [[https://github.com/purcell/exec-path-from-shell][package]] for addressing this issue, but for now I'm just
+going to make sure Emacs can find stuff in =~/.local/bin=.
+
+#+begin_src emacs-lisp
+  (add-to-list 'exec-path (file-truename "~/.local/bin"))
+#+end_src
+
+*** Addendum
+
+Somehow platformio always manages to add itself to the PATH,
+i.e. =exec-path= always seems to contain it. I should try to copy
+whatever approach pio takes, but ten minutes looking around my system
+for ~.platformio/penv/bin~ being added to the PATH yielded nothing
+fruitful. There's nothing relevant in =/etc/profile.d=.
+
+** Close ~use-package emacs~
 
 #+begin_src emacs-lisp
 )
+#+end_src
+
+* vterm
+
+I only really need [[https://github.com/akermu/emacs-libvterm][this]] for =julia-vterm=, but it's a nice terminal
+emulator nonetheless. =shell-command= and =async-shell-command= tend
+to be better bets for general terminal commands.
+
+I kept seeing the following in the messages buffer:
+
+#+begin_example
+error in process filter: Process vterm not running: exited abnormally with code 127
+#+end_example
+
+I tried reinstalling =libvterm= and forcing Emacs to reinstall the
+=vterm= package; turns out there's another system package,
+=emacs-libvterm-git= (AUR), that doesn't appear to be reliable any
+longer.
+
+In the end I resorted to installing =emacs-libvterm= [[https://github.com/akermu/emacs-libvterm?tab=readme-ov-file#manual-installation][manually]].
+
+#+begin_src emacs-lisp :tangle no
+(use-package vterm
+  :load-path "~/.emacs.d/packages/emacs-libvterm")
+#+end_src
+
+* Julia
+
+I've used Julia for some data-wrangling (see, e.g., [[file:~/org/papers/smc-2025/smc-2025.org][SMC '25]]). It can
+be a bit of a nuisance to work with (though that's largely down to the
+vterm issues described above). I should really be managing my Julia
+versions per-project with Nix or equivalent.
+
+#+begin_src emacs-lisp
+(use-package julia-mode
+  :ensure t)
+#+end_src
+
+** vterm-based major mode
+
+This provides a better experience (in Org Mode (in theory)) than plain
+=julia-mode=.
+
+#+begin_src emacs-lisp
+(use-package julia-vterm
+  :ensure t
+  :pin melpa
+  :config
+  (add-hook 'julia-mode-hook #'julia-vterm-mode))
+#+end_src
+
+** Org Babel support
+
+Closely related to =julia-vterm=, this adds the kind of Org Babel
+source block support that one would hope for.
+
+Repo: [[https://github.com/shg/ob-julia-vterm.el]]
+
+#+begin_src emacs-lisp
+(use-package ob-julia-vterm
+  :ensure t
+  :pin melpa
+  :after julia-vterm
+  :config
+  (defalias 'org-babel-execute:julia 'org-babel-execute:julia-vterm)
+  (defalias 'org-babel-variable-assignments:julia 'org-babel-variable-assignments:julia-vterm))
+#+end_src
+
+* Faust
+** Org Babel support
+
+This is a (rudimentary) package that I wrote myself, and it's not on
+MELPA (with good reason) so a manual load is necessary.
+
+#+begin_src emacs-lisp
+(use-package ob-faust
+  :load-path "~/.emacs.d/packages/ob-faust")
 #+end_src
 
 * Org Mode
@@ -114,13 +213,256 @@ I like to fold everything by default; this can be overridden with,
 e.g., ~#+startup: nofold~.
 
 #+begin_src emacs-lisp
-(setq org-startup-folded 'fold)
+  (setq org-startup-folded 'fold)
 #+end_src
 
-** Finish up
+** Typography
+:PROPERTIES:
+:header-args: :tangle no
+:END:
+
+This part isn't doing enough of what I'd like, so I'm not tangling it
+for the time being.
+
+** Use a variable pitch font by default
+
+#+begin_src emacs-lisp
+  (add-hook 'org-mode-hook 'variable-pitch-mode)
+#+end_src
+
+** Allow lines to wrap
+
+#+begin_src emacs-lisp
+  (add-hook 'org-mode-hook 'visual-line-mode t)
+#+end_src
+
+** Actually, don't show emphasis markers
+
+#+begin_src emacs-lisp
+  (setq org-hide-emphasis-markers t)
+#+end_src
+
+** Use fixed pitch for a variety of Org Mode elements
+
+The main things that won't stick here are ~org-block-begin-line~ and
+~org-block-end-line~.
+
+#+begin_src emacs-lisp
+  (set-face-attribute 'variable-pitch nil :family "EB Garamond" :height 130)
+
+  (set-face-attribute 'fixed-pitch nil :family "Iosevka Comfy Motion" :height 110)
+  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-formula nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-block-begin-line nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-block-end-line nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-drawer nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-property-value nil :inherit 'fixed-pitch)
+#+end_src
+
+#+begin_src emacs-lisp :tangle no
+  (custom-theme-set-faces
+   'user
+   '(variable-pitch ((t (:family "EB Garamond" :height 130))))
+   '(fixed-pitch ((t (:family "Iosevka Comfy Motion" :height 110))))
+   '(org-block ((t (:inherit fixed-pitch))))
+   '(org-code ((t (:inherit (shadow fixed-pitch)))))
+   ;; '(org-document-info ((t (:foreground "dark orange"))))
+   '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
+   '(org-indent ((t (:inherit (org-hide fixed-pitch)))))
+   ;; '(org-link ((t (:foreground "royal blue" :underline t))))
+   '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+   '(org-block-begin-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+   '(org-block-end-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+   ;; '(org-block-begin-line ((t (:inherit org-meta-line))))
+   ;; '(org-block-end-line ((t (:inherit org-block-begin-line))))
+   '(org-property-value ((t (:inherit fixed-pitch))) t)
+   '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+   ;; '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
+   '(org-table ((t (:inherit fixed-pitch))))
+   '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
+   '(org-verbatim ((t (:inherit (shadow fixed-pitch))))))
+#+end_src
+
+** Structure templates
+
+*** Add =org-tempo= to =org-modules=
+
+This means I can use, e.g., ~<f [TAB]~ to insert a Faust source block.
+
+#+begin_src emacs-lisp
+  (add-to-list 'org-modules 'org-tempo t)
+#+end_src
+
+It might be better in the long run to move these to =yasnippet=.
+
+*** Shell
+
+#+begin_src emacs-lisp
+  (add-to-list 'org-structure-template-alist
+               '("b" . "src shell :results output :exports both"))
+  (add-to-list 'org-structure-template-alist
+               '("B" . "src shell :noeval"))
+#+end_src
+
+*** R
+
+Feels like I'm very unlikely to use these...
+
+#+begin_src emacs-lisp
+  (add-to-list 'org-structure-template-alist
+               '("r" . "src R :results output :session *R* :exports both"))
+  (add-to-list 'org-structure-template-alist
+               '("R" . "src R :results output graphics :file (org-babel-temp-file \"figure\" \".png\") :exports both :width 600 :height 400 :session *R*"))
+  (add-to-list 'org-structure-template-alist
+               '("RR" . "src R :results output graphics :file  (org-babel-temp-file (concat (file-name-directory (or load-file-name buffer-file-name)) \"figure-\") \".png\") :exports both :width 600 :height 400 :session *R*"))
+#+end_src
+
+*** Python
+
+#+begin_src emacs-lisp
+  (add-to-list 'org-structure-template-alist
+               '("p" . "src python :results output :exports both"))
+  (add-to-list 'org-structure-template-alist
+               '("P" . "src python :results output :session :exports both"))
+  (add-to-list 'org-structure-template-alist
+               '("PP" . "src python :results file :session :var matplot_lib_filename=(org-babel-temp-file \"figure\" \".png\") :exports both
+  import matplotlib.pyplot as plt
+
+  import numpy
+  x=numpy.linspace(-15,15)
+  plt.figure(figsize=(10,5))
+  plt.plot(x,numpy.cos(x)/x)
+  plt.tight_layout()
+
+  plt.savefig(matplot_lib_filename)
+  matplot_lib_filename"))
+#+end_src
+
+*** Emacs Lisp
+
+#+begin_src emacs-lisp
+  (add-to-list 'org-structure-template-alist
+               '("m" . "src emacs-lisp"))
+#+end_src
+
+*** Graphviz
+
+Do I really need this one? [[https://graphviz.org/gallery/][Graphviz]] is ghastly.
+
+#+begin_src emacs-lisp
+  (add-to-list 'org-structure-template-alist
+               '("g" . "src dot :results output graphics :file \"/tmp/graph.pdf\" :exports both
+  digraph G  {
+  node [color=black,fillcolor=white,shape=rectangle,style=filled,fontname=\"Helvetica\"];
+  A[label=\"A\"]
+  B[label=\"B\"]
+  A->B
+  }"))
+#+end_src
+
+*** Faust
+
+#+begin_src emacs-lisp
+  (add-to-list 'org-structure-template-alist
+               '("f" . "src faust"))
+  (add-to-list 'org-structure-template-alist
+               '("fh" . "src faust :results html :exports both :tab svg :sizes 0,100"))
+  (add-to-list 'org-structure-template-alist
+               '("fs" . "src faust :results file svg :file process.svg :exports both"))
+#+end_src
+
+I really need to do something at some point (in =ob-faust=) about that
+whole ~file svg~ situation.
+
+*** Julia
+
+#+begin_src emacs-lisp
+  (add-to-list 'org-structure-template-alist
+               '("j" . "src julia"))
+  (add-to-list 'org-structure-template-alist
+               '("J" . "src julia :session :results output"))
+  (add-to-list 'org-structure-template-alist
+               '("JJ" . "src julia :session :results file graphics :file plot.png :output-dir figs"))
+#+end_src
+
+*** typst
+
+#+begin_src emacs-lisp
+  (add-to-list 'org-structure-template-alist '("t" . "export typst"))
+#+end_src
+
+** Org Babel
+*** Don't ask for confirmation all the time
+
+Might be worth bearing in mind that, according to my old config:
+
+#+begin_quote
+In Org Mode 9 you need to have ~#+Property: header-args :eval
+never-export~ to tell Org Mode not to evaluate every code block every
+time you export.
+#+end_quote
+
+~no-export~ should work too. Info [[https://orgmode.org/manual/Evaluating-Code-Blocks.html][here]].
+
+#+begin_src emacs-lisp
+  (setq org-confirm-babel-evaluate nil)
+#+end_src
+
+*** Load languages
+
+This might be nicer with ~(add-to-list 'org-babel-load-languages
+'([language] . t))~.
+
+#+begin_src emacs-lisp
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '(
+     (emacs-lisp . t)
+     (shell . t)
+     (python . t)
+     (julia-vterm . t)
+     (R . t)
+     (ruby . t)
+     (ocaml . t)
+     (ditaa . t)
+     (dot . t)
+     (octave . t)
+     (sqlite . t)
+     (perl . t)
+     (screen . t)
+     (plantuml . t)
+     (lilypond . t)
+     (org . t)
+     (makefile . t)
+     (latex . t)
+     (faust . t)
+     (js . t)
+     (css . t)
+     ))
+#+end_src
+
+*** Close ~use-package org~
 
 #+begin_src emacs-lisp
 )
+#+end_src
+
+** Org Export
+
+*** Extra export processors
+
+**** Typst
+
+#+begin_src emacs-lisp
+(use-package ox-typst
+  :ensure t
+  :after org)
 #+end_src
 
 * Window-switching
@@ -136,7 +478,6 @@ Let's try the =ace-window= package.
 #+end_src
 
 * Appearance
-
 ** Custom faces
 
 #+begin_src emacs-lisp
@@ -157,6 +498,8 @@ Add some extra contrast to source blocks.
                                    :underline nil))))
 #+end_src
 
+Maybe the above would be better [[*Emacs Itself][above]]...
+
 *** Flyspell
 
 Make spelling errors really pop.
@@ -165,135 +508,10 @@ Make spelling errors really pop.
 '(flyspell-incorrect ((t (:inverse-video t))))
 #+end_src
 
-*** Finish up
-
-Close ~custom-set-faces~.
+** Close ~custom-set-faces~
 
 #+begin_src emacs-lisp
 )
-#+end_src
-
-* Org Mode
-
-#+begin_src emacs-lisp
-(use-package org
-  :ensure nil
-  :config
-#+end_src
-
-** Structure templates
-*** Shell
-
-#+begin_src emacs-lisp
-(add-to-list 'org-structure-template-alist
-             '("b" . "src shell :results output :exports both"))
-(add-to-list 'org-structure-template-alist
-             '("B" . "src shell :noeval"))
-#+end_src
-
-*** R
-
-Feels like I'm very unlikely to use these...
-
-#+begin_src emacs-lisp
-(add-to-list 'org-structure-template-alist
-             '("r" . "src R :results output :session *R* :exports both"))
-(add-to-list 'org-structure-template-alist
-             '("R" . "src R :results output graphics :file (org-babel-temp-file \"figure\" \".png\") :exports both :width 600 :height 400 :session *R*"))
-(add-to-list 'org-structure-template-alist
-             '("RR" . "src R :results output graphics :file  (org-babel-temp-file (concat (file-name-directory (or load-file-name buffer-file-name)) \"figure-\") \".png\") :exports both :width 600 :height 400 :session *R*"))
-#+end_src
-
-*** Python
-
-#+begin_src emacs-lisp
-(add-to-list 'org-structure-template-alist
-             '("p" . "src python :results output :exports both"))
-(add-to-list 'org-structure-template-alist
-             '("P" . "src python :results output :session :exports both"))
-(add-to-list 'org-structure-template-alist
-             '("PP" . "src python :results file :session :var matplot_lib_filename=(org-babel-temp-file \"figure\" \".png\") :exports both
-import matplotlib.pyplot as plt
-
-import numpy
-x=numpy.linspace(-15,15)
-plt.figure(figsize=(10,5))
-plt.plot(x,numpy.cos(x)/x)
-plt.tight_layout()
-
-plt.savefig(matplot_lib_filename)
-matplot_lib_filename"))
-#+end_src
-
-*** Emacs Lisp
-
-#+begin_src emacs-lisp
-(add-to-list 'org-structure-template-alist
-             '("m" . "src emacs-lisp"))
-#+end_src
-
-*** Graphviz
-
-Do I really need this one? [[https://graphviz.org/gallery/][Graphviz]] is ghastly.
-
-#+begin_src emacs-lisp
-(add-to-list 'org-structure-template-alist
-             '("g" . "src dot :results output graphics :file \"/tmp/graph.pdf\" :exports both
-digraph G  {
-node [color=black,fillcolor=white,shape=rectangle,style=filled,fontname=\"Helvetica\"];
-A[label=\"A\"]
-B[label=\"B\"]
-A->B
-}"))
-#+end_src
-
-*** Faust
-
-#+begin_src emacs-lisp
-(add-to-list 'org-structure-template-alist
-	     '("f" . "src faust"))
-(add-to-list 'org-structure-template-alist
-	     '("fh" . "src faust :results html :exports both :tab svg :sizes 0,100"))
-(add-to-list 'org-structure-template-alist
-	     '("fs" . "src faust :results file svg :file process.svg :exports both"))
-#+end_src
-
-I really need to do something at some point (in =ob-faust=) about that
-whole ~file svg~ situation.
-
-*** Julia
-
-#+begin_src emacs-lisp
-(add-to-list 'org-structure-template-alist
-	     '("j" . "src julia"))
-(add-to-list 'org-structure-template-alist
-	     '("J" . "src julia :session :results output"))
-(add-to-list 'org-structure-template-alist
-	     '("JJ" . "src julia :session :results file graphics :file plot.png :output-dir figs"))
-#+end_src
-
-*** typst
-
-#+begin_src emacs-lisp
-(add-to-list 'org-structure-template-alist '("t" . "export typst"))
-#+end_src
-
-** Conclude
-
-Close ~use-package org~
-
-#+begin_src emacs-lisp
-)
-#+end_src
-
-** Export
-
-*** Typst
-
-#+begin_src emacs-lisp
-(use-package ox-typst
-  :ensure t
-  :after org)
 #+end_src
 
 * TODO Use ~setopt~ for ~defcustom~ variables

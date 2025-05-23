@@ -13,7 +13,7 @@ Autodiff has two main modes, [[denote:20240812T142629][forward mode]] and [[deno
 mode, derivatives are propagated from inputs to outputs through the
 computation graph, one per input variable; in reverse mode,
 derivatives are propagated backwards, one per output. A combination of
-forward and backward modes --- so-called /cross-country mode/
+forward and reverse modes --- so-called /cross-country mode/
 [cite:@laueSimple2020] --- may prove more efficient in certain
 contexts.
 

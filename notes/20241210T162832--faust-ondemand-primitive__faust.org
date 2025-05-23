@@ -15,8 +15,8 @@ process = clock,no.noise : ondemand(_) with {
 } <: _,_; 
 #+end_src
 
-This is fun and qacts as an easy lo-fi sample-rate crusher;
-essentially a periodic sample and hold.
+This is fun and acts as an easy lo-fi sample-rate crusher; essentially
+a periodic sample and hold.
 
 Alternatively, a button can dictate whether the noise generator runs:
 
