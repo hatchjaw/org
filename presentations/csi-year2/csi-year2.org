@@ -179,22 +179,10 @@ Improve code block appearance.
 
 * Agenda
 #+ATTR_REVEAL: :frag (appear)
-- The search for a suitable technical foundation
+- The search for a suitable hardware platform
 - Time exchange \to Sampling frequency exchange
 - A sample-synchronous, distributed audio system
 - Hopes & concerns for future work
-
-* Headlines
-
-#+ATTR_REVEAL: :frag t
-My work to-date represents a respectable technical/engineering
-contribution.
-
-#+ATTR_REVEAL: :frag t
-I have yet to make a significant scientific contribution.
-
-#+ATTR_REVEAL: :frag t
-Much remains to be done to produce a system suitable for evaluation.
 
 * Technical Foundations
 :PROPERTIES:
@@ -272,7 +260,7 @@ Broadcom BCM2835, 12-bit fractional clock divider register --- ~DIVF~ (\(D_{f}\)
 
 #+ATTR_REVEAL: :frag t
 \begin{equation}
-F_{s} = \frac{500\times10^{6}}{64(D_{i} + \frac{D_{f}}{4096})}
+F_{s} = \frac{500\times10^{6}}{2^{6}(D_{i} + \frac{D_{f}}{4096})}
 \end{equation}
 
 #+begin_src emacs-lisp :results output :exports results
@@ -421,7 +409,7 @@ offset 204.500000000
 | Sync (Tx)       | Set \(\color{red} {t_{1}=0}\) ns             |                                             |                  |
 | FollowUp (Tx)   | Transmit \(\color{red}{t_{1}}\)              |                                             |                  |
 |                 |                                           | Set \(\color{green}{t_{2}=1\,251}\) ns         | Sync (Rx)        |
-|                 |                                           | Receive \(\color{red}{t_{1}}\) ns              | FollowUp (Rx)    |
+|                 |                                           | Receive \(\color{red}{t_{1}}\)                 | FollowUp (Rx)    |
 |                 |                                           | Set \(\color{green}{t_{3}=592\,727}\) ns       | DelayReq (Tx)    |
 | DelayReq (Rx)   | Set \(\color{red}{t_{4}=593\,569}\) ns       |                                             |                  |
 | DelayResp (Tx)  | Transmit \(\color{red}{t_{4}}\)              |                                             |                  |
@@ -441,168 +429,166 @@ offset 204.500000000
 \text{Offset} = \color{green}{t_{2}} - \color{red}{t_{1}} - \text{Delay} = 204\;\text{ns}
 \end{gather}
 
-** Frugal PTP
-
-- It turns out that Teensy supports PTP
-- Talk about the switch
-
-* Time exchange \to Sampling frequency exchange
-:PROPERTIES:
-:reveal_background: #141414
-:reveal_extra_attr: class="title-slide"
-:END:
-
-* A sample-synchronous, distributed audio systemn
-:PROPERTIES:
-:reveal_background: #141414
-:reveal_extra_attr: class="title-slide" data-auto-animate
-:END:
-
-* A sample-synchronous, distributed audio system
+** Precision Time Protocol
 :PROPERTIES:
 :reveal_extra_attr: data-auto-animate
 :END:
 
-#+header: :exports results :results file raw :file "./images/tikz.png"
-#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 900 -flatten :fit t
-#+header: :headers '("\\usepackage{tikz}")
-#+begin_src latex
-\newcommand*{\wfsptpX}{4}
-\newcommand*{\wfsptpNumWaves}{5}
-\newcommand*{\wfsptpWaveSpace}{.89}
-\newcommand*{\wfsptpNumMCU}{8}
-\newcommand*{\wfsptpNumSecondary}{16}
-\definecolor{wfsptpWaveColour}{HTML}{4077D6}
-\definecolor{wfsptpCtrlColour}{HTML}{479955}
-\begin{tikzpicture}[
-  ctrl/.style={densely dotted, wfsptpCtrlColour, line width=.2mm},
-  audio/.style={wfsptpWaveColour, densely dashdotted},
-  device/.style={draw, fill=black!10, font={\footnotesize}, rounded corners=1mm}
-]
-\draw (-\wfsptpX,-.5) rectangle (\wfsptpX,2);
+\begin{align}
+\mathrm{Adjust} &= \mathrm{Drift} + \mathrm{PI}(\mathrm{Offset}) \\
+  &= \mathrm{Drift} + K_{P}\times\mathrm{Offset} + K_{I}\times\int\mathrm{Offset}
+\end{align}
 
-\begin{scope}
-  \clip (-\wfsptpX,-.5) rectangle (\wfsptpX,2);
-  \node [circle,draw=wfsptpWaveColour,fill=wfsptpWaveColour!50,thick] (primary) at (0,0) {};
+#+ATTR_REVEAL: :frag t
+\(\mathrm{Adjust}\) is a value in nanoseconds by which the PTP timer
+should be corrected for the current interval
 
-  \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,\wfsptpNumWaves}
-    \draw [thick, dashed, wfsptpWaveColour] (-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
+#+ATTR_REVEAL: :frag t
+#+attr_html: :width 500
+[[./images/offset.png]]
 
-  \node [black!50, fill=white, align=center, font={\footnotesize\itshape}] at (-3.15, 0) {Virtual\\soundfield};
-  \node [below right=-1mm and -1mm of primary, font={\footnotesize\itshape}] {Virtual sound source};
+#+ATTR_REVEAL: :frag t
+Two T41s via a direct ethernet connection...
 
-  \foreach \i [
-    evaluate=\i as \secondary using
-    -\wfsptpX+.25+(\i-1)*(2*\wfsptpX/\wfsptpNumSecondary)
-  ] in {1,...,\wfsptpNumSecondary} {
-    \node (\secondary) at (\secondary, 2) {};
-    %\draw [ctrl] (primary) -- (\secondary,2);
-  }
+** Precision Time Protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
-  \draw [ctrl] node [above right=.1mm, font=\tiny] {$(x,y)$} (primary) -- (0, 2);
-\end{scope}
+Doesn't PTP rely on expensive hardware?..
 
-\begin{scope}[
-  yshift=2cm,
-  cross/.pic = {
-    \draw[rotate = 45] (-#1,0) -- (#1,0);
-    \draw[rotate = 45] (0,-#1) -- (0, #1);
-  },
-  mcu/.pic = {
-    \node [device, inner xsep=1.5mm] {MCU};
-  },
-  speaker/.pic = {
-    \draw (-.11, 0) rectangle (.11, .06);
-    \draw (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
-  }
-]
-  \matrix [draw] at (-\wfsptpX+1, 1.2) {
-    \draw [-{Triangle[open]}, ctrl] (0,0) -- (.5,0); & \node [font=\tiny\itshape] {Control}; \\
-    \draw [-{Stealth}, audio] (0,0) -- (.5,0); & \node [font=\tiny\itshape] {Audio}; \\
-    \draw [-{Triangle}] (0,0) -- (.5,0); & \node [font=\tiny\itshape] {PTP}; \\
-  };
+#+ATTR_REVEAL: :frag t
+[[./images/switch.png]]
 
-  \node (authority) [device, inner xsep=1.5mm] at (0, .75) {Server};
-  \node (switch) [device, above=4.5mm of authority] {Switch};
+#+ATTR_REVEAL: :frag t
+€ 200
 
-  \draw [-{Triangle[open]}, ctrl] ([xshift=-3mm] authority.north) -- ([xshift=-3mm] switch.south);
-  \draw [-{Stealth}, audio] (authority.north) -- (switch.south);
-  \draw [{Triangle}-{Triangle}] ([xshift=3mm] authority.north) -- ([xshift=3mm] switch.south);
+* Time exchange \to Sampling frequency exchange
+:PROPERTIES:
+:reveal_background: #141414
+:END:
 
-  \foreach \i [
-    evaluate=\i as \secondary using
-    -\wfsptpX+.25+(\i-1)*(2*\wfsptpX/\wfsptpNumSecondary)
-  ] in {1,...,\wfsptpNumSecondary} {
-    \pic at (\secondary, 0) {cross=2pt};
+** Time exchange \to Sampling frequency exchange
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
-    \ifnum\i=1
-      \draw [ctrl] (\secondary,0) -- +(0, .2) -| ([yshift=-3mm] authority.south);
-    \else
-      \ifnum\i=\wfsptpNumSecondary
-        \draw [-{Triangle[open]}, ctrl] (\secondary,0) -- +(0, .2) -| (authority.south);
-      \else
-        \draw [ctrl] (\secondary,0) -- +(0, .2);
-      \fi
-    \fi
+\(\mathrm{Adjust}\;\) nanoseconds \(\to a\;\) seconds
 
-    \pic at (\secondary, 3.045) {speaker};
-  }
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+\hat{F}_{s} = F_{s}\left(1 + a\right)
+\end{equation}
 
-  \draw [ctrl] (0, 0) -- (0, .2);
+#+ATTR_REVEAL: :frag t
+E.g. running fast, \(\mathrm{Adjust} = -124\,\mathrm{ns},\;a =
+-1.24\times10^{-7}\,\mathrm{s}\)
 
-  \foreach \i [
-    evaluate=\i as \xpos using -\wfsptpX+.5+(\i-1)*(2*\wfsptpX/\wfsptpNumMCU)
-  ] in {1,...,\wfsptpNumMCU} {
-    \pic at (\xpos, 2.825) {mcu};
-
-    \draw [-{Triangle[open]}, ctrl] (\xpos-.2, 2.2) -- (\xpos-.2, 2.6);
-    \draw [-{Stealth}, audio] (\xpos, 2.2) -- (\xpos, 2.6);
-
-    \ifnum\i=1
-      \draw [-{Triangle}] (switch.north) +(0, .325) -- (\xpos-.2, 2.2) (\xpos+.2, 2.2) -| (\xpos+.2, 2.6);
-    \else
-      \ifnum\i=\wfsptpNumMCU
-        \draw [{Triangle}-{Triangle}] (switch.north) -- +(0, .325) -| (\xpos+.2, 2.6);
-      \else
-        \draw [-{Triangle}] (\xpos+.2, 2.2) -- (\xpos+.2, 2.6);
-      \fi
-    \fi
-  }
-\end{scope}
-
-\begin{scope}[
-  yshift=3.25cm,
-  wavefronts/.pic={ % Tried to do this mathematically, but...
-    \foreach \pos/\rad in {0/.18, 1/.615, 2/1.03, 3/1.42, 4/1.78, 5/2.07, 6/2.295, 7/2.42}
-      \draw [black!25] (-\wfsptpX+.25+.5*\pos, 2) circle (\rad);
-  }
-]
-  \clip (-\wfsptpX, 2) rectangle (\wfsptpX,4.6);
-
-  \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,\wfsptpNumWaves}
-    \draw [thick, wfsptpWaveColour] (-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
-
-  \pic {wavefronts};
-  \pic [xscale=-1] {wavefronts};
-
-  \node [black!50, align=center, font={\footnotesize\itshape}] at (-3.15, 4) {Synthesised\\soundfield};
-\end{scope}
-\end{tikzpicture}
+#+begin_src emacs-lisp :exports none
+(let* ((adjust -124)
+       (fs 48e3)       
+       (nsps 1e9)
+       (drift (* adjust (/ 1 nsps)))
+       (ratio (+ 1 drift))
+       (newfs (* fs ratio))
+       (frac-diff (/ 1. (- newfs fs))))
+  (format "Ratio: %.9f, new fs: %.9f Hz, fractional diff: 1/%.1f Hz"
+          ratio newfs frac-diff))
 #+end_src
-#+attr_html: :width 600
-#+attr_org: :width 400
+
 #+RESULTS:
-[[file:./images/tikz.png]]
+#+begin_example
+Adjust: 0.000000124, Ratio: 0.999999876, new fs: 47999.994048000 Hz, fractional diff: 1/-168.0 Hz
+#+end_example
+
+#+ATTR_REVEAL: :frag t
+\begin{align}
+\hat{F}_{s} &= 48\,000\left(1 - 1.24\times10^{-7}\right) \\
+  &= 48\,000 \times 0.999\,999\,876 \\
+  &= 47\,999.994\,048\;\mathrm{Hz}
+\end{align}
+
+** Time exchange \to Sampling frequency exchange
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{equation}
+\hat{F}_{s} = \frac{24\times10^{6}}{2^{8}}\frac{D_{S}+\frac{D_{N}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+D_{N} = D_{D}\left(\frac{2^{8}\hat{F}_{s}D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24\times10^{6}} - D_{S}\right)
+\end{equation}
+
+#+begin_src emacs-lisp :exports none
+(* 1e9
+   (- (/ (* (lsh 1 8) 3 19 47999.994048)
+         24e6)
+      29.0))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+183996381.1840022
+#+end_example
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :style margin-top: 2em
+\(\hat{F}_{s} = 48\,000\quad\to\quad D_{N} = 184\,000\,000\)
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :style margin-top: 2em
+\(\hat{F}_{s} = 47\,999.994\,048\quad\to\quad D_{N} \approx 183\,996\,381\)
+
+* A sample-synchronous, distributed audio system
+:PROPERTIES:
+:reveal_background: #141414
+:reveal_extra_attr: data-auto-animate
+:END:
+
+- system diagram
+- drift plots
+
+* Outlook
+:PROPERTIES:
+:reveal_background: #141414
+:END:
+
+** Headlines
+
+#+ATTR_REVEAL: :frag t
+My work to-date represents a respectable technical/engineering
+contribution.
+
+#+ATTR_REVEAL: :frag t
+I have yet to make a significant scientific contribution.
+
+#+ATTR_REVEAL: :frag t
+Much remains to be done to produce a system suitable for evaluation.
+
+** Concerns
+
+#+ATTR_REVEAL: :frag t
+The switch is a /weak link/
+
+#+ATTR_REVEAL: :frag t
+Building a control system will take time
+
+#+ATTR_REVEAL: :frag t
+Can ambisonics work in a distributed setting?
+
+#+ATTR_REVEAL: :frag t
+Can Teensy run real-time convolutions?
+
+#+ATTR_REVEAL: :frag t
+How to evaluate the system from a user-centric perspective?
+
+* Thank You
 
 * Local Variables                                                  :noexport:
 
 # Local Variables:
 # org-babel-min-lines-for-block-output: 0
-# eval: (advice-add 'org-babel-latex-tex-to-pdf :before
-#   (lambda (file)
-#     (with-temp-buffer
-#       (insert-file-contents file)
-#       (beginning-of-buffer)
-#       (insert "% xelatex\n")
-#       (write-file file))))
 # End:
