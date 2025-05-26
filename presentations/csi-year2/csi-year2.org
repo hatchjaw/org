@@ -165,4 +165,444 @@ Improve code block appearance.
 }
 #+end_src
 
-* OK, what am I going to talk about again?
+** Tables
+
+#+begin_src css
+.reveal table th, .reveal table td {
+    text-align: center;
+}
+
+.reveal table td {
+    border: none;
+}
+#+end_src
+
+* Agenda
+#+ATTR_REVEAL: :frag (appear)
+- The search for a suitable technical foundation
+- Time exchange \to Sampling frequency exchange
+- A sample-synchronous, distributed audio system
+- Hopes & concerns for future work
+
+* Headlines
+
+#+ATTR_REVEAL: :frag t
+My work to-date represents a respectable technical/engineering
+contribution.
+
+#+ATTR_REVEAL: :frag t
+I have yet to make a significant scientific contribution.
+
+#+ATTR_REVEAL: :frag t
+Much remains to be done to produce a system suitable for evaluation.
+
+* Technical Foundations
+:PROPERTIES:
+:reveal_background: #141414
+:END:
+
+** Candidate Hardware Platforms
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+| Raspberry Pi CM5 | [[./images/rpi.png]] |
+| Teensy 4.1       | [[./images/t41.png]] |
+
+** Candidate Hardware Platforms
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+|                  |                  | CPU     | Memory         | Cost |
+|------------------+------------------+---------+----------------+------|
+| Raspberry Pi CM5 | [[./images/rpi.png]] | 1.5 GHz | 1 GB+          | € 89 |
+| Teensy 4.1       | [[./images/t41.png]] | 600 MHz | 1 MB (+ 16 MB) | € 48 |
+
+#+begin_quote
+Cost includes networking and audio add-ons.
+#+end_quote
+
+** Candidate Hardware Platforms
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+| [[./images/rpi.png]] | [[./images/t41.png]] |
+
+Both capable of dynamic audio clock adjustments.
+
+#+ATTR_REVEAL: :frag t
+Both support IEEE 1588 Precision Time Protocol...
+
+** Candidate Hardware Platforms
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+|                  | Programmable                        | PTP        |
+|------------------+-------------------------------------+------------|
+| [[./images/rpi.png]] | Linux or bare metal (/Circle/)        | =linuxptp=   |
+| [[./images/t41.png]] | RTOS/Zephyr or bare metal (/Arduino/) | Bare metal |
+
+** Candidate Hardware Platforms
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+|                  | I^{2}S Clock                   | Clock Resolution |
+|------------------+-----------------------------+------------------|
+| [[./images/rpi.png]] | GPIO                        | 12 bits          |
+| [[./images/t41.png]] | /Synchronous Audio Interface/ | 30 bits          |
+
+#+ATTR_REVEAL: :frag t
+#+begin_quote
+Teensy core codebase uses a numerator register value of \(1\times10^{4}\); no
+impediment to using \(1\times10^{9}\).
+#+end_quote
+
+** Candidate Hardware Platforms
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+[[./images/rpi.png]]
+
+Broadcom BCM2835, 12-bit fractional clock divider register --- ~DIVF~ (\(D_{f}\))
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+F_{s} = \frac{500\times10^{6}}{64(D_{i} + \frac{D_{f}}{4096})}
+\end{equation}
+
+#+begin_src emacs-lisp :results output :exports results
+(let ((divf 3111))
+  (while (< divf 3119)
+    (princ (format "DIVF = %d :: Fs = %.12f\n" divf
+                   (/ (/ 500e6 (+ 162 (/ (float divf) 4096))) 64)))
+    (setq divf (1+ divf)))))
+#+end_src
+#+ATTR_REVEAL: :frag t
+#+attr_html: :style width: 20em
+#+RESULTS:
+#+begin_example
+DIVF = 3111 :: Fs = 48000.264001452008
+DIVF = 3112 :: Fs = 48000.192000768002
+DIVF = 3113 :: Fs = 48000.120000299998
+DIVF = 3114 :: Fs = 48000.048000048002
+DIVF = 3115 :: Fs = 47999.976000012000
+DIVF = 3116 :: Fs = 47999.904000192000
+DIVF = 3117 :: Fs = 47999.832000588001
+DIVF = 3118 :: Fs = 47999.760001199997
+#+end_example
+
+** Candidate Hardware Platforms
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+[[./images/t41.png]]
+
+NXP iMX.RT1060, 30-bit fractional clock divider register, ~NUM~ (\(D_{N}\))
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+F_{s} = \frac{24\times10^{6}}{2^{8}}\frac{D_{S}+\frac{D_{N}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}
+\end{equation}
+
+#+begin_src emacs-lisp :results output :exports results
+(let ((numerator 183999996))
+  (while (< numerator 184000004)
+    (princ
+     (format "NUM = %d :: Fs = %.12f\n"
+             numerator
+             (* (/ 24e6 (lsh 1 8))          ;; 24 MHz XO, 2^8 wordsize
+                (/ (+ 29 (/ numerator 1e9)) ;; DIV + NUM / DENOM
+                   (* 3 19)))))             ;; SAI1 pre & post dividers
+    (setq numerator (1+ numerator)))))
+#+end_src
+#+ATTR_REVEAL: :frag t
+#+attr_html: :style width: 22em
+#+RESULTS:
+#+begin_example
+NUM = 183999996 :: Fs = 47999.999993421057
+NUM = 183999997 :: Fs = 47999.999995065795
+NUM = 183999998 :: Fs = 47999.999996710525
+NUM = 183999999 :: Fs = 47999.999998355263
+NUM = 184000000 :: Fs = 48000.000000000000
+NUM = 184000001 :: Fs = 48000.000001644737
+NUM = 184000002 :: Fs = 48000.000003289475
+NUM = 184000003 :: Fs = 48000.000004934212
+#+end_example
+
+** Candidate Hardware Platforms
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+Approx. clock resolution @48 kHz
+
+| [[./images/rpi.png]]    | [[./images/t41.png]]          |
+| \(\frac{1}{14}\) Hz | \(\frac{1}{600\,000}\) Hz |
+
+** Candidate Hardware Platforms
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+[[./images/t41.png]]
+
+Audio subsystem: powerful and flexible
+
+Code in abundance; community input
+
+PTP support at low-cost
+
+#+ATTR_REVEAL: :frag t
+Lack of memory an issue...
+
+* Precision Time Protocol
+:PROPERTIES:
+:reveal_background: #141414
+:END:
+
+** Precision Time Protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_org: :width 200
+[[./images/ptp.png]]
+
+A time-exchange protocol capable of providing sub-microsecond
+synchronisation
+
+#+attr_html: :style font-size: .5em
+#+begin_quote
+Figure, Schleusner et al. 2024. ‘Sub-Microsecond Time Synchronization for
+Network-Connected Microcontrollers’. In 2024 IEEE International
+Conference on Consumer Electronics (ICCE), 1–6. Las Vegas, NV, USA
+#+end_quote
+
+** Precision Time Protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_src emacs-lisp :exports none
+(let* ((t1 0)
+       (t2 1251)
+       (t3 592727)
+       (t4 593569)
+       (t11 998936898)
+       (t22 998938145)
+       (deltat1 (- t11 t1))
+       (deltat2 (- t22 t2))
+       (drift (- 1 (/ (float deltat2) (float deltat1))))
+       (delay (/ (- (- t4 t1) (- t3 t2)) 2.0))
+       (offset (- t2 t1 delay)))
+  (format "delta t1 %d\ndelta t2 %d\ndrift %.9f\ndelay %.9f\noffset %.9f"
+          deltat1 deltat2 drift delay offset))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+delta t1 998936898
+delta t2 998936894
+drift 0.000000004
+delay 1046.500000000
+offset 204.500000000
+#+end_example
+
+#+attr_html: :style font-size: .6em
+| Clock Authority |                                           |                                             | Clock Subscriber |
+| Message         | Action                                    | Action                                      | Message          |
+|-----------------+-------------------------------------------+---------------------------------------------+------------------|
+| Sync (Tx)       | Set \(\color{red} {t_{1}=0}\) ns             |                                             |                  |
+| FollowUp (Tx)   | Transmit \(\color{red}{t_{1}}\)              |                                             |                  |
+|                 |                                           | Set \(\color{green}{t_{2}=1\,251}\) ns         | Sync (Rx)        |
+|                 |                                           | Receive \(\color{red}{t_{1}}\) ns              | FollowUp (Rx)    |
+|                 |                                           | Set \(\color{green}{t_{3}=592\,727}\) ns       | DelayReq (Tx)    |
+| DelayReq (Rx)   | Set \(\color{red}{t_{4}=593\,569}\) ns       |                                             |                  |
+| DelayResp (Tx)  | Transmit \(\color{red}{t_{4}}\)              |                                             |                  |
+|                 |                                           | Receive \(\color{red}{t_{4}}\)                 | DelayResp (Rx)   |
+| Sync (Tx)       | Set \(\color{red}{t'_{1}=998\,936\,898}\) ns |                                             |                  |
+| FollowUp (Tx)   | Transmit \(\color{red}{t'_{1}}\)             |                                             |                  |
+|                 |                                           | Set \(\color{green}{t'_{2}=998\,938\,145}\) ns | Sync (Rx)        |
+|                 |                                           | Receive \(\color{red}{t'_{1}}\)                | FollowUp (Rx)    |
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :style font-size: .7em
+\begin{gather}
+\text{Drift} = 1 - \frac{\color{green}{t_{2}'}-\color{green}{t_{2}}}
+  {\color{red}{t_{1}'}-\color{red}{t_{1}}} = 4\;\text{ns} \\[5pt]
+\text{Delay} = \frac{(\color{red}{t_{4}} - \color{red}{t_{1}}) -
+  (\color{green}{t_{3}} - \color{green}{t_{2}}) }{2} = 1046\;\text{ns} \\[5pt]
+\text{Offset} = \color{green}{t_{2}} - \color{red}{t_{1}} - \text{Delay} = 204\;\text{ns}
+\end{gather}
+
+** Frugal PTP
+
+- It turns out that Teensy supports PTP
+- Talk about the switch
+
+* Time exchange \to Sampling frequency exchange
+:PROPERTIES:
+:reveal_background: #141414
+:reveal_extra_attr: class="title-slide"
+:END:
+
+* A sample-synchronous, distributed audio systemn
+:PROPERTIES:
+:reveal_background: #141414
+:reveal_extra_attr: class="title-slide" data-auto-animate
+:END:
+
+* A sample-synchronous, distributed audio system
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+header: :exports results :results file raw :file "./images/tikz.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 900 -flatten :fit t
+#+header: :headers '("\\usepackage{tikz}")
+#+begin_src latex
+\newcommand*{\wfsptpX}{4}
+\newcommand*{\wfsptpNumWaves}{5}
+\newcommand*{\wfsptpWaveSpace}{.89}
+\newcommand*{\wfsptpNumMCU}{8}
+\newcommand*{\wfsptpNumSecondary}{16}
+\definecolor{wfsptpWaveColour}{HTML}{4077D6}
+\definecolor{wfsptpCtrlColour}{HTML}{479955}
+\begin{tikzpicture}[
+  ctrl/.style={densely dotted, wfsptpCtrlColour, line width=.2mm},
+  audio/.style={wfsptpWaveColour, densely dashdotted},
+  device/.style={draw, fill=black!10, font={\footnotesize}, rounded corners=1mm}
+]
+\draw (-\wfsptpX,-.5) rectangle (\wfsptpX,2);
+
+\begin{scope}
+  \clip (-\wfsptpX,-.5) rectangle (\wfsptpX,2);
+  \node [circle,draw=wfsptpWaveColour,fill=wfsptpWaveColour!50,thick] (primary) at (0,0) {};
+
+  \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,\wfsptpNumWaves}
+    \draw [thick, dashed, wfsptpWaveColour] (-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
+
+  \node [black!50, fill=white, align=center, font={\footnotesize\itshape}] at (-3.15, 0) {Virtual\\soundfield};
+  \node [below right=-1mm and -1mm of primary, font={\footnotesize\itshape}] {Virtual sound source};
+
+  \foreach \i [
+    evaluate=\i as \secondary using
+    -\wfsptpX+.25+(\i-1)*(2*\wfsptpX/\wfsptpNumSecondary)
+  ] in {1,...,\wfsptpNumSecondary} {
+    \node (\secondary) at (\secondary, 2) {};
+    %\draw [ctrl] (primary) -- (\secondary,2);
+  }
+
+  \draw [ctrl] node [above right=.1mm, font=\tiny] {$(x,y)$} (primary) -- (0, 2);
+\end{scope}
+
+\begin{scope}[
+  yshift=2cm,
+  cross/.pic = {
+    \draw[rotate = 45] (-#1,0) -- (#1,0);
+    \draw[rotate = 45] (0,-#1) -- (0, #1);
+  },
+  mcu/.pic = {
+    \node [device, inner xsep=1.5mm] {MCU};
+  },
+  speaker/.pic = {
+    \draw (-.11, 0) rectangle (.11, .06);
+    \draw (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
+  }
+]
+  \matrix [draw] at (-\wfsptpX+1, 1.2) {
+    \draw [-{Triangle[open]}, ctrl] (0,0) -- (.5,0); & \node [font=\tiny\itshape] {Control}; \\
+    \draw [-{Stealth}, audio] (0,0) -- (.5,0); & \node [font=\tiny\itshape] {Audio}; \\
+    \draw [-{Triangle}] (0,0) -- (.5,0); & \node [font=\tiny\itshape] {PTP}; \\
+  };
+
+  \node (authority) [device, inner xsep=1.5mm] at (0, .75) {Server};
+  \node (switch) [device, above=4.5mm of authority] {Switch};
+
+  \draw [-{Triangle[open]}, ctrl] ([xshift=-3mm] authority.north) -- ([xshift=-3mm] switch.south);
+  \draw [-{Stealth}, audio] (authority.north) -- (switch.south);
+  \draw [{Triangle}-{Triangle}] ([xshift=3mm] authority.north) -- ([xshift=3mm] switch.south);
+
+  \foreach \i [
+    evaluate=\i as \secondary using
+    -\wfsptpX+.25+(\i-1)*(2*\wfsptpX/\wfsptpNumSecondary)
+  ] in {1,...,\wfsptpNumSecondary} {
+    \pic at (\secondary, 0) {cross=2pt};
+
+    \ifnum\i=1
+      \draw [ctrl] (\secondary,0) -- +(0, .2) -| ([yshift=-3mm] authority.south);
+    \else
+      \ifnum\i=\wfsptpNumSecondary
+        \draw [-{Triangle[open]}, ctrl] (\secondary,0) -- +(0, .2) -| (authority.south);
+      \else
+        \draw [ctrl] (\secondary,0) -- +(0, .2);
+      \fi
+    \fi
+
+    \pic at (\secondary, 3.045) {speaker};
+  }
+
+  \draw [ctrl] (0, 0) -- (0, .2);
+
+  \foreach \i [
+    evaluate=\i as \xpos using -\wfsptpX+.5+(\i-1)*(2*\wfsptpX/\wfsptpNumMCU)
+  ] in {1,...,\wfsptpNumMCU} {
+    \pic at (\xpos, 2.825) {mcu};
+
+    \draw [-{Triangle[open]}, ctrl] (\xpos-.2, 2.2) -- (\xpos-.2, 2.6);
+    \draw [-{Stealth}, audio] (\xpos, 2.2) -- (\xpos, 2.6);
+
+    \ifnum\i=1
+      \draw [-{Triangle}] (switch.north) +(0, .325) -- (\xpos-.2, 2.2) (\xpos+.2, 2.2) -| (\xpos+.2, 2.6);
+    \else
+      \ifnum\i=\wfsptpNumMCU
+        \draw [{Triangle}-{Triangle}] (switch.north) -- +(0, .325) -| (\xpos+.2, 2.6);
+      \else
+        \draw [-{Triangle}] (\xpos+.2, 2.2) -- (\xpos+.2, 2.6);
+      \fi
+    \fi
+  }
+\end{scope}
+
+\begin{scope}[
+  yshift=3.25cm,
+  wavefronts/.pic={ % Tried to do this mathematically, but...
+    \foreach \pos/\rad in {0/.18, 1/.615, 2/1.03, 3/1.42, 4/1.78, 5/2.07, 6/2.295, 7/2.42}
+      \draw [black!25] (-\wfsptpX+.25+.5*\pos, 2) circle (\rad);
+  }
+]
+  \clip (-\wfsptpX, 2) rectangle (\wfsptpX,4.6);
+
+  \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,\wfsptpNumWaves}
+    \draw [thick, wfsptpWaveColour] (-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
+
+  \pic {wavefronts};
+  \pic [xscale=-1] {wavefronts};
+
+  \node [black!50, align=center, font={\footnotesize\itshape}] at (-3.15, 4) {Synthesised\\soundfield};
+\end{scope}
+\end{tikzpicture}
+#+end_src
+#+attr_html: :width 600
+#+attr_org: :width 400
+#+RESULTS:
+[[file:./images/tikz.png]]
+
+* Local Variables                                                  :noexport:
+
+# Local Variables:
+# org-babel-min-lines-for-block-output: 0
+# eval: (advice-add 'org-babel-latex-tex-to-pdf :before
+#   (lambda (file)
+#     (with-temp-buffer
+#       (insert-file-contents file)
+#       (beginning-of-buffer)
+#       (insert "% xelatex\n")
+#       (write-file file))))
+# End:

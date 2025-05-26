@@ -165,7 +165,7 @@ https://www.righto.com/2021/02/teardown-of-quartz-crystal-oscillator.html
 
 *** Precision Time Protocol --- IEEE 1588
 
-#+attr_org: :width 400
+#+attr_org: :width 200
 [[./images/ptp.png]]
 
 A time-exchange protocol capable of providing sub-microsecond

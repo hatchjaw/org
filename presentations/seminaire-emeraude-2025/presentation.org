@@ -1482,7 +1482,6 @@ process = d.diff(@);
 :reveal_extra_attr: data-auto-animate
 :END:
 
-
 ** Differentiable Compositions
 :PROPERTIES:
 :reveal_extra_attr: data-auto-animate

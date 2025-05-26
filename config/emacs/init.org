@@ -235,23 +235,14 @@ I only really need [[https://github.com/akermu/emacs-libvterm][this]] for =julia
 emulator nonetheless. =shell-command= and =async-shell-command= tend
 to be better bets for general terminal commands.
 
-I kept seeing the following in the messages buffer:
-
-#+begin_example
-error in process filter: Process vterm not running: exited abnormally with code 127
-#+end_example
-
-I tried reinstalling =libvterm= and forcing Emacs to reinstall the
-=vterm= package; turns out there's another system package,
-=emacs-libvterm-git= (AUR), that doesn't appear to be reliable any
-longer.
-
-In the end I resorted to installing =emacs-libvterm= [[https://github.com/akermu/emacs-libvterm?tab=readme-ov-file#manual-installation][manually]].
-
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package vterm
-  :load-path "~/.emacs.d/packages/emacs-libvterm")
+  :ensure t)
+  ;; :load-path "~/.emacs.d/packages/emacs-libvterm")
 #+end_src
+
+NB. at some point I resorted to installing this manually (see [[*Julia PATH][below]]),
+but later changed my view.
 
 * Julia
 
@@ -274,8 +265,32 @@ This provides a better experience (in Org Mode (in theory)) than plain
 (use-package julia-vterm
   :ensure t
   :pin melpa
+  :hook
+  (julia-mode-hook . julia-vterm-mode)
   :config
-  (add-hook 'julia-mode-hook #'julia-vterm-mode))
+#+end_src
+
+*** Julia PATH
+
+I kept seeing the following in the messages buffer:
+
+#+begin_example
+error in process filter: Process vterm not running: exited abnormally with code 127
+#+end_example
+
+I tried reinstalling =libvterm= and forcing Emacs to reinstall the
+=vterm= package; turns out there's another system package,
+=emacs-libvterm-git= (AUR), that doesn't appear to be reliable any
+longer.
+
+In the end I resorted to installing =emacs-libvterm= [[https://github.com/akermu/emacs-libvterm?tab=readme-ov-file#manual-installation][manually]]... but I
+decided this wasn't the problem after all. Latest theory: vterm is
+fine, but for some reason =julia= isn't in the =PATH= when =julia-vterm=
+attempts to use it. I think this, finally, is the solution:
+
+#+begin_src emacs-lisp
+  (setq-default julia-vterm-repl-program
+                (file-truename "~/.local/bin/julia")))
 #+end_src
 
 ** Org Babel support

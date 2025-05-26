@@ -314,7 +314,7 @@ effect on research and creativity.
 #+name: tab:platforms
 #+caption: Selected embedded computing platforms listed with their
 #+caption: corresponding microcontroller (MCU) or system on chip (SoC), availability of
-#+caption: selected functionality, and approximate cost per unit (rounded
+#+caption: networking functionality, and approximate cost per unit (rounded
 #+caption: to the nearest euro) as of March 2025.
 #+attr_latex: :float multicolumn :align lllllr :booktabs t
 | Platform         | MCU/SoC                         | Memory       | Ethernet | PTP | Unit Cost |
