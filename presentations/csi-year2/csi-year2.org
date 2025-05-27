@@ -2,7 +2,7 @@
 #+subtitle: Thesis Committee --- Year 2
 #+author: Thomas Rushton
 
-#+options: num:t toc:nil
+#+options: num:nil toc:nil
 #+options: reveal_width:1500 reveal_height:1000 reveal_slide_number:c/t
 #+export_file_name: index
 #+property: header-args:css :results none :exports none :tangle ./style.css
@@ -245,7 +245,7 @@ Both support IEEE 1588 Precision Time Protocol...
 
 #+ATTR_REVEAL: :frag t
 #+begin_quote
-Teensy core codebase uses a numerator register value of \(1\times10^{4}\); no
+Teensy core codebase uses a denominator register value of \(1\times10^{4}\); no
 impediment to using \(1\times10^{9}\).
 #+end_quote
 
@@ -463,12 +463,12 @@ Doesn't PTP rely on expensive hardware?..
 #+ATTR_REVEAL: :frag t
 € 200
 
-* Time exchange \to Sampling frequency exchange
+* Time Exchange \to Sampling Frequency Exchange
 :PROPERTIES:
 :reveal_background: #141414
 :END:
 
-** Time exchange \to Sampling frequency exchange
+** Time Exchange \to Sampling Frequency Exchange
 :PROPERTIES:
 :reveal_extra_attr: data-auto-animate
 :END:
@@ -498,7 +498,7 @@ E.g. running fast, \(\mathrm{Adjust} = -124\,\mathrm{ns},\;a =
 
 #+RESULTS:
 #+begin_example
-Adjust: 0.000000124, Ratio: 0.999999876, new fs: 47999.994048000 Hz, fractional diff: 1/-168.0 Hz
+Ratio: 0.999999876, new fs: 47999.994048000 Hz, fractional diff: 1/-168.0 Hz
 #+end_example
 
 #+ATTR_REVEAL: :frag t
@@ -508,7 +508,7 @@ Adjust: 0.000000124, Ratio: 0.999999876, new fs: 47999.994048000 Hz, fractional 
   &= 47\,999.994\,048\;\mathrm{Hz}
 \end{align}
 
-** Time exchange \to Sampling frequency exchange
+** Time Exchange \to Sampling Frequency Exchange
 :PROPERTIES:
 :reveal_extra_attr: data-auto-animate
 :END:
@@ -542,14 +542,153 @@ D_{N} = D_{D}\left(\frac{2^{8}\hat{F}_{s}D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24\times1
 #+attr_html: :style margin-top: 2em
 \(\hat{F}_{s} = 47\,999.994\,048\quad\to\quad D_{N} \approx 183\,996\,381\)
 
-* A sample-synchronous, distributed audio system
+* A Sample-Synchronous, Distributed Audio System
 :PROPERTIES:
 :reveal_background: #141414
+:END:
+
+** Frame-Synchronous Output
+:PROPERTIES:
 :reveal_extra_attr: data-auto-animate
 :END:
 
-- system diagram
-- drift plots
+Problem: Sampling rate parity \(\neq\) synchronous output
+
+#+ATTR_REVEAL: :frag t
+Solution: Start clock subscriber audio subsystem when PTP lock
+achieved
+
+#+ATTR_REVEAL: :frag t
+Takes  ~10 seconds from boot for <100 ns offset
+
+#+ATTR_REVEAL: :frag t
+Works for nominal \(F_{s}\) that is an integer multiple of the buffer
+size
+
+#+begin_src emacs-lisp :exports none
+(format "44.1/128: %f; 48/128: %f" (/ 44100.0 128) (/ 48000.0 128))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+44.1/128: 344.531250; 48/128: 375.000000
+#+end_example
+
+#+ATTR_REVEAL: :frag t
+\begin{gather}
+\frac{44\,100}{128} = 344.531\,25 \\[1em]
+\frac{48\,000}{128} = 375
+\end{gather}
+
+** Frame-Synchronous Output
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+Achieved, in part, by turning code like this:
+#+ATTR_REVEAL: :frag t
+#+begin_src c++ :noeval
+I2S1_RCSR |= I2S_RCSR_RE | I2S_RCSR_BCE;
+I2S1_TCSR = I2S_TCSR_TE | I2S_TCSR_BCE | I2S_TCSR_FRDE;
+#+end_src
+#+ATTR_REVEAL: :frag t
+Into code like this:
+#+ATTR_REVEAL: :frag t
+#+begin_src c++ :noeval
+m_SAI1TransmitControlRegister.setBitClockEnable(true);
+m_SAI1TransmitControlRegister.setFIFORequestDMAEnable(true);
+m_SAI1TransmitControlRegister.setTransmitterEnable(true);
+m_SAI1ReceiveControlRegister.setBitClockEnable(true);
+m_SAI1ReceiveControlRegister.setReceiverEnable(true);
+#+end_src
+
+** Frame-Synchronous Output
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_org: :width 300
+[[./images/logic.png]]
+
+Three clients reproducing a stereo unipolar sawtooth signal with one
+channel inverted; I^{2}S measurement triggered at the peak of the left
+channel.
+
+** Results
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+header: :exports none :session
+#+begin_src julia :results none :var thisdir=(format "%s" default-directory)
+using CSV, DataFrames, Plots
+cd(thisdir)
+
+data = CSV.read(
+    "../../notes/20241218T154907--teensy-ptp-drift-measurements-data__data_ptp_teensy.csv", DataFrame;
+    limit=600
+)
+
+function plotDrift(dataCategory, plotFilepath)
+    scalefontsizes(1.25)
+    t41lastBytes = [191, 203, 234]
+    plot(legendtitle="IP address", yformatter=:scientific,
+         size=(900,600), margin=5Plots.mm);
+    xlabel!("Time (s)")
+    ylabel!("Offset (s)");
+    for b in t41lastBytes
+        column = data[!, "$b-$dataCategory"]
+        # Remove initial offset
+        column .= column .- column[1]
+        # Prevent `noptp` data for client 191 from wrapping. 
+        if b == 191 && dataCategory == "noptp"
+            column[391:end] .= column[391:end] .+ (column[390] - column[391])
+        end
+        plot!(column, label="...48.$b", linewidth=2)
+    end
+
+    savefig(plotFilepath)
+    scalefontsizes()
+end
+#+end_src
+
+Without audio clock conditioning
+
+#+begin_src julia :session :results file graphics :file images/noptp.png :exports results
+plotDrift("noptp", "images/noptp.png")
+#+end_src
+#+attr_org: :width 300
+#+RESULTS:
+[[file:images/noptp.png]]
+
+#+ATTR_REVEAL: :frag t
+1-10 p.p.m.
+
+** Results
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+With audio clock conditioning
+
+#+begin_src julia :session :results file graphics :file images/withptp.png :exports results
+plotDrift("ptp", "images/withptp.png")
+#+end_src
+#+attr_org: :width 300
+#+RESULTS:
+[[file:images/withptp.png]]
+
+#+ATTR_REVEAL: :frag t
+1-10 p.p.b.
+
+** Latest Work
+
+#+ATTR_REVEAL: :frag t
+T41-based audio-server replaced by general purpose computer
+#+ATTR_REVEAL: :frag t
+[[./images/system.png]]
+#+ATTR_REVEAL: :frag t
+One MCU serves double-duty as USB audio device and clock-authority
 
 * Outlook
 :PROPERTIES:
@@ -585,7 +724,21 @@ Can Teensy run real-time convolutions?
 #+ATTR_REVEAL: :frag t
 How to evaluate the system from a user-centric perspective?
 
+** Positives
+
+#+ATTR_REVEAL: :frag t
+SMC paper positively reviewed
+
+#+ATTR_REVEAL: :frag t
+Opportunity to submit to I3DA
+
+#+ATTR_REVEAL: :frag t
+Bonus concern: not much time to write a paper
+
 * Thank You
+:PROPERTIES:
+:reveal_background: #141414
+:END:
 
 * Local Variables                                                  :noexport:
 
