@@ -1,6 +1,6 @@
 # -*- Mode: org -*-
 # -*- coding: utf-8 -*-
-#+STARTUP: overview indent inlineimages logdrawer hidestars
+#+STARTUP: content indent inlineimages logdrawer hidestars
 #+TITLE:       Research Journal
 #+AUTHOR:      Thomas Rushton
 #+LANGUAGE:    en
@@ -8818,3 +8818,158 @@ extension, [[https://clickandread.inist.fr/][Click & Read]], which, as of right 
 - "[[https://numin.inria.fr/portal/g/:spaces:71lwaa/base_de_connaissance/notes/3752?translation=en][Access scientific subscriptions]]" documentation on Numin.
 
 Entered on [2025-05-23 ven. 10:22]
+*** 2025-05-27 mardi
+**** CSI Year 2
+This went fine. I spoke for a little too long (an extra five minutes
+or so), and was my usual discursive self when responding to
+questions. In any case, no worries. As Leo pointed out, however, I
+should've introduced my thesis topic from first principles rather than
+diving straight into a description of a year wrestling with hardware.
+
+- Leo: MAKE A PLAN
+  + Now's the time to be thinking about how to spend the rest of the
+    second half; realistic goals, that sort of thing.
+- Jens: similar stuff; it's impossible to do/implement everything, so
+  be selective.
+  + It /is/ possible to evaluate the technical side of the work and have
+    that be a scientific contribution.
+  + But what about evaluating the /consequences of drift/? What sort of
+    discrepancies are perceptible? How long do they take to arise, etc.?
+  + In the absence (or with question marks over availability at least)
+    of a space and equipment with which to test setups based on my
+    system (or perhaps as a complement) why not use binaural
+    reproduction? HRTFs and artificial, simulated drift...
+
+Jens contacted me after the meeting wrt. the above; he's keen to help
+if I'm interested.
+
+Entered on [2025-05-27 mar. 16:28]
+*** 2025-05-28 mercredi
+**** Comparing PDFs                                        :WRITING:TOOLS:
+Preparing the camera-ready version of my SMC paper, I decided I needed
+to be sure that I hadn't make any content changes subsequent to sharing
+rev. 2-1 with Romain & Tanguy, i.e. I needed to compare =smc-2025.pdf=
+and =smc-2025_rev2-1.pdf=. I tried =M-x diff=, but that just told me that
+/these binary files differ/, not in what way (could just be metadata for
+example). Anyway, I found the open-source [[https://vslavik.github.io/diff-pdf/][diff-pdf]], which works rather
+nicely.
+
+#+begin_src shell :results output :exports both
+diff-pdf --view a.pdf b.pdf
+#+end_src
+
+The above opens a PDF viewer with differences highlighted (no metadata
+view as far as I can tell though).
+
+Entered on [2025-05-28 mer. 16:06]
+*** 2025-05-30 vendredi
+**** Teensy: External Memory                                      :TEENSY:
+Maxime was kind enough to show me how to attach a [[https://www.pjrc.com/store/psram.html][PSRAM chip]] to the
+Teensy. Key takeaways:
+- tin the pads with a thin layer of solder; remove any excess.
+- align the chip, and attach one corner pin with a tiny bit of
+  additional solder.
+- one leg soldered anchors the chip; the rest should follow relatively
+  easily with a small amount of solder.
+- avoid bridging the pads; not the end of the world to have to remove
+  some solder.
+
+There's a [[https://github.com/PaulStoffregen/teensy41_psram_memtest/blob/master/teensy41_psram_memtest.ino][memory test program]], and, sure enough, with one chip
+attached on one Teensy, it produces the expected output:
+
+#+begin_example
+EXTMEM Memory Test, 8 Mbyte
+ CCM_CBCMR=B5AE8304 (88.0 MHz)
+testing with fixed pattern 5A698421
+testing with pseudo-random sequence, seed=2976674124
+testing with pseudo-random sequence, seed=1438200953
+testing with pseudo-random sequence, seed=3413783263
+testing with pseudo-random sequence, seed=1900517911
+testing with pseudo-random sequence, seed=1227909400
+...
+testing with fixed pattern CCCCCCCC
+testing with fixed pattern F0F0F0F0
+testing with fixed pattern FF00FF00
+testing with fixed pattern FFFF0000
+testing with fixed pattern FFFFFFFF
+testing with fixed pattern 00000000
+ test ran for 36.43 seconds
+All memory tests passed :-)
+#+end_example
+
+It runs 57 tests in total, each of which iterates over the entire 8 MB
+memory twice. So, give or take, that's
+
+#+begin_src emacs-lisp
+(let ((numTests 57)
+      (numIter 2)
+      (memSizeBytes (* 8 1024 1024))
+      (testDuration 36.43))
+  (format "%f byte/sec"
+          (/ (* numTests numIter memSizeBytes)
+             testDuration)))
+#+end_src
+
+#+RESULTS:
+: 26250379.138073 byte/sec
+
+Mono, 16-bit, 48 kHz wav has a data rate of
+
+#+begin_src emacs-lisp
+(let ((bytesPerSample 2)
+      (fs 48000))
+  (format "%f byte/sec" (* bytesPerSample fs)))
+#+end_src
+
+#+RESULTS:
+: 96000.000000 byte/sec
+
+Now imagine we want to convolve with an impulse response; computing
+each output sample is going to require access to (and computation
+with) a number of samples equal to the length of the IR, so...
+
+#+begin_src emacs-lisp
+(let* ((bytesPerSample 2)
+       (fs 48000)
+       (irDuration .005)
+       (irSamples (* irDuration fs)))
+  (format "IR samples %f, %f byte/sec"
+          irSamples
+          (* bytesPerSample fs irSamples)))
+#+end_src
+
+#+RESULTS:
+: IR samples 240.000000, 23040000.000000 byte/sec
+
+Doesn't look too promising, frankly.
+
+Entered on [2025-05-30 ven. 14:38]
+**** Email exchange with Alexander Carôt      :WRITING:NETWORKEDAUDIO:PTP:
+Having supplemented my SMC paper with a reference to one of the papers
+suggested by [[*Reviewer 1][reviewer 1]] [cite:@carotGNSSbased2019], I contacted the
+first author, one Alexander Carôt of NetJack fame
+[cite:@carotNetjack2009]. It turns out that Prof Carôt (who kindly
+congratulated me on my paper) was that very reviewer! I asked about
+the lingering ppb drift that I'm seeing, and he added Christian Hoene
+(third author) to the discussion. Here's the latter's contribution to
+the discussion:
+
+#+begin_quote
+Yes, it was an idea from research. A GNSS synchronized sound card – it
+would work especially well together with the golden cables and PCB.
+
+As for the product, we decided not to implement it as it would account
+to about one additional click in a typical session. Thus, it never
+left the POC and research phase.
+
+Good luck with your research
+#+end_quote
+
+I'm not sure what golden cables he's referring to, nor what this
+additional click might be. Never mind, I suppose.
+
+Incidentally, Dr. Hoene is associated with [[https://symonics.com/][Symonics]], a company with an
+interest in networked audio. They have a product, [[https://symonics.com/fastmusic/][Fastmusic]], that's
+based on [[https://www.soundjack.eu/][Soundjack]] (another Prof. Carôt system, apparently).
+
+Entered on [2025-05-30 ven. 16:13]

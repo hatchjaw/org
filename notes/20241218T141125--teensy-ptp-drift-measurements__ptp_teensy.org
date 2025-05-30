@@ -115,7 +115,7 @@ plotDrift("noptp", "$dir/noptp.png")
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-vjS59g/20241218T141125/noptp.png]]
+[[file:/tmp/babel-8LjkxS/20241218T141125/noptp.png]]
 
 As one would expect, we see more-or-less linear drift, with two
 subscribers running fast (one, =...48.234=, significantly faster than
@@ -143,7 +143,7 @@ plotDrift("unmanaged", "$dir/unmanaged.png")
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-vjS59g/20241218T141125/unmanaged.png]]
+[[file:/tmp/babel-8LjkxS/20241218T141125/unmanaged.png]]
 
 Unexpectedly, perhaps, we now see all three subscribers run fast, and
 by about the same degree.
@@ -172,7 +172,7 @@ plotDrift("ptp", "$dir/ptp.png")
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-vjS59g/20241218T141125/ptp.png]]
+[[file:/tmp/babel-8LjkxS/20241218T141125/ptp.png]]
 
 There's still some drift, but now we're talking! In the worst case,
 that of =...48.234=, we have:

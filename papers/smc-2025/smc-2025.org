@@ -8,10 +8,10 @@
 #+export_file_name: out/smc-2025
 #+options: toc:nil num:3 date:nil author:nil
 #+latex_class: smc-2025
-#+bibliography: smc2025bib.bib
-# Bastards want us to use bibtex. Got to create a separate,
+# Our dear friends want us to use bibtex. Got to create a separate,
 # bibtex-compatible file for this paper.
 #+cite_export: bibtex
+#+bibliography: smc2025bib.bib
 #+latex_header_extra: \RequirePackage[]{./out/smc-2025}
 #+property: header-args:julia :eval no-export
 

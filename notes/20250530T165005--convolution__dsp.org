@@ -1,0 +1,120 @@
+#+title:      Convolution
+#+date:       [2025-05-30 ven. 16:50]
+#+filetags:   :dsp:
+#+identifier: 20250530T165005
+
+I want to run real-time impulse response convolutions on an embedded
+platform that's programmed in C/C++. Let's explore how I should go
+about implementing that.
+
+* Notation
+
+Discrete time-domain convolution of a signal \(s[n]\) with an impulse response
+\(h[n]\) is notated [cite:@mcclellanSignal2003 ch. 5]
+
+\begin{equation}
+y[n] = s[n] \ast h[n] = \sum^{M}_{k=0} h[k]s[n-k]
+\end{equation}
+
+* Example
+
+Let's consider an example where \(s[n]\) is a rectangular pulse,
+\(s[n] = \{1,1,1,1\}\) and \(h[n]\), with length \(M = 3\), is an
+inverted ramp, \(h[n] = \{1, 0.5, 0.25\}\). The convolution can be
+represented in tabular fashion, demonstrating /synthetic polynomial
+multiplication/.
+
+#+attr_latex: :scale 2
+\begin{equation}
+\begin{array}{r||c|cccccc|c}
+n          & n<0 & 0 & 1   & 2    & 3    & 4    & 5    & n>5 \\
+\hline \hline
+s[n]       & 0   & 1 & 1   & 1    & 1    & 0    & 0    & 0 \\
+h[n]       & 0   & 1 & 0.5 & 0.25 &      &      &      &   \\
+\hline
+h[0]s[n]   & 0   & 1 & 1   & 1    & 1    & 0    & 0    & 0 \\
+h[1]s[n-1] & 0   & 0 & 0.5 & 0.5  & 0.5  & 0.5  & 0    & 0 \\
+h[2]s[n-2] & 0   & 0 & 0   & 0.25 & 0.25 & 0.25 & 0.25 & 0 \\
+\hline
+y[n]       & 0   & 1 & 1.5 & 1.75 & 1.75 & 0.75 & 0.25 & 0
+\end{array}
+\end{equation}
+
+Sure enough:
+
+#+begin_src julia :session
+import Pkg; Pkg.add("DSP"); Pkg.add("OffsetArrays")
+using DSP, Plots, OffsetArrays
+
+s = OffsetArray([1, 1, 1, 1, 0], -1)
+h = OffsetArray([1, .5, .25], -1)
+y1 = conv(s, h)
+#+end_src
+
+#+RESULTS:
+: 7-element OffsetArray(::Vector{Float64}, 0:6) with eltype Float64 with indices 0:6:
+:  1.0
+:  1.5
+:  1.75
+:  1.75
+:  0.75
+:  0.25
+:  0.0
+
+And visually:
+
+#+begin_src julia :session :results file graphics :file (format "%s/conv1.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+plot(y1, label="y_1[n]")
+savefig("$dir/conv1.png")
+#+end_src
+#+attr_org: :width 450
+#+RESULTS:
+[[file:/tmp/babel-8LjkxS/conv1.png]]
+
+* Code
+
+The above is fine, but in practice it's not going to be possible to
+lean on a library implementation. Let's perform the calculation by
+hand.
+
+#+begin_src julia :session
+function convolve(s, h)
+    M = length(h) - 1
+    len = length(s) + M
+    y = OffsetArray(zeros(len), -1)
+    for n = 0:len
+        for k = 0:M
+            if n - k >= 0 && n - k < length(s)
+                y[n] += h[k] * s[n - k]
+            end
+        end
+    end
+    return y
+end;
+
+y2 = convolve(s, h)
+#+end_src
+
+#+RESULTS:
+: 7-element OffsetArray(::Vector{Float64}, 0:6) with eltype Float64 with indices 0:6:
+:  1.0
+:  1.5
+:  1.75
+:  1.75
+:  0.75
+:  0.25
+:  0.0
+
+#+begin_src julia :session :results file graphics :file (format "%s/conv2.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+plot(y2, label="y_2[n]")
+savefig("$dir/conv2.png")
+#+end_src
+#+attr_org: :width 450
+#+RESULTS:
+[[file:/tmp/babel-8LjkxS/conv2.png]]
+
+* Computational Requirements
+
+Clearly then, the longer the impulse response, the heavier the
+calculation --- which is completely logical, since we're essentially
+applying an FIR filter (with three taps in this case).

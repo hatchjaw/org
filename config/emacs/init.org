@@ -1,16 +1,24 @@
 #+title: Emacs Config
-#+property: header-args :tangle ~/.emacs.d/org-init.el :noeval
+#+property: header-args :tangle ~/.emacs.d/org-init.el
 
 I aim to migrate my existing config, managed with [[https://www.chezmoi.io/][chezmoi]], to this
 file. In the meantime, I tangle it to a file that I then load from
-=init.el=. For more config, see [[file:early-init.org][early init]].
+=init.el=.
+
+#+begin_src emacs-lisp :tangle no
+;; .emacs.d/init.el
+...
+(load-file "~/.emacs.d/org-init.el")
+#+end_src
+
+For more config, see [[file:early-init.org][early init]].
 
 #+begin_notes
 It's already clear that I'm going to have to devise a better structure
-for this file at some point (see [[*Inspo][Inspo]]).
+for this file at some point (see [[*Inspiration][Inspiration]]).
 #+end_notes
 
-* Inspo
+* Inspiration
 
 - https://codeberg.org/mehrad/.emacs.d
 - https://protesilaos.com/emacs/dotemacs
@@ -28,13 +36,51 @@ need to wrap, so I disable =visual-line-mode=.
 (global-visual-line-mode -1)
 #+end_src
 
+* Themes
+
+I've used [[https://github.com/nashamri/spacemacs-theme/][spacemacs-theme]] extensively.
+
+#+begin_src emacs-lisp
+(use-package spacemacs-theme
+  :ensure t
+  :pin melpa
+  :config
+  (setq spacemacs-theme-comment-bg nil
+        spacemacs-theme-comment-italic t))
+#+end_src
+
+I'd also like the option of doom-themes.
+
+#+begin_src emacs-lisp
+(use-package doom-themes
+  :ensure t
+  :config
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t
+        doom-themes-padded-modeline t)
+  (doom-themes-org-config))
+#+end_src
+
+[[https://github.com/larstvei/dot-emacs?tab=readme-ov-file#advice][Reset the theme state]] when switching themes, e.g. with =M-x load-theme=.
+
+#+begin_src emacs-lisp
+(defadvice load-theme
+    (before disable-before-load
+            (theme &optional no-confirm no-enable) activate)
+  (mapc 'disable-theme custom-enabled-themes))
+#+end_src
+
+** TODO Make this work with Org Mode fixed-pitch face attributes
+
+Said face attributes are overridden by a new theme when it loads.
+
 * Emacs Itself
 
 #+begin_src emacs-lisp
 (use-package emacs
   :ensure nil
   :init
-  #+end_src
+#+end_src
 
 ** Default mode & scratch message
 
@@ -133,7 +179,7 @@ No buffer name in the title bar:
 
 *** Frame Border
 
-Let's let the visual space breath a little bit.
+Let's allow the frame to breathe a little bit.
 
 #+begin_src emacs-lisp
   (add-to-list 'default-frame-alist '(internal-border-width . 8))
@@ -141,15 +187,30 @@ Let's let the visual space breath a little bit.
 
 *** Fonts
 
-Define variable and fixed pitch fonts. (Cantarell italic doesn't seem
-to work)
+Define default, fixed-pitch and variable-pitch fonts.
 
 #+begin_src emacs-lisp
-  ;; (set-face-attribute 'variable-pitch nil :family "Minion Pro" :height 130)
-  ;; (set-face-attribute 'variable-pitch nil :family "EB Garamond" :height 130)
-  ;; (set-face-attribute 'variable-pitch nil :family "Cantarell" :height 125)
-  (set-face-attribute 'variable-pitch nil :family "Noto Sans" :height 115)
-  (set-face-attribute 'fixed-pitch nil :family "Iosevka Comfy Motion" :height 110)
+  (defvar tar/font-height 11
+    "Default font height in pt.")
+  (defvar tar/fixed-pitch-font "Iosevka Comfy Motion"
+    "Typeface to use for default and fixed-pitch face attributes.")
+  (defvar tar/variable-pitch-font "IBM Plex Sans"
+    "Typeface to use for variable pitch face attribute.")
+
+  (defun should-set-font-p (font)
+    "Check if the FONT exists, and whether this is a graphic display"
+    (and (display-graphic-p) (not (null (x-list-fonts font)))))
+
+  (when (should-set-font-p tar/fixed-pitch-font)
+    (set-face-attribute 'default nil
+                        :font tar/fixed-pitch-font
+                        :height (* 10 tar/font-height))
+    (set-face-attribute 'fixed-pitch nil
+                        :family tar/fixed-pitch-font))
+
+  (when (should-set-font-p tar/variable-pitch-font)
+    (set-face-attribute 'variable-pitch nil
+                        :family tar/variable-pitch-font))
 #+end_src
 
 Make sure comments are always rendered with fixed pitch, even in Org
@@ -159,7 +220,16 @@ mode, where they'd otherwise be variable pitch.
   (set-face-attribute 'font-lock-comment-face nil :inherit 'fixed-pitch)
 #+end_src
 
-** Close ~use-package emacs~
+*** Theme
+
+Load my chosen theme.
+
+#+begin_src emacs-lisp
+  (load-theme 'spacemacs-dark
+              t)
+#+end_src
+
+** Emacs done
 
 #+begin_src emacs-lisp
 )
@@ -211,7 +281,7 @@ And we're done.
 
 ** Dictionary
 
-Be sure to use a British English dictionary by default.
+Use a British English dictionary by default.
 
 #+begin_src emacs-lisp
   (setq ispell-dictionary "en_GB")
@@ -225,7 +295,7 @@ Improve the visual prominence of spelling errors.
   (set-face-attribute 'flyspell-incorrect nil :inverse-video t)
 #+end_src
 
-** [End spelling]
+** Spelling done
 
 #+begin_src emacs-lisp
 )
@@ -331,13 +401,21 @@ MELPA (with good reason) so a manual load is necessary.
   :config
 #+end_src
 
-** Initial Folding State
+** General options
 
-I like to fold everything by default; this can be overridden with,
+*** Folding
+
+I like to show headings and subheadings by default; this can be overridden with,
 e.g., ~#+startup: nofold~.
 
 #+begin_src emacs-lisp
-  (setq org-startup-folded 'fold)
+  (setq org-startup-folded 'content)
+#+end_src
+
+Replace the usual ellipsis for folded content
+
+#+begin_src emacs-lisp
+  (setq org-ellipsis "   ⬎")
 #+end_src
 
 ** Typography
@@ -368,26 +446,43 @@ These can always be revealed with =C-c e=.
 
 Use fixed pitch for a variety of Org Mode elements.
 
-#+begin_src emacs-lisp
-  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-formula nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-code nil :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-block-begin-line nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-block-end-line nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-drawer nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-property-value nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-document-info-keyword nil :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-tag nil :inherit '(shadow fixed-pitch) :weight 'bold :height 1.0)
+#+begin_src emacs-lisp :results none
+  (set-face-attribute 'org-block nil
+                      :foreground nil
+                      :inherit 'fixed-pitch)
+  (set-face-attribute 'org-table nil
+                      :inherit 'fixed-pitch)
+  (set-face-attribute 'org-formula nil
+                      :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil
+                      :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-verbatim nil
+                      :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil
+                      :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil
+                      :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-block-begin-line nil
+                      :inherit 'fixed-pitch)
+  (set-face-attribute 'org-block-end-line nil
+                      :inherit 'org-block-begin-line)
+  (set-face-attribute 'org-checkbox nil
+                      :inherit 'fixed-pitch)
+  (set-face-attribute 'org-drawer nil
+                      :inherit 'fixed-pitch)
+  (set-face-attribute 'org-property-value nil
+                      :inherit 'fixed-pitch)
+  (set-face-attribute 'org-document-info-keyword nil
+                      :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-tag nil
+                      :inherit '(shadow fixed-pitch)
+                      :weight 'bold
+                      :height 1.0)
 #+end_src
 
 ** Structure templates
 
-*** Add =org-tempo= to =org-modules=
+*** Tempo module
 
 This means I can use, e.g., ~<f [TAB]~ to insert a Faust source block.
 
@@ -494,7 +589,9 @@ whole ~file svg~ situation.
 #+end_src
 
 ** Org Babel
-*** Don't ask for confirmation all the time
+*** Evaluation
+
+Don't ask for confirmation all the time
 
 Might be worth bearing in mind that, according to my old config:
 
@@ -543,7 +640,7 @@ This might be nicer with ~(add-to-list 'org-babel-load-languages
      ))
 #+end_src
 
-*** Close ~use-package org~
+*** [End Org Mode]
 
 #+begin_src emacs-lisp
 )

@@ -3,13 +3,37 @@
 
 * Appearance
 
+#+begin_src emacs-lisp
+(setq default-frame-alist '(
+#+end_src
+
+** Frame size
+
+Fullscreen as standard.
+
+#+begin_src emacs-lisp
+  (fullscreen . maximized)
+#+end_src
+
+** Background colour
+
 Set the default background colour to match ~bg1~ from
 the dark version of =spacemacs-theme=.
 https://github.com/nashamri/spacemacs-theme/blob/6c74684c4d55713c8359bedf1936e429918a8c33/spacemacs-theme.el#L108
 
 #+begin_src emacs-lisp
-(setq default-frame-alist '((background-color . "#292b2e")))
+  (background-color . "#292b2e")
 #+end_src
+
+** Default frame elements
+
+#+begin_src emacs-lisp
+  (vertical-scroll-bars . nil)
+  (menu-bar-lines . 0)
+  (tool-bar-lines . 0)))
+#+end_src
+
+** UI Settings
 
 Don't show the menu, tool, or scroll bars.
 
