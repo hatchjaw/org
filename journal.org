@@ -5794,10 +5794,10 @@ And the router attests to a very low offset indeed:
 
 This is pretty good news.
 
-Incidentally, stopping and restarting ptp41, the router seems to be
+Incidentally, stopping and restarting =ptp4l=, the router seems to be
 able to re-attain a good sync, unlike the situation where a Teensy
-acts as the clock authority. Why? Perhaps the =t41-ptp= clock
-authority imlementation sets up some faulty state when potential clock
+acts as the clock authority. Why? Perhaps the =t41-ptp= clock authority
+imlementation sets up some faulty state when potential clock
 subscribers have been running longer than it has.
 
 ***** Not out of the woods
@@ -7814,9 +7814,9 @@ Entered on [2025-04-22 mar. 18:40]
 **** PTP Setup; System Clock Sync                                    :PTP:
 I'm really not sure at this stage whether I'm doing things right, but,
 let's see, I have:
-- =ptp41= running
+- =ptp4l= running
   #+begin_src shell :results output :exports both
-sudo ptp41 -m -2 -i enp85s0u2u3u1
+sudo ptp4l -m -2 -i enp85s0u2u3u1
   #+end_src
 - I did nothing to speak of with =pmc=
   #+begin_src shell :noeval
@@ -8941,7 +8941,9 @@ with) a number of samples equal to the length of the IR, so...
 #+RESULTS:
 : IR samples 240.000000, 23040000.000000 byte/sec
 
-Doesn't look too promising, frankly.
+Doesn't look too promising, frankly. Seems likely that I'll have to
+explore more efficient, FFT-based convolution algorithms. Still, I'll
+try the time-domain version first.
 
 Entered on [2025-05-30 ven. 14:38]
 **** Email exchange with Alexander Carôt      :WRITING:NETWORKEDAUDIO:PTP:
@@ -8973,3 +8975,385 @@ interest in networked audio. They have a product, [[https://symonics.com/fastmus
 based on [[https://www.soundjack.eu/][Soundjack]] (another Prof. Carôt system, apparently).
 
 Entered on [2025-05-30 ven. 16:13]
+** 2025-06 juin
+*** 2025-06-01 dimanche
+**** Ethernet Dongle Trouble                                :HARDWARE:PTP:
+Another new Linux kernel version, another problem with the
+dongle. Tried reinstalling the driver (for kernel 6.6.90), and the
+module file is sat in
+=/lib/modules/6.6.90-1-MANJARO/kernel/drivers/net/usb=, /and/ =lsmod=
+suggests that =ax_usb_nic= is loaded, but =ethtool= isn't giving up the
+goods
+
+#+begin_src shell :results verbatim
+ethtool -T enp85s0u2u3u1c2
+#+end_src
+
+#+RESULTS:
+: Time stamping parameters for enp85s0u2u3u1c2:
+: Capabilities:
+: 	software-transmit
+: 	software-receive
+: 	software-system-clock
+: PTP Hardware Clock: none
+: Hardware Transmit Timestamp Modes: none
+: Hardware Receive Filter Modes: none
+
+Another restart probably required.
+
+Note also that the interface identifier has changed /yet again/. Good
+thing I'm turning my back on the whole dongle situation.
+
+***** Post-restart
+
+First, let's list our ethernet interfaces
+
+#+begin_src shell :results output
+ip a show | grep enp
+#+end_src
+
+#+RESULTS:
+: 6: enp85s0u2u3u1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+:     inet 192.168.10.10/24 brd 192.168.10.255 scope global noprefixroute enp85s0u2u3u1
+: 7: enp85s0u2u4: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel state DOWN group default qlen 1000
+
+OK, interesting, the old ID is back.
+
+#+begin_src shell :results verbatim
+ethtool -T enp85s0u2u3u1
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Time stamping parameters for enp85s0u2u3u1:
+Capabilities:
+	hardware-transmit
+	software-transmit
+	hardware-receive
+	software-receive
+	software-system-clock
+	hardware-raw-clock
+PTP Hardware Clock: 1
+Hardware Transmit Timestamp Modes:
+	off
+	on
+	onestep-sync
+	onestep-p2p
+Hardware Receive Filter Modes:
+	none
+	ptpv1-l4-event
+	ptpv1-l4-sync
+	ptpv1-l4-delay-req
+	ptpv2-l4-event
+	ptpv2-l4-sync
+	ptpv2-l4-delay-req
+	ptpv2-l2-event
+	ptpv2-l2-sync
+	ptpv2-l2-delay-req
+#+end_example
+
+Entered on [2025-06-01 dim. 14:31]
+**** Ananas: Initial Time Exchange                        :NETWORKEDAUDIO:
+If I'm to dispense with the dongle, I need to set up some kind of
+initial exchange of time between the clock authority Teensy and the
+audio server. My first idea was just to add a thread to the audio
+server to scrutinise the network for a PTP follow-up message, but that
+poses a couple of problems:
+- Messages are currently bouncing around on OSI level 2. Reading L2
+  PTP packets on a raw socket requires an interface name, and I think
+  opening a ~SOCK_RAW~ requires root permissions (possibly corroborated
+  [[https://www.tenouk.com/Module43a.html][here]]).
+- Socket programming is kind of horrible.
+- Isn't Wireshark perfectly happy sniffing around for L2 packets?
+  + Yes, but I'm pretty sure installing Wireshark adds a privileged
+    group to the system so it's possible to access all the named
+    network interfaces.
+
+What about switching back to L3, now the dongle is out of the
+equation? Anecdotally, this seems to make clock authority ambiguity
+more likely.
+
+Entered on [2025-06-01 dim. 18:04]
+*** 2025-06-02 lundi
+**** Ananas: Initial Time Exchange II                     :NETWORKEDAUDIO:
+The plot thickens.
+
+- So maybe if clock subscribers start before the switch, then we get
+  into a whole ~Invalid PLL4 numerator 2147483647 for target sample
+  rate 161842.881121 and denominator 1000000000~ situation. The
+  solution there is restart PTP (maybe via the ~onControllerUpdated~
+  callback).
+- After bashing my head against a wall for a few hours (see "Socket
+  programming is kind of horrible"), it became clear to me that JUCE's
+  datagram socket implementation is not compatible with joining a
+  multicast group via a *specific* network interface on a port that's
+  bound to *any* network interface. Allow me to explain...
+
+I asked [[https://phind.com][Phind]] about networking in JUCE, but it hallucinated at me for
+a bit and I gave up. For some reason I thought of Claude, and give the
+free model a try. After a false start, during which it insisted I
+should be using port 319 (event port; incorrect) for follow-up
+messages rather than 320 (general port; correct; it conceded its error
+when I demonstarted a wireshark capture), it regurgitated the
+following, more-or-less immaculate code:
+
+#+begin_src c++
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+
+class MulticastReceiver
+{
+public:
+    MulticastReceiver() : socketFd(-1) {}
+    
+    ~MulticastReceiver()
+    {
+        if (socketFd >= 0) {
+            close(socketFd);
+        }
+    }
+    
+    bool setup(const std::string& multicastGroup, int port, const std::string& localInterface)
+    {
+        // Create socket
+        socketFd = socket(AF_INET, SOCK_DGRAM, 0);
+        if (socketFd < 0) {
+            DBG("Failed to create socket: " << strerror(errno));
+            return false;
+        }
+        
+        // Allow multiple sockets to use the same PORT number
+        int reuse = 1;
+        if (setsockopt(socketFd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+            DBG("Failed to set SO_REUSEADDR: " << strerror(errno));
+            close(socketFd);
+            socketFd = -1;
+            return false;
+        }
+        
+        // Bind to the multicast port
+        struct sockaddr_in addr;
+        memset(&addr, 0, sizeof(addr));
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = INADDR_ANY;  // Bind to all interfaces
+        addr.sin_port = htons(port);
+        
+        if (bind(socketFd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+            DBG("Failed to bind socket: " << strerror(errno));
+            close(socketFd);
+            socketFd = -1;
+            return false;
+        }
+        
+        // Join the multicast group
+        struct ip_mreq mreq;
+        mreq.imr_multiaddr.s_addr = inet_addr(multicastGroup.c_str());
+        mreq.imr_interface.s_addr = inet_addr(localInterface.c_str());
+        
+        if (setsockopt(socketFd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0) {
+            DBG("Failed to join multicast group: " << strerror(errno));
+            close(socketFd);
+            socketFd = -1;
+            return false;
+        }
+        
+        DBG("Successfully joined multicast group " << multicastGroup << " on port " << port);
+        return true;
+    }
+    
+    int receiveData(uint8_t* buffer, int bufferSize, std::string& senderIP, int& senderPort)
+    {
+        struct sockaddr_in senderAddr;
+        socklen_t senderAddrLen = sizeof(senderAddr);
+        
+        int bytesReceived = recvfrom(socketFd, buffer, bufferSize, 0, 
+                                   (struct sockaddr*)&senderAddr, &senderAddrLen);
+        
+        if (bytesReceived > 0) {
+            senderIP = inet_ntoa(senderAddr.sin_addr);
+            senderPort = ntohs(senderAddr.sin_port);
+        }
+        
+        return bytesReceived;
+    }
+    
+    bool waitForData(int timeoutMs)
+    {
+        fd_set readSet;
+        FD_ZERO(&readSet);
+        FD_SET(socketFd, &readSet);
+        
+        struct timeval timeout;
+        timeout.tv_sec = timeoutMs / 1000;
+        timeout.tv_usec = (timeoutMs % 1000) * 1000;
+        
+        int result = select(socketFd + 1, &readSet, nullptr, nullptr, &timeout);
+        return result > 0;
+    }
+    
+private:
+    int socketFd;
+};
+
+// Usage in your TimestampListener class:
+void Server::TimestampListener::prepare()
+{
+    if (!multicastReceiver.setup("224.0.1.129", 320, "192.168.10.10")) {
+        DBG("Failed to setup multicast receiver");
+        return;
+    }
+    
+    startThread();
+}
+
+void Server::TimestampListener::run()
+{
+    while (!threadShouldExit()) {
+        if (multicastReceiver.waitForData(500)) {
+            uint8_t buffer[1500];
+            std::string senderIP;
+            int senderPort;
+            
+            int bytesRead = multicastReceiver.receiveData(buffer, sizeof(buffer), senderIP, senderPort);
+            
+            if (bytesRead > 0) {
+                DBG("Received " << bytesRead << " bytes from " << senderIP << ":" << senderPort);
+                
+                // Log first few bytes for debugging
+                DBG("First bytes: " << std::hex 
+                    << "0x" << (int)buffer[0] << " "
+                    << "0x" << (int)buffer[1] << " " 
+                    << "0x" << (int)buffer[2]);
+                
+                // Check for Follow_Up message (0x08)
+                if ((buffer[0] & 0x0f) == 0x08) {
+                    DBG("Follow-up message found!");
+                    // Process your PTP message here
+                }
+            } else if (bytesRead < 0) {
+                DBG("Error receiving data: " << strerror(errno));
+            }
+        }
+    }
+    
+    DBG("Stopping timestamp listener thread");
+}
+#+end_src
+
+The only bit that didn't work was ~// Log first few bytes for
+debugging~. Blimey. Anyway, what was the problem with my original
+JUCE-based attempt? The culprit: ~juce::SocketHelpers~:
+
+#+begin_src c++
+namespace juce {
+  namespace SocketHelpers {
+    static bool bindSocket (SocketHandle handle, int port, const String& address) noexcept
+    {
+        if (handle == invalidSocket || ! isValidPortNumber (port))
+            return false;
+
+        struct sockaddr_in addr;
+        zerostruct (addr); // (can't use "= { 0 }" on this object because it's typedef'ed as a C struct)
+
+        addr.sin_family = PF_INET;
+        addr.sin_port = htons ((uint16) port);
+        addr.sin_addr.s_addr = address.isNotEmpty() ? ::inet_addr (address.toRawUTF8())
+                                                    : htonl (INADDR_ANY);
+
+        return ::bind (handle, (struct sockaddr*) &addr, sizeof (addr)) >= 0;
+    }
+#+end_src
+
+Here, if an address (i.e. that of a network interface) is provided,
+~addr.sin_addr.s_addr~ is set to that address, when in fact it needs to
+be bound to ~INADDR_ANY~. So just omit the address right? Wrong, because
+there's no way to provide an address to ~DatagramSocket::joinMulticast~
+
+#+begin_src c++
+bool DatagramSocket::joinMulticast (const String& multicastIPAddress)
+{
+    if (handle < 0 || ! isBound)
+        return false;
+
+    return SocketHelpers::multicast (handle, multicastIPAddress, lastBindAddress, true);
+}
+#+end_src
+
+~lastBindAddress~? That's the value that gets passed to
+~DatagramSocket::bindToPort~; it can't be overridden here.
+
+So just call ~SocketHelpers::multicast~ directly, right? Wrong; all of
+those helpers are defined statically in =juce_Socket.cpp=. The solution:
+
+#+begin_src c++
+void AnanasServer::TimestampListener::prepare()
+{
+    if (-1 == socket.getBoundPort()) {
+        // JUCE doesn't handle multicast in a manner that's compatible with
+        // reading PTP packets on a specific interface...
+
+        // ...(it's probably not necessary to allow port-reuse in this case, but
+        // what the hell)...
+        if (!socket.setEnablePortReuse(true)) {
+            DBG("Failed to set socket port reuse: " << strerror(errno));
+            socket.shutdown(); // TODO: abstract away the socket...
+            return;
+        }
+
+        // ... anyway, so bind the relevant port to ALL interfaces
+        // (INADDR_ANY)...
+        if (!socket.bindToPort(320)) {
+            DBG("Failed to bind socket to port: " << strerror(errno));
+            socket.shutdown();
+            return;
+        }
+
+        // ...then join the appropriate multicast group on the relevant
+        // interface (i.e. a manually-configured ethernet connection).
+        struct ip_mreq mreq{};
+        mreq.imr_multiaddr.s_addr = inet_addr(juce::String("224.0.1.129").toRawUTF8());
+        mreq.imr_interface.s_addr = inet_addr(juce::String("192.168.10.10").toRawUTF8());
+
+        if (setsockopt(
+                socket.getRawSocketHandle(),
+                IPPROTO_IP,
+                IP_ADD_MEMBERSHIP,
+                (const char *) &mreq, sizeof (mreq)) < 0) {
+            DBG("Failed to add multicast membership: " << strerror(errno));
+            socket.shutdown();
+            return;
+        }
+    }
+
+    startThread();
+}
+#+end_src
+
+Entered on [2025-06-02 lun. 15:22]
+**** Convolution Won't Work                                       :TEENSY:
+To be specific, the PSRAM isn't fast enough to do time-domain
+convolution. With an IR length of 256 samples (thus a convolution
+buffer of two channels each of 256 samples), and appropriating the
+~CYCLE_COUNTER_APPROX_PERCENT~ macro from ~AudioStream~, the algorithm
+consumes 115% CPU time.
+
+| IR length (samples) | Approx CPU time (%) |
+|---------------------+---------------------|
+|                   2 |                 1.6 |
+|                   4 |                 2.5 |
+|                   8 |                 4.3 |
+|                  16 |                 7.9 |
+|                  32 |                15.0 |
+|                  64 |                29.4 |
+|                 128 |                58.1 |
+|                 256 |               115.4 |
+
+So an approximate doubling with each doubling of the number of
+samples. (That's linear, isn't it? I thought we were dealing with
+\(O(N^{2})\)). Anyway, the irony is IRs of that length could be stored in
+SRAM and things wouldn't be nearly as slow. (I should check that
+tomorrow.)
+
+Entered on [2025-06-02 lun. 20:27]

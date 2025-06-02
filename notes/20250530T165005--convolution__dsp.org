@@ -52,14 +52,6 @@ y1 = conv(s, h)
 #+end_src
 
 #+RESULTS:
-: 7-element OffsetArray(::Vector{Float64}, 0:6) with eltype Float64 with indices 0:6:
-:  1.0
-:  1.5
-:  1.75
-:  1.75
-:  0.75
-:  0.25
-:  0.0
 
 And visually:
 
@@ -69,7 +61,7 @@ savefig("$dir/conv1.png")
 #+end_src
 #+attr_org: :width 450
 #+RESULTS:
-[[file:/tmp/babel-8LjkxS/conv1.png]]
+[[file:/tmp/babel-QoBbOY/conv1.png]]
 
 * Code
 
@@ -111,7 +103,7 @@ savefig("$dir/conv2.png")
 #+end_src
 #+attr_org: :width 450
 #+RESULTS:
-[[file:/tmp/babel-8LjkxS/conv2.png]]
+[[file:/tmp/babel-QoBbOY/conv2.png]]
 
 * Computational Requirements
 
