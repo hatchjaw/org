@@ -257,6 +257,12 @@ Music/Drama Technician, Parrs Wood High School, Manchester, UK,
 
 * Publications
 
+T. A. Rushton, Y. Orlarey, R. Michon, T. Risset, S. Letz, 2025, Faust
+Autodiff: Towards Audio Domain-Specific Machine Learning, /Proceedings
+of the 2025 AES International Conference on Artifical Intelligence and
+Machine Learning for Audio/ (accepted; to be published September
+2025).
+
 T. A. Rushton, R. Michon, T. Risset, 2025, All Together Now: A
 Synchronous Platform for Distributed Spatial Audio, /Proceedings of
 the 22^{nd} Sound and Music Computing Conference/ (accepted; to be
@@ -279,12 +285,12 @@ the 7th Interactive Sonification Workshop (ISon)/.
 - Winner: /Best Student Paper/.
 
 T. A. Rushton, D. Overholt, 2022, [[https://vbn.aau.dk/files/497197288/d20.pdf][The Springamajig: A Flexible Digital
-Musical Instrument]], /19th Sound and Music Computing Conference, SMC
+Musical Instrument]], /Proceedings of the 19th Sound and Music Computing Conference, SMC
 2022/.
 
 G. V. K. Gustafsson, M. Timossi, T. A. Rushton, 2022, [[https://vbn.aau.dk/en/publications/kuplen-a-hands-on-physical-model][Kuplen: A
-Hands-On Physical Model]], /19th Sound and Music Computing Conference,
-SMC 2022/.
+Hands-On Physical Model]], /Proceedings of the 19th Sound and Music
+Computing Conference, SMC 2022/.
 
 * Emacs setup                                                      :noexport:
 
