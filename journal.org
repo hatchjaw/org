@@ -9353,7 +9353,197 @@ consumes 115% CPU time.
 So an approximate doubling with each doubling of the number of
 samples. (That's linear, isn't it? I thought we were dealing with
 \(O(N^{2})\)). Anyway, the irony is IRs of that length could be stored in
-SRAM and things wouldn't be nearly as slow. (I should check that
+RAM and things wouldn't be nearly as slow. (I should check that
 tomorrow.)
 
 Entered on [2025-06-02 lun. 20:27]
+*** 2025-06-03 mardi
+**** Teensy RAM vs PSRAM                                          :TEENSY:
+Alright, this is unexpected. Switching to RAM, 64-sample IR:
+#+begin_example
+Convolver: 37.580002 % CPU
+#+end_example
+
+and, to restate the point, using the PSRAM:
+#+begin_example
+Convolver: 29.420002 % CPU
+#+end_example
+
+What the bloody hell is going on?
+
+First things first, it was a bad idea to implement a ring buffer with
+direct pointer arithmetic, e.g.
+
+#+begin_src c++
+EXTMEM int16_t convBuffer[Convolver::kBufferSize][Convolver::kNumChannels]{};
+
+int16_t *Convolver::FIFO::getReadPointer()
+{
+    const auto current{readPointer};
+    --readPointer;
+    if (readPointer < convBuffer[0]) {
+        readPointer = convBuffer[kBufferSize - 1];
+    }
+    return current;
+}
+#+end_src
+
+(and similar for ~getWritePointer~). Incrementing/decrementing pointers
+that reside on the PSRAM is costly, apparently. Doing no processing, just
+iterating, the convolver reports
+
+#+begin_example
+Convolver: 4.352000 % CPU
+#+end_example
+
+and using ~size_t~ indices instead:
+
+#+begin_example
+Convolver: 0.088000 % CPU
+#+end_example
+
+Entered on [2025-06-03 mar. 09:45]
+**** Réunion Emeraude: Simon Jacquin, Stagiaire     :MEETING:PRESENTATION:
+/Évaluation des stratégies d'ordonnancement (scheduling) dans le
+compilateur FAUST et pistes d'amélioration/
+
+- For a given Faust program there may not be a unique valid
+  implementation. Do these different implementations differ in
+  performance?
+  + (This is about the results of compilation, not compilation
+    itself.)
+- Graph representation; something about restructuring the graph in
+  acyclic form, splitting out/removing loops with delays greater
+  than 1.
+  + Looks like a graph of dependencies.
+  + /Partial graph/, says Christine. /Precedence graph (graph de
+    précedence)/. /Topological tree/.
+- Four strategies described for traversing the graph; depth-first,
+  breadth-first, interleaved, reverse breadth-first.
+  + There is no one best strategy; different Faust algorithms are
+    more-efficiently handled by the different strategies.
+  + Interleaved is pretty bad almost across the board... but there are
+    some exceptions.
+  + These also vary wrt. compiler (clang vs gcc).
+- All compilers reschedule instructions; all use the /List Scheduling/
+  algorithm.
+- Intention is to focus henceforth on investigating clang in "native
+  mode".
+- /La vectorisation ne gagne pas toujours./
+- Next: separate loops for better cache-usage...
+
+Entered on [2025-06-03 mar. 10:06]
+*** 2025-06-04 mercredi
+**** CCRMA VSR: no dice; AES AIMLA acceptance              :WRITING:VISIT:
+The [[*France-Stanford Institute][France-Stanford Institute]] turned down my request for cash
+#+begin_quote
+I am sorry to report that the center received many more applications
+worthy of funding than our resources enable us to support and that we
+are therefore unable to provide you with funding at this time.
+#+end_quote
+thus perish my hopes of being a visiting student researcher at
+CCRMA. Should hopefully go back for a week (or two) with Romain in
+October/November.
+
+My Faust Autodiff paper was accepted, however; reviews: 2, 2, 2, -1. A
+couple of the reviewers failed to appreciate 
+
+Entered on [2025-06-04 mer. 14:54]
+*** 2025-06-05 jeudi
+**** More convolution on the Teensy                               :TEENSY:
+Ditching iteration over channels (i.e. assuming two output channels
+rather than generalising), and bumping the PSRAM clock speed from 88
+to 105.6 MHz (see =startup.c=) it's possible to convolve two channels
+with an IR of 750 samples (~15.6 ms). That's still dreadful, but I've
+yet to explore more efficient convolution algorithms, so all hope is
+not yet lost.
+
+Also that's for the case that entails performing all DSP on the first
+of two per-buffer DMA interrupts. I don't know why ~AudioStream~ does it
+this way, but that's the approach I emulated. Anyway, this means that
+I can't exceed 50% CPU time (the above costs just over 48%). In
+effect, it might be possible to double the above IR length. Still
+useless, but what I'm getting at is there's some unused scope for
+computation.
+
+On a side-note, my convolver appears to be back-to-front, i.e. setting
+
+#+begin_src c++
+irBuffer[0] = 1.f;
+irBuffer[kBufferSize - 1] = 1.f;
+#+end_src
+
+adds a copy delayed by one sample, not the length of the IR buffer,
+whereas
+
+#+begin_src c++
+irBuffer[0] = 1.f;
+irBuffer[1] = 1.f;
+#+end_src
+
+Creates the expected delay. I've certainly done something idiotic in
+my code to reach this unintended outcome.
+
+Entered on [2025-06-05 jeu. 10:48]
+  
+  [[file:~/org/journal.org::*Teensy RAM vs PSRAM][Teensy RAM vs PSRAM]]
+**** Important things to do and maybe not do                   :BRAINDUMP:
+***** DONE Reply to Cristina Rottondi
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-06-06 ven. 09:41]
+:END:
+Mention our upcoming meeting, the prospective IS2 workshop, CCRMA not
+working out, etc.
+***** DONE Reply to Jens
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-06-06 ven. 09:06]
+:END:
+Regarding drift simulation. Maybe explain that I've got a lot on my
+plate and that stuff might have to wait till August.
+***** DONE Reply to Leonardo
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-06-06 ven. 09:06]
+:END:
+Thank him (and Jens) for their help with my CSI.
+***** DONE Submit CSI report to ADUM
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-06-06 ven. 14:44]
+:END:
+And any other required supporting documentation, naturally.
+***** DONE Contact Chris & Nette
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-06-06 ven. 09:58]
+:END:
+The VSR game is up.
+***** TODO Prepare slides for SMC
+Just 5 minutes. Use Typst? In that case, ask Pierre for a template.
+***** TODO Prepare poster for SMC
+And ask Tanguy about printing it to foldable fabric instead of paper.
+***** TODO Register for AES AIMLA
+Do this by July 1st (early-bird deadline). [[https://aes2.org/event-extra/2025-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio/][$475 for non-members]].
+***** TODO Submit camera-ready AES paper
+Do this by [[https://aes2.org/contributions/2025-1st-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio-call-for-contributions/][July 14th]].
+***** TODO Finish 3rd year enrolment with doctoral school
+Needs a combined PDF containing
+- Progress report
+- Letter from Tanguy (verdict on progress, perspectives for following
+  year)
+- Convention individuelle de formation doctorale
+  
+Entered on [2025-06-05 jeu. 11:15]
+*** 2025-06-08 dimanche
+**** Even more convolution                                    :DSP:TEENSY:
+I had indeed done something stupid when resetting the convolution
+buffer read index; it's no longer an issue.
+
+So I managed to port the Teensy Audio Library's 1024-point FFT to my
+~AudioProcessor~ model, and it works, /and/ it's fast --- like 5% CPU fast
+--- thanks to the ARM Core M7's SIMD capabilites. This is great, and
+could support frequency-domain convolution (well, multiplication), but
+equally I might well be able to wring more performance out of the
+time-domain approach before I have to resort to something like
+singular value decomposition [cite:@atkinsApproximate2013].
+
+Entered on [2025-06-08 dim. 19:29]
+  
+  [[file:~/org/journal.org::*More convolution on the Teensy][More convolution on the Teensy]]

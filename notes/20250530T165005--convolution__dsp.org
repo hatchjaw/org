@@ -52,6 +52,14 @@ y1 = conv(s, h)
 #+end_src
 
 #+RESULTS:
+: 7-element OffsetArray(::Vector{Float64}, 0:6) with eltype Float64 with indices 0:6:
+:  1.0
+:  1.5
+:  1.75
+:  1.75
+:  0.75
+:  0.25
+:  0.0
 
 And visually:
 
@@ -104,6 +112,35 @@ savefig("$dir/conv2.png")
 #+attr_org: :width 450
 #+RESULTS:
 [[file:/tmp/babel-QoBbOY/conv2.png]]
+
+Here's a sligtly more involved example (with the aim of debugging
+implementation problems on the Teensy):
+
+#+begin_src julia :session :results file graphics :file (format "%s/conv3.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+s2 = OffsetArray(repeat(1:-1e-2:0, outer=2), -1)
+h2 = OffsetArray([1; zeros(10); 1; zeros(10); 1], -1)
+y3 = convolve(s2, h2)
+plot([y3, s2], label=["y_3[n]" "s_2[n"])
+savefig("$dir/conv3.png")
+#+end_src
+#+attr_org: :width 450
+#+RESULTS:
+[[file:/tmp/babel-QoBbOY/conv3.png]]
+
+And here's another that demonstrates convolution of an impuse with
+an impulse at \(n = 0\), /and/ a time-shifted impulse.
+
+#+begin_src julia :session :results file graphics :file (format "%s/conv4.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+s3 = OffsetArray([1; zeros(100)], -1)
+h3 = OffsetArray([1; zeros(49); .5], -1)
+y4 = convolve(s3, h3)
+plot(y4, label="y_4[n]")
+# plot!(s3, label="s_3[n]")
+savefig("$dir/conv4.png")
+#+end_src
+#+attr_org: :width 450
+#+RESULTS:
+[[file:/tmp/babel-QoBbOY/conv4.png]]
 
 * Computational Requirements
 
