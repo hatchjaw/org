@@ -67,7 +67,7 @@ And visually:
 plot(y1, label="y_1[n]")
 savefig("$dir/conv1.png")
 #+end_src
-#+attr_org: :width 450
+#+attr_org: :width 400
 #+RESULTS:
 [[file:/tmp/babel-QoBbOY/conv1.png]]
 
@@ -109,12 +109,15 @@ y2 = convolve(s, h)
 plot(y2, label="y_2[n]")
 savefig("$dir/conv2.png")
 #+end_src
-#+attr_org: :width 450
+#+attr_org: :width 400
 #+RESULTS:
 [[file:/tmp/babel-QoBbOY/conv2.png]]
 
+** Examples
+
 Here's a sligtly more involved example (with the aim of debugging
-implementation problems on the Teensy):
+implementation problems on the Teensy), in which an inverted ramp is
+convolved with a train of three impulses:
 
 #+begin_src julia :session :results file graphics :file (format "%s/conv3.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
 s2 = OffsetArray(repeat(1:-1e-2:0, outer=2), -1)
@@ -123,22 +126,21 @@ y3 = convolve(s2, h2)
 plot([y3, s2], label=["y_3[n]" "s_2[n"])
 savefig("$dir/conv3.png")
 #+end_src
-#+attr_org: :width 450
+#+attr_org: :width 400
 #+RESULTS:
 [[file:/tmp/babel-QoBbOY/conv3.png]]
 
 And here's another that demonstrates convolution of an impuse with
-an impulse at \(n = 0\), /and/ a time-shifted impulse.
+an impulses at \(n = 0\) and \(n = 50\)
 
 #+begin_src julia :session :results file graphics :file (format "%s/conv4.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
 s3 = OffsetArray([1; zeros(100)], -1)
 h3 = OffsetArray([1; zeros(49); .5], -1)
 y4 = convolve(s3, h3)
 plot(y4, label="y_4[n]")
-# plot!(s3, label="s_3[n]")
 savefig("$dir/conv4.png")
 #+end_src
-#+attr_org: :width 450
+#+attr_org: :width 400
 #+RESULTS:
 [[file:/tmp/babel-QoBbOY/conv4.png]]
 
@@ -146,4 +148,148 @@ savefig("$dir/conv4.png")
 
 Clearly then, the longer the impulse response, the heavier the
 calculation --- which is completely logical, since we're essentially
-applying an FIR filter (with three taps in this case).
+applying an FIR filter (with three taps in this case). From /Spectral
+Audio Signal Processing/ [cite:@smithSpectral2011, ch. 8.1.1]:
+
+#+begin_quote
+...the computational complexity of direct form cyclic convolution of
+two N-point signals is \(\mathcal{O}(N^{2})\) ... More precisely, [it]
+requires \(N^{2}\) multiplies and \(N(N-1)\) additions...
+#+end_quote
+
+* FFT-based Convolution
+
+Time-domain convolution's frequency-domain counterpart is
+multiplication
+
+\begin{equation}
+\mathrm{DFT}_{k}\{h \ast x\} = H(\omega_{k})X(\omega_{k})\;,
+\end{equation}
+
+and it is of complexity \(\mathcal{O}(N\log_{2}N)\), performing optimally
+when the length of the FFT is a power of two.
+
+#+begin_src julia :session
+Pkg.add("FFTW")
+using FFTW
+
+nfft = nextpow(2, max(length(s), length(h)))
+S = fft([collect(s); zeros(nfft - length(s))])
+H = fft([collect(h); zeros(nfft - length(h))])
+Y = S.*H
+#+end_src
+
+#+RESULTS:
+: 8-element Vector{ComplexF64}:
+:                   7.0 + 0.0im
+:  -0.10355339059327373 - 3.871320343559642im
+:                   0.0 + 0.0im
+:    0.6035533905932737 - 0.37132034355964266im
+:                   0.0 + 0.0im
+:    0.6035533905932737 + 0.37132034355964266im
+:                   0.0 + 0.0im
+:  -0.10355339059327373 + 3.871320343559642im
+
+Numerical loss of precision aside, taking the inverse transform and
+getting the real part produces a familiar set of output samples:
+
+#+begin_src julia :session
+y5 = OffsetArray(real(ifft(Y)), -1)
+#+end_src
+
+#+RESULTS:
+: 8-element OffsetArray(::Vector{Float64}, 0:7) with eltype Float64 with indices 0:7:
+:  1.0
+:  1.5
+:  1.7499999999999998
+:  1.75
+:  0.75
+:  0.25
+:  2.220446049250313e-16
+:  0.0
+
+And the visual, too, bears a familiar countenance:
+
+#+begin_src julia :session :results file graphics :file (format "%s/conv5.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+plot(y5, label="y_5[n]")
+savefig("$dir/conv5.png")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:/tmp/babel-QoBbOY/conv5.png]]
+
+** Convolving Long Signals
+
+[[https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/convolution.html][However, for long IRs...]]
+
+#+begin_quote
+...naively doing a standard overlap-add FFT convolution using an FFT
+of size N with L=N/2, where N is chosen to be at least twice the
+length of the convolution kernel (zero-padding the kernel) to perform
+each convolution operation...  would incur a substantial input to
+output pipeline latency on the order of L samples. Because of the
+enormous audible delay, this simple method cannot be used. Aside from
+the enormous delay, the size N of the FFT could be extremely
+large. For example, with an impulse response of 10 seconds at 44.1Khz,
+N would equal 1048576 (2^20). This would take a very long time to
+evaluate.
+#+end_quote
+
+Essentially, for block-based processing, it's going to be necessary to
+break the FFT of the impulse response into chunks too. Enter
+overlap-add (and/or overlap-save).
+
+** Block-based Processing
+
+First, consider the frequency-domain convolution of the sequences ~s3~
+and ~h3~:
+
+#+begin_src julia :session :results file graphics :file (format "%s/conv6.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+nfft = nextpow(2, max(length(s3), length(h3)))
+S3 = fft([collect(s3); zeros(nfft - length(s3))])
+H3 = fft([collect(h3); zeros(nfft - length(h3))])
+Y2 = S3.*H3
+y6 = OffsetArray(real(ifft(Y2)), -1)
+plot(y6, label="y_6[n]")
+savefig("$dir/conv6.png")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:/tmp/babel-QoBbOY/conv6.png]]
+
+Again, numerical precsion aside (consult the value of ~y6~ if in doubt),
+things look just as they did before (albeit with an output signal
+that's only 128 samples long).
+
+*** Chopping up the input
+
+Next, let's process the input in blocks of 16 samples, leaving the IR
+alone.
+
+#+begin_src julia :session :results output
+M = 16                         # Block size
+L = length(h3)                 # IR Length
+R = M                          # Hop size
+nSig = length(s3)
+nFFT = nextpow(2, L+M-1)
+
+# Zero-pad the input signal.
+s31 = OffsetArray([collect(s3); zeros(nFFT - nSig)], -1)
+
+# Take the FFT of the IR
+H31 = fft([collect(h3); zeros(nFFT - length(h3))])
+
+lastSampIdx = Integer(R*(ceil(nSig/R)))
+y7 = OffsetArray(zeros(nSig + nFFT), -1)
+for m=0:R:lastSampIdx
+    szp = [collect(s31[m:m+M-1]); zeros(nFFT - M)]
+    Sm = fft(szp)
+    Y7 = Sm.*H31
+    y7[m:m+nFFT-1] += real(ifft(Y7))
+end
+#+end_src
+
+#+RESULTS:
+: LoadError: BoundsError: attempt to access 229-element OffsetArray(::Vector{Float64}, 0:228) with eltype Float64 with indices 0:228 at index [112:239]
+: in expression starting at /tmp/babel-QoBbOY/julia-vterm-src-LALmYm:15
+

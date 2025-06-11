@@ -4,12 +4,12 @@
 #+TITLE:       Research Journal
 #+AUTHOR:      Thomas Rushton
 #+LANGUAGE:    en
-#+TAGS: noexport(n) MEETING(m) SUPERVISION(u) PRESENTATION(p) SOUTENANCE(F)
+#+TAGS: noexport(n) MEETING(m) SUPERVISION(u) PRESENTATION(p) SOUTENANCE(C)
 #+TAGS: BLOG(b) TRAINING(n) INSPO(i) DIY(d) TEACHING(h) REPRES(R) REVIEW(v)
-#+TAGS: GSoC(G) CONFERENCE(C) WRITING(w) BRAINDUMP(B) VISIT(V)
+#+TAGS: GSoC(G) CONFERENCE(O) WRITING(w) BRAINDUMP(B) VISIT(V)
 #+TAGS: [ PROGRAMMING : R(r) PYTHON(P) JULIA(j) FAUST(f) CPP(c) ]
 #+TAGS: [ TOOLS : EMACS(e) ORGMODE(o) GIT(g) ZOTERO(z) LATEX(l) ]
-#+TAGS: [ AUDIO : SYNTHESIS(s) PHYSMOD(y) SPATIALAUDIO(S) NETWORKEDAUDIO(N) DDSP(D) ]
+#+TAGS: [ AUDIO : SYNTHESIS(s) PHYSMOD(y) SPATIALAUDIO(S) NETWORKEDAUDIO(N) DSP(D) DDSP(F) ]
 #+TAGS: [ HARDWARE : RPI(i) TEENSY(t) PTP(T) ]
 #+EXPORT_SELECT_TAGS: BLOG
 #+OPTIONS:   H:3 num:0 toc:t \n:nil @:t ::t |:t ^:{} _:{} -:t f:t *:t <:t
@@ -9520,7 +9520,9 @@ Just 5 minutes. Use Typst? In that case, ask Pierre for a template.
 ***** TODO Prepare poster for SMC
 And ask Tanguy about printing it to foldable fabric instead of paper.
 ***** TODO Register for AES AIMLA
-Do this by July 1st (early-bird deadline). [[https://aes2.org/event-extra/2025-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio/][$475 for non-members]].
+Do this by July 1st (early-bird deadline). [[https://aes2.org/event-extra/2025-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio/][$475 for non-members]]. In
+Portail Missions, state that the source of funds should be /dotation
+d'Inria/.
 ***** TODO Submit camera-ready AES paper
 Do this by [[https://aes2.org/contributions/2025-1st-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio-call-for-contributions/][July 14th]].
 ***** TODO Finish 3rd year enrolment with doctoral school
@@ -9544,6 +9546,32 @@ equally I might well be able to wring more performance out of the
 time-domain approach before I have to resort to something like
 singular value decomposition [cite:@atkinsApproximate2013].
 
+There are also a load of built-in ARM DSP [[https://arm-software.github.io/CMSIS_5/DSP/html/group__Conv.html][functions]].
+
 Entered on [2025-06-08 dim. 19:29]
   
   [[file:~/org/journal.org::*More convolution on the Teensy][More convolution on the Teensy]]
+*** 2025-06-11 mercredi
+**** Convoluted                                               :DSP:TEENSY:
+It emerges that the ~arm_conv_...~ functions aren't strictly suitable
+for real-time processing (so says Claude🤖, so pinch of salt); the
+expectation is probably more that one would use ~arm_fir_...~ instead;
+there's an [[https://arm-software.github.io/CMSIS_5/DSP/html/arm_fir_example_f32_8c-example.html][example]], but that features a filter of only 29 taps --- not
+the thousands of taps I'm hoping to be able to work with. I got it to
+work with an IR of 256 samples (10% CPU time for two channels), which
+suggests a 2-4x potential speedup compared with my plain, non-SIMD
+implementation --- great, but still useless. In any case, I can't
+actually get it to work for anything greater than that; the cause is
+entirely mysterious, but my guess (given the hard, power-of-two limit)
+is something to do with caching or memory alignment.
+
+As Romain pointed out yesterday, convolution reverbs (I could do with
+an example or two when it comes to writing about this one day) are
+invariably [[https://www.analog.com/media/en/technical-documentation/dsp-book/dsp_book_ch18.pdf][FFT-based]].
+
+***** Resources
+- [[https://www.analog.com/media/en/technical-documentation/dsp-book/dsp_book_ch18.pdf][Chapter 18]] from /The Scientist and Engineer's Guide to Digital Signal Processing/.
+- A signal processing Stack Exchange [[https://dsp.stackexchange.com/questions/74710/convolution-reverb-calculation][discussion]] featuring a
+  pseudo-MATLAB FFT convolution implementation.
+
+Entered on [2025-06-11 mer. 10:42]
