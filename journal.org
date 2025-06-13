@@ -9575,3 +9575,54 @@ invariably [[https://www.analog.com/media/en/technical-documentation/dsp-book/ds
   pseudo-MATLAB FFT convolution implementation.
 
 Entered on [2025-06-11 mer. 10:42]
+
+*** 2025-06-12 jeudi
+**** Artificial Intelligence and Creativity in Music :LECTURE:PRESENTATION:
+A presentation by (friend of the Emeraude team) Jérémy Cohen of
+CNRS/CREATIS/Lyon 1; part of the [[https://arqus-alliance.eu/news/2nd-edition-journey-through-artificial-intelligence-lecture-series/][A Journey through Artificial
+Intelligence]] lecture series.
+
+- (I see there are going to be SUNO examples. This might not be to my
+  taste.)
+- How AI/ML can be a benefit to creative practice; downsides of AI in this regard.
+- Gen AI is SoTA for text & image (+video) problems; what about music?
+- Ca. 2024 quality was good, respected stylistic tropes, but "not yet
+  very realistic music"
+- That was /academic research/, with published results; the likes of
+  Suno, private companies who do not publish, facilitate the creation
+  of commercial-sounding results, musical, etc.
+- Suno aiming to give the "artist" more and more control.
+- Gen AI
+  + + Lowers technical barries to creating music
+  + + Generates new ideas; collaboration between AI and artists
+  + - Copyright infringement --- trained on commercial material
+  + - Producers/artists replaced?
+- Many tools besides gen AI; artists have already started to make
+  music with AI.
+- AI Song Contest; mixture of Gen AI (e.g. text-to-singing voice),
+  pitch detection, timbre transfer, source separation,
+  mixing/mastering, text to /texture/...
+- Jérémy says tone transfer /allows you to play an instrument that you
+  otherwise cannot/.
+- (Oh, he's not a fan of the term /AI/; he'd rather say /machine learning/;
+  that is a principled position.)
+- Supervised learning: linear regression (approximate a curve with a
+  straight line); learn a function from data samples. Training data \to
+  model \to training.
+  + Looks like he's giving a binary classification example... 
+  + A neural nework (generic non-lineal model) can approximately
+    reproduce the function that produces the aforementioned straight
+    line (or some other, more complicated function in higher
+    dimensions).
+- Basic Pitch (Spotify research); onset detector, denoiser \to note
+  detector \to MIDI file. Training data is pairs of MIDI data and
+  corresponding audio. Not too expensive to train; a couple of hours
+  on a couple of GPUs; quick at inference time too.
+  + Still quite clunky.
+- Yaboi Hanoi (ex-Magenta) won the AI song contest (2022)q, in part, by
+  using tone/timbre transfer on a /Phi Nai/ (Thai traditional
+  instrument) --- doesn't conform to western tuning --- mapped onto a
+  sax.
+  * Now the sax does something that a real sax can't.
+
+Entered on [2025-06-12 jeu. 13:58]

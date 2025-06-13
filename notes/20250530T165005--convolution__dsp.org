@@ -131,11 +131,11 @@ savefig("$dir/conv3.png")
 [[file:/tmp/babel-QoBbOY/conv3.png]]
 
 And here's another that demonstrates convolution of an impuse with
-an impulses at \(n = 0\) and \(n = 50\)
+an impulses at \(n = 0\) and a scaled impulse at \(n = 20\)
 
 #+begin_src julia :session :results file graphics :file (format "%s/conv4.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
-s3 = OffsetArray([1; zeros(100)], -1)
-h3 = OffsetArray([1; zeros(49); .5], -1)
+s3 = OffsetArray([1; zeros(99)], -1)
+h3 = OffsetArray([1; zeros(19); .5], -1)
 y4 = convolve(s3, h3)
 plot(y4, label="y_4[n]")
 savefig("$dir/conv4.png")
@@ -263,33 +263,191 @@ that's only 128 samples long).
 
 *** Chopping up the input
 
-Next, let's process the input in blocks of 16 samples, leaving the IR
-alone.
+Next, let's process the input in blocks of \(M = 16\) samples, leaving
+the IR, of length \(L\), alone.
 
 #+begin_src julia :session :results output
-M = 16                         # Block size
-L = length(h3)                 # IR Length
-R = M                          # Hop size
-nSig = length(s3)
-nFFT = nextpow(2, L+M-1)
+using Printf
+M = 16
+L = length(h3)
+@printf "M = %d; L = %d" M L
+#+end_src
 
-# Zero-pad the input signal.
-s31 = OffsetArray([collect(s3); zeros(nFFT - nSig)], -1)
+#+RESULTS:
+: M = 16; L = 21
 
-# Take the FFT of the IR
-H31 = fft([collect(h3); zeros(nFFT - length(h3))])
+Simply convolving a block with the IR would produce an output frame of
+length \(N = M + L - 1\). To take exploit the efficiencies of the FFT, The
+IR should be zero-padded such that its length is the first power of
+two greater than \(N\).
 
-lastSampIdx = Integer(R*(ceil(nSig/R)))
-y7 = OffsetArray(zeros(nSig + nFFT), -1)
-for m=0:R:lastSampIdx
-    szp = [collect(s31[m:m+M-1]); zeros(nFFT - M)]
+#+begin_src julia :session :results output
+N = M + L - 1 
+nFFT = nextpow(2, N)
+@printf "N = %d; nFFT = %d" N nFFT
+#+end_src
+
+#+RESULTS:
+: N = 36; nFFT = 64
+
+Let's zero-pad the IR such that it's ~nFFT~ samples long, and take its FFT
+
+#+begin_src julia :session :results none
+H3_1 = fft([collect(h3); zeros(nFFT - length(h3))])
+#+end_src
+
+The input signal should be zero-padded such that its length is one
+less than the total number of blocks, plus one FFT's worth of
+zeros. The output signal, \(y_{7}\), should be the same length.
+
+#+begin_src julia :session
+endSig = Integer(nFFT * ceil(length(s3) / nFFT)) 
+nSig = endSig - M + nFFT
+s3_1 = OffsetArray([collect(s3); zeros(nSig - length(s3))], -1)
+nSig
+#+end_src
+
+#+RESULTS:
+: 176
+
+We'll use a rectangular window for a start, and a hop size of \(R =
+M\) (100 %).
+
+#+begin_src julia :session :results none
+R = M
+#+end_src
+
+For each input block, convolved with the IR, the
+corresponding output block will be of length ~nFFT~. Having computed an
+output block, it should be overlap-added to the existing output
+signal; the second output block should combined with the tail of the
+first output block, i.e. the value of the output sample \(y(M+m)\)
+will be the sum of the first sample of the second output block and the
+\((M+m)^{\mathrm{th}}\) sample of the first output block.
+
+#+begin_src julia :session :results none
+y7 = OffsetArray(zeros(nSig), -1)
+for m=0:R:endSig-R-1
+    szp = [collect(s3_1[m:m+M-1]); zeros(nFFT - M)]
     Sm = fft(szp)
-    Y7 = Sm.*H31
+    Y7 = Sm .* H3_1
     y7[m:m+nFFT-1] += real(ifft(Y7))
 end
 #+end_src
 
-#+RESULTS:
-: LoadError: BoundsError: attempt to access 229-element OffsetArray(::Vector{Float64}, 0:228) with eltype Float64 with indices 0:228 at index [112:239]
-: in expression starting at /tmp/babel-QoBbOY/julia-vterm-src-LALmYm:15
+OK, let's plot the output signal
 
+#+begin_src julia :session :results file graphics :file (format "%s/conv7.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+plot(y7, label="y_7[n]")
+savefig("$dir/conv7.png")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:/tmp/babel-QoBbOY/conv7.png]]
+
+*** A more instructive example
+
+Let's make the input signal a little more interesting, and create a
+new IR
+
+#+begin_src julia :session y8 :results file graphics :file (format "%s/conv8.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+using Plots, OffsetArrays, FFTW
+s4 = OffsetArray(repeat([1; zeros(14); -.5; zeros(14)], 4), -1)
+h4 = OffsetArray([-.5; zeros(21); .5], -1)
+plot(s4, label="s_4[n]")
+plot!(h4, label="h_4[n]")
+savefig("$dir/conv8")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:/tmp/babel-QoBbOY/conv8.png]]
+
+#+begin_src julia :session y8 :results file graphics :file (format "%s/conv9.gif" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+M = 16
+R = M
+L = length(h4)
+N = M + L - 1 
+nFFT = nextpow(2, N)
+endSig = Integer(nFFT * ceil(length(s4) / nFFT)) 
+nSig = endSig - M + nFFT
+H4 = fft([collect(h4); zeros(nFFT - length(h4))])
+s4zp = OffsetArray([collect(s4); zeros(nSig - length(s4))], -1)
+y8 = OffsetArray(zeros(nSig), -1)
+anim = @animate for m=0:R:endSig-R-1
+    szp = [collect(s4zp[m:m+M-1]); zeros(nFFT - M)]
+    Sm = fft(szp)
+    Y8 = Sm .* H4
+    y8[m:m+nFFT-1] += real(ifft(Y8))
+    plot(y8, label="y_8[n]")
+end
+gif(anim, "$dir/conv9.gif", fps = 1)
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:/tmp/babel-QoBbOY/conv9.gif]]
+
+#+begin_notes
+=C-c C-x m= to play the animated gif.
+#+end_notes
+
+As expected, the output signal is each non-zero sample in the input
+signal, first with its sign flipped and scaled down by a half, then
+with its original sign, also scaled down by fifty percent. The pairs
+of impulses are interleaved becuase of the structure of the IR.
+
+*** Chopping up the IR too
+
+So, now there case where \(h\) is very long. According to Claude🤖,
+the next step is /partitioned convolution/ (not covered by Smith
+directly, but sort of included as an exercise to the reader). The
+process:
+
+- Split \(h\) into \(K\) blocks of length \(M\): \(h_{0}, h_{1}, \dots, h_{K-1}\).
+- For each input block \(x_{n}\), convolve with each partition of \(h\).
+- The output block \(y_{n}\) is the sum of each of the convolutions of
+  the \((n-k)^{\mathrm{th}}\) input blocks with the \(k^{\mathrm{th}}\)
+  partition of \(h\).
+
+(I guess overlap-add will be necessary too. In any case)
+
+\begin{equation}
+y_{n} = x_{n} \ast h = \sum_{k=0}^{K-1} x_{n-k} \ast h_{k}
+\end{equation}
+
+E.g., for \(K = 3\)
+
+\begin{align}
+y_{0} &= x_{0} \ast h_{0} \\
+y_{1} &= x_{1} \ast h_{0} + x_{0} \ast h_{1} \\
+y_{2} &= x_{2} \ast h_{0} + x_{1} \ast h_{1} + x_{0} \ast h_{2} \\
+y_{3} &= x_{3} \ast h_{0} + x_{2} \ast h_{1} + x_{1} \ast h_{2} \\
+&\dots
+\end{align}
+
+So, one FFT, \(X_{n}\), for each input block, multiplied by each of
+\(H_{k}\)...
+
+\begin{equation}
+y_{n} = \sum_{k=0}^{K-1} \Re\left(\mathcal{F}^{-1}\left\{X_{n-k} \cdot H_{k}\right\}\right)
+\end{equation}
+
+So (for uniform partitioning) it's going to be necessary to keep a
+buffer \(\mathbf{X}\), a matrix composed of \(K\) FFT vectors, \(X_{n}\).
+
+*** Non-uniform partitioning
+
+Interesting is the idea of /non-uniform partitioning/. Later partitions
+can be progressively larger powers of two, exploiting the fact that
+longer FFTs, while introducing more latency, are more computationally
+efficient than shorter ones (which may in fact be /less/ efficient than
+using direct form time-domain) plus the idea that the latter part of
+the IR is typically of less significance to the output (though what
+the nature of that (in)significance is I can't say without digging
+into the literature myself). The aim (echoed [[https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/convolution.html][here]], so to speak) is to
+minimise latency by having output samples ready to go as close to
+immediately as possible, perhaps even using direct form for the first
+couple of blocks.
+
+#+begin_src julia :session y9
+
+#+end_src

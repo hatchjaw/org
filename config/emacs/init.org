@@ -480,6 +480,16 @@ Use fixed pitch for a variety of Org Mode elements.
                       :height 1.0)
 #+end_src
 
+*** LaTeX previews
+
+The default scale (1.5) is too large for my current choice of variable
+pitch font, so:
+
+#+begin_src emacs-lisp
+  (setq org-format-latex-options
+        (plist-put org-format-latex-options :scale 1.3))
+#+end_src
+
 ** Structure templates
 
 *** Tempo module
@@ -656,6 +666,36 @@ This might be nicer with ~(add-to-list 'org-babel-load-languages
 (use-package ox-typst
   :ensure t
   :after org)
+#+end_src
+
+** Animated gifs in Org Mode
+
+Fun/useful if making [[https://docs.juliaplots.org/latest/animations/][animated plots]], for example.
+
+#+begin_src emacs-lisp
+(use-package org-inline-anim
+  :ensure t
+#+end_src
+
+Get the latest version, with ~org-inline-anim-loop~.
+
+#+begin_src emacs-lisp
+  :pin melpa
+#+end_src
+
+Hook it into Org Mode.
+
+#+begin_src emacs-lisp
+  :after org
+  :hook
+  (org-mode . org-inline-anim-mode)
+  :config
+#+end_src
+
+Loop gifs by default.
+
+#+begin_src emacs-lisp
+  (setq org-inline-anim-loop t))
 #+end_src
 
 * Window-switching
