@@ -9626,3 +9626,97 @@ Intelligence]] lecture series.
   * Now the sax does something that a real sax can't.
 
 Entered on [2025-06-12 jeu. 13:58]
+*** 2025-06-13 vendredi
+**** Convolution thoughts from the Teensy Forum               :DSP:TEENSY:
+***** PSRAM limitations 
+Paul Stoffregen [[https://forum.pjrc.com/index.php?threads/external-psram-usage-advice-on-the-teensy-4-1.76886/post-357846][says]]
+
+#+begin_quote
+The theoretical bandwidth is about 40 Mbyte/sec if using the default
+88 MHz clock, or about 60 Mbyte/sec if you edit the startup code to
+use 132 MHz.
+#+end_quote
+
+So I should look into achieving that higher clock speed (currently I
+have ~105 MHz by changing the value of a divider register, IIRC. I
+probably need to alter the clock source too.
+
+#+begin_quote
+PSRAM also works pretty well for complex stuff that fits within the
+Cortex-M7 32K cache. For example, if you're doing matrix multiply or
+FIR filters or direct convolution reverb, expect to run into problems
+if any 1 data set your program handles at a time grows larger than
+32K.
+#+end_quote
+
+This might explain why ~arm_conv_fast_q15~ wouldn't go any further than
+256 samples (unpartitioned). I'll need to be wary of this while
+implementing things in the frequency domain.
+
+#+begin_quote
+PSRAM can be accessed by DMA, which doesn't use the cache. Total
+bandwidth is an issue.
+#+end_quote
+
+So, that sidestep the cache limitation, with other tradeoffs
+presumably. Looks like the [[https://github.com/PaulStoffregen/teensy41_psram_memtest/blob/master/teensy41_psram_memtest.ino][memtest sketch]] uses DMA.
+
+***** More PSRAM stuff
+
+Probably of no direct use to me (besides debugging?) but interesting
+nonetheless: someone [[https://forum.pjrc.com/index.php?threads/section-type-conflict-and-other-memory-error.76357/][trying to run a nerual network]] on a Teensy,
+storing weights in PSRAM, using DMA for some operations.
+
+***** Other attempts to synchronise Teensies
+
+Convolution-related too. [[https://forum.pjrc.com/index.php?threads/synchronizing-teensies-again.75740/][First up]], attempting to record [[https://en.wikipedia.org/wiki/Green%27s_function][Green's
+functions]] in two rooms, with a Teensy master in one room, synced to 32
+teensies in another, and what [[https://forum.pjrc.com/index.php?threads/synchronizing-teensies-again.75740/post-348929][sounds like]] a convolution partitioned
+across the group of 32...
+
+Second (related) we have [[https://forum.pjrc.com/index.php?threads/triggered-i2s.74407/][attempts]] to /trigger I^{2}S/ at the same time
+on distributed devices. Uses a voltage change on a given pin to
+trigger I^{2}S operations, with I^{2}S buffers written too directly,
+i.e. without using DMA. So... clock sharing over a physical link! Sort
+of; not strictly the clock, and only syncing on startup, it seems,
+i.e. no drift correction. But that's a [[https://forum.pjrc.com/index.php?threads/triggered-i2s.74407/post-339450][decent-looking sync]]. Damn.
+
+What does that get me thinking? Well, PTP necessitates the use of
+compliant switches. So if we had a clock authority producing a voltage
+impulse train on a given pin, with that pin hard-linked to a
+corresponding pin on each of the rest of the network (and there would
+still have to be a /network/ for audio transmission), one could trigger
+an interrupt that one could use, in tandem with the ENET clock /anyway/,
+to do switchless PTP. From the thread (and because it's interesting):
+
+#+begin_src c++
+attachInterruptVector(IRQ_SAI1, isr);
+NVIC_ENABLE_IRQ(IRQ_SAI1);
+
+attachInterrupt(digitalPinToInterrupt(0), adjustClock, CHANGE);
+#+end_src
+
+Nonetheless, that extra cable... though it'd be daisy-chainable,
+unlike ethernet... which would negate the elegance of the
+daisy-chaining. Agh.
+
+***** Partitioned convolution
+
+Well, of course [[https://forum.pjrc.com/index.php?threads/low-latency-two-level-partitioned-convolution-for-the-t4.68939/][someone already tried it]].
+
+#+begin_quote
+I see about 28 to 35% ProcessorUsage on a T4.0 at 600MHz,
+which is very usable. (with a single-tier partitioned convolution I
+could only get to 20k taps or so before the CPU usage started to
+max-out)
+
+This 35% is at 44100 sample rate at 66161 taps, mono. If this could be
+done in the time domain it would only allow 0.34ns per
+multiply-accumulate operation.
+#+end_quote
+
+So... 70+% for ~1.5s stereo @ 48 kHz? Honestly, I don't know whether
+to be optimistic. It's uniformly partitioned I guess... might be more
+to be wrung out of it.
+
+Entered on [2025-06-13 ven. 18:58]

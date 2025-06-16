@@ -69,7 +69,7 @@ savefig("$dir/conv1.png")
 #+end_src
 #+attr_org: :width 400
 #+RESULTS:
-[[file:/tmp/babel-QoBbOY/conv1.png]]
+[[file:/tmp/babel-Rt7hKA/conv1.png]]
 
 * Code
 
@@ -111,7 +111,7 @@ savefig("$dir/conv2.png")
 #+end_src
 #+attr_org: :width 400
 #+RESULTS:
-[[file:/tmp/babel-QoBbOY/conv2.png]]
+[[file:/tmp/babel-Rt7hKA/conv2.png]]
 
 ** Examples
 
@@ -128,7 +128,7 @@ savefig("$dir/conv3.png")
 #+end_src
 #+attr_org: :width 400
 #+RESULTS:
-[[file:/tmp/babel-QoBbOY/conv3.png]]
+[[file:/tmp/babel-Rt7hKA/conv3.png]]
 
 And here's another that demonstrates convolution of an impuse with
 an impulses at \(n = 0\) and a scaled impulse at \(n = 20\)
@@ -142,7 +142,7 @@ savefig("$dir/conv4.png")
 #+end_src
 #+attr_org: :width 400
 #+RESULTS:
-[[file:/tmp/babel-QoBbOY/conv4.png]]
+[[file:/tmp/babel-Rt7hKA/conv4.png]]
 
 * Computational Requirements
 
@@ -216,7 +216,7 @@ savefig("$dir/conv5.png")
 #+end_src
 #+attr_org: :width 400
 #+RESULTS:
-[[file:/tmp/babel-QoBbOY/conv5.png]]
+[[file:/tmp/babel-Rt7hKA/conv5.png]]
 
 ** Convolving Long Signals
 
@@ -255,7 +255,7 @@ savefig("$dir/conv6.png")
 #+end_src
 #+attr_org: :width 400
 #+RESULTS:
-[[file:/tmp/babel-QoBbOY/conv6.png]]
+[[file:/tmp/babel-Rt7hKA/conv6.png]]
 
 Again, numerical precsion aside (consult the value of ~y6~ if in doubt),
 things look just as they did before (albeit with an output signal
@@ -343,7 +343,7 @@ savefig("$dir/conv7.png")
 #+end_src
 #+attr_org: :width 400
 #+RESULTS:
-[[file:/tmp/babel-QoBbOY/conv7.png]]
+[[file:/tmp/babel-Rt7hKA/conv7.png]]
 
 *** A more instructive example
 
@@ -360,7 +360,7 @@ savefig("$dir/conv8")
 #+end_src
 #+attr_org: :width 400
 #+RESULTS:
-[[file:/tmp/babel-QoBbOY/conv8.png]]
+[[file:/tmp/babel-Rt7hKA/conv8.png]]
 
 #+begin_src julia :session y8 :results file graphics :file (format "%s/conv9.gif" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
 M = 16
@@ -384,7 +384,7 @@ gif(anim, "$dir/conv9.gif", fps = 1)
 #+end_src
 #+attr_org: :width 400
 #+RESULTS:
-[[file:/tmp/babel-QoBbOY/conv9.gif]]
+[[file:/tmp/babel-Rt7hKA/conv9.gif]]
 
 #+begin_notes
 =C-c C-x m= to play the animated gif.
@@ -431,10 +431,10 @@ So, one FFT, \(X_{n}\), for each input block, multiplied by each of
 y_{n} = \sum_{k=0}^{K-1} \Re\left(\mathcal{F}^{-1}\left\{X_{n-k} \cdot H_{k}\right\}\right)
 \end{equation}
 
-So (for uniform partitioning) it's going to be necessary to keep a
+So (for uniform partitioning) it's probably going to be necessary to keep a
 buffer \(\mathbf{X}\), a matrix composed of \(K\) FFT vectors, \(X_{n}\).
 
-*** Non-uniform partitioning
+**** Non-uniform partitioning
 
 Interesting is the idea of /non-uniform partitioning/. Later partitions
 can be progressively larger powers of two, exploiting the fact that
@@ -448,6 +448,224 @@ minimise latency by having output samples ready to go as close to
 immediately as possible, perhaps even using direct form for the first
 couple of blocks.
 
-#+begin_src julia :session y9
+*** Partitioned Convolution
 
+NB. it turns out Rémi covered this topic rather well in his SMC paper
+[cite:@jeunehommeRealTime2025], albeit focusing on overlap-save.
+
+First up, let's create a longish input signal.
+
+#+begin_src julia :session partition1 :results file graphics :file (format "%s/conv10.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+using Plots
+nSig = 600
+nTaps = 7
+s = zeros(nSig)
+for n=0:nTaps-1
+    s[1 + Integer(n * floor(nSig / nTaps))] = .5 * (-1)^n
+end
+plot(s, label="s")
+savefig("$dir/conv10.png")
 #+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:/tmp/babel-Rt7hKA/conv10.png]]
+
+Next, define an impulse response.
+
+#+begin_src julia :session partition1 :results file graphics :file (format "%s/conv11.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+nIR = Integer(nSig/8)
+nTaps = 17
+h = zeros(nIR)
+for n=0:nTaps-1
+    h[1 + Integer(n * floor(nIR/nTaps))] = .5 * exp(-.25 * n) * (-1)^(n+1)
+end
+plot(h, label="h")
+savefig("$dir/conv11.png")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:/tmp/babel-Rt7hKA/conv11.png]]
+
+Now let's run them through a ready-made convolution algorithm to get
+our ground truth.
+
+#+begin_src julia :session partition1 :results file graphics :file (format "%s/conv12.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+using DSP
+yConv = conv(s, h)
+plot(yConv, label="conv(s, h)")
+savefig("$dir/conv12")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:/tmp/babel-Rt7hKA/conv12.png]]
+
+Next, split the input signal into blocks, and the IR into partitions.
+
+#+begin_src julia :session partition1 :results output
+using Printf
+# Number of samples per input block
+nB = 8
+# Number of samples per IR partition
+nP = 32
+# Minimum convolution block size to avoid time aliasing.
+nC = nB + nP -1
+# Get the smallest power of two greater than nC. Partitions are going
+# to be zero-padded to this size.
+nFFT = nextpow(2, nC)
+
+numParts = nIR/nP
+@printf("IR should be split into %f (%d) partitions.\nA %d-point FFT should be used on each block and on each partition.",
+        numParts, ceil(numParts), nFFT)
+#+end_src
+
+#+RESULTS:
+: IR should be split into 2.343750 (3) partitions.
+: A 64-point FFT should be used on each block and on each partition.
+
+\(s\) should be zero-padded to take the IR tail into account; the
+final partition of the IR will need to be zero-padded too.
+
+#+begin_src julia :session partition1 :results output
+hzp = [h; zeros(Integer(ceil(numParts)) * nP - length(h))]
+hParts = reshape(hzp, nP, Integer(ceil(numParts)))
+szp = [s; zeros(length(hzp) - nB)]
+# Recalculate numBlocks based on padded length.
+numBlocks = Integer(length(szp) / nB)
+sBlocks = reshape(szp, nB, numBlocks)
+@printf("Input is of shape %s; IR is of shape %s.",
+        size(sBlocks), size(hParts))
+#+end_src
+
+#+RESULTS:
+: Input is of shape (8, 86); IR is of shape (32, 3).
+
+As one might in a real-time setting, pre-compute the FFT of each
+partition of the IR. For each partition, zero-pad it to be ~2 * nP~
+samples long.
+
+#+begin_src julia :session partition1 :results output
+using FFTW
+H = [fft([hParts[:,i]; zeros(nP)]) for i in 1:size(hParts, 2)]
+@printf("H contains a %d-point FFT of each of the %d IR partitions.",
+        size(H[1], 1), size(H, 1))
+#+end_src
+
+#+RESULTS:
+: H contains a 64-point FFT of each of the 3 IR partitions.
+
+Calculate some useful block counts.
+
+#+begin_src julia :session partition1 :results output
+blocksPerIR = Integer(nP * size(hParts, 2) / nB)
+blocksPerPartition = Integer(nFFT / nB / 2)
+blocksPerConv = Integer(ceil(nC / nB))
+
+@printf("The IR is zero-padded to %d blocks (%d samples) long.\nIt is split into %d partitions.\nEach partition is %d blocks long",
+        blocksPerIR, blocksPerIR * nB,
+        size(hParts, 2), blocksPerPartition)
+#+end_src
+
+#+RESULTS:
+: The IR is zero-padded to 12 blocks (96 samples) long.
+: It is split into 3 partitions.
+: Each partition is 4 blocks long
+
+Create a buffer to store the convolution of each input block with each
+IR partition. This can either be implemented flat, like this, or as a
+circular buffer (by replacing ~nBlocks~ with ~blocksPerIR~).
+
+#+begin_src julia :session partition1
+convBuf = zeros(numBlocks, size(hParts, 2), nFFT)
+size(convBuf)
+#+end_src
+
+#+RESULTS:
+: (86, 3, 64)
+
+Now perform the partitioned convolution. 
+
+#+begin_src julia :session partition1 :results file graphics :file (format "%s/conv13.gif" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+# An output vector long enough to store all the samples that will be
+# produced.
+y = zeros(length(szp))
+
+anim = @animate for m=1:numBlocks
+    # Zero-pad the current input block.
+    local szp = [sBlocks[:,m]; zeros(nFFT - nB)]
+    S = fft(szp)
+
+    # Get the convBuf block index
+    block = mod1(m, numBlocks)#blocksPerIR)
+    
+    # Store the convolution of the input block with each IR partition.
+    for l=1:size(H, 1)
+        convBuf[block, l, :] = real(ifft(S .* H[l]))
+        
+        # if m == 1 || m == 11 || m == 32
+        #     # plot(real(ifft(S)), label="s$m")
+        #     # plot!(real(ifft(H[l])), label="h$l")
+        #     plot(conv(szp, real(ifft(H[l]))), label="conv(s, h)")
+        #     plot!(convBuf[block, l, :], label="ifft(S .* H)")
+        
+        #     savefig("$dir/conv13-$m-$l")
+        # end
+    end
+
+    if m < 20
+        @printf "Output block %d\n" m
+    end
+
+    # Get the starting sample index at which to write to the output
+    # vector.
+    yStart = 1 + (m - 1) * size(sBlocks, 1)
+
+    # OK, now we need to iterate as far back as to cover all the
+    # partitions with a commensurate number of blocks...
+    # For a start we need samples [1:nBlock] from the convolution of
+    # the current block with the first partition.
+    # Then we need samples [nBlock+1:2*nBlock] from the convolution of
+    # the previous block with... well, probably the first partition
+    # again...
+    for l=1:blocksPerIR
+        block = mod1(m - (l - 1), numBlocks)#blocksPerIR)
+        partition = Integer(floor((l - 1) / blocksPerPartition)) + 1
+        offset = 1 + (mod1(l, blocksPerPartition) - 1) * nB
+        
+        if m < 20
+            @printf "Input block %3d Partition %3d Offset %3d\n" block partition offset
+        end
+
+        # Overlap-add.
+        y[yStart:yStart + nB - 1] += convBuf[
+            block,
+            partition,
+            offset:offset + nB - 1
+        ]
+    end
+    
+    plot(y, label=@sprintf("y[n], block %d", m))
+end
+
+plot(y, label="y[n]")
+savefig("$dir/conv13")
+gif(anim, "$dir/conv13.gif", fps=2)
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:/tmp/babel-Rt7hKA/conv13.gif]]
+
+Now plot the difference between the pre-baked convolution and the
+partitioned variety.
+
+#+begin_src julia :session partition1 :results file graphics :file (format "%s/conv14.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+plotLen = min(length(yConv), length(y))
+convDiff = yConv[1:plotLen] - y[1:plotLen]
+plot(convDiff,
+     label="diff",
+     yticks=range(minimum(convDiff), maximum(convDiff), length=6),
+     yformatter=:scientific)
+savefig("$dir/conv14")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:/tmp/babel-Rt7hKA/conv14.png]]

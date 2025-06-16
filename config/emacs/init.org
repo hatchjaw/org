@@ -229,6 +229,29 @@ Load my chosen theme.
               t)
 #+end_src
 
+** Completion
+
+As advised in [[https://github.com/minad/corfu?tab=readme-ov-file#configuration][corfu's suggested config]]:
+
+Indent /and/ complete with =TAB=.
+
+#+begin_src emacs-lisp
+  :custom
+  (tab-always-indent 'complete)
+#+end_src
+
+Disable Ispell completion.
+
+#+begin_src emacs-lisp
+  (text-mode-ispell-word-completion nil)
+#+end_src
+
+Hide commands in M-x which do not apply to the current mode.
+
+#+begin_src emacs-lisp
+  (read-extended-command-predicate #'command-completion-default-include-p)
+#+end_src
+
 ** Emacs done
 
 #+begin_src emacs-lisp
@@ -700,7 +723,8 @@ Loop gifs by default.
 
 * Window-switching
 
-Let's try the =ace-window= package.
+As an alternative to the less-than-idea =C-x o=, let's try the
+=ace-window= package.
 
 #+begin_src emacs-lisp
 (use-package ace-window
@@ -708,6 +732,88 @@ Let's try the =ace-window= package.
   :config
   (global-set-key (kbd "M-o") 'ace-window)
   (setq aw-dispatch-always t))
+#+end_src
+
+* LSP
+
+#+begin_src emacs-lisp
+(use-package lsp-mode
+  :ensure t
+  :hook (faust-mode . lsp-deferred)
+  :commands (lsp lsp-deferred)
+  :custom
+  (setq lsp-keymap-prefix "C-c C-l")
+  :config
+  (add-to-list 'lsp-language-id-configuration
+               '(faust-mode . "faust"))
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection "faustlsp")
+    :activation-fn (lsp-activate-on "faust")
+    :server-id 'faustlsp
+    )))
+#+end_src
+
+* Language support
+
+** Faust
+
+For basic support, let's start with =faust-mode=.
+
+#+begin_src emacs-lisp
+(use-package faust-mode
+  :ensure t
+  :pin melpa
+  :config
+  (add-to-list 'auto-mode-alist
+               '("\\.\\(dsp\\|lib\\)\\'" . faust-mode)))
+#+end_src
+
+It might be worthwhile looking at [[https://melpa.org/#/faustine][faustine]] at some point.
+
+It might also pay to submit a PR one day, fixing a couple of bugs. One
+is a total failure to parse due to the use of the ~font-lock~ face,
+deprecated since Emacs 29 (see [[https://github.com/hatchjaw/ob-faust][ob-faust]] for details). The other is a
+bad parser rule regarding identifiers that contain numbers.
+
+** Go
+
+#+begin_src emacs-lisp
+(use-package go-mode
+  :ensure t)
+#+end_src
+
+** Other programming-related modes
+
+#+begin_src emacs-lisp
+(use-package git-modes
+  :ensure t)
+#+end_src
+
+* Completion
+
+Let's give =corfu= a go.
+
+#+begin_src emacs-lisp
+(use-package corfu
+  :ensure t
+  :init
+  (global-corfu-mode)
+  (corfu-history-mode)
+  (corfu-popupinfo-mode)
+  :custom
+  (corfu-popupinfo-delay '(1.0 . 0.5)))
+#+end_src
+
+** Completion icons
+
+#+begin_src emacs-lisp
+(use-package nerd-icons-corfu
+  :ensure t
+  :if (display-graphic-p)
+  :after corfu
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 #+end_src
 
 * TODO Use ~setopt~ for ~defcustom~ variables
