@@ -587,7 +587,7 @@ Now perform the partitioned convolution.
 #+begin_src julia :session partition1 :results file graphics :file (format "%s/conv13.gif" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
 # An output vector long enough to store all the samples that will be
 # produced.
-y = zeros(length(szp))
+y = zeros(length(szp) + nB)
 
 anim = @animate for m=1:numBlocks
     # Zero-pad the current input block.
@@ -641,6 +641,15 @@ anim = @animate for m=1:numBlocks
             partition,
             offset:offset + nB - 1
         ]
+
+        # Agh, this shouldn't be necessary.
+        if mod(l, blocksPerPartition) == 0
+            y[yStart + nB:yStart + (2*nB) - 1] += convBuf[
+                block,
+                partition,
+                offset + nB:offset + (2*nB)-1
+            ]
+        end
     end
     
     plot(y, label=@sprintf("y[n], block %d", m))
