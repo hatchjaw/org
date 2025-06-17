@@ -9525,7 +9525,10 @@ Portail Missions, state that the source of funds should be /dotation
 d'Inria/.
 ***** TODO Submit camera-ready AES paper
 Do this by [[https://aes2.org/contributions/2025-1st-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio-call-for-contributions/][July 14th]].
-***** TODO Finish 3rd year enrolment with doctoral school
+***** DONE Finish 3rd year enrolment with doctoral school
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-06-17 mar. 11:56]
+:END:
 Needs a combined PDF containing
 - Progress report
 - Letter from Tanguy (verdict on progress, perspectives for following
@@ -9639,7 +9642,8 @@ use 132 MHz.
 
 So I should look into achieving that higher clock speed (currently I
 have ~105 MHz by changing the value of a divider register, IIRC. I
-probably need to alter the clock source too.
+probably need to alter the clock source too). [Edit: it didn't appear
+to work for me at 132 MHz.]
 
 #+begin_quote
 PSRAM also works pretty well for complex stuff that fits within the
@@ -9720,3 +9724,33 @@ to be optimistic. It's uniformly partitioned I guess... might be more
 to be wrung out of it.
 
 Entered on [2025-06-13 ven. 18:58]
+
+*** 2025-06-17 mardi
+**** Do we even need PSRAM?                                       :TEENSY:
+Just a thought. A 5 s IR would fit in regular RAM.
+
+#+begin_src emacs-lisp :results value
+(let* ((irLengthS 5)
+       (bytesPerSample 2)
+       (fs 48000)
+       (totalSamples (* irLengthS fs))
+       (totalBytes (* totalSamples bytesPerSample)))
+  (format "%d s, %d samples, %d B, %.1f kB, %.3f MB"
+          irLengthS
+          totalSamples
+          totalBytes
+          (/ (float totalBytes) 1024.)
+          (/ (float totalBytes) (* 1024. 1024.))))
+#+end_src
+
+#+RESULTS:
+: 5 s, 240000 samples, 480000 B, 468.8 kB, 0.458 MB
+
+Well, just, and that's if one assumes that there's not a lot of other
+stuff needed in memory; not a given where, say, WFS is concerned.
+
+OK, if there's a distinct IR for each of the two output channels then
+that pushes things more in the direction of the PSRAM. And after
+zero-padding and taking an FFT the above figures would likely grow.
+
+Entered on [2025-06-17 mar. 14:10]

@@ -448,16 +448,17 @@ minimise latency by having output samples ready to go as close to
 immediately as possible, perhaps even using direct form for the first
 couple of blocks.
 
-*** Partitioned Convolution
+*** Overlap-add
 
 NB. it turns out Rémi covered this topic rather well in his SMC paper
-[cite:@jeunehommeRealTime2025], albeit focusing on overlap-save.
+[cite:@jeunehommeRealTime2025], albeit focusing on overlap-save. I'm
+going to try overlap-add first.
 
 First up, let's create a longish input signal.
 
-#+begin_src julia :session partition1 :results file graphics :file (format "%s/conv10.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+#+begin_src julia :session fupola :results file graphics :file (format "%s/conv10.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
 using Plots
-nSig = 600
+nSig = 9600
 nTaps = 7
 s = zeros(nSig)
 for n=0:nTaps-1
@@ -472,8 +473,8 @@ savefig("$dir/conv10.png")
 
 Next, define an impulse response.
 
-#+begin_src julia :session partition1 :results file graphics :file (format "%s/conv11.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
-nIR = Integer(nSig/8)
+#+begin_src julia :session fupola :results file graphics :file (format "%s/conv11.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+nIR = Integer(nSig/4)
 nTaps = 17
 h = zeros(nIR)
 for n=0:nTaps-1
@@ -489,7 +490,7 @@ savefig("$dir/conv11.png")
 Now let's run them through a ready-made convolution algorithm to get
 our ground truth.
 
-#+begin_src julia :session partition1 :results file graphics :file (format "%s/conv12.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+#+begin_src julia :session fupola :results file graphics :file (format "%s/conv12.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
 using DSP
 yConv = conv(s, h)
 plot(yConv, label="conv(s, h)")
@@ -501,14 +502,14 @@ savefig("$dir/conv12")
 
 Next, split the input signal into blocks, and the IR into partitions.
 
-#+begin_src julia :session partition1 :results output
+#+begin_src julia :session fupola :results output
 using Printf
 # Number of samples per input block
-nB = 8
+nB = 128
 # Number of samples per IR partition
-nP = 32
+nP = 512
 # Minimum convolution block size to avoid time aliasing.
-nC = nB + nP -1
+nC = nB + nP - 1
 # Get the smallest power of two greater than nC. Partitions are going
 # to be zero-padded to this size.
 nFFT = nextpow(2, nC)
@@ -519,13 +520,13 @@ numParts = nIR/nP
 #+end_src
 
 #+RESULTS:
-: IR should be split into 2.343750 (3) partitions.
-: A 64-point FFT should be used on each block and on each partition.
+: IR should be split into 4.687500 (5) partitions.
+: A 1024-point FFT should be used on each block and on each partition.
 
 \(s\) should be zero-padded to take the IR tail into account; the
 final partition of the IR will need to be zero-padded too.
 
-#+begin_src julia :session partition1 :results output
+#+begin_src julia :session fupola :results output
 hzp = [h; zeros(Integer(ceil(numParts)) * nP - length(h))]
 hParts = reshape(hzp, nP, Integer(ceil(numParts)))
 szp = [s; zeros(length(hzp) - nB)]
@@ -537,13 +538,13 @@ sBlocks = reshape(szp, nB, numBlocks)
 #+end_src
 
 #+RESULTS:
-: Input is of shape (8, 86); IR is of shape (32, 3).
+: Input is of shape (128, 94); IR is of shape (512, 5).
 
 As one might in a real-time setting, pre-compute the FFT of each
 partition of the IR. For each partition, zero-pad it to be ~2 * nP~
 samples long.
 
-#+begin_src julia :session partition1 :results output
+#+begin_src julia :session fupola :results output
 using FFTW
 H = [fft([hParts[:,i]; zeros(nP)]) for i in 1:size(hParts, 2)]
 @printf("H contains a %d-point FFT of each of the %d IR partitions.",
@@ -551,11 +552,11 @@ H = [fft([hParts[:,i]; zeros(nP)]) for i in 1:size(hParts, 2)]
 #+end_src
 
 #+RESULTS:
-: H contains a 64-point FFT of each of the 3 IR partitions.
+: H contains a 1024-point FFT of each of the 5 IR partitions.
 
 Calculate some useful block counts.
 
-#+begin_src julia :session partition1 :results output
+#+begin_src julia :session fupola :results output
 blocksPerIR = Integer(nP * size(hParts, 2) / nB)
 blocksPerPartition = Integer(nFFT / nB / 2)
 blocksPerConv = Integer(ceil(nC / nB))
@@ -566,25 +567,25 @@ blocksPerConv = Integer(ceil(nC / nB))
 #+end_src
 
 #+RESULTS:
-: The IR is zero-padded to 12 blocks (96 samples) long.
-: It is split into 3 partitions.
+: The IR is zero-padded to 20 blocks (2560 samples) long.
+: It is split into 5 partitions.
 : Each partition is 4 blocks long
 
 Create a buffer to store the convolution of each input block with each
 IR partition. This can either be implemented flat, like this, or as a
 circular buffer (by replacing ~nBlocks~ with ~blocksPerIR~).
 
-#+begin_src julia :session partition1
+#+begin_src julia :session fupola
 convBuf = zeros(numBlocks, size(hParts, 2), nFFT)
 size(convBuf)
 #+end_src
 
 #+RESULTS:
-: (86, 3, 64)
+: (94, 5, 1024)
 
 Now perform the partitioned convolution. 
 
-#+begin_src julia :session partition1 :results file graphics :file (format "%s/conv13.gif" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+#+begin_src julia :session fupola :results file graphics :file (format "%s/fupola.gif" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
 # An output vector long enough to store all the samples that will be
 # produced.
 y = zeros(length(szp) + nB)
@@ -600,19 +601,6 @@ anim = @animate for m=1:numBlocks
     # Store the convolution of the input block with each IR partition.
     for l=1:size(H, 1)
         convBuf[block, l, :] = real(ifft(S .* H[l]))
-        
-        # if m == 1 || m == 11 || m == 32
-        #     # plot(real(ifft(S)), label="s$m")
-        #     # plot!(real(ifft(H[l])), label="h$l")
-        #     plot(conv(szp, real(ifft(H[l]))), label="conv(s, h)")
-        #     plot!(convBuf[block, l, :], label="ifft(S .* H)")
-        
-        #     savefig("$dir/conv13-$m-$l")
-        # end
-    end
-
-    if m < 20
-        @printf "Output block %d\n" m
     end
 
     # Get the starting sample index at which to write to the output
@@ -630,10 +618,6 @@ anim = @animate for m=1:numBlocks
         block = mod1(m - (l - 1), numBlocks)#blocksPerIR)
         partition = Integer(floor((l - 1) / blocksPerPartition)) + 1
         offset = 1 + (mod1(l, blocksPerPartition) - 1) * nB
-        
-        if m < 20
-            @printf "Input block %3d Partition %3d Offset %3d\n" block partition offset
-        end
 
         # Overlap-add.
         y[yStart:yStart + nB - 1] += convBuf[
@@ -642,7 +626,8 @@ anim = @animate for m=1:numBlocks
             offset:offset + nB - 1
         ]
 
-        # Agh, this shouldn't be necessary.
+        # Ideally this shouldn't be necessary, but frankly this isn't
+        # my finest work.
         if mod(l, blocksPerPartition) == 0
             y[yStart + nB:yStart + (2*nB) - 1] += convBuf[
                 block,
@@ -652,21 +637,21 @@ anim = @animate for m=1:numBlocks
         end
     end
     
-    plot(y, label=@sprintf("y[n], block %d", m))
+    plot(y, title="FUPOLA", label=@sprintf("y[n], block %d", m))
 end
 
-plot(y, label="y[n]")
-savefig("$dir/conv13")
-gif(anim, "$dir/conv13.gif", fps=2)
+plot(y, title="FUPOLA", label="y[n]")
+savefig("$dir/fupola")
+gif(anim, "$dir/fupola.gif", fps=10)
 #+end_src
 #+attr_org: :width 400
 #+RESULTS:
-[[file:/tmp/babel-Rt7hKA/conv13.gif]]
+[[file:/tmp/babel-Rt7hKA/fupola.gif]]
 
 Now plot the difference between the pre-baked convolution and the
 partitioned variety.
 
-#+begin_src julia :session partition1 :results file graphics :file (format "%s/conv14.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+#+begin_src julia :session fupola :results file graphics :file (format "%s/conv14.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
 plotLen = min(length(yConv), length(y))
 convDiff = yConv[1:plotLen] - y[1:plotLen]
 plot(convDiff,
@@ -678,3 +663,157 @@ savefig("$dir/conv14")
 #+attr_org: :width 400
 #+RESULTS:
 [[file:/tmp/babel-Rt7hKA/conv14.png]]
+
+OK, that looks fine, but the algorithm as I've implemented it is a bit
+of a dog's breakfast.
+
+*** Overlap-save
+
+Since overlap-add didn't turn out very nicely, and since overlap-save
+is apparently the more common approach\nbsp[cite:@wefersPartitioned2015],
+let's give the latter a try. First of all, (frequency-domain)
+uniformly partitioned (FUPOLS).
+
+Setup is as it was for FUPOLA.
+
+#+begin_src julia :session fupols :results output
+using Plots, Printf, FFTW, DSP
+
+# Input signal.
+Ns = 9600
+nTaps = 7
+s = zeros(Ns)
+for n=0:nTaps-1
+    s[1 + Integer(n * floor(Ns / nTaps))] = .5 * (-1)^n
+end
+
+# Impulse response.
+Nh = Integer(Ns/4)
+nTaps = 17
+h = zeros(Nh)
+for n=0:nTaps-1
+    h[1 + Integer(n * floor(Nh/nTaps))] = .5 * exp(-.25 * n) * (-1)^(n+1)
+end
+
+# Block length
+B = 128
+# Partition length
+L = B
+# Transform size
+K = 2 * B
+# Partition count
+P = Integer(ceil(Nh/L))
+
+@printf "Block length %d | Partition length %d | Transform size %d | Partition count %d" B L K P
+#+end_src
+
+#+RESULTS:
+: Block length 128 | Partition length 128 | Transform size 256 | Partition count 19
+
+Zero-pad, as before.
+
+#+begin_src julia :session fupols :results output
+hzp = [h; zeros(P * L - length(h))]
+hp = reshape(hzp, L, P)
+szp = [s; zeros(length(hzp) - B)]
+# Number of blocks in the input signal.
+M = length(szp) / B
+if isinteger(M)
+    M = Integer(M)
+    sb = reshape(szp, B, M)
+    @printf "Input is of shape %s; IR is of shape %s." size(sb) size(hp)
+else
+    @printf "Somehow, the number of blocks (M) is not an integer; are you sure about that?"
+end
+#+end_src
+
+#+RESULTS:
+: Input is of shape (128, 93); IR is of shape (128, 19).
+
+Split the length \(N_{h}\) IR into \(P = \lceil N/L \rceil\) length-\(L\)
+sub-filters. Zero-pad each sub-filter to length \(2L\) and perform a
+\(2L\)-point FFT on each.
+
+#+begin_src julia :session fupols :results output
+H = [fft([hp[:,i]; zeros(L)]) for i in 1:P]
+@printf("H contains a %d-point FFT of each of the %d IR partitions.",
+        size(H[1], 1), size(H, 1))
+#+end_src
+
+#+RESULTS:
+: H contains a 256-point FFT of each of the 19 IR partitions.
+
+Now for the FUPOLS algorithm.
+
+#+begin_src julia :session fupols :results file graphics :file (format "%s/fupols.gif" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+y = zeros(length(szp) + B)
+
+# The input buffer acts as a 2B-point sliding window of the input
+# signal.
+inputBuffer = zeros(2 * B)
+
+# Frequency-domain delay line.
+FDL = [zeros(ComplexF64, K) for i in 1:P]
+
+anim = @animate for m=1:M
+    # With each new input block, the right half of the input buffer is
+    # shifted to the left and the new block is stored in the right
+    # half.
+    inputBuffer[1:B] = inputBuffer[B + 1:2 * B]
+    inputBuffer[B + 1:2 * B] = sb[:,m]
+
+    # All contents in the FDL are shifted up by one slot.
+    FDL[2:P] = FDL[1:P - 1]
+    # A 2B-point FFT is computed from the input buffer, resulting in
+    # B+1 complex-conjugate symmetric DFT coefficients. The result is
+    # stored in the first slot of the FDL.
+    FDL[1] = fft(inputBuffer)
+
+    X = zeros(ComplexF64, K)
+    
+    # The P sub-filter spectra are pairwise multipiled with the input
+    # spectra in the FDL. The results are accumulated in the frequency
+    # domain.
+    for i=1:P
+        X += FDL[i] .* H[i]
+    end
+
+    # Of the accumulated spectral convolutions, a 2B-point IFFT is
+    # computed.
+    x = real(ifft(X))
+    # From the resulting 2B samples, the left half is discarded and the
+    # right half is returned as the next output block.
+    y[1 + (m - 1) * B:(m - 1) * B + B] = x[B + 1:2 * B]
+
+    plot(y, title="FUPOLS", label=@sprintf("y[n], block %d", m))
+end
+
+gif(anim, "$dir/fupols.gif", fps=10)
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:/tmp/babel-Rt7hKA/fupols.gif]]
+
+Now let's see how accurate the results are.
+
+#+begin_src julia :session fupols :results file graphics :file (format "%s/fupols.png" (org-babel-temp-directory)) :var dir=(org-babel-temp-directory)
+z = conv(s, h)
+diff = z[1:maxLen] - y[1:maxLen]
+p1 = plot(z, title="conv(s, h)", legend=false)
+p2 = plot(y, title="FUPOLS", legend=false)
+maxLen = min(length(z), length(y))
+p3 = plot(diff, title="diff",
+          yticks=range(minimum(diff), maximum(diff), length=4),
+          yformatter=:scientific,
+          legend=false)
+plot(p1, p2, p3, layout=(3,1), size=(600, 800))
+savefig("$dir/fupols")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:/tmp/babel-Rt7hKA/fupols.png]]
+
+That was a lot easier than overlap-add, for one thing because I simply
+followed the point-by-point instructions
+in\nbsp[cite:@wefersPartitioned2015], and secondly, perhaps, because I
+also followed the recommendation of setting \(L = B\).
