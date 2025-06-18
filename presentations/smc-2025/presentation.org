@@ -1,0 +1,102 @@
+#+title: All Together Now
+#+subtitle: A Synchronous Platform For Distributed Spatial Audio
+#+author: Thomas Rushton, Romain Michon, Tanguy Risset
+#+date: July 2025
+
+#+property: header-args:typst :tangle out/theme.typ
+#+options: toc:nil
+#+export_file_name: out/smc-2025
+#+include: "out/theme.typ" export typst
+
+* Typst setup                                                      :noexport:
+
+** Packages
+
+#+begin_src typst
+#import "@preview/polylux:0.4.0":*
+#import "@preview/metropolis-polylux:0.1.0" as metropolis
+
+#import metropolis: new-section
+#+end_src
+
+** Metropolis setup
+
+#+begin_src typst
+#show: metropolis.setup.with(
+    text-font: "Minion Pro",
+    code-font: "Iosevka Comfy Motion",
+    math-font: "New Computer Modern Math",
+    text-size: 22pt,
+    footer: [
+        #set text(size: 14pt)
+        T. A. Rushton, R. Michon, T. Risset
+    ]
+)
+#+end_src
+
+** Use old-style numbers
+
+#+begin_src typst
+#set text(number-type: "old-style")
+#+end_src
+
+** Title slide
+
+#+begin_src typst
+#let subtitle = "A Synchronous Platform For Distributed Spatial Audio"
+
+#context[
+  #slide[
+    #set page(header: none, footer: none, margin: 3em)
+
+    #text(size: 1.8em, weight: "bold", style: "italic")[
+      #document.title
+    ]
+
+    #align(right)[
+      #text(size: 1.3em, weight: "semibold")[
+        #subtitle
+      ]
+    ]
+
+    #metropolis.divider
+
+    #set text(size: .8em, weight: "light")
+    #document.author.first()
+
+    [PUT LOGOS HERE!]
+  ]
+]
+#+end_src
+
+** Begin first slide
+
+#+begin_src typst
+#slide[
+#+end_src
+
+* A slide
+
+aosnetuh
+
+*test*
+
+\begin{equation}
+1 = x^{2} + y^{2}
+\end{equation}
+
+#+typst: ]
+#+typst: #slide[
+
+* Another slide
+
+aoentunatoeh
+
+#+typst: ]
+#+typst: #slide[
+
+* Yet Another slide
+
+athodeunthday
+
+#+typst: ]

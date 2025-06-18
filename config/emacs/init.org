@@ -401,8 +401,10 @@ Repo: [[https://github.com/shg/ob-julia-vterm.el]]
   :pin melpa
   :after julia-vterm
   :config
-  (defalias 'org-babel-execute:julia 'org-babel-execute:julia-vterm)
-  (defalias 'org-babel-variable-assignments:julia 'org-babel-variable-assignments:julia-vterm))
+  (defalias 'org-babel-execute:julia
+    'org-babel-execute:julia-vterm)
+  (defalias 'org-babel-variable-assignments:julia
+    'org-babel-variable-assignments:julia-vterm))
 #+end_src
 
 * Faust
@@ -525,6 +527,15 @@ This means I can use, e.g., ~<f [TAB]~ to insert a Faust source block.
 
 It might be better in the long run to move these to =yasnippet=.
 
+*** Reset
+
+Make sure that any additions to the structure template list aren't
+added again if reloading config.
+
+#+begin_src emacs-lisp
+  (custom-reevaluate-setting 'org-structure-template-alist)
+#+end_src
+
 *** Shell
 
 #+begin_src emacs-lisp
@@ -618,7 +629,8 @@ whole ~file svg~ situation.
 *** typst
 
 #+begin_src emacs-lisp
-  (add-to-list 'org-structure-template-alist '("t" . "export typst"))
+  (add-to-list 'org-structure-template-alist '("t" . "src typst"))
+  (add-to-list 'org-structure-template-alist '("T" . "export typst"))
 #+end_src
 
 ** Org Babel
@@ -670,6 +682,7 @@ This might be nicer with ~(add-to-list 'org-babel-load-languages
      (faust . t)
      (js . t)
      (css . t)
+     ;; (typst-ts . t) doesn't exist!
      ))
 #+end_src
 
@@ -688,7 +701,10 @@ This might be nicer with ~(add-to-list 'org-babel-load-languages
 #+begin_src emacs-lisp
 (use-package ox-typst
   :ensure t
-  :after org)
+  :after org
+  :custom
+  (org-typst-from-latex-environment 'org-typst-from-latex-with-pandoc)
+  (org-typst-from-latex-fragment 'org-typst-from-latex-with-pandoc))
 #+end_src
 
 ** Animated gifs in Org Mode
@@ -742,7 +758,7 @@ As an alternative to the less-than-idea =C-x o=, let's try the
   :hook (faust-mode . lsp-deferred)
   :commands (lsp lsp-deferred)
   :custom
-  (setq lsp-keymap-prefix "C-c C-l")
+  (lsp-keymap-prefix "C-c C-l")
   :config
   (add-to-list 'lsp-language-id-configuration
                '(faust-mode . "faust"))
@@ -755,6 +771,10 @@ As an alternative to the less-than-idea =C-x o=, let's try the
 #+end_src
 
 * Language support
+
+#+begin_notes
+I guess the Julia stuff above should be here...
+#+end_notes
 
 ** Faust
 
@@ -780,6 +800,13 @@ bad parser rule regarding identifiers that contain numbers.
 
 #+begin_src emacs-lisp
 (use-package go-mode
+  :ensure t)
+#+end_src
+
+** Typst
+
+#+begin_src emacs-lisp
+(use-package typst-ts-mode
   :ensure t)
 #+end_src
 

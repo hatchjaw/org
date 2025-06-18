@@ -9754,3 +9754,18 @@ that pushes things more in the direction of the PSRAM. And after
 zero-padding and taking an FFT the above figures would likely grow.
 
 Entered on [2025-06-17 mar. 14:10]
+*** 2025-06-18 mercredi
+**** What am I up to?                                          :BRAINDUMP:
+I've taken a break from [[denote:20250530T165005][convolution]] for the time being to divert my
+attention to:
+- My [[file:presentations/smc-2025/presentation.org][slides]] for SMC
+  + I decided to try to export from Org Mode to Typst for those. It's
+    not a perfectly smooth experience so far, but it's fine.
+- My poster for SMC
+  + I haven't started this yet, but I found my 2023 SMC poster on
+    overleaf.
+- The IS^{2} proposal
+  + Cristina gave me some advice; said it shouldn't be too much
+    work. N'importe quoi.
+  
+Entered on [2025-06-18 mer. 15:42]
