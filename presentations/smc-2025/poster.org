@@ -1,0 +1,7 @@
+#+title: All Together Now
+#+subtitle: A Synchronous Platform For Distributed Spatial Audio
+#+author: Thomas Rushton, Romain Michon, Tanguy Risset
+#+date: July 2025
+
+#+options: toc:nil
+#+export_file_name: out/smc-2025-poster

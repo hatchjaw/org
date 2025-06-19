@@ -9764,6 +9764,7 @@ attention to:
 - My poster for SMC
   + I haven't started this yet, but I found my 2023 SMC poster on
     overleaf.
+  + There's also this niceish [[https://github.com/philipphoman/org-mode-poster][org-mode-poster]] example on github.
 - The IS^{2} proposal
   + Cristina gave me some advice; said it shouldn't be too much
     work. N'importe quoi.

@@ -4,11 +4,17 @@
 #+date: July 2025
 
 #+property: header-args:typst :tangle out/theme.typ
-#+options: toc:nil
+#+options: toc:nil num:nil
 #+export_file_name: out/smc-2025
 #+include: "out/theme.typ" export typst
 
 * Typst setup                                                      :noexport:
+
+** Symlink images
+
+#+begin_src emacs-lisp :results none :export none :eval yes
+(dired-make-relative-symlink "images" "out/images" t)
+#+end_src
 
 ** Packages
 
@@ -16,10 +22,14 @@
 #import "@preview/polylux:0.4.0":*
 #import "@preview/metropolis-polylux:0.1.0" as metropolis
 
-#import metropolis: new-section
+#import metropolis: new-section, focus
 #+end_src
 
-** Metropolis setup
+#+begin_src typst :tangle no
+#import "@preview/diatypst:0.6.0": *
+#+end_src
+
+** Slide setup
 
 #+begin_src typst
 #show: metropolis.setup.with(
@@ -34,10 +44,31 @@
 )
 #+end_src
 
+#+begin_src typst :tangle no
+#let subtitle = "A Synchronous Platform For Distributed Spatial Audio"
+
+#context[
+  #show: slides.with(
+    title: text(style: "italic")[#document.title],
+    subtitle: subtitle,
+    authors: document.author.first(),
+    // Optional Style Options
+    title-color: red.darken(50%),
+    ratio: 16/9,
+    layout: "small", // one of "small", "medium", "large"
+    //toc: true,
+    //count: "dot", // one of "dot", "number", or none
+    //footer: true,
+    // footer-title: "Custom Title",
+    footer-subtitle: "Rushton, Michon, Risset",
+    theme: "full", // one of "normal", "full"
+  )
+#+end_src
+
 ** Use old-style numbers
 
 #+begin_src typst
-#set text(number-type: "old-style")
+#set text(font: "Minion Pro", number-type: "old-style")
 #+end_src
 
 ** Title slide
@@ -64,18 +95,26 @@
     #set text(size: .8em, weight: "light")
     #document.author.first()
 
-    [PUT LOGOS HERE!]
+    #place(bottom + center, dy: -0cm)[
+        #stack(
+          dir: ltr,
+          spacing: 1.5em,
+          image("images/inria.svg", height: 2.5em),
+          image("images/insa.svg", height: 3em),
+          image("images/citi.png", height: 3em)
+        )
+    ]
   ]
 ]
+
+// #context[ // Needed because each header introduces a closing bracket
 #+end_src
 
-** Begin first slide
+* Begin slides :ignore:
 
-#+begin_src typst
-#slide[
-#+end_src
+#+typst: #new-section[Yo]
 
-* A slide
+** A slide
 
 aosnetuh
 
@@ -85,18 +124,47 @@ aosnetuh
 1 = x^{2} + y^{2}
 \end{equation}
 
-#+typst: ]
-#+typst: #slide[
-
-* Another slide
+** Another slide
 
 aoentunatoeh
 
-#+typst: ]
-#+typst: #slide[
+#+begin_src python
+x = 2
+#+end_src
 
-* Yet Another slide
+#+RESULTS:
+: 7
+
+** Yet Another slide
 
 athodeunthday
 
-#+typst: ]
+321654987
+
+* A focus slide
+ #+typst: #show: focus
+
+ Super pivotal
+
+* Close the Typst ~context~ (or ~slide~) block                           :ignore:
+
+# #+typst: ]
+
+* Local variables                                                  :noexport:
+
+# Local Variables:
+# org-export-filter-headline-functions: ((lambda
+#  (headline backend info)
+#    (when (org-export-derived-backend-p backend 'typst)
+#      ;;(if (string-prefix-p "#heading(level: 1" headline)
+#      ;;  (replace-regexp-in-string
+#      ;;    ".+\\[\\(.+\\)\\] #label\(.+\)\\(.*\\)"
+#      ;;    "\]\n#new-section[\\1]\\2"
+#      ;;    headline)
+#        (concat "#slide[\n" headline "]\n")))))
+# org-export-filter-body-functions: ((lambda
+#  (contents backend info)
+#    (when (org-export-derived-backend-p backend 'typst)
+#      (concat contents "\n]"))))
+# org-export-filter-body-functions: nil
+# End:
