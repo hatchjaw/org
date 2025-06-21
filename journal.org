@@ -9519,7 +9519,12 @@ The VSR game is up.
 Just 5 minutes. Use Typst? In that case, ask Pierre for a template.
 ***** TODO Prepare poster for SMC
 And ask Tanguy about printing it to foldable fabric instead of paper.
-***** TODO Register for AES AIMLA
+***** WAITING Register for AES AIMLA
+:LOGBOOK:
+- State "WAITING"    from "TODO"       [2025-06-19 jeu. 17:37] \\
+  Just applied for student membership, which will bring the registration
+  fee down considerably.
+:END:
 Do this by July 1st (early-bird deadline). [[https://aes2.org/event-extra/2025-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio/][$475 for non-members]]. In
 Portail Missions, state that the source of funds should be /dotation
 d'Inria/.
@@ -9770,3 +9775,18 @@ attention to:
     work. N'importe quoi.
   
 Entered on [2025-06-18 mer. 15:42]
+*** 2025-06-20 vendredi
+**** Cristina Rottondi, Torino visit                             :MEETING:
+- Ask Tanguy/Romain about formal process.
+  + And maybe Anouchka re. funding?
+- Check civil liability insurance for validity abroad.
+- Get letter from Cristina for formal purposes (at some point).
+- Create account on /ospitalita/ [[https://ospitalita.edisu-piemonte.it/Login.aspx][website]].
+- Peruse the halls of residence [[https://www.edisu.piemonte.it/en/services/living/halls-residences/hall-residence-borsellino][website]].
+- No huge pressure to settle on the dates, but April 2026 suggested
+  for now.
+- Don't worry too much about MUSMET contribution; if something of
+  mutual benefit emerges, great.
+- Can be sorted out in the autumn!
+
+Entered on [2025-06-20 ven. 14:59]

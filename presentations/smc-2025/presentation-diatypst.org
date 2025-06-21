@@ -376,11 +376,6 @@ Typst right now, thank you very much.
 }
 #+end_src
 
-** Packages
-
-#+begin_src typst :tangle no
-#import "@preview/diatypst:0.6.0": *
-#+end_src
 
 ** Typography
 

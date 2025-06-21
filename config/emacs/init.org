@@ -696,6 +696,15 @@ This might be nicer with ~(add-to-list 'org-babel-load-languages
 
 *** Extra export processors
 
+**** Beamer
+
+This is built into Org Mode, but needs to be loaded explicitly.
+
+#+begin_src emacs-lisp
+(use-package ox-beamer
+  :ensure nil)
+#+end_src
+
 **** Typst
 
 #+begin_src emacs-lisp
