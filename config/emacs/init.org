@@ -707,9 +707,14 @@ This is built into Org Mode, but needs to be loaded explicitly.
 
 **** Typst
 
+There's a PR on =ox-typst= that provides support for ~:width~ and ~:height~
+attributes on images. Until that's merged, use the version on the PR
+branch.
+
 #+begin_src emacs-lisp
 (use-package ox-typst
   :ensure t
+  :vc (:url "https://github.com/jmpunkt/ox-typst" :rev "045dc23")
   :after org
   :custom
   (org-typst-from-latex-environment 'org-typst-from-latex-with-pandoc)

@@ -135,7 +135,7 @@
 %\definecolor{i6colorscheme3}{HTML}{0033CC}  % e.g. for poster background
 \definecolor{i6colorscheme5}{HTML}{FFFFFF}  % e.g. for poster background
 \definecolor{i6colorscheme4}{HTML}{000000} 
-\definecolor{colourHeader}{HTML}{770000}  % for headline bg
+\definecolor{cHeader}{HTML}{7F0000}  % for headline bg
 %\definecolor{i6colorschemeHeadline}{HTML}{FFFFFF}  % for headline bg
 %\definecolor{i6colorschemeFootline}{HTML}{100D09}  % for headline bg
 \definecolor{cAuthor}{HTML}{DDDDDD}
@@ -144,7 +144,7 @@
 ** Header fonts & colours
 
 #+begin_src latex
-\setbeamercolor{headline}{fg=white,bg=colourHeader}
+\setbeamercolor{headline}{fg=white,bg=cHeader}
 \setbeamercolor{title in headline}{fg=white}
 \setbeamercolor{logo}{bg=white}
 %\setbeamercolor{title in headline}{fg=blue}
@@ -158,7 +158,7 @@
 ** Footer fonts & colours
 
 #+begin_src latex
-\setbeamercolor{footline}{fg=white,bg=colourHeader}
+\setbeamercolor{footline}{fg=white,bg=cHeader}
 \setbeamerfont{footline}{size=\normalsize}
 %\setbeamerfont{footline}{size=\small}
 #+end_src

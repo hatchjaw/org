@@ -360,7 +360,7 @@ Typst right now, thank you very much.
           dir: ltr,
           spacing: 2em,
           image("images/inria_blanc.png", height: 2.5em),
-          image("images/insa_blanc.png", height: 3em),
+          image("images/insa_blanc_crop.png", height: 2.6em),
           image("images/citi_blanc.png", height: 3em)
         )
     ]
@@ -404,17 +404,111 @@ Typst right now, thank you very much.
   )
 #+end_src
 
-* Begin slides
+* Figures                                                          :noexport:
+:PROPERTIES:
+:header-args: :tangle smc25figs.sty :results silent :noeval
+:END:
+
+OK, let's define some figures, in Tikz, since I'm more familiar with
+it, plus they might better lend themselves to re-use.
+
+The idea is to write some Tikz functions, tangle them to a file, and
+include them in LaTeX source blocks here, and in regular markup in
+=poster.org=.
+
+#+begin_src latex
+\ProvidesPackage{smc25figs}
+\usepackage{tikz}
+\usetikzlibrary{shapes}
+\usepackage{fontspec}
+\setmainfont[
+  Mapping={tex-text}, 
+  Numbers={OldStyle},
+  Ligatures={Common},
+  UprightFont=*-Regular,
+  BoldFont=*-Bold,
+  BoldItalicFont=*-BoldIt,
+  ItalicFont=*-It,
+  FontFace={sb}{n}{*-Semibold},
+  FontFace={sb}{it}{*-SemiboldIt},
+  Scale=15
+]{MinionPro}
+
+\tikzset{
+  pics/teensythinks/.style={
+    code={
+      \tikzset{teensythinks/.cd, #1}
+
+      \def\nomFS{\pgfkeysvalueof{/tikz/teensythinks/nominalfs}}
+      \def\actFS{\pgfkeysvalueof{/tikz/teensythinks/actualfs}}
+      
+      \node [] at (0,0) {
+        \includegraphics[width=40cm]{./images/t41_orig}
+      };
+      \draw [line width=5mm, fill=white] (3,10) ellipse (2cm and 1cm);
+      \draw [line width=5mm, fill=white] (0,13.5) ellipse (3.5cm and 1.75cm);
+      \node [cloud, cloud ignores aspect, cloud puffs=9, cloud puff arc=96, draw, line width=5mm, fill=white] () at (-9, 23) {\nomFS kHz!};
+
+      \pgfmathparse{\actFS > 0}
+      \ifnum\pgfmathresult=1
+        \node [magnifying glass, line width=5mm, draw, fill=white, fill opacity=0.75, text opacity=1, align=center] () at (6.5,-6.5) {\actFS\\[.75ex]kHz};
+      \fi
+    }
+  },
+  teensythinks/.cd,
+  nominalfs/.initial=48,
+  actualfs/.initial=0
+}
+#+end_src
+
+* Distributed Spatial Audio
+
+** LFG
+
+#+header: :exports results :results file raw :file "./images/gen/t41.png"
+#+header: :imagemagick t :iminoptions -density 72 :imoutoptions -geometry 400 -flatten :fit t
+#+header: :headers '("\\usepackage{smc25figs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic at (0, 0) {teensythinks={nominalfs=48}};
+\end{tikzpicture}
+#+end_src
+#+attr_org: :width 200
+#+attr_typst: :width 5cm
+#+RESULTS:
+[[file:./images/gen/t41.png]]
 
 ** A slide
 
-aosnetuh
+#+header: :exports results :results file raw :file "./images/gen/t41-nominal.png"
+#+header: :imagemagick t :iminoptions -density 72 :imoutoptions -geometry 1000 -flatten :fit t
+#+header: :headers '("\\usepackage{smc25figs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic at (0, 0) {teensythinks={nominalfs=48}};
+  \pic at (50, 0) {teensythinks={nominalfs=48}};
+  \pic at (100, 0) {teensythinks={nominalfs=48}};
+\end{tikzpicture}
+#+end_src
+#+attr_typst: :height 5cm
+#+RESULTS:
+[[file:./images/gen/t41-nominal.png]]
 
-*test*
+** Next!
 
-\begin{equation}
-1 = x^{2} + y^{2}
-\end{equation}
+#+header: :exports results :results file raw :file "./images/gen/t41-actual.png"
+#+header: :imagemagick t :iminoptions -density 72 :imoutoptions -geometry 1000 -flatten :fit t
+#+header: :headers '("\\usepackage{smc25figs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic at (0, 0) {teensythinks={nominalfs=48, actualfs=47.98}};
+  \pic at (50, 0) {teensythinks={nominalfs=48, actualfs=48.01}};
+  \pic at (100, 0) {teensythinks={nominalfs=48, actualfs=47.99}};
+\end{tikzpicture}
+#+end_src
+#+attr_typst: :height 5cm
+#+RESULTS:
+[[file:./images/gen/t41-actual.png]]
 
 ** Another slide
 
@@ -436,3 +530,11 @@ athodeunthday
 * Close the Typst ~context~ block                                      :ignore:
 
 #+typst: ]
+
+* Local variables                                                  :noexport:
+
+#+begin_example
+Local Variables:
+org-latex-compiler: "xelatex"
+End:
+#+end_example
