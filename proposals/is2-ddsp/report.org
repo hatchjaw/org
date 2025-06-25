@@ -1,0 +1,150 @@
+#+title: Enabling Distributed Spatial Audio
+#+subtitle: Individual Follow-up Committee: Year 2
+#+author: Thomas Rushton
+#+date: May 2025
+
+#+options: toc:nil num:2
+#+bibliography: references.bib
+
+#+export_file_name: out/proposal
+#+cite_export: biblatex
+#+latex_class: proposal
+#+latex_header: \RequirePackage[]{proposalIS2}
+#+latex_compiler: xelatex
+
+* Latex Setup                                                      :noexport:
+:PROPERTIES:
+:HEADER-ARGS: :tangle out/proposalIS2.sty :results silent
+:END:
+
+** Basics
+
+#+begin_src latex
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{proposalIS2}
+#+end_src
+
+** Packages
+
+Hm. Looks like these packages come from the example [[https://www.latextemplates.com/template/arsclassica-article][here]].
+
+#+begin_src latex
+\RequirePackage{subfig}
+\RequirePackage[
+  subfig,
+  beramono,
+  eulermath,
+  pdfspacing
+]{classicthesis}
+\RequirePackage{arsclassica}
+\RequirePackage{hyperref}
+\RequirePackage{fontspec}
+\RequirePackage{enumitem} % Required for manipulating the whitespace between and within lists
+\RequirePackage{subfig} % Required for creating figures with multiple parts (subfigures)
+\RequirePackage{amsmath,amssymb,amsthm} % For including math equations, theorems, symbols, etc
+\RequirePackage{varioref} % More descriptive referencing
+\RequirePackage{cleveref}
+#+end_src
+
+** Typography
+
+Reduce the default font size by half a point.
+
+#+begin_src latex
+\KOMAoptions{fontsize=10pt}
+#+end_src
+
+Reduce the size of the date.
+
+#+begin_src latex
+\setkomafont{date}{\normalsize}
+#+end_src
+
+Use Minion for both main and "sans" fonts.
+
+#+begin_src latex
+\setmainfont[Mapping={tex-text}, 
+  Numbers={OldStyle},
+  Ligatures={Common},
+  %% Extension=.otf,
+  %% UprightFont=*-Regular,
+  %% ItalicFont= *-It,
+  %% BoldFont= *-Bold,
+  %% BoldItalicFont = *-BoldIt
+]{MinionPro-Regular}
+
+\setsansfont[Mapping=tex-text,
+  Ligatures={Common},
+  Numbers={OldStyle},
+  %% Extension=.otf,
+  %% UprightFont=MyriadPro-Regular,
+  %% ItalicFont=MyriadPro-CondIt,
+  %% BoldFont=MyriadPro-Semibold,
+  %% BoldItalicFont=MyriadPro-SemiboldIt,
+]{MinionPro-Regular}
+#+end_src
+
+Scale Iosevka to more-or-less match Minion.
+
+#+begin_src latex
+\setmonofont[Mapping=tex-text,Scale=0.9]{Iosevka Comfy Motion}
+#+end_src
+
+** Bibliography
+
+#+begin_src latex
+\PassOptionsToPackage{%
+  %backend=biber,bibencoding=utf8, %instead of bibtex
+%   backend=bibtex8,bibencoding=ascii,%
+  language=auto,
+  style=numeric-comp,
+  %style=authoryear-comp, % Author 1999, 2010
+  %bibstyle=authoryear,dashed=false, % dashed: substitute rep. author with ---
+  % sorting=nyt, % name, year, title
+  sorting=none,
+  maxbibnames=10, % default: 3, et al.
+  natbib=true, % natbib compatibility mode (\citep and \citet still work)
+  url=false,
+  doi=false,
+  isbn=false,
+  giveninits=true,
+}{biblatex}
+#+end_src
+
+#+begin_src latex :tangle out/biblatex.cfg
+\AtEveryBibitem{
+  \clearfield{eventtitle}
+  %% \clearfield{pages}
+}
+#+end_src
+
+* Abstract
+
+* Motivation
+
+* Objectives
+
+* Detailed Outline
+
+* Target Audience
+
+* Presenter Information
+
+* History
+
+* Technical Requirements
+
+* Local Variables                                                  :noexport:
+
+# Local Variables:
+# org-latex-classes: (("proposal" "\\documentclass[
+# a4paper,oneside,headinclude,footinclude,BCOR=5mm,
+# numbers=noenddot,cleardoublepage=empty,tablecaptionabove
+# ]{scrartcl}
+# [NO-DEFAULT-PACKAGES]"
+# ("\\section{%s}" . "\\section*{%s}")
+# ("\\subsection{%s}" . "\\subsection*{%s}")
+# ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+# ("\\paragraph{%s}" . "\\paragraph*{%s}")
+# ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+# End:

@@ -3,7 +3,7 @@
 #+author: Thomas Rushton, Romain Michon, Tanguy Risset
 #+date: July 2025
 
-#+property: header-args:typst :tangle out/theme-diatypst.typ
+#+property: header-args:typst :tangle out/theme-diatypst.typ :noeval
 #+options: toc:nil num:nil
 #+export_file_name: out/smc-2025-diatypst
 #+include: "out/theme-diatypst.typ" export typst
@@ -22,6 +22,8 @@
 able to add some images to the title page. Perhaps I should've forked
 it... but I really don't want to be learning more than superifical
 Typst right now, thank you very much.
+
+Most of the template follows unchanged:
 
 #+begin_src typst
 #let layouts = (
@@ -85,6 +87,13 @@ Typst right now, thank you very much.
     width: width,
     height: height,
     margin: (x: 0.5 * space, top: space, bottom: 0.6 * space),
+#+end_src
+
+*** Header
+
+Make sure headings are top-left aligned.
+
+#+begin_src typst
   // HEADER
     header: [
       #context {
@@ -93,7 +102,7 @@ Typst right now, thank you very much.
         let heading = headings.rev().find(x => x.location().page() <= page)
 
         if heading != none {
-          set align(top)
+          set align(top + left)
           if (theme == "full") {
             block(
               width: 100%,
@@ -325,8 +334,13 @@ Typst right now, thank you very much.
   set bibliography(
     title: none
   )
+#+end_src
 
+*** Title page
 
+Again, as per the original template to start:
+
+#+begin_src typst
   // CONTENT---------------------------------------------
   // Title Slide
   if (title == none) {
@@ -355,6 +369,13 @@ Typst right now, thank you very much.
       if date != none {text(1.1em, date)} +
       align(left+bottom, authors.join(", ", last: " & "))
     )
+#+end_src
+
+*** Logos
+
+With the addition of some logos in the header.
+
+#+begin_src typst
     place(top + right, dx: -2em, dy: 2em)[
         #stack(
           dir: ltr,
@@ -370,9 +391,16 @@ Typst right now, thank you very much.
   if (toc == true) {
     outline()
   }
-  // Normal Content
-  content
+#+end_src
 
+*** Normal content
+
+Vertically centre the content of normal slides.
+
+#+begin_src typst
+  // Normal Content
+  set align(horizon + center)
+  content
 }
 #+end_src
 
@@ -416,6 +444,8 @@ The idea is to write some Tikz functions, tangle them to a file, and
 include them in LaTeX source blocks here, and in regular markup in
 =poster.org=.
 
+** Setup
+
 #+begin_src latex
 \ProvidesPackage{smc25figs}
 \usepackage{tikz}
@@ -433,7 +463,11 @@ include them in LaTeX source blocks here, and in regular markup in
   FontFace={sb}{it}{*-SemiboldIt},
   Scale=15
 ]{MinionPro}
+#+end_src
 
+** Set Tikz stuff
+
+#+begin_src latex
 \tikzset{
   pics/teensythinks/.style={
     code={
@@ -447,7 +481,7 @@ include them in LaTeX source blocks here, and in regular markup in
       };
       \draw [line width=5mm, fill=white] (3,10) ellipse (2cm and 1cm);
       \draw [line width=5mm, fill=white] (0,13.5) ellipse (3.5cm and 1.75cm);
-      \node [cloud, cloud ignores aspect, cloud puffs=9, cloud puff arc=96, draw, line width=5mm, fill=white] () at (-9, 23) {\nomFS kHz!};
+      \node [cloud, cloud ignores aspect, cloud puffs=9, cloud puff arc=96, draw, line width=5mm, fill=white, align=center] () at (-9, 23) {\nomFS\ kHz!};
 
       \pgfmathparse{\actFS > 0}
       \ifnum\pgfmathresult=1
@@ -463,10 +497,34 @@ include them in LaTeX source blocks here, and in regular markup in
 
 * Distributed Spatial Audio
 
-** LFG
+** 
+
+* The Hardware Platform
+
+** A humble microcontroller development board
+
+#+typst: #columns(2, [
+
+#+attr_typst: :width 8cm
+[[./images/t41_orig.png]]
+
+#+typst: #colbreak()
+#+typst: #set align(left)
+
+- Teensy 4.1 (~https://pjrc.com~)
+- 600 MHz Arm Core-M7, FPU, DSP, SIMD
+- MCU with dedicated audio subsystem
+- Ethernet subsystem with IEEE 1588 PTP support
+- \~€ 30  + \~€ 15 with ethernet and audio add-ons
+- Memory-poor — 1024 kB (+ 16 MB PSRAM)
+
+#+typst: ])
+#+typst: #set align(center)
+
+** A humble microcontroller development board                     :noexport:
 
 #+header: :exports results :results file raw :file "./images/gen/t41.png"
-#+header: :imagemagick t :iminoptions -density 72 :imoutoptions -geometry 400 -flatten :fit t
+#+header: :imagemagick t :iminoptions -density 100 :imoutoptions -geometry 400 -flatten :fit t
 #+header: :headers '("\\usepackage{smc25figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
@@ -478,10 +536,10 @@ include them in LaTeX source blocks here, and in regular markup in
 #+RESULTS:
 [[file:./images/gen/t41.png]]
 
-** A slide
+** A collection of humble MCUs
 
 #+header: :exports results :results file raw :file "./images/gen/t41-nominal.png"
-#+header: :imagemagick t :iminoptions -density 72 :imoutoptions -geometry 1000 -flatten :fit t
+#+header: :imagemagick t :iminoptions -density 100 :imoutoptions -geometry 1000 -flatten :fit t
 #+header: :headers '("\\usepackage{smc25figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
@@ -490,43 +548,90 @@ include them in LaTeX source blocks here, and in regular markup in
   \pic at (100, 0) {teensythinks={nominalfs=48}};
 \end{tikzpicture}
 #+end_src
-#+attr_typst: :height 5cm
+#+attr_typst: :height 4cm
 #+RESULTS:
 [[file:./images/gen/t41-nominal.png]]
 
-** Next!
+Each can be configured to run at a preferred sampling rate.
+
+\begin{equation}
+\hat{F}_{s} = \frac{24\times10^{6}}{2^{8}}\frac{D_{S}+\frac{D_{N}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}
+\end{equation}
+
+Audio PLL numerator/denominator are 30-bit registers, i.e. \(D_{N}, D_{D} \in \{0,1,\dots,1\,073\,741\,823\}\).
+
+** A collection of humble MCUs
 
 #+header: :exports results :results file raw :file "./images/gen/t41-actual.png"
-#+header: :imagemagick t :iminoptions -density 72 :imoutoptions -geometry 1000 -flatten :fit t
+#+header: :imagemagick t :iminoptions -density 100 :imoutoptions -geometry 1000 -flatten :fit t
 #+header: :headers '("\\usepackage{smc25figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
-  \pic at (0, 0) {teensythinks={nominalfs=48, actualfs=47.98}};
-  \pic at (50, 0) {teensythinks={nominalfs=48, actualfs=48.01}};
-  \pic at (100, 0) {teensythinks={nominalfs=48, actualfs=47.99}};
+  \pic at (0, 0) {teensythinks={nominalfs=48, actualfs=47.998}};
+  \pic at (50, 0) {teensythinks={nominalfs=48, actualfs=48.001}};
+  \pic at (100, 0) {teensythinks={nominalfs=48, actualfs=47.999}};
 \end{tikzpicture}
 #+end_src
-#+attr_typst: :height 5cm
+#+attr_typst: :height 4.5cm
 #+RESULTS:
 [[file:./images/gen/t41-actual.png]]
 
-** Another slide
+Due to manufacturing tolerances, and operational stability, this will
+not be the /true/ sampling frequency.
 
-aoentunatoeh
+** What's a crystal oscillator?
 
-#+begin_src emacs-lisp
-(dosomething 7 x)
-#+end_src
+#+typst: #columns(2, [
 
-#+RESULTS:
-: 7
+#+attr_typst: :height 5.5cm
+[[./images/xo.jpg]]
 
-** Yet Another slide
+#+typst: #colbreak()
+#+typst: #set align(left)
 
-athodeunthday
+- Present in just about any electronic circuit that requires a /source
+  of time/.
+- Features a vibrating sliver of quartz or some other piezoelectric
+  material.
+- *Tolerance*, in parts per million (ppm), describes how far it can
+  diverge from its /nominal/ frequency.
+- Stability can be affected by temperature, voltage, etc.
+- Crystals also /age/.
 
-321654987
+#+typst: ])
+#+typst: #set align(center)
 
+#+begin_quote
+Image source:
+https://www.righto.com/2021/02/teardown-of-quartz-crystal-oscillator.html
+#+end_quote
+
+** What's a part per million between friends?
+
+#+typst: #text(size: 1.5em)[
+1 ppm \to \pm1 \micro{}s per second \to \pm1 second every million seconds
+
+1 million seconds \approx 11.6 days
+#+typst: ]
+
+** What are a few parts per million between friends?
+
+#+typst: #text(size: 1.5em)[
+20 ppm \to \pm1 second every \~14 hours
+
+20 ppm \to \pm20 \micro{}s per second
+
+Sampling period at 48 kHz \approx 21 \micro{}s
+#+typst: ] #v(1cm)
+
+If, after one second, two audio devices are out of sync by one sample...
+
+* Time Exchange
+
+** Precision Time Protocol (IEEE 1588)
+yeah
+** Fucking kill myself
+yeay
 * Close the Typst ~context~ block                                      :ignore:
 
 #+typst: ]
