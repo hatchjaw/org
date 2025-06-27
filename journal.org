@@ -9794,3 +9794,19 @@ Entered on [2025-06-18 mer. 15:42]
   Switzerland, apparently (worth bearing in mind).
 
 Entered on [2025-06-20 ven. 14:59]
+*** 2025-06-26 jeudi
+**** Linux Audio Conference: Nando & Nils    :PRESENTATION:NETWORKEDAUDIO:
+/AVB For (Linux) Dummies/
+
+https://avb-academy.com
+
+Key terms:
+- Media clock
+- Presentation time
+
+I should be referring to /reproduction time/ as /presentation time/.
+
+How does AVB do media clock correction? It doesn't? In that case how
+is it achieved? PLL-conditioning or resampling?
+
+Entered on [2025-06-26 jeu. 15:30]

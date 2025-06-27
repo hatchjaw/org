@@ -434,7 +434,7 @@ Vertically centre the content of normal slides.
 
 * Figures                                                          :noexport:
 :PROPERTIES:
-:header-args: :tangle smc25figs.sty :results silent :noeval
+:header-args: :results silent :noeval
 :END:
 
 OK, let's define some figures, in Tikz, since I'm more familiar with
@@ -444,10 +444,17 @@ The idea is to write some Tikz functions, tangle them to a file, and
 include them in LaTeX source blocks here, and in regular markup in
 =poster.org=.
 
-** Setup
+** Teensy
+:PROPERTIES:
+:header-args: :tangle teensyfigs.sty :results silent :noeval
+:END:
+
+
+For some reason I need to scale the font aggressively to get nice
+output. I'm probably using =imagemagic= wrong.
 
 #+begin_src latex
-\ProvidesPackage{smc25figs}
+\ProvidesPackage{teensyfigs}
 \usepackage{tikz}
 \usetikzlibrary{shapes}
 \usepackage{fontspec}
@@ -465,7 +472,7 @@ include them in LaTeX source blocks here, and in regular markup in
 ]{MinionPro}
 #+end_src
 
-** Set Tikz stuff
+Draw a Teensy with a thought bubble, and an optional magnifying glass.
 
 #+begin_src latex
 \tikzset{
@@ -495,9 +502,104 @@ include them in LaTeX source blocks here, and in regular markup in
 }
 #+end_src
 
+** WFS
+:PROPERTIES:
+:header-args: :tangle wfsfigs.sty :results silent :noeval
+:END:
+
+No font scaling required here.
+
+#+begin_src latex
+\ProvidesPackage{wfsfigs}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont[
+  Mapping={tex-text}, 
+  Numbers={OldStyle},
+  Ligatures={Common},
+  UprightFont=*-Regular,
+  BoldFont=*-Bold,
+  BoldItalicFont=*-BoldIt,
+  ItalicFont=*-It,
+  FontFace={sb}{n}{*-Semibold},
+  FontFace={sb}{it}{*-SemiboldIt},
+]{MinionPro}
+#+end_src
+
+Bits with which to draw WFS diagrams.
+
+#+begin_src latex
+\definecolor{wfsptpWaveColour}{HTML}{4077D6}
+\newcommand*{\wfsptpWaveSpace}{.89}
+\newcommand*{\wfsptpWidth}{8}
+\newcommand*{\wfsptpNumSecondary}{16}
+
+\tikzset{
+  halfSecondaryWavefronts/.pic={
+    \foreach \pos/\rad in {0/.18, 1/.615, 2/1.03, 3/1.42, 4/1.78, 5/2.07, 6/2.295, 7/2.42}
+    \draw [black!25] (.25+.5*\pos, 0) circle (\rad);
+  },
+  secondaryWavefronts/.pic={
+    \clip (0, 0) rectangle (\wfsptpWidth, 2.5);
+    \pic {halfSecondaryWavefronts};
+    \pic [xscale=-1] at (\wfsptpWidth, 0) {halfSecondaryWavefronts};
+  },
+  wavefronts/.pic={
+    \clip (0, 0) rectangle (\wfsptpWidth, 2.5);
+    \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,5}
+    \draw [thick, wfsptpWaveColour] (\wfsptpWidth/2-\rad, -2) arc [radius=\rad, start angle=180, end angle=0];
+  },
+  speaker/.pic={
+    \draw (-.11, 0) rectangle (.11, .06);
+    \draw (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
+  },
+  speakers/.pic={
+    \foreach \i [
+      evaluate=\i as \secondary using
+      .25+(\i-1)*(\wfsptpWidth/\wfsptpNumSecondary)
+    ] in {1,...,\wfsptpNumSecondary} {
+      \pic at (\secondary, 0) {speaker};
+    }
+  }
+}
+#+end_src
+
 * Distributed Spatial Audio
 
-** 
+** A centralised approach
+
+#+header: :exports results :results file raw :file "./images/gen/centralised.png"
+#+header: :imagemagick t :iminoptions -density 300 :imoutoptions -geometry 1000 -flatten :fit t
+#+header: :headers '("\\usepackage{wfsfigs}")
+#+begin_src latex :ezal no-export
+\begin{tikzpicture}
+  \pic {secondaryWavefronts};
+  \pic {wavefronts};
+  \pic at (0, -.225) {speakers};
+  \node [minimum width=\wfsptpWidth{}cm, draw, fill=black!10, rounded corners=1mm] at (\wfsptpWidth/2, -.46) {WFS};
+\end{tikzpicture}
+#+end_src
+#+attr_typst: :height 5cm
+#+RESULTS:
+[[file:./images/gen/centralised.png]]
+
+** A distributed approach
+
+[WFS figure, distributed]
+
+** Motivation
+
+Lower the barrier to entry; 
+
+Lower cost per channel
+
+Modular; scalable by small increments
+
+Increased aggregate computing power
+
+** The effect of asynchronicity
+
+[diagram]
 
 * The Hardware Platform
 
@@ -509,7 +611,7 @@ include them in LaTeX source blocks here, and in regular markup in
 [[./images/t41_orig.png]]
 
 #+typst: #colbreak()
-#+typst: #set align(left)
+#+typst: #align(left)[
 
 - Teensy 4.1 (~https://pjrc.com~)
 - 600 MHz Arm Core-M7, FPU, DSP, SIMD
@@ -518,8 +620,7 @@ include them in LaTeX source blocks here, and in regular markup in
 - \~€ 30  + \~€ 15 with ethernet and audio add-ons
 - Memory-poor — 1024 kB (+ 16 MB PSRAM)
 
-#+typst: ])
-#+typst: #set align(center)
+#+typst: ]])
 
 ** A humble microcontroller development board                     :noexport:
 
@@ -540,7 +641,7 @@ include them in LaTeX source blocks here, and in regular markup in
 
 #+header: :exports results :results file raw :file "./images/gen/t41-nominal.png"
 #+header: :imagemagick t :iminoptions -density 100 :imoutoptions -geometry 1000 -flatten :fit t
-#+header: :headers '("\\usepackage{smc25figs}")
+#+header: :headers '("\\usepackage{teensyfigs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
   \pic at (0, 0) {teensythinks={nominalfs=48}};
@@ -552,7 +653,7 @@ include them in LaTeX source blocks here, and in regular markup in
 #+RESULTS:
 [[file:./images/gen/t41-nominal.png]]
 
-Each can be configured to run at a preferred sampling rate.
+Each can be configured to run at a preferred audio sampling rate.
 
 \begin{equation}
 \hat{F}_{s} = \frac{24\times10^{6}}{2^{8}}\frac{D_{S}+\frac{D_{N}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}
@@ -564,7 +665,7 @@ Audio PLL numerator/denominator are 30-bit registers, i.e. \(D_{N}, D_{D} \in \{
 
 #+header: :exports results :results file raw :file "./images/gen/t41-actual.png"
 #+header: :imagemagick t :iminoptions -density 100 :imoutoptions -geometry 1000 -flatten :fit t
-#+header: :headers '("\\usepackage{smc25figs}")
+#+header: :headers '("\\usepackage{teensyfigs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
   \pic at (0, 0) {teensythinks={nominalfs=48, actualfs=47.998}};
@@ -584,10 +685,10 @@ not be the /true/ sampling frequency.
 #+typst: #columns(2, [
 
 #+attr_typst: :height 5.5cm
-[[./images/xo.jpg]]
+[[./images/xo_annot.jpg]]
 
 #+typst: #colbreak()
-#+typst: #set align(left)
+#+typst: #align(left)[
 
 - Present in just about any electronic circuit that requires a /source
   of time/.
@@ -598,8 +699,7 @@ not be the /true/ sampling frequency.
 - Stability can be affected by temperature, voltage, etc.
 - Crystals also /age/.
 
-#+typst: ])
-#+typst: #set align(center)
+#+typst: ]])
 
 #+begin_quote
 Image source:
@@ -608,30 +708,74 @@ https://www.righto.com/2021/02/teardown-of-quartz-crystal-oscillator.html
 
 ** What's a part per million between friends?
 
-#+typst: #text(size: 1.5em)[
-1 ppm \to \pm1 \micro{}s per second \to \pm1 second every million seconds
+#+typst: #text(size: 1.25em)[
+*1 ppm*
 
-1 million seconds \approx 11.6 days
+\downarrow
+
+\pm1 \micro{}s per second
+
+\downarrow
+
+\pm1 second every million seconds
 #+typst: ]
+
+/1 million seconds \approx 11.6 days/
 
 ** What are a few parts per million between friends?
 
-#+typst: #text(size: 1.5em)[
-20 ppm \to \pm1 second every \~14 hours
+#+typst: #text(size: 1.25em)[
+*20 ppm*
 
-20 ppm \to \pm20 \micro{}s per second
+\downarrow
+
+\pm1 second every \~14 hours
+
+\downarrow
+
+\pm20 \micro{}s per second
+
+!
 
 Sampling period at 48 kHz \approx 21 \micro{}s
-#+typst: ] #v(1cm)
+#+typst: ] #v(.5cm)
 
 If, after one second, two audio devices are out of sync by one sample...
 
 * Time Exchange
 
 ** Precision Time Protocol (IEEE 1588)
-yeah
-** Fucking kill myself
-yeay
+
+[PTP diagram]
+
+** PTP (continued)
+
+[PTP calculations. See CSI presentation]
+
+** Sampling rate conditioning
+
+[Example sampling rate computation]
+
+["Media clock"]
+
+** Reproduction simultaneity
+
+["Presentation time"]
+
+* Results
+
+** Results
+
+[Before and after drift plots]
+
+* Outlook
+
+** Next steps
+
+fucking kill myself
+
+* Thank you!
+
 * Close the Typst ~context~ block                                      :ignore:
 
 #+typst: ]

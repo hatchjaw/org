@@ -249,8 +249,9 @@
   %\end{beamercolorbox}
 
   \begin{tikzpicture}[remember picture, overlay]
-    \node[anchor=north east, opacity=0.25] at ([xshift=8.5cm, yshift=.2cm]current page.north east){
-      \includegraphics[height=18cm]{wfs_blanc_crop}
+    \clip (0, 0) rectangle (\textwidth, 18cm);
+    \node[anchor=north east, opacity=0.25] at ([xshift=8.5cm, yshift=9.575cm]current page.north east){
+      \includegraphics[height=68cm]{wfs_blanc}
     };
   \end{tikzpicture}
 }
@@ -343,7 +344,7 @@ Draw a vertical line separating the two columns.
 :END:
 
 #+NAME: code1
-#+BEGIN_SRC R  :file 3.png :session :exports both :results graphics  
+#+BEGIN_SRC R  :file 3.png :session :exports both :results graphics :eval no-export
 set.seed(20180402)
 x1 <- rnorm(100, 0, 1)
 x2 <- rnorm(100, 0.5, 1)
@@ -372,7 +373,7 @@ hist(x2, col="blue", add=TRUE)
 :END:
 
 #+NAME: code2
-#+BEGIN_SRC R :session :exports both :results value :colnames yes :cache yes
+#+BEGIN_SRC R :session :exports both :results value :colnames yes :cache yes :eval no-export
 library(broom)
 library(dplyr)
 t1 <- tidy(round(summary(x1), 2)) 
@@ -478,7 +479,7 @@ derived as follows:
 :END:
 
 #+NAME: codeleft
-#+BEGIN_SRC R :file 4l.png :session :exports results :results graphics
+#+BEGIN_SRC R :file 4l.png :session :exports results :results graphics :eval no-export
 d1 <- density(x1)
 plot(d1, col="red", lwd=3)
 #+END_SRC
@@ -497,7 +498,7 @@ plot(d1, col="red", lwd=3)
 :END:
 
 #+NAME: coderight
-#+BEGIN_SRC R  :file 4r.png :session :exports results :results graphics
+#+BEGIN_SRC R  :file 4r.png :session :exports results :results graphics :eval no-export
 d2 <- density(x2)
 plot(d2, col="blue", lwd=3)
 #+END_SRC
