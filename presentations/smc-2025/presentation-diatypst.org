@@ -20,7 +20,7 @@
 
 [[https://github.com/skriptum/diatypst][Diatypst]] is nice and simple, but a little too simple; I want to be
 able to add some images to the title page. Perhaps I should've forked
-it... but I really don't want to be learning more than superifical
+it... but I really don't want to be learning more than superficial
 Typst right now, thank you very much.
 
 Most of the template follows unchanged:
@@ -447,9 +447,9 @@ include them in LaTeX source blocks here, and in regular markup in
 ** Setup
 
 #+begin_src latex
-\ProvidesPackage{teensyfigs}
+\ProvidesPackage{smc25figs}
 \usepackage{tikz}
-\usetikzlibrary{shapes}
+\usetikzlibrary{shapes, positioning, arrows.meta}
 \usepackage{fontspec}
 \setmainfont[
   Mapping={tex-text}, 
@@ -505,26 +505,45 @@ Bits with which to draw WFS diagrams.
 \definecolor{wfsptpWaveColour}{HTML}{4077D6}
 \newcommand*{\wfsptpWaveSpace}{.89}
 \newcommand*{\wfsptpWidth}{8}
+\newcommand*{\wfsptpNumWaves}{5}
 \newcommand*{\wfsptpNumSecondary}{16}
+\newcommand*{\wfsptpNumMCU}{8}
 
 \tikzset{
   halfSecondaryWavefronts/.pic={
     \foreach \pos/\rad in {0/.18, 1/.615, 2/1.03, 3/1.42, 4/1.78, 5/2.07, 6/2.295, 7/2.42}
-    \draw [black!25] (.25+.5*\pos, 0) circle (\rad);
+    \draw [black!40, thick] (.25+.5*\pos, 0) circle (\rad);
   },
   secondaryWavefronts/.pic={
     \clip (0, 0) rectangle (\wfsptpWidth, 2.5);
     \pic {halfSecondaryWavefronts};
     \pic [xscale=-1] at (\wfsptpWidth, 0) {halfSecondaryWavefronts};
   },
-  wavefronts/.pic={
+  secondaryWavefrontsAsync/.pic={
+    \clip (-1, 0) rectangle (\wfsptpWidth+1, 2.5);
+    \foreach \pos/\rad in {0/.18, 1/.615,
+      2/0.83, 3/1.22,
+      4/1.88, 5/2.17,
+      6/1.295, 7/1.42,
+      8/1.72, 9/1.595,
+      10/0.41, 11/0.12,
+      12/1.42, 13/1.03,
+      14/0, 15/0}
+    \draw [black!40, thick] (.25+.5*\pos, 0) circle (\rad);
+  },
+  realWavefronts/.pic={
     \clip (0, 0) rectangle (\wfsptpWidth, 2.5);
-    \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,5}
+    \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,\wfsptpNumWaves}
     \draw [thick, wfsptpWaveColour] (\wfsptpWidth/2-\rad, -2) arc [radius=\rad, start angle=180, end angle=0];
   },
+  virtualWavefronts/.pic={
+    \clip (-1, 0) rectangle (2*\wfsptpWaveSpace*\wfsptpNumWaves, 2);
+    \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,\wfsptpNumWaves}
+    \draw [thick, dashed, wfsptpWaveColour] (\wfsptpWidth/2-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
+  },
   speaker/.pic={
-    \draw (-.11, 0) rectangle (.11, .06);
-    \draw (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
+    \path [draw=black, fill=white] (-.11, 0) rectangle (.11, .06);
+    \path [draw=black, fill=white] (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
   },
   speakers/.pic={
     \foreach \i [
@@ -533,6 +552,15 @@ Bits with which to draw WFS diagrams.
     ] in {1,...,\wfsptpNumSecondary} {
       \pic at (\secondary, 0) {speaker};
     }
+  },
+  mcu/.pic = {
+    \node [draw, fill=black!10, font={\scriptsize}, rounded corners=1mm, inner xsep=1.5mm] {dWFS};
+  },
+  mcus/.pic = {
+    \foreach \i [
+      evaluate=\i as \xpos using .5+(\i-1)
+    ] in {1,...,\wfsptpNumMCU}
+    \pic at (\xpos, 0) {mcu};
   }
 }
 #+end_src
@@ -542,14 +570,16 @@ Bits with which to draw WFS diagrams.
 ** A centralised approach
 
 #+header: :exports results :results file raw :file "./images/gen/centralised.png"
-#+header: :imagemagick t :iminoptions -density 300 :imoutoptions -geometry 1000 -flatten :fit t
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 1000 -flatten :fit t
 #+header: :headers '("\\usepackage{smc25figs}")
-#+begin_src latex :ezal no-export
+#+begin_src latex :eval no-export
 \begin{tikzpicture}
   \pic {secondaryWavefronts};
-  \pic {wavefronts};
-  \pic at (0, -.225) {speakers};
-  \node [minimum width=\wfsptpWidth{}cm, draw, fill=black!10, rounded corners=1mm] at (\wfsptpWidth/2, -.46) {WFS};
+  \pic at (0, -2) {virtualWavefronts};
+  \node [circle, draw=wfsptpWaveColour, fill=wfsptpWaveColour!50, thick] (primary) at (\wfsptpWidth/2, -2) {};
+  \pic {realWavefronts};
+  \pic at (0, -.21) {speakers};
+  \node [minimum width=\wfsptpWidth{}cm, draw, fill=black!10, rounded corners=1mm] at (\wfsptpWidth/2, -.44) {WFS};
 \end{tikzpicture}
 #+end_src
 #+attr_typst: :height 5cm
@@ -558,11 +588,26 @@ Bits with which to draw WFS diagrams.
 
 ** A distributed approach
 
-[WFS figure, distributed]
+#+header: :exports results :results file raw :file "./images/gen/distributed.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 1000 -flatten :fit t
+#+header: :headers '("\\usepackage{smc25figs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic {secondaryWavefronts};
+  \pic at (0, -2) {virtualWavefronts};
+  \node [circle, draw=wfsptpWaveColour, fill=wfsptpWaveColour!50, thick] (primary) at (\wfsptpWidth/2, -2) {};
+  \pic {realWavefronts};
+  \pic at (0, -.21) {speakers};
+  \pic at (0, -.42) {mcus};
+\end{tikzpicture}
+#+end_src
+#+attr_typst: :height 5cm
+#+RESULTS:
+[[file:./images/gen/distributed.png]]
 
 ** Motivation
 
-Lower the barrier to entry; 
+Accessibility
 
 Lower cost per channel
 
@@ -570,9 +615,26 @@ Modular; scalable by small increments
 
 Increased aggregate computing power
 
-** The effect of asynchronicity
+** The perils of asynchronicity
 
-[diagram]
+# Assuming \(c = \qty{343}{\m\per\s}\), in one millisecond,
+# a wavefront propagates the same number of millimetres.
+
+#+header: :exports results :results file raw :file "./images/gen/asynchronous.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 1000 -flatten :fit t
+#+header: :headers '("\\usepackage{smc25figs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic {secondaryWavefrontsAsync};
+  \pic at (0, -2) {virtualWavefronts};
+  \node [circle, draw=wfsptpWaveColour, fill=wfsptpWaveColour!50, thick] (primary) at (\wfsptpWidth/2, -2) {};
+  \pic at (0, -.21) {speakers};
+  \pic at (0, -.42) {mcus};
+\end{tikzpicture}
+#+end_src
+#+attr_typst: :height 5cm
+#+RESULTS:
+[[file:./images/gen/asynchronous.png]]
 
 * The Hardware Platform
 
@@ -583,8 +645,7 @@ Increased aggregate computing power
 #+attr_typst: :width 8cm
 [[./images/t41_orig.png]]
 
-#+typst: #colbreak()
-#+typst: #align(left)[
+#+typst: #colbreak() #align(left)[
 
 - Teensy 4.1 (~https://pjrc.com~)
 - 600 MHz Arm Core-M7, FPU, DSP, SIMD
@@ -613,7 +674,7 @@ Increased aggregate computing power
 ** A collection of humble MCUs
 
 #+header: :exports results :results file raw :file "./images/gen/t41-nominal.png"
-#+header: :imagemagick t :iminoptions -density 300 :imoutoptions -geometry 1000 -flatten :fit t
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 1000 -flatten :fit t
 #+header: :headers '("\\usepackage{smc25figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
@@ -626,7 +687,7 @@ Increased aggregate computing power
 #+RESULTS:
 [[file:./images/gen/t41-nominal.png]]
 
-Each can be configured to run at a preferred audio sampling rate.
+Each can be configured to run at a preferred audio sampling rate
 
 \begin{equation}
 \hat{F}_{s} = \frac{24\times10^{6}}{2^{8}}\frac{D_{S}+\frac{D_{N}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}
@@ -637,7 +698,7 @@ Audio PLL numerator/denominator are 30-bit registers, i.e. \(D_{N}, D_{D} \in \{
 ** A collection of humble MCUs
 
 #+header: :exports results :results file raw :file "./images/gen/t41-actual.png"
-#+header: :imagemagick t :iminoptions -density 300 :imoutoptions -geometry 1000 -flatten :fit t
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 1000 -flatten :fit t
 #+header: :headers '("\\usepackage{smc25figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
@@ -651,7 +712,7 @@ Audio PLL numerator/denominator are 30-bit registers, i.e. \(D_{N}, D_{D} \in \{
 [[file:./images/gen/t41-actual.png]]
 
 Due to manufacturing tolerances, and operational stability, this will
-not be the /true/ sampling frequency.
+not be the /true/ sampling frequency
 
 ** What's a crystal oscillator?
 
@@ -660,17 +721,15 @@ not be the /true/ sampling frequency.
 #+attr_typst: :height 5.5cm
 [[./images/xo_annot.jpg]]
 
-#+typst: #colbreak()
-#+typst: #align(left)[
+#+typst: #colbreak() #align(left)[
 
 - Present in just about any electronic circuit that requires a /source
-  of time/.
+  of time/
 - Features a vibrating sliver of quartz or some other piezoelectric
-  material.
+  material
 - *Tolerance*, in parts per million (ppm), describes how far it can
-  diverge from its /nominal/ frequency.
-- Stability can be affected by temperature, voltage, etc.
-- Crystals also /age/.
+  diverge from its /nominal/ frequency
+- Stability can be affected by temperature, voltage, /age/, etc.
 
 #+typst: ]])
 
@@ -679,7 +738,7 @@ Image source:
 https://www.righto.com/2021/02/teardown-of-quartz-crystal-oscillator.html
 #+end_quote
 
-** What's a part per million between friends?
+** What's a part per million between friends?                      :noexport:
 
 #+typst: #text(size: 1.25em)[
 *1 ppm*
@@ -698,54 +757,262 @@ https://www.righto.com/2021/02/teardown-of-quartz-crystal-oscillator.html
 ** What are a few parts per million between friends?
 
 #+typst: #text(size: 1.25em)[
-*20 ppm*
+*10 ppm*
 
 \downarrow
 
-\pm1 second every \~14 hours
-
-\downarrow
-
-\pm20 \micro{}s per second
+\pm10 \micro{}s per second
 
 !
 
 Sampling period at 48 kHz \approx 21 \micro{}s
 #+typst: ] #v(.5cm)
 
-If, after one second, two audio devices are out of sync by one sample...
+#+begin_quote
+If, after a couple of seconds, two audio devices are out of sync by one sample...
+#+end_quote
 
 * Time Exchange
 
 ** Precision Time Protocol (IEEE 1588)
 
-[PTP diagram]
+#+typst: #columns(2, [
 
-** PTP (continued)
+#+header: :exports results :results file raw :file "./images/gen/ptpflow.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 800 -flatten :fit t
+#+header: :headers '("\\usepackage{smc25figs}")
+#+begin_src latex :eval no-export
+\tikzset{
+  role/.style={align=center, draw, inner sep=1mm, minimum height=1cm, rounded corners=.5mm},
+  authorityMsg/.style={midway, above=-.5mm, rotate=-13},
+  subscriberMsg/.style={midway, above=-.5mm, rotate=13}
+}
+\begin{tikzpicture}
+  \node (auth) [role] at (0, 0) {Clock\\authority};
+  \draw [-{Stealth}] (auth.south) -- +(0, -6.5);
+  \node (sub) [role, right = 2cm of auth] {Clock\\subscriber};
+  \draw [-{Stealth}] (sub.south) -- +(0, -6.5);
+  
+  \node (t1) [below left=1.5mm and -8mm of auth] {\(t_{1}\)};
+  
+  \draw [-{Stealth}] ([yshift=-5.5mm]auth.south) -- ([yshift=-13.5mm]sub.south) node [authorityMsg] {\footnotesize{Sync}};
+  \draw [-{Stealth}] ([yshift=-10.5mm]auth.south) -- ([yshift=-18.5mm]sub.south) node [authorityMsg] {\footnotesize{FollowUp [\(t_{1}\)]}};
 
-[PTP calculations. See CSI presentation]
+  \node (t2) [below right=9.5mm and -8.5mm of sub] {\(t_{2}\)};
+
+  \node (t3) [below right=20mm and -8.5mm of sub] {\(t_{3}\)};
+
+  \draw [-{Stealth}] ([yshift=-24mm]sub.south) -- ([yshift=-32mm]auth.south) node [subscriberMsg] {\footnotesize{DelayReq}};
+
+  \node (t4) [below left=28mm and -8mm of auth] {\(t_{4}\)};
+
+  \draw [-{Stealth}] ([yshift=-36mm]auth.south) -- ([yshift=-44mm]sub.south) node [authorityMsg] {\footnotesize{DelayResp [\(t_{4}\)]}};
+
+  \node (t11) [below left=42mm and -8mm of auth] {\(t'_{1}\)};
+  
+  \draw [-{Stealth}] ([yshift=-47mm]auth.south) -- ([yshift=-55mm]sub.south) node [authorityMsg] {\footnotesize{Sync}};
+  \draw [-{Stealth}] ([yshift=-52mm]auth.south) -- ([yshift=-60mm]sub.south) node [authorityMsg] {\footnotesize{FollowUp [\(t'_{1}\)]}};
+
+  \node (t21) [below right=50mm and -8.5mm of sub] {\(t'_{2}\)};
+\end{tikzpicture}
+#+end_src
+#+attr_org: :width 250
+#+RESULTS:
+[[file:./images/gen/ptpflow.png]]
+
+#+typst: #colbreak() #align(left)[
+
+- Promises nanosecond-order sync; integral to AES67, AVB, Dante...
+- Not typically supported by consumer-grade networking equipment...
+# #+attr_typst: :height 2.5cm
+# [[./images/switch.png]]
+
+#+header: :exports results :results file raw :file "./images/gen/switch.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 800 -flatten :fit t
+#+header: :headers '("\\usepackage{smc25figs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \node [] at (0, 0) {
+    \includegraphics[width=7cm]{./images/switch}
+  };
+  \node [draw=red!50!black, ultra thick, star, star points=10, rotate=15, fill=yellow, inner sep=.1mm] at (2, .75) {€ 200};
+\end{tikzpicture}
+#+end_src
+#+attr_typst: :height 2.5cm
+#+RESULTS:
+[[file:./images/gen/switch.png]]
+
+#+typst: #text(size: .75em)[
+\begin{gather}
+\text{Drift} = 1 - \frac{\color{green}{t'_{2}}-\color{green}{t_{2}}}
+  {\color{red}{t'_{1}}-\color{red}{t_{1}}}\;,\quad
+\text{Delay} = \frac{(\color{red}{t_{4}} - \color{red}{t_{1}}) -
+  (\color{green}{t_{3}} - \color{green}{t_{2}}) }{2}\\[5pt]
+\text{Offset} = \color{green}{t_{2}} - \color{red}{t_{1}} - \text{Delay}
+\end{gather}
+
+#+typst: ]
+
+- Nanoseconds-per-second adjustment found by applying a PI controller
+  to \(\text{Drift}\) and \(\text{Offset}\)
+
+#+typst: ]])
 
 ** Sampling rate conditioning
 
-[Example sampling rate computation]
+Otherwise known as /media clock recovery/
 
-["Media clock"]
+\begin{equation}
+\hat{F}_{s} = F_{s}(1 + \text{Adjust})
+\end{equation}
+where \(\text{Adjust}\) is some very small number, in seconds
+
+\begin{equation}
+D_{N} = D_{D}\left(\frac{2^{8}\hat{F}_{s}D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24\times10^{6}} - D_{S}\right)
+\end{equation}
+
+Let \(D_{D}\) take a convenient value of \(1 \times 10^{9}\)
+
+| \(\hat{F}_{s}\)         | \( D_{N} \)           |
+| \(48\,000\)          | \(184\,000\,000\)  |
+| \(47\,999.994\,048\) | \(\sim183\,996\,381\) |
 
 ** Reproduction simultaneity
 
-["Presentation time"]
+Problem: a recovered media clock \(\ne\) simultaneous /presentation time/
+
+Solution: start clock subscriber audio subsystem when PTP lock achieved
+
+Takes  ~10 seconds from boot for <100 ns offset
+
+Only feasible for a nominal sampling rate that is a multiple of the
+buffer size!
+
+\begin{gather}
+\frac{44\,100}{128} = 344.531\,25 \\[1em]
+\frac{48\,000}{128} = 375
+\end{gather}
 
 * Results
+:PROPERTIES:
+:header-args: :session
+:END:
 
 ** Results
 
-[Before and after drift plots]
+#+begin_src julia :results none :exports none
+using CSV, DataFrames, Plots, LaTeXStrings
+
+function plotDrift(dataCategory)
+    scalefontsizes(2)
+    t41lastBytes = [191, 203, 234]
+    maxOffset = 0
+    yMax = 0
+    plot(fontfamily="Minion Pro Regular",
+         size=(900, 600),
+         margin=6Plots.mm,
+         xlabel="Time (s)",
+         xtickfontfamily="Computer Modern",
+         ytickfontfamily="Computer Modern",
+         legendtitle="IP address",
+         legendfontsize=14,
+         legendfont="iosevka-comfy-motion-normalregularupright",
+         legendtitlefontsize=17,
+         gridlinewidth=2,
+         top_margin=15Plots.mm);
+    for b in t41lastBytes
+        local data = CSV.read("../../papers/smc-2025/data/$b-$dataCategory.csv", DataFrame; header=["offset"], limit=600)
+        data.offset .= data.offset .- data.offset[1]
+        # Prevent `noptp` data for client 191 from wrapping.
+        if b == 191 && dataCategory == "noptp"
+            data.offset[391:end] .= data.offset[391:end] .+ (data.offset[390] - data.offset[391])
+        end
+        plot!(data.offset, label="x.x.48.$b", linewidth=3)
+
+        # Get order-of-magnitude info
+        max = maximum(abs.(data.offset))
+        if max > maxOffset
+            maxOffset = max
+        end
+        max = maximum(data.offset)
+        if max > yMax
+            yMax = max
+        end
+    end
+
+    ordOfMag = floor(Int, log10(maxOffset))
+    ordOffset = 7.5e-8
+    if dataCategory == "noptp"
+        ordOffset = 3.0e-4
+        plot!(ylabel="Offset (s)")
+        plot!(title="Raw drift − order of 7 ppm")
+    else
+        plot!(title="Conditioned clocks − order of 2 ppb")
+    end
+    annotate!(6, yMax + ordOffset, (latexstring("\$\\times10^{$(ordOfMag)}\$"), 18))
+    plot!(yformatter=y -> string(y / 10.0^ordOfMag))
+
+    savefig("./images/gen/$dataCategory.png")
+    scalefontsizes()
+end
+#+end_src
+
+#+typst: #columns(2, [
+
+#+begin_src julia :results file graphics :file noptp.png :output-dir ./images/gen :exports results
+plotDrift("noptp")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:./images/gen/noptp.png]]
+
+#+typst: #colbreak()
+
+#+begin_src julia :results file graphics :file ptp.png :output-dir ./images/gen :exports results
+plotDrift("ptp")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:./images/gen/ptp.png]]
+
+#+typst: ])
 
 * Outlook
 
 ** Next steps
 
-fucking kill myself
+Run a regular computer as the audio server...
+
+#+typst: #text(size: .75em)[
+#+begin_quote
+/...but how to make it part of the PTP network without increasing
+costs/complexity?/
+#+end_quote
+#+typst: ] #v(.5cm)
+
+Make some cool spatial audio installations!..
+
+#+typst: #text(size: .75em)[
+#+begin_quote
+/...To what extent can an ambisonics decoder be parallelised?/
+#+end_quote
+#+typst: ] #v(.5cm)
+
+Address the remaining ppb drift...
+
+#+typst: #text(size: .75em)[
+#+begin_quote
+/...it appears to be inversely proportional to the raw drift/
+#+end_quote
+#+typst: ] #v(.5cm)
+
+Can we do virtual acoustics?
+
+#+typst: #text(size: .75em)[
+#+begin_quote
+/...probably depends upon the performance of the PSRAM/
+#+end_quote
+#+typst: ] #v(.5cm)
 
 * Thank you!
 
