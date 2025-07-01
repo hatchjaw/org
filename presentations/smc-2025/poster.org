@@ -284,7 +284,7 @@ In the second, contact details.
     \column{.4\textwidth}
     \begin{beamercolorbox}[leftskip=1cm, wd=\columnwidth, ht=6cm]{headline}
       \begin{tabular}{rl}
-        \textbf{Contact:} & \authoremail \\
+        \textbf{Contact:} & \url{\authoremail} \\
         \textbf{Git:} & \url{\githubrepo}
       \end{tabular}
       \vspace{2.5ex}
@@ -490,7 +490,7 @@ plot(d1, col="red", lwd=3)
 #+CAPTION: This is the left figure of a two-column block, showing
 #+CAPTION: the density of $x1$.
 #+RESULTS: codeleft
-
+test
 **** Right
 :PROPERTIES:
 :BEAMER_col: 0.48
@@ -507,7 +507,7 @@ plot(d2, col="blue", lwd=3)
 #+NAME: figcoderight
 #+CAPTION: This is the right figure. It shows the density of $x2$.
 #+RESULTS: coderight
-
+test
 *** Conclusions                                            :B_block:
 :PROPERTIES:
 :BEAMER_env: block

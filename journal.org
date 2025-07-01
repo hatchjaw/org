@@ -9515,21 +9515,26 @@ And any other required supporting documentation, naturally.
 - State "DONE"       from "TODO"       [2025-06-06 ven. 09:58]
 :END:
 The VSR game is up.
-***** TODO Prepare slides for SMC
+***** DONE Prepare slides for SMC
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-07-01 mar. 17:29]
+:END:
 Just 5 minutes. Use Typst? In that case, ask Pierre for a template.
 ***** TODO Prepare poster for SMC
 And ask Tanguy about printing it to foldable fabric instead of paper.
-***** WAITING Register for AES AIMLA
+***** DONE Register for AES AIMLA
 :LOGBOOK:
+- State "DONE"       from "WAITING"    [2025-07-01 mar. 17:29]
 - State "WAITING"    from "TODO"       [2025-06-19 jeu. 17:37] \\
   Just applied for student membership, which will bring the registration
   fee down considerably.
 :END:
-Do this by July 1st (early-bird deadline). [[https://aes2.org/event-extra/2025-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio/][$475 for non-members]]. In
-Portail Missions, state that the source of funds should be /dotation
+Do this by July 1st (early-bird deadline). [[https://aes2.org/event-extra/2025-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio/][$475 for non-members]].
+***** TODO Mission for AES AIMLA
+In Portail Missions, state that the source of funds should be /dotation
 d'Inria/.
 ***** TODO Submit camera-ready AES paper
-Do this by [[https://aes2.org/contributions/2025-1st-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio-call-for-contributions/][July 14th]].
+Do this by +July 14th+ [[https://aes2.org/contributions/2025-1st-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio-call-for-contributions/][July 24th]].
 ***** DONE Finish 3rd year enrolment with doctoral school
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2025-06-17 mar. 11:56]
