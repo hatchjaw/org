@@ -873,7 +873,7 @@ D_{N} = D_{D}\left(\frac{2^{8}\hat{F}_{s}D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24\times1
 
 Let \(D_{D}\) take a convenient value of \(1 \times 10^{9}\)
 
-| \(\hat{F}_{s}\)         | \( D_{N} \)           |
+| \(\hat{F}_{s}\)         | \(D_{N}\)             |
 | \(48\,000\)          | \(184\,000\,000\)  |
 | \(47\,999.994\,048\) | \(\sim183\,996\,381\) |
 
@@ -883,7 +883,7 @@ Problem: a recovered media clock \(\ne\) simultaneous /presentation time/
 
 Solution: start clock subscriber audio subsystem when PTP lock achieved
 
-Takes  ~10 seconds from boot for <100 ns offset
+Takes  \~10 seconds from boot for <100 ns offset
 
 Only feasible for a nominal sampling rate that is a multiple of the
 buffer size!

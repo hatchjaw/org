@@ -9810,3 +9810,19 @@ How does AVB do media clock correction? It doesn't? In that case how
 is it achieved? PLL-conditioning or resampling?
 
 Entered on [2025-06-26 jeu. 15:30]
+** 2025-07 juillet
+*** 2025-07-01 mardi
+**** What's the latest?                                        :BRAINDUMP:
+JIMLAC wiped out most of last week, productivity-wise, though I made
+moves on my SMC slides, which I finished yesterday. These may well
+need to be cut down to fit into five minutes.
+
+The poster needs quite a lot of work, though I should be able to
+re-use assets from the slides.
+
+Unofficially (i.e. d'après Cristina R) the IS^{2} tutorial deadline, much
+like the paper deadline, has been pushed back by two
+weeks. Nontheless, unless I /finish/ that today, I should send an email
+as per the [[https://internetofsounds2025.ieee-is2.org/call-papers/call-tutorials][instructions]] indicating that I have something in the works.
+
+Entered on [2025-07-01 mar. 09:30]

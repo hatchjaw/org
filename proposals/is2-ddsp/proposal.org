@@ -1,10 +1,9 @@
-#+title: Enabling Distributed Spatial Audio
-#+subtitle: Individual Follow-up Committee: Year 2
+#+title: DDSP for the Internet of Sounds
+#+subtitle: Tutorial proposal for the 2025 IEEE International Symposium on the Internet of Sounds
 #+author: Thomas Rushton
-#+date: May 2025
+#+date: 1 July 2025
 
 #+options: toc:nil num:2
-#+bibliography: references.bib
 
 #+export_file_name: out/proposal
 #+cite_export: biblatex
@@ -118,21 +117,77 @@ Scale Iosevka to more-or-less match Minion.
 }
 #+end_src
 
+* Presenter
+
+- Name: Thomas Rushton
+- Position: PhD Student
+- Affiliation: Inria ([[https://team.inria.fr/emeraude/][Emeraude team]]), INSA Lyon
+- Address: Laboratoire CITI, 6 av. des Arts, 69100 Villeurbanne, France
+- Email: [[mailto:thomas.rushton@inria.fr][thomas.rushton@inria.fr]]
+  
 * Abstract
+
+This tutorial introduces the concept of *differentiable digital signal
+processing* (DDSP) [cite:@hayesReview2024] --- the creation of signal
+processing algorithms incorporating the principles of differentiable
+programming --- to the Internet of Sounds community. Differentiable
+programming is the backbone of contemporary approaches to mathematical
+optimisation and machine learning, and DDSP is its application to the
+audio domain. With audio researchers and practitioners in mind, the
+session will explore DDSP in the context of Faust, an audio
+domain-specific programming language with established support for
+programming embedded computing platforms [cite:@orlareyFAUST2009;
+@michonReal2019; @michonFaust2020; @michonEmbedded2020]. Participants
+will be assisted in the design and of a DDSP-based parameter
+optimisation algorithm, and shown how they can deploy their algorithm
+for use in a real time, embedded context.
+
+[MOVE REFS TO MOTIVATION]
 
 * Motivation
 
-* Objectives
+** Objectives
 
+By the end of the tutorial, participants will have gained the
+following competences:
+
+- Understanding of DDSP, its principles and applications.
+- Knowledge of the Faust language, its syntax and ecosystem, and how
+  it can be used to create cross-platform signal processing
+  algorithms.
+- Familiarity with the process of deploying Faust code for use on an
+  embedded platform; awareness of the capabilities and limitations of
+  embedded audio devices for performing real-time DDSP.
+- An appreciation for the trade-offs in terms of performance, latency,
+  and feasibility associated with time-domain versus frequency-domain
+  optimisation approaches.
+  
 * Detailed Outline
 
 * Target Audience
+
+This tutorial targets researchers, engineers, audio developers, and
+may be of interest to creative individuals in the computer music
+domain. Participants should ideally posses:
+
+- Some experience of audio programming; previous exposure to
+  functional paradigm languages or experience with Faust may be
+  helpful to those in attendance.
+- An understanding of basic DSP concepts; filters, delays, time-domain
+  vs. frequency-domain processing, etc.
+- Some knowledge of the mathematical concepts to be applied; ordinary
+  and partial differential equations, loss functions, etc.
+- An interest in deploying real-time audio systems in an embedded
+  context; some familiarity with working with devices such as Arduino,
+  Bela, Teensy, ESP32, etc.
 
 * Presenter Information
 
 * History
 
 * Technical Requirements
+
+#+print_bibliography:
 
 * Local Variables                                                  :noexport:
 
@@ -148,3 +203,5 @@ Scale Iosevka to more-or-less match Minion.
 # ("\\paragraph{%s}" . "\\paragraph*{%s}")
 # ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 # End:
+
+#  LocalWords:  Teensy DDSP
