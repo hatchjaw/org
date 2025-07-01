@@ -128,14 +128,14 @@ Scale Iosevka to more-or-less match Minion.
 * Abstract
 
 This tutorial introduces the concept of *differentiable digital signal
-processing* --- the creation of signal processing algorithms
+processing* (DDSP) --- the creation of signal processing algorithms
 incorporating the principles of differentiable programming --- to the
 Internet of Sounds community. Differentiable programming, enabled by
-*automatic differentiation*, is the backbone of contemporary
+*automatic differentiation* (autodiff), is the backbone of contemporary
 approaches to mathematical optimisation and machine learning, and DDSP
 is its application to the audio domain. With audio researchers and
 practitioners in mind, the session will explore DDSP in the context of
-Faust, an audio domain-specific programming language with established
+Faust, a domain-specific audio programming language with established
 support for programming embedded computing platforms. Participants
 will be assisted in the design and of a DDSP-based parameter
 optimisation algorithm, and shown how they can deploy their algorithm
@@ -156,9 +156,9 @@ as PyTorch, TensorFlow, and JAX.
 A wide variety of audio-specific applications of differentiable
 programming exist, from filter optimisation, parameter-matching, and
 acoustic control, to timbre transfer and neural audio synthesis. Being
-instances of /automatic differentiation/ (autodiff) applied in a DSP
+instances of /automatic differentiation/ applied in a DSP
 context, these constitute examples of /differentiable digital signal
-processing/ (DDSP)\nbsp[cite:@hayesReview2024]. Imperative programming
+processing/\nbsp[cite:@hayesReview2024]. Imperative programming
 languages, and established autodiff frameworks may, however, obscure
 the purpose and workings of DSP systems and the mechanisms behind the
 underlying processes of mathematical optimisation.
@@ -184,13 +184,17 @@ they may well be able to find an optimal parameter state, for an IIR
 filter for example, via basic time-domain loss computation. More
 advanced participants may aim to receive arbitrary or /unknown/ audio
 signals over an ethernet connection, and perform frequency-domain loss
-computation to find the optimal parameter state. Other participants
-may wish to explore the side-effects of the optimisation process ---
-the output of a loss function in a DDSP context is, in effect, an
-audio signal in its own right; finding algorithms that do not optimise
-well, and /sonifying/ the result, may give rise to creative
-opportunities, or simply clues as to the nature of the difficulty of a
-given optimisation scenario.
+computation to find the optimal parameter state --- to that end, I
+will bring a network switch, and deploy an audio server on my
+computer, delivering audio signals (filtered noise, elementary
+waveforms of specific frequencies, perhaps more complex synthesised
+sounds) according to participant requirements. Other participants may
+wish to explore the side-effects of the optimisation process --- the
+output of a loss function in a DDSP context is, in effect, an audio
+signal in its own right; finding algorithms that do not optimise well,
+and /sonifying/ the result, may give rise to creative opportunities, or
+simply clues as to the nature of the difficulty of a given
+optimisation scenario.
 
 ** Objectives
 
@@ -212,11 +216,70 @@ following insights:
 
 Total duration: 180 minutes
 
+** Part 1: Introduction to Faust
+
+Duration: 20 minutes
+
+- Overview of Faust syntax, block diagram algebra, and practical DSP
+  design.
+- Introduction to the Faust ecosystem and tooling.
+- Working with the Web IDE or a locally-installed compiler.
+
+** Part 2: DDSP Foundations
+
+Duration: 20 minutes
+
+- Introduction to elementary differentiation; calculus 101.
+- Automatic differentiation (forward and reverse modes) and
+  differentiable programming.
+- Loss functions, gradient descent.
+- Limitations of autodiff, e.g. for primitive operations whose
+  derivatives are poorly-defined; time-domain vs. frequency-domain
+  pros and cons.
+
+** Part 3: DDSP in Faust
+
+Duration: 20 minutes
+
+- Implementation of forward-mode autodiff in Faust.
+- Application of Faust's environment construct and pattern-matching
+  abstractions to create end-to-end differentiable Faust algorithms.
+
+** Part 4: Practical Examples
+
+Duration: 30 minutes
+
+- Creation of differentiable Faust algorithms in the Faust Web IDE.
+- Verification of the results of optimisation for simple problems,
+  e.g. filter coefficient optimisation.
+
+** Break
+
+Duration: 15 minutes
+
+** Part 5: Incorporating the Internet of Sounds
+
+Duration: 45 minutes
+
+- Deployment on participants' chosen embedded devices.
+- Verification that algorithms function as expected in an embedded
+  context.
+- Time, equipment and participants' enthusiasm permitting, combination
+  of DDSP with networked audio for a more practical illustration of
+  what can be achieved.
+
+** Part 6: Close
+
+Duration: 30 minutes
+
+- Project demonstrations.
+- Discussion, Q&A.
+
 * Target Audience
 
 This tutorial targets researchers, engineers, audio developers, and
 may be of interest to creative individuals in the computer music
-domain. Participants should ideally posses:
+field. Participants should ideally posses:
 
 - Some experience of audio programming; previous exposure to
   functional paradigm languages or experience with Faust may be
@@ -250,8 +313,8 @@ the Monts du Lyonnais.
 
 * History
 
-This tutorial has not been presented previously, however the
-theoretical and technical basis for it was demonstrated during a
+This tutorial has not been presented previously. The theoretical and
+technical basis for it has been demonstrated, however, during a
 presentation at the 2024 International Faust Conference[fn:3] to an
 audience of thirty-or-so attendees.
 
@@ -260,16 +323,20 @@ audience of thirty-or-so attendees.
 - Projector/screen for slides and code demonstrations.
 - Internet connection for accessing the Faust Web IDE.
 - Power outlets for participant laptop computers.
+- Power outlet for network switch.
 - Participants should have a modern web browser installed, for use of
   the Faust Web IDE, or, alternatively a local installation[fn:1] of the
   Faust compiler.
-- I will be able to bring up to eight Teensy development boards, with
-  ethernet and audio add-ons. Interested participants can assist by
-  bringing their own audio-enabled (and preferably ethernet-enabled)
-  development boards or single-board computers; supported devices
-  (including Teensy, Daisy, Raspberry Pi, Bela, etc.)  may be found
-  amongst the ~faust2[...]~ tools listed on the Faust documentation
-  website.[fn:2]
+
+I will be able to bring up to eight Teensy development boards, with
+ethernet and audio add-ons, plus USB and ethernet cables. Interested
+participants may assist by bringing their own audio-enabled (and
+preferably ethernet-enabled) development boards or single-board
+computers; supported devices (including Teensy, Daisy, Raspberry Pi,
+Bela, etc.)  may be found amongst the ~faust2[...]~ tools listed on the
+Faust documentation website.[fn:2] I am best placed to assist with
+development for the Teensy; for other devices, participants will
+likely need to take the initiative.
 
 #+print_bibliography:
 
