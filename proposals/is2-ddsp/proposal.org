@@ -128,28 +128,74 @@ Scale Iosevka to more-or-less match Minion.
 * Abstract
 
 This tutorial introduces the concept of *differentiable digital signal
-processing* (DDSP) [cite:@hayesReview2024] --- the creation of signal
-processing algorithms incorporating the principles of differentiable
-programming --- to the Internet of Sounds community. Differentiable
-programming is the backbone of contemporary approaches to mathematical
-optimisation and machine learning, and DDSP is its application to the
-audio domain. With audio researchers and practitioners in mind, the
-session will explore DDSP in the context of Faust, an audio
-domain-specific programming language with established support for
-programming embedded computing platforms [cite:@orlareyFAUST2009;
-@michonReal2019; @michonFaust2020; @michonEmbedded2020]. Participants
+processing* --- the creation of signal processing algorithms
+incorporating the principles of differentiable programming --- to the
+Internet of Sounds community. Differentiable programming, enabled by
+*automatic differentiation*, is the backbone of contemporary
+approaches to mathematical optimisation and machine learning, and DDSP
+is its application to the audio domain. With audio researchers and
+practitioners in mind, the session will explore DDSP in the context of
+Faust, an audio domain-specific programming language with established
+support for programming embedded computing platforms. Participants
 will be assisted in the design and of a DDSP-based parameter
 optimisation algorithm, and shown how they can deploy their algorithm
 for use in a real time, embedded context.
 
-[MOVE REFS TO MOTIVATION]
-
 * Motivation
+
+Mathematical optimisation approaches, particularly those pertaining to
+machine learning, are of particular interest to researchers at the
+present time. Gradient-based optimisation has emerged, for a wide
+variety of optimisation problems, to be the preferred approach, and
+the field of differentiable programming, based upon the principle of
+automatic differentiation\nbsp[cite:@rallArithmetic1986;
+@baydinAutomatic2018], has been paid considerable attention, forming
+the mathematical basis for ubiquitous machine learning frameworks such
+as PyTorch, TensorFlow, and JAX.
+
+A wide variety of audio-specific applications of differentiable
+programming exist, from filter optimisation, parameter-matching, and
+acoustic control, to timbre transfer and neural audio synthesis. Being
+instances of /automatic differentiation/ (autodiff) applied in a DSP
+context, these constitute examples of /differentiable digital signal
+processing/ (DDSP)\nbsp[cite:@hayesReview2024]. Imperative programming
+languages, and established autodiff frameworks may, however, obscure
+the purpose and workings of DSP systems and the mechanisms behind the
+underlying processes of mathematical optimisation.
+
+With the aim of shedding light on these matters, in this tutorial,
+participants will be shown first how to describe DSP algorithms in
+Faust, a functional paradigm, audio domain specific programming
+language, based on an intuitive /block diagram
+algebra/\nbsp[cite:@orlareySyntactical2004; @orlareyFAUST2009], then how to
+perform derivative transformations on their code to produce
+/differentiable signal processors/ [cite:@rushtonDifferentiable2024],
+taking in an exploration of the underlying principles of
+autodiff. Faust is renowned for its compilation support for a variety
+of embedded devices of the /Internet of Sounds/
+kind\nbsp[cite:@michonReal2019; @michonFaust2020; @michonEmbedded2020],
+and participants will be guided through the process of deploying their
+DDSP algorithms to an embedded platform.
+
+In a most basic form, a participant may run an isolated DDSP
+algorithm, comparing some known ground truth signal, generated on
+their device, with one produced by their differentiable processor;
+they may well be able to find an optimal parameter state, for an IIR
+filter for example, via basic time-domain loss computation. More
+advanced participants may aim to receive arbitrary or /unknown/ audio
+signals over an ethernet connection, and perform frequency-domain loss
+computation to find the optimal parameter state. Other participants
+may wish to explore the side-effects of the optimisation process ---
+the output of a loss function in a DDSP context is, in effect, an
+audio signal in its own right; finding algorithms that do not optimise
+well, and /sonifying/ the result, may give rise to creative
+opportunities, or simply clues as to the nature of the difficulty of a
+given optimisation scenario.
 
 ** Objectives
 
 By the end of the tutorial, participants will have gained the
-following competences:
+following insights:
 
 - Understanding of DDSP, its principles and applications.
 - Knowledge of the Faust language, its syntax and ecosystem, and how
@@ -163,6 +209,8 @@ following competences:
   optimisation approaches.
   
 * Detailed Outline
+
+Total duration: 180 minutes
 
 * Target Audience
 
@@ -183,11 +231,54 @@ domain. Participants should ideally posses:
 
 * Presenter Information
 
+*Thomas Rushton* is a PhD candidate at INSA Lyon, and a member of the
+Emeraude (embedded, programmable audio systems) research team of the
+French national institute Inria. Originally from the UK, he received
+his bachelor's degree in Music Technology from the University of
+Edinburgh in 2009, and following a stint in industry, a masters degree
+in /Sound and Music Computing/ from Aalborg University, Copenhagen. He
+is now working toward a PhD under the title /"Enabling Distributed
+Spatial Audio"/. Thomas was a Google Summer of Code contributor to the
+Faust project in 2023, adding automatic differentiation capabilities
+to the Faust compiler, work which led directly to the implementation
+of autodiff and DDSP in the Faust language. He has presented his work
+on sonification, distributed spatial audio, and DDSP at a variety of
+international conferences, and delivered a half-day Faust workshop at
+CCRMA at Stanford University in late 2024. When not thinking about
+networked audio or partial derivatives, Thomas may be found cycling in
+the Monts du Lyonnais.
+
 * History
+
+This tutorial has not been presented previously, however the
+theoretical and technical basis for it was demonstrated during a
+presentation at the 2024 International Faust Conference[fn:3] to an
+audience of thirty-or-so attendees.
 
 * Technical Requirements
 
+- Projector/screen for slides and code demonstrations.
+- Internet connection for accessing the Faust Web IDE.
+- Power outlets for participant laptop computers.
+- Participants should have a modern web browser installed, for use of
+  the Faust Web IDE, or, alternatively a local installation[fn:1] of the
+  Faust compiler.
+- I will be able to bring up to eight Teensy development boards, with
+  ethernet and audio add-ons. Interested participants can assist by
+  bringing their own audio-enabled (and preferably ethernet-enabled)
+  development boards or single-board computers; supported devices
+  (including Teensy, Daisy, Raspberry Pi, Bela, etc.)  may be found
+  amongst the ~faust2[...]~ tools listed on the Faust documentation
+  website.[fn:2]
+
 #+print_bibliography:
+
+* Footnotes
+[fn:3] https://ifc24.soundmit.com/en 
+
+[fn:1] https://faust.grame.fr/downloads/
+
+[fn:2] https://faustdoc.grame.fr/manual/tools/
 
 * Local Variables                                                  :noexport:
 
@@ -204,4 +295,6 @@ domain. Participants should ideally posses:
 # ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 # End:
 
-#  LocalWords:  Teensy DDSP
+# LocalWords: Teensy DDSP INSA Inria Emeraude Rushton WFS JackTrip
+# LocalWords: autodiff "Monts du Lyonnais" DSP ethernet add-ons CCRMA
+# LocalWords: sonification sonifying JAX IIR
