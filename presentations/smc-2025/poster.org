@@ -46,6 +46,7 @@
 \usepackage{textcomp}
 \usepackage{bibentry}
 \usepackage{tikz}
+\usetikzlibrary{shapes, positioning, arrows.meta}
 #+end_src
 
 ** Page size
@@ -134,22 +135,52 @@
 \definecolor{i6colorscheme3}{HTML}{C3DFFF}  % e.g. for poster background
 %\definecolor{i6colorscheme3}{HTML}{0033CC}  % e.g. for poster background
 \definecolor{i6colorscheme5}{HTML}{FFFFFF}  % e.g. for poster background
-\definecolor{i6colorscheme4}{HTML}{000000} 
-\definecolor{cHeader}{HTML}{7F0000}  % for headline bg
+\definecolor{i6colorscheme4}{HTML}{000000}
+
 %\definecolor{i6colorschemeHeadline}{HTML}{FFFFFF}  % for headline bg
 %\definecolor{i6colorschemeFootline}{HTML}{100D09}  % for headline bg
-\definecolor{cAuthor}{HTML}{DDDDDD}
+#+end_src
+
+Dark red for the header background.
+
+#+begin_src latex
+\definecolor{cHeaderBg}{HTML}{7F0000}
+#+end_src
+
+Same again for the footer background.
+
+#+begin_src latex
+\definecolor{cFooterBg}{HTML}{7F0000}
+#+end_src
+
+Light grey for authors/affiliations, so they don't distract too much
+from the title.
+
+#+begin_src latex
+\definecolor{cAuthorFg}{HTML}{DDDDDD}
+#+end_src
+
+Dark red again for block titles.
+
+#+begin_src latex
+\definecolor{cTitleFg}{HTML}{7F0000}
+#+end_src
+
+Some other colour for block backgrounds.
+
+#+begin_src latex
+\definecolor{cBlockBg}{HTML}{f1e9e9}
 #+end_src
 
 ** Header fonts & colours
 
 #+begin_src latex
-\setbeamercolor{headline}{fg=white,bg=cHeader}
+\setbeamercolor{headline}{fg=white,bg=cHeaderBg}
 \setbeamercolor{title in headline}{fg=white}
 \setbeamercolor{logo}{bg=white}
 %\setbeamercolor{title in headline}{fg=blue}
 %\setbeamercolor{author in headline}{fg=lightgray}
-\setbeamercolor{author in headline}{fg=cAuthor}
+\setbeamercolor{author in headline}{fg=cAuthorFg}
 \setbeamercolor{institute in headline}{fg=lightgray}
 \setbeamercolor{logo in headline}{fg=black,bg=lightgray}
 \setbeamercolor{separation line}{bg=i6colorscheme1}
@@ -158,9 +189,8 @@
 ** Footer fonts & colours
 
 #+begin_src latex
-\setbeamercolor{footline}{fg=white,bg=cHeader}
+\setbeamercolor{footline}{fg=white,bg=cFooterBg}
 \setbeamerfont{footline}{size=\normalsize}
-%\setbeamerfont{footline}{size=\small}
 #+end_src
 
 ** Body fonts & colours
@@ -172,19 +202,19 @@
 ** Block environment
 
 #+begin_src latex
-\setbeamercolor*{block body}{bg=i6colorscheme5,fg=black}
+\setbeamercolor*{block body}{bg=cBlockBg,fg=black}
 \setbeamerfont{block body}{size=\large}
-\setbeamercolor*{block title}{fg=i6colorblockfg,bg=i6colorblockbg}
-\setbeamerfont{block title}{size=\Large,series=\bf}
+\setbeamercolor*{block title}{fg=cTitleFg,bg=white}
+\setbeamerfont{block title}{size=\Large,series=\bfseries}
 #+end_src
 
 ** Example Environment
 
 #+begin_src latex
 \setbeamercolor*{example title}{fg=white,bg=i6colorscheme1}
-\setbeamerfont{example title}{size=\large,series=\bf}
+\setbeamerfont{example title}{size=\large,series=\bfseries}
 
-%\setbeamerfont{alerted text}{series=\bf}
+\setbeamerfont{alerted text}{size=\large,series=\bfseries}
 \setbeamercolor{alerted text}{fg=black}
 
 \setbeamertemplate{itemize items}[circle]
@@ -309,6 +339,106 @@ Draw a vertical line separating the two columns.
 \def\footer#1{\def\insertfooter{#1}}
 #+end_src
 
+* TikZ figures                                                     :noexport:
+:PROPERTIES:
+:header-args: :tangle out/smc-2025-poster.sty :results silent :noeval
+:END:
+
+#+begin_src latex
+\definecolor{wfsptpWaveColour}{HTML}{4077D6}
+\newcommand*{\wfsptpWaveSpace}{.89}
+\newcommand*{\wfsptpWidth}{8}
+\newcommand*{\wfsptpNumWaves}{5}
+\newcommand*{\wfsptpNumSecondary}{16}
+\newcommand*{\wfsptpNumMCU}{8}
+
+\newcommand{\supertiny}{\fontsize{8}{8}\selectfont}
+
+\tikzset{
+  halfSecondaryWavefronts/.pic={
+    \foreach \pos/\rad in {0/.18, 1/.615, 2/1.03, 3/1.42, 4/1.78, 5/2.07, 6/2.295, 7/2.42}
+    \draw [black!40, thick] (.25+.5*\pos, 0) circle (\rad);
+  },
+  secondaryWavefronts/.pic={
+    \clip (0, 0) rectangle (\wfsptpWidth, 2.5);
+    \pic {halfSecondaryWavefronts};
+    \pic [xscale=-1] at (\wfsptpWidth, 0) {halfSecondaryWavefronts};
+  },
+  secondaryWavefrontsAsync/.pic={
+    \clip (-1, 0) rectangle (\wfsptpWidth+1, 2.5);
+    \foreach \pos/\rad in {0/.18, 1/.615,
+      2/0.83, 3/1.22,
+      4/1.88, 5/2.17,
+      6/1.295, 7/1.42,
+      8/1.72, 9/1.595,
+      10/0.41, 11/0.12,
+      12/1.42, 13/1.03,
+      14/0, 15/0}
+    \draw [black!40, thick] (.25+.5*\pos, 0) circle (\rad);
+  },
+  realWavefronts/.pic={
+    \clip (0, 0) rectangle (\wfsptpWidth, 2.5);
+    \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,\wfsptpNumWaves}
+    \draw [thick, wfsptpWaveColour] (\wfsptpWidth/2-\rad, -2) arc [radius=\rad, start angle=180, end angle=0];
+  },
+  virtualWavefronts/.pic={
+    \clip (-1, 0) rectangle (2*\wfsptpWaveSpace*\wfsptpNumWaves, 2);
+    \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,\wfsptpNumWaves}
+    \draw [thick, dashed, wfsptpWaveColour] (\wfsptpWidth/2-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
+  },
+  speaker/.pic={
+    \path [draw=black, fill=white] (-.11, 0) rectangle (.11, .06);
+    \path [draw=black, fill=white] (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
+  },
+  speakers/.pic={
+    \foreach \i [
+      evaluate=\i as \secondary using
+      .25+(\i-1)*(\wfsptpWidth/\wfsptpNumSecondary)
+    ] in {1,...,\wfsptpNumSecondary} {
+      \pic at (\secondary, 0) {speaker};
+    }
+  },
+  mcu/.pic = {
+    \node [draw, fill=black!10, rounded corners=1mm, inner sep=1mm] {dWFS};
+  },
+  mcus/.pic = {
+    \foreach \i [
+      evaluate=\i as \xpos using .5+(\i-1)
+    ] in {1,...,\wfsptpNumMCU}
+    \pic at (\xpos, 0) {mcu};
+  },
+  wfs/.pic = {
+    \node [minimum width=\wfsptpWidth{}cm, draw, fill=black!10, rounded corners=1mm, inner sep=1.25mm] at (\wfsptpWidth/2, -.44) {WFS};
+  },
+  primary/.pic = {
+    \node [circle, draw=wfsptpWaveColour, fill=wfsptpWaveColour!50, thick, inner sep=1mm] (primary) at (\wfsptpWidth/2, -2) {};
+  },
+  centralised/.pic = {
+    \pic {secondaryWavefronts};
+    \pic at (0, -2) {virtualWavefronts};
+    \pic {primary};
+    \pic {realWavefronts};
+    \pic at (0, -.21) {speakers};
+    \pic {wfs};
+  },
+  distributed/.pic = {
+    \pic {secondaryWavefronts};
+    \pic at (0, -2) {virtualWavefronts};
+    \pic {primary}
+    \pic {realWavefronts};
+    \pic at (0, -.21) {speakers};
+    \pic at (0, -.42) {mcus};
+  },
+  async/.pic = {
+    \pic {secondaryWavefrontsAsync};
+    \pic at (0, -2) {virtualWavefronts};
+    \pic {primary};
+    \pic at (0, -.21) {speakers};
+    \pic at (0, -.42) {mcus};
+  }
+}
+#+end_src
+
 * The Poster
 :PROPERTIES:
 :BEGIN:
@@ -319,23 +449,35 @@ Draw a vertical line separating the two columns.
 
 ** Left column                                        :BMCOL:
 :PROPERTIES:
-:BEAMER_col: 0.45
+:BEAMER_col: 0.58
 :BEAMER_opt: [t]
 :END:
-*** Background                                        :B_block:
+*** Motivation                                                      :B_block:
 :PROPERTIES:
 :BEAMER_env: block
 :END:
-- Here we show how org-mode (version src_elisp{org-version}
-  {{{results(=9.7.11=)}}}) and emacs (version src_elisp{emacs-version}
-  {{{results(=30.1=)}}}) can be used to make decent looking scientific
-  posters
-- With org-mode we can populate the poster with code, graphs and numbers
-  from inline code in languages such as R, python, Matlab and even shell
-  scripting
-- For example, this poster was created on {{{time(%Y-%m-%d %H:%M)}}} on
-  src_bash{lsb_release -sd} {{{results(=Manjaro Linux=)}}}.
-- Inline code could look like this (which will produce a graph; 
+
+Spatial audio has an *accessibility* problem, but perhaps we can improve
+the situation by *distributing* the signal processing. Wave field
+synthesis, for example, parallelises quite nicely.
+
+#+latex: \vspace{1cm} \scalebox{2.1}{
+\begin{tikzpicture}[font=\supertiny]
+  \pic {centralised};
+  \node [single arrow, fill=red!50!black, inner sep=3mm] at (9.5, 0);
+  \pic at (11.5, 0) {distributed};
+\end{tikzpicture}
+#+latex: }
+
+Distributing things in this manner requires, however, that our group
+of signal processors are synchronised, otherwise the resulting
+soundfield will be destroyed.
+
+#+latex: \vspace{1cm} \begin{center}\scalebox{2.1}{
+\begin{tikzpicture}[font=\supertiny]
+  \pic {async};
+\end{tikzpicture}
+#+latex: }\end{center}
 
 **** Block
 :PROPERTIES:
@@ -343,18 +485,7 @@ Draw a vertical line separating the two columns.
 :BEAMER_opt: [T]
 :END:
 
-#+NAME: code1
-#+BEGIN_SRC R  :file 3.png :session :exports both :results graphics :eval no-export
-set.seed(20180402)
-x1 <- rnorm(100, 0, 1)
-x2 <- rnorm(100, 0.5, 1)
-hist(x1, col="red")
-hist(x2, col="blue", add=TRUE)
-#+END_SRC
-
-#+NAME: figcode1
-#+CAPTION: This is the output.
-#+RESULTS: code1
+Oh, so this is an inner block?
 
 *** Inline code and tables                            :B_block:
 :PROPERTIES:
@@ -398,7 +529,7 @@ mutate(name=c("x1", "x2"))
 
 ** Right column                                       :BMCOL:
 :PROPERTIES:
-:BEAMER_col: 0.45
+:BEAMER_col: 0.38
 :BEAMER_opt: [t]
 :END:
 *** Graphics                                          :B_block:

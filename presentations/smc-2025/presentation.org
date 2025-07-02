@@ -3,10 +3,10 @@
 #+author: Thomas Rushton, Romain Michon, Tanguy Risset
 #+date: July 2025
 
-#+property: header-args:typst :tangle out/theme-diatypst.typ :noeval
+#+property: header-args:typst :tangle out/theme.typ :noeval
 #+options: toc:nil num:nil
-#+export_file_name: out/smc-2025-diatypst
-#+include: "out/theme-diatypst.typ" export typst
+#+export_file_name: out/smc-2025-slides
+#+include: "out/theme.typ" export typst
 
 * Typst setup                                                      :noexport:
 
@@ -561,6 +561,35 @@ Bits with which to draw WFS diagrams.
       evaluate=\i as \xpos using .5+(\i-1)
     ] in {1,...,\wfsptpNumMCU}
     \pic at (\xpos, 0) {mcu};
+  },
+  wfs/.pic = {
+    \node [minimum width=\wfsptpWidth{}cm, draw, fill=black!10, rounded corners=1mm] at (\wfsptpWidth/2, -.44) {WFS};
+  },
+  primary/.pic = {
+    \node [circle, draw=wfsptpWaveColour, fill=wfsptpWaveColour!50, thick] (primary) at (\wfsptpWidth/2, -2) {};
+  },
+  centralised/.pic = {
+    \pic {secondaryWavefronts};
+    \pic at (0, -2) {virtualWavefronts};
+    \pic {primary};
+    \pic {realWavefronts};
+    \pic at (0, -.21) {speakers};
+    \pic {wfs};
+  },
+  distributed/.pic = {
+    \pic {secondaryWavefronts};
+    \pic at (0, -2) {virtualWavefronts};
+    \pic {primary}
+    \pic {realWavefronts};
+    \pic at (0, -.21) {speakers};
+    \pic at (0, -.42) {mcus};
+  },
+  async/.pic = {
+    \pic {secondaryWavefrontsAsync};
+    \pic at (0, -2) {virtualWavefronts};
+    \pic {primary};
+    \pic at (0, -.21) {speakers};
+    \pic at (0, -.42) {mcus};
   }
 }
 #+end_src
@@ -574,12 +603,7 @@ Bits with which to draw WFS diagrams.
 #+header: :headers '("\\usepackage{smc25figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
-  \pic {secondaryWavefronts};
-  \pic at (0, -2) {virtualWavefronts};
-  \node [circle, draw=wfsptpWaveColour, fill=wfsptpWaveColour!50, thick] (primary) at (\wfsptpWidth/2, -2) {};
-  \pic {realWavefronts};
-  \pic at (0, -.21) {speakers};
-  \node [minimum width=\wfsptpWidth{}cm, draw, fill=black!10, rounded corners=1mm] at (\wfsptpWidth/2, -.44) {WFS};
+  \pic{centralised};
 \end{tikzpicture}
 #+end_src
 #+attr_typst: :height 5cm
@@ -593,12 +617,7 @@ Bits with which to draw WFS diagrams.
 #+header: :headers '("\\usepackage{smc25figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
-  \pic {secondaryWavefronts};
-  \pic at (0, -2) {virtualWavefronts};
-  \node [circle, draw=wfsptpWaveColour, fill=wfsptpWaveColour!50, thick] (primary) at (\wfsptpWidth/2, -2) {};
-  \pic {realWavefronts};
-  \pic at (0, -.21) {speakers};
-  \pic at (0, -.42) {mcus};
+  \pic {distributed};
 \end{tikzpicture}
 #+end_src
 #+attr_typst: :height 5cm
@@ -607,7 +626,7 @@ Bits with which to draw WFS diagrams.
 
 ** Motivation
 
-Accessibility
+*Improved accessibility*
 
 Lower cost per channel
 
@@ -625,11 +644,7 @@ Increased aggregate computing power
 #+header: :headers '("\\usepackage{smc25figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
-  \pic {secondaryWavefrontsAsync};
-  \pic at (0, -2) {virtualWavefronts};
-  \node [circle, draw=wfsptpWaveColour, fill=wfsptpWaveColour!50, thick] (primary) at (\wfsptpWidth/2, -2) {};
-  \pic at (0, -.21) {speakers};
-  \pic at (0, -.42) {mcus};
+  \pic {async};
 \end{tikzpicture}
 #+end_src
 #+attr_typst: :height 5cm

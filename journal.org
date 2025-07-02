@@ -9831,3 +9831,14 @@ weeks. Nontheless, unless I /finish/ that today, I should send an email
 as per the [[https://internetofsounds2025.ieee-is2.org/call-papers/call-tutorials][instructions]] indicating that I have something in the works.
 
 Entered on [2025-07-01 mar. 09:30]
+*** 2025-07-02 mercredi
+**** Romain                                          :MEETING:SUPERVISION:
+***** TODO Order Teensies
+Nine of them, plus audio and ethernet shields. Find a good price, from
+an EU distributor, preferably.
+***** TODO Email Pierre Lecomte
+Can I come and test my system(s) et Cetrale in September?
+***** TODO Arrange Stanford mission/transport
+Choose dates that avoid Thanksgiving.
+  
+Entered on [2025-07-02 mer. 16:41]
