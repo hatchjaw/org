@@ -45,17 +45,19 @@
 \usepackage{listings}
 \usepackage{textcomp}
 \usepackage{bibentry}
+\usepackage{siunitx}
+\usepackage{microtype}
+\usepackage{etoolbox}
+\usepackage{ragged2e}
 \usepackage{tikz}
 \usetikzlibrary{shapes, positioning, arrows.meta}
 #+end_src
 
-** Page size
+** Typography
 
-#+begin_src latex :tangle no
-\setlength{\paperwidth}{36in}%{841mm}
-\setlength{\paperheight}{48in}%{1189mm}
-\setlength{\textwidth}{0.98\paperwidth}
-\setlength{\textheight}{0.98\paperheight}
+#+begin_src latex
+\newcommand{\ultratiny}{\fontsize{8}{8}\selectfont}
+\newcommand{\supertiny}{\fontsize{11}{11}\selectfont}
 #+end_src
 
 ** Graphics
@@ -203,9 +205,9 @@ Some other colour for block backgrounds.
 
 #+begin_src latex
 \setbeamercolor*{block body}{bg=cBlockBg,fg=black}
-\setbeamerfont{block body}{size=\large}
+\setbeamerfont{block body}{size=\normalsize}
 \setbeamercolor*{block title}{fg=cTitleFg,bg=white}
-\setbeamerfont{block title}{size=\Large,series=\bfseries}
+\setbeamerfont{block title}{size=\large,series=\bfseries}
 #+end_src
 
 ** Example Environment
@@ -214,7 +216,7 @@ Some other colour for block backgrounds.
 \setbeamercolor*{example title}{fg=white,bg=i6colorscheme1}
 \setbeamerfont{example title}{size=\large,series=\bfseries}
 
-\setbeamerfont{alerted text}{size=\large,series=\bfseries}
+\setbeamerfont{alerted text}{size=\normalsize,series=\bfseries}
 \setbeamercolor{alerted text}{fg=black}
 
 \setbeamertemplate{itemize items}[circle]
@@ -233,8 +235,8 @@ Some other colour for block backgrounds.
 
 #+begin_src latex
 \setbeamertemplate{block begin}{
-  \vskip.75ex
-  \begin{beamercolorbox}[leftskip=1cm,colsep*=.75ex]{block title}%
+  %% \vskip.75ex
+  \begin{beamercolorbox}[leftskip=1cm,colsep*=.75ex,ht=3cm]{block title}%
     \usebeamerfont*{block title}\Large\insertblocktitle
   \end{beamercolorbox}%
   {\ifbeamercolorempty[bg]{block body}{}{\nointerlineskip\vskip-0.5pt}}%
@@ -344,6 +346,39 @@ Draw a vertical line separating the two columns.
 :header-args: :tangle out/smc-2025-poster.sty :results silent :noeval
 :END:
 
+** Teensy
+
+#+begin_src latex
+\tikzset{
+  bubbleline/.style={line width=.375mm},
+  pics/teensythinks/.style={
+    code={
+      \tikzset{teensythinks/.cd, #1}
+
+      \def\nomFS{\pgfkeysvalueof{/tikz/teensythinks/nominalfs}}
+      \def\actFS{\pgfkeysvalueof{/tikz/teensythinks/actualfs}}
+      
+      \node [] at (0,0) {
+        \includegraphics[width=3.5cm]{./images/t41_orig}
+      };
+      \draw [bubbleline, fill=white] (.275, .9) ellipse (1.8mm and .9mm);
+      \draw [bubbleline, fill=white] (0, 1.2) ellipse (2.75mm and 1.5mm);
+      \node [cloud, cloud ignores aspect, cloud puffs=9, cloud puff arc=96, draw, bubbleline, fill=white, align=center, inner sep=1.25mm] () at (-.7, 1.95) {\nomFS\ kHz!};
+
+      \pgfmathparse{\actFS > 0}
+      \ifnum\pgfmathresult=1
+        \node [magnifying glass, bubbleline, draw, fill=white, fill opacity=0.75, text opacity=1, align=center, inner sep=1.25mm] () at (.5,-.5) {\actFS\\kHz};
+      \fi
+    }
+  },
+  teensythinks/.cd,
+  nominalfs/.initial=48,
+  actualfs/.initial=0
+}
+#+end_src
+
+** WFS
+
 #+begin_src latex
 \definecolor{wfsptpWaveColour}{HTML}{4077D6}
 \newcommand*{\wfsptpWaveSpace}{.89}
@@ -351,8 +386,6 @@ Draw a vertical line separating the two columns.
 \newcommand*{\wfsptpNumWaves}{5}
 \newcommand*{\wfsptpNumSecondary}{16}
 \newcommand*{\wfsptpNumMCU}{8}
-
-\newcommand{\supertiny}{\fontsize{8}{8}\selectfont}
 
 \tikzset{
   halfSecondaryWavefronts/.pic={
@@ -365,7 +398,7 @@ Draw a vertical line separating the two columns.
     \pic [xscale=-1] at (\wfsptpWidth, 0) {halfSecondaryWavefronts};
   },
   secondaryWavefrontsAsync/.pic={
-    \clip (-1, 0) rectangle (\wfsptpWidth+1, 2.5);
+    \clip (-1, 0) rectangle (\wfsptpWidth+1, 2.25);
     \foreach \pos/\rad in {0/.18, 1/.615,
       2/0.83, 3/1.22,
       4/1.88, 5/2.17,
@@ -439,6 +472,44 @@ Draw a vertical line separating the two columns.
 }
 #+end_src
 
+** PTP
+
+#+begin_src latex
+\tikzset{
+  role/.style={align=center, draw, inner sep=1mm, minimum height=1cm, rounded corners=.5mm},
+  authorityMsg/.style={midway, above=-3.5mm, rotate=-13},
+  subscriberMsg/.style={midway, above=-3.5mm, rotate=13},
+  ptp/.pic={
+    \node (auth) [role] at (0, 0) {Clock\\authority};
+    \draw [-{Stealth}] (auth.south) -- +(0, -6.5);
+    \node (sub) [role, right = 2cm of auth] {Clock\\subscriber};
+    \draw [-{Stealth}] (sub.south) -- +(0, -6.5);
+    
+    \node (t1) [below left=-1.5mm and -12mm of auth] {\(t_{1}\)};
+    
+    \draw [-{Stealth}] ([yshift=-5.5mm]auth.south) -- ([yshift=-13.5mm]sub.south) node [authorityMsg] {\ultratiny{Sync}};
+    \draw [-{Stealth}] ([yshift=-10.5mm]auth.south) -- ([yshift=-18.5mm]sub.south) node [authorityMsg] {\ultratiny{FollowUp [\(t_{1}\)]}};
+
+    \node (t2) [below right=6.5mm and -12mm of sub] {\(t_{2}\)};
+
+    \node (t3) [below right=17mm and -12mm of sub] {\(t_{3}\)};
+
+    \draw [-{Stealth}] ([yshift=-24mm]sub.south) -- ([yshift=-32mm]auth.south) node [subscriberMsg] {\ultratiny{DelayReq}};
+
+    \node (t4) [below left=25mm and -12mm of auth] {\(t_{4}\)};
+
+    \draw [-{Stealth}] ([yshift=-36mm]auth.south) -- ([yshift=-44mm]sub.south) node [authorityMsg] {\ultratiny{DelayResp [\(t_{4}\)]}};
+
+    \node (t11) [below left=39mm and -12mm of auth] {\(t'_{1}\)};
+    
+    \draw [-{Stealth}] ([yshift=-47mm]auth.south) -- ([yshift=-55mm]sub.south) node [authorityMsg] {\ultratiny{Sync}};
+    \draw [-{Stealth}] ([yshift=-52mm]auth.south) -- ([yshift=-60mm]sub.south) node [authorityMsg] {\ultratiny{FollowUp [\(t'_{1}\)]}};
+
+    \node (t21) [below right=47mm and -12mm of sub] {\(t'_{2}\)};
+  }
+}
+#+end_src
+
 * The Poster
 :PROPERTIES:
 :BEGIN:
@@ -457,82 +528,129 @@ Draw a vertical line separating the two columns.
 :BEAMER_env: block
 :END:
 
+#+latex: \justifying
+
 Spatial audio has an *accessibility* problem, but perhaps we can improve
 the situation by *distributing* the signal processing. Wave field
 synthesis, for example, parallelises quite nicely.
 
-#+latex: \vspace{1cm} \scalebox{2.1}{
-\begin{tikzpicture}[font=\supertiny]
+#+latex: \vspace{.5cm}\begin{center}\scalebox{2.1}{
+\begin{tikzpicture}[font=\ultratiny]
   \pic {centralised};
-  \node [single arrow, fill=red!50!black, inner sep=3mm] at (9.5, 0);
+  \node [single arrow, fill=red!50!black, inner ysep=3mm] at (9.75, 0);
   \pic at (11.5, 0) {distributed};
 \end{tikzpicture}
-#+latex: }
+#+latex: }\end{center}
 
-Distributing things in this manner requires, however, that our group
-of signal processors are synchronised, otherwise the resulting
-soundfield will be destroyed.
+**** Left
+:PROPERTIES:
+:BEAMER_col: 0.53
+:BEAMER_opt: [T]
+:END:
 
-#+latex: \vspace{1cm} \begin{center}\scalebox{2.1}{
-\begin{tikzpicture}[font=\supertiny]
+#+latex: \justifying
+
+Distributing things in this manner requires that our group of signal
+processors is *synchronised*, however, otherwise the resulting
+soundfield will be destroyed.  A 1\nbsp{}ms asynchronicity between two
+distributed audio devices would result in a propagation discrepancy of
+over 30\nbsp{}cm.
+
+**** Right
+:PROPERTIES:
+:BEAMER_col: 0.43
+:BEAMER_opt: [T]
+:END:
+
+#+latex: \begin{center}\scalebox{1.9}{
+\begin{tikzpicture}[font=\ultratiny]
   \pic {async};
 \end{tikzpicture}
 #+latex: }\end{center}
 
-**** Block
-:PROPERTIES:
-:BEAMER_col: 0.68
-:BEAMER_opt: [T]
-:END:
-
-Oh, so this is an inner block?
-
-*** Inline code and tables                            :B_block:
+*** Asynchronicity                                                  :B_block:
 :PROPERTIES:
 :BEAMER_env: block
 :END:
-- Tables are powerful in org-mode and even include spreadsheet
-  capabilities
-- Some code to process the first vector from above to make a table out
-  of its summary could look like this, which would result in a little
-  table (Table [[tabcode2]]) :
 
-**** Block
+#+latex: \justifying
+
+We can configure a network of audio-capable devices (Teensy 4.1
+microcontroller development boards) to run at a given target sampling
+rate, but if we had a way of measuring /true/ time − and thus true
+frequency − we would find that they're actually running *slightly
+faster* or *slightly slower* than instructed.
+
+#+latex: \vspace{.5cm}\begin{center}\scalebox{2.25}{
+\begin{tikzpicture}[font=\supertiny]
+  \pic at (0, 0) {teensythinks={nominalfs=48, actualfs=47.998}};
+  \pic at (6, 0) {teensythinks={nominalfs=48, actualfs=48.001}};
+  \pic at (12, 0) {teensythinks={nominalfs=48, actualfs=47.999}};
+\end{tikzpicture}
+#+latex: }\end{center}
+
+Each device has its own *distinct internal time reference* − a crystal
+oscillator (XO) − and each one of those time references behaves
+slightly differently. XOs are rated to a given tolerance − typically
+reported in /parts per million/ (ppm) − an amount by which they may be
+expected to deviate from their nominal frequency.
+
+*** Time Exchange
+
+**** Left
 :PROPERTIES:
-:BEAMER_col: 0.78
+:BEAMER_col: 0.58
 :BEAMER_opt: [T]
 :END:
 
-#+NAME: code2
-#+BEGIN_SRC R :session :exports both :results value :colnames yes :cache yes :eval no-export
-library(broom)
-library(dplyr)
-t1 <- tidy(round(summary(x1), 2)) 
-t2 <- tidy(round(summary(x2), 2))
+#+latex: \justifying
 
-# This will export as a table
-rbind(t1, t2) %>%
-mutate(name=c("x1", "x2"))
-#+END_SRC
+IEEE 1588 *Precision Time Protocol* (PTP) is a nanosecond-order
+time-exchange mechanism. Clock authority and subscriber(s) exchange
+per-second timestamped packets until the subscriber has enough
+information to determine its *drift* and *offset* relative to the
+authority. These values are typically fed to a proportional integral
+controller, and the result used as a /nanoseconds-per-second/
+adjustment value to be applied to a dedicated PTP timer.
 
-\vspace{2cm}
-\small
-#+CAPTION: A table summarizing the two distributions.
-#+NAME: tabcode2
-#+RESULTS[9d0ec7348265a5cb6de39440ff06a8dbb8e5ecf1]: code2
-|---------+-------+--------+------+------+---------+------|
-| minimum |    q1 | median | mean |   q3 | maximum | name |
-|---------+-------+--------+------+------+---------+------|
-|   -2.29 | -0.49 |   0.11 | 0.14 |  0.8 |    2.47 | x1   |
-|   -2.17 | -0.45 |   0.07 | 0.13 | 0.85 |    2.23 | x2   |
-|---------+-------+--------+------+------+---------+------|
+#+latex: \begin{center}\scalebox{2.3}{
+\begin{tikzpicture}[font=\supertiny]
+  \node [] at (0, 0) {
+    \includegraphics[width=7cm]{./images/switch}
+  };
+  \node [draw=red!50!black, ultra thick, star, star points=10, rotate=15, fill=yellow, inner sep=.1mm] at (2, .75) {€ 200};
+\end{tikzpicture}
+#+latex: }\end{center}
+
+Consumer-grade networking equipment does not tend to support PTP, but
+relatively inexpensive exceptions do exist. What's more, our chosen
+microcontroller platform supports it too.
+
+**** Right
+:PROPERTIES:
+:BEAMER_col: 0.38
+:BEAMER_opt: [T]
+:END:
+
+#+latex: \begin{center}\scalebox{2.3}{
+\begin{tikzpicture}[font=\supertiny]
+  \pic {ptp};
+\end{tikzpicture}
+#+latex: }\end{center}
+
+\begin{gather*}
+\text{Drift} = 1 - \frac{t'_{2}-t_{2}}{t'_{1}-t_{1}}\\[10pt]
+\text{Delay} = \frac{(t_{4} - t_{1}) - (t_{3} - t_{2}) }{2}\\[10pt]
+\text{Offset} = t_{2} - t_{1} - \text{Delay}
+\end{gather*}
+
 
 ** Right column                                       :BMCOL:
 :PROPERTIES:
 :BEAMER_col: 0.38
 :BEAMER_opt: [t]
 :END:
-*** Graphics                                          :B_block:
+*** Media Clock Recovery                                            :B_block:
 :PROPERTIES:
 :BEAMER_env: block
 :END:
@@ -562,7 +680,7 @@ curl -0 https://www.gnu.org/software/emacs/images/emacs.png
 #+RESULTS: code3
 [[file:./images/module.jpg]]
 
-*** Math                                                   :B_block:
+*** Presentation Time                                               :B_block:
 :PROPERTIES:
 :BEAMER_env: block
 :END:
@@ -598,7 +716,7 @@ derived as follows:
 \DKLPQ{P}{Q}{,} = \sumin \Big(\Xoi{P} \log \frakPQ{P}{Q} + \Xoi{Q} \log \frakPQ{Q}{P} \Big).
 \end{align}
 
-*** Columns                                                :B_block:
+*** Results                                                         :B_block:
 :PROPERTIES:
 :BEAMER_env: block
 :END:
@@ -656,3 +774,5 @@ org-latex-classes: (("smc-2025-poster"
 org-latex-listings: minted
 End:
 #+end_example
+
+#  LocalWords:  asynchronicity microcontroller soundfield
