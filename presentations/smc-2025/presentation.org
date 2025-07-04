@@ -598,8 +598,10 @@ Bits with which to draw WFS diagrams.
 
 ** A centralised approach
 
+#+typst: #grid(columns: (60%, 40%), [
+
 #+header: :exports results :results file raw :file "./images/gen/centralised.png"
-#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 1000 -flatten :fit t
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
 #+header: :headers '("\\usepackage{smc25figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
@@ -610,10 +612,22 @@ Bits with which to draw WFS diagrams.
 #+RESULTS:
 [[file:./images/gen/centralised.png]]
 
+#+typst: ],[
+
+Costly
+
+Inaccessible
+
+Scales poorly
+
+#+typst: ])
+
 ** A distributed approach
 
+#+typst: #grid(columns: (60%, 40%), [
+
 #+header: :exports results :results file raw :file "./images/gen/distributed.png"
-#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 1000 -flatten :fit t
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
 #+header: :headers '("\\usepackage{smc25figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
@@ -624,9 +638,9 @@ Bits with which to draw WFS diagrams.
 #+RESULTS:
 [[file:./images/gen/distributed.png]]
 
-** Motivation
+#+typst: ],[
 
-*Improved accessibility*
+Improved accessibility
 
 Lower cost per channel
 
@@ -634,13 +648,14 @@ Modular; scalable by small increments
 
 Increased aggregate computing power
 
+#+typst: ])
+
 ** The perils of asynchronicity
 
-# Assuming \(c = \qty{343}{\m\per\s}\), in one millisecond,
-# a wavefront propagates the same number of millimetres.
+#+typst: #grid(columns: (60%, 40%), [
 
 #+header: :exports results :results file raw :file "./images/gen/asynchronous.png"
-#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 1000 -flatten :fit t
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
 #+header: :headers '("\\usepackage{smc25figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
@@ -651,13 +666,21 @@ Increased aggregate computing power
 #+RESULTS:
 [[file:./images/gen/asynchronous.png]]
 
+#+typst: ],[
+
+A mere 1 ms asynchronicity between two nodes results in a propagation
+discrepancy of over 30 cm.
+
+#+typst: ])
+
 * The Hardware Platform
 
 ** A humble microcontroller development board
 
 #+typst: #columns(2, [
 
-#+attr_typst: :width 8cm
+#+attr_org: :width 200
+#+attr_typst: :height 6cm
 [[./images/t41_orig.png]]
 
 #+typst: #colbreak() #align(left)[
@@ -667,6 +690,7 @@ Increased aggregate computing power
 - MCU with dedicated audio subsystem
 - Ethernet subsystem with IEEE 1588 PTP support
 - \~€ 30  + \~€ 15 with ethernet and audio add-ons
+- Well-known to the maker/DIY community
 - Memory-poor — 1024 kB (+ 16 MB PSRAM)
 
 #+typst: ]])
@@ -689,7 +713,7 @@ Increased aggregate computing power
 ** A collection of humble MCUs
 
 #+header: :exports results :results file raw :file "./images/gen/t41-nominal.png"
-#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 1000 -flatten :fit t
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
 #+header: :headers '("\\usepackage{smc25figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
@@ -713,7 +737,7 @@ Audio PLL numerator/denominator are 30-bit registers, i.e. \(D_{N}, D_{D} \in \{
 ** A collection of humble MCUs
 
 #+header: :exports results :results file raw :file "./images/gen/t41-actual.png"
-#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 1000 -flatten :fit t
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
 #+header: :headers '("\\usepackage{smc25figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
@@ -915,7 +939,7 @@ buffer size!
 
 ** Results
 
-#+begin_src julia :results none :exports none
+#+begin_src julia :session slides :results none :exports none
 using CSV, DataFrames, Plots, LaTeXStrings
 
 function plotDrift(dataCategory)
@@ -967,28 +991,28 @@ function plotDrift(dataCategory)
     annotate!(6, yMax + ordOffset, (latexstring("\$\\times10^{$(ordOfMag)}\$"), 18))
     plot!(yformatter=y -> string(y / 10.0^ordOfMag))
 
-    savefig("./images/gen/$dataCategory.png")
+    savefig("./images/gen/$(dataCategory)_slides.png")
     scalefontsizes()
 end
 #+end_src
 
 #+typst: #columns(2, [
 
-#+begin_src julia :results file graphics :file noptp.png :output-dir ./images/gen :exports results
+#+begin_src julia :session slides :results file graphics :file noptp_slides.png :output-dir ./images/gen :exports results
 plotDrift("noptp")
 #+end_src
 #+attr_org: :width 400
 #+RESULTS:
-[[file:./images/gen/noptp.png]]
+[[file:./images/gen/noptp_slides.png]]
 
 #+typst: #colbreak()
 
-#+begin_src julia :results file graphics :file ptp.png :output-dir ./images/gen :exports results
+#+begin_src julia :session slides :results file graphics :file ptp_slides.png :output-dir ./images/gen :exports results
 plotDrift("ptp")
 #+end_src
 #+attr_org: :width 400
 #+RESULTS:
-[[file:./images/gen/ptp.png]]
+[[file:./images/gen/ptp_slides.png]]
 
 #+typst: ])
 

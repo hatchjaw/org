@@ -5,21 +5,13 @@
 * Options                                                     :ignore:
 #+options: toc:nil title:nil author:nil
 #+latex_compiler: xelatex
+#+cite_export: biblatex sorting=none
 #+export_file_name: out/smc-2025-poster
 #+latex_class: smc-2025-poster
 #+latex_header_extra: \RequirePackage[]{smc-2025-poster}
 #+latex_header: \newcommand{\authoremail}{thomas.rushton@inria.fr}
 #+latex_header: \newcommand{\githubrepo}{https://github.com/hatchjaw/teensy-audiosync}
 #+beamer_theme: smc25
-
-# To be removed
-** Latex header                                               :ignore:
-#+LATEX_HEADER: \newcommand\sumin{\sum_{i=1}^{n}}
-#+LATEX_HEADER: \newcommand{\Xoi}[1]{#1(i)}
-#+LATEX_HEADER: \newcommand{\frakPQ}[2]{\frac{\Xoi{#1}}{\Xoi{#2}}}
-#+LATEX_HEADER: \newcommand{\DKLPQ}[3]{D_{\mathrm{KL}}(#1 #3 #2)}
-
-** Latex macros                                               :ignore:
 
 * LaTeX package                                                    :noexport:
 :PROPERTIES:
@@ -37,7 +29,7 @@
 #+begin_src latex
 \usepackage[orientation=portrait,size=a0,scale=1.4,]{beamerposter}
 \usepackage[absolute,overlay]{textpos}
-\usepackage[authoryear]{natbib}
+\usepackage[sorting=none]{biblatex}
 \usepackage[export]{adjustbox}
 \usepackage{graphicx,caption}
 \usepackage{minted}
@@ -70,11 +62,32 @@
 ** Authors & affiliations
 
 #+begin_src latex
-\author{Thomas Rushton$^{1}$, Romain Michon$^{1}$, Tanguy Risset$^{2}$ 
+\author{Thomas Rushton,$^{1}$ Romain Michon,$^{1}$ Tanguy Risset$^{2}$ 
 \\[3ex]
 \normalsize{$^{1}$Inria, INSA Lyon, CITI, EA3720, 69100 Villeurbanne, France}\\
 \normalsize{$^{2}$INSA Lyon, Inria, CITI, EA3720, 69100 Villeurbanne, France}
 }
+#+end_src
+
+** Bibliography
+
+#+begin_src latex
+\AtBeginBibliograhphy{\small}
+\AtEveryBibitem{
+  \clearfield{pages}
+  \clearfield{pagetotal}
+  \clearfield{edition}
+  \clearname{editor}
+  \clearfield{url}
+  \clearfield{urlyear}
+  \clearfield{doi}
+  \clearfield{eprintclass}
+  \clearfield{eventtitle}
+  \clearfield{isbn}
+  \clearlist{publisher}
+  \clearlist{location}
+}
+\renewcommand*{\bibfont}{\normalfont\footnotesize}
 #+end_src
 
 * Beamer theme                                                     :noexport:
@@ -123,25 +136,6 @@
 #+begin_src latex
 %% \selectcolormodel{cmyk}
 \mode<presentation>
-
-\definecolor{i6blue}{cmyk}{1,0.305,0,0.06}
-\definecolor{i6bluedark}{rgb}{0.0156,0.2578,0.5625} 
-\definecolor{i6colorscheme1}{HTML}{FF6518}  % e.g. for block title
-%\definecolor{i6colorscheme1}{HTML}{FFFFFF}  % e.g. for block title
-%\definecolor{i6colorblockbg}{HTML}{0033cc}
-%\definecolor{i6colorblockfg}{HTML}{FFFFFF}
-\definecolor{i6colorblockfg}{HTML}{FCE94F}
-%\definecolor{i6colorblockfg}{HTML}{0033cc}
-\definecolor{i6colorblockbg}{HTML}{0033CC}
-%\definecolor{i6colorblockbg}{HTML}{C3DFFF}
-\definecolor{i6colorscheme2}{HTML}{000000}  % e.g. title in headline
-\definecolor{i6colorscheme3}{HTML}{C3DFFF}  % e.g. for poster background
-%\definecolor{i6colorscheme3}{HTML}{0033CC}  % e.g. for poster background
-\definecolor{i6colorscheme5}{HTML}{FFFFFF}  % e.g. for poster background
-\definecolor{i6colorscheme4}{HTML}{000000}
-
-%\definecolor{i6colorschemeHeadline}{HTML}{FFFFFF}  % for headline bg
-%\definecolor{i6colorschemeFootline}{HTML}{100D09}  % for headline bg
 #+end_src
 
 Dark red for the header background.
@@ -169,10 +163,17 @@ Dark red again for block titles.
 \definecolor{cTitleFg}{HTML}{7F0000}
 #+end_src
 
-Some other colour for block backgrounds.
+A lighter colour for block backgrounds.
 
 #+begin_src latex
 \definecolor{cBlockBg}{HTML}{f1e9e9}
+#+end_src
+
+Bibliography entry colours
+
+#+begin_src latex
+\definecolor{cBibAuthorFg}{HTML}{600000}
+\definecolor{cBibNoteFg}{HTML}{613737}
 #+end_src
 
 ** Header fonts & colours
@@ -186,7 +187,7 @@ Some other colour for block backgrounds.
 \setbeamercolor{author in headline}{fg=cAuthorFg}
 \setbeamercolor{institute in headline}{fg=lightgray}
 \setbeamercolor{logo in headline}{fg=black,bg=lightgray}
-\setbeamercolor{separation line}{bg=i6colorscheme1}
+%% \setbeamercolor{separation line}{bg=i6colorscheme1}
 #+end_src
 
 ** Footer fonts & colours
@@ -202,6 +203,25 @@ Some other colour for block backgrounds.
 \setbeamercolor*{normal text}{fg=black,bg=white}
 #+end_src
 
+** Bibliography fonts & colours
+
+#+begin_src latex
+\setbeamerfont{bibliography item}{size=\footnotesize}
+\setbeamercolor{bibliography item}{fg=black,bg=white}
+
+\setbeamerfont{bibliography entry author}{size=\footnotesize}
+\setbeamercolor{bibliography entry author}{fg=cBibAuthorFg,bg=white}
+
+%% \setbeamerfont{bibliography entry title}{size=\footnotesize}
+%% \setbeamercolor{bibliography entry title}{fg=black,bg=white}
+
+%% \setbeamerfont{bibliography entry location}{size=\footnotesize}
+%% \setbeamercolor{bibliography entry location}{fg=black,bg=white}
+
+\setbeamerfont{bibliography entry note}{size=\footnotesize}
+\setbeamercolor{bibliography entry note}{fg=cBibNoteFg,bg=white}
+#+end_src
+
 ** Block environment
 
 #+begin_src latex
@@ -214,7 +234,7 @@ Some other colour for block backgrounds.
 ** Example Environment
 
 #+begin_src latex
-\setbeamercolor*{example title}{fg=white,bg=i6colorscheme1}
+\setbeamercolor*{example title}{fg=white,bg=cTitleFg}
 \setbeamerfont{example title}{size=\large,series=\bfseries}
 
 \setbeamerfont{alerted text}{size=\normalsize,series=\bfseries}
@@ -535,7 +555,7 @@ Draw a vertical line separating the two columns.
 
 Spatial audio has an *accessibility* problem, but perhaps we can improve
 the situation by *distributing* the signal processing. Wave field
-synthesis, for example, parallelises quite nicely.
+synthesis, for example, parallelises quite nicely\nbsp[cite:@bellochPerformance2021].
 
 #+latex: \vspace{.5cm}\begin{center}\scalebox{2.1}{
 \begin{tikzpicture}[font=\ultratiny]
@@ -556,7 +576,7 @@ synthesis, for example, parallelises quite nicely.
 Distributing things in this manner requires that our group of signal
 processors is *synchronised*, however, otherwise the resulting
 soundfield will be destroyed.  A 1\nbsp{}ms asynchronicity between two
-distributed audio devices would result in a propagation discrepancy of
+distributed audio devices would result in a *propagation discrepancy* of
 over 30\nbsp{}cm.
 
 **** Right
@@ -627,7 +647,7 @@ adjustment value to be applied to a dedicated PTP timer.
 
 Consumer-grade networking equipment does not tend to support PTP, but
 relatively inexpensive exceptions do exist. What's more, our chosen
-microcontroller platform supports it too.
+microcontroller platform supports it too\nbsp[cite:@schleusnerSubMicrosecond2024].
 
 **** Right
 :PROPERTIES:
@@ -658,6 +678,8 @@ microcontroller platform supports it too.
 :BEAMER_env: block
 :END:
 
+#+latex: \justifying
+
 A target sampling rate \(\hat{F}_s\) for the Teensy is found as
 \begin{equation}
 \hat{F}_{s} = \frac{F_{XO}}{2^{8}}\frac{D_{S}+\frac{D_{N}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}
@@ -666,7 +688,7 @@ A target sampling rate \(\hat{F}_s\) for the Teensy is found as
 \(D\) parameters are hardware *clock divider registers*. \(D_{N}\), the
 audio PLL fractional numerator register, provides *30 bits of
 resolution*; more than enough to effect nanosecond-order
-adjustments. Rearranging:
+adjustments\nbsp[cite:@carotGNSSbased2019]. Rearranging:
 #+name: eq:dn
 \begin{equation}
 D_{N} = D_{D}\left(\frac{2^{8}\hat{F}_{s}D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{F_{XO}} - D_{S}\right)
@@ -691,9 +713,11 @@ rate gives us a figure that can be plugged into eqref:eq:dn
 :BEAMER_env: block
 :END:
 
+#+latex: \justifying
+
 Conditioning the media clock alone is not enough. To guarantee that
 samples will be *presented simultaneously*, we wait until a sub-100 ns
-PTP lock is achieved (takes about ten seconds), to start clock
+PTP lock is achieved (takes about ten seconds) to start clock
 subscriber audio subsystems. This entails starting presentation time
 on a given PTP second, so it's easiest when working with a nominal
 sampling rate that's a multiple of the buffer size!
@@ -707,7 +731,7 @@ sampling rate that's a multiple of the buffer size!
 :BEAMER_env: block
 :END:
 
-#+begin_src julia :results none :exports none
+#+begin_src julia :session poster :results none :exports none
 using CSV, DataFrames, Plots, LaTeXStrings
 
 function plotDrift(dataCategory)
@@ -716,17 +740,21 @@ function plotDrift(dataCategory)
     maxOffset = 0
     yMax = 0
     plot(fontfamily="Minion Pro Regular",
-         size=(900, 600),
-         margin=6Plots.mm,
+         size=(900, 645),
+         bottom_margin=5Plots.mm,
+         left_margin=5Plots.mm,
+         right_margin=5Plots.mm,
+         top_margin=7Plots.mm,
          xlabel="Time (s)",
          xtickfontfamily="Computer Modern",
          ytickfontfamily="Computer Modern",
          legendtitle="IP address",
-         legendfontsize=14,
          legendfont="iosevka-comfy-motion-normalregularupright",
-         legendtitlefontsize=17,
-         gridlinewidth=2,
-         top_margin=15Plots.mm);
+         legendfontsize=20,
+         legendtitlefontsize=22,
+         tickfontsize=20,
+         guidefontsize=24,
+         gridlinewidth=2);
     for b in t41lastBytes
         local data = CSV.read("../../papers/smc-2025/data/$b-$dataCategory.csv", DataFrame; header=["offset"], limit=600)
         data.offset .= data.offset .- data.offset[1]
@@ -748,21 +776,23 @@ function plotDrift(dataCategory)
     end
 
     ordOfMag = floor(Int, log10(maxOffset))
-    ordOffset = 7.5e-8
+    ordOffset = 8e-8
     if dataCategory == "noptp"
-        ordOffset = 3.0e-4
+        ordOffset = 3.5e-4
         plot!(ylabel="Offset (s)")
-        plot!(title="Raw drift − order of 7 ppm")
+        plot!(title="Raw drift")
     else
-        plot!(title="Conditioned clocks − order of 2 ppb")
+        plot!(title="Conditioned clocks")
     end
-    annotate!(6, yMax + ordOffset, (latexstring("\$\\times10^{$(ordOfMag)}\$"), 18))
+    annotate!(12, yMax + ordOffset, (latexstring("\$\\times10^{$(ordOfMag)}\$"), 22))
     plot!(yformatter=y -> string(y / 10.0^ordOfMag))
 
-    savefig("./images/gen/$dataCategory.png")
+    savefig("./images/gen/$(dataCategory)_poster.png")
     scalefontsizes()
 end
 #+end_src
+
+#+latex: \justifying
 
 Without sampling rate conditioning, a trio of clock subscribers,
 outputting a pulse-per-second test audio signal, drift on the order of
@@ -776,13 +806,13 @@ billion* and a propagation discrepancy of less than 1 mm.
 :BEAMER_opt: [T]
 :END:
 
-#+begin_src julia :results file graphics :file noptp.png :output-dir ./images/gen :exports results
+#+begin_src julia :session poster :results file graphics :file noptp_poster.png :output-dir ./images/gen :exports results
 plotDrift("noptp")
 #+end_src
 #+attr_org: :width 400
 #+attr_latex: :width \linewidth
 #+RESULTS:
-[[file:./images/gen/noptp.png]]
+[[file:./images/gen/noptp_poster.png]]
 
 **** Right
 :PROPERTIES:
@@ -790,21 +820,17 @@ plotDrift("noptp")
 :BEAMER_opt: [T]
 :END:
 
-#+begin_src julia :results file graphics :file ptp.png :output-dir ./images/gen :exports results
+#+begin_src julia :session poster :results file graphics :file ptp_poster.png :output-dir ./images/gen :exports results
 plotDrift("ptp")
 #+end_src
 #+attr_org: :width 400
 #+attr_latex: :width \linewidth
 #+RESULTS:
-[[file:./images/gen/ptp.png]]
+[[file:./images/gen/ptp_poster.png]]
 
 *** References
 
-[1] J. Schleusner et al., ‘Sub-Microsecond Time Synchronization for Network-Connected Microcontrollers’, in /2024 IEEE International Conference on Consumer Electronics/
-
-[2] A. Carôt, et al., ‘GNSS-based Sound Card
-Synchronization’, in /Proceedings of the 2019 Federated Conference on
-Computer Science and Information Systems/
+#+print_bibliography:
 
 * Local variables                                                  :noexport:
 
