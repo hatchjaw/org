@@ -722,7 +722,7 @@ subscriber audio subsystems. This entails starting presentation time
 on a given PTP second, so it's easiest when working with a nominal
 sampling rate that's a multiple of the buffer size!
 \begin{equation*}
-\frac{44\,100}{128} = 344.531\,25\;, \quad\quad
+\frac{44\,100}{128} = 344.53125 \quad\quad\quad
 \frac{48\,000}{128} = 375
 \end{equation*}
 
@@ -750,10 +750,10 @@ function plotDrift(dataCategory)
          ytickfontfamily="Computer Modern",
          legendtitle="IP address",
          legendfont="iosevka-comfy-motion-normalregularupright",
-         legendfontsize=20,
+         legendfontsize=22,
          legendtitlefontsize=22,
-         tickfontsize=20,
-         guidefontsize=24,
+         tickfontsize=22,
+         guidefontsize=26,
          gridlinewidth=2);
     for b in t41lastBytes
         local data = CSV.read("../../papers/smc-2025/data/$b-$dataCategory.csv", DataFrame; header=["offset"], limit=600)
