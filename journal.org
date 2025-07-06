@@ -9520,7 +9520,10 @@ The VSR game is up.
 - State "DONE"       from "TODO"       [2025-07-01 mar. 17:29]
 :END:
 Just 5 minutes. Use Typst? In that case, ask Pierre for a template.
-***** TODO Prepare poster for SMC
+***** DONE Prepare poster for SMC
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-07-04 ven. 18:25]
+:END:
 And ask Tanguy about printing it to foldable fabric instead of paper.
 ***** DONE Register for AES AIMLA
 :LOGBOOK:
@@ -9833,12 +9836,45 @@ as per the [[https://internetofsounds2025.ieee-is2.org/call-papers/call-tutorial
 Entered on [2025-07-01 mar. 09:30]
 *** 2025-07-02 mercredi
 **** Romain                                          :MEETING:SUPERVISION:
-***** TODO Order Teensies
+***** DONE Order Teensies
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-07-04 ven. 18:25]
+:END:
 Nine of them, plus audio and ethernet shields. Find a good price, from
 an EU distributor, preferably.
-***** TODO Email Pierre Lecomte
+***** DONE Email Pierre Lecomte
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-07-04 ven. 18:25]
+:END:
 Can I come and test my system(s) et Cetrale in September?
 ***** TODO Arrange Stanford mission/transport
-Choose dates that avoid Thanksgiving.
+Choose dates that avoid Thanksgiving. Do [[*Mission for AES AIMLA][London/AES]] too.
   
 Entered on [2025-07-02 mer. 16:41]
+*** 2025-07-06 dimanche
+**** Graz thoughts                                             :BRAINDUMP:
+I have the awkward situation on my hands whereby IS^{2} is at the /end/ of
+October, rather than the beginning (like last year), which now
+corresponds with the period I'm due to spend at CCRMA, which should
+ideally avoid Thanksgiving week (24-28 November). Options:
+
+- Withdraw the tutorial proposal; go to CCRMA e.g. October 23th -
+  November 22nd.
+- Leave it be, go to CCRMA e.g. Nov 2nd-24th (~three weeks, as Romain
+  suggested); hope that my proposal is accepted.
+
+Do I even want to do the tutorial? It's work that isn't directly
+related to my thesis, so obviously a drain on my resources, and yet
+it'd be good for my /brand/, as it were.
+
+I also have work to do, on my SMC slides and on the AES paper, which
+may need (hopefully minor) revisions --- at the very least I need to
+switch to the non-anonymised template.
+
+***** TODO Decide CCRMA Dates; arrange mission
+See previous [[*Arrange Stanford mission/transport][TODO]].
+***** TODO Edit down SMC slides
+***** TODO AES AIMLA paper
+Also in a previous [[*Submit camera-ready AES paper][TODO]].
+
+Entered on [2025-07-06 dim. 08:12]
