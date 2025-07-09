@@ -9873,8 +9873,25 @@ switch to the non-anonymised template.
 
 ***** TODO Decide CCRMA Dates; arrange mission
 See previous [[*Arrange Stanford mission/transport][TODO]].
-***** TODO Edit down SMC slides
-***** TODO AES AIMLA paper
+***** DONE Edit down SMC slides
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-07-07 lun. 11:01]
+:END:
+And upload them to the appropriate shared drive (see email for details).
+***** DONE Revise AES AIMLA paper
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-07-09 mer. 14:37]
+:END:
 Also in a previous [[*Submit camera-ready AES paper][TODO]].
 
 Entered on [2025-07-06 dim. 08:12]
+**** Bela Gem                                                   :HARDWARE:
+So, there's a [[https://www.crowdsupply.com/bela/bela-gem-stereo-and-multi][new Bela]] in town. Quad-core, 1.4 GHz affair, 512 MB
+LPDDR4, but the two-channel version is $97 with the associated
+PocketBeagle. Cute that they assert, blithely, that the Teensy can
+only run at 44.1 kHz.
+
+Probably more than powerful enough for auralisation, but the price
+puts it way out of reach as far as I can see.
+
+Entered on [2025-07-06 dim. 16:16]

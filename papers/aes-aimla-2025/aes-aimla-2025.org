@@ -24,9 +24,9 @@ perspectives on optimisation problems in the field of audio.  We
 present a general scheme for differentiable programming in the Faust
 programming language, a high-performance DSL tailored to audio
 synthesis and signal processing. Faust's rich ecosystem, coupled with
-a comprehensive AD implementation, could support audio optimisation
-and machine learning applications on a multitude of platforms, from
-FPGAs to the web.
+a comprehensive AD implementation, can provide support for audio
+optimisation and machine learning applications on a multitude of
+platforms, from FPGAs to the web.
 
 #+begin_src latex
 \end{onecolabstract}
@@ -256,10 +256,10 @@ language\nbsp[cite:@rushtonDifferentiable2024], here we exploit Faust's
 pattern matching abstraction to extend to a more general AD syntax,
 demonstrating that arbitrary compositions of signal processing blocks
 can be differentiated, and to higher order if desired. With AD in
-Faust, it is possible to create differentiable IIR filters and neural
-network building blocks. Our work provides the basis for an
-audio-focused ecosystem for the development of solutions to problems
-based on machine learning.
+Faust, it is possible to create differentiable infinite impulse
+response (IIR) filters and neural network building blocks. Our work
+provides the basis for an audio-focused ecosystem for the development
+of solutions to problems based on machine learning.
 
 * The Faust Programming Language
 
@@ -361,7 +361,7 @@ process = A : B;
 
 Conceptually, a given block diagram, \(D\), may undergo semantic
 transformation, notated \(\llbracket \cdot \rrbracket\), into a signal
-processor\nbsp[cite:@orlareySyntactical2004]:
+processor\nbsp[cite:@orlareySyntactical2004]:[fn:7]
 #+NAME: eq:semanticTransformation
 \begin{equation}
   \begin{split}
@@ -537,9 +537,9 @@ process = diff(+);
 Considering the plethora of existing approaches to
 DDSP\nbsp[cite:@hayesReview2024], why pursue an implementation in Faust?
 The availability of the Faust-to-JAX transpiler would appear to
-obviate such an endeavour, until one considers that the AD
-transformations facilitated by JAX lie the wrong side, as it were, of
-that transpilation. A comprehensive differentiable programming
+obviate such an initiative, but for the fact that the AD
+transformations facilitated by JAX lie the wrong side of the
+transpilation step. A comprehensive differentiable programming
 framework in the Faust language itself would allow DDSP algorithms to
 be written once, and run anywhere. A domain-specific approach to
 audio-oriented machine learning is not without precedent; indeed, a
@@ -591,7 +591,7 @@ dynamic field of research.
     \begin{minipage}[c]{\dimexpr\linewidth*22/40\relax}
       \begin{gather}
         \textrm{Parallel iteration, }\texttt{par(l, L, D)}\textrm{:} \nonumber \\
-        \big\|_{l=1}^{L}D = D_{1},\dots,D_{L} \\
+        \big\|_{l=1}^{L}D_{l} = D_{1},\dots,D_{L} \\
         \textrm{Signal interleaving function: }\nonumber \\
         \chi(r,c) = \big\|_{l=1}^{r\times{}c}\_ <: \big\|_{m=0}^{r-1}
           \big\|_{n=1}^{c}\left(
@@ -608,7 +608,7 @@ dynamic field of research.
 In Faust's block diagram algebra, a given block diagram, \(D\), is
 comprised of a primitive block, \(P\), or the composition of two block
 diagrams via a composition operator according to the syntactic
-rule[fn:1]
+rule
 #+NAME: eq:syntax
 \begin{equation}
 D = P \;|\; (D_{1} \diamond D_{2})\;,
@@ -696,8 +696,8 @@ essentially the outputs of separate block diagrams; thus
 B \rrbracket\), and, more generally
 #+NAME: eq:diffpar
 \begin{equation}
-\Delta_{N}\left\llbracket\big\|_{l=1}^{L}D\right\rrbracket =
-  \big\|_{l=1}^{L}\Delta_{N}\llbracket D \rrbracket \;.
+\Delta_{N}\left\llbracket\big\|_{l=1}^{L}D_{l}\right\rrbracket =
+  \big\|_{l=1}^{L}\Delta_{N}\llbracket D_{l} \rrbracket \;.
 \end{equation}
 
 *** Sequential Composition
@@ -991,7 +991,7 @@ cref:eq:diffmerge.
 #+begin_src faust :noeval
 // diff.lib
 neuron(NINPUTS, activationFunction) =
-  WX + b : activationFunction;
+  WX + b : activationFunction
 with {
   WX = linalg.dot(NINPUTS);
   b = _;
@@ -1040,16 +1040,16 @@ An artificial neuron of the form \(y = \sigma(\mathbf{wx}+b)\), such as
 could be used in a binary classification problem, can be created as
 per cref:lst:neuron. The code describes a neuron and sigmoid
 activation function in primal form, in a library file, =diff.lib=; the
-~dot~ function (line 14) makes use of the familiar ~interleave~
-function to compute the dot product, \(\mathbf{wx}\); in =neuron.dsp=,
-differentiable weights and biases are created according to a network
-layer specification (line 24) --- one pair of signals indicating one
-layer containing one neuron with ~NW~ weights; weights and biases are
-used to create a differentiable environment (~d~, line 28; described
+~dot~ function (line 14) makes use of the familiar ~interleave~ function
+to compute the dot product, \(\mathbf{wx}\); in =neuron.dsp=,
+differentiable weights and biases, ~wb~, are created according to a network
+layer specification (line 27) --- one pair of signals indicating
+one layer containing one neuron with ~NW~ weights; weights and biases
+are used to create a differentiable environment (~d~, line 28; described
 in cref:sec:diffprog,lst:diffAdd); the wrapper-function ~diffInN~
-(line 22) enacts the recursive derivative transformation; its first
-~NW~ inputs are considered input signals, \(\mathbf{s}\), the rest as
-input variables, \(\mathbf{x}\).
+(line 25) enacts the recursive derivative transformation; its first ~NW~
+inputs are considered input signals, \(\mathbf{s}\), the rest as input
+variables, \(\mathbf{x}\).
 
 Worthy of reflection is that algorithms of this sort, consisting of
 differentiable primitives, plus our now-differentiable composition
@@ -1067,13 +1067,13 @@ Although the scheme presented here renders a great deal of existing
 Faust code differentiable, certain primitives and language constructs
 cannot, at present, be subjected to AD.
 
-Faust's ~route~ primitive cannot be pattern-matched, which precludes
-the derivative transformation of arbitrary signal routing expressions
+Faust's ~route~ primitive cannot be pattern-matched, which precludes the
+derivative transformation of arbitrary signal routing expressions
 based on that primitive, such as those in the =routes.lib=
 library.[fn:4] As described in cref:sec:cut, however, such expressions
-can be recreated via judicious use of the identity and cut primitives;
-common routing tasks like interleaving can be achieved differentiably
-with code such as in cref:lst:interleave.
+can be recreated with the identity and cut primitives; common routing
+tasks like interleaving can be achieved differentiably with code such
+as in cref:lst:interleave.
 
 User interface primitives (sliders and buttons, for example) are
 matchable in principle, but in practice, ~hslider("x1", 0, -1, 1,
@@ -1098,15 +1098,14 @@ Though not a frequently-employed feature of the language, unapplied
 lambda abstractions appear in some key definitions, the ~iir~ function
 in =filters.lib=, for example. Implemented in
 transposed-direct-form\nbsp[cite:@smithIntroduction2008], ~iir~ is defined
-with the unapplied lambda abstraction ~ma.sub~, which accepts two
-arguments, ~x~ and ~y~, and returns the result ~y-x~. Attempting
-\(\Delta_{N}\llbracket \texttt{sub} \rrbracket\), the abstraction is
-essentially treated as a numerical constant, and given a vector of
-zeros as its gradient. Fortunately, constructions of this kind --- in
-this case reversing signal order before applying some primitive
-operation --- are effectively matters of signal-routing and, as
-described in cref:sec:cut, can be recreated using differentiable
-primitives.
+with the abstraction ~ma.sub~, which accepts two arguments, ~x~ and ~y~, and
+returns the result ~y-x~. Attempting \(\Delta_{N}\llbracket \texttt{sub}
+\rrbracket\), the abstraction is essentially treated as a numerical
+constant, and given a vector of zeros as its gradient. Fortunately,
+constructions of this kind --- in this case reversing signal order
+before applying some primitive operation --- are effectively matters
+of signal-routing and, as described in cref:sec:cut, can be recreated
+using differentiable primitives.
 
 ** Applications & Outlook
 
@@ -1163,23 +1162,23 @@ hidden delay lines can be found by optimisation against a
 differentiable FIR filterbank; these examples point the way to a
 variety of real-time adaptive processing applications.
 
-Though demonstrated with /known/ algorithms, in principle the above
-could be extended to optimisation against a target /black box/ filter,
-granted that both target and estimate receive the same input
-signal. This hints, however, at another limitation of the current
-approach --- Faust is primarily concerned with time-domain operations,
-thus loss is computed in the time domain on a per-sample basis (albeit
-with the possibility of taking a running-average of recent sample
-values, for example). For phase-invariant and perceptually-informed
-optimisation scenarios, frequency-domain loss computation is required;
-the recent introduction of multi-rate processing to the Faust language
-means that spectral signal analysis may soon be feasible. Developments
-of this sort would improve the feasibility of taking on larger-scale,
-typically deferred-time problems such neural audio synthesis. These
-call for generalisation to a corpus of training data (rather than
-optimisation to a small number of input variables); with that end in
-mind, the example in cref:lst:neuron should be extended to a general
-neural network structure, and a supporting infrastructure created for
+Though demonstrated with /known/ algorithms, in principle the above can
+be extended to optimisation against a target /black box/ filter, granted
+that both target and estimate receive the same input signal. This
+hints, however, at another limitation of the current approach ---
+Faust is primarily concerned with time-domain operations, thus loss is
+computed in the time domain on a per-sample basis (albeit with the
+possibility of taking a running-average of recent sample values, for
+example). For phase-invariant and perceptually-informed optimisation
+scenarios, frequency-domain loss computation is required; the recent
+introduction of multi-rate processing to the Faust language promises
+to enable spectral signal analysis. Developments of this sort will
+improve the feasibility of taking on larger-scale, typically
+deferred-time problems such neural audio synthesis. These call for
+generalisation to a corpus of training data (rather than optimisation
+to a small number of input variables); with that end in mind, the
+example in cref:lst:neuron should be extended to a general neural
+network structure, and a supporting infrastructure created for
 delivering training data and capturing weights and biases for
 real-time inference.
 
@@ -1208,6 +1207,10 @@ processing.
 #+print_bibliography:
 
 * Footnotes
+[fn:7] The colon symbol on the first line of
+cref:eq:semanticTransformation introduces the /type/ of the signal
+processor \(\llbracket D \rrbracket\) and is not to be confused with
+Faust's sequential composition operator.
 
 [fn:6] \url{https://faustide.grame.fr/}
 
@@ -1216,13 +1219,9 @@ processing.
 [fn:4]
 \url{https://github.com/grame-cncm/faustlibraries/blob/65594336a3476d9a82a4df71e88c92f3e4b94821/routes.lib}
 
-[fn:3] Note that in Faust, \(a\), the iterator index, starts from
-zero. (What works in code does not necessarily transfer well to the
-page.)
-
 [fn:2] Though not the case in Faust's early
 days\nbsp[cite:@orlareySyntactical2004], the equality of \(o_{A}\) and \(i_{B}\)
-is, at the time of writing, an absolute condition of sequential
+is long-established as an absolute condition of sequential
 composability.
 
 [fn:1] Orlarey\nbsp[cite:@orlareySyntactical2004] includes the identity
@@ -1233,7 +1232,7 @@ consider these as belonging to the set of primitive blocks.
 
 # Local Variables:
 # org-latex-classes: (("aes-aimla-2025"
-# "\\documentclass[conference,peer-reviewed,blind-review]{aesconf}
+# "\\documentclass[conference,peer-reviewed]{aesconf}
 # [NO-DEFAULT-PACKAGES]"
 # ("\\section{%s}" . "\\section*{%s}")
 # ("\\subsection{%s}" . "\\subsection*{%s}")
@@ -1244,3 +1243,9 @@ consider these as belonging to the set of primitive blocks.
 # org-latex-pdf-process: ("latexmk -f -pdf -%latex \
 #   -interaction=nonstopmode -shell-escape -output-directory=%o %f")
 # End:
+
+#  LocalWords:  transpile backpropagated backends VST luthiers ChucK
+#  LocalWords:  transpiler transpilation routings datatypes unapplied
+#  LocalWords:  backpropagating metaparameters filterbank DSL FPGAs
+#  LocalWords:  composability differentiably DDSP LMS IIR LLVM JAX
+#  LocalWords:  backend feedforward Autodiff
