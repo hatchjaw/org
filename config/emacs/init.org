@@ -829,6 +829,9 @@ bad parser rule regarding identifiers that contain numbers.
 #+begin_src emacs-lisp
 (use-package git-modes
   :ensure t)
+
+(use-package cmake-mode
+  :ensure t)
 #+end_src
 
 * Completion
