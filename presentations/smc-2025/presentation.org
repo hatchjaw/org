@@ -520,7 +520,7 @@ Bits with which to draw WFS diagrams.
     \pic [xscale=-1] at (\wfsptpWidth, 0) {halfSecondaryWavefronts};
   },
   secondaryWavefrontsAsync/.pic={
-    \clip (-1, 0) rectangle (\wfsptpWidth+1, 2.5);
+    \clip (0, 0) rectangle (\wfsptpWidth, 2.5);
     \foreach \pos/\rad in {0/.18, 1/.615,
       2/0.83, 3/1.22,
       4/1.88, 5/2.17,
@@ -668,8 +668,8 @@ Increased aggregate computing power
 
 #+typst: ],[
 
-A mere 1 ms asynchronicity between two nodes results in a propagation
-discrepancy of over 30 cm.
+A mere 1 ms asynchronicity between two nodes will result in a
+propagation discrepancy of over 30 cm.
 
 #+typst: ])
 
@@ -712,6 +712,12 @@ discrepancy of over 30 cm.
 
 ** A collection of humble MCUs
 
+Each can be configured to run at a preferred audio sampling rate
+
+\begin{equation}
+\hat{F}_{s} = \frac{24\times10^{6}}{2^{8}}\frac{D_{S}+\frac{D_{N}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}
+\end{equation}
+
 #+header: :exports results :results file raw :file "./images/gen/t41-nominal.png"
 #+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
 #+header: :headers '("\\usepackage{smc25figs}")
@@ -725,12 +731,6 @@ discrepancy of over 30 cm.
 #+attr_typst: :height 4cm
 #+RESULTS:
 [[file:./images/gen/t41-nominal.png]]
-
-Each can be configured to run at a preferred audio sampling rate
-
-\begin{equation}
-\hat{F}_{s} = \frac{24\times10^{6}}{2^{8}}\frac{D_{S}+\frac{D_{N}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}
-\end{equation}
 
 Audio PLL numerator/denominator are 30-bit registers, i.e. \(D_{N}, D_{D} \in \{0,1,\dots,1\,073\,741\,823\}\).
 
@@ -750,10 +750,13 @@ Audio PLL numerator/denominator are 30-bit registers, i.e. \(D_{N}, D_{D} \in \{
 #+RESULTS:
 [[file:./images/gen/t41-actual.png]]
 
-Due to manufacturing tolerances, and operational stability, this will
-not be the /true/ sampling frequency
+Due to imperfections in each device's clock source − a crystal
+oscillator (XO) − this will not be the /true/ sampling frequency
 
-** What's a crystal oscillator?
+*Tolerance*, given in parts per million (ppm), describes how far the XO
+may diverge from its /nominal/ frequency
+
+** What's a crystal oscillator?                                    :noexport:
 
 #+typst: #columns(2, [
 
@@ -910,7 +913,9 @@ where \(\text{Adjust}\) is some very small number, in seconds
 D_{N} = D_{D}\left(\frac{2^{8}\hat{F}_{s}D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24\times10^{6}} - D_{S}\right)
 \end{equation}
 
-Let \(D_{D}\) take a convenient value of \(1 \times 10^{9}\)
+# Let \(D_{D}\) take a convenient value of \(1 \times 10^{9}\)
+
+#+typst: #v(.5cm)
 
 | \(\hat{F}_{s}\)         | \(D_{N}\)             |
 | \(48\,000\)          | \(184\,000\,000\)  |
@@ -927,8 +932,10 @@ Takes  \~10 seconds from boot for <100 ns offset
 Only feasible for a nominal sampling rate that is a multiple of the
 buffer size!
 
+#+typst: #v(.5cm)
+
 \begin{gather}
-\frac{44\,100}{128} = 344.531\,25 \\[1em]
+\frac{44\,100}{128} = 344.531\,25 \quad\quad\quad
 \frac{48\,000}{128} = 375
 \end{gather}
 
