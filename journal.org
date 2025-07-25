@@ -9533,10 +9533,16 @@ And ask Tanguy about printing it to foldable fabric instead of paper.
   fee down considerably.
 :END:
 Do this by July 1st (early-bird deadline). [[https://aes2.org/event-extra/2025-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio/][$475 for non-members]].
-***** TODO Mission for AES AIMLA
+***** DONE Mission for AES AIMLA
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-07-24 jeu. 11:09]
+:END:
 In Portail Missions, state that the source of funds should be /dotation
 d'Inria/.
-***** TODO Submit camera-ready AES paper
+***** DONE Submit camera-ready AES paper
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-07-24 jeu. 11:19]
+:END:
 Do this by +July 14th+ [[https://aes2.org/contributions/2025-1st-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio-call-for-contributions/][July 24th]].
 ***** DONE Finish 3rd year enrolment with doctoral school
 :LOGBOOK:
@@ -9847,8 +9853,10 @@ an EU distributor, preferably.
 - State "DONE"       from "TODO"       [2025-07-04 ven. 18:25]
 :END:
 Can I come and test my system(s) et Cetrale in September?
-***** TODO Arrange Stanford mission/transport
-Choose dates that avoid Thanksgiving. Do [[*Mission for AES AIMLA][London/AES]] too.
+***** TODO Arrange Stanford mission/transport/accommodation
+Choose dates that avoid Thanksgiving. Do [[*Mission for AES AIMLA][London/AES]] too. [Edit, don't
+worry about thanksgiving; leave time for IS2, in case my tutorial is
+accepted.]
   
 Entered on [2025-07-02 mer. 16:41]
 *** 2025-07-06 dimanche
@@ -9895,3 +9903,48 @@ Probably more than powerful enough for auralisation, but the price
 puts it way out of reach as far as I can see.
 
 Entered on [2025-07-06 dim. 16:16]
+*** 2025-07-11 vendredi
+**** Optimisation Residual Synthesis                               :INSPO:
+I should try to generate some sonic material with faust-ddsp and
+compose something. There's the unoptimisable phasor, the oscillator
+example, and just getting the bursts of noise (or the residuals of
+other input signals) from examples that optimise well could work well
+too. I wonder what it would sound like to try signals besides
+~no.noise~, e.g. musical excerpts. I could submit something to next
+year's SMC. Theme of /loss/.
+
+The procedure might be to run a local version of the web IDE, connect
+it to Reaper with Pipewire, and record some samples.
+
+Entered on [2025-07-11 ven. 09:04]
+**** SMC Keynote: Jana Winderen                  :PRESENTATION:CONFERENCE:
+[[https://smc25.iem.at/sessions/keynote11/]["Listening with"]]
+
+Now, there's an idea: taking underwater ambisoics recordings to be
+reproduced on dry land. Wonder whether I could get hold of some of the
+recordings to test with.
+
+P.S. formidable individual! Amazing drawings of the beasts (insects,
+fish...) she's studied. Tons of field recordings, beautiful
+photographs. Bone conduction example; great big tuning fork passed
+around the room to be struck and brought to the top of one's head;
+idea being to get us thinking about other species hear, and generally
+sense the world around them. And how they make noise! Fish making
+metallic, granular-like sounds (as picked up by a hydrophone).
+
+Ecological impact on aquatic animals; they can be /deafened/ by
+underwater industrial activity.
+
+Material on [[https://janawinderen.bandcamp.com/][bandcamp]].
+
+Entered on [2025-07-11 ven. 09:27]
+**** New OTTOSonics paper                               :INSPO:CONFERENCE:
+/LOTTO (Localize OTTOsonics): Automated Spatial Speaker Localization
+Using Tetrahedral Microphone Array/ ([[https://smc25.iem.at/contributions/lotto/][link]])
+
+So, they've solved DIY calibration, using Cramer's rule... practically
+instantaneous; exportable to the IEM plugins. It's in Pd, however, and
+in centralised form. I wonder whether I can adapt it to the
+distributed case.
+
+Entered on [2025-07-11 ven. 10:50]

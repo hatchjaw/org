@@ -1,3 +1,4 @@
+
 #+title: Emacs Config
 #+property: header-args :tangle ~/.emacs.d/org-init.el
 
@@ -832,6 +833,10 @@ bad parser rule regarding identifiers that contain numbers.
 
 (use-package cmake-mode
   :ensure t)
+
+(use-package nix-mode
+  :ensure t
+  :mode "\\.nix\\'")
 #+end_src
 
 * Completion
