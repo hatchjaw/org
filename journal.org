@@ -9948,3 +9948,34 @@ in centralised form. I wonder whether I can adapt it to the
 distributed case.
 
 Entered on [2025-07-11 ven. 10:50]
+*** 2025-07-25 vendredi
+**** PPB Drift Fixed                           :NETWORKEDAUDIO:TEENSY:PTP:
+Method:
+- Count audio interrupts.
+- After a second's worth of the above (2 * 375 for a buffer size
+  of 128), read the ENET timer for the nanoseconds part.
+- Compare with the nanoseconds registered the first time a second's
+  worth of interrupts occured.
+- In a perfect world the difference between ~currentNS~ and
+  ~firstInterruptNS~ should be zero; in practice it is not. In any case
+  store the difference.
+- When adjusting the audio clock, include ~audioPTPOffset = currentNS -
+  firstInterruptNS~ in the calculation.
+  #+begin_src c++
+const double proportionalAdjustment{
+    1. + (adjust + s_AudioPTPOffset) * ClockConstants::k_Nanosecond
+};
+  #+end_src
+  where ~adjust~ is the PTP-derived nsps value.
+
+And this works great, for the most part. I've had three Teensies
+running most of the afternoon, mostly staying synced to within 250 ns.
+
+Occasionally, however, a given device can get into a sort of
+oscillation, where the audio/PTP offset correction becomes rather
+wild. Amplitude can be as much as 500 ns. Not the end of the world,
+but it would be nice to avoid that. I briefly tried implementing a PI
+controller by way of mitigation, but it didn't work. I should try
+again.
+  
+Entered on [2025-07-25 ven. 18:30]
