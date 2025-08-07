@@ -1,0 +1,66 @@
+#+title:      Intégrité scientifique dans les métiers de la recherche
+#+date:       [2025-08-07 jeu. 15:33]
+#+filetags:   :phd:training:
+#+identifier: 20250807T153316
+
+* Ethique / Intégrité / Déontologie
+/Ethics / Integrity / Code-of-conduct/
+
+- Ethics: big questions posed by scientific progress and its sociatal
+  repecussions.
+- Integrity: rules that govern research practice.
+  + Integral: fair, raw data, metadata.
+  + Open: pre-prints, publication costs.
+- Code-of-conduct: moitoring of /conflicts of interest/ and /multiple
+  roles/ amongst civil servants.
+
+* Module 1
+Aims:
+- Show the importance and the diversity of issues behind scientific
+  integrity.
+- Describe the relevant reference documents at the disposal of the
+  scientific community.
+- Present case studies demonstrating scientific fraud, underlining the
+  consequences for science, for society, for the scientific community,
+  and for the fraudsters themselves.
+
+** Sequence 1
+- A series of examples of *misconduct*: /fake research/, fake peer
+  reviews, fact-fabrication and data-manipulation, plagiarism
+  (/plagiat/), fraud, conflicts of interest, etc.
+- Sociology of science introduce by Robert Merton. Writing in 1942, he
+  described a situation whereby the norms of scientific integrity
+  were, at that time, /known/ somehow, but tacit in nature.
+- According to Yannick Lung, three main types of scientific
+  misconduct/fraud:
+  + data fabrication (making up data in the first place, I suppose).
+  + falsification of data and results (modification versus
+    fabrication).
+  + plagiarism.
+- Spectrum of scientific practice, from /Good Research Practices/, via
+  /Questionable Practices/ such as sloppiness, unconscious bias and
+  conscious bias, to *falsification*, outright *fabrication* and
+  *plagiarism*.
+- Regarding questionable practices (« zone grise »), choosing data
+  favourable to a hypothesis, for example, 1 in 3 researchers confess
+  to having strayed into such practices.
+- Merton proposed four values:
+  + Universalism (science transcends nations/borders).
+  + Communalism (not to be appropriated by private interests).
+  + Altruism/disinterest (standing on the shoulders of giants).
+  + Organised skepticism (impartiality in the face of politics,
+    religion, and economic influences).
+
+*** Principles of scientific integrity
+Extract from [[http://www.fun-mooc.fr/asset-v1:ubordeaux+28007+session01+type@asset+block@FR_ALLEA_Code_de_conduite_europeen_pour_lintegrite_en_recherche.pdf][European code of conduct for research integrity]]:
+
+- *Trustworthiness*: to guarantee the quality of research through its
+  conception, methodology, analysis and use of resources.
+- *Honesty*: to devise, undertake, evaluate and disseminate research in
+  a transparent, fair, complete and objective manner.
+- *Respect*: for colleagues, participants, society, ecosystems, cultural
+  heritage and the environment.
+- *Responsibility*: for research activities, from ideation to
+  publication, their management and organisation, training,
+  supervision and mentoring, and for the general implications of
+  research.
