@@ -6783,9 +6783,9 @@ PI-controller, that I was probably on the wrong track. Thinking about
 it, there's a difference between how the adjustment is used for PTP
 --- as a periodic augmented/diminished per-cycle timer increment ---
 and how it's used for the audio sample rate --- as a multiplier to a
-frequency. For the PTP timer, it's sort of like a resampler; insted of
-incrementing 40 ns per cycle, every \(n\) cycles, we increment by 41
-or 39 depending on the polarity of the adjustment. E.g.
+frequency. For the PTP timer, it's sort of like a resampler; instead
+of incrementing 40 ns per cycle, every \(n\) cycles, we increment by
+41 or 39 depending on the polarity of the adjustment. E.g.
 
 #+begin_src elisp
 (let* ((nsps 1e9) ; 1 billion nanoseconds per seecond
@@ -9853,7 +9853,10 @@ an EU distributor, preferably.
 - State "DONE"       from "TODO"       [2025-07-04 ven. 18:25]
 :END:
 Can I come and test my system(s) et Cetrale in September?
-***** TODO Arrange Stanford mission/transport/accommodation
+***** DONE Arrange Stanford mission/transport/accommodation
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-08-08 ven. 16:30]
+:END:
 Choose dates that avoid Thanksgiving. Do [[*Mission for AES AIMLA][London/AES]] too. [Edit, don't
 worry about thanksgiving; leave time for IS2, in case my tutorial is
 accepted.]
@@ -9879,7 +9882,10 @@ I also have work to do, on my SMC slides and on the AES paper, which
 may need (hopefully minor) revisions --- at the very least I need to
 switch to the non-anonymised template.
 
-***** TODO Decide CCRMA Dates; arrange mission
+***** DONE Decide CCRMA Dates; arrange mission
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-08-08 ven. 16:30]
+:END:
 See previous [[*Arrange Stanford mission/transport][TODO]].
 ***** DONE Edit down SMC slides
 :LOGBOOK:
