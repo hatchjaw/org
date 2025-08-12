@@ -14,7 +14,7 @@
 - Code-of-conduct: moitoring of /conflicts of interest/ and /multiple
   roles/ amongst civil servants.
 
-* Module 1
+* Module 1: Issues
 Aims:
 - Show the importance and the diversity of issues behind scientific
   integrity.
@@ -91,7 +91,7 @@ responsibility.
 
 [[./20250811T110822--enjeux-de-lintégrité-scientifique__phd_training.png]]
 
-* Module 2
+* Module 2: Types of breaches
 Aims:
 - Present, more precisely, breaches of scientific integrity and their
   principal factors.
@@ -236,7 +236,7 @@ Aims:
 
 [[./20250811T162738--méconduites-scientifiques__phd_training.png]]
 
-* Prevention
+* Module 3: Prevention
 Aims:
 - Provide tips for avoiding various breaches of scientific
   integrity, by recalling /good practice/.
@@ -280,3 +280,176 @@ Aims:
   of finalised results.
 - Tension between data retention, and deletion (or anonymisation) of
   sensitive data.
+
+** Open science
+- 2003 [[https://openaccess.mpg.de/Berlin-Declaration][Berlin Declaration]] on Open Acces to Knowledge in the Sciences
+  and Humanities. Emphasis on the impact of the internet on the
+  "practical and economic realities of distributing scientific
+  knowledge".
+- First French initiative in 2018, followed by a second national
+  initiative for 2021-24. Le Comité de la science ouverte (CoSO) leads
+  work on this stuff. L'Agence Nationale de la Recherche (ANR) put in
+  place a data management plan in 2019.
+- L'Office français de l'intégrité scientifique (OFIS) held its first
+  colloquium in 2019 and identified two principle axes: data sharing,
+  according to four principles (FAIR):
+  + Findable.
+    * Data has a PID such as a DOI; metadata aims to facilitate the
+      search for data, and contains, amongst other things, the PID;
+      data to be stored in an open-access data store.
+  + Accessible.
+    * Use of standardised, open communication protocols (HTTP, FTP,
+      etc.); avoidance of closed ones (Skype, etc.); use of
+      authentification --- /"as open as possible, as closed as
+      necessary"/ --- to protect sensitive data, i.e. use of /secure/
+      protocols e.g. HTTPS; preserve access to metadata to mitigate
+      /data degradation/, even if the data itself becomes inaccessible.
+  + Interoperable.
+    * Use predefined vocabulary to minimise ambiguity when classifying
+      data; common language, itself following FAIR principles; linked
+      metadata --- global network of scientific information; objects
+      of subjects can become subjects of other objects, etc.
+  + Reusable
+    * Metadata with attributes; version of software used, where/when
+      observations were made, who created the data, etc.; licencing,
+      e.g. CC-BY; provenance of data; community standards, the
+      following of conventions for data and metadata formats.
+- and open access to the results of research; obligatory open access
+  to the results of all research supported by public funds. Think HAL,
+  etc. The aim with both axes is to maximise the impact of publicly
+  funded work, i.e. to make the money go as far as it possibly can.
+
+
+** Who/what is an author
+- What does the fact of being author or co-author of a scientific
+  publication represent? Well, it's an important milestone,
+  particularly in the career of a young researcher.
+- What's the problem of authorship? Co-authorship is kind of nuts
+  nowadays, particularly in Physics, e.g. Higgs' Boson work falling
+  under the names of more than five thousand authors: physicists,
+  technicians, etc.
+- Authorship conflicts: can these drive misconduct? H-index,
+  etc. causing pressure to introduce authors who weren't really
+  involved. Inviting friends (who in turn invite friends); honorary
+  authorship, perhaps with the aim of swaying reviewers by way of
+  reputation; hierarchical authorship, i.e. the inclusion of
+  director(s) de thèse or lab directors whether they had any
+  direct involvement or not.
+  + Interesting /double-bind/ problem: PIs spend all their time trying
+    to secure funding, at the expense of their doing hands-on
+    research, and yet they need (or feel they need) to be cultivating
+    their H-index/number of publications in order to give their
+    funding applications a greater chance of success.
+  + Important to include authorship rules up-front when definiting a
+    program of research so as to avoid conflicts down the line.
+- CNRS states three conditions for authorship (particular relevance
+  to biomedicine):
+  + To have played a substantial role in the conception of the project
+    and experimental protocol.
+  + To have written the first version of the article or to have
+    participated in the revision of intellectual content.
+  + To have approved the final version and assumed responsibility for
+    the content.
+- The above conditions may hold in other domains of research.
+- COMETS-CNRS adds (2016) that an "author must be able to defend part
+  or all of the publication content"
+- Order of authors: (interesting, I didn't know that, by convention,
+  the PI/director typically appears last.) To avoid conflicts this
+  should /simply/ be discussed at the level of the team, lab,
+  etc. (again, putting guidelines it in the initial research plan
+  sounds like common sense...)
+- Significant contribution: now we're presented with the argument,
+  quite contrary to some of those that preceded it, that social
+  factors lend significance to contributions too. Those who aid in
+  creating links between teams, between laboratories --- directors,
+  etc. --- are welcome to sign on as co-authors, as without those
+  links the research could not go ahead.
+
+** Researchers' public interventions
+- Public interventions can transgress rules of scientific integrity.
+- Singapore declaration states, for example, that researchers should
+  only intervene in their domain of competence.
+- Separation to be made between a researcher's knowledge on the one
+  hand, and their opinions on the other.
+- Difficulty lying in the fact that high-profile researchers are
+  routinely called upon by society and the media to give their views
+  on contentious topics.
+- Relationship with the media: distortion by researchers themselves
+  (inflation, exaggeration, diminution of work that disagrees);
+  distortion in press releases; distortion in the process of
+  scientific production
+- Stanford experiment example (/une escroquerie (swindle)
+  scientifique?/).
+- INRAE adopted a /charter of public expression/ in 2022.
+
+[[./20250812T162447--prévenir-les-méconduites__phd_training.png]]
+
+* Module 4: Regulations
+Aims:
+- Present methods for regulating scientific integrity on both a
+  collective and an individual level, emphasising the responsibilty of
+  the researcher.
+- At the collective level, present instances and procedures planned by
+  the state and institutions for handling allegations of
+  misconduct. Peer review is also discussed on this level.
+- Individual responsibility is addressed on three axes:
+  + In public interventions, emphasising scientific legitimacy.
+  + By providing information on the role of whistleblowers.
+  + By addressing the behaviour that researchers can adopt if
+    confronted by cases of breaches of scientific integrity.
+
+Being apprised of the above, the aim is the community may
+autoregulate.
+
+** The institutional framework
+- Scientific integrity has become a matter of French law. In December
+  2020, the French parliament introduced legislation, /la Loi de
+  Programmation de la Recherche/, making explicit mention of scientific
+  integrity.
+- There are efforts, on an international level, for avoiding breaches;
+  the OECD applied a bit of pressure by saying, essentially, that
+  institutions should have procedures in place for preventing and
+  exposing breaches.
+- Procedures:
+  + Referral: witness to the breach should be referred by the
+    institution to the relevant scientific council or integrity
+    officer; must be clear and well-defined.
+  + Investigation: there must be an enquiry to establish if there has
+    indeed been a breach. Such an enquiry can be internal or external;
+    in general an external enquiry is recommended.
+  + Action: if a breach has been established, the action to be taken
+    must be considered by the employer of the person(s) responsible,
+    either via internal committees, or, depending on the severity, via
+    referral to the courts and/or institutional partners.
+- Principles to respect: impartiality; respect for the rules and
+  procedures; transparency; confidentiality.
+- Sensitivity must be applied in applying procedures in cases of
+  outright fraud versus those of grey-area misconduct; different
+  procedures may apply in respective cases.
+- Approaches differ internationally; in the US there's an independent
+  legislative body for handling cases of misconduct; in the UK and
+  Germany there's a rule that in order to grant funding it must be
+  proven that measures are in place to prevent and address misconduct
+  should it occur; (actually the US combines the two;) in France, and
+  in other countries, it seems the model relies on good-will. Yikes.
+- In France, things are moving toward a more structured approach (see
+  the introduction the 2020 law, above).The Corvol report of 2016
+  contributed to this situation with a series of recommendations.
+- Corvol himself explains the delay in France getting its act
+  together. A logical concern or the reputation of the institution;
+  difficulty in dealing with such issues formally when there exists no
+  formal legal framework (ibid); temptation to sweep cases under the
+  rug arising as a result of the above.
+- L'OFIS (l'Office français de l'intégrité scientifique), established
+  in 2017. Eleven researchers and one journalist make up
+  the council. Five-yearly meetings with each research institute,
+  university, doctoral school, etc. OFIS is not to be addressed
+  directly, however with misconduct cases; rather it seeks to empower
+  establishments to govern themselves, with scientific integrity
+  "guardians" and training in place.
+- The purpose of OFIS, unlike the US equivalent (ORI) which is
+  primarily concerned with fraud, is to prevent, as far as possible,
+  the occurrence of fraud. Pre-emptive, preventative, like.
+
+** Peer review
+- 
