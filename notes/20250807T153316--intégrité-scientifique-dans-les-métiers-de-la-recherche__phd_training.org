@@ -447,9 +447,78 @@ autoregulate.
   directly, however with misconduct cases; rather it seeks to empower
   establishments to govern themselves, with scientific integrity
   "guardians" and training in place.
-- The purpose of OFIS, unlike the US equivalent (ORI) which is
-  primarily concerned with fraud, is to prevent, as far as possible,
-  the occurrence of fraud. Pre-emptive, preventative, like.
+- The purpose of OFIS, unlike the US equivalent (Office of Research
+  Integrity, ORI) which is primarily concerned with fraud, is to
+  prevent, as far as possible, the occurrence of fraud. Pre-emptive,
+  preventative, like.
 
 ** Peer review
-- 
+- Separation of scientific review from political interference
+  (contrast with Soviet practice)
+- Avoids quantitative evaluation, by e.g. management, according to,
+  e.g. impact score, H-index, etc.
+- To review research, in order to know how to evaluate research ---
+  and this is why peer-review is the dominant model --- one must be a
+  researcher oneself.
+- Predatory journals (/reveues prédatrices/): resemble, or present
+  themselves as, good journals, but they aren't. /Publish or perish/
+  drives researchers to consider publication in such journals.
+  + "Open access", a benefit to the publishing researcher, demands
+    that authors pay the exorbiant fees (perhaps 2000+ €) demanded by
+    respected journals to make published work freely available,
+    typically out of hard-won research budgets. The review process may
+    also take a long time, on the order of months.
+  + Predation comes in when other, (seemingly) competing journals
+    propose submission, for a relatively inexpensive sum, and much
+    more quickly than the alternative. The problem is there's probably
+    no proper peer-review, and shoddy publication quality.
+- Pseudo-science (/canulars/ --- hoaxes): use of these as a way to trap
+  predatory (or just unscrupulous or stupid) journals, exposing them
+  as failing to subject work to proper peer review. Particularly
+  prevalent in the social sciences.
+  + The Sokal Hoax: Alain Sokal wrote a an article of
+    pseudo-scientific nonsense which was published in /Social Texts/
+    in 1996. The article, /Transgressing the Boundaries: Towards a
+    Transformative Hermeneutics of Quantum Gravity/, gave the illusion
+    of sense, albeit to a reader with no real grounding in
+    physics. (Sounds a cruel thing to do... did he just have too much
+    time on his hands?) The journal was flattered to have the work of
+    a /real physicist/ to publish, apparently, and didn't submit the
+    text to any real evaluation. Anyway, the affair prompted social
+    science journals to improve reviewing practice.
+  + Still, it goes on. /Society/ published an article in 2014, submitted
+    pseudonymously, on "postmodern cars", that was later publicly
+    denounced by the authors under true names.
+  + In the experimental sciences too. John Bohannon submitted a bogus
+    article on a fictitious cancer-fighting molecule to 304
+    open-access predatory journals, and more than half accepted the
+    work.
+  + "Get me off your fucking mailing list" example. Fun,
+    that. Actually wound up accepted and published.
+  + La Fontaine allusion: « ...ceux qui n'ont du monde aucune
+    expérience sont aux moindres objets frappés d'etonnement ». This
+    strikes me as rather mean-spirited.
+- [[https://pubpeer.com/][PubPeer]]: open, anonymous comment-thread on any paper out there with
+  a DOI. An autoregulation platform for the scientific community.
+
+** The responsibility of the researcher
+- Whistleblowers: France has put in place laws in recent years to
+  define situations in which whistleblowers are legally protected ---
+  cases of corruption, conflicts of interest, risk to public health,
+  risk to the environment. The problem, however, is there's no one
+  single definition of what constitutes a whistleblower.
+- In the US, whistleblowers are automatically recognised by the ORI
+  and their allegations investigated. In France, whether a
+  whistleblower may receive legal protection depends on the type of
+  misconduct reported.
+- Baltimore affair: 1986-96; allegation of fraud made by a postdoc
+  against senior figures, who lost their jobs at MIT and Rockefeller
+  institue. Triggered the creation of the ORI.
+- Questions (of a nebulous sort) raised by the phenomenon of
+  participative and citizen science.
+- Singapore statement describes an /obligation to report/ instances of
+  misconduct to which one is a witness; to fail to do so renders one
+  complicit.
+  
+
+[[./20250813T130110--la-régulation-de-lintégrité-scientifique__phd_training.png]]1
