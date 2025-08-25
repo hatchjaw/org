@@ -230,6 +230,12 @@ Load my chosen theme.
               t)
 #+end_src
 
+*** Shush
+
+#+begin_src emacs-lisp
+  (setq-default visible-bell t)
+#+end_src
+
 ** Completion
 
 As advised in [[https://github.com/minad/corfu?tab=readme-ov-file#configuration][corfu's suggested config]]:

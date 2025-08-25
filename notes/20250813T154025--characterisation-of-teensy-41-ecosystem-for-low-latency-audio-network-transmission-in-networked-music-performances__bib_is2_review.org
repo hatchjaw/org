@@ -1,0 +1,93 @@
+#+title:      Characterisation of Teensy 4.1 Ecosystem for Low-Latency Audio Network Transmission in Networked Music Performances
+#+date:       [2025-08-13 mer. 15:40]
+#+filetags:   :bib:is2:review:
+#+identifier: 20250813T154025
+#+reference:  murrayCharacterisation
+
+* Summary
+
+The authors present an evaluation of the Teensy 4.1 microcontroller
+development board as a low-cost platform for networked music
+performance (NMP). Subjecting the device to a series of test
+conditions, they establish expected latencies, for a selection of
+sampling rates and buffer sizes, for I2S transmission, buffer
+passthrough, ethernet transmission, etc., and finish with /my mouth to
+my ear/ (MM2ME) latency over a wide area network. The experimental work
+demonstrates a methodical approach, with latency factors and their
+respective impacts examined separately and in combination.
+
+There is a commendable level of rigour on display in this work, with
+regard to the experimental procedure and presentation of results,
+which are certainly of interest to the IS2 community. Were it not for
+a large number of proofreading inconsistencies and a selection of
+oversights (see below) I would rate this submission more highly;
+nonetheless, subject to correction of the typographical issues, I
+recommend it for acceptance.
+
+* Notes
+
+- Prices are given for the Teensy 4.1 board itself, plus audio and
+  ethernet add-ons, however the statement that the ensemble is
+  "...approximately one-third the cost of other embedded NMP
+  platforms" is not supported with figures.
+- Little detail is provided regarding the JackTrip client
+  implementation, nor is relevant code available at the linked GitHub
+  repository
+  (https://github.com/leighmurray/Teensy4.1LatencyBenchmarks/). Additionally,
+  the authors could cite\nbsp[cite:@rushtonMicrocontrollerbased2023] as an
+  example of an existing Teensy-based JackTrip client.
+- Only one explicit reference is made to the Teensy Audio Library
+  (§IV B, p. 9), but the library itself is not clearly
+  described. Further, no mention is made of the question of
+  interoperability; many Teensy Audio Library classes are written with
+  hard-coded values that mean support is strictly limited to a
+  sampling rate of 44.1 kHz.
+- §II B: "a sample rate of 48 kHz and a depth of 16-bit is generally
+  required" --- reference [5] is nearly twenty years old; 16-bit is
+  perhaps not up to modern standards.
+- §II C: "...using buffers" --- since network transmission is
+  mentioned here, it would be a good place to introduce the idea of a
+  "packet". A network packet may contain a buffer's worth of audio
+  samples, but it tends to be referred to as a packet rather than a
+  buffer.
+- §III B: "Users testing the SGTL5000..." --- which users? Is this a
+  reference to information on the Teensy forum?
+- Tables VI and VII: it doesn't appear to be explained in the text why
+  figures for 48 kHz/128 samples are higher than the figures for 44.1
+  kHz/128 samples. 
+
+* Proofreading
+
+- Abstract: the EPT is surely a /minimum/ threshold for perceivable delay.
+- §II: [1][2][3] could be more tidily represented as [1-3] with
+  something like ~\cite{ref1,ref2,ref3}~. Similar for [7][5][1] on the
+  next page.
+- §II: "OOSE ideally needs to be between 10 and 25 milliseconds" ---
+  the ideal OOSE would be 0 ms, would it not?
+- §II: There's some typographical inconsistency with respect to the
+  representation of numerical values. Examples in this section are
+  "343 m/s" and "3 milliseconds", which are in Times, whereas "100 \micro{}s"
+  is displayed using Computer Modern. If the authors are using the
+  =siunitx= package, I think there's an option to use the text typeface
+  rather than the math typeface; for consistency it might be better to
+  go with the former.
+  + §II E: Similarly, "A review of 18 NMP software frameworks" needn't use
+    Computer Modern for "18".
+- §II C: "would results" => "would result"
+- Table II: "TIME REQUIRED TO FILL A BUFFER (MS)" --- these figures
+  are time /limits/, not time requirements.
+- §II D: OpenRemJam is introduced here, but the footnote with the URL
+  for that project does not appear until the project is mentioned in
+  §V.
+- §III A: "...in the development of the UNISON" => "...in the
+  development of the UNISON audio streaming system" (or similar).
+- §III A: "approximatively" => "approximately".
+- Footnote 13: This link is broken; the href contains some trailing
+  digits.
+- §VI B (I2S passthrough): "Fig. III and Table 14" => "Table III and
+  Fig. 14". I would encourage the authors to check all such references
+  for consistency and to use ~\label~ and ~\ref~ wherever possible.
+- §VI B (Buffer passthrough): "Table. VI." => "Table VI".
+- Fig 16.: "increasing" => "decreasing".
+- Fig 20.: the x-axis is labelled "Sample Rate (kHz)/Buffer Size
+  (samples)", but the tick labels show figures in bits.
