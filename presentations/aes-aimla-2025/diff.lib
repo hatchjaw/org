@@ -1,0 +1,362 @@
+si = library("signals.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+df = library("diff.lib");
+
+declare name "Faust Automatic Differentiation Library";
+
+//==========================Input Variables=====================================
+//
+//==============================================================================
+
+var(meter, init) = -~_ : _,init : + <: attach(meter);
+
+vars(V) = environment {
+    // Count the variables.
+    N = outputs(V);
+    // Retrieve a variable by index i.
+    var(i) = take(i, V),pds(N, i)
+    with {
+        // Compute partial derivatives of
+        // variable x_i.
+        pds(N, i) = par(j, N, i-1==j);
+
+        take(i, L) = _ <: L:sel with {
+            sel = par(j, i-1, !),_,par(j, outputs(L)-i, !);
+        };
+    };
+};
+
+weightsAndBiases(LAYERSPEC) = vars(
+    par(i, outputs(LAYERSPEC) / 2,
+        par(j, ba.take(2 * i + 1, LAYERSPEC),
+            par(k, ba.take(2 * i + 2, LAYERSPEC),
+                df.var(hbargraph("[0] w%3i%3j%3k", -10, 10), 0)
+            ),df.var(hbargraph("[1] b%3i%3j", -10, 10), 0)
+        )
+    )
+);
+
+//========================Parameter Optimisation================================
+//
+//==============================================================================
+
+paramOpt(target, estimate, lossFunction) = vgroup("[0]Target", target),_ : backprop
+with {
+    backprop(y) = (routes.crossNM(nvars, nInputs)
+        : vgroup("[1]Estimate", estimate)
+        : L
+    ) ~ (!,!,si.bus(nvars))
+    : y,_,_,si.block(nvars)
+    with {
+        L(yHat) = yHat,vgroup("[2]Loss & Gradients", lossFunction(y,yHat));
+    };
+
+    nvars = inputs(estimate),inputs(target) : -;
+    nInputs = inputs(target);
+};
+
+//========================Differentiable environment============================
+//
+//==============================================================================
+
+env(vars) = environment {
+    // Automatically differentiate the circuit C in forward mode.
+    // Make just the first N inputs differentiable; treat the rest as
+    // differentiable variables.
+    diffInN(C, N) = par(i, N, input),par(j, inputs(C) - N, diff(_)) : diff(C);
+
+    //================Differentiable composition operations=====================
+    //
+    //==========================================================================
+
+    // Recursive composition
+    diff(A ~ B) = diff(A) ~ diff(B);
+
+    // Merge Composition
+    diff(A :> B) = diff(A : routes.interleave(inputs(B), k))
+        : par(p, inputs(B), par(q, k, diff(_)) :> diff(_))
+        : diff(B)
+    with {
+        k = outputs(A) / inputs(B);
+    };
+
+    // Split composition
+    diff(A <: B) = diff(A) <: diff(B);
+
+    // Parallel composition
+    diff((A,B)) = diff(A),diff(B);
+
+    // Sequential composition
+    diff(A : B) = diff(A) : diff(B);
+
+    //=====================Differentiable primitives============================
+    //
+    //==========================================================================
+
+    // Identity primitive.
+    // (<s, s'>) -> (<s, s'>)
+    diff(_) = par(i,vars.N+1,_);
+
+    // Cut primitive.
+    // (<s, s'>) -> ()
+    diff(!) = par(i, vars.N+1, !);
+
+    // Addition.
+    // (<s1, s1'>,<s2, s2'>) -> (<s1+s2, s1'+s2'>)
+    diff(+) = diffadd
+    with{
+        diffadd = binary(+, (_,!,!,_ : +));
+        // diffadd = routes.interleave(vars.N + 1, 2)
+            // : +,par(i, vars.N, +);
+    };
+
+    // Subtraction.
+    // (<s1, s1'>,<s2, s2'>) -> (<s1-s2, s1'-s2'>)
+    diff(-) = diffsub
+    with {
+        diffsub = routes.interleave(vars.N + 1, 2)
+            : -,par(i, vars.N, -);
+    };
+
+    // Multiplication.
+    // (<s1, s1'>,<s2, s2'>) -> (<s1*s2, s1'*s2 + s2'*s1>)
+    diff(*) = diffmul with { diffmul = binary(*, (*,* : +)); };
+
+    // Division.
+    // (<s1, s1'>,<s2, s2'>) -> (<s1/s2, (s1'*s2 - s2'*s1) / s2^2>)
+    diff(/) = diffdiv
+    with {
+        diffdiv = binary(/, (_,(_ <: _,_),_,_
+                : _,_,routes.crossNM(1, 2)
+                : *,*,(_ <: *)
+                : -,_
+                : /
+        ));
+    };
+
+    // Exponentiation
+    // (<s1, s1'>,<s2, s2'>) = (<s1^s2, s1^{s2-1}*(s2*s1' + ln(s1)*s1*s2')>)
+    diff(^) = diffpow with { diffpow = binary(^, (
+        _,(_ <: _,-(1)),(_ <: _,*(log)),_
+        : *,(routes.cross(2) : ^),*
+        : routes.cross(2),_
+        : _,+
+        : *
+    )); };
+
+    // Differentiable delay
+    // Only really works for delays that increase because it's asymmetrical in time.
+    // Still, it's useful as a component in differentiable algorithms that feature
+    // fixed delays.
+    //
+    // <u, u'>[n-<v, v'>] = <u[n-v], u'[n-v] - v' * (u[n-v])'_n>
+    //                    = u@v,u'@v,v',(u@v)'_n : _,_,* : _,-;
+    diff(@) = diffdelay with { diffdelay = binary(@, (
+        _,(_ <: _,_),_,_
+        // : @,routes.cross(2),_
+        // : _,(@ <: _,mem),_
+        // : _,-,_
+        // : _,*
+        // : -
+        : @ - (routes.cross(2) : @ <: _,mem : -)*_
+    )); };
+    
+    // Sine function
+    // (<s, s'>) -> (<sin(s), s'*cos(s)>)
+    diff(sin) = diffsin with { diffsin = unary(sin, (_,cos : *)); };
+
+    // Cosine function
+    // (<s, s'>) -> (<cos(s), -s'*sin(s)>)
+    diff(cos) = diffcos with { diffcos = unary(cos, (*(-1),sin : *)); };
+
+    // Tangent function
+    // (<s, s'>) -> (<tan(s), s'/cos^2(s)>)
+    diff(tan) = difftan with { difftan = unary(tan, (_,(cos <: *) : /)); };
+
+    // Exponential function
+    // (<s, s'>) -> (<exp(s), s'*exp(s)>)
+    diff(exp) = diffexp with { diffexp = unary(exp, (_,exp : *)); };
+
+    // Base-e logarithm
+    // (<s, s'>) -> (<log(s), s'/s>)
+    diff(log) = difflog with { difflog = unary(log, /); };
+
+    // Absolute value function
+    // (<s, s'>) -> (<abs(s), s'*s/abs(s)>)
+    diff(abs) = diffabs with { diffabs = unary(abs, (_,(_ <: _,abs : positiveSafediv) : *)); };
+
+    // One-sample delay
+    // (<s, s'>) -> (<s[n-1], s'[n-1]>)
+    diff(mem) = diffmem with { diffmem = mem,par(i, vars.N, mem); };
+
+    // Constant signal
+    // () -> (<c, 0>)
+    diff(c) = diffconst with{ diffconst = c,par(i, vars.N, 0); };
+
+    // Differentiable (audio) input
+    // (s) -> (<s, 0>)
+    input = _,par(i, vars.N, 0);
+
+    //=========================Neural Networks=================================
+    //
+    //=========================================================================
+
+    neuron(NINPUTS, activationFunction) = Y
+    with {
+        WX = linalg.dot(NINPUTS);
+        b = _;
+        Y = activationFunction(WX + b);
+    };
+
+    activations = environment {
+        // Sigmoid activation function
+        // y = 1 / (1 + e^{-z})
+        sigmoid = *(-1) : 1 / (1 + exp);
+
+        // ReLU
+        // y = max(0, z) = (z + |z|) / 2
+        relu = diff(_ <: (_,abs) : + : /(2));
+    };
+
+    layers = environment {
+        // Dense (fully-connected) layer
+        dense(nNeurons, wPerNeuron, activationFunction) = routing(nNeurons, wPerNeuron)
+            : par(n, nNeurons, neuron(wPerNeuron, activationFunction))
+        with {
+            routing(nn, nw) = seq(n, nn-1,
+                par(l, nw + n*(2*nw + 1), _),
+                routes.crossNM((nn-1-n)*nw, nw+1),
+                par(l, (nn-1-n)*(nw+1), _)
+            );
+        };
+    };
+
+    nn(LAYERSPEC, activationFunction) = seq(k, nLayers, layer(nLayers - k - 1)
+        with {
+            nNeurons = ba.take(2 * k + 1, LAYERSPEC);
+            wPerNeuron = ba.take(2 * k + 2, LAYERSPEC);
+
+            // NB. layers are numbered in descending order.
+            layer(0) = layers.dense(nNeurons, wPerNeuron, activationFunction);
+            layer(j) = (layer(0) <: si.bus(nextLayer.nInputs)),si.bus(nParams)
+            with {
+                nextLayer = environment {
+                    nNeurons = ba.take(2 * k + 3, LAYERSPEC);
+                    wPerNeuron = ba.take(2 * k + 4, LAYERSPEC);
+                    nInputs = nNeurons * wPerNeuron;
+                };
+
+                // Number of parameters to pass on to succeeding layers.
+                nParams = vars.N - usedParams;
+
+                usedParams = sum(g, k + 1, nNeurons * (wPerNeuron + 1)
+                with {
+                    nNeurons = ba.take(2 * g + 1, LAYERSPEC);
+                    wPerNeuron = ba.take(2 * g + 2, LAYERSPEC);
+                });
+            };
+        })with {
+            // Number of layers, i.e. number of nNeurons,wPerNeuron pairs in the layer specification.
+            nLayers = ba.count(LAYERSPEC) / 2;
+        };
+
+    //===========================Loss functions=================================
+    //
+    //==========================================================================
+
+    losses = environment {
+        L1 = lossFunction(abs);
+        L2 = lossFunction(^(2));
+    } with {
+        lossFunction(function, windowSize, learningRate, y, yHat) = error,par(i,vars.N,_)
+            : window
+            : diff(function)
+            : meter
+            : _,scaleGrads
+        with {
+            window = par(i, vars.N+1, ba.slidingMean(windowSize));
+            error = yHat,y : -;
+            meter = (_ <: attach(hbargraph("[100]loss",0.,.05))),
+                par(i, vars.N, _ <: attach(hbargraph("gradient%3i",-.5,.5)));
+            scaleGrads = par(i, vars.N, _,learningRate : *);
+        };
+    };
+} with {
+    // Template function for differentiable unary primitives.
+    unary(primal, tangent) = routing : primal,par(i, vars.N, tangent)
+    with {
+        routing =
+            // Split u N times.
+            (_ <: par(i, vars.N + 1, _)),par(i, vars.N, _)
+            // Distribute u amongst u': u'1,u, ..., u'N,u
+            : _,routes.outerleave(vars.N, 2);
+    };
+
+    // Template function for differentiable binary primitives.
+    binary(primal, tangent) = routing : primal,par(i, vars.N, tangent)
+    with {
+        routing =
+            // Duplicate u and v for primal computation.
+            // Result: u,u,du1,...,duN, v,v,dv1,...,dvN
+            par(j, 2, (_ <: _,_),si.bus(vars.N))
+            // Move a copy of v where it can easily be combined with a copy of u.
+            // Move u after its partial derivatives.
+            // Result: u,v, du1,...duN,u, v,dv1,...,dvN
+            : _,routes.swapOuter(vars.N + 2),si.bus(vars.N+1)
+            : _,_,(
+                // Split u and v. Result: du1,...,duN, u,...,u, v,...,v, dv1,...,dvN
+                si.bus(vars.N),(_ <: si.bus(vars.N)),(_ <: si.bus(vars.N)),si.bus(vars.N)
+                // Interleave u and v separately. Result: du1,u,...duN,u, v,dv1,...,v,dvN
+                : par(i, 2, routes.interleave(vars.N, 2))
+                // Interleave u and v together. Result: du1,v,u,dv1,...,duN,v,u,dvN
+                : routes.interleave(2*vars.N, 2)
+            );
+    };
+
+    // Avoid division by zero.
+    // This uses a lambda abstraction and isn't differentiable.
+    safediv(x, y) = x,(y,(ma.EPSILON,-1*ma.EPSILON : select2(y < 0)) : select2(abs(y) < ma.EPSILON)) : /;
+
+    // This one works for guaranteed-positive denominators.
+    positiveSafediv = _,_,ma.EPSILON : _,max : /;
+};
+
+//===========================Differentiable Utilities=================================
+//
+//====================================================================================
+routes = environment {
+    // interleave(2, 2) Maps input signals 1,2,3,4 to 1,3,2,4
+    interleave(1, C) = par(i, C, _);
+    interleave(R, C) = par(i, R * C, _) <: par(r, R, par(c, C, distribute(r, 1, R - r - 1)));
+
+    // outerleave(2, 2) Maps input signals 1,2,3,4 to 3,1,4,2
+    outerleave(R, C) = par(i, R * C, _) <:
+        par(r, R, par(c, C, distribute((R - r) * (C - 1) - c, 1, c + r * (C - 1))));
+
+    // Differentiable cross.
+    cross(0) = distribute(0, 0, 0);
+    cross(n) = par(i, n, _) <: par(i, n, distribute(n - i - 1, 1, i));
+
+    // Differentiable crossNM.
+    crossNM(n, m) = par(i, n + m, _) <: distribute(n, n + m, m);
+
+    // Swap the first and nth of n signals. Equivalent to `route(n, n, 1, n, 2, 2, ..., n, 1)`
+    swapOuter(0) = distribute(0, 0, 0);
+    swapOuter(1) = distribute(0, 1, 0);
+    swapOuter(2) = cross(2);
+    swapOuter(n) = par(i, n, _) <: distribute(n - 1, 1, 0),par(i, n-2, distribute(i + 1, 1, n - 2 - i)),distribute(0, 1, n - 1);
+} with {
+    // Helper function for distributing groups of signals.
+    // p: number of signals to cut at the start of the group.
+    // q: number of signals to pass.
+    // r: number of signals to cut at the end of the group.
+    distribute(0, q, 0) = par(i, q, _);
+    distribute(p, q, 0) = par(i, p, !),par(j, q, _);
+    distribute(0, q, r) = par(i, q, _),par(j, r, !);
+    distribute(p, q, r) = par(i, p, !),par(j, q, _),par(k, r, !);
+};
+
+linalg = environment {
+    dot(N) = routes.interleave(N, 2) : par(i, N, *) :> _;
+};

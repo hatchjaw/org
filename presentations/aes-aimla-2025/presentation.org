@@ -1,0 +1,1868 @@
+#+TITLE: Faust Autodiff
+#+subtitle: Towards audio domain-specific machine learning
+#+AUTHOR: Thomas Rushton
+
+# Set num:nil when done editing
+#+options: num:t toc:nil
+#+options: reveal_width:1500 reveal_height:1000
+#+export_file_name: index
+#+property: header-args:css :results none :exports none :tangle ./emeraude2025.css
+#+property: header-args:js :results none :exports none :tangle ./emeraude2025.js
+#+property: header-args:faust :eval no-export
+#+reveal_root: ../reveal.js
+#+reveal_theme: white_contrast_compact_verbatim_headers
+#+reveal_trans: slide
+# So org-re-reveal doesn't load MathJax automatically
+#+reveal_mathjax_url:
+#+reveal_min_scale: 1.0
+#+reveal_max_scale: 1.0
+#+reveal_extra_options: hash: true, fragmentInURL: true
+#+reveal_title_slide: <h1>%t</h1><h2>%s</h2><h3>%a</h3><h4>Inria, Emeraude team &mdash; INSA Lyon</h4><div class="logos">
+#+reveal_title_slide: <img src="logos/insa.svg" height="100">
+#+reveal_title_slide: <img src="logos/inria.svg" height="100">
+#+reveal_title_slide: <img src="logos/citi.png" height="100"></div>
+#+reveal_title_slide_extra_attr: class="title-slide"
+#+reveal_extra_scripts: ("./emeraude2025.js")
+#+reveal_extra_css: emeraude2025.css
+
+* About This Presentation                                          :noexport:
+
+This =org= file describes my presentation for the 2025 Emeraude
+Séminaire in Peyrusse.
+
+** Dependencies
+
+- =org-re-reveal= ([[https://gitlab.com/oer/org-re-reveal/-/tree/main][gitlab]]), which enables export support from Org to [[https://revealjs.com/][Reveal.js]].
+- =ob-faust= ([[https://github.com/hatchjaw/ob-faust][github]]), which adds (basic) support for Faust to Org Babel.
+- Emacs =faust-mode=, modified slightly to fix syntax highlighting in
+  source blocks.
+  + One of these days I should submit a PR.
+
+** Running the Presentation
+
+Tangle, then, from the reveal.js directory (=../reveal.js=), run:
+
+#+begin_src shell :noeval :exports code
+npm start -- --root=../
+#+end_src
+
+Then navigate to [[http://localhost:8000/aes-aimla-2025/]].
+
+* CSS                                                              :noexport:
+
+** Symlink to =~/org/fonts=
+
+#+begin_src emacs-lisp :results none :export none :eval yes
+(dired-make-relative-symlink "../../fonts" "fonts" t)
+#+end_src
+
+** Typography
+
+Define some fonts. Useful info [[https://www.digitalocean.com/community/tutorials/how-to-load-and-use-custom-fonts-with-css#loading-a-self-hosted-font-with-font-face][here]].
+
+#+begin_src css
+@font-face {
+    font-family: "MyMinion";
+    src:
+        local("MinionPro-Regular"),
+        url("fonts/minionpro/MinionPro-Regular.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-It.otf") format("opentype");
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-Semibold.otf") format("opentype");
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-Bold.otf") format("opentype");
+    font-weight: 800;
+    font-style: normal;
+}
+#+end_src
+
+Now override some of reveal's variables.
+
+#+begin_src css
+:root {
+    --r-main-font: "MyMinion";
+    --r-main-font-size: 42px;
+    --r-heading-font: "MyMinion";
+    --r-code-font: "Iosevka Comfy Motion";
+    --r-heading-text-transform: none;
+}
+#+end_src
+
+*** Headings
+
+Decorate my h2's and h3's.
+
+#+begin_src css
+.stack h2, .stack h3 {
+    text-decoration: underline 3px #bbb;
+}
+#+end_src
+
+*** Figures
+
+#+begin_src css
+.reveal figure {
+    margin-top: 0;
+}
+#+end_src
+
+*** Use old style numbers
+
+#+begin_src css
+body {
+    font-variant-numeric: oldstyle-nums;
+}
+#+end_src
+
+But not in code blocks
+
+#+begin_src css
+.reveal pre {
+    font-variant-numeric: normal;
+}
+#+end_src
+
+*** Font size utility classes
+
+Captions
+
+#+begin_src css
+.caption {
+    font-size: .6em;
+}
+#+end_src
+
+Big equations
+
+#+begin_src css
+.big-eqn {
+    font-size: 1.5em;
+}
+
+.huge-eqn {
+    font-size: 2em;
+}
+#+end_src
+
+** Code blocks
+
+Improve code block appearance.
+
+#+begin_src css
+.reveal pre {
+    padding: 1em;
+    width: 66.6%;
+    box-shadow: none;
+    background: #efefef;
+    font-size: .7em;
+}
+#+end_src
+
+** Logos on title slide
+
+#+begin_src css
+.title-slide > .logos {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 3em;
+}
+#+end_src
+
+* JS                                                               :noexport:
+
+** MathJax
+
+So I can use \(\lBrack\) and \(\rBrack\), I tried using
+[[https://www.npmjs.com/package/@amermathsoc/mathjax-unicode-math][mathjax-unicode-math]]. This doesn't appear to work with the current
+stable version of MathJax (3.2.2, bottom half of brackets lopped off),
+so I tried MathJax 4.0.0-beta.4.
+
+4.0.0-beta.4 is the most recent version that permits performant
+dynamic typesetting, but, for SVG, it doesn't reproduce \(\quad\) and
+other spacing commands as expected.
+
+#+begin_src js
+// Not ideal to do it this way (better to read package.json somehow)
+// but better than changing things by hand below.
+MATHJAX4 = false;
+
+MathJax = {
+    loader: {load: ['[tex]/mathtools']},
+    tex: {
+        packages: {'[+]': ['mathtools']},
+        macros: {
+            sembrack: [
+                MATHJAX4 ?
+                    "\\unicode{x27e6}\\! #1 \\!\\unicode{x27e7}" :
+                    "\\left[\\!\\left[\\,#1\\,\\right]\\!\\right]",
+                1
+            ],
+            diffbrack: ["\\Delta_{N}\\sembrack{#1}", 1],
+        }
+    },
+    options: {
+        enableMenu: false
+    },
+    startup: {
+        ready: async () => {
+            MathJax.startup.defaultReady();
+            
+            await MathJax.startup.promise;
+            console.log('MathJax initial typesetting complete.');
+
+            // These work without a timeout for MathJax 4.0.0-beta.7.
+            // console.log("Typesetting dynamic content.");
+            // await xSquared();
+            
+            // This timeout is the only reliable way I've found to
+            // avoid MathJax 4.0.0-beta.4  `Retry` errors.
+            window.setTimeout(async () => {
+                console.log("Typesetting dynamic content.");
+                await xSquared();
+                numericalExample();
+            }, 100);
+        }
+    }
+};
+
+(() => {
+    const script = document.createElement("script");
+    script.src = `./node_modules/mathjax${MATHJAX4 ? "" : "/es5"}/tex-svg.js`;
+    script.async = true;
+    document.head.appendChild(script);
+})();
+#+end_src
+
+* Agenda
+
+#+ATTR_REVEAL: :frag (appear)
+- The Faust programming language
+- Differentiation
+- Automatic differentiation in Faust
+- Differentiable Faust programs
+- Higher-order derivatives
+
+** Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_quote
+"Backpropagation and gradient-based optimization are behind virtually
+all recent successes in machine learning..." --- Baydin\nbsp{}et\nbsp{}al.
+#+end_quote
+
+#+attr_html: :class caption
+Automatic Differentiation in Machine Learning: a Survey (2018)
+
+** Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_quote
+"Backpropagation and gradient-based optimization are behind virtually
+all recent successes in machine learning..." --- Baydin\nbsp{}et\nbsp{}al.
+#+end_quote
+
+#+attr_html: :class caption
+Automatic Differentiation in Machine Learning: a Survey (2018)
+
+#+begin_quote
+"Before the autodiff revolution, researchers and practitioners needed
+to manually implement the gradient of the functions they wished to
+optimize." --- Blondel & Roulet
+#+end_quote
+
+#+attr_html: :class caption
+The Elements of Differentiable Programming (2024)
+
+** Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_quote
+"[Differentiable DSP has been] applied to... instrument modelling,
+synthesiser sound matching, speech synthesis and voice
+transformation... audio effect modelling, automatic mixing and
+intelligent music production, and filter design." --- Hayes et al.
+#+end_quote
+
+#+attr_html: :class caption
+A review of differentiable digital signal processing for music and
+speech synthesis (2024)
+
+** Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_quote
+"[Differentiable DSP has been] applied to... instrument modelling,
+synthesiser sound matching, speech synthesis and voice
+transformation... audio effect modelling, automatic mixing and
+intelligent music production, and filter design." --- Hayes et al.
+#+end_quote
+
+#+attr_html: :class caption
+A review of differentiable digital signal processing for music and
+speech synthesis (2024)
+
+#+begin_quote
+"This illustrates the strong parallel between RNNs and IIR filters ---
+they are both recursive systems that operate element-by-element on a
+sequence of numerical data, storing information in their internal
+states..." --- Kuznetsov et al.
+#+end_quote
+
+#+attr_html: :class caption
+Differentiable IIR Filters for Machine Learning Applications (2020)
+
+** Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+A new arithemetical domain.
+#+ATTR_REVEAL: :frag t
+Pushes the limits of the language.
+
+** Origins
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate data-auto-animate-restart
+:END:
+
+Google Summer of Code, summer 2023.
+
+Faust compiler; signal stage.
+
+Results: underwhelming.
+
+** Origins
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+Resumed, early 2024.
+
+Faust language; pattern matching.
+
+Results: more interesting.
+
+** Developments
+
+GSoC again, 2024.
+
+Presented at IFC.
+
+AES paper under review.
+
+** The Faust programming language
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+ATTR_REVEAL: :frag (appear)
+- Functional paradigm language for audio synthesis and DSP
+- Highly optimised compiler
+- Web IDE; recent addition of an LSP
+- Compiles to C++, Rust, WebAssembly...
+- /Architectures/ provide support for DAW plugins, smartphone apps,
+  embedded platforms...
+- The SyFaLa project provides a direct Faust-to-FPGA toolchain
+
+** The Faust programming language
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_src faust :results file svg :file images/stereo.svg :exports both
+import("stdfaust.lib");
+process = os.osc(440) <: _,_;
+#+end_src
+#+attr_org: :width 200
+#+attr_html: :width 500
+#+RESULTS:
+[[file:images/stereo.svg]]
+
+** The Faust programming language
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_src faust :results file svg :file images/iir1.svg :exports both
+N = 3; // filter order
+process = fir(N) : + ~ fir(N-1)
+with {
+  fir(n) = _ <: sum(i, n, _,i : @,coeff : *
+  with {
+    coeff = hslider("coeff_%i", 0, -1, 1, .01);
+  });
+};
+#+end_src
+#+attr_org: :width 500
+#+attr_html: :width 1400
+#+RESULTS:
+[[file:images/iir1.svg]]
+
+** The Faust programming language
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_src faust :results file svg :file images/iir2.svg :exports both
+import("stdfaust.lib");
+process = fi.iir((.9, .25, .75),(-.5, -.25));
+#+end_src
+#+attr_org: :width 250
+#+attr_html: :width 1000
+#+RESULTS:
+[[file:images/iir2.svg]]
+
+* Differentiation
+
+#+REVEAL: split
+
+#+begin_export html
+<div id="xSquaredContainer">
+  <div>
+    <div>
+      <canvas id="xSquaredCanvas"></canvas>
+      <canvas id="secantCanvas"></canvas>
+    </div>
+    <div>
+      <label for="xSquared-xValue">\(x\)</label>
+      <input type="range" id="xSquared-x" min=-2 max=2 value=0 step=.001 />
+      <span id="xSquared-xValue" class="sliderValue"></span>
+    </div>
+    <div>
+      <label for="xSquared-hValue">\(h\)</label>
+      <input type="range" id="xSquared-h" min=-1 max=2 value=2 step=.001 />
+      <span id="xSquared-hValue" class="sliderValue"></span>
+    </div>
+  </div>
+  <div id="xSquaredMath">
+    <p style="padding-bottom: 2em;">\(f(x) = x^{2}\)</p>
+    <div id="xSquaredDynamicMath">
+    </div>
+  </div>
+</div>
+#+end_export
+
+#+REVEAL: split data-transition="slide-in fade-out"
+
+#+attr_html: :class huge-eqn
+\begin{equation}
+f'(x) = \lim_{h\to0}\frac{f(x + h) - f(x)}{h}
+\end{equation}
+
+#+REVEAL: split data-transition="fade"
+
+#+attr_html: :class huge-eqn
+\begin{equation}
+f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
+\end{equation}
+
+\(\dot{x}\) --- Newton's notation for the derivative.
+
+\(\varepsilon\) --- a /nilpotent symbol/: \(\quad\varepsilon \neq
+0\;,\quad\varepsilon^{2} = 0\)
+
+#+REVEAL: split data-transition="fade"
+
+#+attr_html: :class huge-eqn
+\begin{equation}
+\varepsilon\dot{x}f'(x) = f(x + \varepsilon\dot{x}) - f(x)
+\end{equation}
+
+#+REVEAL: split data-transition="fade"
+
+#+attr_html: :class huge-eqn
+\begin{equation}
+f(x + \varepsilon\dot{x}) = f(x) + \varepsilon\dot{x}f'(x)
+\end{equation}
+
+#+REVEAL: split data-transition="fade"
+
+\begin{equation}
+\textrm{Let}\; f(x) = x
+\end{equation}
+
+#+attr_html: :class huge-eqn
+\begin{align}
+f(x + \varepsilon\dot{x}) &= f(x) + \varepsilon\dot{x}f'(x) \\ 
+  &= {\color{blue} x} + {\color{green} \varepsilon\dot{x}}
+\end{align}
+
+#+begin_export html
+<p class="fragment">This is a <span style="color:blue;">DUAL</span> <span style="color:green;">NUMBER</span>.</p>
+<p class="fragment">The first component is the <span style="color:blue;">PRIMAL</span>; the second is the <span style="color:green;">TANGENT</span>.</p>
+#+end_export
+
+** CSS & JS for the x^{2} plot                                         :noexport:
+
+#+begin_src css
+#xSquaredContainer {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+#xSquaredMath {
+    width: 45%;
+}
+
+#xSquaredCanvas {
+    position: absolute;
+}
+
+#xSquaredDynamicMath {
+    position: absolute;
+    left: 63%;
+}
+
+.sliderValue {
+    display: inline-block;
+    width: 2.5em;
+    text-align: right;
+}    
+#+end_src
+
+Constants
+
+#+begin_src js
+const SVG = {};
+
+const CANVAS = {
+    WIDTH: 900,
+    HEIGHT: 600,
+    PADDING: 5
+};
+
+const AXES = {
+    WIDTH: 600,
+    X: {
+        ZERO: 300,
+        INDICATOR: {
+            WIDTH: 3,
+            HEIGHT: 10
+        }
+    },
+    Y: {
+        ZERO: CANVAS.HEIGHT - CANVAS.PADDING - 50,
+    }
+};
+
+const X = {
+    MIN: -2,
+    MAX: 2,
+    LEN: 1000
+};
+
+X.STEP = (X.MAX-X.MIN)/X.LEN;
+#+end_src
+
+A vector for the independent variable \(x\):
+
+#+begin_src js
+const xVec = Array.from({length: X.LEN + 1}, (_,x) => X.MIN + x * X.STEP);
+#+end_src
+
+#+begin_src js
+const xSquared = async () => {
+    const f = x => x * x;
+    const yVec = xVec.map(x => ({x: x, y: f(x)}));
+    const yMax = Math.max(...yVec.map(y => y.y));
+
+    //await MathJax.startup.promise;
+    const xml = new XMLSerializer();
+    const tex2imageSrc = tex => "data:image/svg+xml;base64, " +
+          window.btoa(unescape(encodeURIComponent(
+              xml.serializeToString(MathJax.tex2svg(tex).firstElementChild)
+          )));
+#+end_src
+
+Define the axes and the static plot of \(f(x)\):
+
+#+begin_src js
+const staticLayer = {
+    canvas: document.getElementById("xSquaredCanvas"),
+
+    visualiser: ctx => ({
+        drawAxis: {
+            x: () => {
+                ctx.beginPath();
+                ctx.moveTo(CANVAS.PADDING, AXES.Y.ZERO);
+                ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING, AXES.Y.ZERO);
+                ctx.stroke();
+                // Arrow
+                ctx.beginPath();
+                ctx.moveTo(CANVAS.WIDTH - CANVAS.PADDING, AXES.Y.ZERO);
+                ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING - 10, AXES.Y.ZERO - 5);
+                ctx.lineTo(CANVAS.WIDTH - CANVAS.PADDING - 10, AXES.Y.ZERO + 5);
+                ctx.closePath();
+                ctx.fill();
+            },
+            y: () => {
+                ctx.beginPath();
+                ctx.moveTo(AXES.X.ZERO, CANVAS.PADDING);
+                ctx.lineTo(AXES.X.ZERO, CANVAS.HEIGHT - CANVAS.PADDING);
+                ctx.stroke();
+                // Arrow
+                ctx.beginPath();
+                ctx.moveTo(AXES.X.ZERO, CANVAS.PADDING);
+                ctx.lineTo(AXES.X.ZERO - 5, CANVAS.PADDING + 10);
+                ctx.lineTo(AXES.X.ZERO + 5, CANVAS.PADDING + 10);
+                ctx.closePath();
+                ctx.fill();
+                // Label
+                ctx.drawImage(SVG.FX, AXES.X.ZERO - 60, CANVAS.PADDING,
+                              SVG.FX.naturalWidth * 1.5,
+                              SVG.FX.naturalHeight * 1.5);
+            }
+        },
+
+        drawFunction: () => {
+            ctx.beginPath();
+            ctx.moveTo(
+                CANVAS.PADDING + (yVec[0].x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                CANVAS.PADDING + (yMax - yVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+            );
+            yVec.forEach(p => ctx.lineTo(
+                CANVAS.PADDING + (p.x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+            ));
+            ctx.strokeStyle = "blue";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        },
+    }),
+
+    async init() {
+        if (this.canvas.getContext) {
+            this.canvas.setAttribute("width", CANVAS.WIDTH);
+            this.canvas.setAttribute("height", CANVAS.HEIGHT);
+
+            let img = new Image();
+            img.src = tex2imageSrc("f(x)");
+            await img.decode();
+            SVG.FX = img;
+
+            const v = this.visualiser(this.canvas.getContext("2d"));
+            v.drawAxis.x();
+            v.drawAxis.y();
+            v.drawFunction();
+        }
+    }
+};
+#+end_src
+
+Define the dynamic part of the plot --- the secant and axis
+indicators. Slope \(m\) found as \(m = \frac{f(x + h) - f(x)}{h}\);
+secant line found as \(m(x - x_{1}) + y_{1}\).
+
+#+begin_src js
+const dynamicLayer = {
+    canvas: document.getElementById("secantCanvas"),
+    xSlider: {
+        element: document.getElementById("xSquared-x"),
+        valSpan: document.getElementById("xSquared-xValue")
+    },
+    hSlider: {
+        element: document.getElementById("xSquared-h"),
+        valSpan: document.getElementById("xSquared-hValue"),
+        prevValue: 0
+    },
+    math: document.getElementById("xSquaredDynamicMath"),
+
+    visualiser: ctx => ({
+        drawIndicators: (x, h) => {
+            const drawXIndicator = (x, y) => ctx.fillRect(
+                CANVAS.PADDING - (AXES.X.INDICATOR.WIDTH / 2) + (x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                y - AXES.X.INDICATOR.HEIGHT / 2,
+                AXES.X.INDICATOR.WIDTH,
+                AXES.X.INDICATOR.HEIGHT
+            );
+
+            const drawFxIndicator = (x, y) => {
+                const indicatorWidth = 6;
+                ctx.beginPath();
+                ctx.arc(
+                    CANVAS.PADDING + (x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax,
+                    indicatorWidth,
+                    0, 2 * Math.PI
+                );
+                ctx.fill();
+            };
+
+            const drawSVG = (img, x, y, scale) => {
+                const w = img.naturalWidth * scale;
+                const h = img.naturalHeight * scale;
+                const xPos = CANVAS.PADDING - w / 2 +
+                      (x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN);
+                const yPos = CANVAS.PADDING + (yMax - y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax;
+                ctx.drawImage(img, xPos, yPos, w, h);
+            };
+
+            drawXIndicator(x, AXES.Y.ZERO);
+            drawXIndicator(x + h, AXES.Y.ZERO);
+
+            drawFxIndicator(x, f(x));
+            drawFxIndicator(x + h, f(x + h));
+
+            drawSVG(SVG.X, x, -.08, 1.5);
+            drawSVG(SVG.XPLUSH, x + h, -.2, 1.5);
+        },
+
+        drawSecant: (x, h) => {
+            const slope = (f(x + h) - f(x)) / h;
+            const ySecVec = xVec.map(xVal => ({x: xVal, y: slope * (xVal - x) + f(x)}));
+            ctx.beginPath();
+            ctx.moveTo(
+                CANVAS.PADDING + (ySecVec[0].x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                CANVAS.PADDING + (yMax - ySecVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+            );
+            ySecVec.forEach(p => ctx.lineTo(
+                CANVAS.PADDING + (p.x + X.MAX) * (AXES.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+            ));
+            ctx.strokeStyle = "green";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        },
+
+        clear: () => ctx.clearRect(0, 0, CANVAS.WIDTH, CANVAS.HEIGHT),
+        
+        draw(x, h) {
+            this.drawIndicators(x, h);
+            this.drawSecant(x, h);
+        },
+        
+        redraw(x, h) {
+            this.clear();
+            this.draw(x, h)
+        }
+    }),
+
+    async init() {
+        if (this.canvas.getContext) {
+            this.canvas.setAttribute("width", CANVAS.WIDTH);
+            this.canvas.setAttribute("height", CANVAS.HEIGHT);
+            
+            let img = new Image();
+            img.src = tex2imageSrc("x");
+            await img.decode();
+            SVG.X = img;
+            
+            img = new Image();
+            img.src = tex2imageSrc("x + h");
+            await img.decode();
+            SVG.XPLUSH = img;
+
+            const x = Number(this.xSlider.element.value);
+            const h = Number(this.hSlider.element.value);                
+            const v = this.visualiser(this.canvas.getContext("2d"));
+            v.draw(x, h);
+
+            const updateMath = async () => {
+                const x = Number(this.xSlider.element.value);
+                const h = Number(this.hSlider.element.value);
+                const xx = f(x);
+                const xhxh = f(x + h);
+                const fprimex = (xhxh - xx) / h;
+                const mx = fprimex / x;
+
+                MathJax.typesetClear([this.math, this.xSlider.valSpan, this.hSlider.valSpan]);
+                this.math.innerHTML = `$$
+    \\begin{align}
+        f'(x) &\\approx \\frac{f(x + h) - f(x)}{h} \\\\[10pt]
+          &\\approx \\frac{${xhxh.toFixed(3)} - ${xx.toFixed(3)}}{${h}} = ${fprimex.toFixed(3)} \\\\[10pt]
+          &\\approx ${isFinite(mx) ? mx.toFixed(3) + "x" : "\\infty{}"}
+    \\end{align}
+    $$`;
+                this.xSlider.valSpan.innerHTML = `\\(${x.toFixed(3)}\\)`;
+                this.hSlider.valSpan.innerHTML = `\\(${h.toFixed(3)}\\)`;
+                await MathJax.typesetPromise([this.math, this.xSlider.valSpan, this.hSlider.valSpan]);
+            };
+
+            updateMath();
+
+            this.xSlider.element && this.xSlider.valSpan &&
+                this.xSlider.element.addEventListener("input", async ({target: {value: val}}) => {
+                    v.redraw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
+                    await updateMath();
+                });
+
+            this.hSlider.element && this.hSlider.valSpan &&
+                this.hSlider.element.addEventListener("input", async ({target: {value: val}}) => {
+                    // Avoid division by zero!
+                    if (val == 0) {
+                        val = this.hSlider.prevValue > val ? -.01 : .01;
+                        this.hSlider.element.value = val;
+                    }
+                    this.hSlider.prevValue = val;
+                    v.redraw(Number(this.xSlider.element.value), Number(this.hSlider.element.value));
+                    await updateMath();
+                });
+        }
+    }
+};
+#+end_src
+
+Initialise the layers:
+
+#+begin_src js
+await staticLayer.init();
+await dynamicLayer.init();
+};
+#+end_src
+
+** Dual Number Arithmetic
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{align}
+(u + \varepsilon\dot{u}) + (v + \varepsilon\dot{v}) &= {\color{blue} u + v} + {\color{green} \varepsilon(\dot{u} + \dot{v})} \\[.5em]
+(u + \varepsilon\dot{u}) - (v + \varepsilon\dot{v}) &= {\color{blue} u - v} + {\color{green} \varepsilon(\dot{u} - \dot{v})} \\[.5em]
+(u + \varepsilon\dot{u}) \times (v + \varepsilon\dot{v}) &= {\color{blue} uv} + {\color{green} \varepsilon(u\dot{v} + v\dot{u})} \\[.5em]
+(u + \varepsilon\dot{u}) \div (v + \varepsilon\dot{v}) &= {\color{blue} \frac{u}{v}} + {\color{green} \varepsilon\left(\frac{v\dot{u} - u\dot{v}}{v^{2}}\right)}
+\end{align}
+
+** Dual Number Arithmetic
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+Truncated Taylor series expansion at \(\varepsilon\dot{x} = 0\):
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+f(x + \varepsilon\dot{x}) = f(x) + \varepsilon\dot{x}f'(x) +
+  \cancel{(\varepsilon\dot{x})^{2}\frac{f''(x)}{2}} + \cancel{(\varepsilon\dot{x})^{3}\frac{f'''(x)}{6}} + \cdots
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+\begin{align}
+\sin(u + \varepsilon\dot{u}) &= {\color{blue} \sin(u)} + {\color{green} \varepsilon\dot{u}\cos(u)} \\[.5em]
+\ln(u + \varepsilon\dot{u}) &= {\color{blue} \ln(u)} + {\color{green} \varepsilon\dot{u}\frac{1}{u}} \\[.5em]
+e^{(u + \varepsilon\dot{u})} &= {\color{blue} e^{u}} + {\color{green} \varepsilon\dot{u}e^{u}}
+\end{align}
+
+** Dual Number Arithmetic
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_html: :class big-eqn
+\begin{equation}
+({\color{blue} u} + {\color{green} \varepsilon\dot{u}}) \to \langle {\color{blue} u}, {\color{green} u'} \rangle
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :class big-eqn
+\begin{equation}
+UV = \langle {\color{blue} u}, {\color{green} u'} \rangle\langle {\color{blue} v}, {\color{green} v'} \rangle
+  = \langle {\color{blue} uv}, {\color{green} uv' + vu'} \rangle
+\end{equation}
+
+** Automatic Differentiation
+
+Compute the primal and tangent of \((x + 1)(x - 2)\).
+
+Independent variable, \(X = \langle {\color{blue} x}, {\color{green} 1}
+\rangle\). Constant, \(C = \langle {\color{blue} c}, {\color{green} 0} \rangle\).
+
+#+begin_export html
+<div id="dualExample" class="fragment">
+  <div>
+    <label for="dualX">\(x\)</label>
+    <input type="range" id="dualX" min=-2 max=2.75 value=0 step=.01 />
+  </div>
+  <div id="dualNumerical">
+  </div>
+  <canvas id="dualPlotStatic"></canvas>
+  <canvas id="dualPlotDynamic"></canvas>
+</div>
+#+end_export
+
+*** Define the dual number class                                   :noexport:
+
+#+begin_src js
+class Dual {
+    constructor(primal, tangent) {
+        this.primal = primal;
+        this.tangent = tangent;
+    }
+
+    toString() {
+        return `\\langle{\\color{blue}${this.primal.toFixed(2)}},{\\color{green}${this.tangent.toFixed(2)}}\\rangle`;
+    }
+
+    add(d) {
+        return new Dual(this.primal + d.primal, this.tangent + d.tangent);
+    }
+
+    sub(d) {
+        return new Dual(this.primal - d.primal, this.tangent - d.tangent);
+    }
+
+    mul(d) {
+        return new Dual(this.primal * d.primal, this.primal * d.tangent + d.primal * this.tangent);
+    }
+};
+#+end_src
+
+*** Function for the numerical example                             :noexport:
+
+#+begin_src js
+const numericalExample = async () => {
+#+end_src
+
+*** Canvas                                                         :noexport:
+
+#+begin_src js
+const CANVAS = { WIDTH: 550, HEIGHT: 550, PADDING: 0 };
+const AXES = { X: { ZERO: CANVAS.WIDTH / 2 },
+               Y: { ZERO: CANVAS.HEIGHT - 250 } };
+const X = { LEN: 1000, MIN: -2.5, MAX: 2.5};
+X.STEP = (X.MAX - X.MIN) / X.LEN;
+#+end_src
+
+*** Vectors, constants, input variables, output function           :noexport:
+
+#+begin_src js
+const xVec = Array.from({length: X.LEN + 1}, (_,x) => X.MIN + x * X.STEP);
+const C1 = new Dual(1, 0);
+const C2 = new Dual(2, 0);
+const f = x => x.add(C1).mul(x.sub(C2));
+const yVec = xVec.map(x => ({x: x, y: f(new Dual(x, 1)).primal}));
+const yMax = 3.5;//Math.max(...yVec.map(y => y.y));
+#+end_src
+
+*** DOM elements to target                                         :noexport:
+
+#+begin_src js    
+const math = document.getElementById("dualNumerical");
+const slider = document.getElementById("dualX");
+#+end_src
+
+*** Static plot; axes and f(x)                                     :noexport:
+
+#+begin_src js
+const plot = {
+    staticLayer: {
+        canvas: document.getElementById("dualPlotStatic"),
+
+        drawAxis: {
+            x: ctx => {
+                ctx.beginPath();
+                ctx.moveTo(0, AXES.Y.ZERO);
+                ctx.lineTo(CANVAS.WIDTH, AXES.Y.ZERO);
+                ctx.stroke();
+                // Arrow
+                ctx.beginPath();
+                ctx.moveTo(CANVAS.WIDTH, AXES.Y.ZERO);
+                ctx.lineTo(CANVAS.WIDTH - 10, AXES.Y.ZERO - 5);
+                ctx.lineTo(CANVAS.WIDTH - 10, AXES.Y.ZERO + 5);
+                ctx.closePath();
+                ctx.fill();
+            },
+            y: ctx => {
+                ctx.beginPath();
+                ctx.moveTo(AXES.X.ZERO, 0);
+                ctx.lineTo(AXES.X.ZERO, CANVAS.HEIGHT);
+                ctx.stroke();
+                // Arrow
+                ctx.beginPath();
+                ctx.moveTo(AXES.X.ZERO, 0);
+                ctx.lineTo(AXES.X.ZERO - 5, 10);
+                ctx.lineTo(AXES.X.ZERO + 5, 10);
+                ctx.closePath();
+                ctx.fill();
+            }
+        },
+
+        drawFunction: ctx => {
+            ctx.beginPath();
+            ctx.moveTo(
+                CANVAS.PADDING + (yVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                CANVAS.PADDING + (yMax - yVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+            );
+            yVec.forEach(p => ctx.lineTo(
+                CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+            ));
+            ctx.strokeStyle = "blue";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        },
+
+        init() {
+            if (this.canvas.getContext) {
+                this.canvas.setAttribute("width", CANVAS.WIDTH);
+                this.canvas.setAttribute("height", CANVAS.HEIGHT);
+
+                const ctx = this.canvas.getContext("2d");
+                this.drawAxis.x(ctx);
+                this.drawAxis.y(ctx);
+                this.drawFunction(ctx);
+            }
+        }
+    },
+#+end_src
+
+*** Dynamic plot; f(x) indicator and tangent                       :noexport:
+
+#+begin_src js
+    dynamicLayer: {
+        canvas: document.getElementById("dualPlotDynamic"),
+
+        artist: ctx => ({
+            clear: () => ctx.clearRect(0, 0, CANVAS.WIDTH, CANVAS.HEIGHT),
+
+            drawTangent: x => {
+                const slope = f(new Dual(x, 1)).tangent;
+                const yTanVec = xVec.map(xVal => ({x: xVal, y: slope * (xVal - x) + f(new Dual(x, 1)).primal}));
+                ctx.beginPath();
+                ctx.moveTo(
+                    CANVAS.PADDING + (yTanVec[0].x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - yTanVec[0].y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                );
+                yTanVec.forEach(p => ctx.lineTo(
+                    CANVAS.PADDING + (p.x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - p.y) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax
+                ));
+                ctx.strokeStyle = "green";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            },
+
+            drawIntersection: x => {
+                const indicatorWidth = 6;
+                ctx.beginPath();
+                ctx.arc(
+                    CANVAS.PADDING + (x + X.MAX) * (CANVAS.WIDTH - CANVAS.PADDING * 2) / (X.MAX - X.MIN),
+                    CANVAS.PADDING + (yMax - f(new Dual(x, 1)).primal) * (AXES.Y.ZERO - CANVAS.PADDING) / yMax,
+                    indicatorWidth,
+                    0, 2 * Math.PI
+                );
+                ctx.fill();
+            },
+
+            draw(x) {
+                this.drawTangent(x);
+                this.drawIntersection(x);
+            },
+
+            redraw(x) {
+                this.clear();
+                this.draw(x);
+            }
+        }),
+
+        async init() {
+            if (this.canvas.getContext) {
+                this.canvas.setAttribute("width", CANVAS.WIDTH);
+                this.canvas.setAttribute("height", CANVAS.HEIGHT);
+
+                return this.artist(this.canvas.getContext("2d"));
+            }
+        }
+    }
+};
+#+end_src
+
+*** Typeset math update callback                                   :noexport:
+
+#+begin_src js
+const updateMath = async () => {
+    const x = new Dual(Number(slider.value), 1);
+    
+    MathJax.typesetClear([math]);
+    math.innerHTML = `\\begin{align}
+& ( ${x} + ${C1} )( ${x} - ${C2} ) \\\\[.5em]
+=& ${x.add(C1)} ${x.sub(C2)} \\\\[.5em]
+=& ${f(x)}
+\\end{align}`
+    await MathJax.typesetPromise([math]);
+};
+#+end_src
+
+*** Setup and input variable change event listener                 :noexport:
+
+#+begin_src js
+await updateMath();
+plot.staticLayer.init();
+const d = await plot.dynamicLayer.init();
+d.draw(Number(slider.value));
+
+slider.addEventListener("input", async ({target: {value}}) => {
+    await updateMath();
+    await d.redraw(Number(value));
+});
+};
+#+end_src
+
+*** Some CSS                                                       :noexport:
+
+#+begin_src css
+#dualExample {
+    position: relative;
+    padding-bottom: 1em;
+}
+
+#dualExample > canvas {
+    position: absolute;
+    top: -5%;
+    opacity: .4;
+    z-index: -100;
+}
+#+end_src
+
+** Tangent \to Gradient
+
+#+attr_html: :class big-eqn
+\begin{equation}
+\langle {\color{blue} u},{\color{green} u'} \rangle \to \langle {\color{blue} u}, {\color{green} \nabla{}u} \rangle
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :class big-eqn
+\begin{equation}
+\nabla{}u = \begin{bmatrix}\frac{\partial{}u}{\partial{}x_{1}} \\ \vdots \\ \frac{\partial{}u}{\partial{}x_{N}}\end{bmatrix}
+\end{equation}
+
+* Differentiable Faust Primitives
+
+** Identity Primitive
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_html: :style width: 6.5em
+#+begin_src faust :results file svg :file images/identity.svg :exports both
+process = _;
+#+end_src
+#+attr_org: :width 100
+#+attr_html: :width 300
+#+RESULTS:
+[[file:images/identity.svg]]
+
+** Identity Primitive
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_org: :width 100
+#+attr_html: :width 300
+[[file:images/identity.svg]]
+
+Semantic scheme:
+
+\begin{align}
+  \sembrack{\_} \;&:\; \mathbb{S} \to \mathbb{S} \\[5pt]
+  \sembrack{\_}(s)& \to (s)
+\end{align}
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+y(t) = s(t)\cdot{}1 = s(t)
+\end{equation}
+
+** Identity Primitive
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+In dual signal arithmetic:
+
+\begin{equation}
+\langle{}s,\nabla{}s\rangle \in \mathbb{S}_{d}, \quad \mathbb{S}_{d} = \mathbb{S}^{N+1}
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :style margin-top: 2em
+\begin{equation}
+\langle{}s,\nabla{}s\rangle\langle{}1,\nabla1\rangle = \langle{}1s, 1\nabla{}s + s\nabla{}1 \rangle = \langle{}s,\nabla{}s\rangle
+\end{equation}
+
+** Identity Primitive
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\(\diffbrack{\cdot}_{}\)
+
+Derivative transformation with respect to \(N\) input variables.
+
+#+ATTR_REVEAL: :frag t
+\begin{align}
+  \diffbrack{\_} \;&:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\[5pt]
+  \diffbrack{\_}(\langle s,\nabla{}s \rangle)& \to (\langle s,\nabla{}s \rangle)
+\end{align}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :style margin-top: 2em
+\begin{equation}
+\diffbrack{\_}
+  \;=\; \left[\!\!\left[ \overbrace{\_\,,\dots,\_}^{N+1 }\right]\!\!\right]
+  \;=\; \left[\!\!\left[ {\Big\|_{l=1}^{N+1}\;\_}\, \right]\!\!\right]
+\end{equation}
+
+** Identity Primitive
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_src faust :results file svg :file images/diffidentity.svg :exports both
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(_);
+#+end_src
+#+attr_org: :width 100
+#+attr_html: :width 300
+#+ATTR_REVEAL: :frag t
+#+RESULTS:
+[[file:images/diffidentity.svg]]
+
+** Identity Primitive
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+In the differentiable environment in =diff.lib=...
+
+#+attr_html: :style width: 18em
+#+begin_src faust
+env(vars) = environment {
+  ···
+  diff(_) = par(i, vars.N + 1, _);
+  ···
+};
+#+end_src
+
+** Unary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate data-auto-animate-restart
+:END:
+
+\begin{align}
+\diffbrack{U} \;&:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\[5pt]
+\diffbrack{U}(\langle s,\nabla{}s \rangle)& \to (\langle y,\nabla{}y \rangle)
+\end{align}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :style margin-top: 2em
+\begin{align}
+\langle y,\nabla{}y \rangle &= U(\langle s,\nabla{}s \rangle) \\
+  &= \langle U(s), \nabla{}s\,U'(s) \rangle
+\end{align}
+
+** Unary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{equation}
+\exp(\langle s,\nabla{}s \rangle) = \langle \exp(s), \nabla{}s\exp(s) \rangle
+\end{equation}
+
+#+attr_html: :style width: 11.5em
+#+begin_src faust :noeval :exports code
+process = d.diff(exp);
+#+end_src
+
+#+begin_src faust :results file svg :file images/diffunary1.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(exp);
+#+end_src
+#+attr_org: :width 200
+#+attr_html: :width 800
+#+RESULTS:
+[[file:images/diffunary1.svg]]
+
+** Unary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{equation}
+\cos(\langle s,\nabla{}s \rangle) = \langle \cos(s), -\nabla{}s\sin(s) \rangle
+\end{equation}
+
+#+attr_html: :style width: 11.5em
+#+begin_src faust :noeval :exports code
+process = d.diff(cos);
+#+end_src
+
+#+begin_src faust :results file svg :file images/diffunary2.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(cos);
+#+end_src
+#+attr_org: :width 200
+#+attr_html: :width 800
+#+RESULTS:
+[[file:images/diffunary2.svg]]
+
+** Unary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+In =diff.lib=...
+
+#+attr_html: :style width: 40em
+#+begin_src faust
+env(vars) = environment {
+  ···
+  diff(cos) = diffcos with { diffcos = unary(cos, (*(-1),sin : *)); };
+  ···
+} with {
+  unary(primal, tangent) = routing : primal,par(i, vars.N, tangent)
+  with {
+    routing = ...
+  };
+  ···
+};
+#+end_src
+** Unary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+What about ~mem~?
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+\langle{}s,\nabla{}s\rangle\ast\langle{}h,\nabla{}h\rangle = \langle{}s\ast{}h, \nabla{}s\ast{}h\rangle
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+  \begin{split}
+    \diffbrack{\mathrm{mem}} &\;:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\[5pt]
+    \diffbrack{\mathrm{mem}}(\langle{}s, \nabla{}s\rangle) &\to (\langle{}y, \nabla{}y\rangle) \\[5pt]
+    \langle{}y(t),\nabla{}y(t)\rangle &= \langle{}s(t-1),\nabla{}s(t-1)\rangle
+  \end{split}
+\end{equation}
+
+#+begin_src faust :results file svg :file images/diffmem.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(mem);
+#+end_src
+#+attr_org: :width 200
+#+attr_html: :width 300
+#+ATTR_REVEAL: :frag t
+#+RESULTS:
+[[file:images/diffmem.svg]]
+
+** Binary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate data-auto-animate-restart
+:END:
+
+\begin{align}
+\diffbrack{B} \;&:\; \mathbb{S}^{2}_{d} \to \mathbb{S}_{d} \\[5pt]
+\diffbrack{B}(\langle s_{1},\nabla{}s_{1} \rangle,\langle &s_{2},\nabla{}s_{2} \rangle) \to (\langle y,\nabla{}y \rangle)
+\end{align}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :style margin-top: 2em
+\begin{align}
+\langle y,\nabla{}y \rangle &= B(\langle s_{1},\nabla{}s_{1} \rangle,\langle s_{2},\nabla{}s_{2} \rangle) \\
+  &= \left\langle B(s_{1},s_{2}), \nabla{}s_{1}\frac{\partial{}B}{\partial{}s_{1}}+\nabla{}s_{2}\frac{\partial{}B}{\partial{}s_{2}} \right\rangle
+\end{align}
+
+** Binary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_html: :style width: 10.5em
+#+begin_src faust :noeval :exports code
+process = d.diff(*);
+#+end_src
+
+#+begin_src faust :results file svg :file images/diffbinary1.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(*);
+#+end_src
+#+attr_org: :width 200
+#+attr_html: :width 1400
+#+RESULTS:
+[[file:images/diffbinary1.svg]]
+
+** Binary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_html: :style width: 10.5em
+#+begin_src faust :noeval :exports code
+process = d.diff(+);
+#+end_src
+
+#+begin_src faust :results file svg :file images/diffbinary2.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(+);
+#+end_src
+#+attr_org: :width 200
+#+attr_html: :width 1400
+#+RESULTS:
+[[file:images/diffbinary2.svg]]
+
+#+begin_src faust :noeval :exports code
+diff(+) = diffadd with { diffadd = binary(+, (_,!,!,_ : +)); };
+#+end_src
+
+** Binary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_html: :style width: 10.5em
+#+begin_src faust :noeval :exports code
+process = d.diff(+);
+#+end_src
+
+#+begin_src faust :results file svg :file images/diffaddalt.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = routes.interleave(vars.N + 1, 2) : +,par(i, vars.N, +);
+#+end_src
+#+attr_org: :width 200
+#+attr_html: :width 450
+#+RESULTS:
+[[file:images/diffaddalt.svg]]
+
+#+attr_html: :style width: 23em
+#+begin_src faust :noeval :exports code
+diff(+) = diffadd
+with {
+  diffadd = routes.interleave(vars.N + 1, 2)
+            : +,par(i, vars.N, +);
+};
+#+end_src
+
+** Binary Primitives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_html: :style width: 10.5em
+#+begin_src faust :noeval :exports code
+process = d.diff(@);
+#+end_src
+
+#+begin_src faust :results file svg :file images/diffdelay.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(@);
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 1400
+#+RESULTS:
+[[file:images/diffdelay.svg]]
+
+** Gradient \to Jacobian
+
+#+attr_html: :class big-eqn
+\begin{equation}
+\langle {\color{blue} s}, {\color{green} \nabla{}s} \rangle \to \langle {\color{blue} \mathbf{s}},{\color{green} \mathbf{J_{s}}} \rangle
+\end{equation}
+
+\begin{equation}
+\langle {\color{blue} \mathbf{s}},{\color{green} \mathbf{J_{s}}} \rangle =
+  \langle {\color{blue} s_{1}},{\color{green} \nabla{}s_{1}} \rangle,\dots,\langle {\color{blue} s_{M}},{\color{green} \nabla{}s_{M}} \rangle
+\end{equation}
+
+\begin{equation}
+\mathbf{J_{s}} = \begin{bmatrix}
+  \frac{\partial{}s_{1}}{\partial{}x_{1}} & \cdots & \frac{\partial{}s_{1}}{\partial{}x_{N}} \\
+  \vdots & \ddots & \vdots \\
+  \frac{\partial{}s_{M}}{\partial{}x_{1}} & \cdots & \frac{\partial{}s_{M}}{\partial{}x_{N}} \\
+\end{bmatrix}
+\end{equation}
+
+** Differentiable Circuits
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{equation}
+  \begin{split}
+    \diffbrack{C} &\;:\; \mathbb{S}_{d}^{M} \to \mathbb{S}_{d}^{P} \\[5pt]
+    \diffbrack{C}(\langle{} \mathbf{s},\mathbf{J_{s}} \rangle) &\to (\langle{} \mathbf{y},\mathbf{J_{y}} \rangle) \\[5pt]
+    \langle\mathbf{y}(t), \;\mathbf{J}_{\mathbf{y}}(t)\rangle &= \langle{}f(\mathbf{s}(t)), \;\mathbf{J}_{f}(t)\mathbf{J}_{{\mathbf{s}}}(t)\rangle
+  \end{split}
+\end{equation}
+
+** Differentiable Compositions
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+** Differentiable Compositions
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{equation}
+  \diffbrack{C_{1},C_{2}} = \diffbrack{C_{1}},\diffbrack{C_{2}}
+\end{equation}
+
+#+begin_src faust :results file svg :file images/diffpar.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff((*,sin));
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 1000
+#+RESULTS:
+[[file:images/diffpar.svg]]
+
+** Differentiable Compositions
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{equation}
+  \diffbrack{C_{1} : C_{2}} = \diffbrack{C_{1}} : \diffbrack{C_{2}}
+\end{equation}
+
+#+begin_src faust :results file svg :file images/diffseq.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff((* : sin));
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 1500
+#+RESULTS:
+[[file:images/diffseq.svg]]
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+\langle \mathbf{y},\mathbf{J_{y}} \rangle = \langle f(g(\mathbf{s})), \mathbf{J}_{f}\mathbf{J}_{g}\mathbf{J_{s}} \rangle
+\end{equation}
+
+** Differentiable Compositions
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{equation}
+  \diffbrack{C_{1} \sim C_{2}} = \diffbrack{C_{1}} \sim \diffbrack{C_{2}}
+\end{equation}
+
+#+begin_src faust :results file svg :file images/diffrec.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff((* ~ sin));
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 1000
+#+RESULTS:
+[[file:images/diffrec.svg]]
+
+** Differentiable Compositions
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{equation}
+  \diffbrack{C_{1} <: C_{2}} = \diffbrack{C_{1}} <: \diffbrack{C_{2}}
+\end{equation}
+
+#+begin_src faust :results file svg :file images/diffsplit.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff((sin <: *));
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 1500
+#+RESULTS:
+[[file:images/diffsplit.svg]]
+
+** Differentiable Compositions
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{gather}
+  \diffbrack{C_{1} :> C_{2}} = \diffbrack{C_{1} :  \chi(i_{C_{2}},k)} : F : \diffbrack{C_{2}} \\
+  F = \big\|_{l=1}^{i_{C_{2}}}\left(
+    \big\|_{l=1}^{k}\diffbrack{\_} \;:>\; \diffbrack{\_}
+  \right), \quad k = \frac{o_{C_{1}}}{i_{C_{2}}}
+\end{gather}
+
+#+begin_src faust :results file svg :file images/diffmerge.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(((*,+) :> sin));
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 1200
+#+RESULTS:
+[[file:images/diffmerge.svg]]
+
+** Differentiable Compositions
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{equation}
+\begin{split}
+\diffbrack{(C_{1},C_{2}) : C_{3}} &= \diffbrack{C_{1},C_{2}} \;:\; \diffbrack{C_{3}} \\
+  &= \diffbrack{C_{1}},\diffbrack{C_{2}} \;:\; \diffbrack{C_{3}}
+\end{split}
+\end{equation}
+
+* Higher Order Derivatives
+
+** Higher Order Derivatives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{equation}
+s \quad \xRightarrow{\frac{\partial{}}{\partial{}\mathbf{x}}} \quad \nabla{}s \quad \xRightarrow{\frac{\partial{}}{\partial{}\mathbf{x}}} \quad \mathbf{H}_{s}
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+\mathbf{H}_s = \begin{bmatrix}
+  \frac{\partial{}^{2}s}{\partial{}x_{1}^{2}}
+    & \frac{\partial{}^{2}s}{\partial{}x_{1}\partial{}x_{2}}
+    & \cdots
+    & \frac{\partial{}^{2}s}{\partial{}x_{1}\partial{}x_{N}} \\
+  \frac{\partial{}^{2}s}{\partial{}x_{2}\partial{}x_{1}}
+    & \frac{\partial{}^{2}s}{\partial{}x_{2}^{2}}
+    & \cdots
+    & \frac{\partial{}^{2}s}{\partial{}x_{2}\partial{}x_{N}} \\
+  \vdots & \vdots & \ddots & \vdots \\
+  \frac{\partial{}^{2}s}{\partial{}x_{N}\partial{}x_{1}}
+    & \frac{\partial{}^{2}s}{\partial{}x_{N}\partial{}x_{2}}
+    & \cdots
+    & \frac{\partial{}^{2}s}{\partial{}x_{N}^{2}} \\
+\end{bmatrix}
+\end{equation}
+
+** Higher Order Derivatives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_html: :class big-eqn
+\begin{equation}
+s
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :class big-eqn
+\begin{equation}
+\langle s,\nabla{}s \rangle
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :class big-eqn
+\begin{equation}
+\langle s,\nabla{}s,\mathbf{H}_{s} \rangle
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :class big-eqn
+\begin{equation}
+\langle s,\nabla{}s,\mathbf{H}_{s},\dots \rangle
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+#+attr_html: :class big-eqn
+\begin{equation}
+\vdots
+\end{equation}
+
+** Higher Order Derivatives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+\begin{equation}
+\left\langle s, \nabla{}s,
+  \left\langle
+    \frac{\partial{}s}{\partial{}x_{1}}, \frac{\partial{}s^{2}}{\partial{}x_{1}^{2}}, \dots, \frac{\partial{}s}{\partial{}x_{2}}, \frac{\partial{}^{2}s}{\partial{}x_{2}\partial{}x_{1}}, \dots
+  \right\rangle
+\right\rangle
+\end{equation}
+
+** Higher Order Derivatives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_src faust :noeval :exports code
+process = d.diff(d.diff(*));
+#+end_src
+
+#+begin_src faust :results file svg :file images/diffdiffmul.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(d.diff(*));
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 1400
+#+RESULTS:
+[[file:images/diffdiffmul.svg]]
+
+** Higher Order Derivatives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_src faust :noeval :exports code
+process = d.diff(d.diff(d.diff(sin)));
+#+end_src
+
+#+begin_src faust :results file svg :file images/diffdiffdiffsin.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(d.diff(d.diff(sin)));
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 1400
+#+RESULTS:
+[[file:images/diffdiffsin.svg]]
+
+* A Brief Demonstration...
+
+** Second order autodiff (in the web IDE)                          :noexport:
+
+#+begin_src faust
+import("stdfaust.lib");
+import("diff.lib");
+
+N = 2;
+
+vars1(V) = environment {
+    // Count the variables.
+    N = outputs(V);
+    // Retrieve a variable by index i.
+    var(i) = ba.take(i, V),pds(N, i)
+    with {
+        // Compute partial derivatives of
+        // variable x_i.
+        pds(N, i) = par(j, N, i-1==j);
+    };
+};
+
+X = vars1(par(i, N, hslider("x%i", 0, -10, 10, 1)));
+d = df.env(X);
+
+f = ^(2),_ : *;
+
+x1 = hslider("[0]x1", 0, -10, 10, 1),1,0,1,0,0,0,0,0;
+x2 = hslider("[1]x2", 0, -10, 10, 1),0,1,0,0,0,1,0,0;
+
+process = x1,x2
+    : d.diff(d.diff(f))
+    : (_ <: attach(hbargraph("[2]y = x1^2 * x2", -100, 100))),
+    (_ <: attach(hbargraph("[3]dy/dx1 = 2*x1*x2", -100, 100))),
+    (_ <: attach(hbargraph("[4]dy/dx2 = x1^2", -100, 100))),
+    (_ <: attach(hbargraph("[5]dy/dx1 = 2*x1*x2", -100, 100))),
+    (_ <: attach(hbargraph("[6]dyy/dx1x1 = 2*x2", -100, 100))),
+    (_ <: attach(hbargraph("[7]dyy/dx1x2 = 2*x1", -100, 100))),
+    (_ <: attach(hbargraph("[8]dy/dx2 = x1^2", -100, 100))),
+    (_ <: attach(hbargraph("[9]dyy/dx2x1 = 2*x1", -100, 100))),
+    (_ <: attach(hbargraph("[10]dyy/dx2x2 = 0", -100, 100)));
+#+end_src
+
+* Emacs Setup                                                      :noexport:
+
+# Local Variables:
+# org-re-reveal-pdfseparatefragments: nil
+# End:

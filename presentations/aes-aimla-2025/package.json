@@ -1,0 +1,8 @@
+{
+  "name": "seminaire-emeraude-2025",
+  "version": "0.0.1",
+  "description": "Dynamic content support for my presentation for the 2025 team seminar.",
+  "dependencies": {
+      "mathjax": "^3.2.2"
+  }
+}

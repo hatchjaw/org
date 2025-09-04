@@ -349,8 +349,8 @@ but later changed my view.
 * Julia
 
 I've used Julia for some data-wrangling (see, e.g., [[file:~/org/papers/smc-2025/smc-2025.org][SMC '25]]). It can
-be a bit of a nuisance to work with (though that's largely down to the
-vterm issues described above). I should really be managing my Julia
+be a bit of a nuisance to work with (though that's largely down to 
+vterm issues described [[*Julia PATH][below]]). I should really be managing my Julia
 versions per-project with Nix or equivalent.
 
 #+begin_src emacs-lisp
@@ -787,8 +787,7 @@ As an alternative to the less-than-idea =C-x o=, let's try the
    (make-lsp-client
     :new-connection (lsp-stdio-connection "faustlsp")
     :activation-fn (lsp-activate-on "faust")
-    :server-id 'faustlsp
-    )))
+    :server-id 'faustlsp)))
 #+end_src
 
 * Language support
