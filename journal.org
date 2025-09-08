@@ -9985,3 +9985,26 @@ controller by way of mitigation, but it didn't work. I should try
 again.
   
 Entered on [2025-07-25 ven. 18:30]
+** 2025-09 septembre
+*** 2025-09-08 lundi
+**** AES AIMLA: Franco Caspe, Jatin Chowdhury   :PRESENTATION:CONFERENCE:
+[[https://aes2.org/event-extra/2025-aes-international-conference-on-artificial-intelligence-and-machine-learning-for-audio-program/][Tutorial]]: /Real-Time Neural Audio Inference/
+
+Challenges of real-time inference, etc. Requirement to store state for
+block-based processing, and to match kernel size (i.e. length of CNN,
+which is analogous to FIR filter) to buffer size, or alternatively
+zero-pad so things don't get uncausal --- standard convolution
+requirements.
+
+(Incidentally, an IIR filter is analogous to an RNN, and I should
+really have twigged, having read, /and cited/, B. Kuznetzov's paper on
+differentiable IIR filters.)
+
+Anyway, interesting Colab notebook [[https://colab.research.google.com/drive/1GBVoNxyBoMIKsuy6f9B8uLF2WYgwKrhm][here]]. Example of CNN with several
+convolutional layers, each one with a /dilation/ applied; the first is
+essentially a 3-tap FIR filter (followed by a leaky ReLU), the second
+has three non-zero taps, each separated by a zero-tap, for the nth,
+each of three non-zero taps is separated by \(2^{(n-1)}\) zero taps. Used
+for modelling a guitar fuzz effect.
+
+Entered on [2025-09-08 lun. 09:57]
