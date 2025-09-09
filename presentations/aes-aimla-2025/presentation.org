@@ -3,7 +3,7 @@
 #+AUTHOR: Thomas Rushton, Yann Orlarey, Romain Michon, Tanguy Risset & Stéphane Letz
 
 # Set num:nil when done editing
-#+options: num:t toc:nil
+#+options: num:nil toc:nil
 #+options: reveal_width:1500 reveal_height:1000
 #+export_file_name: index
 #+property: header-args:css :results none :exports none :tangle ./emeraude2025.css
@@ -256,7 +256,7 @@ MathJax = {
 #+ATTR_REVEAL: :frag (appear)
 - The Faust programming language
 - Why autodiff in Faust?
-- Dual-number/signal arithmetic
+- Dual-number arithmetic
 - Differentiable Faust programs
 
 ** The Faust programming language
@@ -266,9 +266,7 @@ MathJax = {
 
 #+ATTR_REVEAL: :frag (appear)
 - Functional paradigm domain-specific language (DSL) for audio synthesis and DSP
-- Highly optimised compiler
-- Web IDE; recent addition of an LSP
-- Compiles to C++, Rust, WebAssembly, LLVM...
+- Compiles to highly optimised C++, Rust, WebAssembly, LLVM...
 - /Architectures/ provide support for DAW plugins, smartphone apps,
   embedded platforms...
 - The SyFaLa project provides a direct Faust-to-FPGA toolchain
@@ -340,7 +338,7 @@ process = A :> B;
 
 #+attr_html: :style width: 12.5em
 #+begin_src faust :results file svg :file images/gain.svg :exports both
-process = _ * .5 <: _,_;
+process = _ * 0.5 <: _,_;
 #+end_src
 #+attr_org: :width 200
 #+attr_html: :width 750
@@ -469,6 +467,8 @@ Differentiable IIR Filters for Machine Learning Applications (2020)
 
 * Differentiation arithmetic
 
+** Maybe don't use this                                            :noexport:
+
 #+REVEAL: split data-transition="slide-in fade-out"
 
 #+attr_html: :class huge-eqn
@@ -490,9 +490,7 @@ f'(x) = \frac{f(x + \varepsilon\dot{x}) - f(x)}{\varepsilon\dot{x}}
 
 #+REVEAL: split data-transition="fade"
 
-\begin{equation}
-\textrm{Let}\; f(x) = x
-\end{equation}
+Rearrange, and let \(f(x) = x\)
 
 #+attr_html: :class huge-eqn
 \begin{align}
@@ -505,7 +503,7 @@ f(x + \varepsilon\dot{x}) &= f(x) + \varepsilon\dot{x}f'(x) \\
 <p class="fragment">The first component is the <span style="color:blue;">PRIMAL</span>; the second is the <span style="color:green;">TANGENT</span>.</p>
 #+end_export
 
-** Dual Number Arithmetic
+** Dual Number Arithmetic                                          :noexport:
 :PROPERTIES:
 :reveal_extra_attr: data-auto-animate
 :END:
@@ -518,7 +516,7 @@ f(x + \varepsilon\dot{x}) &= f(x) + \varepsilon\dot{x}f'(x) \\
 \end{align}
 
 
-** Dual Number Arithmetic
+** Dual Number Arithmetic                                          :noexport:
 :PROPERTIES:
 :reveal_extra_attr: data-auto-animate
 :END:
@@ -535,9 +533,36 @@ UV = \langle {\color{blue} u}, {\color{green} u'} \rangle\langle {\color{blue} v
   = \langle {\color{blue} uv}, {\color{green} uv' + vu'} \rangle
 \end{equation}
 
+** Dual Number Arithmetic
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_html: :class big-eqn
+\begin{equation}
+U = \langle {\color{blue} u}, {\color{green} u'} \rangle
+\end{equation}
+
+#+begin_export html
+<p class="fragment">This is a <span style="color:blue;">DUAL</span> <span style="color:green;">NUMBER</span>.</p>
+<p class="fragment">The first component is the <span style="color:blue;">PRIMAL</span>; the second is the <span style="color:green;">TANGENT</span>.</p>
+#+end_export
+
+#+ATTR_REVEAL: :frag t
+\begin{gather}
+U+V = \langle {\color{blue} u}, {\color{green} u'} \rangle + \langle {\color{blue} v}, {\color{green} v'} \rangle
+  = \langle {\color{blue} u+v}, {\color{green} u' + v'} \rangle \\
+U-V = \langle {\color{blue} u}, {\color{green} u'} \rangle - \langle {\color{blue} v}, {\color{green} v'} \rangle
+  = \langle {\color{blue} u+v}, {\color{green} u' - v'} \rangle \\
+UV = \langle {\color{blue} u}, {\color{green} u'} \rangle\langle {\color{blue} v}, {\color{green} v'} \rangle
+  = \langle {\color{blue} uv}, {\color{green} uv' + vu'} \rangle \\
+\frac{U}{V} = \frac{\langle {\color{blue} u}, {\color{green} u'} \rangle}{\langle {\color{blue} v}, {\color{green} v'} \rangle}
+  = \left\langle {\color{blue} \frac{u}{v}}, {\color{green} \frac{vu' - uv'}{v^{2}}} \right\rangle
+\end{gather}
+
 ** Automatic Differentiation
 
-Compute the primal and tangent of \((x + 1)(x - 2)\).
+Compute the primal and tangent, wrt. \(x\), of \((x + 1)(x - 2)\).
 
 Independent variable, \(X = \langle {\color{blue} x}, {\color{green} 1}
 \rangle\). Constant, \(C = \langle {\color{blue} c}, {\color{green} 0} \rangle\).
@@ -875,7 +900,6 @@ Derivative transformation with respect to \(N\) input variables.
 #+attr_html: :style margin-top: 2em
 \begin{equation}
 \diffbrack{\_}
-  \;=\; \left[\!\!\left[ \overbrace{\_\,,\dots,\_}^{N+1 }\right]\!\!\right]
   \;=\; \left[\!\!\left[ {\Big\|_{l=1}^{N+1}\;\_}\, \right]\!\!\right]
 \end{equation}
 
@@ -914,7 +938,6 @@ env(vars) = environment {
   ···
 };
 #+end_src
-
 
 ** Unary Primitives
 
@@ -980,11 +1003,7 @@ process = d.diff(mem);
 
 #+ATTR_REVEAL: :frag t
 \begin{equation}
-  \begin{split}
-    \diffbrack{\mathrm{mem}} &\;:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\[5pt]
-    \diffbrack{\mathrm{mem}}(\langle{}s, \nabla{}s\rangle) &\to (\langle{}y, \nabla{}y\rangle) \\[5pt]
-    \langle{}y(t),\nabla{}y(t)\rangle &= \langle{}s(t-1),\nabla{}s(t-1)\rangle
-  \end{split}
+  \langle{}y(t),\nabla{}y(t)\rangle = \langle{}s(t-1),\nabla{}s(t-1)\rangle
 \end{equation}
 
 #+begin_src faust :results file svg :file images/diffmem.svg :exports results
@@ -1002,6 +1021,7 @@ process = d.diff(mem);
 #+RESULTS:
 [[file:images/diffmem.svg]]
 
+* Differentiable Faust Programs
 ** Gradient \to Jacobian
 
 #+attr_html: :class big-eqn
@@ -1022,23 +1042,14 @@ process = d.diff(mem);
 \end{bmatrix}
 \end{equation}
 
-** Differentiable Circuits
-:PROPERTIES:
-:reveal_extra_attr: data-auto-animate
-:END:
-
-\begin{equation}
-  \begin{split}
-    \diffbrack{C} &\;:\; \mathbb{S}_{d}^{M} \to \mathbb{S}_{d}^{P} \\[5pt]
-    \diffbrack{C}(\langle{} \mathbf{s},\mathbf{J_{s}} \rangle) &\to (\langle{} \mathbf{y},\mathbf{J_{y}} \rangle) \\[5pt]
-    \langle\mathbf{y}(t), \;\mathbf{J}_{\mathbf{y}}(t)\rangle &= \langle{}f(\mathbf{s}(t)), \;\mathbf{J}_{f}(t)\mathbf{J}_{{\mathbf{s}}}(t)\rangle
-  \end{split}
-\end{equation}
 
 ** Differentiable Compositions
 :PROPERTIES:
 :reveal_extra_attr: data-auto-animate
 :END:
+
+#+attr_html: :style font-size: 3em; display: flex; justify-content: space-around; margin: 0 .25em;
+~,~ ~:~ ~~~ ~<:~ ~:>~
 
 ** Differentiable Compositions
 :PROPERTIES:
@@ -1048,6 +1059,11 @@ process = d.diff(mem);
 \begin{equation}
   \diffbrack{C_{1},C_{2}} = \diffbrack{C_{1}},\diffbrack{C_{2}}
 \end{equation}
+
+#+attr_html: :style width: 13.5em
+#+begin_src faust :noeval :exports code
+process = d.diff((*,sin));
+#+end_src
 
 #+begin_src faust :results file svg :file images/diffpar.svg :exports results
 import("diff.lib");
@@ -1072,6 +1088,11 @@ process = d.diff((*,sin));
   \diffbrack{C_{1} : C_{2}} = \diffbrack{C_{1}} : \diffbrack{C_{2}}
 \end{equation}
 
+#+attr_html: :style width: 13.5em
+#+begin_src faust :noeval :exports code
+process = d.diff(* : sin);
+#+end_src
+
 #+begin_src faust :results file svg :file images/diffseq.svg :exports results
 import("diff.lib");
 
@@ -1079,14 +1100,13 @@ N = 2;
 X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
 d = df.env(X);
 
-process = d.diff((* : sin));
+process = d.diff(* : sin);
 #+end_src
 #+attr_org: :width 300
 #+attr_html: :width 1500
 #+RESULTS:
 [[file:images/diffseq.svg]]
 
-#+ATTR_REVEAL: :frag t
 \begin{equation}
 \langle \mathbf{y},\mathbf{J_{y}} \rangle = \langle f(g(\mathbf{s})), \mathbf{J}_{f}\mathbf{J}_{g}\mathbf{J_{s}} \rangle
 \end{equation}
@@ -1100,6 +1120,11 @@ process = d.diff((* : sin));
   \diffbrack{C_{1} \sim C_{2}} = \diffbrack{C_{1}} \sim \diffbrack{C_{2}}
 \end{equation}
 
+#+attr_html: :style width: 13.5em
+#+begin_src faust :noeval :exports code
+process = d.diff(* ~ sin);
+#+end_src
+
 #+begin_src faust :results file svg :file images/diffrec.svg :exports results
 import("diff.lib");
 
@@ -1107,7 +1132,7 @@ N = 2;
 X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
 d = df.env(X);
 
-process = d.diff((* ~ sin));
+process = d.diff(* ~ sin);
 #+end_src
 #+attr_org: :width 300
 #+attr_html: :width 1000
@@ -1122,6 +1147,11 @@ process = d.diff((* ~ sin));
 \begin{equation}
   \diffbrack{C_{1} <: C_{2}} = \diffbrack{C_{1}} <: \diffbrack{C_{2}}
 \end{equation}
+
+#+attr_html: :style width: 14em
+#+begin_src faust :noeval :exports code
+process = d.diff(sin <: *);
+#+end_src
 
 #+begin_src faust :results file svg :file images/diffsplit.svg :exports results
 import("diff.lib");
@@ -1149,6 +1179,11 @@ process = d.diff((sin <: *));
   \right), \quad k = \frac{o_{C_{1}}}{i_{C_{2}}}
 \end{gather}
 
+#+attr_html: :style width: 16em
+#+begin_src faust :noeval :exports code
+process = d.diff((*,*) :> sin);
+#+end_src
+
 #+begin_src faust :results file svg :file images/diffmerge.svg :exports results
 import("diff.lib");
 
@@ -1156,7 +1191,7 @@ N = 2;
 X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
 d = df.env(X);
 
-process = d.diff(((*,+) :> sin));
+process = d.diff(((*,*) :> sin));
 #+end_src
 #+attr_org: :width 300
 #+attr_html: :width 1200
@@ -1168,12 +1203,74 @@ process = d.diff(((*,+) :> sin));
 :reveal_extra_attr: data-auto-animate
 :END:
 
+Now we can recursively decompose entire Faust programs and recompose
+them in differentiable fashion.
+
 \begin{equation}
 \begin{split}
 \diffbrack{(C_{1},C_{2}) : C_{3}} &= \diffbrack{C_{1},C_{2}} \;:\; \diffbrack{C_{3}} \\
   &= \diffbrack{C_{1}},\diffbrack{C_{2}} \;:\; \diffbrack{C_{3}}
 \end{split}
 \end{equation}
+
+** Higher Order Derivatives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate data-auto-animate-restart
+:END:
+
+#+begin_src faust :noeval :exports code
+process = d.diff(d.diff(*));
+#+end_src
+
+#+begin_src faust :results file svg :file images/diffdiffmul.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(d.diff(*));
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 1400
+#+RESULTS:
+[[file:images/diffdiffmul.svg]]
+
+** Higher Order Derivatives
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_src faust :noeval :exports code
+process = d.diff(d.diff(d.diff(sin)));
+#+end_src
+
+#+begin_src faust :results file svg :file images/diffdiffdiffsin.svg :exports results
+import("diff.lib");
+
+N = 2;
+X = df.vars(par(i, N, hslider("x%i", 0, -1, 1, .01)));
+d = df.env(X);
+
+process = d.diff(d.diff(d.diff(sin)));
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 1400
+#+RESULTS:
+[[file:images/diffdiffsin.svg]]
+
+** Outlook
+
+#+ATTR_REVEAL: :frag (appear)
+- Certain language features can't yet be pattern-matched
+- The compiler output is optimised; signal propagation /during compilation/
+  is costly
+- The concepts demonstrated here may be better applied as a
+  compiler-level transformation
+ #+ATTR_REVEAL: :frag (appear)
+  + This would make /reverse mode/ automatic differentiation more feasible
+
+* Thank you
 
 * Emacs Setup                                                      :noexport:
 
