@@ -10008,3 +10008,86 @@ each of three non-zero taps is separated by \(2^{(n-1)}\) zero taps. Used
 for modelling a guitar fuzz effect.
 
 Entered on [2025-09-08 lun. 09:57]
+*** 2025-09-24 mercredi
+**** WFS control plugin                                   :NETWORKEDAUDIO:
+/On y go/. So, initial thoughts.
+- In a DAW context it isn't possible to query the active audio output
+  device, so it's not possible to know by that means whether /Teensy
+  Ananas/ is connected.
+- Without configuring the switch to mirror traffic...
+  #+begin_example
+> interface/ethernet/switch/port set ether[N] mirror-ingress=yes
+  #+end_example
+  ...it's not possible to read PTP messages transmitted by Teensies on
+  the network, so that's not a way of knowing whether /Teensy Ananas/ is
+  connected, nor whether other Teensies are.
+- I guess sending a beacon packet (to =192.168.10.10= or whatever
+  address has been assigned to the ethernet interface, or to a
+  multicast group, or the same multicast group on a different port...)
+  once per second, say, would do the job of announcing the presence of
+  /Teensy Ananas/, but obviously wouldn't say whether it's the active
+  audio device.
+
+What happens if a different device is in use?
+- The plugin takes initial timestamp from a follow-up packet and uses
+  that to compute the start time for the outgoing packet stream.
+- Successive audio callbacks at a rate governed by the active audio
+  device, not by /Teensy Ananas/.
+- Inevitable drift occurs between the packet stream and the audio
+  stream on the Teensy network.
+
+Another thing to consider is Pipewire, specifically how =pw-jack= is
+configured. Configuration is handled by =~/.config/pipewire/jack.conf=,
+and I'm most interested in this bit:
+
+#+begin_example
+# global properties for all jack clients
+jack.properties = {
+     node.latency       = 64/48000
+     node.rate          = 1/48000
+     node.quantum       = 64/48000
+...
+#+end_example
+
+Those should really be =128=... or rather it shouldn't matter, Ananas
+Server should adapt its packet structure to the quantum and the client
+should decouple the packet stream from the audio stream.
+
+Entered on [2025-09-24 mer. 14:43]
+*** 2025-09-25 jeudi
+**** Presentation time problems                :NETWORKEDAUDIO:TEENSY:PTP:
+In a DAW context we have the issue that /pressing play/ (or /unfocusing
+the DAW/) can result (at least in the case of Reaper) in packet
+timestamps exceeding the available range at the client side. This, I
+suppose, is because of some sort of buffering delay at the server side
+that means the expected increment (2,666,666.6... ns at 128/48000)
+doesn't match the amount it takes to process the first (few)
+buffer(s).
+
+A solution of sorts is keep the server's timestamp listener thread
+running and compare, every time a follow-up packet is received, the
+time of the follow-up packet with that of the current outgoing packet
+timestamp. Given that the client-side packet buffer is 50 packets
+long, if the absolute value of the time difference is greater than 25
+times the expected packet interval, use the new timestamp (with the
+usual presentation offset of .1 s applied).
+
+This sounds like it ought to be kind of dreadful, but actually as long
+as the DAW is playing or stays either in or out of focus, things stay
+pretty stable: the server doesn't get out of sync, and clients stay at
+a steady packet/sample offset.
+
+An alternative approach would be to have clients reporting their
+packet/sample offset over the network. This could be part of the
+information that they send as part of the periodic "I am here!"
+message that I intend to implement. Should a given client report that
+it's not able to find a packet with a timestamp that's valid with
+respect to its PTP timer, it could announce whether it's behind or
+ahead and the server could act accordingly (re-open the timestamp
+listener thread?). If one client gets out of sync, it's fair to assume
+that the whole group are suffering, so this should be a viable
+approach.
+
+Anyway, let's see how we get on with the current approach.
+
+Entered on [2025-09-25 jeu. 18:35]
