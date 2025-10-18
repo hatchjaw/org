@@ -10062,7 +10062,7 @@ timestamps exceeding the available range at the client side. This, I
 suppose, is because of some sort of buffering delay at the server side
 that means the expected increment (2,666,666.6... ns at 128/48000)
 doesn't match the amount it takes to process the first (few)
-buffer(s).
+buffer(s). The delay tends to be on the order of 0.1 s.
 
 A solution of sorts is keep the server's timestamp listener thread
 running and compare, every time a follow-up packet is received, the
@@ -10091,3 +10091,223 @@ approach.
 Anyway, let's see how we get on with the current approach.
 
 Entered on [2025-09-25 jeu. 18:35]
+** 2025-10 octobre
+*** 2025-10-07 mardi
+**** More on presentation time                            :NETWORKEDAUDIO:
+The situation I was encountering was one whereby [[*Presentation time problems][presentation time
+problems]] were occurring in the DAW, but not for the console app. And
+that was with the DAW in the /foreground/, on the order of once a
+minute; quite troubling. What's the difference? Aren't they both using
+JACK? Well, perhaps, but the DAW is obviously a lot heavier. I decided
+to try to experiment with pipewire's JACK config
+(=~/.config/pipewire/jack.conf=). I had both =node.latency= and
+=node.quantum= set to 128; doubling =node.latency= seems to have a
+positive impact:
+
+#+begin_example
+# global properties for all jack clients
+jack.properties = {
+     node.latency       = 256/48000
+     node.rate          = 1/48000
+     node.quantum       = 128/48000
+#+end_example
+
+No timing issues (besides on initial playback) during the past ten
+minutes or so. Promising. One to keep an eye on though.
+
+Entered on [2025-10-07 mar. 13:19]
+**** Presentation time again                              :NETWORKEDAUDIO:
+So, even that was maybe a bit ambitious; setting the quantum to 256
+too appears to help.
+
+#+begin_example
+# global properties for all jack clients
+jack.properties = {
+     node.latency       = 256/48000
+     node.rate          = 1/48000
+     node.quantum       = 256/48000
+#+end_example
+
+Since I've decoupled the audio buffer in the server from the packet
+size, it just works, with the caveats that it's necessary to drop the
+reproduction offset to one sixty-fourth of a second
+
+#+begin_src c++
+constexpr static int64_t PacketOffsetNs{NSPS / 64};
+#+end_src
+
+and the packet sleep interval to an eighth of the expected packet
+interval.
+
+#+begin_src c++
+nsSleepInterval = nsPerPacket * 1 / 8;
+#+end_src
+
+Too long a sleep and the send thread doesn't get all the packets out
+in time and the clients get into difficulty.
+
+***** Addendum
+Actually even 1/8 seems too much; maybe a delay isn't necessary? I'm
+trying 1/64 at the moment. Seems stabler. Seems to work without the
+delay too...
+
+Entered on [2025-10-07 mar. 16:44]
+
+*** 2025-10-13 lundi
+**** More presentation time + USB woes                    :NETWORKEDAUDIO:
+Alright, I asked my dear friend Claude about optimising my system such
+that Reaper might behave itself a little better; towards the bottom of
+[[https://claude.ai/share/68d6ed4e-d31c-435e-8982-03109213cf96][this discussion]] came the following advice:
+
+/Set CPU to performance mode to prevent frequency scaling stutters:/
+
+#+begin_src shell :results output :exports both
+# Check current governor
+cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+#+end_src
+
+#+RESULTS:
+#+begin_example
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+#+end_example
+
+#+begin_src shell :noeval
+# Set to performance (temporary)
+sudo cpupower frequency-set -g performance
+#+end_src
+
+#+begin_src shell :noeval
+# Make permanent - install and enable
+sudo pacman -S cpupower
+sudo systemctl enable --now cpupower.service
+#+end_src
+
+The above really seems to do the job; for now I'll stick to doing it
+manually, but at some point I should incorporate this advice into the
+(as-yet nonexistent) documentation for the system.
+
+***** USB audio trouble
+Clients are staying nicely synchronised for the most part, but their
+packet buffers seem to be inexorably filling up to the point of
+overflowing. This suggests that TeensyAnanas (the USB audio device,
+should any reminder be required) is asking my laptop (more
+specifically Pipewire I suppose) for audio /too often/, i.e. the average
+audio interrupt interval on my laptop is shorter than it should
+be. I've tried tinkering with
+=framework-arduinoteensy/cores/teensy4/usb_audio.cpp= but so far to no
+avail.
+
+Entered on [2025-10-13 lun. 14:09]
+
+*** 2025-10-16 jeudi
+**** Soutenance de thèse: Romain Pichon (MARACAS)             :SOUTENANCE:
+*Quantum Algorithms for NOMA Systems*
+
+/Design and evaluation of quantum annealing-based solutions for
+massive access in wireless networks/
+
+#+begin_note
+Romain put bottles of water out on the desks for each member of the jury...
+#+end_note
+
+- Massive machine type communication systems; 10^{4} - 10^{6} devices served simultaneously.
+- The idea is try to leverage quantum computing to better serve such systems.
+- Strong connection between physics and decoding tasks; investigation
+  of use of quantum algorithms for signal processing.
+- 5G wireless networks; multiple users attempt to initiate uplink
+  simultaneously.
+- Communication channel has a /frequency band/ and /frame duration/.
+- Access techniques; access protocols.
+- /Code division multiple access/ --- multiple users can share resource
+  blocks.
+- /Active User Detection/ (AUD) not a trivial task. Non-orthogonality of
+  activity signals. Most reliable estimator of activity:
+  /Maximum-Likelihood/ (minimises a log-likelihood). Gradient descent
+  involved...
+- Maybe qubits are better suited to this sort of problem...
+
+I understood very little of the technical detail, but by all accounts
+an incredibly assured and professional job; very clearly presented.
+
+Entered on [2025-10-16 jeu. 09:03]
+*** 2025-10-17 vendredi
+**** More USB audio trouble                        :NETWORKEDAUDIO:TEENSY:
+I had to take a step away because it was drining me loopy. Issue is it
+doesn't seem to matter what I do with the ~feedback_accumulator~ of
+~AudioInputUSB~, my computer seems to process audio at a rate faster
+than one would expect, with PTP as the reference for authoritative
+time, i.e. client buffers overflow, which suggests that the computer
+is sending audio too quickly, which in turn suggests that the
+time-authority Teensy is requesting audio too quickly.
+
+Claude gave me [[https://claude.ai/share/8230aaf2-e122-45c2-8798-4fb9d02db5cf][some leads to follow]], e.g. checking that the computer
+is receiving USB frames containing the feedback accumulator. It also
+led me to check whether Teensy runs as a high-speed USB device or not;
+I was under the impression that it doesn't, but (having added a
+~usbHighSpeed~ member to ~AuthorityAnnouncePacket~) it turns out that it
+does. This in turn suggests that certain elements of Teensy's USB
+descriptor (=usb_desc.c=) are incorrect, i.e.
+
+#+begin_src c
+0x11,  // bmAttributes = isochronous, feedback
+3, 0,  // wMaxPacketSize, 3 bytes  <-- WRONG for High Speed
+1,	   // bInterval, 1 = every frame
+5,	   // bRefresh, 5 = 32ms
+
+// What It Should Be for High Speed
+0x11,  // bmAttributes = isochronous, feedback
+4, 0,  // wMaxPacketSize, 4 bytes
+4,     // bInterval, 4 = every 8 microframes (1ms)
+0,     // bRefresh is ignored for High Speed
+#+end_src
+
+At one point I had the suspicion that audio and PTP mighte be drifting
+relative to each other on the timing authority. Using an
+~audioPTPOffset~ field in the packet struct, however, I discovered that
+this is not the case; the greatest offset I saw during a couple of
+hours of testing was \pm40 ns (which is one tick of the 25 MHz ethernet
+timer, and totally conceivable if there's a slight offset between
+reading the timer and comparing with the time at the point at which
+~2 * samplingRate / bufferSize~ (750 @ 48 kHz @ 128 samples) frames have
+elapsed). So, we come back to the USB feedback accumulator, and
+whether the computer is respecting it.
+
+To offer a more positive reflection on recent work, I now have the
+foundations for monitoring a network of clients from within a
+standalone app or a plugin, I can verify (more-or-less accurately)
+that they reliably achieve a PTP lock, and regain it if it is
+disturbed; I've even written the client implemtation such that it
+recovers from a catastrophic loss of authoritative PTP time (in which
+case it restarts the PTP algorithm and retries). A group of five
+clients stays synchronised to with a couple of hundred nanoseconds
+during "normal use", i.e. with the audio server running in a CLAP
+plugin. CPU use on the client is less than 1 % for packets containing
+16 channels. In principle, with 32-frame packets we could send up to
+22 channels, or 44 @ 16-frames, but at 16 timing becomse more fraught
+(the packet buffer is half the /duration/, and the risk of
+overflow/underrun is greater; increasing the /size/ of the buffer puts
+pressure on Teensy's limited memory... though maybe using an attribute
+~PSRAM~, ~DMAMEM~, etc., I could get it to reside somewhere more
+sensible), and handling more channels, more frequently, eats more CPU
+time.
+
+Entered on [2025-10-17 ven. 19:23]
