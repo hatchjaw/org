@@ -10201,9 +10201,12 @@ sudo pacman -S cpupower
 sudo systemctl enable --now cpupower.service
 #+end_src
 
-The above really seems to do the job; for now I'll stick to doing it
-manually, but at some point I should incorporate this advice into the
-(as-yet nonexistent) documentation for the system.
+Running as a service, cpupower is configured via =/etc/default/cpupower=.
+
+The above, changing the setting from =powersave= to =performance=, really
+seems to do the job; for now I'll stick to doing it manually, but at
+some point I should incorporate this advice into the (as-yet
+nonexistent) documentation for the system.
 
 ***** USB audio trouble
 Clients are staying nicely synchronised for the most part, but their
@@ -10311,3 +10314,159 @@ sensible), and handling more channels, more frequently, eats more CPU
 time.
 
 Entered on [2025-10-17 ven. 19:23]
+** 2025-12 décembre
+*** 2025-12-04 jeudi
+**** Ananas Latest                                        :NETWORKEDAUDIO:
+It's been a while; I haven't been well.
+
+I got Teensy Ananas (the PTP/USB audio time authority) working better
+in Reaper. Much tinkering with teensy core =usb_audio.cpp= led me to
+come up with my own scheme for handling USB audio feedback (see
+~FEEDBACK_ACCUMULATOR~) and the following useful terminal commands:
+
+#+begin_src shell :results output :exports both
+cat /proc/asound/card2/stream0
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Teensyduino Teensy Ananas at usb-0000:55:00.0-2.3.3.2, high speed : USB Audio
+
+Playback:
+  Status: Running
+    Interface = 3
+    Altset = 1
+    Packet Size = 200
+    Momentary freq = 48001 Hz (0x6.0008)
+    Feedback Format = 16.16
+  Interface 3
+    Altset 1
+    Format: S16_LE
+    Channels: 2
+    Endpoint: 0x03 (3 OUT) (ASYNC)
+    Rates: 48000
+    Data packet interval: 1000 us
+    Bits: 16
+    Channel map: FL FR
+    Sync Endpoint: 0x84 (4 IN)
+    Sync EP Interface: 3
+    Sync EP Altset: 1
+    Implicit Feedback Mode: No
+
+Capture:
+  Status: Stop
+  Interface 2
+    Altset 1
+    Format: S16_LE
+    Channels: 2
+    Endpoint: 0x83 (3 IN) (ADAPTIVE)
+    Rates: 48000
+    Data packet interval: 1000 us
+    Bits: 16
+    Channel map: FL FR
+#+end_example
+
+which can be used with =watch=, i.e.
+
+#+begin_src shell :noeval
+watch -n 0.1 'cat /proc/asound/card2/stream0'
+#+end_src
+
+In any case, this demonstrates that feedback is in the correct format,
+the momentary frequency is slightly evelvated in this case, etc.
+
+Another useful command:
+
+#+begin_src shell :noeval
+sudo cat /sys/kernel/debug/usb/usbmon/5u | grep -E "Zo.+[0-9]{2}[^2] = "
+#+end_src
+
+Which generates output like this:
+
+#+begin_example
+ffff8881e75ea100 2641147579 S Zo:5:025:3 -115:8:3816 1 -18:0:196 196 = 4b00e3ff 4c00dcff 4e00daff 4e00d2ff 4900b7ff 440097ff 410068ff 410043ff
+ffff8881e75ea100 2643195598 S Zo:5:025:3 -115:8:3816 1 -18:0:196 196 = 3d008e00 4a009900 4d00a200 4400a000 3e00a000 3d00a000 3c00a000 3900a300
+ffff8881e75ea100 2645243634 S Zo:5:025:3 -115:8:3816 1 -18:0:196 196 = 61010201 0c027201 18026201 a4010201 4901c100 4401d500 5e010d01 64013f01
+ffff8881e75ea100 2647291650 S Zo:5:025:3 -115:8:3816 1 -18:0:196 196 = d3ff1e00 ceff1400 c9ff0a00 c1ffffff b3fff8ff a4fff3ff 9dfff2ff 94fff5ff
+ffff8881517f5000 2651373682 S Zo:5:025:3 -115:8:3704 1 -18:0:196 196 = a7fd04fe a9fd0afe aafd0bfe a7fd11fe a4fd16fe a8fd19fe a7fd1afe a7fd17fe
+ffff8881517f5c00 2651407678 S Zo:5:025:3 -115:8:3976 1 -18:0:188 188 = d9017401 d7017401 d9017801 d8017e01 da018301 dd018801 dc018b01 d9019201
+ffff8881517f5c00 2659599757 S Zo:5:025:3 -115:8:3976 1 -18:0:188 188 = a7ff55ff 71ff6aff 31ff73ff f3fe7aff cafe6fff b3fe5aff a4fe3eff a3fe20ff
+ffff8881517f5c00 2667791837 S Zo:5:025:3 -115:8:3976 1 -18:0:188 188 = 7f00f5ff 8000f5ff 8300f6ff 8300fcff 8300faff 8800ffff 8500fdff 8a000100
+ffff8881517f5c00 2675983918 S Zo:5:025:3 -115:8:3976 1 -18:0:188 188 = 46fcd1fc 3ffcd1fc 39fccdfc 34fccefc 30fcc9fc 2cfccbfc 2afccafc 27fcc8fc
+ffff8881517f5c00 2684176008 S Zo:5:025:3 -115:8:3976 1 -18:0:188 188 = 0100edfe 1700f9fe 2c00fcfe 3d0004ff 53000dff 650019ff 82002bff a00030ff
+#+end_example
+
+The expected USB packet size at 48 kHz is 192 bytes. Filtering out the
+packets of that size, we see that, as the momentary frequency changes,
+the device occasionally requests packets that are either four bytes
+larger (running fast) or smaller (running slow). At first this wasn't
+working because I'd set a hard limit on packet size, in =usb.c= of 192,
+not understanding that some headroom is needed for when the feedback
+accumulator is greater than its default value of ~48 << 25~. Anyway,
+that all seems to work pretty nicely now, and USB audio more-or-less
+keeps pace with the PTP-based recovered media clock, i.e. client
+buffers don't overflow.
+
+**** Using ALSA instead of JACK
+
+The whole USB audio feedback mechanism seems to track more reliably to
+PTP time when using Teensy Ananas as Reaper's audio device via ALSA
+directly, rather than using JACK (strictly =pw-jack= in my case). It's
+also necessary to specify zero input channels for things to behave nicely.
+
+**** Preventing spurious timestamp updates
+
+Since the JUCE app/plugin is listening for PTP follow-up messages
+(which are timestamped) on an ethernet interface without
+hardware-level PTP support, there are non-deterministic delays in the
+time at which such packets are received and processed by the
+application. These delays can vary from anything as low as a few
+hundred microseconds to a few miliseconds, particularly as USB Audio
+drifts relative to PTP. This is acceptable up to a point; at 32-frames
+and a packet buffer size of 50, clients have \pm16.6 ms or thereabouts
+grace to play with. That being said, occasionally what I've observed
+is the server finding PTP timestamps that are far outside of that
+range. This obviously happens when hitting play in Reaper, but it can
+also happen for no readly apparent reason during playback. I observed
+that it tends to be a case of one timestamp that's wildly late,
+followed by one that appears to be wildly early, which is to say that
+by the time the third timestamp is read, we're back where we
+started. So, the solution, for now, is that only if three /bad
+timestamps/ in a row are encountered should the outgoing packet
+timestamp be updated. This means a delay of 3-4 seconds between
+hitting play in Reaper, and clients being ready to reproduce audio
+(they have to respond to any such change in packet timestamp at their
+end), but that simply entails leaving some silence at the beginning
+of a Reaper session.
+
+**** Loss of PTP lock
+
+I need to investigate this further, but it seems that if a given
+client loses its PTP lock --- i.e. it slips beyond \pm 100 ns --- then
+it can lose its presentation time parity with the rest of the
+network. The only way I can think to test this is to unplug the
+ethernet cable for a given client and see how it responds. I don't
+know yet how to correct for this if it occurs. In principle I don't
+think it should be happening at all that presentation time doesn't
+correct itself once a PTP lock is restored, but there it is. The vast
+majority of the time I witness no such problem, by the way; i.e. the
+four clients I have connected to the logic analyser can happily remain
+synced to within a couple of hundred nanoseconds for hours at a time.
+
+**** Multicast address weirdness
+
+Having consulted with Claude, I decided to move authority and client
+announcement packets away from the multicast address I'm using for
+audio, i.e. =224.4.224.4=, with the rationale that I don't necessarily
+want to be placing any additional burden on devices joining that
+multicast group --- clients don't need to receving authority
+annoucement packets for example, nor announcement packets from other
+clients. However, trying =224.4.224.6=, for example, I find that,
+although these packets show up in Wireshark, my plugin doesn't receive
+them. It's really bothering me. I tried other addresses too
+(=224.4.226.6=, =224.44.224.44=, etc.) but none of those work either. Did
+I configure the switch in some way when we first got it? No... if it
+was that then Wireshark wouldn't see those packets. There's something
+weird going on with my C++ (or with JUCE) I think.
+
+Entered on [2025-12-04 jeu. 15:52]
