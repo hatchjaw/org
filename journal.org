@@ -10520,9 +10520,11 @@ between a Teensy connected to one switch versus one connected to the
 other. I have confirmed that this is a PTP issue (and not one of audio
 transmission, which wouldn't make sense anyway) by connecting the
 logic analyser to pin 24 (~ENET_1588_EVENT1_OUT~) on Teensies connected
-to the two switches; sure enough, ~400 ns offset. I don't think
-there's a sensible workaround. Perhaps playing with that daft /hardware
-offset/ value in =ptp-base.cpp=...
+to the two switches; sure enough, ~400 ns offset. I tried swapping out
+the daisy-chaining ethernet cable for a much longer one to see whether
+that might be a factor, but apparently not. I don't think there's a
+sensible workaround. Perhaps playing with that daft /hardware offset/
+value in =ptp-base.cpp=...
 #+begin_src c++
 const int hwOffset = -200; // Hardware Offset
 #+end_src
@@ -10534,8 +10536,8 @@ setup. For now I'm not even going to try it because I have other
 things to do. Two switches gives us this many potential output
 channels to play with:
 #+begin_src emacs-lisp
-(let ((portsPerSwitch 24)
-      (numSwitches 2)
+(let ((numSwitches 2)
+      (portsPerSwitch 24)
       (outputChannelsPerPort 2)
       (switch1PcPorts 1)
       (switch1DaisyChainPorts 1)
@@ -10551,3 +10553,41 @@ channels to play with:
 : 90
 
 I.e. plenty.
+
+***** In other news
+I fixed (sort of) switch-monitoring in the /Network/ tab of the
+plugin. Those text fields still really don't like to receive focus,
+which is a nuisance (but one I recall afflicting Amati++ in 2024);
+limitation of JUCE, or JUCE+CLAP, and one that's a misery to debug, so
+for now I'm leaving it be. Moving away from ascending numerical
+identifiers for the switches, and just generating a random integer
+when adding a row to the table instead, appears to have done the
+trick. So now that tab consists of
+- A /Switches/ section, where rows can be added, IP/username/password
+  entered, drift/offset viewed, and a PTP reset command (actually a
+  disable/re-enable) sent. Rows can of course be removed from the
+  table.
+- A /Time Authority/ section for keeping an eye on the Teensy that's
+  acting as the PTP authority and USB audio device. This section only
+  really exists because I was concerned about the whole /feedback
+  accumulator/ situation and wanted to keep tabs on it; it's probably
+  not of great use in the grand scheme. Sometimes I think the
+  authority stops sending /announce packets/ and it's difficult to know
+  why because, it being a USB audio device, and not a USB serial
+  device, it can't be serial monitored.
+- A /Clients/ section which reports, as one might expect, on connected
+  audio clients/clock subscribers. Clients send announce packets of
+  their own, much like the time authority, and data from these packets
+  populates the resulting table. The total number of clients is
+  reported above the table, as is the /approximate group asymmetry/,
+  which, given the above news regarding cascaded boundary clocks, may
+  have to lean heavily on the word "approximate". Nonetheless, it's
+  been useful for assessing presentation time offsets, packet buffer
+  sizes, etc. as correspond to buffer fill levels; it's also shown me
+  that the client has to work slightly harder for packets of 16 frames
+  versus 32 (~0.7 % vs ~0.6 % CPU).
+
+The monitoring side of things seems to be ticking along, clients
+behave nicely, the plugin behaves nicely enough for now (it can
+happily play-back/transmit pulses for hours without encountering a
+catastrophic timestamp discrepancy). Time to write some audio code.
