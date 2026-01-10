@@ -10470,3 +10470,84 @@ was that then Wireshark wouldn't see those packets. There's something
 weird going on with my C++ (or with JUCE) I think.
 
 Entered on [2025-12-04 jeu. 15:52]
+
+*** 2025-12-05 vendredi
+**** Multicast weirdress fixed
+Why was the PTP follow-up listener thread still working? It wasn't an
+address or a port or an interface problem, it was that bug with JUCE
+whereby if one wants to bind to ~INADDR_ANY~ /on a specific interface/
+it's necessary to work with the raw socket and ~setsockopt~ directly.
+
+**** Recovering from loss of PTP Lock
+The nuclear option is to reboot the Teensy
+
+#+begin_src c++
+// reboot
+SRC_GPR5 = 0x0BAD00F1;
+SCB_AIRCR = 0x05FA0004;
+while (true) {}
+#+end_src
+
+Better is to shut down DMA
+
+#+begin_src c++
+sDMA.detachInterrupt();
+sDMA.disable();
+#+end_src
+
+then set it up again completely when the clock restarts. For reasons
+that escape me, it doesn't work if I wait until PTP is ready to
+initialise DMA in the first place; it's necessary to do it when
+setting up ~AudioSystemManager~.
+
+Entered on [2025-12-05 ven. 16:57]
+
+* 2026
+** 2026-01 janvier
+*** 2026-01-10 samedi
+**** Two switches                                     :NETWORKEDAUDIO:PTP:
+Fired up a second [[file:~/org/journal.org::*MikroTik Cloud Router Switch][MikroTik switch]]. These can act as a [[https://help.mikrotik.com/docs/spaces/ROS/pages/64127015/Precision+Time+Protocol#PrecisionTimeProtocol-Summary][Two-step
+Ordinary Clock and Boundary Clock]], and not, as described in
+[cite:@vankempenIEEE], as a transparent clock.
+#+begin_quote
+Due to the cumulative effect of multiple servo loops, cascading
+multiple Boundary Clocks within a network can significantly degrade
+clock accuracy of the system. In order to avoid this, a new clock type
+called “Transparent Clocks” (TC) appears in PTP V2.
+#+end_quote
+Consequently (as far as I can tell) I'm seeing a 400-500 ns offset
+between a Teensy connected to one switch versus one connected to the
+other. I have confirmed that this is a PTP issue (and not one of audio
+transmission, which wouldn't make sense anyway) by connecting the
+logic analyser to pin 24 (~ENET_1588_EVENT1_OUT~) on Teensies connected
+to the two switches; sure enough, ~400 ns offset. I don't think
+there's a sensible workaround. Perhaps playing with that daft /hardware
+offset/ value in =ptp-base.cpp=...
+#+begin_src c++
+const int hwOffset = -200; // Hardware Offset
+#+end_src
+...but even if that were to work, it would require compiling different
+versions of the clock subscriber on a per-switch basis, and connecting
+them to the right switches. Hardly worth it over a matter of half a
+microsecond. I wonder how things would look with a third switch in the
+setup. For now I'm not even going to try it because I have other
+things to do. Two switches gives us this many potential output
+channels to play with:
+#+begin_src emacs-lisp
+(let ((portsPerSwitch 24)
+      (numSwitches 2)
+      (outputChannelsPerPort 2)
+      (switch1PcPorts 1)
+      (switch1DaisyChainPorts 1)
+      (switch2DaisyChainPorts 1))
+  (* outputChannelsPerPort
+     (- (* portsPerSwitch numSwitches)
+        switch1PcPorts
+        switch1DaisyChainPorts
+        switch2DaisyChainPorts)))
+#+end_src
+
+#+RESULTS:
+: 90
+
+I.e. plenty.
