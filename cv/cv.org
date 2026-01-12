@@ -257,16 +257,14 @@ Music/Drama Technician, Parrs Wood High School, Manchester, UK,
 
 * Publications
 
-T. A. Rushton, Y. Orlarey, R. Michon, T. Risset, S. Letz, 2025, Faust
-Autodiff: Towards Audio Domain-Specific Machine Learning, /Proceedings
+T. A. Rushton, Y. Orlarey, R. Michon, T. Risset, S. Letz, 2025, [[https://aes.org/publications/elibrary-page/?id=23017][Faust
+Autodiff: Towards Audio Domain-Specific Machine Learning]], /Proceedings
 of the 2025 AES International Conference on Artifical Intelligence and
-Machine Learning for Audio/ (accepted; to be published September
-2025).
+Machine Learning for Audio/.
 
-T. A. Rushton, R. Michon, T. Risset, 2025, All Together Now: A
-Synchronous Platform for Distributed Spatial Audio, /Proceedings of
-the 22^{nd} Sound and Music Computing Conference/ (accepted; to be
-published July 2025).
+T. A. Rushton, R. Michon, T. Risset, 2025, [[https://smc25.iem.at/contributions/all-together-now/][All Together Now: A
+Synchronous Platform for Distributed Spatial Audio]], /Proceedings of the
+22^{nd} Sound and Music Computing Conference/ (SMC2025).
 
 T. A. Rushton, 2024, [[https://hal.science/hal-04846518/document#page=17][Differentiable DSP In Faust]], /Proceedings of the
 International Faust Conference (IFC-24)/.
@@ -285,8 +283,8 @@ the 7th Interactive Sonification Workshop (ISon)/.
 - Winner: /Best Student Paper/.
 
 T. A. Rushton, D. Overholt, 2022, [[https://vbn.aau.dk/files/497197288/d20.pdf][The Springamajig: A Flexible Digital
-Musical Instrument]], /Proceedings of the 19th Sound and Music Computing Conference, SMC
-2022/.
+Musical Instrument]], /Proceedings of the 19th Sound and Music Computing
+Conference, SMC 2022/.
 
 G. V. K. Gustafsson, M. Timossi, T. A. Rushton, 2022, [[https://vbn.aau.dk/en/publications/kuplen-a-hands-on-physical-model][Kuplen: A
 Hands-On Physical Model]], /Proceedings of the 19th Sound and Music
