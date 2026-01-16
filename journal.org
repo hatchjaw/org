@@ -10591,3 +10591,44 @@ The monitoring side of things seems to be ticking along, clients
 behave nicely, the plugin behaves nicely enough for now (it can
 happily play-back/transmit pulses for hours without encountering a
 catastrophic timestamp discrepancy). Time to write some audio code.
+
+*** 2026-01-13 mardi
+**** Meeting: Romain                                    :MEETING:SUPERVISION:
+- Meet with Clemens at some point before I go on the 27th to bring him
+  up to speed.
+- Start manuscript while away --- which template?
+  + Decide on this while away.
+  + Ask Maxime what he used.
+  + Romain to send his HDR template.
+  + Basically, besides the front page, it's up to me...
+- Journal article at some point; co-author with Clemens.
+- Conference submissions.
+- Fill in form for Marie Curie funding.
+- Ask Cristina Rottondi about postdoc opportunity.
+*** 2026-01-16 vendredi
+**** WFS: two big problems            :SPATIALAUDIO:NETWORKEDAUDIO:TEENSY:
+First up, introducing the WFS algorithm completely knackers the packet
+buffer adjustment strategy. I repeatedly see serial reports like this:
+
+#+begin_example
+Presentation time diff 4005936 ns outside of range 0-666666 ns
+Seeking closest packet... Found packet with presentation time diff 5936 ns (read index 22)
+#+end_example
+
+At the next 1588 interrupt something similar happens. Presentation
+time is out by up to \pm10 \micro{}s.
+
+Clients report a PTP lock and sensible sampling rates, there's no
+significant additional weight of UDP traffic, and the entire module,
+Ananas Client and WFS algo, is running at no more than 10% CPU (unless
+~softwareISR~ and ~getOutputInterleaved~ in particular, are taking a very
+long time). What's throwing off the presentation time delta so wildly?
+Is there a delay reading the PTP timer?
+
+Second problem: the WFS algorithm doesn't appear to run with more than
+about 8 sources, and very modest soundfield dimensions, maximum
+speaker spacing, etc. This suggests a memory problem. I can debug it
+by sprinkling ~Serial.printf~ statements in the class derived from the
+architecture file I created, but bloody hell this is concerning. It's
+not a question of processing power, so I'm guessing it's delay
+lines. Very disappointing. PSRAM required?
