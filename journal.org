@@ -10703,13 +10703,20 @@ laptop, running Ubuntu (6.8.0-62-generic).
 - That's fine and everything, but to use the helpful scripts in
   =teensy-audiosync= would require that the user installs [[https://koromix.dev/tytools][tytools]].
 - Building the plugin entailed making some additions to the plugin's
-  =CMakeLists.txt=; I can't remember which JUCE modules I had to add to
-  ~target_link_libraries~, but there were two.
+  =CMakeLists.txt=; I had to add the following to ~target_link_libraries~
+  #+begin_src cmake
+target_link_libraries(ananasWFS
+    PRIVATE
+    ...
+    juce::juce_audio_devices
+    juce::juce_audio_utils
+    ...
+  #+end_src
 - Building the plugin also entailed installing =libcurl= (i.e. =sudo apt-get
   install libcurlpp-dev= IIRC)
 - Running the plugin took some troubleshooting. Reaper was just
   hanging when I tried to add an instance of AnanasWFS; it turned out
-  (confirmed by running the debugger in VS Code, and by using =strace)=
+  (confirmed by running the debugger in VS Code, and by using =strace=)
   that it was attempting to bind the ~TimestampListener~ socket to port
   320 that was the problem:
   #+begin_example

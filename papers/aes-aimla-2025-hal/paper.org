@@ -1,0 +1,1266 @@
+#+title: Faust Autodiff: Towards Audio Domain-Specific Machine Learning
+#+author: Thomas Rushton
+
+#+startup: overview
+#+export_file_name: out/aes-aimla-2025-hal
+#+options: toc:nil num:5 H:5 date:nil author:nil title:nil
+#+latex_class: aes-aimla-2025-hal
+#+cite_export: biblatex numeric,sorting=none,url=false,isbn=false,giveninits
+#+latex_header_extra: \RequirePackage[]{./out/aes-aimla-2025-hal}
+
+#+begin_src latex
+\makeRR
+\tableofcontents
+\newpage
+#+end_src
+
+* LaTeX Setup                                                      :noexport:
+:PROPERTIES:
+:header-args: :tangle out/aes-aimla-2025-hal.sty :results silent
+:END:
+
+** Provide the package
+
+#+begin_src latex
+\ProvidesPackage{aes-aimla-2025-hal}
+#+end_src
+
+** Packages
+
+#+begin_src latex
+\usepackage[a4paper]{geometry}
+#+end_src
+
+UTF-8 encoding is recommended but use one that works for you.
+
+#+begin_src latex
+\usepackage[utf8]{inputenc}
+#+end_src
+
+#+begin_src latex
+\usepackage[T1]{fontenc}
+#+end_src
+
+The RR package courtesy of Inria
+
+#+begin_src latex
+\usepackage{RR}
+#+end_src
+
+Highly recommended package for better looking text automatically.
+
+#+begin_src latex
+\usepackage{microtype}
+#+end_src
+
+"These are useful for different purposes."
+
+#+begin_src latex
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{boxedminipage}
+\usepackage{moreverb}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.8}
+#+end_src
+
+Diagrams.
+
+#+begin_src latex
+\usepackage{tikz}
+\usetikzlibrary{positioning,calc}
+#+end_src
+
+Maths stuff.
+
+Why it's necessary to use a negative top margin is... mysterious.
+
+#+begin_src latex
+\usepackage{mdframed}
+\mdfsetup{skipabove=0pt,
+  skipbelow=0pt,
+  linewidth=.5pt,
+  innertopmargin=-10pt
+  innerleftmargin=0pt
+}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+#+end_src
+
+More useful stuff
+
+#+begin_src latex
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+\usepackage[noabbrev,capitalise]{cleveref}
+\Crefname{lstlisting}{Listing}{Listings}
+#+end_src
+
+Listings. I should consider using [[https://www.reddit.com/r/emacs/comments/lbkmmz/the_best_syntax_highlighting_in_a_pdf_youll_see_a/][engrave-faces]] instead.
+
+#+begin_src latex
+\usepackage{listings}
+\definecolor{mygrey}{rgb}{0.96,0.96,0.96}
+\lstdefinelanguage{faust}{
+  morekeywords={process,with,environment},
+  morecomment=[l]{//},
+}
+\lstset{
+  tabsize=4,
+  basicstyle=\ttfamily,
+  commentstyle=\color{black!55!white},
+  identifierstyle=\color{black!75!white},
+  lineskip=-.1em,
+  basewidth=0.525em,
+  backgroundcolor=\color{mygrey},
+  captionpos=b,
+  breaklines=true,
+  xleftmargin=5pt,
+  framexleftmargin=5pt,
+  framexrightmargin=2pt,
+  framextopmargin=3pt,
+  framexbottommargin=3pt,
+  frame=tb,
+  framerule=0pt,
+  numberstyle=\ttfamily\tiny\color{black!45!white},
+  numbersep=4pt
+}
+\usepackage[varqu,varl]{inconsolata}
+#+end_src
+
+** Figures
+
+Graphics path.
+
+#+begin_src latex
+\graphicspath{{./}{figures/}}
+#+end_src
+
+Subcaptions & SVGs.
+
+#+begin_src latex
+\usepackage{subcaption}
+\usepackage[inkscapelatex=false]{svg}
+#+end_src
+
+** Colours
+
+#+begin_src latex
+\definecolor{inriaGrayBlue}{HTML}{384257} %Unused
+\definecolor{insaGray}{HTML}{5E5E5E} %Dark grey
+\definecolor{inriaRed}{HTML}{E63312} % Flash Red
+\definecolor{inriaRedDark}{HTML}{B11904} % Brick
+\definecolor{LightBlueGray}{RGB}{186,200,211} %Lighter Grey
+\definecolor{FontColor}{RGB}{100,100,100}
+
+\colorlet{inriaRedLight}{inriaRed!80} % Light red
+\colorlet{insaGrayLight}{insaGray!60} %Light Grey
+
+% ---- Color Set
+\definecolor{DarkerGrey}{RGB}{215,217,219}%% dotted lines
+\colorlet{blocktitlefgcolor}{inriaRedDark} %blocks titles
+\colorlet{blocktitlebgcolor}{DarkerGrey} %blocks lines
+\colorlet{blockbodyfgcolor}{FontColor} %blocks text
+\colorlet{innerblocktitlebgcolor}{inriaRedDark}
+\colorlet{innerblocktitlefgcolor}{white}
+#+end_src
+
+** RR stuff
+
+#+begin_src latex
+\RRNo{0000}
+#+end_src
+
+*** Date
+
+#+begin_src latex
+\RRdate{September 2025}
+#+end_src
+
+*** Title
+
+#+begin_src latex
+\RRetitle{Faust Autodiff: Towards Audio Domain-Specific Machine Learning}
+
+\titlehead{Faust Autodiff}
+#+end_src
+
+*** Authors
+
+#+begin_src latex
+\RRauthor{Thomas Rushton \thanks[inriaaff]{\textit{Inria, INSA Lyon,
+  CITI, EA3720} 69621 Villeurbanne, France
+  \textit{firstname.lastname@inria.fr}}\and
+  Yann Orlarey \thanksref{inriaaff}\and
+  Romain Michon \thanksref{inriaaff}\and
+  Tanguy Risset \thanksref{inriaaff}\and
+  Stéphane Letz \thanks[grameaff]{\textit{Grame CNCM, CITI, EA3720} 69621 Villeurbanne, France}}
+
+\authorhead{Thomas Rushton et al.}
+#+end_src
+
+*** Abstract
+
+#+begin_src latex
+\RRabstract{Differentiable programming via automatic differentiation
+  (AD) is the foundation for gradient-based optimisation techniques,
+  and forms the basis for many current approaches to machine
+  learning. Though well catered-for in general-purpose programming
+  languages, the availability of AD in a domain-specific language
+  (DSL) could offer novel perspectives on optimisation problems in the
+  field of audio.  We present a general scheme for differentiable
+  programming in the Faust programming language, a high-performance
+  DSL tailored to audio synthesis and signal processing. Faust's rich
+  ecosystem, coupled with a comprehensive AD implementation, can
+  provide support for audio optimisation and machine learning
+  applications on a multitude of platforms, from FPGAs to the web.}
+#+end_src
+
+*** Keywords
+
+#+begin_src latex
+%\RRkeyword{}
+#+end_src
+
+*** Project
+
+#+begin_src latex
+\RRprojets{Emeraude}
+\RCGrenoble
+#+end_src
+
+* Bibliography Style                                               :noexport:
+:PROPERTIES:
+:header-args: :tangle out/biblatex.cfg :results silent
+:END:
+
+#+begin_src latex
+\AtEveryBibitem{
+  \clearfield{pages}
+  \clearfield{pagetotal}
+  \clearfield{edition}
+  \clearname{editor}
+  \clearfield{url}
+  \clearfield{urlyear}
+  \clearfield{doi}
+  \clearfield{eprintclass}
+  \clearfield{eventtitle}
+  \iffieldequalstr{entrykey}{alexandreExperimental2023}
+    {\clearlist{publisher}}
+    {}
+  \iffieldequalstr{entrykey}{albouyFaust2017}
+    {\clearlist{publisher}}
+    {}
+}
+
+\DeclareNameAlias{author}{last-first}
+#+end_src
+
+* Introduction
+
+Gradient-based methods are ubiquitous in tackling a wide variety of
+mathematical optimisation and machine learning problems, and the
+availability of such methods hinges on the possibility of computing
+the derivatives of computer programs. In the field of machine learning
+in particular, automatic differentiation
+(AD)\nbsp[cite:@baydinAutomatic2018] has emerged as the dominant
+differentiable programming paradigm. In AD, the primitive operations
+of a programming language are defined differentiably, thus programs
+composed from those operations are in turn differentiable end-to-end
+with respect to their input variables. In a gradient-based
+optimisation scenario, the partial derivatives of an algorithm
+terminating in a loss function constitute a gradient vector, which can
+be backpropagated, causing the algorithm's input variables, weights in
+a neural network perhaps, to approach optimal values. Techniques of
+this sort employed in the audio domain are referred to as
+/differentiable digital signal processing/
+(DDSP)\nbsp[cite:@hayesReview2024], and find applications from least mean
+squares (LMS) filtering\nbsp[cite:@alexandreExperimental2023] to
+differentiable audio synthesis\nbsp[cite:@engelDifferentiable2020].
+
+Building on previous work on AD in the Faust programming
+language\nbsp[cite:@rushtonDifferentiable2024], here we exploit Faust's
+pattern matching abstraction to extend to a more general AD syntax,
+demonstrating that arbitrary compositions of signal processing blocks
+can be differentiated, and to higher order if desired. With AD in
+Faust, it is possible to create differentiable infinite impulse
+response (IIR) filters and neural network building blocks. Our work
+provides the basis for an audio-focused ecosystem for the development
+of solutions to problems based on machine learning.
+
+* The Faust Programming Language
+
+#+begin_src faust :results file svg :file images/seq.svg :exports none
+A = _ <: par(n, 20, -) :> _;
+B = _ <: par(n, 20, +) :> _;
+process = A : B;
+#+end_src
+
+#+RESULTS:
+[[file:images/seq.svg]]
+
+#+begin_src faust :results file svg :file images/par.svg :exports none
+A = _ <: par(i, 20, +) :> _;
+B = _ <: par(i, 20, -) :> _;
+process = A,B;
+#+end_src
+
+#+RESULTS:
+[[file:images/par.svg]]
+
+#+begin_src faust :results file svg :file images/rec.svg :exports none
+A = _,_ <: par(i, 20, +) :> _;
+B = _ <: par(i, 20, -) :> _;
+process = A ~ B;
+#+end_src
+
+#+RESULTS:
+[[file:images/rec.svg]]
+
+#+begin_src faust :results file svg :file images/split.svg :exports none
+A = _ <: par(i, 20, +) :> _,_;
+B = _,_,_,_ <: par(i, 20, -) :> _;
+process = A <: B;
+#+end_src
+
+#+RESULTS:
+[[file:images/split.svg]]
+
+#+begin_src faust :results file svg :file images/merge.svg :exports none
+A = _ <: par(i, 20, +) :> _,_,_,_;
+B = _,_ <: par(i, 20, -) :> _;
+process = A :> B;
+#+end_src
+
+#+RESULTS:
+[[file:images/merge.svg]]
+
+#+name: fig:compositions
+#+caption: Example compositions of Faust blocks.
+\begin{figure*}[t]
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*18/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/par}
+    \subcaption{Parallel\\\(A,B\).}
+    \label{fig:par}
+  \end{minipage}
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*20/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/seq}
+    \subcaption{Sequential\\\(A:B\).}
+    \label{fig:seq}
+  \end{minipage}
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*22/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/split}
+    \subcaption{Split\\\(A<:B\).}
+    \label{fig:split}
+  \end{minipage}
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*20/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/rec}
+    \subcaption{Recursive\\\(A\sim{}B\).}
+    \label{fig:rec}
+  \end{minipage}
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*22/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/merge}
+    \subcaption{Merge\\\(A:>B\).}
+    \label{fig:merge}
+  \end{minipage}
+\end{figure*}
+
+Faust is a functional paradigm, domain specific language for audio
+digital signal processing\nbsp[cite:@orlareyFAUST2009]. It is built atop a
+domain-agnostic /block diagram
+algebra/\nbsp[cite:@orlareyAlgebra2002;@orlareySyntactical2004] that
+describes primitive operations connected into graphs via a selection
+of /composition operators/ (see cref:fig:compositions). A textual
+language, Faust can, for example, define a diagram consisting of two
+blocks, \(A\) and \(B\), composed in sequence, with code of the form
+#+name: lst:seq
+#+caption: Sequential composition of two Faust blocks.
+#+begin_src faust :noeval
+process = A : B;
+#+end_src
+
+#+RESULTS: lst:seq
+
+Conceptually, a given block diagram, \(D\), may undergo semantic
+transformation, notated \(\llbracket \cdot \rrbracket\), into a signal
+processor\nbsp[cite:@orlareySyntactical2004]:[fn:7]
+#+NAME: eq:semanticTransformation
+\begin{equation}
+  \begin{split}
+    \llbracket D \rrbracket &\;:\; \mathbb{S}^{n} \to \mathbb{S}^{m} \\
+    \llbracket D \rrbracket(s_{1},\dots,s_{n}) &\to (y_{1},\dots,y_{m}) \\
+    \mathbf{y}(t) &= f(\mathbf{s}(t))\;,
+  \end{split}
+\end{equation}
+where \(\mathbb{S}\) is the set of all signals, \(f\) is a
+mathematical function analogous to the primitive operations and
+compositions of \(D\), and \(t\) is time. The signal processor
+receives a vector of input signals, \(\mathbf{s}\), and produces a
+vector of output signals, \(\mathbf{y}\).
+
+** The Faust Ecosystem
+
+Faust is a highly optimised, compiled language\nbsp[cite:@orlareyNew2020],
+with C++ as its default compilation target. One of the great strengths
+of the Faust ecosystem is its /write once, run anywhere/ model; a
+variety of additional backends are supported, including
+LLVM\nbsp[cite:@letzOverview2018], WebAssembly\nbsp[cite:@letzCompiling2017],
+and Rust\nbsp[cite:@gasterAudio2020], plus numerous software and hardware
+platforms. Faust code can be compiled for use in VST
+plugins\nbsp[cite:@albouyFaust2017], for embedded
+systems\nbsp[cite:@michonEmbedded2020] and
+\mbox{FPGAs}\nbsp[cite:@cochardProgramming2024]; it is used by artists and
+digital
+luthiers\nbsp[cite:@michonFaust2020a;@carenKeyWI2020;@hansenWeather2018],
+and features sophisticated libraries for wave digital filter
+modelling\nbsp[cite:@roosenburgWave2021] and physical modelling
+synthesis\nbsp[cite:@russoIntroducing2021;@michonFaust2018], amongst
+others.
+
+** Differentiable Programming in Faust
+:PROPERTIES:
+:CUSTOM_ID: sec:diffprog
+:END:
+
+In light of Faust's versatility, efficiency, and strengths as a DSL in
+tackling audio problems it may come as little surprise that it has
+been turned to machine learning problems in the audio domain, via
+/DawDreamer/\nbsp[cite:@braunDawDreamer2021], which uses a Python backend
+to transpile Faust code for gradient-based optimisation with the JAX
+Python library. JAX, and other well-known machine learning frameworks,
+such as TensorFlow and PyTorch, enable gradient-based optimisation
+approaches by way of /automatic differentiation/, a technique for
+computing the numerical outputs of both a mathematical expression (or,
+more commonly, a computer program) and its derivatives in
+parallel\nbsp[cite:@rallArithmetic1986;@baydinAutomatic2018;@harrisonBrief2021].
+
+Differentiable programming\nbsp[cite:@wangDemystifying2019] is, broadly
+speaking, the creation of computer programs using primitive operations
+which are themselves differentiable; a computer program consisting of
+differentiable primitives may be differentiated automatically,
+producing the desired /primal/ and /gradient/ numerical outputs for
+use in a gradient-based optimisation algorithm. In this vein, a
+Faust-based LMS algorithm has been used for real-time acoustic
+control\nbsp[cite:@alexandreExperimental2023], though the DDSP aspect of
+this work was limited to the particular application. The feasibility
+of a more general approach to DDSP in the Faust language has been
+demonstrated via the implementation of forward-mode AD
+primitives\nbsp[cite:@rushtonDifferentiable2024].
+
+One way of framing forward-mode AD is as an arithmetic of dual
+numbers\nbsp[cite:@rallArithmetic1986;@yuDNAD2013] of the form \(\langle{}u,\nabla{}u\rangle\),
+where \(u\) is the aforementioned primal, and \(\nabla{}u
+= \begin{bmatrix}\frac{\partial{}u}{\partial{}x_{1}} & \cdots & \frac{\partial{}u}{\partial{}x_{N}}\end{bmatrix}^{T}\),
+the gradient of \(u\), its partial derivatives with respect to a
+vector of \(N\) input variables, \(\mathbf{x}\). A dual number can be
+passed into a forward-mode differentiable primitive, \(f\), yielding
+an output dual number, \(\langle{}f(u),\nabla{}uf'(u)\rangle\). Faust is a language of
+/signals/ and signal processors; consequently we will refer to the
+/dual signal/, \(\langle{}s,\nabla{}s\rangle \in \mathbb{S}_{d}\), where \(\mathbb{S}_{d} =
+\mathbb{S}^{N+1}\). The signal processor based on the differentiated
+block diagram \(D\) has the following semantic scheme:
+#+NAME: eq:diffSemantic
+\begin{equation}
+\begin{split}
+\Delta_{N}\llbracket D \rrbracket &\;:\; \mathbb{S}_{d}^{M} \to \mathbb{S}_{d}^{P} \\
+\Delta_{N}\llbracket D \rrbracket(\langle{}s_{1},\nabla{}s_{1}\rangle,&\dots,\langle{}s_{M},\nabla{}s_{M}\rangle) \\
+&\to (\langle{}y_{1},\nabla{}y_{1}\rangle,\dots,\langle{}y_{P},\nabla{}y_{P}\rangle) \\
+\langle\mathbf{y}(t), \;\mathbf{J}_{\mathbf{y}}(t)\rangle &= \langle{}f(\mathbf{s}(t)), \;\mathbf{J}_{f}(t)\mathbf{J}_{{\mathbf{s}}}(t)\rangle\;,
+\end{split}
+\end{equation}
+where \(\Delta_{N}\llbracket \cdot \rrbracket\) indicates derivative
+transformation with respect to \(N\) input variables, and
+\(\mathbf{J}_{\mathbf{y}}\), \(\mathbf{J}_{f} = \nabla{}f(\mathbf{s})\), and
+\(\mathbf{J}_{\mathbf{s}} = \nabla\mathbf{s}\) are, respectively, \(P\times{}N\),
+\(P\times{}M\) and \(M\times{}N\) Jacobian matrices.
+
+AD primitives have been demonstrated in Faust using the language's
+pattern matching
+abstraction\nbsp[cite:@rushtonDifferentiable2024]. Pattern matching is a
+source code transformation mechanism, and exploits the fact that a
+Faust function may receive, as a parameter, a programmatic
+expression. For example, a differentiable addition primitive, acting
+on dual signals \(\langle{}s_{1}, \nabla{}s_{1}\rangle,\langle{}s_{2}, \nabla{}s_{2}\rangle\), may be created by defining a
+function that accepts the addition operator as a parameter, and
+produces, in parallel, the addition primitive's primal output,
+\(s_{1}+s_{2}\), and its gradients, \(\nabla{}s_{1}+\nabla{}s_{2}\).
+#+name: lst:diffAdd
+#+caption: Definition of a differentiable addition primitive in the
+#+caption: Faust language.
+#+attr_latex: :float t
+#+begin_src faust :noeval
+env(vars) = environment {
+  // ...
+  diff(+) = interleave(vars.N + 1, 2) : +,par(i, vars.N, +);
+  // ...
+};
+#+end_src
+A dual-signal addition operator implementation is given in
+cref:lst:diffAdd; the operator is defined within a /differentiable
+environment/, which receives and enumerates a vector of input
+variables, ensuring that all derivative transformations produce the
+appropriate number of partial derivatives; the function ~interleave~
+delivers the primal signals and their respective partial derivatives
+to the addition operations in the appropriate order: \(s_{1}, s_{2},
+\frac{\partial{}s_{1}}{\partial{}x_{1}}, \frac{\partial{}s_{2}}{\partial{}x_{1}},\dots,\frac{\partial{}s_{1}}{\partial{}x_{N}}, \frac{\partial{}s_{2}}{\partial{}x_{N}}\),
+as illustrated in cref:fig:diffadd. One addition primitive is created
+for the primal operation, and a further \(N\) additions in parallel,
+which we can notate \(\big\|_{l=1}^{N} +\), for computing partial
+derivatives.
+
+#+begin_src faust :results silent :file images/diffadd.svg :exports none
+N = 2;
+distribute(0, q, 0) = par(i, q, _);
+distribute(p, q, 0) = par(i, p, !),par(j, q, _);
+distribute(0, q, r) = par(i, q, _),par(j, r, !);
+distribute(p, q, r) = par(i, p, !),par(j, q, _),par(k, r, !);
+interleave(R, C) = par(i, R * C, _) <: par(r, R, par(c, C, distribute(r, 1, R - r - 1)));
+diff(+) = interleave(N + 1, 2) : +,par(i, N, +);
+process = diff(+);
+#+end_src
+
+#+begin_src emacs-lisp :results file :file images/diffaddannotated.svg :exports results
+(let* ((file "./images/diffadd.svg")
+       (svg (xml-parse-file file)))
+  (svg-text svg "s1" :x "4" :y "49" :font-size "5")
+  (svg-path svg '((moveto ((2 . 61.5)))
+                  (lineto ((.5 . 58) (3.5 . 58)))
+                  (lineto ((2 . 61.5)) :relative nil))
+            :fill "none"
+            :stroke "black"
+            :stroke-linecap "square"
+            :stroke-width ".35")
+  (svg-text svg "s1{" :x "3.5" :y "61.5" :font-size "5")
+  (svg-text svg "s2" :x "4" :y "73.5" :font-size "5")
+  (svg-path svg '((moveto ((2 . 85.25)))
+                  (lineto ((.5 . 81.75) (3.5 . 81.75)))
+                  (lineto ((2 . 85.25)) :relative nil))
+            :fill "none"
+            :stroke "black"
+            :stroke-linecap "square"
+            :stroke-width ".35")
+  (svg-text svg "s2{" :x "3.5" :y "85.5" :font-size "5")
+  (with-temp-buffer
+    (xml-print svg)
+    (buffer-string)))
+#+end_src
+#+attr_latex: :width .5\linewidth :float t
+#+attr_org: :width 300
+#+name: fig:diffadd
+#+caption: Differentiable addition primitive applied to dual signals
+#+caption: \(\langle{}s_{1}, \nabla{}s_{1}\rangle,\langle{}s_{2}, \nabla{}s_{2}\rangle\); implicit input variable
+#+caption: vector \(\mathbf{x}\) of length \(N = 2\).
+#+RESULTS:
+[[file:images/diffaddannotated.svg]]
+
+** Motivation
+
+Considering the plethora of existing approaches to
+DDSP\nbsp[cite:@hayesReview2024], why pursue an implementation in Faust?
+The availability of the Faust-to-JAX transpiler would appear to
+obviate such an initiative, but for the fact that the AD
+transformations facilitated by JAX lie the wrong side of the
+transpilation step. A comprehensive differentiable programming
+framework in the Faust language itself would allow DDSP algorithms to
+be written once, and run anywhere. A domain-specific approach to
+audio-oriented machine learning is not without precedent; indeed, a
+suite of ML-centric tools, with an emphasis on human computer
+interaction, exists for the ChucK programming
+language\nbsp[cite:@liChAI2024]. Faust, however, with its functional
+approach, and cross-platform capabilities, offers a unique point of
+vantage.
+
+The observation has been made that the relative structures of neural
+networks and digital filters bear striking
+similarities\nbsp[cite:@kuznetsovDifferentiable2020]. There is a very real
+sense in which machine learning problems, and gradient-based
+optimisation problems in general, are signal processing problems. The
+possibility of turning a signal processing DSL to problems of this
+sort paves the way to novel approaches and fresh perspectives on this
+dynamic field of research.
+
+* A General Scheme for Differentiating Faust Programs
+
+#+name: fig:diffRules
+#+caption: Automatic differentiation rules for Faust's composition operators,
+#+caption: plus supporting primitive operators and routing expressions. Use of
+#+caption: \(\Delta_{N}\llbracket \texttt{mem} \rrbracket\) is implicit in the
+#+caption: definition of \(\Delta_{N}\llbracket A \sim B\rrbracket\). \(N\) is the
+#+caption: number of input variables with respect to which partial derivatives are
+#+caption: calculated.
+\begin{figure*}[t]
+  \begin{mdframed}
+    \begin{minipage}[c]{\dimexpr\linewidth*18/40\relax}
+      \begin{gather}
+        \Delta_{N}\llbracket A,B \rrbracket =
+          \Delta_{N}\llbracket A \rrbracket,\Delta_{N}\llbracket B \rrbracket \\
+        \Delta_{N}\llbracket A : B \rrbracket =
+          \Delta_{N}\llbracket A \rrbracket : \Delta_{N}\llbracket B \rrbracket \\
+        \Delta_{N}\llbracket A <: B \rrbracket =
+          \Delta_{N}\llbracket A \rrbracket <: \Delta_{N}\llbracket B \rrbracket \\
+        \Delta_{N}\llbracket A \sim B \rrbracket =
+          \Delta_{N}\llbracket A \rrbracket \sim \Delta_{N}\llbracket B \rrbracket \\
+        \Delta_{N}\llbracket A :> B \rrbracket =
+          \Delta_{N}\left\llbracket A : \chi(i_{B},k)\right\rrbracket : F : \Delta_{N}\llbracket B \rrbracket
+          \label{eq:diffmerge} \\
+        F = \big\|_{l=1}^{i_{B}}\left(
+          \big\|_{l=1}^{k}\Delta_{N}\llbracket\_\rrbracket \;:>\; \Delta_{N}\llbracket\_\rrbracket
+        \right) \nonumber \\
+        k = \frac{o_{A}}{i_{B}} \nonumber
+      \end{gather}
+    \end{minipage}
+    \begin{minipage}[c]{\dimexpr\linewidth*22/40\relax}
+      \begin{gather}
+        \textrm{Parallel iteration, }\texttt{par(l, L, D)}\textrm{:} \nonumber \\
+        \big\|_{l=1}^{L}D_{l} = D_{1},\dots,D_{L} \\
+        \textrm{Signal interleaving function: }\nonumber \\
+        \chi(r,c) = \big\|_{l=1}^{r\times{}c}\_ <: \big\|_{m=0}^{r-1}
+          \big\|_{n=1}^{c}\left(
+            \big\|_{p=1}^{m}!,\_,\big\|_{q=1}^{r-m-1}!
+          \right) \label{eq:interleave} \\
+        \Delta_{N}\llbracket \_ \rrbracket = \big\|_{l=1}^{N+1}\_ \\
+          \Delta_{N}\llbracket ! \rrbracket = \big\|_{l=1}^{N+1}! \\
+        \Delta_{N}\llbracket\texttt{mem}\rrbracket = \big\|_{l=1}^{N+1}\texttt{mem}
+      \end{gather}
+    \end{minipage}
+  \end{mdframed}
+\end{figure*}
+
+In Faust's block diagram algebra, a given block diagram, \(D\), is
+comprised of a primitive block, \(P\), or the composition of two block
+diagrams via a composition operator according to the syntactic
+rule
+#+NAME: eq:syntax
+\begin{equation}
+D = P \;|\; (D_{1} \diamond D_{2})\;,
+\end{equation}
+where \(\diamond\) is one of the sequential (:), parallel (,), split (<:),
+merge (:>), or recursive (\(\sim\)) composition operators. The creation
+of differentiable Faust programs has been shown to be possible by
+/undifferentiated/ composition of differentiated primitive
+blocks\nbsp[cite:@rushtonDifferentiable2024], the syntactic rule being
+#+NAME: eq:badDiffSyntax
+\begin{equation}
+\Delta_{N}\llbracket D \rrbracket = \Delta_{N}\llbracket P_{1} \rrbracket \diamond \Delta_{N}\llbracket P_{2} \rrbracket \diamond \dots \diamond \Delta_{N}\llbracket P_{n} \rrbracket\;.
+\end{equation}
+While effective in facilitating differentiable programming, this
+syntax imposed an undesirable verbosity. Our preferred syntactic rule
+should be a direct transformation of cref:eq:syntax:
+#+NAME: eq:idealDiffSyntax
+\begin{equation}
+\Delta_{N}\llbracket D \rrbracket
+  = \Delta_{N}\llbracket P \rrbracket \;|\; \Delta_{N}\llbracket D_{1} \diamond D_{2} \rrbracket \;.
+\end{equation}
+The ideal outcome is to permit the programmer to subject an entire
+Faust program to automatic differentiation in a single expression,
+minimising the amount of re-writing required to ready their code for
+transformation. This would render a great proportion of existing Faust
+code differentiable, and, in doing so, prepare that wealth of material
+for prospective use in optimisation problems, and machine learning
+applications. In order to achieve such an outcome, it is necessary to
+provide differentiation rules for the five composition operators,
+taking into account their arithmetical significance, if any, in a
+block diagram to which they contribute.
+
+** Differentiable Block-Diagram Compositions
+
+To define syntactic rules for the derivatives of Faust's composition
+operators entails analysing them as if they were themselves primitive
+blocks. To do this, we must consider them in tandem with rules for
+some of Faust's fundamental primitive operators; these will assist us
+in achieving differentiable compositions.
+
+*** Identity Primitive
+
+Faust's identity function, notated \(\_\), describes a connection
+between two blocks. Treated as a signal processor, it adheres to the
+following semantic scheme\nbsp[cite:@orlareySyntactical2004]:
+#+NAME: eq:identity
+\begin{equation}
+  \begin{split}
+    \llbracket \_ \rrbracket &\;:\; \mathbb{S} \to \mathbb{S} \\
+    \llbracket \_ \rrbracket(s) &\to (s)\;.
+  \end{split}
+\end{equation}
+It receives one signal and returns that same signal unchanged,
+analogous to multiplying it by a constant signal of value
+\(1\). In dual signal arithmetic, this is
+#+NAME: eq:dualIdentity
+\begin{align}
+\langle{}s,\nabla{}s\rangle\langle{}1,\nabla1\rangle
+  = \langle{}1s, 1\nabla{}s + s\nabla{}1 \rangle
+  = \langle{}s,\nabla{}s\rangle\;,
+\end{align}
+and the semantic rule for the derivative of the identity function is
+thus
+#+NAME: eq:diffidentity
+\begin{equation}
+  \begin{split}
+    \Delta_{N}\llbracket \_ \rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\
+    \Delta_{N}\llbracket \_ \rrbracket(\langle{}s, \nabla{}s\rangle) &\to (\langle{}s, \nabla{}s\rangle)\;.
+  \end{split}
+\end{equation}
+The dual signal \(\langle{}s,\nabla{}s\rangle\) being composed of one
+primal signal and \(N\) gradient signals, we can further state that
+#+NAME: eq:diffidentity2
+\begin{equation}
+  \Delta_{N}\llbracket \_ \rrbracket = \big\|_{l=1}^{N+1}\;\_\;.
+\end{equation}
+
+*** Parallel Composition
+
+Blocks composed in parallel (see cref:fig:par) do not influence
+one-another, arithmetically-speaking. The outputs of the program
+\(A,B\), \(y_{1},\dots,y_{o_{A}}\) and \(y_{o_{A}+1},\dots,y_{o_{A}+o_{B}}\), are
+essentially the outputs of separate block diagrams; thus
+\(\Delta_{N}\llbracket A,B \rrbracket = \Delta_{N}\llbracket A \rrbracket,\Delta_{N}\llbracket
+B \rrbracket\), and, more generally
+#+NAME: eq:diffpar
+\begin{equation}
+\Delta_{N}\left\llbracket\big\|_{l=1}^{L}D_{l}\right\rrbracket =
+  \big\|_{l=1}^{L}\Delta_{N}\llbracket D_{l} \rrbracket \;.
+\end{equation}
+
+*** Sequential Composition
+
+#+begin_src latex
+\pgfkeys{
+  /diffop/.cd,
+  faust/.initial=,
+  math/.initial=,
+}
+\newcommand\diffop[1]{
+  \pgfkeys{/diffop/.cd,#1}
+  \begin{scope}[
+    faustnode/.style={rectangle, thick, draw=black, minimum size=7mm}
+  ]
+    \draw[] (0,0) rectangle (3.5,2.8);
+    
+    \node[faustnode](mul) at (2.7,.7) {\(\times\)};
+    \node[faustnode](dop)[above left=-2mm and 6mm of mul]{\(\nabla\pgfkeysvalueof{/diffop/math}\)};
+    \node[faustnode](op)[above=2mm of dop]{\(\pgfkeysvalueof{/diffop/math}\)};
+    \node(label)[above right=3mm and -5mm of op]{\(\Delta_{N}\llbracket \pgfkeysvalueof{/diffop/faust} \rrbracket\)};
+
+    \draw[thick, ->] let \p{opw}=(op.west) in (0,\y{opw}) -- (op.west);
+    \draw[thick, ->] let \p{opw}=(op.west), \p{dopw}=(dop.west) in (0,\y{opw}) -| (.5,\y{dopw}) |- (dop.west);
+    \draw[thick, ->] let \p{ope}=(op.east) in (op.east) -- (3.5,\y{ope});
+    \draw[thick, ->] let \p{mulw}=(mul.west) in (dop.east) --+ (.3,0) |- (\x{mulw},.9);
+    \draw[thick, ->] let \p{mulw}=(mul.west) in (0,\y{mulw}) --+ (.5,0) --+ (.5,-.15) |-+ (\x{mulw},-.15);
+    \draw[thick, ->] let \p{mule}=(mul.east) in (mul.east) -- (3.5,\y{mule});
+  \end{scope}
+}
+#+end_src
+
+#+name: fig:dualSec
+#+caption: Derivative transformation of the sequential composition of two
+#+caption: Faust blocks, \(\Delta_{N}\llbracket A : B \rrbracket\),
+#+caption: is analogous to composition of two mathematical functions of a vector of
+#+caption: dual signals, \(f(g(\langle\mathbf{s},\,\mathbf{J}_{\mathbf{s}}\rangle))\), and
+#+caption: is thus equivalent to the sequential composition of the blocks following
+#+caption: separate derivative transformation.
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}
+ \begin{scope}[xshift=-5cm]
+    \node (primal) at (4, 2.155) {\(\mathbf{s}\)};
+    \node (jacobian) at (4, .7) {\(\mathbf{J}_{\mathbf{s}}\)};
+    \draw[thick, ->] (primal.east)--(5, 2.155);
+    \draw[thick, ->] (jacobian.east)--(5, .7);
+  \end{scope}
+  
+  \diffop{faust=A,math=g}
+  \node (primal) at (4.8, 2.155) {\(\mathbf{z} = g(\mathbf{s})\)};
+  \node (jacobian) at (4.8, .7) {\(\mathbf{J}_{\mathbf{z}} = \mathbf{J}_{g}\mathbf{J}_{\mathbf{s}}\)};
+  \draw[thick] (3.5, 2.155)--(primal.west);
+  \draw[thick] (3.5, .7)--(jacobian.west);
+  \draw[thick, ->] (primal.east)--(6.2, 2.155);
+  \draw[thick, ->] (jacobian.east)--(6.2, .7);
+  
+  \begin{scope}[xshift=6.2cm]
+    \diffop{faust=B,math=f}
+    \node (primal) at (5, 2.155) {\(\mathbf{y} = f(g(\mathbf{s}))\)};
+    \node (jacobian) at (5,.7) {\(\mathbf{J}_{\mathbf{y}} = \mathbf{J}_{f}\mathbf{J}_{g}\mathbf{J}_{\mathbf{s}}_{}\)};
+    \draw[thick] (3.5, 2.155)--(primal.west);
+    \draw[thick] (3.5, .7)--(jacobian.west);
+  \end{scope}
+\end{tikzpicture}
+\end{figure*}
+
+Implicit in cref:eq:semanticTransformation,eq:diffSemantic are the
+input and output signals of the Faust block diagram, \(D\), and the
+following equivalence applies:
+\begin{align}
+D &= \big\|_{l=1}^{i_{D}}\,\_ \;:\; D\label{eq:diffSeqIn} \\
+D &= D \;:\; \big\|_{l=1}^{o_{D}}\,\_ \;,
+\end{align}
+where \(i_{D}\) and \(o_{D}\) are, respectively, the number of input and
+output signals of \(D\). Applying derivative transformation to
+cref:eq:diffSeqIn, and bringing cref:eq:diffpar,eq:diffidentity2 to
+bear,
+#+NAME: eq:diffImplicitIn
+\begin{align}
+\Delta_{N}\llbracket D \rrbracket &= \Delta_{N}\llbracket \big\|_{l=1}^{i_{D}}\,\_ \;:\; D \rrbracket \nonumber \\
+  &= \big\|_{l=1}^{i_{D}}\big\|_{m=1}^{N+1}\,\_ \;:\; \Delta_{N}\llbracket D \rrbracket \nonumber \\
+  &= \big\|_{l=1}^{i_{D}}\Delta_{N}\llbracket \_ \rrbracket \;:\; \Delta_{N}\llbracket D \rrbracket\;.
+\end{align}
+The arithmetical transparency of sequential composition holds in the
+general case; expanding on the semantic scheme in cref:eq:diffSemantic,
+\(\Delta_{N}\llbracket A : B \rrbracket\) is analogous to composing two
+functions, \(g\) and \(f\):
+#+NAME: eq:diffSeqSemantic
+\begin{equation}
+\begin{split}
+\Delta_{N}\llbracket A : B \rrbracket(\langle{}\mathbf{s}, &\;\mathbf{J}_{\mathbf{s}}\rangle)
+  \to (\langle{}\mathbf{y}, \;\mathbf{J}_{\mathbf{y}}\rangle) \\[5pt]
+\langle{}\mathbf{y}(t), \;\mathbf{J}_{\mathbf{y}}(t)\rangle
+  &= f(g(\langle\mathbf{s}(t), \;\mathbf{J}_{\mathbf{s}}(t)\rangle)) \\
+  &= \big\langle{}f(g(\mathbf{s}(t))), \;\mathbf{J}_{f}(t)\mathbf{J}_{g}(t)\mathbf{J}_{\mathbf{s}}(t)\big\rangle\;.
+\end{split}
+\end{equation}
+As illustrated in cref:fig:dualSec, the composition of functions of dual
+signals has the effect of primal function composition on the one hand,
+and application of the chain rule of differentiation on the other, and
+works so long as \(o_{A} = i_{B}\),[fn:2] thus
+#+NAME: eq:diffSeq
+\begin{equation}
+\Delta_{N}\llbracket A : B \rrbracket = \Delta_{N}\llbracket A \rrbracket : \Delta_{N}\llbracket B \rrbracket\;.
+\end{equation}
+
+*** Split Composition
+
+Composing \(A\) and \(B\), \(i_{B} = ko_{A}\), with the split
+composition operator (see cref:fig:split) duplicates the output
+signals of \(A\), \(k\) times, passing each group of duplicates to
+\(B\), in order:
+#+NAME: eq:split
+\begin{equation}
+A <: B = A \;:\; \big\|_{l=1}^{o_{A}}\,\_ \;<:\; \big\|_{m=1}^{k}\big\|_{l=1}^{o_{A}}\,\_ \;:\; B\;.
+\end{equation}
+Signal order is maintained within each group of duplicates, so,
+applying derivative transformation to both sides of cref:eq:split, and
+recalling cref:eq:diffImplicitIn,
+#+NAME: eq:diffsplit
+\begin{align}
+&\quad\;\Delta_{N}\llbracket A <: B \rrbracket \nonumber\\
+  &= \Delta_{N}\llbracket A \rrbracket :
+    \big\|_{l=1}^{o_{A}}\Delta_{N}\llbracket \_ \rrbracket <:
+    \big\|_{m=1}^{k}\big\|_{l=1}^{o_{A}}\Delta_{N}\llbracket \_ \rrbracket :
+    \Delta_{N}\llbracket B \rrbracket \nonumber \\
+  &= \Delta_{N}\llbracket A \rrbracket <: \Delta_{N}\llbracket B \rrbracket \;.
+\end{align}
+
+*** Cut Primitive
+:PROPERTIES:
+:CUSTOM_ID: sec:cut
+:END:
+
+The cut primitive, notated !, terminates a signal, and combinations of
+the cut and identity functions can be used to create complex signal
+routings.  For instance, to interleave two groups of two signals, such
+that \(s_{1,1},s_{1,2},s_{2,1},s_{2,2}\) becomes \(s_{1,1},s_{2,1},s_{1,2},s_{2,2}\), one may
+write
+#+NAME: eq:interleave22
+\begin{equation}
+\_,\_,\_,\_ \;<:\; \_,!,\_,!,!,\_,!,\_\;.
+\end{equation}
+To differentiate an expression of this kind, the appropriate
+accompaniment to cref:eq:diffidentity2,eq:diffsplit for the derivative
+of the cut primitive is
+#+NAME: eq:cut
+\begin{equation}
+  \begin{split}
+    \Delta_{N}\llbracket ! \rrbracket &= \big\|_{l=1}^{N+1}!\;.
+  \end{split}
+\end{equation}
+A general interleaving function, as used in cref:lst:diffAdd, can be
+written using the cut and identity primitives, plus parallel and split
+composition (see cref:lst:interleave). Comprising only differentiable
+elements, it too is differentiable.
+#+name: lst:interleave
+#+caption: A Faust function, \(\chi(r,c)\) (see cref:eq:interleave for its
+#+caption: mathematical definition), that interleaves \(c\) groups of \(r\)
+#+caption: signals into \(r\) groups of \(c\) signals.
+#+attr_latex: :options float=ht
+#+begin_src faust :noeval
+interleave(r, c) = par(l, r * c, _)
+  <: par(m, r, par(n, c, cutpq(m, r - m - 1)))
+with {
+  cutpq(0, q) = _,par(l, q, !);
+  cutpq(p, 0) = par(l, p, !),_;
+  cutpq(p, q) = par(l, p, !),cutpq(0, q);
+};
+#+end_src
+
+*** Delay Primitive
+:PROPERTIES:
+:CUSTOM_ID: sec:delay
+:END:
+
+Faust provides two primitives for delaying signals; here we will focus
+on the ~mem~ primitive, which, when composed in sequence with a
+signal, applies a one-sample delay.  In general, a fixed delay can be
+represented as the convolution of a signal, \(s(x,t)\), with a
+time-shifted impulse [cite:@mcclellanSignal2003],
+#+NAME: eq:delayAsConv
+\begin{equation}
+s(x, t-\tau) = s(x, t) \ast h(t)\;,\quad h(t) = \delta(t - \tau)\;.
+\end{equation}
+Taking the temporal-parametric Fourier transform of the derivative of
+the convolution with respect to \(x\), then using the convolution and
+differentiation properties of the
+transform\nbsp[cite:@mcclellanSignal2003], yields
+#+NAME: eq:timeinvariantdiff
+\begin{align}
+&\quad\;\mathcal{F}\left[\frac{\partial{}}{\partial{}x}\left(s(x,t) \ast h(t)\right)\right] \nonumber\\
+  &= j\omega_{x}S(j\omega_{x},j\omega_{t})H(j\omega_{t}) \\
+  &= \mathcal{F}\left[\frac{\partial{}}{\partial{}x}s(x,t)\right]\cdot\mathcal{F}\left[h(t)\right]\;,
+\end{align}
+which demonstrates that differentiation is time-invariant, and allows
+us to deduce the convolution rule of differentiation --- to
+differentiate a convolution we need only differentiate one of the
+functions being convolved. Applied to dual numbers,
+#+NAME: eq:
+\begin{equation}
+\langle{}s,\nabla{}s\rangle\ast\langle{}h,\nabla{}h\rangle = \langle{}s\ast{}h, \nabla{}s\ast{}h\rangle\;,
+\end{equation}
+giving us the following semantic scheme:
+#+NAME: eq:diffmem
+\begin{equation}
+  \begin{split}
+    \Delta_{N}\llbracket\texttt{mem}\rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\
+    \Delta_{N}\llbracket\texttt{mem}\rrbracket(\langle{}s, \nabla{}s\rangle) &\to (\langle{}y, \nabla{}y\rangle) \\
+    \langle{}y(t),\nabla{}y(t)\rangle &= \langle{}s(t-1),\nabla{}s(t-1)\rangle\;.
+  \end{split}
+\end{equation}
+
+*** Recursive Composition
+
+The differentiability of recursive filters is
+well-established\nbsp[cite:@shynkAdaptive1989] --- in short, the
+derivative of a recursive expression is itself recursive. In the
+specific case of Faust's recursive composition operator (see
+cref:fig:rec), to establish a rule for derivative transformation we
+can take a similar approach to cref:eq:diffSeqSemantic, making \(g\)
+an inner function that acts upon a vector of past output signals:
+#+NAME: eq:dualrec
+\begin{equation}
+\langle{}\mathbf{y}(t),\,\mathbf{J}_{\mathbf{y}}(t)\rangle =
+  \bigg\langle{}f(\mathbf{s}(t),g(\mathbf{y}(t-1))),\;
+  \frac{\partial{}f}{\partial{}\mathbf{s}(t)}\mathbf{J}_{\mathbf{s}}(t) +
+\frac{\partial{}f}{\partial{}g(\mathbf{y}(t-1))}\mathbf{J}_{g}(t-1)\mathbf{J}_{\mathbf{y}}(t-1)\bigg\rangle\;.
+\end{equation}
+In the absence of a feedforward component (notwithstanding the fact
+that such a system would produce constant output signals of value
+zero), the result simplifies to
+#+NAME: eq:all-pole
+\begin{equation}
+\langle{}f(g(\mathbf{y}(t-1))),\; \mathbf{J}_{f}(t-1)\mathbf{J}_{g}(t-1)\mathbf{J}_{\mathbf{y}}(t-1)\rangle\;,
+\end{equation}
+which, comparing with cref:eq:diffSeqSemantic, tells us that recursive
+composition is simply /sequential composition through time/, and
+points to the implicit, and trivially-differentiable, one-sample delay
+introduced by Faust's recursive composition operator. We may conclude
+that
+#+NAME: eq:diffrec
+\begin{equation}
+\Delta_{N}\llbracket A \sim B \rrbracket = \Delta_{N}\llbracket A \rrbracket \sim \Delta_{N}\llbracket B \rrbracket\;.
+\end{equation}
+
+*** Merge Composition
+
+Merge composition (cref:fig:merge) entails
+summation\nbsp[cite:@orlareySyntactical2004], thus the addition rule of
+differentiation must be obeyed when merging dual signals. A merge \(A
+:> B\), can be viewed as an interleaving of the outputs of \(A\) into
+\(i_{B}\) groups of \(k=o_{A}/i_{B}\) signals, followed by a merging of each
+group into one signal path:
+#+NAME: eq:expandedMerge
+\begin{equation}
+A :> B = A \,:\, \chi(i_{B},k) \,:\, \big\|_{l=1}^{i_{B}}\left(
+  \big\|_{m=1}^{k}\,\_ \;:>\; \_
+\right) : B\;.
+\end{equation}
+Clearly \(\Delta_{N}\llbracket A:>B \rrbracket\) cannot be defined
+recursively, however. Note that for \(i_{B}=1\) the right hand side of
+cref:eq:expandedMerge reduces to \(A:>\_\), which is essentially the
+term in parenthesis, and can be handled thanks to the definitions in
+cref:eq:diffidentity2,eq:diffpar,
+#+NAME: eq:mergeOntoOne
+\begin{equation}
+\Delta_{N}\llbracket \big\|_{m=1}^{k}\,\_ \;:>\; \_ \rrbracket
+  = \big\|_{m=1}^{k}\Delta_{N}\llbracket \_ \rrbracket \;:>\; \Delta_{N}\llbracket \_ \rrbracket\;.
+\end{equation}
+The order of signals is maintained, so the resulting dual signal is
+guaranteed to be of the desired form
+\(\left\langle{}\sum_{m=1}^{k}s_{m},\sum_{l=m}^{k}\nabla{}s_{m}\right\rangle\).  For the full
+expression for differentiable merge composition, see
+cref:eq:diffmerge.
+
+* Discussion
+:PROPERTIES:
+:CUSTOM_ID: sec:discussion
+:END:
+
+#+attr_latex: :options float=t, numbers=left, xleftmargin=12pt, framexleftmargin=12pt
+#+name: lst:neuron
+#+caption: Excerpt from a differentiable artificial neuron
+#+caption: implementation. See cref:sec:discussion for
+#+caption: detail.
+#+begin_src faust :noeval
+// diff.lib
+neuron(NINPUTS, activationFunction) = WX + b : activationFunction
+with {
+  WX = linalg.dot(NINPUTS);
+  b = _;
+};
+
+activations = environment {
+  sigmoid = *(-1) : 1 / (1 + exp);
+}
+
+linalg = environment {
+  dot(N) = interleave(N, 2) : par(i, N, *) :> _;
+};
+
+// neuron.dsp
+NW = 3; // Number of weights.
+
+// Send inputs, and weights/biases,
+// to the differentiated neuron.
+process = par(i, NW, _),par(i, NW + 1, wb.var(i + 1)) : d.diffInN(neuron, NW)
+with {
+  wb = weightsAndBiases((1, NW));
+  d = df.env(wb);
+  neuron = d.neuron(NW, d.activations.sigmoid);
+};
+#+end_src
+
+The rules for differentiating Faust's composition operators are
+collected in cref:fig:diffRules. With the implementation of these
+rules via pattern matching, Faust programs can be recursively
+decomposed according to their composition operators, and re-composed
+in differentiable fashion, satisfying the syntactic rule in
+cref:eq:idealDiffSyntax. For example:
+#+NAME: eq:diffComposition
+\begin{equation}
+\begin{split}
+\Delta_{N}\llbracket (A,C):B \rrbracket
+  &= \Delta_{N}\llbracket A,C \rrbracket \;:\; \Delta_{N}\llbracket B \rrbracket \\
+  &= \Delta_{N}\llbracket A \rrbracket , \Delta_{N}\llbracket C \rrbracket \;:\; \Delta_{N}\llbracket B \rrbracket\;.
+\end{split}
+\end{equation}
+An artificial neuron of the form \(y = \sigma(\mathbf{wx}+b)\), such as
+could be used in a binary classification problem, can be created as
+per cref:lst:neuron. The code describes a neuron and sigmoid
+activation function in primal form, in a library file, =diff.lib=; the
+~dot~ function (line 14) makes use of the familiar ~interleave~ function
+to compute the dot product, \(\mathbf{wx}\); in =neuron.dsp=,
+differentiable weights and biases, ~wb~, are created according to a network
+layer specification (line 27) --- one pair of signals indicating
+one layer containing one neuron with ~NW~ weights; weights and biases
+are used to create a differentiable environment (~d~, line 28; described
+in cref:sec:diffprog,lst:diffAdd); the wrapper-function ~diffInN~
+(line 25) enacts the recursive derivative transformation; its first ~NW~
+inputs are considered input signals, \(\mathbf{s}\), the rest as input
+variables, \(\mathbf{x}\).
+
+Worthy of reflection is that algorithms of this sort, consisting of
+differentiable primitives, plus our now-differentiable composition
+operators, can be automatically differentiated to arbitrary order,
+\(\Delta_{N}\llbracket{\scriptstyle\Delta_{N}\llbracket
+\cdots}{\scriptscriptstyle\Delta_{N}\llbracket \cdot \rrbracket}{\scriptstyle \cdots
+\rrbracket}\rrbracket\).
+
+** Limitations
+:PROPERTIES:
+:CUSTOM_ID: sec:limitations
+:END:
+
+Although the scheme presented here renders a great deal of existing
+Faust code differentiable, certain primitives and language constructs
+cannot, at present, be subjected to AD.
+
+Faust's ~route~ primitive cannot be pattern-matched, which precludes the
+derivative transformation of arbitrary signal routing expressions
+based on that primitive, such as those in the =routes.lib=
+library.[fn:4] As described in cref:sec:cut, however, such expressions
+can be recreated with the identity and cut primitives; common routing
+tasks like interleaving can be achieved differentiably with code such
+as in cref:lst:interleave.
+
+User interface primitives (sliders and buttons, for example) are
+matchable in principle, but in practice, ~hslider("x1", 0, -1, 1,
+.01)~, whose parameters are a string identifier, initial value,
+minimum, maximum and step, must be matched verbatim; clearly, in the
+general case, this is not practical. The obvious derivative
+transformation of a user interface element is to an input variable,
+i.e. a parameter for optimisation such as a weight in a neural
+network. Input variables must be identifiable so as to create the
+appropriate corresponding dual signal,
+\(\big\langle{}x_{i},\begin{bmatrix}0 & \cdots & \frac{\partial{}x_{i}}{\partial{}x_{i}} & \cdots &
+0\end{bmatrix}^{T}\big\rangle\). The approach proposed is to move input
+variables out of the general AD transformation; a wrapper function is
+used to indicate the number of input signals (whose gradients are zero
+vectors) and input variables received by the main body of the
+differentiated block diagram (see cref:lst:neuron,lst:iir). Though
+imposing a certain coding convention, we consider this comparable with
+the particular requirements imposed by PyTorch, TensorFlow, and JAX,
+with their respective dedicated datatypes for learnable parameters.
+
+Though not a frequently-employed feature of the language, unapplied
+lambda abstractions appear in some key definitions, the ~iir~ function
+in =filters.lib=, for example. Implemented in
+transposed-direct-form\nbsp[cite:@smithIntroduction2008], ~iir~ is defined
+with the abstraction ~ma.sub~, which accepts two arguments, ~x~ and ~y~, and
+returns the result ~y-x~. Attempting \(\Delta_{N}\llbracket \texttt{sub}
+\rrbracket\), the abstraction is essentially treated as a numerical
+constant, and given a vector of zeros as its gradient. Fortunately,
+constructions of this kind --- in this case reversing signal order
+before applying some primitive operation --- are effectively matters
+of signal-routing and, as described in cref:sec:cut, can be recreated
+using differentiable primitives.
+
+** Applications & Outlook
+
+#+attr_latex: :options float=t, numbers=left, xleftmargin=12pt, framexleftmargin=12pt
+#+name: lst:iir
+#+caption: Excerpt from a differentiable IIR filter implementation.
+#+begin_src faust :noeval
+N = 2; // filter order.
+
+// ...Set up AD vars & environment...
+
+// Differentiable TDF IIR filter.
+iir = ((sub,par(l, N, _)) ~ (fir(N))),par(l, N + 1, _)
+  : _,par(l, N, !),par(l, N + 1, _)
+  : fir(N + 1)
+with { 
+  sub = _,_ <: !,_,_,! : -;
+  fir(n) = (_ <: par(l, n, seq(m, l, mem))),par(l, n, _) : linalg.dot(n);
+};
+
+// Send a signal input, and coeffs,
+// to the differentiated filter.
+process = _,coeffs : d.diffInN(iir, 1)
+with {
+    coeffs = par(i, 2 * N + 1, vars.var(i + 1));
+};
+#+end_src
+
+Despite the above limitations, and beyond the example given in
+cref:lst:neuron, the AD system described here can be put to practical
+use. A differentiable transposed-direct-form IIR filter implementation
+is given in cref:lst:iir; though reliant on some careful signal
+routing, particularly for directing coefficients to the feedback
+(~fir(N)~, line 7) and feedforward (~fir(N + 1)~, line 9) portions of
+the filter, it overcomes the obstacles to differentiability posed by
+its counterpart in =filters.lib=. Structurally, it is similar to the
+neuron implementation in cref:lst:neuron; parameters, in this case
+learnable filter coefficients, are defined outside of the
+differentiable environment, and passed, along with an input signal, to
+the wrapper function ~diffInN~. An expanded version of this example
+(plus that given in cref:lst:neuron) is available online[fn:5] and can
+be run in Faust's web IDE.[fn:6] Comparing, via a differentiable loss
+function, the output of the filter against that of an equivalent
+filter with fixed, /hidden/ parameters, and backpropagating the
+resulting gradients, learnable parameters can be optimised in real
+time. This generalises to filters of higher order and those described
+by metaparameters such as cutoff frequency, and the length of multiple
+hidden delay lines can be found by optimisation against a
+differentiable FIR filterbank; these examples point the way to a
+variety of real-time adaptive processing applications.
+
+Though demonstrated with /known/ algorithms, in principle the above can
+be extended to optimisation against a target /black box/ filter, granted
+that both target and estimate receive the same input signal. This
+hints, however, at another limitation of the current approach ---
+Faust is primarily concerned with time-domain operations, thus loss is
+computed in the time domain on a per-sample basis (albeit with the
+possibility of taking a running-average of recent sample values, for
+example). For phase-invariant and perceptually-informed optimisation
+scenarios, frequency-domain loss computation is required; the recent
+introduction of multi-rate processing to the Faust language promises
+to enable spectral signal analysis. Developments of this sort will
+improve the feasibility of taking on larger-scale, typically
+deferred-time problems such neural audio synthesis. These call for
+generalisation to a corpus of training data (rather than optimisation
+to a small number of input variables); with that end in mind, the
+example in cref:lst:neuron should be extended to a general neural
+network structure, and a supporting infrastructure created for
+delivering training data and capturing weights and biases for
+real-time inference.
+
+* Conclusion
+
+In this paper we have described a general scheme for differentiating
+Faust programs, moving an important step toward providing the means
+with which to tackle audio optimisation and machine learning problems
+with the domain-specific and cross-platform benefits of the Faust
+language. A variety of time-domain, gradient-based optimisation
+problems can be tackled in Faust, with results produced in real-time.
+
+Many challenges and opportunities remain as impetus for further
+development of the work presented here. Having only been put to
+informal use to-date, the proposed AD approach should be assessed for
+its efficacy and efficiency. Beyond the correctness of the semantic
+scheme, being based on forward-mode AD, which, on paper, compares
+unfavourably with reverse-mode in terms of computational expense, its
+combination with the optimisations of the Faust compiler should be
+explored. At the level of the Faust compiler, changes that would
+facilitate the transformation of elements of the language that
+currently elude pattern matching would be of benefit here, as would
+further development of Faust's adaptability to frequency domain
+processing.
+
+#+print_bibliography:
+
+* Footnotes
+[fn:7] The colon symbol on the first line of
+cref:eq:semanticTransformation introduces the /type/ of the signal
+processor \(\llbracket D \rrbracket\) and is not to be confused with
+Faust's sequential composition operator.
+
+[fn:6] \url{https://faustide.grame.fr/}
+
+[fn:5] \url{https://codeberg.org/hatchjaw/aes-faust-ddsp}
+
+[fn:4]
+\url{https://github.com/grame-cncm/faustlibraries/blob/65594336a3476d9a82a4df71e88c92f3e4b94821/routes.lib}
+
+[fn:2] Though not the case in Faust's early
+days\nbsp[cite:@orlareySyntactical2004], the equality of \(o_{A}\) and \(i_{B}\)
+is long-established as an absolute condition of sequential
+composability.
+
+[fn:1] Orlarey\nbsp[cite:@orlareySyntactical2004] includes the identity
+(_) and cut (!) blocks separately in this syntactic rule; here we will
+consider these as belonging to the set of primitive blocks.
+
+* Local Variables                                                  :noexport:
+
+# Local Variables:
+# org-latex-classes: (("aes-aimla-2025-hal"
+# "\\documentclass[twoside]{article}
+# [NO-DEFAULT-PACKAGES]"
+# ("\\section{%s}" . "\\section*{%s}")
+# ("\\subsection{%s}" . "\\subsection*{%s}")
+# ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+# ("\\paragraph{%s}" . "\\paragraph*{%s}")
+# ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+# org-latex-src-block-backend: listings
+# org-latex-pdf-process: ("latexmk -f -pdf -%latex \
+#   -interaction=nonstopmode -shell-escape -output-directory=%o %f")
+# End:
+
+#  LocalWords:  transpile backpropagated backends VST luthiers ChucK
+#  LocalWords:  transpiler transpilation routings datatypes unapplied
+#  LocalWords:  backpropagating metaparameters filterbank DSL FPGAs
+#  LocalWords:  composability differentiably DDSP LMS IIR LLVM JAX
+#  LocalWords:  backend feedforward Autodiff
