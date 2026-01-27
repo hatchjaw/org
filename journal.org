@@ -10632,3 +10632,106 @@ by sprinkling ~Serial.printf~ statements in the class derived from the
 architecture file I created, but bloody hell this is concerning. It's
 not a question of processing power, so I'm guessing it's delay
 lines. Very disappointing. PSRAM required?
+*** 2026-01-17 samedi
+**** WFS: one problem fixed           :SPATIALAUDIO:NETWORKEDAUDIO:TEENSY:
+Turns out the first problem was a fairly straightforward case of audio
+processing causing a backlog of packets. I noticed that the average
+packet reception interval was skewing slow, on the order of 700+ \micro{}s
+instead of the expected 666 \micro{}s. Establishing a packet queue when
+setting up a ~NetworkProcessor~ socket...
+
+#+begin_src c++
+qindesign::network::EthernetUDP socket{4};
+#+end_src
+
+...and switching from an if statement to a while loop in
+~ananas::AudioClient::run~ did the job:
+
+#+begin_src c++
+void AudioClient::run()
+{
+    int size{socket.parsePacket()};
+    while (size > 0) {
+        nWrite++;
+
+        socket.read(rxPacket.rawData(), size);
+        packetBuffer.write(rxPacket);
+        //...
+        size = socket.parsePacket();
+    }
+    //...
+}
+#+end_src
+*** 2026-01-27 mardi
+**** WFS: the other problem fixed; demo :FAUST:SPATIALAUDIO:NETWORKEDAUDIO:TEENSY:
+By reducing the maximum speaker spacing to 30 cm, and adding =-dlt 1024=
+to =faust2ananas= (thus reducing the size of the delay line buffers from
+4096 to 2520), 16 sources works fine. Still, to handle focused sources
+as well (via time reversal, see [cite:@ahrensAnalytic2012]), or more
+than 16 secondary sources (i.e. more than eight modules), PSRAM will
+almost certainly be required.
+
+***** X-axis trouble
+Plugged everything in the old salle commune and ran it and it wasn't
+right. In switching to a unit square for the soundfield co-ordinate
+space, and incorrectly deriving an equation for each module's delay
+lines, I'd cocked things up. The solution:
+
+#+begin_src faust :noeval
+x(p) = hslider("%p/x", 0, -1, 1, 0.001) : +(1) : /(2) : *(maxX);
+#+end_src
+
+i.e. transposing \([-1, 1]\) to \([0, 1]\) means I could use the
+existing code for the x-axis component of the right triangle between a
+virtual source, \(y = 0\), and a given secondary source:
+
+#+begin_src faust :noeval
+cathetusX(k) = x - (s*(k + id*2));
+#+end_src
+
+***** Parameter smoothing
+Parameter smoothing outside of Faust is a bit of a mess, but that's
+probably because I'm updating ~SmoothedParameter~ instances in ~loop()~
+when in fact that should probably happen in
+~AudioProcessor::processAudio()~.
+
+***** Building and running the plugin on another machine
+Next test was could I get things running on the behemoth Syfala
+laptop, running Ubuntu (6.8.0-62-generic).
+- Installing the VS Code platformIO extension required also installing
+  =python3-venv= (see [[https://github.com/platformio/platformio-core-installer/issues/1774][this GitHub issue]]).
+- That's fine and everything, but to use the helpful scripts in
+  =teensy-audiosync= would require that the user installs [[https://koromix.dev/tytools][tytools]].
+- Building the plugin entailed making some additions to the plugin's
+  =CMakeLists.txt=; I can't remember which JUCE modules I had to add to
+  ~target_link_libraries~, but there were two.
+- Building the plugin also entailed installing =libcurl= (i.e. =sudo apt-get
+  install libcurlpp-dev= IIRC)
+- Running the plugin took some troubleshooting. Reaper was just
+  hanging when I tried to add an instance of AnanasWFS; it turned out
+  (confirmed by running the debugger in VS Code, and by using =strace)=
+  that it was attempting to bind the ~TimestampListener~ socket to port
+  320 that was the problem:
+  #+begin_example
+strace -e trace=socket,bind,setsockopt /home/syfala/opt/REAPER/reaper 2>&1
+...
+bind(36, {sa_family=AF_INET, sin_port=htons{320}, sin_addr=inet_addr("0.0.0.0")}, 16) = -1 EACCES (Permission denied)
+  #+end_example
+  Claude made some garbage suggestions about running =setcap= on the
+  Reaper executable or the plugin, I had the thought that it might be
+  a matter of the =syfala= user not being part of the =network= or =netdev=
+  groups (the former not even existing by default on Ubuntu,
+  apparently; Claude suggested I add it --- didn't help). Once I
+  provided the above output to Claude it correctly suggested the
+  following
+  #+begin_src shell :noeval
+# Check IP binding restrictions
+sysctl net.ipv4.ip_unprivileged_port_start
+  #+end_src
+  Which returned 1024 on the Ubuntu machine, 0 on my Manjaro
+  machine. I ran ~sudo sysctl net.ipv4.ip_unprivileged_port_start=0~ and
+  added ~net.ipv4.ip_unprivileged_port_start=0~ to
+  =/etc/system.d/10-network-security.conf= (I think that was the
+  filename, in any case something in =/etc/system.d=) and that was that.
+
+Entered on [2026-01-27 mar. 15:41]
