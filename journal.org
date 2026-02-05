@@ -10712,6 +10712,14 @@ target_link_libraries(ananasWFS
     juce::juce_audio_utils
     ...
   #+end_src
+  + This /might/ be because I had to change the CMake version to
+    #+begin_src cmake
+cmake_minimum_required(VERSION 3.28) # as opposed to 3.30
+    #+end_src
+    because that was the version installed on the Ubuntu
+    machine. =cmake --version= on my Manjaro machine shows =cmake version
+    4.2.1=. Could indeed be the problem there... aah, except CLion uses
+    its own bundled CMake at version 3.30.5.
 - Building the plugin also entailed installing =libcurl= (i.e. =sudo apt-get
   install libcurlpp-dev= IIRC)
 - Running the plugin took some troubleshooting. Reaper was just

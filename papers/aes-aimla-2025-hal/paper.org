@@ -1,18 +1,28 @@
-#+title: Faust Autodiff: Towards Audio Domain-Specific Machine Learning
+#+title: Faust Autodiff: Towards Audio Domain-Specific Machine Learning\cite{rushtonFaust2025}
 #+author: Thomas Rushton
 
 #+startup: overview
 #+export_file_name: out/aes-aimla-2025-hal
-#+options: toc:nil num:5 H:5 date:nil author:nil title:nil
+#+options: toc:nil num:5 H:5 date:nil author:nil
 #+latex_class: aes-aimla-2025-hal
-#+cite_export: biblatex numeric,sorting=none,url=false,isbn=false,giveninits
+#+cite_export: bibtex
+#+bibliography: aes-aimla-2025-hal.bib
 #+latex_header_extra: \RequirePackage[]{./out/aes-aimla-2025-hal}
 
-#+begin_src latex
-\makeRR
-\tableofcontents
-\newpage
-#+end_src
+#+begin_abstract
+Differentiable programming via automatic differentiation (AD) is the
+foundation for gradient-based optimisation techniques, and forms the
+basis for many current approaches to machine learning. Though well
+catered-for in general-purpose programming languages, the availability
+of AD in a domain-specific language (DSL) could offer novel
+perspectives on optimisation problems in the field of audio.  We
+present a general scheme for differentiable programming in the Faust
+programming language, a high-performance DSL tailored to audio
+synthesis and signal processing. Faust's rich ecosystem, coupled with
+a comprehensive AD implementation, can provide support for audio
+optimisation and machine learning applications on a multitude of
+platforms, from FPGAs to the web.
+#+end_abstract
 
 * LaTeX Setup                                                      :noexport:
 :PROPERTIES:
@@ -28,23 +38,7 @@
 ** Packages
 
 #+begin_src latex
-\usepackage[a4paper]{geometry}
-#+end_src
-
-UTF-8 encoding is recommended but use one that works for you.
-
-#+begin_src latex
-\usepackage[utf8]{inputenc}
-#+end_src
-
-#+begin_src latex
-\usepackage[T1]{fontenc}
-#+end_src
-
-The RR package courtesy of Inria
-
-#+begin_src latex
-\usepackage{RR}
+\usepackage{hal}
 #+end_src
 
 Highly recommended package for better looking text automatically.
@@ -57,12 +51,6 @@ Highly recommended package for better looking text automatically.
 
 #+begin_src latex
 \usepackage{booktabs}
-\usepackage{graphicx}
-\usepackage{url}
-\usepackage{boxedminipage}
-\usepackage{moreverb}
-\usepackage{pgfplots}
-\pgfplotsset{compat=1.8}
 #+end_src
 
 Diagrams.
@@ -87,6 +75,18 @@ Why it's necessary to use a negative top margin is... mysterious.
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{stmaryrd}
+#+end_src
+
+Scalabale parallel composition notation:
+
+#+begin_src latex
+\newcommand{\ppar}{\delimiter"026B30D }
+#+end_src
+
+Wider underscore
+
+#+begin_src latex
+\renewcommand{\_}{\rule[-.2ex]{.5em}{.06ex}}
 #+end_src
 
 More useful stuff
@@ -145,90 +145,23 @@ Subcaptions & SVGs.
 \usepackage[inkscapelatex=false]{svg}
 #+end_src
 
-** Colours
+** Authors & Affiliations
 
 #+begin_src latex
-\definecolor{inriaGrayBlue}{HTML}{384257} %Unused
-\definecolor{insaGray}{HTML}{5E5E5E} %Dark grey
-\definecolor{inriaRed}{HTML}{E63312} % Flash Red
-\definecolor{inriaRedDark}{HTML}{B11904} % Brick
-\definecolor{LightBlueGray}{RGB}{186,200,211} %Lighter Grey
-\definecolor{FontColor}{RGB}{100,100,100}
+\author[1]{\mbox{\firstname{Thomas}\lastname{Rushton}\email{thomas.rushton@inria.fr}}}
+\author[1]{\mbox{\firstname{Yann}\lastname{Orlarey}}}
+\author[1]{\mbox{\firstname{Romain}\lastname{Michon}}}
+\author[1]{\mbox{\firstname{Tanguy}\lastname{Risset}}}
+\author[2]{\mbox{\firstname{Stéphane}\lastname{Letz}}}
 
-\colorlet{inriaRedLight}{inriaRed!80} % Light red
-\colorlet{insaGrayLight}{insaGray!60} %Light Grey
-
-% ---- Color Set
-\definecolor{DarkerGrey}{RGB}{215,217,219}%% dotted lines
-\colorlet{blocktitlefgcolor}{inriaRedDark} %blocks titles
-\colorlet{blocktitlebgcolor}{DarkerGrey} %blocks lines
-\colorlet{blockbodyfgcolor}{FontColor} %blocks text
-\colorlet{innerblocktitlebgcolor}{inriaRedDark}
-\colorlet{innerblocktitlefgcolor}{white}
+\affil[1]{\institution{Inria, INSA Lyon}\city{CITI, EA3720, 69621 Villeurbanne}\country{France}}
+\affil[2]{\institution{Grame CNCM}\city{CITI, EA3720, 69621 Villeurbanne}\country{France}}
 #+end_src
 
-** RR stuff
+** Wrap up
 
 #+begin_src latex
-\RRNo{0000}
-#+end_src
-
-*** Date
-
-#+begin_src latex
-\RRdate{September 2025}
-#+end_src
-
-*** Title
-
-#+begin_src latex
-\RRetitle{Faust Autodiff: Towards Audio Domain-Specific Machine Learning}
-
-\titlehead{Faust Autodiff}
-#+end_src
-
-*** Authors
-
-#+begin_src latex
-\RRauthor{Thomas Rushton \thanks[inriaaff]{\textit{Inria, INSA Lyon,
-  CITI, EA3720} 69621 Villeurbanne, France
-  \textit{firstname.lastname@inria.fr}}\and
-  Yann Orlarey \thanksref{inriaaff}\and
-  Romain Michon \thanksref{inriaaff}\and
-  Tanguy Risset \thanksref{inriaaff}\and
-  Stéphane Letz \thanks[grameaff]{\textit{Grame CNCM, CITI, EA3720} 69621 Villeurbanne, France}}
-
-\authorhead{Thomas Rushton et al.}
-#+end_src
-
-*** Abstract
-
-#+begin_src latex
-\RRabstract{Differentiable programming via automatic differentiation
-  (AD) is the foundation for gradient-based optimisation techniques,
-  and forms the basis for many current approaches to machine
-  learning. Though well catered-for in general-purpose programming
-  languages, the availability of AD in a domain-specific language
-  (DSL) could offer novel perspectives on optimisation problems in the
-  field of audio.  We present a general scheme for differentiable
-  programming in the Faust programming language, a high-performance
-  DSL tailored to audio synthesis and signal processing. Faust's rich
-  ecosystem, coupled with a comprehensive AD implementation, can
-  provide support for audio optimisation and machine learning
-  applications on a multitude of platforms, from FPGAs to the web.}
-#+end_src
-
-*** Keywords
-
-#+begin_src latex
-%\RRkeyword{}
-#+end_src
-
-*** Project
-
-#+begin_src latex
-\RRprojets{Emeraude}
-\RCGrenoble
+\completesetup
 #+end_src
 
 * Bibliography Style                                               :noexport:
@@ -343,31 +276,31 @@ process = A :> B;
   \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*18/100\relax}
     \centering
     \includesvg[width=\textwidth]{images/par}
-    \subcaption{Parallel\\\(A,B\).}
+    \subcaption{Parallel, \(A,B\).}
     \label{fig:par}
   \end{minipage}
   \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*20/100\relax}
     \centering
     \includesvg[width=\textwidth]{images/seq}
-    \subcaption{Sequential\\\(A:B\).}
+    \subcaption{Sequential, \(A:B\).}
     \label{fig:seq}
   \end{minipage}
   \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*22/100\relax}
     \centering
     \includesvg[width=\textwidth]{images/split}
-    \subcaption{Split\\\(A<:B\).}
+    \subcaption{Split, \(A<:B\).}
     \label{fig:split}
   \end{minipage}
   \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*20/100\relax}
     \centering
     \includesvg[width=\textwidth]{images/rec}
-    \subcaption{Recursive\\\(A\sim{}B\).}
+    \subcaption{Recursive, \(A\sim{}B\).}
     \label{fig:rec}
   \end{minipage}
   \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*22/100\relax}
     \centering
     \includesvg[width=\textwidth]{images/merge}
-    \subcaption{Merge\\\(A:>B\).}
+    \subcaption{Merge, \(A:>B\).}
     \label{fig:merge}
   \end{minipage}
 \end{figure*}
@@ -498,7 +431,8 @@ produces, in parallel, the addition primitive's primal output,
 #+begin_src faust :noeval
 env(vars) = environment {
   // ...
-  diff(+) = interleave(vars.N + 1, 2) : +,par(i, vars.N, +);
+  diff(+) = interleave(vars.N + 1, 2)
+    : +,par(i, vars.N, +);
   // ...
 };
 #+end_src
@@ -512,7 +446,7 @@ to the addition operations in the appropriate order: \(s_{1}, s_{2},
 \frac{\partial{}s_{1}}{\partial{}x_{1}}, \frac{\partial{}s_{2}}{\partial{}x_{1}},\dots,\frac{\partial{}s_{1}}{\partial{}x_{N}}, \frac{\partial{}s_{2}}{\partial{}x_{N}}\),
 as illustrated in cref:fig:diffadd. One addition primitive is created
 for the primal operation, and a further \(N\) additions in parallel,
-which we can notate \(\big\|_{l=1}^{N} +\), for computing partial
+which we can notate \(\big\ppar_{l=1}^{N} +\), for computing partial
 derivatives.
 
 #+begin_src faust :results silent :file images/diffadd.svg :exports none
@@ -551,7 +485,7 @@ process = diff(+);
     (xml-print svg)
     (buffer-string)))
 #+end_src
-#+attr_latex: :width .5\linewidth :float t
+#+attr_latex: :width .75\linewidth :float t
 #+attr_org: :width 300
 #+name: fig:diffadd
 #+caption: Differentiable addition primitive applied to dual signals
@@ -597,7 +531,7 @@ dynamic field of research.
 #+caption: calculated.
 \begin{figure*}[t]
   \begin{mdframed}
-    \begin{minipage}[c]{\dimexpr\linewidth*18/40\relax}
+    \begin{minipage}[c]{\dimexpr\linewidth*19/40\relax}
       \begin{gather}
         \Delta_{N}\llbracket A,B \rrbracket =
           \Delta_{N}\llbracket A \rrbracket,\Delta_{N}\llbracket B \rrbracket \\
@@ -610,24 +544,24 @@ dynamic field of research.
         \Delta_{N}\llbracket A :> B \rrbracket =
           \Delta_{N}\left\llbracket A : \chi(i_{B},k)\right\rrbracket : F : \Delta_{N}\llbracket B \rrbracket
           \label{eq:diffmerge} \\
-        F = \big\|_{l=1}^{i_{B}}\left(
-          \big\|_{l=1}^{k}\Delta_{N}\llbracket\_\rrbracket \;:>\; \Delta_{N}\llbracket\_\rrbracket
+        F = \big\ppar_{l=1}^{i_{B}}\left(
+          \big\ppar_{l=1}^{k}\Delta_{N}\llbracket\_\rrbracket \;:>\; \Delta_{N}\llbracket\_\rrbracket
         \right) \nonumber \\
         k = \frac{o_{A}}{i_{B}} \nonumber
       \end{gather}
     \end{minipage}
-    \begin{minipage}[c]{\dimexpr\linewidth*22/40\relax}
+    \begin{minipage}[c]{\dimexpr\linewidth*21/40\relax}
       \begin{gather}
         \textrm{Parallel iteration, }\texttt{par(l, L, D)}\textrm{:} \nonumber \\
-        \big\|_{l=1}^{L}D_{l} = D_{1},\dots,D_{L} \\
+        \big\ppar_{l=1}^{L}D_{l} = D_{1},\dots,D_{L} \\
         \textrm{Signal interleaving function: }\nonumber \\
-        \chi(r,c) = \big\|_{l=1}^{r\times{}c}\_ <: \big\|_{m=0}^{r-1}
-          \big\|_{n=1}^{c}\left(
-            \big\|_{p=1}^{m}!,\_,\big\|_{q=1}^{r-m-1}!
+        \chi(r,c) = \big\ppar_{l=1}^{r\times{}c}\_ <: \big\ppar_{m=0}^{r-1}
+          \big\ppar_{n=1}^{c}\left(
+            \big\ppar_{p=1}^{m}!,\_,\big\ppar_{q=1}^{r-m-1}!
           \right) \label{eq:interleave} \\
-        \Delta_{N}\llbracket \_ \rrbracket = \big\|_{l=1}^{N+1}\_ \\
-          \Delta_{N}\llbracket ! \rrbracket = \big\|_{l=1}^{N+1}! \\
-        \Delta_{N}\llbracket\texttt{mem}\rrbracket = \big\|_{l=1}^{N+1}\texttt{mem}
+        \Delta_{N}\llbracket \_ \rrbracket = \big\ppar_{l=1}^{N+1}\_ \\
+          \Delta_{N}\llbracket ! \rrbracket = \big\ppar_{l=1}^{N+1}! \\
+        \Delta_{N}\llbracket\texttt{mem}\rrbracket = \big\ppar_{l=1}^{N+1}\texttt{mem}
       \end{gather}
     \end{minipage}
   \end{mdframed}
@@ -711,7 +645,7 @@ The dual signal \(\langle{}s,\nabla{}s\rangle\) being composed of one
 primal signal and \(N\) gradient signals, we can further state that
 #+NAME: eq:diffidentity2
 \begin{equation}
-  \Delta_{N}\llbracket \_ \rrbracket = \big\|_{l=1}^{N+1}\;\_\;.
+  \Delta_{N}\llbracket \_ \rrbracket = \big\ppar_{l=1}^{N+1}\;\_\;.
 \end{equation}
 
 *** Parallel Composition
@@ -724,8 +658,8 @@ essentially the outputs of separate block diagrams; thus
 B \rrbracket\), and, more generally
 #+NAME: eq:diffpar
 \begin{equation}
-\Delta_{N}\left\llbracket\big\|_{l=1}^{L}D_{l}\right\rrbracket =
-  \big\|_{l=1}^{L}\Delta_{N}\llbracket D_{l} \rrbracket \;.
+\Delta_{N}\left\llbracket\big\ppar_{l=1}^{L}D_{l}\right\rrbracket =
+  \big\ppar_{l=1}^{L}\Delta_{N}\llbracket D_{l} \rrbracket \;.
 \end{equation}
 
 *** Sequential Composition
@@ -797,8 +731,8 @@ Implicit in cref:eq:semanticTransformation,eq:diffSemantic are the
 input and output signals of the Faust block diagram, \(D\), and the
 following equivalence applies:
 \begin{align}
-D &= \big\|_{l=1}^{i_{D}}\,\_ \;:\; D\label{eq:diffSeqIn} \\
-D &= D \;:\; \big\|_{l=1}^{o_{D}}\,\_ \;,
+D &= \big\ppar_{l=1}^{i_{D}}\,\_ \;:\; D\label{eq:diffSeqIn} \\
+D &= D \;:\; \big\ppar_{l=1}^{o_{D}}\,\_ \;,
 \end{align}
 where \(i_{D}\) and \(o_{D}\) are, respectively, the number of input and
 output signals of \(D\). Applying derivative transformation to
@@ -806,9 +740,9 @@ cref:eq:diffSeqIn, and bringing cref:eq:diffpar,eq:diffidentity2 to
 bear,
 #+NAME: eq:diffImplicitIn
 \begin{align}
-\Delta_{N}\llbracket D \rrbracket &= \Delta_{N}\llbracket \big\|_{l=1}^{i_{D}}\,\_ \;:\; D \rrbracket \nonumber \\
-  &= \big\|_{l=1}^{i_{D}}\big\|_{m=1}^{N+1}\,\_ \;:\; \Delta_{N}\llbracket D \rrbracket \nonumber \\
-  &= \big\|_{l=1}^{i_{D}}\Delta_{N}\llbracket \_ \rrbracket \;:\; \Delta_{N}\llbracket D \rrbracket\;.
+\Delta_{N}\llbracket D \rrbracket &= \Delta_{N}\llbracket \big\ppar_{l=1}^{i_{D}}\,\_ \;:\; D \rrbracket \nonumber \\
+  &= \big\ppar_{l=1}^{i_{D}}\big\ppar_{m=1}^{N+1}\,\_ \;:\; \Delta_{N}\llbracket D \rrbracket \nonumber \\
+  &= \big\ppar_{l=1}^{i_{D}}\Delta_{N}\llbracket \_ \rrbracket \;:\; \Delta_{N}\llbracket D \rrbracket\;.
 \end{align}
 The arithmetical transparency of sequential composition holds in the
 general case; expanding on the semantic scheme in cref:eq:diffSemantic,
@@ -841,7 +775,7 @@ signals of \(A\), \(k\) times, passing each group of duplicates to
 \(B\), in order:
 #+NAME: eq:split
 \begin{equation}
-A <: B = A \;:\; \big\|_{l=1}^{o_{A}}\,\_ \;<:\; \big\|_{m=1}^{k}\big\|_{l=1}^{o_{A}}\,\_ \;:\; B\;.
+A <: B = A \;:\; \big\ppar_{l=1}^{o_{A}}\,\_ \;<:\; \big\ppar_{m=1}^{k}\big\ppar_{l=1}^{o_{A}}\,\_ \;:\; B\;.
 \end{equation}
 Signal order is maintained within each group of duplicates, so,
 applying derivative transformation to both sides of cref:eq:split, and
@@ -850,8 +784,8 @@ recalling cref:eq:diffImplicitIn,
 \begin{align}
 &\quad\;\Delta_{N}\llbracket A <: B \rrbracket \nonumber\\
   &= \Delta_{N}\llbracket A \rrbracket :
-    \big\|_{l=1}^{o_{A}}\Delta_{N}\llbracket \_ \rrbracket <:
-    \big\|_{m=1}^{k}\big\|_{l=1}^{o_{A}}\Delta_{N}\llbracket \_ \rrbracket :
+    \big\ppar_{l=1}^{o_{A}}\Delta_{N}\llbracket \_ \rrbracket <:
+    \big\ppar_{m=1}^{k}\big\ppar_{l=1}^{o_{A}}\Delta_{N}\llbracket \_ \rrbracket :
     \Delta_{N}\llbracket B \rrbracket \nonumber \\
   &= \Delta_{N}\llbracket A \rrbracket <: \Delta_{N}\llbracket B \rrbracket \;.
 \end{align}
@@ -876,7 +810,7 @@ of the cut primitive is
 #+NAME: eq:cut
 \begin{equation}
   \begin{split}
-    \Delta_{N}\llbracket ! \rrbracket &= \big\|_{l=1}^{N+1}!\;.
+    \Delta_{N}\llbracket ! \rrbracket &= \big\ppar_{l=1}^{N+1}!\;.
   \end{split}
 \end{equation}
 A general interleaving function, as used in cref:lst:diffAdd, can be
@@ -890,11 +824,13 @@ elements, it too is differentiable.
 #+attr_latex: :options float=ht
 #+begin_src faust :noeval
 interleave(r, c) = par(l, r * c, _)
-  <: par(m, r, par(n, c, cutpq(m, r - m - 1)))
+  <: par(m, r,
+       par(n, c, cutpq(m, r - m - 1)))
 with {
   cutpq(0, q) = _,par(l, q, !);
   cutpq(p, 0) = par(l, p, !),_;
-  cutpq(p, q) = par(l, p, !),cutpq(0, q);
+  cutpq(p, q) =
+    par(l, p, !),cutpq(0, q);
 };
 #+end_src
 
@@ -951,10 +887,11 @@ can take a similar approach to cref:eq:diffSeqSemantic, making \(g\)
 an inner function that acts upon a vector of past output signals:
 #+NAME: eq:dualrec
 \begin{equation}
-\langle{}\mathbf{y}(t),\,\mathbf{J}_{\mathbf{y}}(t)\rangle =
-  \bigg\langle{}f(\mathbf{s}(t),g(\mathbf{y}(t-1))),\;
-  \frac{\partial{}f}{\partial{}\mathbf{s}(t)}\mathbf{J}_{\mathbf{s}}(t) +
-\frac{\partial{}f}{\partial{}g(\mathbf{y}(t-1))}\mathbf{J}_{g}(t-1)\mathbf{J}_{\mathbf{y}}(t-1)\bigg\rangle\;.
+\begin{split}
+&\langle{}\mathbf{y}(t),\,\mathbf{J}_{\mathbf{y}}(t)\rangle = \bigg\langle{}f(\mathbf{s}(t),g(\mathbf{y}(t-1))), \\
+  &\frac{\partial{}f}{\partial{}\mathbf{s}(t)}\mathbf{J}_{\mathbf{s}}(t) +
+  \frac{\partial{}f}{\partial{}g(\mathbf{y}(t-1))}\mathbf{J}_{g}(t-1)\mathbf{J}_{\mathbf{y}}(t-1)\bigg\rangle\;.
+\end{split}
 \end{equation}
 In the absence of a feedforward component (notwithstanding the fact
 that such a system would produce constant output signals of value
@@ -983,8 +920,8 @@ differentiation must be obeyed when merging dual signals. A merge \(A
 group into one signal path:
 #+NAME: eq:expandedMerge
 \begin{equation}
-A :> B = A \,:\, \chi(i_{B},k) \,:\, \big\|_{l=1}^{i_{B}}\left(
-  \big\|_{m=1}^{k}\,\_ \;:>\; \_
+A :> B = A : \chi(i_{B},k) : \big\ppar_{l=1}^{i_{B}}\left(
+  \big\ppar_{m=1}^{k}\,\_ \;:>\; \_
 \right) : B\;.
 \end{equation}
 Clearly \(\Delta_{N}\llbracket A:>B \rrbracket\) cannot be defined
@@ -994,8 +931,8 @@ term in parenthesis, and can be handled thanks to the definitions in
 cref:eq:diffidentity2,eq:diffpar,
 #+NAME: eq:mergeOntoOne
 \begin{equation}
-\Delta_{N}\llbracket \big\|_{m=1}^{k}\,\_ \;:>\; \_ \rrbracket
-  = \big\|_{m=1}^{k}\Delta_{N}\llbracket \_ \rrbracket \;:>\; \Delta_{N}\llbracket \_ \rrbracket\;.
+\Delta_{N}\bigg\llbracket \big\ppar_{m=1}^{k}\,\_ \;:>\; \_ \bigg\rrbracket
+  = \big\ppar_{m=1}^{k}\Delta_{N}\llbracket \_ \rrbracket \;:>\; \Delta_{N}\llbracket \_ \rrbracket\;.
 \end{equation}
 The order of signals is maintained, so the resulting dual signal is
 guaranteed to be of the desired form
@@ -1015,7 +952,8 @@ cref:eq:diffmerge.
 #+caption: detail.
 #+begin_src faust :noeval
 // diff.lib
-neuron(NINPUTS, activationFunction) = WX + b : activationFunction
+neuron(NINPUTS, activationFunction) =
+  WX + b : activationFunction
 with {
   WX = linalg.dot(NINPUTS);
   b = _;
@@ -1026,7 +964,8 @@ activations = environment {
 }
 
 linalg = environment {
-  dot(N) = interleave(N, 2) : par(i, N, *) :> _;
+  dot(N) = interleave(N, 2)
+    : par(i, N, *) :> _;
 };
 
 // neuron.dsp
@@ -1034,11 +973,14 @@ NW = 3; // Number of weights.
 
 // Send inputs, and weights/biases,
 // to the differentiated neuron.
-process = par(i, NW, _),par(i, NW + 1, wb.var(i + 1)) : d.diffInN(neuron, NW)
+process = par(i, NW, _),
+  par(i, NW + 1, wb.var(i + 1))
+  : d.diffInN(neuron, NW)
 with {
   wb = weightsAndBiases((1, NW));
   d = df.env(wb);
-  neuron = d.neuron(NW, d.activations.sigmoid);
+  neuron = d.neuron(NW,
+    d.activations.sigmoid);
 };
 #+end_src
 
@@ -1138,19 +1080,24 @@ N = 2; // filter order.
 // ...Set up AD vars & environment...
 
 // Differentiable TDF IIR filter.
-iir = ((sub,par(l, N, _)) ~ (fir(N))),par(l, N + 1, _)
+iir = ((sub,par(l, N, _))
+  ~ (fir(N))),par(l, N + 1, _)
   : _,par(l, N, !),par(l, N + 1, _)
   : fir(N + 1)
 with { 
   sub = _,_ <: !,_,_,! : -;
-  fir(n) = (_ <: par(l, n, seq(m, l, mem))),par(l, n, _) : linalg.dot(n);
+  fir(n) =
+    (_ <: par(l, n, seq(m, l, mem))),
+      par(l, n, _) 
+    : linalg.dot(n);
 };
 
 // Send a signal input, and coeffs,
 // to the differentiated filter.
 process = _,coeffs : d.diffInN(iir, 1)
 with {
-    coeffs = par(i, 2 * N + 1, vars.var(i + 1));
+    coeffs = par(i, 2 * N + 1,
+                 vars.var(i + 1));
 };
 #+end_src
 
@@ -1247,7 +1194,7 @@ consider these as belonging to the set of primitive blocks.
 
 # Local Variables:
 # org-latex-classes: (("aes-aimla-2025-hal"
-# "\\documentclass[twoside]{article}
+# "\\documentclass{article}
 # [NO-DEFAULT-PACKAGES]"
 # ("\\section{%s}" . "\\section*{%s}")
 # ("\\subsection{%s}" . "\\subsection*{%s}")
@@ -1257,6 +1204,7 @@ consider these as belonging to the set of primitive blocks.
 # org-latex-src-block-backend: listings
 # org-latex-pdf-process: ("latexmk -f -pdf -%latex \
 #   -interaction=nonstopmode -shell-escape -output-directory=%o %f")
+# org-cite-global-bibliography: nil
 # End:
 
 #  LocalWords:  transpile backpropagated backends VST luthiers ChucK
