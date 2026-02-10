@@ -1,4 +1,4 @@
-#+title: Faust Autodiff: Towards Audio Domain-Specific Machine Learning\cite{rushtonFaust2025}
+#+title: Faust Autodiff: Towards Audio Domain-Specific Machine Learning
 #+author: Thomas Rushton
 
 #+startup: overview
@@ -575,11 +575,12 @@ rule
 \begin{equation}
 D = P \;|\; (D_{1} \diamond D_{2})\;,
 \end{equation}
-where \(\diamond\) is one of the sequential (:), parallel (,), split (<:),
-merge (:>), or recursive (\(\sim\)) composition operators. The creation
-of differentiable Faust programs has been shown to be possible by
-/undifferentiated/ composition of differentiated primitive
-blocks\nbsp[cite:@rushtonDifferentiable2024], the syntactic rule being
+where \(\diamond\) is one of the sequential (\(:\)), parallel (\(,\)), split
+(\(<:\)), merge (\(:>\)), or recursive (\(\sim\)) composition
+operators. The creation of differentiable Faust programs has been
+shown to be possible by /undifferentiated/ composition of differentiated
+primitive blocks\nbsp[cite:@rushtonDifferentiable2024], the syntactic rule
+being
 #+NAME: eq:badDiffSyntax
 \begin{equation}
 \Delta_{N}\llbracket D \rrbracket = \Delta_{N}\llbracket P_{1} \rrbracket \diamond \Delta_{N}\llbracket P_{2} \rrbracket \diamond \dots \diamond \Delta_{N}\llbracket P_{n} \rrbracket\;.
@@ -740,7 +741,7 @@ cref:eq:diffSeqIn, and bringing cref:eq:diffpar,eq:diffidentity2 to
 bear,
 #+NAME: eq:diffImplicitIn
 \begin{align}
-\Delta_{N}\llbracket D \rrbracket &= \Delta_{N}\llbracket \big\ppar_{l=1}^{i_{D}}\,\_ \;:\; D \rrbracket \nonumber \\
+\Delta_{N}\llbracket D \rrbracket &= \Delta_{N}\Big\llbracket \big\ppar_{l=1}^{i_{D}}\,\_ \;:\; D \Big\rrbracket \nonumber \\
   &= \big\ppar_{l=1}^{i_{D}}\big\ppar_{m=1}^{N+1}\,\_ \;:\; \Delta_{N}\llbracket D \rrbracket \nonumber \\
   &= \big\ppar_{l=1}^{i_{D}}\Delta_{N}\llbracket \_ \rrbracket \;:\; \Delta_{N}\llbracket D \rrbracket\;.
 \end{align}
@@ -931,7 +932,7 @@ term in parenthesis, and can be handled thanks to the definitions in
 cref:eq:diffidentity2,eq:diffpar,
 #+NAME: eq:mergeOntoOne
 \begin{equation}
-\Delta_{N}\bigg\llbracket \big\ppar_{m=1}^{k}\,\_ \;:>\; \_ \bigg\rrbracket
+\Delta_{N}\Big\llbracket \big\ppar_{m=1}^{k}\,\_ \;:>\; \_ \Big\rrbracket
   = \big\ppar_{m=1}^{k}\Delta_{N}\llbracket \_ \rrbracket \;:>\; \Delta_{N}\llbracket \_ \rrbracket\;.
 \end{equation}
 The order of signals is maintained, so the resulting dual signal is
