@@ -10750,3 +10750,217 @@ sysctl net.ipv4.ip_unprivileged_port_start
   filename, in any case something in =/etc/system.d=) and that was that.
 
 Entered on [2026-01-27 mar. 15:41]
+
+** 2026-02 février
+*** 2026-02-13 vendredi
+**** Race conditions and stuff                 :NETWORKEDAUDIO:TEENSY:PTP:
+Some progress made, with JUCE UI stuff, etc., but whenever I feel like
+I'm getting somewhere with ironing out PTP sync bugs I find I haven't
+cracked it.
+
+The system seems to run fine as a plain server/client, but adding WFS
+(and all the overhead that that brings to the clients) results in
+sporadic loss of PTP lock that thus far I've been unable to resolve. I
+"fixed" some potential race conditions in =t41-ptp= and =QNEthernet= (on
+my own forks), but perhaps there are some left, because every so often
+this sort of thing happens:
+
+#+begin_example
+==============================================================================
+IP: 192.168.48.168 | MAC: 04:E9:E5:14:30:A8 | SN: 13231760
+PTP t1: 9883201926468, t2: 9883201927757, t3 9883202490891, t4 9883202491726
+  Mode: fine, Drift: 1127.454754, Offset: 54, Delay 1089, Adjust: 1017.454754
+Clock Subscriber - Frames/Fs: 32/48000 (48000.0499418281906401)
+PLL4 DIV: 29, NUM: 184030365, DENOM: 1000000000; SAI1 PRED: 3, PODF: 19
+Audio-PTP offset: -22 ns
+Ananas Client:     % CPU: 0.592000 (max 0.816000)
+  Packets received: 249016 Average reception interval: 6.667828e+05 ns
+  Read index: 45, Write index: 16, 42 % full.
+  Packet offset: 216304 ns (10 frames), Times adjusted: 1
+WFS:               % CPU: 23.087999 (max 23.808001)
+  Module ID: 0, Speaker spacing: 0.228 m
+Module:            % CPU: 23.952000 (max 29.679998)
+==============================================================================
+
+
+==============================================================================
+IP: 192.168.48.168 | MAC: 04:E9:E5:14:30:A8 | SN: 13231760
+PTP t1: 9885202617512, t2: 9885202257126, t3 9885202679007, t4 9885202679993
+  Mode: coarse, Drift: 1127.454754, Offset: -180886, Delay -179700, Adjust: 0.000000
+Clock Subscriber - Frames/Fs: 32/48000 (47999.9978400000036345)
+PLL4 DIV: 29, NUM: 183998687, DENOM: 1000000000; SAI1 PRED: 3, PODF: 19
+Audio-PTP offset: -45 ns
+Ananas Client:     % CPU: 0.592000 (max 0.816000)
+  Packets received: 250512 Average reception interval: 6.667805e+05 ns
+  Read index: 42, Write index: 12, 40 % full.
+  Packet offset: 216281 ns (10 frames), Times adjusted: 1
+WFS:               % CPU: 23.120001 (max 23.808001)
+  Module ID: 0, Speaker spacing: 0.228 m
+Module:            % CPU: 23.983999 (max 29.679998)
+==============================================================================
+
+
+==============================================================================
+IP: 192.168.48.168 | MAC: 04:E9:E5:14:30:A8 | SN: 13231760
+PTP t1: 9886202620294, t2: 9886202621344, t3 9886203154265, t4 9886203155319
+  Mode: fine, Drift: 1127.454754, Offset: -202, Delay 1052, Adjust: 0.000000
+Clock Subscriber - Frames/Fs: 32/48000 (48000.0409440000003087)
+PLL4 DIV: 29, NUM: 184024894, DENOM: 1000000000; SAI1 PRED: 3, PODF: 19
+Audio-PTP offset: 853 ns
+Ananas Client:     % CPU: 0.592000 (max 0.816000)
+  Packets received: 252012 Average reception interval: 6.667797e+05 ns
+  Read index: 39, Write index: 12, 46 % full.
+  Packet offset: 216299 ns (10 frames), Times adjusted: 1
+WFS:               % CPU: 23.280001 (max 23.808001)
+  Module ID: 0, Speaker spacing: 0.228 m
+Module:            % CPU: 24.240000 (max 29.679998)
+==============================================================================
+
+
+==============================================================================
+IP: 192.168.48.168 | MAC: 04:E9:E5:14:30:A8 | SN: 13231760
+PTP t1: 9887201857865, t2: 9887201859110, t3 9887202426241, t4 9887202427355
+  Mode: fine, Drift: 1127.454754, Offset: -269, Delay 1045, Adjust: 1474.954754
+Clock Subscriber - Frames/Fs: 32/48000 (48000.1259978281814256)
+PLL4 DIV: 29, NUM: 184076607, DENOM: 1000000000; SAI1 PRED: 3, PODF: 19
+Audio-PTP offset: 1150 ns
+Ananas Client:     % CPU: 0.592000 (max 0.816000)
+  Packets received: 253508 Average reception interval: 6.667817e+05 ns
+  Read index: 36, Write index: 8, 44 % full.
+  Packet offset: 216316 ns (10 frames), Times adjusted: 1
+WFS:               % CPU: 23.280001 (max 23.808001)
+  Module ID: 0, Speaker spacing: 0.228 m
+Module:            % CPU: 24.224001 (max 29.679998)
+==============================================================================
+#+end_example
+
+Note that Offset and Delay suddenly go high, and the subsequent
+audio-PTP offset rises from a few nanoseconds to over a
+microsecond. This is a relatively mild example. It happens for one
+client at a time, and the switch doesn't appear to be affected, so
+it's something to do with th
+
+Depending on the severity of the loss of sync, a client may
+resyncronise (to within a microsecond) in anything from a few seconds
+to a few minutes... the trouble is, if PTP goes into coarse correction
+mode, the audio-PTP offset enters into enormous oscillations that can take
+ages to settle down.
+
+***** PIO Elisp utilities 
+With some thanks to Claude I have the following useful bits of Emacs
+lisp for quickly monitoring 
+
+***** Kill all PlatformIO monitor buffers
+
+#+begin_src emacs-lisp
+(defun tar/kill-pio-monitors ()
+  "Kill all PIO monitor buffers and their processes."
+  (interactive)
+  (dolist (buffer (buffer-list))
+    (when (string-match "^\\*pio-monitor-ACM[0-9]+\\*" (buffer-name buffer))
+      ;; Kill the process if it exists
+      (let ((proc (get-buffer-process buffer)))
+        (when proc
+          (delete-process proc)))
+      ;; Then kill the buffer
+      (kill-buffer buffer))))
+#+end_src
+
+#+RESULTS:
+: tar/kill-pio-monitors
+
+***** Kill all PIO buffers and launch new ones
+
+#+begin_src emacs-lisp
+(defun tar/setup-pio-monitors ()
+  "Close all PIO monitor buffers and start 4 PlatformIO device monitors in a grid."
+  (interactive)
+  
+  (tar/kill-pio-monitors)
+  
+  ;; Make the current window fill the frame
+  (delete-other-windows)
+  
+  ;; Create the four monitors
+  (let ((devices '(0 1 2 3))
+        (buffers '())
+        (display-buffer-alist '((".*" (display-buffer-no-window)))))
+    
+    ;; Start each async shell command
+    (dolist (n devices)
+      (let* ((cmd (format "pio device monitor -p /dev/ttyACM%d" n))
+             (buffer-name (format "*pio-monitor-ACM%d*" n)))
+        ;; Start async shell command
+        (async-shell-command cmd buffer-name)
+        (push buffer-name buffers)))
+    
+    ;; Reverse to get correct order
+    (setq buffers (nreverse buffers))
+    
+    ;; Arrange in 2x2 grid
+    ;; Top-left: first buffer (already displayed)
+    (switch-to-buffer (nth 0 buffers))
+    
+    ;; Split right for top-right
+    (split-window-right)
+    ;; Split below for bottom left
+    (split-window-below)
+    ;; Switch to next window
+    (other-window 1)
+    ;; Open second shell command output
+    (switch-to-buffer (nth 1 buffers))
+    ;; Switch to next
+    (other-window 1)
+    ;; Open third buffer
+    (switch-to-buffer (nth 2 buffers))
+    ;; Split below
+    (split-window-below)
+    ;; Switch to next
+    (other-window 1)
+    ;; Open fourth
+    (switch-to-buffer (nth 3 buffers))
+    
+    ;; Balance windows for equal sizes
+    (balance-windows)))
+#+end_src
+
+#+RESULTS:
+: tar/setup-pio-monitors
+
+Entered on [2026-02-13 ven. 13:59]
+
+*** 2026-02-22 dimanche
+**** QoS, IPs/ports, QNEthernet, focused sources, etc. :NETWORKEDAUDIO:TEENSY:PTP:
+Latest developments (I've been working quite obsessively and not
+taking notes):
+- It turns out Quality of Service is quite important, and there's a
+  [[https://help.mikrotik.com/docs/spaces/ROS/pages/189497483/Quality+of+Service#QualityofService-Dante][guide]] in the MikroTix Router OS docs about configuring Dante; I
+  adapted this to my setup, but I think I need to refine my approach.
+  + This is all with the aim of prioritising PTP traffic, then audio
+    traffic, and leaving announcemeguident traffic and control data as
+    low-priority.
+  + I realised that I was getting a pretty stable PTP lock for
+    AnanasServer (versus AnanasWFS) because although the packet rate
+    was a comparable ~1500/sec, bandwidth was 2 Mbps vs 12 Mbps;
+    follow-up messages weren't reaching the clients from the switch
+    boundary clock, presumably because they were being overwhelmed by
+    audio traffic.
+- Switching on QoS stuff on the switch broke everything --- this was
+  because clients weren't sending IGMP packets and were thus getting
+  kicked out of their multicast groups. I spent a couple of hours
+  updating my fork-of-a-fork of QNEthernet on the hunch that the
+  canonical upstream had been fixed in the intervening five years, and
+  I was right.
+- I also rewrote the PTP implementation from scratch. It only supports
+  IPv4 E2E, but that's all we need. It's much easier to maintain, it's
+  more efficient, I think, and I understand PTP a lot better now than
+  I did before.
+- I had a go at simplifying the protocol part of my implementation; I
+  now have the following IP:port combinations
+  + Audio data on =224.4.224.4:49152=
+  + WFS control data on =224.4.224.5:49162=
+  + Reboot messages on =224.4.224.5:49163=
+  + Authority accouncements on =224.4.224.6:49172=
+  + Client accouncements on =224.4.224.6:49173=
+
+Entered on [2026-02-22 dim. 19:01]
