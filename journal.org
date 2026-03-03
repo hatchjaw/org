@@ -10964,3 +10964,80 @@ taking notes):
   + Client accouncements on =224.4.224.6:49173=
 
 Entered on [2026-02-22 dim. 19:01]
+*** 2026-02-23 lundi
+**** IGMP addendum                                 :NETWORKEDAUDIO:TEENSY:
+The MikroTik Dante QoS guide says
+#+begin_quote
+When using Dante in multicast mode, it is beneficial to enable IGMP snooping on the switch. This feature directs traffic only to ports with subscribed devices, preventing unnecessary flooding.
+#+end_quote
+I narrowed down some problems I was having with clients dropping off
+the network to IGMP snooping being enabled. It's kind of useful for
+verifying which devices are subscribed to which multicast groups, but
+appears to be more trouble than it's worth.
+
+Entered on [2026-02-23 lun. 21:01]
+** 2026-03 mars
+*** 2026-03-03 mardi
+**** PTP fix, PI controller, ongoing issues    :NETWORKEDAUDIO:TEENSY:PTP:
+Trynig to take sync measurements with =ananasServer=, I found that,
+after about forty-five minutes, clients started to drift. My idea was
+that perhaps I had a (16-bit?) counter that was wrapping, but it
+turned out that the issue was the delay request sequence ID,
+i.e. without a propertly incrementing senquence ID, eventually the
+switch was just not responding to delay request messages, leaving time
+exchanges incomplete, and causing ~updateController~ not to be called,
+and, consequently, no update to the ~audioPTPOffset~ PI controller that
+I recently added
+
+***** PI controller
+I switched to a PI controller for handling the ~audioPTPOffset~
+
+#+begin_src c++
+void AudioSystemManager::adjustClock(const double adjust)
+{
+    // Apply PI controller to audio-PTP offset.
+    accumulatedOffset += audioPTPOffset;
+    // Mitigate "wind-up" by clamping the accumulated offset.
+    accumulatedOffset = ananas::Utils::clamp(accumulatedOffset, -MaxAccumulatedOffset, MaxAccumulatedOffset);
+    const double offsetP{static_cast<double>(audioPTPOffset) * KP};
+    const double offsetI{static_cast<double>(accumulatedOffset) * KI};
+    config.setExactSamplingRate(
+        1. + (adjust + offsetP + offsetI) * ClockConstants::Nanosecond
+    );
+    //...
+#+end_src
+
+where ~KP~ and ~KI~ are ~.1~ and ~.01~ respectively. This replaced a previous
+attempt using a mean sampling rate as a fallback when sync was lost,
+that obviously wasn't working. My thinking with the previous iteration
+was that, after a little while at least, the average sampling rate
+should be analogous to PTP drift and remain reasonably constant, thus
+getting around situations whereby large PTP adjusments are made, and
+thus large ~audioPTPOffset~ values are calculated. The averaging
+approach wasn't helping matters, however, whereas the PI controller
+does. PTP trouble, particularly when running =ananasWFS= (and
+=wfs-module=) still cause async, but the PI controller does appear to be
+effective in bringing things back into line. Possible further
+improvements available by tweaking ~KP~ and ~KI~.
+
+***** Ongoing issues
+The switch is the weakpoint as far as I can tell. When running
+=ananasServer= and =clock-subscriber=, follow-up message loss --- i.e. the
+server sending a sync message, but not the corresponding follow-up to
+a given clock subscriber --- is on the order of < 1 %, which isn't
+enough to cause much of a problem. When running =ananasWFS= and
+=wfs-module=, however, loss is over 10 %, which is occasionally rather
+catastrophic for presentation-time synchronicity. The aforementioned
+PI controller does its job, but it can take a minute or two for clock
+subscribers/modules to resynchronise if they're knocked out of line by
+a particularly egregious loss of PTP exchange data.
+
+The plugin UI is coming together, but for =ananasWFS= in particular
+there remains the issue whereby if a module disconnects all other
+modules' iDs are reset to -1, and, upon rejoining, they don't receive
+their former module IDs. Modules also don't appear to be correctly
+parsing (or receiving?) initial source position OSC data when they
+connect, i.e. subsequent source position changes are required to
+/remind/ modules of source positions.
+
+Entered on [2026-03-03 mar. 07:29]
