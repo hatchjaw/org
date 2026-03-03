@@ -1,0 +1,124 @@
+#+title:      Ananas synchronicity data analysis
+#+date:       [2026-03-03 mar. 07:54]
+#+filetags:   :data:networkedaudio:smc:teensy:
+#+identifier: 20260303T075431
+
+Data visualisation for the SMC paper I'm authoring with Clemens,
+Romain and Tanguy.
+
+* Data capture procedure
+
+** Hardware setup
+
+- Computer running =ananasServer= connected to a Dell USB multiport
+  adapter.
+- Multiport adapter connected to:
+  + MikroTik CRS326-24G-2S+IN ethernet switch, via CAT5E ethernet
+    cable.
+  + Orico USB hub over USB-A to USB-B cable.
+- USB hub connected to Digilent Analag Discovery 2 logic analyser over USB.
+- USB hub connected to four Teensy Ananas =clock-subscriber= modules
+  over USB.
+- USB hub connected to one Teensy Ananas =clock-authority-usb-audio=
+  module over USB.
+- Switch connected to =clock-authority-usb-audio= and
+  =clock-subscriber= modules over CAT5E ethernet.
+- Four =clock-subscriber= modules connected to the logic analyser on:
+  + Ground.
+  + Pin 7, data.
+  + Pin 20, LRCLK.
+  + Pin 21, BCLK.
+
+    
+** Software setup
+
+- Digilent Waveforms running in /Logic/ mode.
+- Reaper running a track with a PPS signal, i.e. a single
+  maximal-amplitude 16-bit sample once per second.
+- That track routed as a send to another track running the
+  =ananasServer= plugin.
+- Waveforms set up with four I2S devices, the =clock-subscriber=
+  modules, set to trigger on I2S3 on a sample with value 0x7FFE.
+- Logging configured with the following script:
+
+  #+begin_src javascript
+function findFirstTimestamp(channel, target) {
+    var index = 0;
+    channel.data.forEach(function(element, idx) {
+        if (index == 0 && element == target) {
+            index = idx;
+        }
+    });
+    return channel.eventStamps[index];
+}
+
+var target = "h7ffe";
+var times = [
+    findFirstTimestamp(Logic.Channels.I2S,  target),
+    findFirstTimestamp(Logic.Channels.I2S2, target),
+    findFirstTimestamp(Logic.Channels.I2S3, target),
+    findFirstTimestamp(Logic.Channels.I2S4, target)
+];
+
+FileAppendLine("~/tmp/logic/ananas_x.csv", [times.join(",")]);
+  #+end_src
+
+  and set up to capture data "Each triggered acquisition".
+- Per the script, data written to a CSV file.
+- I2S3 used as the time reference; all other modules' offsets
+  recorded relative to I2S3 each second.
+
+
+** Data analysis
+# #+begin_src julia :results file graphics :file synchro.png :output-dir ./figures
+#+begin_src julia
+using CSV, DataFrames, Plots, LaTeXStrings, Statistics
+
+# The number of datapoints, i.e. seconds, to plot
+numData = 3600
+
+# Read the data. Limit to 3600 data points, i.e. 1 hour's worth.
+data = CSV.read(
+"20260303T221301--ananas-synchronicity-measurements-data__ananas_data_teensy.csv",
+    DataFrame,
+    limit=numData + 1
+)
+
+# Remove the initial offset.
+data = data .- data[1, 3]
+# Calculate the mean offset for each point in time.
+meanOffsets = mean(Matrix(data), dims=2)
+
+# Create a vector of x values to plot against, i.e. seconds
+x = 0:numData
+plot(
+    # Data
+    x,
+    Matrix(data),
+    # Size
+    size=(1800, 600),
+    # Labels
+    xlabel="Time (s)",
+    ylabel="Offset (ns)",
+    label=permutedims(names(data)),
+    # Styling
+    fontfamily="Times-Roman",
+    margin=10Plots.mm,
+    gridlinewidth=2,
+    linewidth=1.5,
+    guidefontsize=18,
+    tickfontsize=12,
+    legendfontsize=12,
+    xlims=(-numData * .005, numData * 1.005),
+    # Y formatter
+    yformatter=y -> string(Int(round(y / 10.0^-9)))
+)
+
+# Plot the mean offset too
+plot!(x, meanOffsets, label="Mean offset", linewidth=3, c=:red)
+
+# savefig("./figures/synchro.png")
+#+end_src
+
+#+RESULTS:
+: Plot{Plots.GRBackend() n=5}
