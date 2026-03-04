@@ -70,8 +70,7 @@ FileAppendLine("~/tmp/logic/ananas_x.csv", [times.join(",")]);
 
 
 ** Data analysis
-# #+begin_src julia :results file graphics :file synchro.png :output-dir ./figures
-#+begin_src julia
+#+begin_src julia :results file graphics :file synchro.png :output-dir ./figures
 using CSV, DataFrames, Plots, LaTeXStrings, Statistics
 
 # The number of datapoints, i.e. seconds, to plot
@@ -84,10 +83,12 @@ data = CSV.read(
     limit=numData + 1
 )
 
-# Remove the initial offset.
+# Remove the initial offset (using I2S3 as the reference)
 data = data .- data[1, 3]
-# Calculate the mean offset for each point in time.
-meanOffsets = mean(Matrix(data), dims=2)
+# Calculate the range of offsets, i.e. the group asynchronicity, for
+# each point in time.
+groupAsync = maximum(Matrix(data), dims=2) - minimum(Matrix(data), dims=2)
+meanAsync = mean(groupAsync)
 
 # Create a vector of x values to plot against, i.e. seconds
 x = 0:numData
@@ -108,17 +109,29 @@ plot(
     linewidth=1.5,
     guidefontsize=18,
     tickfontsize=12,
-    legendfontsize=12,
+    legendfontsize=11,
     xlims=(-numData * .005, numData * 1.005),
     # Y formatter
     yformatter=y -> string(Int(round(y / 10.0^-9)))
 )
 
 # Plot the mean offset too
-plot!(x, meanOffsets, label="Mean offset", linewidth=3, c=:red)
+plot!(x, groupAsync, label="Group asynchronicity", linewidth=2, c=:red)
 
-# savefig("./figures/synchro.png")
+hline!([meanAsync],
+       label="Mean asynchronicity",
+       linewidth=3,
+       linestyle=:dot,
+       c=:black)
+
+savefig("./figures/synchro.png")
 #+end_src
 
 #+RESULTS:
-: Plot{Plots.GRBackend() n=5}
+[[file:./figures/synchro.png]]
+
+So, the four clients stay synchronised to within just over 200 ns over
+the course of an hour, with a mean group asynchronicity of about 80
+ns. Pity, I suppose, that this isn't always the case... thanks, I
+think, due to the switch's PTP implementation being sporadically
+unreliable.
