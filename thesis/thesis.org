@@ -1,0 +1,448 @@
+#+title: My astonishing thesis
+#+author: Thomas Albert Rushton
+
+#+options: toc:nil
+#+export_file_name: out/thesis
+#+latex_class: thesis
+#+cite_export: biblatex
+#+latex_header_extra: \RequirePackage[]{./out/thesis}
+
+#+begin_src latex
+\frontmatter
+#+end_src
+
+#+begin_src latex
+\newgeometry{top=1.85cm,bottom=2.5cm,right=1.6cm,left=1.85cm}
+ 
+\begin{titlepage}
+
+\begin{center}
+\includegraphics[height=3cm]{INSA.png}
+\end{center}
+
+\vspace{-.35cm}
+
+\small
+N° d'ordre NNT : XXX\\[-.3cm]
+
+\begin{center}
+
+\Large
+
+\scalebox{1}[.9]{\textbf{THESE de DOCTORAT DE L’INSA LYON,}}\\[-.2cm]
+\scalebox{1}[.9]{\textbf{membre de l’Université de Lyon}}
+
+\vspace{.9cm}
+
+\large
+\textbf{Ecole Doctorale} 512\\
+\textbf{Informatique et Mathématiques}\\[.4cm]
+\textbf{Spécialité/ discipline de doctorat :} Informatique\\[2.1cm]
+
+\normalsize
+Soutenue publiquement le xx/xx/xxxx, par :\\
+\Large
+\scalebox{1}[.9]{\textbf{xxxxxxx}}\\[.7cm]
+
+\hrulefill\\[.3cm]
+\Huge
+\textbf{xxxxxxx}
+
+\hrulefill\\[2cm]
+
+\end{center}
+
+\normalsize
+\noindent Devant le jury composé de :\\[.3cm]
+
+\small
+
+\noindent\begin{tabular}{lllll}
+&&&&\\
+Nom&Prenom&Fonction&Employeur&Président du jury\\
+xx&xx&xx&xx&Rapporteur\\
+xx&xx&xx&xx&Rapporteur\\
+xx&xx&xx&xx&Examinatrice\\
+xx&xx&xx&xx&Examinatrice\\
+&&&&\\
+xx&xx&xx&xx&Directeur de thèse\\
+xx&xx&xx&xx&Co-enc. de thèse\\
+\end{tabular}
+
+\end{titlepage}
+#+end_src
+
+#+begin_src latex
+\newgeometry{top=2.5cm,bottom=2.5cm,right=2.5cm,left=2.5cm}
+
+\pagestyle{empty}
+
+\begin{center}
+\large\textbf{Département FEDORA – INSA Lyon - Ecoles Doctorales}
+\end{center}
+
+%\scriptsize
+\fontsize{7.0pt}{7.0pt}\selectfont
+\begin{center}%
+\begin{tabular}{|>{\centering}>{\columncolor[rgb]{0.90, 0.87, 0.93}}>{\color{txtED}}b{1.4cm}|b{7.8cm}|b{5.5cm}|}
+\hline\vspace{.05cm}
+\textbf{SIGLE}&\textbf{ECOLE DOCTORALE}&\textbf{NOM ET COORDONNEES DU RESPONSABLE}\\
+
+\hline	
+	\begin{tabular}{@{}c@{}}
+		ED 206\\
+		\\
+		CHIMIE\end{tabular}&
+	\begin{tabular}{@{}l@{}}
+		\\
+		\textbf{\underline{CHIMIE DE LYON}}\\[.2cm]
+		\textcolor{siteED}{\textbf{https://www.edchimie-lyon.fr}}\\
+		Sec. : Renée EL MELHEM\\
+		Bât. Blaise PASCAL\\
+		7, Avenue Jean Capelle\\
+		69621 Villeurbanne CEDEX\\
+		\textcolor{blue}{\underline{\textbf{secretariat@edchimie-lyon.fr}}}\\
+		\\
+	\end{tabular}&
+	\begin{tabular}{@{}l@{}}
+		\textcolor{txtED}{\textbf{M. Stéphane DANIELE}}\\
+		C2P2-CPE LYON-UMR 5265\\
+		Bâtiment F308, BP 2077\\
+		43 Boulevard du 11 novembre 1918\\
+		69616 Villeurbanne CEDEX\\
+		\textcolor{blue}{\underline{\textbf{directeur@edchimie-lyon.fr}}}\\
+	\end{tabular}\\
+	
+\hline	
+	\begin{tabular}{@{}c@{}}
+		ED 341\\
+		\\
+		E2M2\end{tabular}&
+	\begin{tabular}{@{}l@{}}
+		\\
+		\textbf{\underline{ÉVOLUTION, ÉCOSYSTÈME, MICROBIOLOGIE, MODÉLISATION}}\\[.2cm]
+		\textcolor{siteED}{\textbf{http://e2m2.universite-lyon.fr }}\\
+		Sec. : Bénédicte LANZA\\
+		Bâtiment Atrium, 43, Boulevard du 11 Novembre 1918\\
+		69622 Villeurbanne CEDEX\\
+		Tél : 04.72.44.83.62\\
+		\textcolor{blue}{\underline{\textbf{secretariat.e2m2@univ-lyon1.fr}}}\\
+		\\
+	\end{tabular}&
+	\begin{tabular}{@{}l@{}}
+		\textcolor{txtED}{\textbf{Mme Sandrine CHARLES }}\\
+		Université Claude Bernard Lyon 1\\
+		UFR Biosciences, Bâtiment Mendel\\
+		43, boulevard du 11 Novembre 1918\\
+		69622 Villeurbanne CEDEX\\
+		\textcolor{blue}{\underline{\textbf{e2m2.codir@listes.univ-lyon1.fr}}}\\
+	\end{tabular}\\
+	
+\hline	
+	\begin{tabular}{@{}c@{}}
+		ED 205\\
+		\\
+		EDISS\end{tabular}&
+	\begin{tabular}{@{}l@{}}
+		\\
+		\textbf{\underline{INTERDISCIPLINAIRE SCIENCES-SANTÉ}}\\[.2cm]
+		\textcolor{siteED}{\textbf{http://ediss.universite-lyon.fr}}\\
+		Sec. : Bénédicte LANZA\\
+		Bâtiment Atrium, 43, Boulevard du 11 Novembre 1918\\
+		69622 Villeurbanne CEDEX\\
+		Tél : 04.72.44.83.62\\
+		\textcolor{blue}{\underline{\textbf{secretariat.ediss@univ-lyon1.fr}}}\\
+		\\
+	\end{tabular}&
+	\begin{tabular}{@{}l@{}}
+		\textcolor{txtED}{\textbf{M. Jérôme LAMARTINE}}\\
+		Université Claude Bernard Lyon 1\\
+		Equipe Intégrité Fonctionnelle du Tissu Cutané\\
+		LBTI - UMR5305 CNRS\\
+		IBCP - 7 passage du Vercors\\
+                69367 Lyon CEDEX 07\\
+		Tel : 04.72.72.26.66\\
+		\textcolor{blue}{\underline{\textbf{jerome.lamartine@univ-lyon1.fr}}}\\
+	\end{tabular}\\
+		
+\hline	
+	\begin{tabular}{@{}c@{}}
+		ED 34\\
+		\\
+		EDML\end{tabular}&
+	\begin{tabular}{@{}l@{}}
+		\\
+		\textbf{\underline{MATÉRIAUX DE LYON}}\\[.2cm]
+		\textcolor{siteED}{\textbf{http://ed34.universite-lyon.fr}}\\
+		Sec. : Yann DE ORDENANA\\
+		Tél : 04.72.18.62.44\\
+		\\
+		\textcolor{blue}{\underline{\textbf{yann.de-ordenana@ec-lyon.fr}}}\\
+		\\
+	\end{tabular}&
+	\begin{tabular}{@{}l@{}}
+		\textcolor{txtED}{\textbf{M. Stéphane BENAYOUN}}\\
+		Ecole Centrale de Lyon\\
+		Laboratoire LTDS\\
+		36 avenue Guy de Collongue\\
+		69134 Ecully CEDEX\\
+		Tél : 04.72.18.64.37\\ 
+		\textcolor{blue}{\underline{\textbf{stephane.benayoun@ec-lyon.fr}}}\\
+	\end{tabular}\\
+		
+\hline	
+	\begin{tabular}{@{}c@{}}
+		ED 160\\
+		\\
+		EEA\end{tabular}&
+	\begin{tabular}{@{}l@{}}
+		\\
+		\textbf{\underline{ÉLECTRONIQUE, ÉLECTROTECHNIQUE, AUTOMATIQUE}}\\[.2cm]
+		\textcolor{siteED}{\textbf{https://edeea.universite-lyon.fr}}\\
+		Sec. : Philomène TRECOURT\\
+		Bâtiment Charlotte PERRIAND\\
+		69621 Villeurbanne CEDEX\\
+		Tél : 04.72.43.71.70\\
+		\textcolor{blue}{\underline{\textbf{secretariat.edeea@insa-lyon.fr}}}\\
+		\\
+	\end{tabular}&
+	\begin{tabular}{@{}l@{}}
+		\textcolor{txtED}{\textbf{M. Philippe DELACHARTRE}}\\
+		INSA LYON\\
+		Laboratoire CREATIS\\
+		Bâtiment Blaise Pascal, 7 avenue Jean Capelle\\
+		69621 Villeurbanne CEDEX\\
+		Tél : 04.72.43.88.63\\
+		\textcolor{blue}{\underline{\textbf{philippe.delachartre@insa-lyon.fr}}}\\
+	\end{tabular}\\
+		
+\hline	
+	\begin{tabular}{@{}c@{}}
+		ED 512\\
+		\\
+		INFOMATHS\end{tabular}&
+	\begin{tabular}{@{}l@{}}
+		\\
+		\textbf{\underline{INFORMATIQUE ET MATHÉMATIQUES}}\\[.2cm]
+		\textcolor{siteED}{\textbf{http://edinfomaths.universite-lyon.fr}}\\
+		Sec. : Renée EL MELHEM\\
+		Bât. Blaise PASCAL\\
+		7, Avenue Jean Capelle\\
+		69621 Villeurbanne CEDEX\\
+		\textcolor{blue}{\underline{\textbf{infomaths@univ-lyon1.fr}}}\\
+		\\
+	\end{tabular}&
+	\begin{tabular}{@{}l@{}}
+		\textcolor{txtED}{\textbf{M. Dragos IFTIMIE}}\\
+		Université Claude Bernard Lyon 1\\
+		Bâtiment Braconnier\\
+		21 Avenue Claude BERNARD\\
+		69 622 Villeurbanne CEDEX\\
+		Tél : 04.72.44.79.58\\
+		\textcolor{blue}{\underline{\textbf{direction.infomaths@listes.univ-lyon1.fr}}}\\
+	\end{tabular}\\
+		
+\hline	
+	\begin{tabular}{@{}c@{}}
+		ED 162\\
+		\\
+		MEGA\end{tabular}&
+	\begin{tabular}{@{}l@{}}
+		\\
+		\textbf{\underline{MÉCANIQUE, ÉNERGÉTIQUE, GÉNIE CIVIL, ACOUSTIQUE}}\\[.2cm]
+		\textcolor{siteED}{\textbf{http://edmega.universite-lyon.fr}}\\
+		Sec. : Philomène TRECOURT\\
+		Bâtiment Charlotte PERRIAND\\
+		69621 Villeurbanne CEDEX\\
+		Tél : 04.72.43.71.70\\
+		\textcolor{blue}{\underline{\textbf{mega@insa-lyon.fr}}}\\
+		\\
+	\end{tabular}&
+	\begin{tabular}{@{}l@{}}
+		\textcolor{txtED}{\textbf{M. Etienne PARIZET}}\\
+		INSA Lyon\\
+		Laboratoire LVA\\
+		Bâtiment St. Exupéry\\
+		25 bis av. Jean Capelle\\
+		69621 Villeurbanne CEDEX\\ 
+		\textcolor{blue}{\underline{\textbf{etienne.parizet@insa-lyon.fr}}}\\
+	\end{tabular}\\
+		
+\hline	
+	\begin{tabular}{@{}c@{}}
+		ED 483\\
+		\\
+		ScSo\end{tabular}&
+	\begin{tabular}{@{}l@{}}
+		\\
+		\textbf{\underline{ScSo}}\footnotemark[1]\\[.2cm]
+		\textcolor{siteED}{\textbf{https://edsciencessociales.universite-lyon.fr}}\\
+		Sec. : Mélina FAVETON\\
+		Tél : 04.78.69.72.76\\
+		Université Lyon 2 Campus Berges du Rhône, Bureau BEL 309\\
+		18, Quai Claude BERNARD\\
+		69365 LYON CEDEX 07\\
+		\textcolor{blue}{\underline{\textbf{melina.faveton@univ-lyon2.fr}}}\\
+		\\
+	\end{tabular}&
+	\begin{tabular}{@{}l@{}}
+		\textcolor{txtED}{\textbf{M. Bruno MILLY}}\\
+		Univ. Lyon 2 Campus Berges du Rhône\\
+		18, quai Claude Bernard\\
+		69365 LYON CEDEX 07\\
+		Bureau BEL 319\\
+		\textcolor{blue}{\underline{\textbf{bruno.milly@univ-lyon2.fr}}}\\
+	\end{tabular}\\
+	
+	\hline	
+\end{tabular}
+\end{center}
+
+\footnotetext[1]{\scriptsize ScSo : Histoire, Géographie, Aménagement, Urbanisme, Archéologie, Science politique, Sociologie, Anthropologie }
+#+end_src
+
+#+begin_src latex
+\normalsize
+\normalfont
+\rmfamily
+\restoregeometry
+\normalem
+\pagestyle{fancy}
+\headerChapterTitle
+\tableofcontents
+\listoffigures
+#+end_src
+
+#+begin_src latex
+\mainmatter
+#+end_src
+
+* About                                                            :noexport:
+
+Org file describing my PhD thesis.
+
+* LaTeX Setup                                                      :noexport:
+:PROPERTIES:
+:header-args: :tangle out/thesis.sty :results silent :noeval
+:END:
+
+** Provide the package
+
+#+begin_src latex
+\ProvidesPackage{thesis}
+#+end_src
+
+** Packages
+
+*** Graphics
+
+#+begin_src latex
+\usepackage[dvipsnames]{xcolor}
+\usepackage{geometry}
+\usepackage{graphicx}
+#+end_src
+
+*** Colours
+
+#+begin_src latex
+\definecolor{tabED}{rgb}{0.90, 0.87, 0.93}
+\definecolor{txtED}{rgb}{0.60, 0.28, 0.02}
+\definecolor{siteED}{rgb}{0.04, 0.27, 0.47}
+#+end_src
+
+*** Typography
+
+#+begin_src latex
+\usepackage{palatino}
+\usepackage{inconsolata}
+\usepackage{microtype}
+#+end_src
+
+**** Quotes
+
+#+begin_src latex
+\makeatletter
+\newenvironment{chapquote}[2][2em]
+{\setlength{\@tempdima}{#1}%
+  \def\chapquote@author{#2}%
+  \parshape 1 \@tempdima \dimexpr\textwidth-2\@tempdima\relax%
+\itshape}
+{\par\normalfont\hfill--\ \chapquote@author\hspace*{\@tempdima}\par\bigskip}
+\makeatother
+#+end_src
+
+*** Tables
+
+#+begin_src latex
+\usepackage{booktabs}
+#+end_src
+
+*** Maths
+
+#+begin_src latex
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+#+end_src
+
+*** Units
+
+#+begin_src latex
+\usepackage{siunitx}
+#+end_src
+
+*** References
+
+#+begin_src latex
+\usepackage[noabbrev,capitalise]{cleveref}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks,
+  linkcolor=black
+}
+#+end_src
+
+* Abstract
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
+
+#+begin_abstract
+This is what my work is about
+#+end_abstract
+
+* Introduction
+:PROPERTIES:
+:UNNUMBERED: t
+:CUSTOM_ID: sec:intro
+:END:
+
+#+begin_src latex
+\addcontentsline{toc}{chapter}{\nameref{sec:intro}}
+#+end_src
+
+Hi there; let's go.
+
+* A Chapter
+
+#+begin_chapquote
+Time is an illusion; lunchtime doubly so.
+#+end_chapquote
+
+** A Section
+
+*** A Subsection
+
+* Local Variables                                                  :noexport:
+
+# Local Variables:
+# org-latex-classes: (("thesis" "\\documentclass[a4paper, 12pt, table]{book}
+# [NO-DEFAULT-PACKAGES]"
+# ("\\chapter{%s}" . "\\chapter*{%s}")
+# ("\\section{%s}" . "\\section*{%s}")
+# ("\\subsection{%s}" . "\\subsection*{%s}")
+# ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+# ("\\paragraph{%s}" . "\\paragraph*{%s}")
+# ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+# org-latex-title-command: nil
+# End:
