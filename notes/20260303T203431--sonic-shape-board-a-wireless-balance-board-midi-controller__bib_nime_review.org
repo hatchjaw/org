@@ -6,6 +6,52 @@
 
 * Summary
 
+The Sonic Shape Board is an aesthetically-pleasing piece of wood,
+mounted (as far as figure 3 indicates) on a pivot and equipped with an
+inertial measurement unit (IMU). IMU data is captured by a
+microcontroller and converted to MIDI CC messages, which are
+transmitted over Bluetooth to a computer where they can be used as
+control data for synthesisers or audio spatialisation systems (to give
+the two examples offered in the paper).
+
+The lack of expressivity ("liveness", "a human element", §2) in
+performance with live electronics is positively identified as a
+problem that the proposed controller can address; relevant references
+are given for advantages of a physically gestural, effortful element,
+one of /vicarious performance/ that an audience can identify with when a
+performer of electronic music produces a particular sonic
+gesture. Indeed, employing the typically otherwise under-exploited
+lower-extremities of a performer's body is a laudable idea. The
+controller's construction appears simple and requires no recourse to
+proprietary or second-hand commercial equipment.
+
+The device is likened to a "wobble-board", but no definition of such
+an object is given. The reader is left to intuit the precise
+construction of the controller from the image given in figure 3; no
+description is offered of the supporting element, its rigidity or
+otherwise. No reflection is offered on the additional cognitive and
+physical burden associated with balancing and pivoting the controller
+while performing manual musical tasks; parallels could have been drawn
+with the four way co-ordination demanded of performers of the standard
+drum kit or organ (with its manuals and pedals).
+
+The paper weighs in at about 1,800 words. In two hundred further words
+the author(s) could have explained what a wobble-board is, and given a
+full description of the construction of the controller. Figure 1 only
+offers a top-down view, and figure 3 isn't clear enough to indicate
+the exact nature of the element upon which the board is mounted. The
+assertion that "Low-complexity devices are particularly effective as
+auxiliary musical controllers" is made without reference to supporting
+literature.
+
+Ultimately, while describing an interesting controller, and
+clearly-written as it is, the supporting paper lacks substance and I
+cannot recommend it for inclusion.
+
 * Observations
 
-* Proofreading
+- Figure 3 appears to demonstrate the participation of a human
+  subject, which calls the Ethical Standards statement in §7 into
+  question.
+
+#  LocalWords:  microcontroller spatialisation liveness

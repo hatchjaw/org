@@ -6,6 +6,73 @@
 
 * Summary
 
+Vibe FM is a system for generating, navigating and selecting FM
+synthesis presets. The author(s) claim(s) that authoring synthesiser
+presets using their system significantly accelerates composition
+workflow. In its current incarnation, Vibe FM is limited to operation
+with a software emulator of the Yamaha DX7 FM synthesiser, but as the
+author(s) observe(s), a similar auditory imaging and preset-generation
+approach could be applied to other synthesiser types.
+
+Largely clearly-written, and very well-sourced, the paper draws on
+interesting ideas concerning the visual representation of sonic
+information, similarity of generated presets, and interpolation
+between sounds of interest. The supplementary material does a good job
+of presenting the capabilities of the software and its use-cases. The
+inclusion of a case study and the effort to conduct user interviews
+stand in this work's favour.
+
+The author(s) could be more explicit about how they define
+"similarity" in terms of the presets their system generates. The
+reader is led to understand that timbral quality and envelope
+characteristics define certain aspects of similarity; are these
+defined as completely separate similarity axes, or are they
+interdependent?
+
+While not a paper about audio synthesis /per se/, since the system is
+called "Vibe FM", and since terminology specific to FM synthesis, and
+indeed the DX7, is used, some explanation of terms such as "operator",
+the "so-called algorithm" associated with each, and what the stated
+"144 parameters" consist of are notable and troublesome
+omissions. Presumably we're dealing with modulation frequencies or
+frequency ratios, modulation indices, feedback indices, etc. A brief
+(on the order of a paragraph and a single equation) primer on FM for
+the uninitiated reader would be of value.
+
+Overall, the system seems interesting, feature-rich, and is, on the
+whole, well-described; furthermore, in an age when machine learning
+dominates research, it is refreshing to encounter a work that puts the
+human user at the centre of the creative and exploratory
+process. Despite the aforementioned shortcomings and omissions, I
+cautiously recommend this paper for acceptance.
+
 * Observations
 
+- Figure 1: While giving an overview of the system interface, various
+  UI elements are too small at this scale to give a clear indication
+  of their meaning or use.
+- Figure 2: a similar problem of scale; this would have been better
+  represented as a schematic diagram rather than using screenshots
+  from the application itself.
+- §2: "Instead of automatic ways, research proposed user interfaces to
+  make sound design more usable." --- the meaning of this sentence is
+  unclear.
+- Figure 5: Again, a problem of scale. Perhaps this could be a
+  two-column image. The caption could be clearer too; there appears to
+  be only one sample "near" the preset; further it is not clear how
+  "harmonic presence" maps to /blueness/.
+- §4.2: What is meant by "mediocre discrete results"?
+
 * Proofreading
+
+- §2, p. 2, l. 176: "Contrary" => "On the contrary" / "Contrarily" /
+  "In comparison", etc.
+- §3.2, p. 3, l. 297-8: "learning" => "learn"
+- §4.2, p. 5, l. 568: "...overviews implies are more possibilities..."
+=> "...overviews implies more possibilities..."
+- §4.2, p. 5, l. 571: "organiz" => "organize"
+- §4.2, p. 5, l. 555: "a complex structure as FM synthesis" => "as complex a
+structure as FM synthesis"
+- §5, p. 5, l. 605: "one-fits-all" => "one-size-fits-all"
+  
+#  LocalWords:  timbral se

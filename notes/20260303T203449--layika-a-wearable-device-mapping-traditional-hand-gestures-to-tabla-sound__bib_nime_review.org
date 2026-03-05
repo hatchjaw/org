@@ -8,4 +8,20 @@
 
 * Observations
 
+- §5.1, p. 3: It is stated that the glove is made of "a blend of
+  polyester, polyurethane and nylon", but later, in §8, that the
+  prototype "used for the study" was cotton-based. The image in figure
+  1, plus the supplementary video, appear to show the
+  former. Mentioning the characteristics of the prototype long after
+  describing the final/current version is a little confusing.
+- §7.4, p. 4, l. 472: "A slight latency" --- how much is "slight"? For
+  what it's worth, in the supplementary video, latency between
+  thumb-finger contacts and tabla sounds isn't readily apparent.
+
 * Proofreading
+
+- §7.6, p. 4, l. 490: "paragraph" --- is this some stray LaTeX markup?
+- §10, p. 5, l. 596: Why is "(Widdess 1980)" cited inline rather than
+  as a reference to the bibliography?
+
+# LocalWords LaTeX Widdess
