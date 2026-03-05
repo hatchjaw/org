@@ -6,6 +6,32 @@
 
 * Summary
 
+The paper introduces "Layika", a glove-based interface for aiding
+Hindustani classical vocalists by sonifying finger gestures associated
+with their practice with tabla drum samples. While not a suitable
+replacement for a live tabla accompanist, the author(s) state(s) that,
+according to a small target group of musicians, the interface acts as
+a suitable aid to solo practice, maintaining the link to traditional
+finger-gesture timekeeping while adding a useful sonic
+accompaniment. The supplementary video demonstrates the glove in
+action; interaction appears smooth, untroubled by mis-taps or multiple
+contacts; the vocalist appears comfortable practicing in the manner
+they would without the device, with the added benefit of a percussive
+accompaniment to their solo practice. The author(s) describe(s) an
+iterative design process, involving direct work with participants and
+consequent refinement via a series of prototypes.
+
+It is a slight pity that the authors did not cite Thomas and Heap's
+/Soundgrasp/ controller [1], as this would have been a pertinent
+addition; it is noted, however, that Thomas's other work on
+glove-based interfaces is cited (ref [14]).
+
+Despite some misgivings about the paper's figures and structure (see
+Observations below), I find this to be a largely well-composed paper
+and piece of work, and a good fit for this year's theme; with the
+caveat of the need for some minor modifications, I recommend it for
+acceptance.
+
 * Observations
 
 - §5.1, p. 3: It is stated that the glove is made of "a blend of
@@ -14,9 +40,13 @@
   1, plus the supplementary video, appear to show the
   former. Mentioning the characteristics of the prototype long after
   describing the final/current version is a little confusing.
-- §7.4, p. 4, l. 472: "A slight latency" --- how much is "slight"? For
-  what it's worth, in the supplementary video, latency between
-  thumb-finger contacts and tabla sounds isn't readily apparent.
+- Figures 3, 4 and 5: These feature elements that are too small to be
+  readily informative; they should be modified or changed to
+  two-column figures.
+- §7.4, p. 4, l. 472: "A slight latency" --- how much is "slight",
+  exactly? For what it's worth, in the supplementary video, latency
+  between thumb-finger contacts and tabla sounds isn't readily
+  apparent.
 
 * Proofreading
 
@@ -24,4 +54,8 @@
 - §10, p. 5, l. 596: Why is "(Widdess 1980)" cited inline rather than
   as a reference to the bibliography?
 
-# LocalWords LaTeX Widdess
+* References
+
+[1] Mitchell, Thomas, and Imogen Heap. "Soundgrasp: A gestural interface for the performance of live music." Proceedings of the International Conference on New Interfaces for Musical Expression. 2011.
+
+# LocalWords LaTeX Widdess sonifying practicing
