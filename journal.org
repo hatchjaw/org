@@ -11041,3 +11041,47 @@ connect, i.e. subsequent source position changes are required to
 /remind/ modules of source positions.
 
 Entered on [2026-03-03 mar. 07:29]
+
+*** 2026-03-10 mardi
+**** Meeting: Romain                                 :MEETING:SUPERVISION:
+- Start the thesis from the middle... something very technical. Build
+  outwards.
+- Sketch an outline... what's going to be the table of contents?
+  Romain & Tanguy need to sign this off.
+- Reasonable length ~100-130 pages. Can be more (ideally not more
+  than 200) shouldn't be less.
+- For ~130 pages, technical background should be around 15 pages.
+- State of the art should be really exhaustive, not just on
+  distributed audio, but in /all directions/. Networked audio, PTP, etc.
+- Be as broad as I like, but be concise.
+- Keep the style simple.
+- Really important: one thing many theses lack is a very clear
+  exhibition of the scientific challenges of the work.
+  + /Research question/ approach maybe.
+- Highlight the contributions that I've made; very explicitly.
+  + Outline them in the intro or pre-intro as /Contributions/ or
+    /Foreword/.
+- Romain to send me a good thesis he evaluated recently.
+
+Entered on [2026-03-10 mar. 16:08]
+*** 2026-03-13 vendredi
+**** Ambisonics paper                                            :WRITING:
+- Spatial/immersive audio desirable but out of reach, costly, etc.
+- HOA requires high channel-count transmission and many loudspeakers.
+- IEM plugins exist, which is good.
+- Combined with our networked audio plugin and a distributed decoder,
+  it's possible to produce 5th order ambisonics \((5+1)^{2}\) channels of
+  b-format need to be transmitted... to something like 64
+  loudspeakers, so 32 modules
+  + So switch daisy-chaining required, and commensurate temporal
+    offset (~100 ns).
+  + 4th order entails 25 channels and, ideally 48 speakers... could
+    probably bring that down to 44, which would be the limit with one
+    switch, accounting for the fact that two ports are taken up by the
+    time authority and the DAW host respectively (\(24 - 2\) ports
+    gives \(22 \times 2 = 44\) loudspeakers).
+- Anyway, we sent our 25 channels of b-format encoded audio over the
+  network to each of our 22 Teensy modules.
+  + Each teensy was informed of the two rows of decoding coefficients
+    needed in order to produce its parts of the soundfield.
+Entered on [2026-03-13 ven. 20:09]
