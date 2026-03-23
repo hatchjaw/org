@@ -1,4 +1,4 @@
-#+title: Distributed Ambisonics, etc.
+#+title: Accessible, Distributed Ambisonics on a Network of Microcontrollers
 
 This paper was/is being authored on [[https://www.overleaf.com/project/699d55907b16edc701b4cf02][Overleaf]], so only the bibliography
 is to be found here. 
