@@ -11085,3 +11085,41 @@ Entered on [2026-03-10 mar. 16:08]
   + Each teensy was informed of the two rows of decoding coefficients
     needed in order to produce its parts of the soundfield.
 Entered on [2026-03-13 ven. 20:09]
+*** 2026-03-28 samedi
+**** Thesis thoughts                                   :WRITING:BRAINDUMP:
+- I haven't been taking enough notes these past few months.
+  + I can probably cut myself some slack for that.
+  + I wrote a paper for SMC, so that's something.
+- I think three of my chapters should be /Networked Audio/, /Time
+  Exchange/, and /Sound Field Synthesis/.
+- I think /Networked Audio/ should start with networking in general;
+  definition/origins of packet-switched (as opposed to
+  circuit-switched) networks; the fact that Ethernet is fifty years
+  old and still bears the same name and basic packet structure; 90's
+  VOIP, SoundWire, JackTrip, etc.
+- /Time Exchange/ ought to start with something about ppm and the fact
+  that drift is inevitable; no two reproductions of the same audio
+  information (whether stored/transferred digitally or anologue) will
+  ever be the same, sort of as a justfication for using any old Teensy
+  as the time authority.
+- /Sound Field Synthesis/ should obviously describe WFS and HOA, but
+  also how we got there I suppose. Ambisonics is surprisingly old
+  (30's?). Driving functions? I feel like taking Jens's approach,
+  which does a lot of assuming continuous secondary arrays, is too
+  theoretical for my work, but I'll have to look into it further.
+
+Regarding drift, I tried to find out what XO is driving the Teensy
+4.1. The best I could discern is that the IMXRT1060 evaluation board
+uses a [[https://www.mouser.fr/datasheet/3/827/1/7v.pdf][TXC 7V24000002]] XO (alluded to [[https://forum.pjrc.com/index.php?threads/teensy-4-testing-mbed-nxp-mxrt1050-evkb-600-mhz-m7.54265/page-7#post-193228][here]], in the PJRC forum). There's
+some more info in this [[https://claude.ai/chat/eb7b4563-5115-4eb0-8f1f-8e1406032352][chat]] with Claude. In any case, all I have a
+basic idea of for the time being is that the XO is rated to [[https://forum.pjrc.com/index.php?threads/teensy-4-1-as-stable-clock-source.71539/#post-316465][30 ppm]],
+but I don't have a /proper/ source beyond what Paul Stoffregen says on
+the forum.
+
+Purely anecdotally, based on what I can recall seeing the switch
+reporting re. PTP drift, 17 ppm (or rather 17,000 ppb) is a number
+that jumps to mind, but I guess I should try syncing to a bunch of
+different T41s programmed as the time authority and see what sort of
+drift figures emerge.
+
+Entered on [2026-03-28 sam. 20:53]

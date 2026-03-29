@@ -116,56 +116,25 @@ Fancy characters (typically) at the beginning of chapters.
 *** References
 
 #+begin_src latex
-\usepackage[noabbrev,capitalise]{cleveref}
-\usepackage{hyperref}
+\usepackage[noabbrev,capitalise]{cleveref} \usepackage{hyperref}
 \hypersetup{
+  unicode,
   colorlinks,
-  linkcolor=black
+  citecolor=black,
+  filecolor=black,
+  linkcolor=black,
+  urlcolor=black,
+  bookmarksnumbered,
+  pdfstartview=XYZ
 }
 #+end_src
 
 * Export hooks                                                     :noexport:
 
-
-#+bind: org-export-filter-headline-functions (tar/acks-as-section tar/abstract-as-section tar/intro-in-toc)
-
-** Acknowledgements & Abstract as sections, not chapters
-
-#+begin_src emacs-lisp :results none
-(defun tar/acks-as-section (headline backend info)
-  "Export Acknowledgements heading as \\section instead of \\chapter."
-  (when (org-export-derived-backend-p backend 'latex)
-    (replace-regexp-in-string
-     "\\\\chapter\\*{\\(Acknowledgements\\)}"
-     "\\\\section*{\\1}"
-     headline)))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defun tar/abstract-as-section (headline backend info)
-  "Export Abstract heading as \\section instead of \\chapter; put it on a new page too."
-  (when (org-export-derived-backend-p backend 'latex)
-    (replace-regexp-in-string
-     "\\\\chapter\\*{\\(Abstract\\)}"
-     "\\\\newpage
-\\\\section*{\\1}"
-     headline)))
-#+end_src
-
-** Add Introduction to contents
-
-#+begin_src emacs-lisp :results none
-(defun tar/intro-in-toc (headline backend info)
-  "Add the Introduction to the table of contents."
-  (when (org-export-derived-backend-p backend 'latex)
-    (replace-regexp-in-string
-     "\\(\\\\label{sec:intro}\\)"
-     "\\1
-\\\\addcontentsline{toc}{chapter}{\\\\nameref{sec:intro}}"
-     headline)))
-#+end_src
-
 ** Lettrine at the start of each chapter
+
+Maybe just do this as LaTeX markup... at this stage I can't see it
+being useful to export to formats besides LaTeX...
 
 # #+bind: org-export-before-parsing-functions (tar/lettrine-after-h1)
 # #+begin_src emacs-lisp :results none
@@ -204,7 +173,49 @@ Fancy characters (typically) at the beginning of chapters.
 :UNNUMBERED: notoc
 :END:
 
-Thanks, y'all.
+Unlike many of my doctoral peers, I have had the privilege of being
+able to develop the work presented in this thesis for a full four
+years; I began my doctorate with an internship, a master's thesis, and
+a conference publication on the topic already under my belt. For this
+I have my thesis co-director, Romain Michon, to thank, as well as
+Stefania Serafin, who also co-supervised my master's thesis, for
+inviting Romain to Aalborg University, Copenhagen twice a year to give
+workshops on Faust, digitial musical instrument development, and
+physical modelling.
+
+For welcoming me as an intern and later as a /doctorant/, I must thank
+Inria, the research institute that it has been an honour to be a part
+of since 2023. INSA Lyon, too, for having me as a PhD student, the CITI
+laboratory more specifically for being my home from home, and my
+colleagues and friends there.
+
+Beyond that, the gratitude I wish to express is more personal in
+nature than it is scholarly or professional. Romain and Tanguy, my
+thesis co-directors, have shown me great support and also given me the
+freedom to explore my ideas, including some entirely adjacent to my
+main area of research. My Emeraude teammates, past and present: Pierre
+Cochard, Maxime Popoff, Orégane Desrentes, Yann Orlarey, Stéphane
+Letz, Romain Bouarah, Romain Fontaine, Bastien Barbe, Florian
+Rascoursier, Louis Ledoux, Benjamin Quiédeville, Anastasia Volkova,
+Florent de Dinechin, Théo Cantaloube, Clemens Wegener. Other doctoral
+students from other teams (/on est tous en la même galère/): Alix,
+Guillaume, Aurélien, Mehdi, Kim, Antoine, Julien. Linda Soumari,
+Cecilia Navarro and Anouchka Ronceray for tolerating my
+slowly-improving French. Djurdjura Mehrad, Élise Denoyelle, Stéphanie
+Wolska and Morgane Le Prince. Frédéric Lemouel, Léonardo Cardoso and
+Jens Ahrens; Cristoff Ressi, Shaun Silverman, and Jean-Michel Friedt.
+
+Others, beyond the confines of the lab: Kimberly Hoole, Irène Hontang,
+Myriam Boussaboua, Cristina Rottondi, Tomas Poloniecki, Julie Darnat
+and Ghis, Alice Aniello, Matti Gardner, Kate Fox, Anna Percy, Judy
+Knowles, Matt Rushton, Sally Rushton, Sally Catmull, Ani Cammack, Dave
+Rushton, Andreas Friberg, Louise Smith, Greg Chick, Anca Diana Axinia,
+Francesco Ganis, Razvan Paisa, Scott Naylor, Mike Croft, Alex Calgaro,
+Laura Armstrong and Mahmoud Nadda.
+
+I owe you all an enormous debt of gratitude.
+
+Tommy
 
 * Abstract
 :PROPERTIES:
@@ -223,11 +234,19 @@ This is what my work is about
 
 Hi there; let's go.
 
-* Computer Networking
+* Networked Audio
 
-Computer networks are a thing\nbsp[cite:@metcalfeEthernet1976]
+\lettrine{A}{udio transmission} over packet-switched networks has
+become the /de facto/ standard for a variety of applications over the
+past three decades. Replacing the previous generation of cumbersome,
+point-to-point installations, it was the broadcast industry that first
+embraced audio over ethernet\nbsp[cite:@bakkerIntroduction2014], and
+digital telephony that pioneered more general audio over internet
+protocol (IP) approaches\nbsp[cite:@turlettiINRIA1994].
 
-* Time
+Ethernet is a thing\nbsp[cite:@metcalfeEthernet1976]
+
+* Time Exchange
 
 #+begin_quote
 Time is an illusion; lunchtime doubly so.
@@ -260,26 +279,37 @@ is far from perfectly-defined.
 Time in computer systems is, of course, subject to the same
 vagaries. It is in fact something like a tuning fork that describes
 the idea of time in the vast majority of digital systems. A crystal
-oscillator (XO), is a sliver of piezoelectric quartz mineral and, like
-a tuning fork, on receiving some energy (in this case electrical) as
-input, vibrates at a more-or-less reliable frequency. How accurate
-this frequency is (setting aside the fallibility of the definition of
-a second) is typically defined in /parts-per-million/ (ppm); a XO with a
-tolerance of 10 ppm can reasonably be expected to vibrate up to 0.001
-% faster or slower than the frequency to which it is rated. Thus a 10
-ppm XO manufactured to vibrate at \qty{1}{\mega\hertz} my be expected
-to produce a frequency, \(f\), in the range
+oscillator (XO), is a sliver of piezoelectric quartz mineral or
+ceramic, and, like a tuning fork, on receiving some energy (in this
+case electrical) as input, vibrates at a more-or-less reliable
+frequency. How accurate this frequency is (setting aside the
+fallibility of the definition of a second) is typically defined in
+/parts-per-million/ (ppm); a XO with a tolerance of 10 ppm can
+reasonably be expected to vibrate up to 0.001 % faster or slower than
+the frequency to which it is rated. Thus a 10 ppm XO manufactured to
+vibrate at \qty{1}{\mega\hertz} my be expected to produce a frequency,
+\(f\), in the range
 
 #+NAME: eq:freq-range
 \begin{equation}
-999\,990 \leq f \leq 1\,000\,010
+999\,990 \leq f \leq 1\,000\,010\;.
 \end{equation}
-If, to the (audio) engineer's eye, those figures suddenly doesn't look
+If, to the (audio) engineer's eye, those figures suddenly don't look
 so reliable after all, that is entirely understandable. What of the
 purity, the /truth/ of the audio sampling rate? Indeed, an audio system
 governed by a 10 ppm XO, running at a nominal sampling frequency of
-\qty{48}{\kilo\hertz} may run as slow as \qty{47999.52}{\hertz} or as
-fast as \qty{48000.48}{\hertz}.
+\qty{48}{\kilo\hertz} may run as slow as \(f_{s_{1}} =
+\)\qty{47999.52}{\hertz} or as fast as \(f_{s_{2}} =
+\)\qty{48000.48}{\hertz}. Is this sort of difference perceptible? By
+way of context, that difference is analogous to having two A_{4} tuning
+forks, one producing a frequency of \qty{439.9956}{\hertz} and another
+at \qty{440.0044}{\hertz}, so a difference of less than one hundredth
+of a cycle per second; this falls far, far below the threshold for
+human perception of difference in pitch. The audio engineer notes,
+however, that the devices running at \(f_{s_{1}}\) and \(f_{s_{2}}\) will,
+after one second, be out of sync by roughly the duration of one full
+audio sample; the sum two audio signals, \(x_{1}[n]\) and \(x_{2}[n]\),
+where \(x_{2}[n] = x_{1}[n-1]\) is a one-zero low-pass filter.
 
 ** A Section
 
@@ -301,7 +331,7 @@ fast as \qty{48000.48}{\hertz}.
 # ("\\paragraph{%s}" . "\\paragraph*{%s}")
 # ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 # org-latex-title-command: nil
-# org-export-allow-bind-keywords: t
+# org-export-filter-headline-functions: (tar/acks-as-section tar/abstract-as-section tar/intro-in-toc)
 # End:
 
 # LocalWords transduced
