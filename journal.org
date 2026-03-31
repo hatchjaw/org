@@ -11123,3 +11123,91 @@ different T41s programmed as the time authority and see what sort of
 drift figures emerge.
 
 Entered on [2026-03-28 sam. 20:53]
+*** 2026-03-31 mardi
+**** Things to talk about in the manuscript            :WRITING:BRAINDUMP:
+In no particular order, just to start getting this stuff out of my
+head and into the bloody Org file.
+
+- The Open Systems Interconnection (OSI) model and/or the Internet
+  Protocol Suite
+- User Datagram Protocol (UDP, transport layer)
+- Multicast group
+- Internet Group Membership Protocol (IGMP, internet layer)
+- The Internet Assigned Names Authority (IANA)
+- Networked Audio
+- JackTrip
+- Dante
+- Audio Over OSC (AOO)
+- Open Sound Control (OSC)
+- Wave field synthesis (WFS)
+- Higher Order Ambisonics (HOA)
+- JUCE
+- The Teensy Audio Library
+- Teensy 4.1 (and other versions)
+- Raspberry Pi/Bela/Elk/ELS
+- Daisy/STM32/ESP32
+- Precision Time Protocol (PTP, application layer)
+- Network Time Protocol (NTP, application layer)
+- The importance of synchronisation in audio systems
+- Ananas, of course
+- The Ananas Audio Protocol (AAP, application layer)
+- The Ananas Client Description Protocol (ACDP, application layer)
+- The Ananas Authority Description Protocol (AADP, application layer)
+- Atomic clocks/GPS
+- Clock Drift
+- Jitter?
+- Faust
+- AmbiTools
+- The inverse square law
+- Huygens' Principle
+- The acoustic curtain
+- Spherical microphone arrays
+- Distributed computing
+- Parallelisation of algorithms
+- Audio format conversion
+- Encoding audio (and arbitrary) data to network packets
+- Presentation time recovery
+- Media clock recovery
+- Presentation time offset
+- Phase Locked Loops (PLL)
+- Microcontrollers (MCUs)
+- Microcontroller development boards
+- The NXP IMXRT1062 MCU
+- Algorithm for finding ideal register values for achieving target
+  sampling rate on the IMXRT1062
+- A hardware abstraction layer (HAL)
+- Ambisonics decoding
+- Virtual sound sources
+- Focused sound sources
+- Plane waves
+- IP addresses
+- IPv4
+- Medium/media access control (MAC, link layer)
+- Source and destination ports
+- Maximum transmissible unit (MTU)
+- Sampling frequency
+- Buffer sizes
+- Sample resolution
+- Throughput/bandwidth/Mbps
+- Network switches
+- Ethernet
+- WiFi?
+- Radio
+- 5G/6G?
+- SyFaLa
+- Field Programmable Gate Arrays (FPGAs)
+- Virtual Reality
+- Spatial Audio in general
+- Immersive audio
+- Modularity/scalability
+- Cost-per-output-channel
+- Spatial aliasing
+- Sweet-spots
+- Embedded computing
+- AES67
+- Audio Video Bridging (AVB)
+- Arduino?
+- USB Audio & feedback accumulation
+- PlatformIO
+
+Entered on [2026-03-31 mar. 21:37]

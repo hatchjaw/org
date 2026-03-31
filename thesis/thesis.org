@@ -1,7 +1,7 @@
-#+title: A Sample-Synchronous Distrisbuted Audio System for Spatial and Immersive Applications
+#+title: A Sample-Synchronous Distributed Audio System for Spatial and Immersive Applications
 #+author: Thomas Albert Rushton
 
-#+options: toc:nil
+#+options: toc:nil h:4
 #+export_file_name: out/thesis
 #+latex_class: thesis
 #+cite_export: biblatex
@@ -26,11 +26,28 @@ Org file describing my PhD thesis.
 
 ** Packages
 
+*** Geometry
+
+#+begin_src latex
+\usepackage[a4paper, left=3cm, right=3cm, top=3cm, bottom=3cm]{geometry}
+#+end_src
+
+*** Headers/footers
+
+#+begin_src latex
+\usepackage{fancyhdr}
+#+end_src
+
+*** Per-chapter tables of contents
+
+#+begin_src latex
+\usepackage{minitoc}
+#+end_src
+
 *** Graphics
 
 #+begin_src latex
 \usepackage[dvipsnames]{xcolor}
-\usepackage{geometry}
 \usepackage{graphicx}
 #+end_src
 
@@ -116,7 +133,8 @@ Fancy characters (typically) at the beginning of chapters.
 *** References
 
 #+begin_src latex
-\usepackage[noabbrev,capitalise]{cleveref} \usepackage{hyperref}
+\usepackage[noabbrev,capitalise]{cleveref}
+\usepackage{hyperref}
 \hypersetup{
   unicode,
   colorlinks,
@@ -202,8 +220,8 @@ students from other teams (/on est tous en la même galère/): Alix,
 Guillaume, Aurélien, Mehdi, Kim, Antoine, Julien. Linda Soumari,
 Cecilia Navarro and Anouchka Ronceray for tolerating my
 slowly-improving French. Djurdjura Mehrad, Élise Denoyelle, Stéphanie
-Wolska and Morgane Le Prince. Frédéric Lemouel, Léonardo Cardoso and
-Jens Ahrens; Cristoff Ressi, Shaun Silverman, and Jean-Michel Friedt.
+Wolska and Morgane Le Prince. Frédéric Le Mouël, Leonardo Cardoso and
+Jens Ahrens; Cristoff Ressi, Shawn Silverman, and Jean-Michel Friedt.
 
 Others, beyond the confines of the lab: Kimberly Hoole, Irène Hontang,
 Myriam Boussaboua, Cristina Rottondi, Tomas Poloniecki, Julie Darnat
@@ -235,6 +253,8 @@ This is what my work is about
 Hi there; let's go.
 
 * Networked Audio
+#+latex: \minitoc
+#+latex: \newpage
 
 \lettrine{A}{udio transmission} over packet-switched networks has
 become the /de facto/ standard for a variety of applications over the
@@ -244,18 +264,92 @@ embraced audio over ethernet\nbsp[cite:@bakkerIntroduction2014], and
 digital telephony that pioneered more general audio over internet
 protocol (IP) approaches\nbsp[cite:@turlettiINRIA1994].
 
+** Computer Networking
+
+*** Ethernet
 Ethernet is a thing\nbsp[cite:@metcalfeEthernet1976]
+
+*** WiFi
+
+** The Internet Protocol Suite
+
+** Network Protocols
+
+*** User Datagram Protocol
+
+*** Internet Group Management Protocol
+
+** Audio Over Computer Networks
+
+*** JackTrip
+
+*** NetJack
+
+*** Audio Over OSC
+
+*** Audio Video Bridging
+
+*** AES67
+
+*** Dante
+
+*** NetJUCE
+
+** The Need for a New Protocol
+
+* Developing Digital Audio Systems
+#+latex: \minitoc
+#+latex: \newpage
+
+** Embedded Audio Systems
+
+*** Embedded Linux Systems
+
+**** Raspberry Pi
+
+**** Bela
+
+**** Elk
+
+*** Microcontroller Development Boards
+
+**** ESP32
+
+**** STM32
+
+**** Teensy
+
+**** PlatformIO
+
+*** Field Programmable Gate Arrays
+
+**** The SyFaLa Toolchain
+
+** The Faust Programming Language
+
+** Audio Plugins
+
+*** Jules's Utility Class Extensions
+
+*** The Clever Audio Plugin Format
 
 * Time Exchange
 
-#+begin_quote
+\begin{chapquote}{Douglas Adams, \emph{The Hitchhiker's Guide to the Galaxy}}
 Time is an illusion; lunchtime doubly so.
-#+end_quote
+\end{chapquote}
 
-Consider a tuning fork, a steel, two-pronged resonator which, when
-struck, vibrates at a reliable frequency. Just how reliable is this
-frequency when all is said and done? Frequency, given in
-\unit{\hertz}, can be said to describe the number of times a given
+#+begin_chapquote :by "Douglas Adams" :from "The Hitchhiker's Guide to the Galaxy"
+Time is an illusion; lunchtime doubly so.
+#+end_chapquote
+
+#+latex: \minitoc
+#+latex: \newpage
+
+\lettrine{C}{onsider} a tuning fork, a steel, two-pronged resonator
+which, when struck, vibrates at a reliable frequency. Just how
+reliable is this frequency when all is said and done? Frequency, given
+in \unit{\hertz}, can be said to describe the number of times a given
 event occurs in one second. And how is a second defined? In terms of
 the duration required for a caesium atom to vibrate a certain number
 of times. So, frequency is defined in terms of time, and time in terms
@@ -272,9 +366,9 @@ than on a hot day. And that is not even to mention the device against
 which it was calibrated on the day it was manufactured. In short, a
 tuning fork designed to produce a reliable \qty{440}{\hertz} frequency
 /does not/, /has never/, and /will never/ produce precisely that
-frequency. Indeed, given that atomic clocks are /only/ accurate to
-parts per quadrillion, the very idea of the quantity \qty{440}{\hertz}
-is far from perfectly-defined.
+frequency. Indeed, given that atomic clocks are /only/ accurate to parts
+per trillion, the very idea of the quantity \qty{440}{\hertz} is far
+from perfectly-defined.
 
 Time in computer systems is, of course, subject to the same
 vagaries. It is in fact something like a tuning fork that describes
@@ -304,25 +398,87 @@ governed by a 10 ppm XO, running at a nominal sampling frequency of
 way of context, that difference is analogous to having two A_{4} tuning
 forks, one producing a frequency of \qty{439.9956}{\hertz} and another
 at \qty{440.0044}{\hertz}, so a difference of less than one hundredth
-of a cycle per second; this falls far, far below the threshold for
-human perception of difference in pitch. The audio engineer notes,
-however, that the devices running at \(f_{s_{1}}\) and \(f_{s_{2}}\) will,
-after one second, be out of sync by roughly the duration of one full
-audio sample; the sum two audio signals, \(x_{1}[n]\) and \(x_{2}[n]\),
+of a cycle per second; this falls far, far below the /just noticeable
+difference/ threshold for human pitch perception. The audio engineer
+notes, however, that the devices running at \(f_{s_{1}}\) and \(f_{s_{2}}\)
+will, after one second, be out of sync by roughly the duration of one
+full audio sample; the sum two audio signals, \(x_{1}[n]\) and \(x_{2}[n]\),
 where \(x_{2}[n] = x_{1}[n-1]\) is a one-zero low-pass filter.
 
-** A Section
+** Network Protocols for Time Exchange
 
-*** A Subsection
+*** Network Time Protocol
+
+*** Precision Time Protocol
+
+** Media Clock Recovery
+
+** Presentation Time Recovery
 
 * Sound Field Synthesis
+#+latex: \minitoc
+#+latex: \newpage
+** General Principles of Sound Field Synthesis
+
+** Periphony
+
+*** Stereo
+
+*** Surround Sound
+
+*** Binaural Reproduction
+
+** Wave Field Synthesis
+
+*** Virtual Sound Sources
+
+*** Focused Sound Sources
+
+*** Plane Waves
+
+** Ambisonics
+
+*** Higher Order Ambisonics
+
+*** Spherical Microphone Arrays
+
+*** Ambisonics Encoding
+
+*** Ambisonics Decoding
+
+** State of the Art
+
+*** Economic and Financial Considerations
+
+* Development
+#+latex: \minitoc
+#+latex: \newpage
+** The Ananas Protocol
+*** The Ananas Audio Protocol
+*** The Ananas Authority Description Protocol
+*** The Ananas Client Description Protocol
+** Supporting Software Systems
+*** Audio Plugins
+** Case Studies
+
+* Evaluation
+#+latex: \minitoc
+#+latex: \newpage
+* Conclusion
+#+latex: \minitoc
+#+latex: \newpage
 
 #+print_bibliography:
 
 * Local Variables                                                  :noexport:
 
+- Add the /thesis/ document class.
+- Don't output the title; that's handled by =frontmatter.tex=.
+- Add some export headline filters (see =.dir-locals.el=). 
+
 # Local Variables:
-# org-latex-classes: (("thesis" "\\documentclass[a4paper, 12pt, table]{book}
+# org-latex-classes: (("thesis" "\\documentclass[a4paper, 12pt, table,
+# twoside]{book}
 # [NO-DEFAULT-PACKAGES]"
 # ("\\chapter{%s}" . "\\chapter*{%s}")
 # ("\\section{%s}" . "\\section*{%s}")
@@ -331,7 +487,8 @@ where \(x_{2}[n] = x_{1}[n-1]\) is a one-zero low-pass filter.
 # ("\\paragraph{%s}" . "\\paragraph*{%s}")
 # ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 # org-latex-title-command: nil
-# org-export-filter-headline-functions: (tar/acks-as-section tar/abstract-as-section tar/intro-in-toc)
+# org-export-filter-headline-functions: (tar/acks-as-section
+# tar/abstract-as-section tar/intro-in-toc)
 # End:
 
-# LocalWords transduced
+# LocalWords transduced periphony ambisonics
