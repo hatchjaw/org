@@ -11209,5 +11209,43 @@ head and into the bloody Org file.
 - Arduino?
 - USB Audio & feedback accumulation
 - PlatformIO
+- Psychoacoustics/localisation
 
 Entered on [2026-03-31 mar. 21:37]
+** 2026-04 avril
+*** 2026-04-01 mercredi
+**** What's a Phase Locked Loop?                        :WRITING:HARDWARE:
+#+begin_quote
+A PLL is a device which causes one signal to track another one.
+#+end_quote
+
+Continuing\nbsp[cite:@hsiehPhaselocked1996]:
+
+#+begin_quote
+It keeps an output signal synchronizing with a reference input signal
+in frequency as well as in phase.
+#+end_quote
+
+And:
+
+#+begin_quote
+More precisely, the PLL is simply a servo system, which controls the
+phase of its output signal in such a way that the phase error between
+output phase and reference phase reduces to a minimum.
+#+end_quote
+
+Or, as Claude put it:
+
+#+begin_quote
+A Phase-Locked Loop (PLL) is an electronic feedback circuit that locks
+the phase of an output oscillator to match that of a reference input
+signal, allowing it to generate a stable output frequency that is a
+precise multiple of the reference.
+#+end_quote
+
+It is interesting that there's a parallel here between a PLL and
+PTP. I'm sure I've seen the word "servo" thrown around where PTP is
+concerned. PI controllers too. All to do with time and/or frequency
+and synchronisation.
+
+Entered on [2026-04-01 mer. 20:10]

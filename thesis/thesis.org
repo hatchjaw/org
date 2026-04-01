@@ -1,7 +1,7 @@
 #+title: A Sample-Synchronous Distributed Audio System for Spatial and Immersive Applications
 #+author: Thomas Albert Rushton
 
-#+options: toc:nil h:4
+#+options: toc:nil num:4 h:4
 #+export_file_name: out/thesis
 #+latex_class: thesis
 #+cite_export: biblatex
@@ -29,26 +29,38 @@ Org file describing my PhD thesis.
 *** Geometry
 
 #+begin_src latex
-\usepackage[a4paper, left=3cm, right=3cm, top=3cm, bottom=3cm]{geometry}
+\RequirePackage[
+  a4paper,
+  left=3cm,
+  right=3cm,
+  top=3cm,
+  bottom=3cm
+]{geometry}
 #+end_src
 
 *** Headers/footers
 
 #+begin_src latex
-\usepackage{fancyhdr}
+\RequirePackage{fancyhdr}
 #+end_src
 
 *** Per-chapter tables of contents
 
 #+begin_src latex
-\usepackage{minitoc}
+\RequirePackage{minitoc}
+#+end_src
+
+Number minitoc sections as deep as ~\subsubsection~
+
+#+begin_src latex
+\setcounter{minitocdepth}{3}
 #+end_src
 
 *** Graphics
 
 #+begin_src latex
-\usepackage[dvipsnames]{xcolor}
-\usepackage{graphicx}
+\RequirePackage[dvipsnames]{xcolor}
+\RequirePackage{graphicx}
 #+end_src
 
 *** Colours
@@ -64,33 +76,33 @@ Org file describing my PhD thesis.
 The main serif typeface.
 
 #+begin_src latex
-\usepackage[cmintegrals,cmbraces]{newtxmath}
-\usepackage{ebgaramond-maths}
-\usepackage[T1]{fontenc}
+\RequirePackage[cmintegrals,cmbraces]{newtxmath}
+\RequirePackage{ebgaramond-maths}
+\RequirePackage[T1]{fontenc}
 #+end_src
 
 A nicer sans-serif typeface.
 
 #+begin_src latex
-\usepackage{helvet}
+\RequirePackage{helvet}
 #+end_src
 
 A nicer monospaced typeface.
 
 #+begin_src latex
-\usepackage{inconsolata}
+\RequirePackage{inconsolata}
 #+end_src
 
 Just all-round better typography.
 
 #+begin_src latex
-\usepackage{microtype}
+\RequirePackage{microtype}
 #+end_src
 
 Fancy characters (typically) at the beginning of chapters.
 
 #+begin_src latex
-\usepackage{lettrine}
+\RequirePackage{lettrine}
 #+end_src
 
 **** Quotes
@@ -109,21 +121,21 @@ Fancy characters (typically) at the beginning of chapters.
 *** Tables
 
 #+begin_src latex
-\usepackage{booktabs}
+\RequirePackage{booktabs}
 #+end_src
 
 *** Maths
 
 #+begin_src latex
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsfonts}
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
+\RequirePackage{amsfonts}
 #+end_src
 
 *** Units
 
 #+begin_src latex
-\usepackage{siunitx}
+\RequirePackage{siunitx}
 \sisetup{
   mode=match,
   per-mode=symbol
@@ -133,8 +145,8 @@ Fancy characters (typically) at the beginning of chapters.
 *** References
 
 #+begin_src latex
-\usepackage[noabbrev,capitalise]{cleveref}
-\usepackage{hyperref}
+\RequirePackage[noabbrev,capitalise]{cleveref}
+\RequirePackage{hyperref}
 \hypersetup{
   unicode,
   colorlinks,
@@ -259,19 +271,22 @@ Hi there; let's go.
 \lettrine{A}{udio transmission} over packet-switched networks has
 become the /de facto/ standard for a variety of applications over the
 past three decades. Replacing the previous generation of cumbersome,
-point-to-point installations, it was the broadcast industry that first
-embraced audio over ethernet\nbsp[cite:@bakkerIntroduction2014], and
-digital telephony that pioneered more general audio over internet
-protocol (IP) approaches\nbsp[cite:@turlettiINRIA1994].
+point-to-point installations, it was digital telephony and
+videoconferencing that first embraced audio (and video) over the
+internet protocol (IP) suite\nbsp[cite:@turlettiINRIA1994] and the
+broadcast industry that pioneered audio over
+ethernet\nbsp[cite:@bakkerIntroduction2014].
 
 ** Computer Networking
+
+
 
 *** Ethernet
 Ethernet is a thing\nbsp[cite:@metcalfeEthernet1976]
 
 *** WiFi
 
-** The Internet Protocol Suite
+** The Internet Protocol Suite and the OSI Model
 
 ** Network Protocols
 
@@ -418,6 +433,13 @@ where \(x_{2}[n] = x_{1}[n-1]\) is a one-zero low-pass filter.
 * Sound Field Synthesis
 #+latex: \minitoc
 #+latex: \newpage
+
+** Psychoacoustics and Sound Localisation
+
+*** Interaural Level Difference
+
+*** Interaural Time Difference
+
 ** General Principles of Sound Field Synthesis
 
 ** Periphony
@@ -442,10 +464,7 @@ where \(x_{2}[n] = x_{1}[n-1]\) is a one-zero low-pass filter.
 
 *** Spherical Microphone Arrays
 
-*** Ambisonics Encoding
-
-*** Ambisonics Decoding
-
+*** Ambisonics Encoding and Decoding
 ** State of the Art
 
 *** Economic and Financial Considerations
@@ -459,11 +478,17 @@ where \(x_{2}[n] = x_{1}[n-1]\) is a one-zero low-pass filter.
 *** The Ananas Client Description Protocol
 ** Supporting Software Systems
 *** Audio Plugins
-** Case Studies
+**** The Ananas Audio Server Plugin
+**** The Ananas WFS Plugin
+**** The Ananas Ambisonics Plugin
+*** DSP Algorithms
+**** The Distributed WFS Algorithm
+**** The Distributed Ambisonics Decoder
 
 * Evaluation
 #+latex: \minitoc
 #+latex: \newpage
+** Case Studies
 * Conclusion
 #+latex: \minitoc
 #+latex: \newpage
@@ -491,4 +516,4 @@ where \(x_{2}[n] = x_{1}[n-1]\) is a one-zero low-pass filter.
 # tar/abstract-as-section tar/intro-in-toc)
 # End:
 
-# LocalWords transduced periphony ambisonics
+# LocalWords: transduced periphony ambisonics microcontroller datagram
