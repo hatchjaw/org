@@ -228,12 +228,13 @@ Cochard, Maxime Popoff, Orégane Desrentes, Yann Orlarey, Stéphane
 Letz, Romain Bouarah, Romain Fontaine, Bastien Barbe, Florian
 Rascoursier, Louis Ledoux, Benjamin Quiédeville, Anastasia Volkova,
 Florent de Dinechin, Théo Cantaloube, Clemens Wegener. Other doctoral
-students from other teams (/on est tous en la même galère/): Alix,
-Guillaume, Aurélien, Mehdi, Kim, Antoine, Julien. Linda Soumari,
-Cecilia Navarro and Anouchka Ronceray for tolerating my
-slowly-improving French. Djurdjura Mehrad, Élise Denoyelle, Stéphanie
-Wolska and Morgane Le Prince. Frédéric Le Mouël, Leonardo Cardoso and
-Jens Ahrens; Cristoff Ressi, Shawn Silverman, and Jean-Michel Friedt.
+students from other teams (/on est tous en la même galère/): Alix
+Jeannerot, Guillaume, Aurélien Delarge, Mehdi, Khiem Huynh, Antoine Bonneau,
+Julien. Linda Soumari, Cecilia Navarro and Anouchka Ronceray for
+tolerating my slowly-improving French. Djurdjura Mehrad, Élise
+Denoyelle, Stéphanie Wolska and Morgane Le Prince. Frédéric Le Mouël,
+Leonardo Cardoso and Jens Ahrens; Cristoff Ressi, Shawn Silverman, and
+Jean-Michel Friedt.
 
 Others, beyond the confines of the lab: Kimberly Hoole, Irène Hontang,
 Myriam Boussaboua, Cristina Rottondi, Tomas Poloniecki, Julie Darnat

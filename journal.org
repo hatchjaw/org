@@ -11249,3 +11249,47 @@ concerned. PI controllers too. All to do with time and/or frequency
 and synchronisation.
 
 Entered on [2026-04-01 mer. 20:10]
+*** 2026-04-02 jeudi
+**** MCSA Postdoctoral Fellowship Training                      :TRAINING:
+- Quick info-dump on the program...
+- Checking eligibility is a goal for the day
+- Session 1: Intro to MCSA PF, 21/04 10h -- 12h30, online
+- Session 2: How to write a proposal for PF, 19/05 9h -- 16h30, online
+- Session 3: How to fine tune your proposal, 22-26/06 Paris, in-person
+- *Register for the above sessions* https://sondages.inria.fr/index.php/745553?lang=en
+- June-Aug, CPPI Europe will support in preparing proposal
+- Deadline September 9th
+- MSCA is an EC program for research and innovation
+  + Focus on mobility --- international, intersectoral
+    (academic/industrial), interdisciplinary
+  + Only program that is for individuals (as opposed to institutions)
+- For PhD degree holders.
+  + Hm, I'm probably not eligible this year because I won't defend until
+    October...
+- Funding is incredibly generous. (Hence highly competitive.)
+  + Possible to /hire/ e.g. a masters student for an internship with
+    part of the funding.
+- Possible start date April 2027 (deferrable up to August 2028)
+- Mobility rule: not resident in country of destination more than 12
+  months in the 36 months prior to deadline.
+- European vs /Global/ fellowships. The latter more complex to write;
+  three years in total (instead of two), two outside of Europe (the
+  list of countries that qualify as Europe is... weird, e.g. Egypt).
+- Anyway, bottom-up project, training-through-research; individual,
+  personalised; transferable skills, teaching, dissemination,
+  communication/outreach, "horizontal skills", training in gender and
+  ethics issues.
+
+- Maybe attend first session this year, but not the second
+- Ask Romain about writing a "paper-thesis"...
+- Generally mention that I came here and I'm interested in the
+  process.
+- Maybe if there's the possibility of staying with the team for a
+  postdoc...
+- Even if I go somewhere else for a postdoc, I can apply with Inria
+  for PF/GF next year.
+- Stanford is an option... choose a supervisor with different
+  expertise cf. Romain/Emeraude.
+- Grame could serve as 6-month placement
+
+Entered on [2026-04-02 jeu. 09:54]
