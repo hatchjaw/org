@@ -383,7 +383,7 @@ which it was calibrated on the day it was manufactured. In short, a
 tuning fork designed to produce a reliable \qty{440}{\hertz} frequency
 /does not/, /has never/, and /will never/ produce precisely that
 frequency. Indeed, given that atomic clocks are /only/ accurate to parts
-per trillion, the very idea of the quantity \qty{440}{\hertz} is far
+per trillion,[fn:1] the very idea of the quantity \qty{440}{\hertz} is far
 from perfectly-defined.
 
 Time in computer systems is, of course, subject to the same
@@ -417,9 +417,10 @@ at \qty{440.0044}{\hertz}, so a difference of less than one hundredth
 of a cycle per second; this falls far, far below the /just noticeable
 difference/ threshold for human pitch perception. The audio engineer
 notes, however, that the devices running at \(f_{s_{1}}\) and \(f_{s_{2}}\)
-will, after one second, be out of sync by roughly the duration of one
-full audio sample; the sum two audio signals, \(x_{1}[n]\) and \(x_{2}[n]\),
-where \(x_{2}[n] = x_{1}[n-1]\) is a one-zero low-pass filter.
+will, after one second, be out of sync by almost the duration of one
+full audio sample (\sim\qty{21}{\micro\second} at \qty{48}{\kilo\hertz}); the
+DSP engineer notes that the sum two audio signals, \(x_{1}[n]\) and
+\(x_{2}[n]\), where \(x_{2}[n] = x_{1}[n-1]\) is a one-zero low-pass filter.
 
 ** Network Protocols for Time Exchange
 
@@ -470,22 +471,25 @@ where \(x_{2}[n] = x_{1}[n-1]\) is a one-zero low-pass filter.
 
 *** Economic and Financial Considerations
 
-* Development
+* Contribution 1: A Synchronous, Distributed Audio System
+#+latex: \minitoc
+#+latex: \newpage
+
+** ???
+
+* Contribution 2: Distributed Spatial Audio Algorithms
+#+latex: \minitoc
+#+latex: \newpage
+** Distributed Wave Field Synthesis
+** Distributed Higher Order Ambisonics
+* Contribution 3: Protocol and Software Systems
 #+latex: \minitoc
 #+latex: \newpage
 ** The Ananas Protocol
 *** The Ananas Audio Protocol
 *** The Ananas Authority Description Protocol
 *** The Ananas Client Description Protocol
-** Supporting Software Systems
-*** Audio Plugins
-**** The Ananas Audio Server Plugin
-**** The Ananas WFS Plugin
-**** The Ananas Ambisonics Plugin
-*** DSP Algorithms
-**** The Distributed WFS Algorithm
-**** The Distributed Ambisonics Decoder
-
+** Audio Plugins
 * Evaluation
 #+latex: \minitoc
 #+latex: \newpage
@@ -501,6 +505,11 @@ where \(x_{2}[n] = x_{1}[n-1]\) is a one-zero low-pass filter.
 - Add the /thesis/ document class.
 - Don't output the title; that's handled by =frontmatter.tex=.
 - Add some export headline filters (see =.dir-locals.el=). 
+
+* Footnotes
+
+[fn:1] Emphasis added because a one part-per-trillion clock will lose
+one second on the order of once every thirty-two thousand years.
 
 # Local Variables:
 # org-latex-classes: (("thesis" "\\documentclass[a4paper, 12pt, table,

@@ -10852,7 +10852,7 @@ lisp for quickly monitoring
 
 ***** Kill all PlatformIO monitor buffers
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results none
 (defun tar/kill-pio-monitors ()
   "Kill all PIO monitor buffers and their processes."
   (interactive)
@@ -10866,12 +10866,9 @@ lisp for quickly monitoring
       (kill-buffer buffer))))
 #+end_src
 
-#+RESULTS:
-: tar/kill-pio-monitors
-
 ***** Kill all PIO buffers and launch new ones
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results none
 (defun tar/setup-pio-monitors ()
   "Close all PIO monitor buffers and start 4 PlatformIO device monitors in a grid."
   (interactive)
@@ -10923,9 +10920,6 @@ lisp for quickly monitoring
     ;; Balance windows for equal sizes
     (balance-windows)))
 #+end_src
-
-#+RESULTS:
-: tar/setup-pio-monitors
 
 Entered on [2026-02-13 ven. 13:59]
 
@@ -11210,6 +11204,8 @@ head and into the bloody Org file.
 - USB Audio & feedback accumulation
 - PlatformIO
 - Psychoacoustics/localisation
+- Spatial Aliasing
+- Secondary Point Sources
 
 Entered on [2026-03-31 mar. 21:37]
 ** 2026-04 avril
@@ -11272,6 +11268,7 @@ Entered on [2026-04-01 mer. 20:10]
 - Possible start date April 2027 (deferrable up to August 2028)
 - Mobility rule: not resident in country of destination more than 12
   months in the 36 months prior to deadline.
+- Postdoctoral Fellowship (PF), Global Fellowship (GF)
 - European vs /Global/ fellowships. The latter more complex to write;
   three years in total (instead of two), two outside of Europe (the
   list of countries that qualify as Europe is... weird, e.g. Egypt).
@@ -11293,3 +11290,63 @@ Entered on [2026-04-01 mer. 20:10]
 - Grame could serve as 6-month placement
 
 Entered on [2026-04-02 jeu. 09:54]
+*** 2026-04-06 lundi
+**** I've been reading about networks                            :WRITING:
+What have I actually learned as a result of reading (most
+of)\nbsp[cite:@bonaventureComputer2011]? Well, that the Ethernet MTU is
+1500 bytes, which I already knew; I still don't really know why, other
+than that it's an arbitrary limit and was arrived at by
+experimentation I suppose. That switches are data link layer
+relays. That the OSI model and TCP/IP suite are actually mortal
+enemies (see also\nbsp[cite:@russellRough2006]). Perhaps it wasn't the
+most fruitful way to spend several days, i.e. fretting over forcing
+myself to read something dull, with ugly figures and occasional
+typos. Not the strongest of bibliographical entries for the thesis.
+
+Entered on [2026-04-06 lun. 22:00]
+*** 2026-04-16 jeudi
+**** Reliable PTP achieved?                           :NETWORKEDAUDIO:PTP:
+Let's not get carried away, but it looks like the development version
+of Router OS that MikroTik support provided has done the
+trick... mostly. Anecdotally, we've gone from > 30 % follow-up packet
+loss at 44 channels (~ 35 Mbps Rx) to ~1 %. The remaining follow-up
+losses don't appear to be catastrophic enough to cause
+desynchronisation, even for that high number of channels and
+corresponding high(ish) Rx bandwidth.
+
+So, with that out of the way (for now... I must test it again
+tomorrow), it's back to Faust. Latest headache is the WFS algorithm,
+or something in the Faust-generated C++ at any rate, is causing
+intermittent clicks. Another one to re-test tomorrow. Things I've
+tried:
+- Running only 8 virtual sources instead of 16 (still clicks)
+- Running only /2/ virtual sources (clicks)
+- Commenting out ~wfs.processAudio~ (clean output results)
+- Commenting out ~compute~ in =wfs.cpp= and just copying the input to the
+  output (clean)
+
+I should try a /real/ Faust passthrough , ~_~, rather than a hack, and see
+what happens. 
+
+Entered on [2026-04-16 jeu. 16:17]
+*** 2026-04-17 vendredi
+**** Still clicking... or not                      :NETWORKEDAUDIO:TEENSY:
+So it doesn't appear to be:
+- Where Faust's float buffers are located in memory, nor whether
+  they're dynamically or statically allocated.
+- The hierarchy of interrupt priorities on the Teensy.
+- Clipping.
+- Whether focused source computation is happening as well as virtual
+  source computation.
+- The =-dlt= flag.
+- ~static_cast~ usage in ~compute~.
+
+I tried setting up a /passthrough/ environment, and that works just fine
+--- no clicking. As low as two input channels (WFS sources) and
+there's intermittent clicking audible when reproducing a 240 Hz sine
+wave.
+
+I tried removing the questionable ~distanceSim~ I implemented, and... no
+clicking. What the bloody hell?
+
+Entered on [2026-04-17 ven. 15:37]

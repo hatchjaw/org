@@ -1,0 +1,11 @@
+#+title:      ESP-NOW MIDI Protocol and Enomik (ESP-NOW MIDI Toolkit): Wired and Wireless MIDI Devices with an Optional Code-free Workflow
+#+date:       [2026-04-16 jeu. 09:13]
+#+filetags:   :bib:review:smc:
+#+identifier: 20260416T091359
+#+reference:  geisslESPNOW2026
+
+* Summary
+
+* Observations
+
+* Proofreading

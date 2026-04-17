@@ -1,0 +1,11 @@
+#+title:      Predicting Timbre Traits for Interpretable Assessment of Musical Sound Synthesizers
+#+date:       [2026-04-16 jeu. 09:14]
+#+filetags:   :bib:review:smc:
+#+identifier: 20260416T091416
+#+reference:  chaslecauchyPredicting2026
+
+* Summary
+
+* Observations
+
+* Proofreading
