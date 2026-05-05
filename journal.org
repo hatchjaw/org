@@ -9641,7 +9641,7 @@ Intelligence]] lecture series.
   corresponding audio. Not too expensive to train; a couple of hours
   on a couple of GPUs; quick at inference time too.
   + Still quite clunky.
-- Yaboi Hanoi (ex-Magenta) won the AI song contest (2022)q, in part, by
+- Yaboi Hanoi (ex-Magenta) won the AI song contest (2022), in part, by
   using tone/timbre transfer on a /Phi Nai/ (Thai traditional
   instrument) --- doesn't conform to western tuning --- mapped onto a
   sax.
@@ -10254,7 +10254,7 @@ an incredibly assured and professional job; very clearly presented.
 Entered on [2025-10-16 jeu. 09:03]
 *** 2025-10-17 vendredi
 **** More USB audio trouble                        :NETWORKEDAUDIO:TEENSY:
-I had to take a step away because it was drining me loopy. Issue is it
+I had to take a step away because it was driving me loopy. Issue is it
 doesn't seem to matter what I do with the ~feedback_accumulator~ of
 ~AudioInputUSB~, my computer seems to process audio at a rate faster
 than one would expect, with PTP as the reference for authoritative
@@ -11350,3 +11350,119 @@ I tried removing the questionable ~distanceSim~ I implemented, and... no
 clicking. What the bloody hell?
 
 Entered on [2026-04-17 ven. 15:37]
+*** 2026-04-21 mardi
+*** 2026-04-22 mercredi
+**** Reading, WFS second version                            :SPATIALAUDIO:
+Save the end of the final appendix, I finished Jens's
+book\nbsp[cite:@ahrensAnalytic2012]. Did I learn much of practical
+pertinence to my work? Maybe not. Perhaps that I should be windowing
+the edges of my WFS array to mitigate for truncation artifacts.
+
+I decided that the module ID approach, and each WFS module being aware
+of the number of modules in the array, isn't the right way to
+go. Rather, modules should just be aware of the co-ordinates of the
+secondary sources for which they're responsible and the distributed
+algorithm should take care of the rest. I'm confident that this is a
+solid rationale, but it calls for a fairly significant rewrite of the
+control system to account for the fact that modules expect to receive
+secondary source co-ordinates instead of a module ID. Makes a stronger
+case for /unicasting/ module-specific parameters, i.e. secondary source
+co-ordinates, e.g. OSC over UDP addressed to a given IP address and
+taking the following form:
+
+#+begin_example
+/ss/0/x -1.25
+#+end_example
+
+***** Clicking hell
+The clicking is back, whether or not the WFS prefilter is active. I
+really don't know what's causing the problem. I tried writing a WFS
+algorithm from scratch in C++, doing all the computation on ~int16_t~
+samples, and the clicking remained. Also CPU time was hovering around
+30% (without the prefilter) versus 26-27% for the Faust implementation
+(with the prefilter). So I guess sticking with Faust is the way to
+go. My thinking was it couldn't be good to be converting ~int16_t~ to
+~float~, doing DSP, then converting back (i.e. perhaps it was the FPU
+creaking under the weight of all the computation), but that turns out,
+as far as I can tell, not to be the case.
+
+Entered on [2026-04-22 mer. 18:18]
+
+*** 2026-04-24 vendredi
+**** Ethernet interface setup                 :PROGRAMMING:NETWORKEDAUDIO:
+Agh, so I spent half a day trying to unicast secondary source
+co-ordinates to a module, each time finding that my OSC message was
+being sent over wifi instead of ethernet. It turns out the problem was
+the netmask/address range available to ethernet.
+
+If I want to sent a UDP unicast packet on interface ~192.168.10.10~ to,
+e.g. ~192.168.48.203~, the netmask should be ~255.255.0.0~, not
+~255.255.255.0~, i.e. ~192.168.10.10/16~.
+
+Anyway, now it works; I just need to set up the module to receive the data.
+
+Entered on [2026-04-24 ven. 10:56]
+** 2026-05 mai
+*** 2026-05-05 mardi
+**** Clicking resolved                             :NETWORKEDAUDIO:TEENSY:
+Cause: out-of-sequence packets:
+
+[[./images/20260505/WhatsApp Image 2026-05-05 at 10.52.51.jpeg]]
+
+So, thats 16 frames being reproduced 32 frames late.
+
+Solution: buffer write-index shenanigans:
+#+begin_src c++
+void PacketBuffer::write(const AudioPacket &packet)
+{
+    const auto prevWriteIndex{writeIndex == 0 ? Constants::PacketBufferCapacity - 1 : writeIndex - 1};
+    const auto seqNumDelta{
+        packet.header.sequenceNumber == 0 && buffer[prevWriteIndex].header.sequenceNumber == UINT16_MAX
+            ? 1
+            : packet.header.sequenceNumber - buffer[prevWriteIndex].header.sequenceNumber
+    };
+
+    // If the change in sequence number is greater than one or negative ---
+    // and it's not unreasonably large, e.g. on receiving a first packet ---
+    // this is an out-of-sequence packet scenario. Increment or decrement
+    // the write index to accommodate the momentary loss of
+    // sequentiality.
+    if ((seqNumDelta >= 2 || seqNumDelta <= -1) && abs(seqNumDelta) < 10) {
+        Serial.printf("Received out-of-sequence packet: seq %" PRIu16 ", %s%d\n",
+                      packet.header.sequenceNumber,
+                      seqNumDelta > 0 ? "+" : "",
+                      seqNumDelta);
+        if (seqNumDelta > 0) {
+            for (auto i{1}; i < seqNumDelta; ++i) {
+                incrementWriteIndex();
+            }
+        } else {
+            for (auto i{0}; i >= seqNumDelta; --i) {
+                decrementWriteIndex();
+            }
+        }
+        Serial.printf("Writing at index %d\n", writeIndex);
+    }
+
+    buffer[writeIndex] = packet;
+    incrementWriteIndex();
+}
+#+end_src
+
+The two main scenarios I'm seeing are
+
+#+begin_example
+Seq. num.: 1  2  3  5  4  6  7  8  9
+    diff.:   +1 +1 +2 -1 +2 +1 +1 +1
+#+end_example
+
+and (more rarely)
+
+#+begin_example
+Seq. num.: 1  2  3  6  5  4  7  8  9
+    diff.:   +1 +1 +3 -1 -1 +3 +1 +1
+#+end_example
+
+My algorithm appears to handle both without any trouble.
+
+Entered on [2026-05-05 mar. 14:14]

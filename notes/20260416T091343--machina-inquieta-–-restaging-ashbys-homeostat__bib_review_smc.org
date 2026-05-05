@@ -6,6 +6,51 @@
 
 * Summary
 
+The authors present /Machine Inquieta/, a novel digital instrument based
+on a principle of "persistent mustistability"; essentially this is a
+feedback instrument based on four interconnected synthesis units each
+driven by what appears to be a modest neural network. Framing their
+machine learning approach as one of /Small-Data/ and resistance to the
+neo-colonialist behaviours surrounding contemporary machine learning
+is a laudable impulse.
+
+The authors assert in section 5 that their instrument represents "a
+new principle of contemporary musicianship", which is odd because they
+cite, in reference [12], the existing /feedback musicianship network/
+([[https://feedback-musicianship.pubpub.org/][https://feedback-musicianship.pubpub.org/]]), a group of artists and
+researchers who would doubtless be interested in their work, and from
+whom the authors could have drawn inspiration and further
+bibliographical material. Furthermore, designing an instrument that is
+"configured to remain in motion" appears to lie directly at odds with
+the aim of the work, Ashby's Homeostat, that inspired it, the latter
+being a device, as the authors state in their abstract, exhibiting a
+"principle of ultrastability".
+
+I consider this a borderline paper. The instrument appears
+well-realised and adequately described, and, in the examples linked to
+in reference [48], sounds genuinely interesting. A lack of
+acknowledgement of existing feedback musicianship practices, however,
+and incoherence with regard to its inspiration, plus limited
+evaluation call into question the paper's merit for publication.
+
 * Observations
 
+The unconventional terms, "produsage" and "produser" (§1.3),
+presumably borrowed from references [26] and/or [27] should be
+italicised or placed in inverted commas to indicate their unusual
+nature. Similarly, a definition or a reference should be provided for
+the term "post-synthetic realities" (also §1.3) --- it is far from
+evident to this reviewer what that term means.
+
+Almost the entirety of section 4, i.e. page 5, lines 1-52, should be
+italicised to indicate that this is the first-person perspective of
+the performer.
+
 * Proofreading
+
+- §1, line 39: Don't use a citation number as a clause in a
+  sentence. Should read, e.g. "Following Haraway [1]".
+- §3.2, l. 82: Sudden change from past to present tense; should read
+  "...these arrangements were automatically up-sampled..."
+- §3.2, l. 93, l. 97: The authors appear to have used a backtick, `, instead
+  of an apostrophe, ', to close a quoted extract.

@@ -1,0 +1,260 @@
+#+title: Enabling Distributed Spatial Audio
+#+subtitle: Individual Follow-up Committee: Year 3
+#+author: Thomas Rushton
+#+date: May 2026
+
+#+options: toc:nil num:2
+#+export_file_name: out/report
+#+cite_export: biblatex
+#+latex_class: report
+#+latex_header: \RequirePackage[]{report-style}
+#+latex_compiler: xelatex
+
+* Latex Setup                                                      :noexport:
+:PROPERTIES:
+:HEADER-ARGS: :tangle out/report-style.sty :results silent
+:END:
+
+** Basics
+
+#+begin_src latex
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{report-style}
+#+end_src
+
+** Packages
+
+Hm. Looks like these packages come from the example [[https://www.latextemplates.com/template/arsclassica-article][here]].
+
+#+begin_src latex
+\RequirePackage{subfig}
+\RequirePackage[
+  subfig,
+  beramono,
+  eulermath,
+  pdfspacing
+]{classicthesis}
+\RequirePackage{arsclassica}
+\RequirePackage{hyperref}
+\RequirePackage{fontspec}
+\RequirePackage{enumitem} % Required for manipulating the whitespace between and within lists
+\RequirePackage{subfig} % Required for creating figures with multiple parts (subfigures)
+\RequirePackage{amsmath,amssymb,amsthm} % For including math equations, theorems, symbols, etc
+\RequirePackage{varioref} % More descriptive referencing
+\RequirePackage{cleveref}
+\RequirePackage{microtype}
+\RequirePackage{siunitx}
+\sisetup{mode=text}
+#+end_src
+
+** Typography
+
+Reduce the default font size by half a point.
+
+#+begin_src latex
+\KOMAoptions{fontsize=10pt}
+#+end_src
+
+Reduce the size of the date.
+
+#+begin_src latex
+\setkomafont{date}{\normalsize}
+#+end_src
+
+Use Minion for both main and "sans" fonts.
+
+#+begin_src latex
+\setmainfont[Mapping={tex-text}, 
+  Numbers={OldStyle},
+  Ligatures={Common},
+  %% Extension=.otf,
+  %% UprightFont=*-Regular,
+  %% ItalicFont= *-It,
+  %% BoldFont= *-Bold,
+  %% BoldItalicFont = *-BoldIt
+]{MinionPro-Regular}
+
+\setsansfont[Mapping=tex-text,
+  Ligatures={Common},
+  Numbers={OldStyle},
+  %% Extension=.otf,
+  %% UprightFont=MyriadPro-Regular,
+  %% ItalicFont=MyriadPro-CondIt,
+  %% BoldFont=MyriadPro-Semibold,
+  %% BoldItalicFont=MyriadPro-SemiboldIt,
+]{MinionPro-Regular}
+#+end_src
+
+Scale Iosevka to more-or-less match Minion.
+
+#+begin_src latex
+\setmonofont[Mapping=tex-text,Scale=0.9]{Iosevka Comfy Motion}
+#+end_src
+
+** Bibliography
+
+#+begin_src latex
+\PassOptionsToPackage{%
+  %backend=biber,bibencoding=utf8, %instead of bibtex
+%   backend=bibtex8,bibencoding=ascii,%
+  language=auto,
+  style=numeric-comp,
+  %style=authoryear-comp, % Author 1999, 2010
+  %bibstyle=authoryear,dashed=false, % dashed: substitute rep. author with ---
+  % sorting=nyt, % name, year, title
+  sorting=none,
+  maxbibnames=10, % default: 3, et al.
+  natbib=true, % natbib compatibility mode (\citep and \citet still work)
+  url=false,
+  doi=false,
+  isbn=false,
+  giveninits=true,
+}{biblatex}
+#+end_src
+
+#+begin_src latex :tangle out/biblatex.cfg
+\AtEveryBibitem{
+  \clearfield{eventtitle}
+  %% \clearfield{pages}
+}
+#+end_src
+
+* Work Undertaken
+
+The broad goal of my research is to explore the feasibility of
+creating an accessible, distributed platform for spatial and immersive
+audio applications. At the time of my previous individual follow-up
+committee, we had a near-sample-synchronous distributed audio
+platform, consisting of a network of microcontroller (MCU) development
+boards synchronised via IEEE 1588 Precision Time Protocol (PTP),
+exhibiting some residual parts-per-billion audio clock drift.
+
+Following the successful review of our paper for the 2025 Sound and
+Music Computing (SMC) conference, during which one of the reviewers
+brought some interesting prior research to my attention, I entered
+into an email exchange with Alexander Carôt and Christian Hoene on the
+subject of their paper on a GNSS synchronised sound
+card\nbsp[cite:@carotGNSSbased2019]. Though this exchange did not provide
+any leads regarding mitigating for the remaining clock drift, it did
+at least vindicate our choice of MCU, as Prof. Carôt and Dr. Hoene
+used a model produced by the same manufacturer as part of their own
+research several years ago.
+
+Continuing with the technical aspect of my work, I found a reliable
+means to synchronise our network of MCUs and a general purpose
+computer via a dedicated /time-authority/ MCU, which acts both as the
+authoritative source of PTP time and as a USB audio device. I also
+eliminated the remaining clock drift by applying a secondary audio
+clock correction, comparing, on each MCU client, PTP time and audio
+interrupt timing once per second. I created digital audio workstation
+(DAW) plug-ins for managing clients and controlling a distributed wave
+field synthesis (WFS) algorithm.
+
+At the time of writing the system is not without its problems. I
+discovered an issue with the PTP implementation of the low-cost
+ethernet switch that we have been using to co-ordinate the network of
+MCUs and entered into a discussion with the manufacturer's customer
+support department. They declared that they were able to reproduce the
+reported scenario, whereby PTP /sync/ messages are delivered but not
+their corresponding /follow-up/ messages, and have promised to keep us
+informed of improvements to the firmware of the device. This issue
+sporadically causes clients to lose their synchronicity with the time
+authority, so it is very much hoped that a solution can be found.
+
+** Development of the /Ananas/ Networked Audio System
+
+Ananas (/"Ananas Needs Another Networked Audio System"/) is the system
+that supports the implementation aspect of my thesis. It consists of a
+networked audio protocol, describing audio and control-data
+transmission and device discovery, plus supporting software in the
+form of DAW plugins for device monitoring and sound field synthesis
+control, plus firmware for the Teensy 4.1 MCU development board.
+
+** Experiments with Convolution
+
+With a view to supporting virtual acoustics applications, and acutely
+aware of the memory limitations posed by the Teensy 4.1, I spent some
+time exploring the platform's capabilities with regard to enabling
+real-time impulse-response convolutions. I read about partitioned
+convolution\nbsp[cite:@wefersPartitioned2015], and although the Teensy is
+comparatively memory-poor, it can be augmented with up to
+\qty{16}{\mega\byte} PSRAM via surface-mount chips, more than enough
+to store impulse responses of several seconds' duration. I
+investigated the performance of a PSRAM chip alongside the
+\qty{512}{\kilo\byte} /tightly-coupled/ on-MCU RAM, and found it to be
+comparable.
+
+** Publications/Presentations
+
+Two conference papers for which I served as first author were accepted
+for publication. A paper describing work preceding the establishment
+of the Ananas protocol\nbsp[cite:@rushtonAll2025], was published in the
+proceedings of the 2025 Sound and Music Computing (SMC) conference;
+this was accompanied by a presentation and poster session at the
+conference. Another paper, published in the autumn and addressing
+developments to a side-project in differentiable DSP in the Faust
+programming language\nbsp[cite:@rushtonFaust2025], was the subject of a
+presentation at the 2025 AES conference on AI and Machine Learning for
+Audio. Though the latter was not of direct relevance to my doctoral
+research, my hope is that it was of value to the broader activities of
+the Emeraude research team.
+
+A further paper, describing a distribiuted higher order ambisonics
+(HOA) system, is currently under review for this year's SMC
+conference. My paper from last year's SMC conference has been accepted
+for presentation at this year's /Journées d'Informatique Musicale/ to be
+held in Lille in June. I have been invited to deliver a seminar on my
+research at Polytecnico di Torino on May 22nd.
+
+* Outlook
+
+The feasibility of the HOA system, via distribution of an ambisonics
+decoder, is desribed in the SMC paper, but the system itself has not
+been tested; this should be done over the coming months (irrespective
+of the verdict of the review) as an accompaniment to the existing WFS
+implementation.
+
+That and the evaluation of my system aside, my priority is to write my
+manuscript, an endeavour which I have begun, though much work
+remains. Further conference submissions, including for this year's
+Internet of Sounds Symposium, stand as additional targets.
+    
+* Other Activities
+
+** Training
+
+I have undertaken 108 hours of doctoral training,
+including the following, completed since last year's committee
+meeting:
+
+- SMC Summer School 2025: /[[https://smc25.iem.at/summer-school/][The auditory gardener: creating Ambisonic
+  landscapes]]/
+- MOOC / Intégrité scientifique dans les métiers de la recherche
+  
+** Reviews
+
+I served as a reviewer for this year's conference on New Interfaces
+for Music Expression (NIME). I am currently reviewing a selection of
+papers for the 2026 SMC conference.
+
+** Google Summer of Code
+
+I co-mentored the project /[[https://github.com/grame-cncm/faustideas/blob/master/GSOC.md#integrated-faust-language-server-and-formatting-extension-for-vs-code-taken-in-2025][Integrated Faust Language Server and
+Formatting Extension for VS Code]]/.
+
+#+print_bibliography:
+
+* Emacs Setup                                                      :noexport:
+
+# Local Variables:
+# org-latex-classes: (("report" "\\documentclass[
+# a4paper,oneside,headinclude,footinclude,BCOR=5mm,
+# numbers=noenddot,cleardoublepage=empty,tablecaptionabove
+# ]{scrartcl}
+# [NO-DEFAULT-PACKAGES]"
+# ("\\section{%s}" . "\\section*{%s}")
+# ("\\subsection{%s}" . "\\subsection*{%s}")
+# ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+# ("\\paragraph{%s}" . "\\paragraph*{%s}")
+# ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+# End:
