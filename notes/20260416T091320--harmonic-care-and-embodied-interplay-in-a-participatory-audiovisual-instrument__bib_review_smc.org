@@ -30,7 +30,7 @@ anecdotal remarks in section 6. It is difficult, based on these
 omissions, in light of the near-absence of bibliographical references
 (see my remark below), and despite the apparent strength of the
 implementation, to recommend this paper for inclusion, therefore I
-submit an evaluation of /weak reject/.
+submit an evaluation of /reject/.
 
 * Observations
 

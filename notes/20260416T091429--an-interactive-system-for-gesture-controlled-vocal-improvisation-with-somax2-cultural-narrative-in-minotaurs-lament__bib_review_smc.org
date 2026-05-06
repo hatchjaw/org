@@ -6,6 +6,37 @@
 
 * Summary
 
+In this paper, the author presents the design and implementation of a
+novel digital musical instrument, using hand-tracking to control pitch
+shift of a vocal performance. A well-written and well-referenced work,
+the author makes a strong case for the culturally-situated nature of
+the implementation, describing its cultural background in ancient
+Greek /lament/.
+
+The implementation appears to make limited use of the technology upon
+which it is based, however; despite having twenty-one anatomical
+landmarks for the hand, only two gesures are supported. Somax2 appears
+to be a machine learning-based set of autonomous agents, but it ---
+its origin, whether it is open source, how it works --- is not
+adequately introduced in the text; this is a significant
+shortcoming. In the supplementary video, the overall sound of the
+performance is impressive, but the described pitch shift appears to be
+more of a formant shift and there are audible discontinuities in the
+output. With these factors in mind, the contribution of the paper
+appears to be rather insubstantial; I cannot recommend it for
+acceptance.
+
 * Observations
 
+- This reviewer wonders what a "non-cultural context" (page 2, §1)
+  might be.
+- The author appears to have submitted a camera-ready version of their
+  paper, as there are no line-numbers to aid with reviewing.
+
 * Proofreading
+
+- Page 2, §2: "with [6] highlighting the system's low latency..." ---
+  don't use a citation number as a clause in a sentence. Prefer "with
+  Yang et al. [6] highlighting the system's low latency..."
+- Page 5, §4.1 and §4.2: several instances of incorrect quotation
+  marks, e.g. ''low methodical roar'' => ``low methodical roar''.

@@ -6,6 +6,76 @@
 
 * Summary
 
+The authors present a timbre classifier for sounds produced by musical
+synthesisers using Fréchet Audio Distance as the basis for their
+classifier. Using a two-step neural embedding making use of
+human-assigned values for various timbral characteristics, the authors
+claim an interpretable classifier, one that correlates well with human
+ratings.
+
+The paper is well-referenced and selected results appear
+convincing. The text is littered with typographical errors, however
+(several instances of "timber" as opposed to "timbre", see
+proofreading notes below) and the approach appears to lack nuance where
+different performance techniques --- bowing versus plucking, for
+example --- are concerned.
+
+The introduction of an interpretable classifier is a significant
+result, but for this paper to be included in the proceedings I would
+insist that some of the more egregious typographical errors be
+addressed. I consider this a borderline submission.
+
 * Observations
 
+- The authors observe that the woodblock is the instrument for which
+  synthesised samples have the furthest predicted TTP from the ground
+  truth but fail to make the corresponding observation that this is
+  also the instrument least represented in the RWC
+  dataset. Furthermore I would challenge the assertion that "woody" as
+  a timbral characteristic "can hardly be assessed on a spectrogram".
+- It is not until the final section of the paper that the authors
+  contend with the issue of "atypical or unexpected" performance
+  techniques. Indeed, the second spectrogram in figure 5, with its
+  rapid amplitude decay, looks like a plucked note. This sample can be
+  heard in the online supplementary material and this appears indeed
+  to be the case.
+
 * Proofreading
+
+- Page 2, §1, line 25: "conditioning" => "conditionings"
+- P. 2, §1, l. 26: "predictions" => "predictions'"
+- P. 2, §1, l. 26: "each" => "each of the"
+- P. 2, §1, l. 35: "timber" => "timbre"
+- P. 2, §1, l. 35: "traits" => "trait"
+- P. 2, §1, l. 43: "what are timber traits" => "what timbre traits
+  are"
+- P. 2, §2, l. 57: "musicians," => "musicians"
+- P. 2, §2, l. 67: "prototypical" => "archetypical" --- I know that
+  Reymore uses the term "prototypical" but this is incorrect. A
+  prototype is a first instance of something; an archetype is a
+  representative instance.
+- P. 3, §3, l. 13: "assessed in [20]" --- don't use a citation number
+  as a clause in a sentence. Prefer "assessed by Reymore [20]".
+- P. 3, §3.1, l. 18:  As above.
+- P. 3, §3.1, l. 32: "prototypical" => "archetypical"
+- P. 3, footnote 2: quotation marks: ''imagine the sound of'' =>
+  ``imagine the sound of''
+- P. 3, §3.2, l. 75: "got" => "achieved"
+- P. 3, §3.2, l.80: Use of [27] as clause in a sentence.
+- P. 4, §3.3, l. 3: "train" => "training"
+- P. 4, §3.3, l. 4: Use of [20] as clause in a sentence.
+- P. 4, §3.3, l. 21: quotation marks: ''Reduce on Plateau'' =>
+  ``Reduce on Plateau''
+- P. 4, §3.4, l. 31: "do" => "does"
+- P. 4, §3.4, l. 33: "traits" => "trait"
+- P. 4, §3.5, l. 52: "timber" => "timbre"
+- P. 4, §3.5, l. 61: Use of [20] as clause in a sentence.
+- P. 4, §4, l. 72: "traits" => "trait"
+- P. 4, §4, l. 92: "enable to project" => "enable the projection of"
+- P. 4, §4, l. 92: "AS" => "As"
+- P. 5, §4, l. 46: "timber" => "timbre"
+- P. 6, §5, l. 18: "TTPs" => "TTP"
+- P. 6, §5, l. 39: "TTPs" => "TTP"
+- P. 6, §5, l. 46: "TTPs" => "TTP"
+- P. 6, §5, l. 50: "TTPs" => "TTP"
+- P. 6, §5, l. 57: "prototypical" => "archetypical"

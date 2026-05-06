@@ -1,0 +1,490 @@
+#+title: Enabling Distributed Spatial Audio
+#+subtitle: Thesis Committee --- Year 3
+#+author: Thomas Rushton
+
+#+options: num:t toc:nil
+#+options: reveal_width:1500 reveal_height:1000 reveal_slide_number:c/t
+#+export_file_name: index
+#+property: header-args:css :results none :exports none :tangle ./style.css
+#+reveal_root: ../reveal.js
+#+reveal_theme: white_contrast_compact_verbatim_headers
+#+reveal_trans: slide
+#+reveal_plugins: (math)
+#+reveal_extra_css: style.css
+#+reveal_min_scale: 1.0
+#+reveal_max_scale: 1.0
+#+reveal_extra_options: hash: true, fragmentInURL: true
+#+reveal_title_slide: <h1>%t</h1><h2>%s</h2><h3>%a</h3>
+#+reveal_title_slide_background: #141414
+#+reveal_title_slide_extra_attr: class="title-slide"
+
+* About This Presentation                                          :noexport:
+
+This =org= file describes my presentation for my third year /Comité de
+Suivi Individuel/, to be held on May 20th 2026.
+
+** Dependencies
+
+- =org-re-reveal= ([[https://gitlab.com/oer/org-re-reveal/-/tree/main][gitlab]]), which enables export support from Org to [[https://revealjs.com/][Reveal.js]].
+
+** Running the Presentation
+
+From the reveal.js directory (=../reveal.js=), run:
+
+#+begin_src shell :noeval :exports code
+npm start -- --root=../
+#+end_src
+
+Then navigate to [[http://localhost:8000/csi-year2]].
+
+* CSS                                                              :noexport:
+** Symlink to =~/org/fonts=
+
+#+begin_src emacs-lisp :results none :export none :eval yes
+(dired-make-relative-symlink "../../fonts" "fonts" t)
+#+end_src
+
+** Typography
+
+Define some fonts. Useful info [[https://www.digitalocean.com/community/tutorials/how-to-load-and-use-custom-fonts-with-css#loading-a-self-hosted-font-with-font-face][here]].
+
+#+begin_src css
+@font-face {
+    font-family: "MyMinion";
+    src:
+        local("MinionPro-Regular"),
+        url("fonts/minionpro/MinionPro-Regular.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-It.otf") format("opentype");
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-Semibold.otf") format("opentype");
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-Bold.otf") format("opentype");
+    font-weight: 800;
+    font-style: normal;
+}
+#+end_src
+
+Now override some of reveal's variables.
+
+#+begin_src css
+:root {
+    --r-main-font: "MyMinion";
+    --r-main-font-size: 42px;
+    --r-heading-font: "MyMinion";
+    --r-code-font: "Iosevka Comfy Motion";
+    --r-heading-text-transform: none;
+}
+#+end_src
+
+*** Headings
+
+Decorate my h2's and h3's.
+
+#+begin_src css
+.stack h2, .stack h3 {
+    text-decoration: underline 3px #bbb;
+}
+#+end_src
+
+*** Figures
+
+#+begin_src css
+.reveal figure {
+    margin-top: 0;
+}
+#+end_src
+
+*** Use old style numbers
+
+#+begin_src css
+body {
+    font-variant-numeric: oldstyle-nums;
+}
+#+end_src
+
+But not in code blocks
+
+#+begin_src css
+.reveal pre {
+    font-variant-numeric: normal;
+}
+#+end_src
+
+*** Font size utility classes
+
+Captions
+
+#+begin_src css
+.caption {
+    font-size: .6em;
+}
+#+end_src
+
+Big equations
+
+#+begin_src css
+.big-eqn {
+    font-size: 1.5em;
+}
+
+.huge-eqn {
+    font-size: 2em;
+}
+#+end_src
+
+** Code blocks
+
+Improve code block appearance.
+
+#+begin_src css
+.reveal pre {
+    padding: 1em;
+    width: 66.6%;
+    box-shadow: none;
+    background: #efefef;
+    font-size: .7em;
+}
+#+end_src
+
+** Tables
+
+#+begin_src css
+.reveal table th, .reveal table td {
+    text-align: center;
+}
+
+.reveal table td {
+    border: none;
+}
+#+end_src
+
+* Figures                                                          :noexport:
+:PROPERTIES:
+:header-args: :tangle csid3figs.sty :results silent :noeval
+:END:
+
+Let's re-use some figures from last year's SMC presentation.
+
+** Setup
+
+#+begin_src latex
+\ProvidesPackage{csid3figs}
+\usepackage{tikz}
+\usetikzlibrary{shapes, positioning, arrows.meta}
+\usepackage{fontspec}
+\setmainfont[
+  Mapping={tex-text}, 
+  Numbers={OldStyle},
+  Ligatures={Common},
+  UprightFont=*-Regular,
+  BoldFont=*-Bold,
+  BoldItalicFont=*-BoldIt,
+  ItalicFont=*-It,
+  FontFace={sb}{n}{*-Semibold},
+  FontFace={sb}{it}{*-SemiboldIt}
+]{MinionPro}
+#+end_src
+
+
+** WFS
+
+Bits with which to draw WFS diagrams.
+
+#+begin_src latex
+\definecolor{wfsptpWaveColour}{HTML}{4077D6}
+\newcommand*{\wfsptpWaveSpace}{.89}
+\newcommand*{\wfsptpWidth}{8}
+\newcommand*{\wfsptpNumWaves}{5}
+\newcommand*{\wfsptpNumSecondary}{16}
+\newcommand*{\wfsptpNumMCU}{8}
+
+\tikzset{
+  halfSecondaryWavefronts/.pic={
+    \foreach \pos/\rad in {0/.18, 1/.615, 2/1.03, 3/1.42, 4/1.78, 5/2.07, 6/2.295, 7/2.42}
+    \draw [black!40, thick] (.25+.5*\pos, 0) circle (\rad);
+  },
+  secondaryWavefronts/.pic={
+    \clip (0, 0) rectangle (\wfsptpWidth, 2.5);
+    \pic {halfSecondaryWavefronts};
+    \pic [xscale=-1] at (\wfsptpWidth, 0) {halfSecondaryWavefronts};
+  },
+  secondaryWavefrontsAsync/.pic={
+    \clip (0, 0) rectangle (\wfsptpWidth, 2.5);
+    \foreach \pos/\rad in {0/.18, 1/.615,
+      2/0.83, 3/1.22,
+      4/1.88, 5/2.17,
+      6/1.295, 7/1.42,
+      8/1.72, 9/1.595,
+      10/0.41, 11/0.12,
+      12/1.42, 13/1.03,
+      14/0, 15/0}
+    \draw [black!40, thick] (.25+.5*\pos, 0) circle (\rad);
+  },
+  realWavefronts/.pic={
+    \clip (0, 0) rectangle (\wfsptpWidth, 2.5);
+    \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,\wfsptpNumWaves}
+    \draw [thick, wfsptpWaveColour] (\wfsptpWidth/2-\rad, -2) arc [radius=\rad, start angle=180, end angle=0];
+  },
+  virtualWavefronts/.pic={
+    \clip (-1, 0) rectangle (2*\wfsptpWaveSpace*\wfsptpNumWaves, 2);
+    \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,\wfsptpNumWaves}
+    \draw [thick, dashed, wfsptpWaveColour] (\wfsptpWidth/2-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
+  },
+  speaker/.pic={
+    \path [draw=black, fill=white] (-.11, 0) rectangle (.11, .06);
+    \path [draw=black, fill=white] (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
+  },
+  speakers/.pic={
+    \foreach \i [
+      evaluate=\i as \secondary using
+      .25+(\i-1)*(\wfsptpWidth/\wfsptpNumSecondary)
+    ] in {1,...,\wfsptpNumSecondary} {
+      \pic at (\secondary, 0) {speaker};
+    }
+  },
+  mcu/.pic = {
+    \node [draw, fill=black!10, font={\scriptsize}, rounded corners=1mm, inner xsep=1.5mm] {dWFS};
+  },
+  mcus/.pic = {
+    \foreach \i [
+      evaluate=\i as \xpos using .5+(\i-1)
+    ] in {1,...,\wfsptpNumMCU}
+    \pic at (\xpos, 0) {mcu};
+  },
+  wfs/.pic = {
+    \node [minimum width=\wfsptpWidth{}cm, draw, fill=black!10, rounded corners=1mm] at (\wfsptpWidth/2, -.44) {WFS};
+  },
+  primary/.pic = {
+    \node [circle, draw=wfsptpWaveColour, fill=wfsptpWaveColour!50, thick] (primary) at (\wfsptpWidth/2, -2) {};
+  },
+  centralisedwfs/.pic = {
+    \pic {secondaryWavefronts};
+    \pic at (0, -2) {virtualWavefronts};
+    \pic {primary};
+    \pic {realWavefronts};
+    \pic at (0, -.21) {speakers};
+    \pic {wfs};
+  },
+  distributedwfs/.pic = {
+    \pic {secondaryWavefronts};
+    \pic at (0, -2) {virtualWavefronts};
+    \pic {primary}
+    \pic {realWavefronts};
+    \pic at (0, -.21) {speakers};
+    \pic at (0, -.42) {mcus};
+  },
+  asyncwfs/.pic = {
+    \pic {secondaryWavefrontsAsync};
+    \pic at (0, -2) {virtualWavefronts};
+    \pic {primary};
+    \pic at (0, -.21) {speakers};
+    \pic at (0, -.42) {mcus};
+  }
+}
+#+end_src
+
+** Ambisonics
+
+Bits with which to draw HOA diagrams.
+
+#+begin_src latex
+\definecolor{ctrlColour}{HTML}{479955}
+\definecolor{sourceColour}{HTML}{4077D6}
+
+\tikzset{
+  device/.style={draw, fill=black!10, rounded corners=1mm, inner xsep=1.5mm},
+  ctrl/.style={-{Triangle[open]}, densely dotted, ctrlColour, line width=.2mm},
+  acn/.style={-{Stealth}, sourceColour, densely dashdotted},
+  audio/.style={-{Stealth}, sourceColour},
+  ptp/.style={{Triangle}-{Triangle}},
+  legend/.style={font=\tiny\itshape},
+  module/.style={device, fill=ctrlColour!35, font={\footnotesize}, transform shape},
+  speakerhoa/.pic = {
+    \draw [fill=black] (-.11, 0) rectangle (.11, .06);
+    \draw [fill=black] (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
+    \node (-body) at (0, 0) {};   % invisible anchor node
+  },
+  moduleN/.pic = {
+    \node [module] (-body) {dHOA};
+    \draw [ptp] (0, .6) -- (-body.north);
+    \draw [acn] (-.25, .6) -- ([xshift=-.25cm]-body.north);
+    \draw [ctrl] (.25, .6) -- ([xshift=.25cm]-body.north);
+  },
+  moduleS/.pic = {
+    \node [module] (-body) {dHOA};
+    \draw [ptp] (0, -.6) -- (-body.south);
+    \draw [acn] (-.25, -.6) -- ([xshift=-.25cm]-body.south);
+    \draw [ctrl] (.25, -.6) -- ([xshift=.25cm]-body.south);
+  },
+  distributedhoa/.pic={
+    % Synthesised soundfield
+    \draw [thick] (-4, -4) rectangle (4, 4);
+    % Azymuthal rings
+    \draw [dashed, black!30] (0, 0) circle (3.5);
+    \draw [dashed, black!30] (0, 0) circle (2.8);
+    \draw [dashed, black!30] (0, 0) circle (1.9);
+    \draw [dashed, black!30] (0, 0) circle (.8);
+    % Speakers, ring 0
+    \pic [rotate=180] (speaker0) at (0, 3.7) {speakerhoa};
+    \pic [rotate=90] (speaker1) at (3.7, 0) {speakerhoa};
+    \pic (speaker2) at (0, -3.7) {speakerhoa};
+    \pic [rotate=-90] (speaker3) at (-3.7, 0) {speakerhoa};
+    % Speakers, ring 1
+    \pic [rotate=225] (speaker4) at (-2.1, 2.1) {speakerhoa};
+    \pic [rotate=135] (speaker5) at (2.1, 2.1) {speakerhoa};
+    \pic [rotate=45] (speaker6) at (2.1, -2.1) {speakerhoa};
+    \pic [rotate=-45] (speaker7) at (-2.1, -2.1) {speakerhoa};
+    % Speakers, ring 2
+    \pic [rotate=180] (speaker8) at (0, 2.1) {speakerhoa};
+    \pic [rotate=90] (speaker9) at (2.1, 0) {speakerhoa};
+    \pic (speaker10) at (0, -2.1) {speakerhoa};
+    \pic [rotate=-90] (speaker11) at (-2.1, 0) {speakerhoa};
+    % Speakers, ring 3
+    \pic [rotate=225] (speaker12) at (-.7, .7) {speakerhoa};
+    \pic [rotate=135] (speaker13) at (.7, .7) {speakerhoa};
+    \pic [rotate=45] (speaker14) at (.7, -.7) {speakerhoa};
+    \pic [rotate=-45] (speaker15) at (-.7, -.7) {speakerhoa};
+    % Modules
+    \pic [rotate=-45] (module0) at (2.7, 2.7) {moduleN};
+    \pic [rotate=-45] (module1) at (-2.7, -2.7) {moduleS};
+    \pic (module2) at (0, 3.1) {moduleS};
+    \pic (module3) at (0, -3.1) {moduleN};
+    \pic (module4) [rotate=-45] at (1.55, 1.55) {moduleS};
+    \pic (module5) [rotate=-45] at (-1.55, -1.55) {moduleN};
+    \pic (module6) at (0, 1.1) {moduleN};
+    \pic (module7) at (0, -1.1) {moduleS};
+    % Audio
+    \draw [audio] (module0-body.west) -- (speaker0-body.east);
+    \draw [audio] (module0-body.east) -- ([yshift=.125cm, xshift=.1cm]speaker1-body.west);
+    \draw [audio] (module1-body.east) -- (speaker2-body.west);
+    \draw [audio] (module1-body.west) -- ([yshift=-.125cm, xshift=-.1cm]speaker3-body.east);
+    \draw [audio] (module2-body.west) -- ([yshift=.05cm]speaker4-body.east);
+    \draw [audio] (module2-body.east) -- ([yshift=.05cm]speaker5-body.west);
+    \draw [audio] (module3-body.east) -- ([yshift=-.05cm]speaker6-body.west);
+    \draw [audio] (module3-body.west) -- ([yshift=-.05cm]speaker7-body.east);
+    \draw [audio] (module4-body.west) -- (speaker8-body.east);
+    \draw [audio] (module4-body.east) -- ([yshift=.125cm, xshift=.1cm]speaker9-body.west);
+    \draw [audio] (module5-body.east) -- (speaker10-body.west);
+    \draw [audio] (module5-body.west) -- ([yshift=-.125cm, xshift=-.1cm]speaker11-body.east);
+    \draw [audio] (module6-body.west) -- (speaker12-body.east);
+    \draw [audio] (module6-body.east) -- (speaker13-body.west);
+    \draw [audio] (module7-body.east) -- (speaker14-body.west);
+    \draw [audio] (module7-body.west) -- (speaker15-body.east);
+  }
+}
+#+end_src
+
+* Agenda
+#+ATTR_REVEAL: :frag (appear)
+- Recap: broad research goals
+- Elimination of clock drift
+- The /Ananas/ protocol
+- Outlook and aims
+
+* Recap
+
+** Recap
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_quote
+To create spatial audio systems that are more accessible than the
+state of the art.
+#+end_quote
+
+** Recap
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_quote
+To create spatial audio systems that are more accessible than the
+state of the art.
+#+end_quote
+
+#+begin_quote
+To use networks of embedded devices to create spatial audio systems
+that cost less, and are more flexible than, state of the art
+installations.
+#+end_quote
+
+** Recap
+
+*** Centralised spatial audio systems
+
+#+header: :exports results :results file raw :file "./images/gen/centralisedwfs.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{csid3figs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic{centralisedwfs};
+\end{tikzpicture}
+#+end_src
+#+attr_org: :width 250
+#+RESULTS:
+[[file:./images/gen/centralisedwfs.png]]
+
+*** Centralised spatial audio systems
+
+#+header: :exports results :results file raw :file "./images/gen/centralisedhoa.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{csid3figs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic{centralisedhoa};
+\end{tikzpicture}
+#+end_src
+#+attr_org: :width 300
+#+RESULTS:
+[[file:./images/gen/centralisedhoa.png]]
+
+*** Distributed spatial audio systems
+
+*** Distributed spatial audio systems
+
+#+header: :exports results :results file raw :file "./images/gen/distributedhoa.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{csid3figs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic{distributedhoa};
+\end{tikzpicture}
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 800
+#+RESULTS:
+[[file:./images/gen/distributedhoa.png]]
+
+* Thank You
+:PROPERTIES:
+:reveal_background: #141414
+:END:
+
+* Local Variables                                                  :noexport:
+
+#+begin_example
+Local Variables:
+org-babel-min-lines-for-block-output: 0
+org-latex-compiler: "xelatex"
+End:
+#+end_example

@@ -7,7 +7,7 @@
 * Summary
 
 The authors present /Machine Inquieta/, a novel digital instrument based
-on a principle of "persistent mustistability"; essentially this is a
+on a principle of "persistent multistability"; essentially this is a
 feedback instrument based on four interconnected synthesis units each
 driven by what appears to be a modest neural network. Framing their
 machine learning approach as one of /Small-Data/ and resistance to the
