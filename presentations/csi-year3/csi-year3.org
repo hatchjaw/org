@@ -467,6 +467,44 @@ Bits with which to draw HOA diagrams.
 }
 #+end_src
 
+** PTP
+
+#+begin_src latex
+\tikzset{
+  role/.style={align=center, draw, inner sep=1mm, minimum height=1cm, rounded corners=.5mm},
+  authorityMsg/.style={midway, above=-1mm, rotate=-13},
+  subscriberMsg/.style={midway, above=-1mm, rotate=13},
+  ptp/.pic={
+    \node (auth) [role] at (0, 0) {Clock\\authority};
+    \draw [-{Stealth}] (auth.south) -- +(0, -6.5);
+    \node (sub) [role, right = 2cm of auth] {Clock\\subscriber};
+    \draw [-{Stealth}] (sub.south) -- +(0, -6.5);
+    
+    \node (t1) [below left=2mm and -8mm of auth] {\(t_{1}\)};
+    
+    \draw [-{Stealth}] ([yshift=-5.5mm]auth.south) -- ([yshift=-13.5mm]sub.south) node [authorityMsg] {\ultratiny{Sync}};
+    \draw [-{Stealth}] ([yshift=-10.5mm]auth.south) -- ([yshift=-18.5mm]sub.south) node [authorityMsg] {\ultratiny{FollowUp [\(t_{1}\)]}};
+
+    \node (t2) [below right=11mm and -8mm of sub] {\(t_{2}\)};
+
+    \node (t3) [below right=21.5mm and -8mm of sub] {\(t_{3}\)};
+
+    \draw [-{Stealth}] ([yshift=-24mm]sub.south) -- ([yshift=-32mm]auth.south) node [subscriberMsg] {\ultratiny{DelayReq}};
+
+    \node (t4) [below left=29mm and -8mm of auth] {\(t_{4}\)};
+
+    \draw [-{Stealth}] ([yshift=-36mm]auth.south) -- ([yshift=-44mm]sub.south) node [authorityMsg] {\ultratiny{DelayResp [\(t_{4}\)]}};
+
+    \node (t11) [below left=43mm and -8mm of auth] {\(t'_{1}\)};
+    
+    \draw [-{Stealth}] ([yshift=-47mm]auth.south) -- ([yshift=-55mm]sub.south) node [authorityMsg] {\ultratiny{Sync}};
+    \draw [-{Stealth}] ([yshift=-52mm]auth.south) -- ([yshift=-60mm]sub.south) node [authorityMsg] {\ultratiny{FollowUp [\(t'_{1}\)]}};
+
+    \node (t21) [below right=52mm and -8mm of sub] {\(t'_{2}\)};
+  }
+}
+#+end_src
+
 * Agenda
 #+ATTR_REVEAL: :frag (appear)
 - Recap: broad research goals
@@ -596,7 +634,192 @@ art installations.
 #+RESULTS:
 [[file:./images/gen/asyncwfs.png]]
 
-If devices are not synchronised, the synthesised soundfield will be destroyed
+If devices are not synchronised, the synthesised soundfield will be destroyed.
+
+* Time Exchange
+
+** IEEE 1588 Precision Time Protocol
+
+#+header: :exports results :results file raw :file "./images/gen/ptp.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{csid3figs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic{ptp};
+\end{tikzpicture}
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 500
+#+RESULTS:
+[[file:./images/gen/ptp.png]]
+
+** IEEE 1588 Precision Time Protocol
+
+#+ATTR_REVEAL: :frag (appear)
+- For best accuracy, requires physical-layer timestamping
+- Devices with such support tend to be expensive
+- Some rare exceptions do exist
+
+#+ATTR_REVEAL: :frag (appear)
+|[[./images/switch.png]]|[[./images/t41.png]]|
+
+** The Teensy 4.1 microcontroller development board
+
+[[./images/t41.png]]
+
+#+ATTR_REVEAL: :frag (appear)
+- PTP Support
+- Dedicated audio subsystem
+- High-resolution audio clock divider registers
+- Less than € 50 with audio and ethernet add-ons
+- Programmable in Faust
+
+
+** Elimination of clock drift
+
+#+ATTR_REVEAL: :frag (appear)
+- At the time of the previous CSI we had a system exhibiting some
+  residual /parts per billion/ clock drift.
+- This ppb drift appeared to be inversely proportional to the raw,
+  unconditioned drift.
+
+
+** Elimination of clock drift
+
+#+begin_src julia :session drifty :results none :exports none
+using CSV, DataFrames, Plots
+
+data = CSV.read(
+    "../../notes/20241218T154907--teensy-ptp-drift-measurements-data__data_ptp_teensy.csv", DataFrame;
+    limit=600
+)
+
+function plotDrift(dataCategory, plotFilepath)
+    scalefontsizes(1.25)
+    t41lastBytes = [191, 203, 234]
+    plot(legendtitle="IP address",
+         yformatter=:scientific,
+         size=(900,600),
+         margin=5Plots.mm,
+         fontfamily="Minion Pro Regular");
+    xlabel!("Time (s)")
+    ylabel!("Offset (s)");
+    for b in t41lastBytes
+        column = data[!, "$b-$dataCategory"]
+        # Remove initial offset
+        column .= column .- column[1]
+        # Prevent `noptp` data for client 191 from wrapping. 
+        if b == 191 && dataCategory == "noptp"
+            column[391:end] .= column[391:end] .+ (column[390] - column[391])
+        end
+        plot!(column, label="...48.$b", linewidth=2)
+    end
+
+    savefig(plotFilepath)
+    scalefontsizes()
+end
+#+end_src
+
+#+begin_src julia :session drifty :results file graphics :file noptp.png :output-dir ./images/gen :exports none
+plotDrift("noptp", "images/gen/noptp.png")
+#+end_src
+#+attr_org: :width 100
+#+RESULTS:
+[[file:./images/gen/noptp.png]]
+
+#+begin_src julia :session drifty :results file graphics :file withptp.png :output-dir ./images/gen :exports none
+plotDrift("ptp", "images/gen/withptp.png")
+#+end_src
+#+attr_org: :width 100
+#+RESULTS:
+[[file:./images/gen/withptp.png]]
+
+|[[./images/gen/noptp.png]]|[[./images/gen/withptp.png]]|
+
+** Elimination of clock drift
+
+#+ATTR_REVEAL: :frag (appear)
+- Observing this apparent inverse proportionality, I tried to correct
+  for it.
+- My attempts were unsuccessful.
+- Solution: take a reference /nanoseconds/ figure on audio subsystem
+  startup and compare with it once per second, computing an additional
+  correction to apply alongside PTP-derived correction.
+
+
+** Elimination of clock drift
+
+#+begin_src julia :results file graphics :file synchro.png :output-dir ./images/gen :exports results
+using CSV, DataFrames, Plots, LaTeXStrings, Statistics
+
+# The number of datapoints, i.e. seconds, to plot
+numData = 3600
+
+# Read the data. Limit to 3600 data points, i.e. 1 hour's worth.
+data = CSV.read(
+"../../notes/20260303T221301--ananas-synchronicity-measurements-data__ananas_data_teensy.csv",
+    DataFrame,
+    limit=numData + 1
+)
+
+# Remove the initial offset (using I2S3 as the reference)
+data = data .- data[1, 3]
+# Calculate the range of offsets, i.e. the group asynchronicity, for
+# each point in time.
+groupAsync = maximum(Matrix(data), dims=2) - minimum(Matrix(data), dims=2)
+meanAsync = mean(groupAsync)
+
+# Create a vector of x values to plot against, i.e. seconds
+x = 0:numData
+plot(
+    # Data
+    x,
+    Matrix(data),
+    # Size
+    size=(1800, 600),
+    # Labels
+    xlabel="Time (s)",
+    ylabel="Offset (ns)",
+    label=permutedims(names(data)),
+    # Styling
+    fontfamily="Minion Pro Regular",
+    margin=10Plots.mm,
+    gridlinewidth=2,
+    linewidth=1.5,
+    guidefontsize=18,
+    tickfontsize=12,
+    legendfontsize=11,
+    xlims=(-numData * .005, numData * 1.005),
+    # Y formatter
+    yformatter=y -> string(Int(round(y / 10.0^-9)))
+)
+
+# Plot the mean offset too
+plot!(x, groupAsync, label="Group asynchronicity", linewidth=2, c=:red)
+
+hline!([meanAsync],
+       label="Mean asynchronicity",
+       linewidth=3,
+       linestyle=:dot,
+       c=:black)
+
+savefig("./images/gen/synchro.png")
+#+end_src
+#+attr_html: :width 1200
+#+RESULTS:
+[[file:./images/gen/synchro.png]]
+
+
+* The /Ananas/ protocol
+
+** The /Ananas/ protocol
+
+#+ATTR_REVEAL: :frag (appear)
+- /"Ananas necessitates another networked audio system"/
+- A protocol for networked audio and control data transmission, plus
+  device discovery and synchronisation
+- Also a system of supporting software: audio plugins and
+  microcontroller firmware
 
 * Thank You
 :PROPERTIES:
