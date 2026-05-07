@@ -204,13 +204,28 @@ Let's re-use some figures from last year's SMC presentation.
 ]{MinionPro}
 #+end_src
 
+** Common stuff
+
+#+begin_src latex
+\definecolor{ctrlColour}{HTML}{479955}
+\definecolor{audioColour}{HTML}{4077D6}
+
+\tikzset{
+  device/.style={draw, fill=black!10, rounded corners=1mm, inner xsep=1.5mm},
+  ctrl/.style={-{Triangle[open]}, densely dotted, ctrlColour, line width=.2mm},
+  acn/.style={-{Stealth}, audioColour, densely dashdotted},
+  audio/.style={-{Stealth}, audioColour},
+  ptp/.style={{Triangle}-{Triangle}},
+  legend/.style={font=\tiny\itshape},
+  module/.style={device, fill=ctrlColour!35, font={\scriptsize}, transform shape},
+}
+#+end_src
 
 ** WFS
 
 Bits with which to draw WFS diagrams.
 
 #+begin_src latex
-\definecolor{wfsptpWaveColour}{HTML}{4077D6}
 \newcommand*{\wfsptpWaveSpace}{.89}
 \newcommand*{\wfsptpWidth}{8}
 \newcommand*{\wfsptpNumWaves}{5}
@@ -220,7 +235,7 @@ Bits with which to draw WFS diagrams.
 \tikzset{
   halfSecondaryWavefronts/.pic={
     \foreach \pos/\rad in {0/.18, 1/.615, 2/1.03, 3/1.42, 4/1.78, 5/2.07, 6/2.295, 7/2.42}
-    \draw [black!40, thick] (.25+.5*\pos, 0) circle (\rad);
+    \draw [black!40] (.25+.5*\pos, 0) circle (\rad);
   },
   secondaryWavefronts/.pic={
     \clip (0, 0) rectangle (\wfsptpWidth, 2.5);
@@ -237,17 +252,17 @@ Bits with which to draw WFS diagrams.
       10/0.41, 11/0.12,
       12/1.42, 13/1.03,
       14/0, 15/0}
-    \draw [black!40, thick] (.25+.5*\pos, 0) circle (\rad);
+    \draw [black!40] (.25+.5*\pos, 0) circle (\rad);
   },
   realWavefronts/.pic={
     \clip (0, 0) rectangle (\wfsptpWidth, 2.5);
     \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,\wfsptpNumWaves}
-    \draw [thick, wfsptpWaveColour] (\wfsptpWidth/2-\rad, -2) arc [radius=\rad, start angle=180, end angle=0];
+    \draw [thick, audioColour] (\wfsptpWidth/2-\rad, -2) arc [radius=\rad, start angle=180, end angle=0];
   },
   virtualWavefronts/.pic={
     \clip (-1, 0) rectangle (2*\wfsptpWaveSpace*\wfsptpNumWaves, 2);
     \foreach \i [evaluate=\i as \rad using \i*\wfsptpWaveSpace] in {1,...,\wfsptpNumWaves}
-    \draw [thick, dashed, wfsptpWaveColour] (\wfsptpWidth/2-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
+    \draw [thick, dashed, audioColour] (\wfsptpWidth/2-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
   },
   speaker/.pic={
     \path [draw=black, fill=white] (-.11, 0) rectangle (.11, .06);
@@ -262,7 +277,10 @@ Bits with which to draw WFS diagrams.
     }
   },
   mcu/.pic = {
-    \node [draw, fill=black!10, font={\scriptsize}, rounded corners=1mm, inner xsep=1.5mm] {dWFS};
+    \node [module] (-body) {dWFS};
+    \draw [ptp] (0, -.6) -- (-body.south);
+    \draw [audio] (-.25, -.6) -- ([xshift=-.25cm]-body.south);
+    \draw [ctrl] (.25, -.6) -- ([xshift=.25cm]-body.south);
   },
   mcus/.pic = {
     \foreach \i [
@@ -271,10 +289,11 @@ Bits with which to draw WFS diagrams.
     \pic at (\xpos, 0) {mcu};
   },
   wfs/.pic = {
-    \node [minimum width=\wfsptpWidth{}cm, draw, fill=black!10, rounded corners=1mm] at (\wfsptpWidth/2, -.44) {WFS};
+    \node [minimum width=\wfsptpWidth{}cm, draw, fill=black!10, rounded corners=1mm] (wfs) at (\wfsptpWidth/2, -.44) {WFS};
+    \draw [audio] (\wfsptpWidth/2, -1) -- (wfs.south)
   },
   primary/.pic = {
-    \node [circle, draw=wfsptpWaveColour, fill=wfsptpWaveColour!50, thick] (primary) at (\wfsptpWidth/2, -2) {};
+    \node [circle, draw=audioColour, fill=audioColour!50, thick] (primary) at (\wfsptpWidth/2, -2) {};
   },
   centralisedwfs/.pic = {
     \pic {secondaryWavefronts};
@@ -307,20 +326,10 @@ Bits with which to draw WFS diagrams.
 Bits with which to draw HOA diagrams.
 
 #+begin_src latex
-\definecolor{ctrlColour}{HTML}{479955}
-\definecolor{sourceColour}{HTML}{4077D6}
-
 \tikzset{
-  device/.style={draw, fill=black!10, rounded corners=1mm, inner xsep=1.5mm},
-  ctrl/.style={-{Triangle[open]}, densely dotted, ctrlColour, line width=.2mm},
-  acn/.style={-{Stealth}, sourceColour, densely dashdotted},
-  audio/.style={-{Stealth}, sourceColour},
-  ptp/.style={{Triangle}-{Triangle}},
-  legend/.style={font=\tiny\itshape},
-  module/.style={device, fill=ctrlColour!35, font={\footnotesize}, transform shape},
   speakerhoa/.pic = {
-    \draw [fill=black] (-.11, 0) rectangle (.11, .06);
-    \draw [fill=black] (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
+    \draw (-.11, 0) rectangle (.11, .06);
+    \draw (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
     \node (-body) at (0, 0) {};   % invisible anchor node
   },
   moduleN/.pic = {
@@ -335,9 +344,7 @@ Bits with which to draw HOA diagrams.
     \draw [acn] (-.25, -.6) -- ([xshift=-.25cm]-body.south);
     \draw [ctrl] (.25, -.6) -- ([xshift=.25cm]-body.south);
   },
-  distributedhoa/.pic={
-    % Synthesised soundfield
-    \draw [thick] (-4, -4) rectangle (4, 4);
+  hoa/.pic={
     % Azymuthal rings
     \draw [dashed, black!30] (0, 0) circle (3.5);
     \draw [dashed, black!30] (0, 0) circle (2.8);
@@ -349,10 +356,10 @@ Bits with which to draw HOA diagrams.
     \pic (speaker2) at (0, -3.7) {speakerhoa};
     \pic [rotate=-90] (speaker3) at (-3.7, 0) {speakerhoa};
     % Speakers, ring 1
-    \pic [rotate=225] (speaker4) at (-2.1, 2.1) {speakerhoa};
-    \pic [rotate=135] (speaker5) at (2.1, 2.1) {speakerhoa};
-    \pic [rotate=45] (speaker6) at (2.1, -2.1) {speakerhoa};
-    \pic [rotate=-45] (speaker7) at (-2.1, -2.1) {speakerhoa};
+    \pic [rotate=225] (speaker4) at (-2.125, 2.125) {speakerhoa};
+    \pic [rotate=135] (speaker5) at (2.125, 2.125) {speakerhoa};
+    \pic [rotate=45] (speaker6) at (2.125, -2.125) {speakerhoa};
+    \pic [rotate=-45] (speaker7) at (-2.125, -2.125) {speakerhoa};
     % Speakers, ring 2
     \pic [rotate=180] (speaker8) at (0, 2.1) {speakerhoa};
     \pic [rotate=90] (speaker9) at (2.1, 0) {speakerhoa};
@@ -363,6 +370,65 @@ Bits with which to draw HOA diagrams.
     \pic [rotate=135] (speaker13) at (.7, .7) {speakerhoa};
     \pic [rotate=45] (speaker14) at (.7, -.7) {speakerhoa};
     \pic [rotate=-45] (speaker15) at (-.7, -.7) {speakerhoa};
+  },
+  centralisedhoa/.pic={
+    \pic{hoa};
+    \node (hoa) [device] at (-2.75, 3.75) {HOA};
+    \draw [audio] (hoa.south) -- ++(0,-.15) -- ++(-1.5,0) -- ++(0, -.3);
+    \draw [audio] (hoa.south) -- ++(0,-.15) -- ++(-1.3,0) -- ++(0, -.3);
+    \draw [audio] (hoa.south) -- ++(0,-.15) -- ++(-1.1,0) -- ++(0, -.3);
+    \draw [audio] (hoa.south) -- ++(0,-.15) -- ++(-.9,0) -- ++(0, -.3);
+    \draw [audio] (hoa.south) -- ++(0,-.15) -- ++(-.7,0) -- ++(0, -.3);
+    \draw [audio] (hoa.south) -- ++(0,-.15) -- ++(-.5,0) -- ++(0, -.3);
+    \draw [audio] (hoa.south) -- ++(0,-.15) -- ++(-.3,0) -- ++(0, -.3);
+    \draw [audio] (hoa.south) -- ++(0,-.15) -- ++(-.1,0) -- ++(0, -.3);
+    \draw [audio] (hoa.south) -- ++(0,-.15) -- ++(.1,0) -- ++(0, -.3);
+    \draw [audio] (hoa.south) -- ++(0,-.15) -- ++(.3,0) -- ++(0, -.3);
+    \draw [audio] (hoa.south) -- ++(0,-.15) -- ++(.5,0) -- ++(0, -.3);
+    \draw [audio] (hoa.south) -- ++(0,-.15) -- ++(.7,0) -- ++(0, -.3);
+    \draw [audio] (hoa.south) -- ++(0,-.15) -- ++(.9,0) -- ++(0, -.3);
+    \draw [audio] (hoa.south) -- ++(0,-.15) -- ++(1.1,0) -- ++(0, -.3);
+    \draw [audio] (hoa.south) -- ++(0,-.15) -- ++(1.3,0) -- ++(0, -.3);
+    \draw [audio] (hoa.south) -- ++(0,-.15) -- ++(1.5,0) -- ++(0, -.3);
+    % Speaker feeds, ring 0
+    \draw [audio] ([yshift=.25cm]speaker0-body.north) --
+    ([yshift=-.1cm]speaker0-body.north);
+    \draw [audio] ([xshift=.25cm]speaker1-body.east) --
+    ([xshift=-.1cm]speaker1-body.east);
+    \draw [audio] ([yshift=-.25cm]speaker2-body.south) --
+    ([yshift=.1cm]speaker2-body.south);
+    \draw [audio] ([xshift=-.25cm]speaker3-body.west) --
+    ([xshift=.1cm]speaker3-body.west);
+    % Speaker feeds, ring 1
+    \draw [audio] ([xshift=-.33cm,yshift=.25cm]speaker4-body.northwest)
+    -- ([xshift=-.1cm,yshift=0cm]speaker4-body.northwest);
+    \draw [audio] ([xshift=.16cm,yshift=.25cm]speaker5-body.northeast)
+    -- ([xshift=-.1cm,yshift=0cm]speaker5-body.northeast);
+    \draw [audio] ([xshift=.16cm,yshift=-.25cm]speaker6-body.southeast)
+    -- ([xshift=-.1cm,yshift=0cm]speaker6-body.southeast);
+    \draw [audio] ([xshift=-.33cm,yshift=-.25cm]speaker7-body.southwest)
+    -- ([xshift=-.1cm,yshift=0cm]speaker7-body.southwest);
+    % Speaker feeds, ring 2
+    \draw [audio] ([yshift=.25cm]speaker8-body.north) --
+    ([yshift=-.1cm]speaker8-body.north);
+    \draw [audio] ([xshift=.25cm]speaker9-body.east) --
+    ([xshift=-.1cm]speaker9-body.east);
+    \draw [audio] ([yshift=-.25cm]speaker10-body.south) --
+    ([yshift=.1cm]speaker10-body.south);
+    \draw [audio] ([xshift=-.25cm]speaker11-body.west) --
+    ([xshift=.1cm]speaker11-body.west);
+    % Speaker feeds, ring 3
+    \draw [audio] ([xshift=-.33cm,yshift=.25cm]speaker12-body.northwest)
+    -- ([xshift=-.1cm,yshift=0cm]speaker12-body.northwest);
+    \draw [audio] ([xshift=.16cm,yshift=.25cm]speaker13-body.northeast)
+    -- ([xshift=-.1cm, yshift=0cm]speaker13-body.northeast);
+    \draw [audio] ([xshift=.16cm,yshift=-.25cm]speaker14-body.southeast)
+    -- ([xshift=-.1cm,yshift=0cm]speaker14-body.southeast);
+    \draw [audio] ([xshift=-.33cm,yshift=-.25cm]speaker15-body.southwest)
+    -- ([xshift=-.1cm,yshift=0cm]speaker15-body.southwest);
+  },
+  distributedhoa/.pic={
+    \pic{hoa};
     % Modules
     \pic [rotate=-45] (module0) at (2.7, 2.7) {moduleN};
     \pic [rotate=-45] (module1) at (-2.7, -2.7) {moduleS};
@@ -374,17 +440,25 @@ Bits with which to draw HOA diagrams.
     \pic (module7) at (0, -1.1) {moduleS};
     % Audio
     \draw [audio] (module0-body.west) -- (speaker0-body.east);
-    \draw [audio] (module0-body.east) -- ([yshift=.125cm, xshift=.1cm]speaker1-body.west);
+    \draw [audio] (module0-body.east) --
+    ([yshift=.125cm, xshift=.1cm]speaker1-body.west);
     \draw [audio] (module1-body.east) -- (speaker2-body.west);
-    \draw [audio] (module1-body.west) -- ([yshift=-.125cm, xshift=-.1cm]speaker3-body.east);
-    \draw [audio] (module2-body.west) -- ([yshift=.05cm]speaker4-body.east);
-    \draw [audio] (module2-body.east) -- ([yshift=.05cm]speaker5-body.west);
-    \draw [audio] (module3-body.east) -- ([yshift=-.05cm]speaker6-body.west);
-    \draw [audio] (module3-body.west) -- ([yshift=-.05cm]speaker7-body.east);
+    \draw [audio] (module1-body.west) --
+    ([yshift=-.125cm, xshift=-.1cm]speaker3-body.east);
+    \draw [audio] (module2-body.west) --
+    ([yshift=.05cm]speaker4-body.east);
+    \draw [audio] (module2-body.east) --
+    ([yshift=.05cm]speaker5-body.west);
+    \draw [audio] (module3-body.east) --
+    ([yshift=-.05cm]speaker6-body.west);
+    \draw [audio] (module3-body.west) --
+    ([yshift=-.05cm]speaker7-body.east);
     \draw [audio] (module4-body.west) -- (speaker8-body.east);
-    \draw [audio] (module4-body.east) -- ([yshift=.125cm, xshift=.1cm]speaker9-body.west);
+    \draw [audio] (module4-body.east) --
+    ([yshift=.125cm, xshift=.1cm]speaker9-body.west);
     \draw [audio] (module5-body.east) -- (speaker10-body.west);
-    \draw [audio] (module5-body.west) -- ([yshift=-.125cm, xshift=-.1cm]speaker11-body.east);
+    \draw [audio] (module5-body.west) --
+    ([yshift=-.125cm, xshift=-.1cm]speaker11-body.east);
     \draw [audio] (module6-body.west) -- (speaker12-body.east);
     \draw [audio] (module6-body.east) -- (speaker13-body.west);
     \draw [audio] (module7-body.east) -- (speaker14-body.west);
@@ -423,9 +497,9 @@ state of the art.
 #+end_quote
 
 #+begin_quote
-To use networks of embedded devices to create spatial audio systems
-that cost less, and are more flexible than, state of the art
-installations.
+To use a network of distributed signal processors to create spatial
+audio systems that cost less, and are more flexible than, state of the
+art installations.
 #+end_quote
 
 ** Recap
@@ -440,9 +514,14 @@ installations.
   \pic{centralisedwfs};
 \end{tikzpicture}
 #+end_src
-#+attr_org: :width 250
+#+attr_org: :width 300
+#+attr_html: :width 800
 #+RESULTS:
 [[file:./images/gen/centralisedwfs.png]]
+
+#+ATTR_REVEAL: :frag (appear)
+- A single, monolithic system of hardware and software
+- Typically costly, single-purpose, in-situ
 
 *** Centralised spatial audio systems
 
@@ -455,10 +534,33 @@ installations.
 \end{tikzpicture}
 #+end_src
 #+attr_org: :width 300
+#+attr_html: :width 600
 #+RESULTS:
 [[file:./images/gen/centralisedhoa.png]]
 
+#+ATTR_REVEAL: :frag (appear)
+- Scales poorly; expensive to scale up
+- Requires a powerful, centralised DSP system
+
 *** Distributed spatial audio systems
+
+#+header: :exports results :results file raw :file "./images/gen/distributedwfs.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{csid3figs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic{distributedwfs};
+\end{tikzpicture}
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 800
+#+RESULTS:
+[[file:./images/gen/distributedwfs.png]]
+
+#+ATTR_REVEAL: :frag (appear)
+- A network of signal processors combining to produce an immersive
+  auditory environment
+- Lower cost-per-channel
 
 *** Distributed spatial audio systems
 
@@ -471,9 +573,30 @@ installations.
 \end{tikzpicture}
 #+end_src
 #+attr_org: :width 300
-#+attr_html: :width 800
+#+attr_html: :width 600
 #+RESULTS:
 [[file:./images/gen/distributedhoa.png]]
+
+#+ATTR_REVEAL: :frag (appear)
+- Scales more easily
+- DSP is distributed; lower per-device computational demand
+
+*** The importance of synchronicity
+
+#+header: :exports results :results file raw :file "./images/gen/asyncwfs.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{csid3figs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic{asyncwfs};
+\end{tikzpicture}
+#+end_src
+#+attr_org: :width 300
+#+attr_html: :width 800
+#+RESULTS:
+[[file:./images/gen/asyncwfs.png]]
+
+If devices are not synchronised, the synthesised soundfield will be destroyed
 
 * Thank You
 :PROPERTIES:
