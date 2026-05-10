@@ -2,7 +2,7 @@
 #+subtitle: Thesis Committee --- Year 3
 #+author: Thomas Rushton
 
-#+options: num:t toc:nil
+#+options: num:nil toc:nil
 #+options: reveal_width:1500 reveal_height:1000 reveal_slide_number:c/t
 #+export_file_name: index
 #+property: header-args:css :results none :exports none :tangle ./style.css
@@ -513,6 +513,9 @@ Bits with which to draw HOA diagrams.
 - Outlook and aims
 
 * Recap
+:PROPERTIES:
+:reveal_background: #141414
+:END:
 
 ** Recap
 :PROPERTIES:
@@ -540,9 +543,10 @@ audio systems that cost less, and are more flexible than, state of the
 art installations.
 #+end_quote
 
-** Recap
-
 *** Centralised spatial audio systems
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 #+header: :exports results :results file raw :file "./images/gen/centralisedwfs.png"
 #+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
@@ -562,6 +566,9 @@ art installations.
 - Typically costly, single-purpose, in-situ
 
 *** Centralised spatial audio systems
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 #+header: :exports results :results file raw :file "./images/gen/centralisedhoa.png"
 #+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
@@ -581,6 +588,9 @@ art installations.
 - Requires a powerful, centralised DSP system
 
 *** Distributed spatial audio systems
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 #+header: :exports results :results file raw :file "./images/gen/distributedwfs.png"
 #+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
@@ -601,6 +611,9 @@ art installations.
 - Lower cost-per-channel
 
 *** Distributed spatial audio systems
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 #+header: :exports results :results file raw :file "./images/gen/distributedhoa.png"
 #+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
@@ -637,10 +650,16 @@ art installations.
 If devices are not synchronised, the synthesised soundfield will be destroyed.
 
 * Time Exchange
+:PROPERTIES:
+:reveal_background: #141414
+:END:
 
 ** IEEE 1588 Precision Time Protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
-#+header: :exports results :results file raw :file "./images/gen/ptp.png"
+#+header: :exports results :results file raw :file "./images/gen/ptpflow.png"
 #+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
 #+header: :headers '("\\usepackage{csid3figs}")
 #+begin_src latex :eval no-export
@@ -651,9 +670,12 @@ If devices are not synchronised, the synthesised soundfield will be destroyed.
 #+attr_org: :width 300
 #+attr_html: :width 500
 #+RESULTS:
-[[file:./images/gen/ptp.png]]
+[[file:./images/gen/ptpflow.png]]
 
 ** IEEE 1588 Precision Time Protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 #+ATTR_REVEAL: :frag (appear)
 - For best accuracy, requires physical-layer timestamping
@@ -664,6 +686,9 @@ If devices are not synchronised, the synthesised soundfield will be destroyed.
 |[[./images/switch.png]]|[[./images/t41.png]]|
 
 ** The Teensy 4.1 microcontroller development board
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 [[./images/t41.png]]
 
@@ -676,6 +701,9 @@ If devices are not synchronised, the synthesised soundfield will be destroyed.
 
 
 ** Elimination of clock drift
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 #+ATTR_REVEAL: :frag (appear)
 - At the time of the previous CSI we had a system exhibiting some
@@ -685,6 +713,9 @@ If devices are not synchronised, the synthesised soundfield will be destroyed.
 
 
 ** Elimination of clock drift
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 #+begin_src julia :session drifty :results none :exports none
 using CSV, DataFrames, Plots
@@ -736,7 +767,14 @@ plotDrift("ptp", "images/gen/withptp.png")
 
 |[[./images/gen/noptp.png]]|[[./images/gen/withptp.png]]|
 
+#+ATTR_REVEAL: :frag (appear)
+- Unconditioned case: ~1.5 m propagation discrepancy after ten minutes
+- Conditioned case: ~\(\frac{1}{3}\) mm propagation discrepancy
+
 ** Elimination of clock drift
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 #+ATTR_REVEAL: :frag (appear)
 - Observing this apparent inverse proportionality, I tried to correct
@@ -746,8 +784,10 @@ plotDrift("ptp", "images/gen/withptp.png")
   startup and compare with it once per second, computing an additional
   correction to apply alongside PTP-derived correction.
 
-
 ** Elimination of clock drift
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 #+begin_src julia :results file graphics :file synchro.png :output-dir ./images/gen :exports results
 using CSV, DataFrames, Plots, LaTeXStrings, Statistics
@@ -809,10 +849,17 @@ savefig("./images/gen/synchro.png")
 #+RESULTS:
 [[file:./images/gen/synchro.png]]
 
+Clients synchronised for an hour to within 100 ns on average.
 
 * The /Ananas/ protocol
+:PROPERTIES:
+:reveal_background: #141414
+:END:
 
 ** The /Ananas/ protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 #+ATTR_REVEAL: :frag (appear)
 - /"Ananas necessitates another networked audio system"/
@@ -820,6 +867,46 @@ savefig("./images/gen/synchro.png")
   device discovery and synchronisation
 - Also a system of supporting software: audio plugins and
   microcontroller firmware
+
+
+** The /Ananas/ protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_org: :width 300
+#+attr_html: :width 900
+[[./images/network-overview.png]]
+
+** The /Ananas/ protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_org: :width 300
+#+attr_html: :width 900
+[[./images/wfs-control.png]]
+
+** The /Ananas/ protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_org: :width 300
+#+attr_html: :width 500
+[[./images/59F8F47C-F6AD-4A9F-93E0-6F680A943D7E.jpg]]
+
+* Outlook and aims
+:PROPERTIES:
+:reveal_background: #141414
+:END:
+
+** Outlook and aims
+
+#+ATTR_REVEAL: :frag (appear)
+- Demonstrate a HOA system based on /Ananas/
+- Submit a paper on /Ananas/ to the Internet of Sounds Symposium
+- Write my manuscript
 
 * Thank You
 :PROPERTIES:
