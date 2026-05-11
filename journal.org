@@ -11466,3 +11466,38 @@ Seq. num.: 1  2  3  6  5  4  7  8  9
 My algorithm appears to handle both without any trouble.
 
 Entered on [2026-05-05 mar. 14:14]
+*** 2026-05-10 dimanche
+**** Abstract and bio for Turin presentation                :PRESENTATION:
+***** Accessible Spatial Audio Installations on a Network of Distributed Signal Processors
+Access to state-of-the-art spatial audio systems is limited by
+techical and economic factors, with highly multichannel audio
+interfaces and related equipment typically being very costly and
+inflexible. The rise of networked audio, embedded computing, and
+embedded audio in particular, plus the /write once, run anywhere/ model
+of the Faust programming language, mean that the technical ingredients
+exist for democratising spatial and immersive audio applications.
+
+This talk will present the technical challenges faced by the idea of
+running spatial audio algorithms in a distributed setting. The search
+for a suitable candidate hardware platform is principal amongst these,
+and is closely tied to the challenge of synchronising signal
+processors in a networked audio context. The parallelisation of wave
+field synthesis and higher order ambisonics in Faust are the main
+algorithmic challenges to be addressed. The development of a new
+networked audio protocol for time-sensitive applications is also
+discussed.
+***** Bio
+Thomas Rushton received his MSc in Sound and Music Computing at
+Aalborg University, Copenhagen. As part of this program, he worked as
+an intern with Inria's Emeraude (Embedded Programmable Audio Systems)
+research team in Villeurbanne, France, developing a distributed
+spatial audio system based on the Faust programming language, the
+Teensy 4.1 microcontroller, and the JackTrip networked audio
+protocol. He rejoined Emeraude in 2023 as began working toward a PhD
+at INSA Lyon with the tentative title /Enabling Distributed Spatial
+Audio/. His principal areas of research are accessible, distributed
+spatial audio systems and differentiable DSP, topics upon which he has
+presented at a number of conferences across Europe over the past few
+years.
+
+Entered on [2026-05-10 dim. 11:46]

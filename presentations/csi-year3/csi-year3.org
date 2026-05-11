@@ -2,7 +2,7 @@
 #+subtitle: Thesis Committee --- Year 3
 #+author: Thomas Rushton
 
-#+options: num:nil toc:nil
+#+options: num:t toc:nil
 #+options: reveal_width:1500 reveal_height:1000 reveal_slide_number:c/t
 #+export_file_name: index
 #+property: header-args:css :results none :exports none :tangle ./style.css
@@ -121,11 +121,12 @@ body {
 }
 #+end_src
 
-But not in code blocks
+But not in code blocks, and don't use ligatures.
 
 #+begin_src css
 .reveal pre {
     font-variant-numeric: normal;
+    font-variant-ligatures: none;
 }
 #+end_src
 
@@ -784,6 +785,31 @@ plotDrift("ptp", "images/gen/withptp.png")
   startup and compare with it once per second, computing an additional
   correction to apply alongside PTP-derived correction.
 
+
+** Elimination of clock drift
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_src c++
+void AudioSystemManager::audioISR() {
+  if (++numInterrupts >= interruptsPerSecond) {
+    numInterrupts = 0;
+    timespec ts{};
+    EthernetIEEE1588.readTimer(ts);
+
+    // Get a reference nanosecond figure to use for comparison.
+    if (firstInterruptNS == 0) {
+      firstInterruptNS = ts.tv_nsec;
+    }
+    
+    audioPTPOffset = ts.tv_nsec - firstInterruptNS;
+  }
+
+  //... process audio, etc.
+}
+#+end_src
+
 ** Elimination of clock drift
 :PROPERTIES:
 :reveal_extra_attr: data-auto-animate
@@ -845,6 +871,7 @@ hline!([meanAsync],
 
 savefig("./images/gen/synchro.png")
 #+end_src
+#+attr_org: :width 600
 #+attr_html: :width 1200
 #+RESULTS:
 [[file:./images/gen/synchro.png]]

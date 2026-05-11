@@ -1,0 +1,256 @@
+#+title: Accessible Spatial Audio Installations on a Network of Distributed Signal Processors
+#+author: Thomas Rushton
+
+#+options: num:t toc:nil
+#+options: reveal_width:1500 reveal_height:1000
+#+export_file_name: index
+#+property: header-args:css :results none :exports none :tangle ./style.css
+#+reveal_root: ../reveal.js
+#+reveal_theme: white_contrast_compact_verbatim_headers
+#+reveal_trans: slide
+#+reveal_min_scale: 1.0
+#+reveal_max_scale: 1.0
+#+reveal_extra_options: hash: true, fragmentInURL: true
+#+reveal_title_slide: <h1>%t</h1><h2><em>%s</em></h2><h4>%a</h4><div class="logos">
+#+reveal_title_slide: <img src="logos/insa.svg" height="100">
+#+reveal_title_slide: <img src="logos/inria.svg" height="100">
+#+reveal_title_slide: <img src="logos/citi.png" height="100"></div>
+#+reveal_title_slide_extra_attr: class="title-slide"
+#+reveal_extra_css: style.css
+
+* About This Presentation                                          :noexport:
+
+This =org= file describes my presentation for a presentation at
+Politecnico di Torino.
+
+** Dependencies
+
+- =org-re-reveal= ([[https://gitlab.com/oer/org-re-reveal/-/tree/main][gitlab]]), which enables export support from Org to [[https://revealjs.com/][Reveal.js]].
+
+** Running the Presentation
+
+Tangle, then, from the reveal.js directory (=../reveal.js=), run:
+
+#+begin_src shell :noeval :exports code
+npm start -- --root=../
+#+end_src
+
+Then navigate to [[http://localhost:8000/turin-2026/]].
+
+* CSS                                                              :noexport:
+
+v** Symlink to =~/org/fonts=
+
+#+begin_src emacs-lisp :results none :export none :eval yes
+(dired-make-relative-symlink "../../fonts" "fonts" t)
+#+end_src
+
+** Typography
+
+Define some fonts. Useful info [[https://www.digitalocean.com/community/tutorials/how-to-load-and-use-custom-fonts-with-css#loading-a-self-hosted-font-with-font-face][here]].
+
+#+begin_src css
+@font-face {
+    font-family: "MyMinion";
+    src:
+        local("MinionPro-Regular"),
+        url("fonts/minionpro/MinionPro-Regular.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-It.otf") format("opentype");
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-Semibold.otf") format("opentype");
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "MyMinion";
+    src:
+        url("fonts/minionpro/MinionPro-Bold.otf") format("opentype");
+    font-weight: 800;
+    font-style: normal;
+}
+#+end_src
+
+Now override some of reveal's variables.
+
+#+begin_src css
+:root {
+    --r-main-font: "MyMinion";
+    --r-main-font-size: 42px;
+    --r-heading-font: "MyMinion";
+    --r-code-font: "Iosevka Comfy Motion";
+    --r-heading-text-transform: none;
+}
+#+end_src
+
+*** Headings
+
+Decorate my h2's and h3's.
+
+#+begin_src css
+.stack h2, .stack h3 {
+    text-decoration: underline 3px #bbb;
+}
+#+end_src
+
+*** Figures
+
+#+begin_src css
+.reveal figure {
+    margin-top: 0;
+}
+#+end_src
+
+*** Use old style numbers
+
+#+begin_src css
+body {
+    font-variant-numeric: oldstyle-nums;
+}
+#+end_src
+
+But not in code blocks
+
+#+begin_src css
+.reveal pre {
+    font-variant-numeric: normal;
+}
+#+end_src
+
+*** Font size utility classes
+
+Captions
+
+#+begin_src css
+.caption {
+    font-size: .6em;
+}
+#+end_src
+
+** Code blocks
+
+Improve code block appearance.
+
+#+begin_src css
+.reveal pre {
+    padding: 1em;
+    width: 66.6%;
+    box-shadow: none;
+    background: #efefef;
+    font-size: .7em;
+}
+#+end_src
+
+** Logos on title slide
+
+#+begin_src css
+.title-slide > .logos {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 3em;
+}
+#+end_src
+
+* Agenda
+- Motivation: /why distribute spatial audio?/
+- Choice of hardware platform
+- Time exchange
+- Distributing spatial audio algorithms
+- The development of a new networked audio protocol
+
+
+* Motivation
+
+** Motivation
+
+- Access to state-of-the-art spatial audio systems is limited by cost
+  and complexity.
+- Installing a spatial audio system represents a significant
+  investment in money, time and expertise.
+- State-of-the-art systems are centralised, scale poorly; highly
+  multichannel audio interfaces are expensive.
+- We're interested in lowering the barrier to entry.
+- To do this, we offer an alternative that's decentralised, modular,
+  scalable.
+
+* The hardware platform
+
+** The Teensy 4.1 microcontroller development board
+
+- A lot of power in what is indeed a /teensy/ package.
+- 600 MHz Core-M7
+- Not much RAM: 1024 kB --- can be extended by up to 16 MB
+- Support for ethernet and audio
+- Programmable in Faust
+- Costs less than € 50 with add-ons
+
+* Time exchange
+
+** IEEE 1588 Precision Time Protocol
+
+** The time authority
+
+- One Teensy acts both as a PTP time authority /and/ as a USB audio
+  device.
+- Thus governs both audio timing on the /server/ machine, and PTP time
+  for all capable devices on the network.
+- The server reads its PTP /follow-up/ packets for timestamps to add to
+  out-going audio packets.
+- Depending on OS, may entail configuring network settings to allow
+  reading on /privileged/ network ports, i.e. those below 1024.
+
+* Distributed spatial audio
+
+** Distributed wave field synthesis
+
+- For now, let's assume a linear speaker array.
+- Requires that the server knows the number of modules and the speaker
+  spacing.
+- From these, the server can compute co-ordinates for the pairs of
+  loudspeakers (secondary sound sources) handled by the modules.
+- Modules can be assigned secondary source co-ordinates via a DAW
+  plugin interface.
+- The modules need only know their secondary sound source co-ordinates
+  and the co-ordinates of the virtual sound sources.
+- Virtual sound source positions are also configurable via the plugin
+  interface.
+- Sound field dimensions limited by the amount of memory available on
+  each module.
+
+** Distributed higher order ambisonics
+
+- Requires that the server knows the number of modules and speaker
+  co-ordinates.
+- The server computes the HOA decoding matrix.
+- Once assigned a position, a module receives its rows of the decoding
+  matrix over the network.
+- Modules receive the HOA scene and perform their part of the decoding
+  process.
+- Ambisonics order limited by the MTU of the network, i.e. at 16
+  frames per packet, fifth order --- 36 channels --- will fit in a UDP
+  packet without fragmentation.
+
+* A new networked audio protocol
+
+* Thank you for your time
+
+* Local Variables                                                  :noexport:
+
+#+begin_example
+Local Variables:
+org-latex-compiler: "xelatex"
+End:
+#+end_example

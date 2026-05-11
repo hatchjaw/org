@@ -27,8 +27,8 @@
 
 * About This Presentation                                          :noexport:
 
-This =org= file describes my presentation for the 2025 Emeraude
-Séminaire in Peyrusse.
+This =org= file describes my presentation for the 2025 AES AIMLA
+conference.
 
 ** Dependencies
 
