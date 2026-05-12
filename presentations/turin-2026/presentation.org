@@ -2,7 +2,7 @@
 #+author: Thomas Rushton
 
 #+options: num:t toc:nil
-#+options: reveal_width:1500 reveal_height:1000
+#+options: reveal_width:1500 reveal_height:1000 reveal_slide_number:c/t
 #+export_file_name: index
 #+property: header-args:css :results none :exports none :tangle ./style.css
 #+reveal_root: ../reveal.js
@@ -164,15 +164,229 @@ Improve code block appearance.
 }
 #+end_src
 
+* Figures                                                          :noexport:
+:PROPERTIES:
+:header-args: :tangle turinFigs.sty :results silent :noeval
+:END:
+
+** Setup
+
+Provide the package, use tikz, and setup typography.
+
+#+begin_src latex
+\ProvidesPackage{csid3figs}
+\usepackage{tikz}
+\usetikzlibrary{shapes, positioning, arrows.meta}
+\usepackage{fontspec}
+\setmainfont[
+  Mapping={tex-text}, 
+  Numbers={OldStyle},
+  Ligatures={Common},
+  UprightFont=*-Regular,
+  BoldFont=*-Bold,
+  BoldItalicFont=*-BoldIt,
+  ItalicFont=*-It,
+  FontFace={sb}{n}{*-Semibold},
+  FontFace={sb}{it}{*-SemiboldIt}
+]{MinionPro}
+#+end_src
+
+** Common stuff
+
+Define some colours and some node and line styles.
+
+#+begin_src latex
+\definecolor{ctrlColour}{HTML}{479955}
+\definecolor{audioColour}{HTML}{4077D6}
+\definecolor{usbColour}{HTML}{D63E3E}
+
+\tikzset{
+  device/.style={draw, fill=black!10, rounded corners=1mm, inner xsep=1.5mm, align=center},
+  ctrl/.style={densely dotted, ctrlColour, line width=.2mm},
+  ctrlArrow/.style={ctrl, -{Triangle[open]}},
+  acn/.style={-{Stealth}, audioColour, densely dashdotted},
+  audio/.style={-{Stealth}, audioColour},
+  ptp/.style={{Triangle}-{Triangle}},
+  usb/.style={{Triangle[open]}-{Triangle[open]}, usbColour},
+  legend/.style={font=\tiny\itshape},
+  module/.style={device, fill=ctrlColour!35, font={\scriptsize}, transform shape},
+  authority/.style={device, fill=usbColour!35}
+}
+#+end_src
+
+** PTP
+
+#+begin_src latex
+\tikzset{
+  role/.style={align=center, draw, inner sep=1mm, minimum height=1cm, rounded corners=.5mm},
+  authorityMsg/.style={midway, above=-1mm, rotate=-13},
+  subscriberMsg/.style={midway, above=-1mm, rotate=13},
+  ptp/.pic={
+    \node (auth) [role] at (0, 0) {Clock\\authority};
+    \draw [-{Stealth}] (auth.south) -- +(0, -6.5);
+    \node (sub) [role, right = 2cm of auth] {Clock\\subscriber};
+    \draw [-{Stealth}] (sub.south) -- +(0, -6.5);
+    
+    \node (t1) [below left=2mm and -8mm of auth] {\(t_{1}\)};
+    
+    \draw [-{Stealth}] ([yshift=-5.5mm]auth.south) -- ([yshift=-13.5mm]sub.south) node [authorityMsg] {\ultratiny{Sync}};
+    \draw [-{Stealth}] ([yshift=-10.5mm]auth.south) -- ([yshift=-18.5mm]sub.south) node [authorityMsg] {\ultratiny{FollowUp [\(t_{1}\)]}};
+
+    \node (t2) [below right=11mm and -8mm of sub] {\(t_{2}\)};
+
+    \node (t3) [below right=21.5mm and -8mm of sub] {\(t_{3}\)};
+
+    \draw [-{Stealth}] ([yshift=-24mm]sub.south) -- ([yshift=-32mm]auth.south) node [subscriberMsg] {\ultratiny{DelayReq}};
+
+    \node (t4) [below left=29mm and -8mm of auth] {\(t_{4}\)};
+
+    \draw [-{Stealth}] ([yshift=-36mm]auth.south) -- ([yshift=-44mm]sub.south) node [authorityMsg] {\ultratiny{DelayResp [\(t_{4}\)]}};
+
+    \node (t11) [below left=43mm and -8mm of auth] {\(t'_{1}\)};
+    
+    \draw [-{Stealth}] ([yshift=-47mm]auth.south) -- ([yshift=-55mm]sub.south) node [authorityMsg] {\ultratiny{Sync}};
+    \draw [-{Stealth}] ([yshift=-52mm]auth.south) -- ([yshift=-60mm]sub.south) node [authorityMsg] {\ultratiny{FollowUp [\(t'_{1}\)]}};
+
+    \node (t21) [below right=52mm and -8mm of sub] {\(t'_{2}\)};
+  }
+}
+#+end_src
+
+** System overview
+
+#+begin_src latex
+\tikzset{
+  systemOverview/.pic={
+    \node (auth) [authority] at (0, 0) {Time\\authority};
+    \node (switch) [device, above=5mm of auth, inner xsep=10mm] {Switch};
+    \node (server) [device, below=5mm of auth, inner xsep=10mm] {Server};
+    \node (module0) [module, above left=5mm and -7mm of switch] {T41};
+    \node (moduleN) [module, above right=5mm and -7mm of switch] {T41};
+    \node [above=5mm of switch] {\(\cdots\)};
+
+    % PTP between authority and switch
+    \draw [ptp] (auth.north) -- (switch.south);
+
+    % PTP between switch and modules
+    \draw [ptp] ([xshift=-13.3mm]switch.north) --
+    ([xshift=-2mm]module0.south);
+    \draw [ptp] ([xshift=9.3mm]switch.north) --
+    ([xshift=-2mm]moduleN.south);
+
+    % USB audio
+    \draw [usb] ([xshift=-4mm]auth.south) --
+    ([xshift=-4mm]server.north);
+
+    % PTP follow-up from authority to server
+    \draw [-{Triangle}] ([xshift=4mm]auth.south) --
+    ([xshift=4mm]server.north);
+
+    % Audio from server to switch
+    \draw [audio] ([xshift=-12.5mm]server.north) --
+    ([xshift=-12.5mm]switch.south);
+
+    % Ctrl from server to switch
+    \draw [ctrlArrow] ([xshift=12.5mm]server.north) --
+    ([xshift=12.5mm]switch.south);
+
+    % Audio from switch to modules
+    \draw [audio] ([xshift=-11.3mm]switch.north) -- (module0.south);
+    \draw [audio] ([xshift=11.3mm]switch.north) -- (moduleN.south);
+
+    % Ctrl from switch to modules
+    \draw [ctrlArrow] ([xshift=-9.3mm]switch.north) --
+    ([xshift=2mm]module0.south);
+    \draw [ctrlArrow] ([xshift=13.3mm]switch.north) --
+    ([xshift=2mm]moduleN.south);
+  }
+}
+#+end_src
+
+** WFS
+
+#+begin_src latex
+\newcommand{\wfsX}{4}
+\newcommand{\wfsNumWaves}{5}
+\newcommand{\wfsWaveSpace}{.89}
+\newcommand{\wfsNumMCU}{8}
+\newcommand{\wfsNumSecondary}{16}
+\tikzset{
+  cross/.pic = {
+    \draw[rotate = 45] (-#1,0) -- (#1,0);
+    \draw[rotate = 45] (0,-#1) -- (0, #1);
+  },
+  mcu/.pic = {
+    \node [device, inner xsep=1.5mm] {MCU};
+  },
+  speaker/.pic = {
+    \draw (-.11, 0) rectangle (.11, .06);
+    \draw (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
+  },
+  wfs/.pic={
+    \draw (-\wfsX, -.5) rectangle (\wfsX, 2);
+    
+    \begin{scope}
+      \clip (-\wfsX, -.5) rectangle (\wfsX, 2);
+      \node [circle, draw=audioColour, fill=audioColour!50, thick]
+      (primary) at (0, 0) {};
+
+      \foreach \i [
+        evaluate=\i as \rad using \i*\wfsWaveSpace
+      ] in {1,...,\wfsNumWaves} {
+        \draw [thick, dashed, audioColour] (-\rad, 0)
+        arc [radius=\rad, start angle=180, end angle=0];
+      }
+
+      \node [
+        black!50, fill=white, align=center,
+        font={\footnotesize\itshape}
+      ] at (-3.15, 0) {Virtual\\soundfield};
+      \node [
+        below right=-1mm and -1mm of primary,
+        font={\footnotesize\itshape}
+      ] {Virtual sound source};
+
+      \foreach \i [
+        evaluate=\i as \secondary using
+        -\wfsX+.25+(\i-1)*(2*\wfsX/\wfsNumSecondary)
+      ] in {1,...,\wfsNumSecondary} {
+        \node (\secondary) at (\secondary, 2) {};
+      }
+
+      \draw [ctrl] node [above right=.1mm, font=\tiny]
+            {\((x, y)\)} (primary) -- (0, 2);
+    \end{scope}
+
+    \begin{scope}[yshift=2cm]
+      \node (server) [device, inner xsep=7.5mm] at (0, .75) {Server};
+      \node (auth) [authority, above=4mm of server] {Time\\authority};
+      \node (switch) [device, inner xsep=7.5mm, above=4mm of auth] {Switch};
+
+      % USB arrow
+
+      % PTP arrows
+
+      % Audio arrow
+
+      % Control arrow
+    \end{scope}
+  };
+}
+#+end_src
+
 * Agenda
+
+#+ATTR_REVEAL: :frag (appear)
 - Motivation: /why distribute spatial audio?/
 - Choice of hardware platform
 - Time exchange
 - Distributing spatial audio algorithms
 - The development of a new networked audio protocol
 
-
 * Motivation
+:PROPERTIES:
+:reveal_background: #141414
+:END:
 
 ** Motivation
 
@@ -186,20 +400,81 @@ Improve code block appearance.
 - To do this, we offer an alternative that's decentralised, modular,
   scalable.
 
+** Requirements
+
+- A low-cost hardware platform (MCU or SOC) that's powerful, has a
+  decent amount of memory, and supports audio and ethernet.
+- A way to synchronise distributed signal processors.
+- A way to parallelise spatial audio algorithms.
+- Supporting software (DAW plugins) and module firmware.
+
 * The hardware platform
+:PROPERTIES:
+:reveal_background: #141414
+:END:
 
 ** The Teensy 4.1 microcontroller development board
 
+[[./images/t41.png]]
+
+#+ATTR_REVEAL: :frag (appear)
 - A lot of power in what is indeed a /teensy/ package.
 - 600 MHz Core-M7
 - Not much RAM: 1024 kB --- can be extended by up to 16 MB
-- Support for ethernet and audio
+- Dedicated ethernet and audio subsystems
 - Programmable in Faust
 - Costs less than € 50 with add-ons
 
 * Time exchange
+:PROPERTIES:
+:reveal_background: #141414
+:END:
+** IEEE 1588 Precision Time Protocol
+
+#+ATTR_REVEAL: :frag (appear)
+- Sub-microsecond synchronisation possible for compliant devices with
+  support for hardware timestamping.
+- Gold-standard in networked audio settings --- used by AVB, AES67,
+  Dante...
+- Typically only high-end networking equipment supports hardware
+  timestamping; low-cost exceptions do exist.
+- Teensy 4.1 (or rather its NXP IMXRT1062 MCU) features a PTP timer.
+
+#+ATTR_REVEAL: :frag (appear)
+|[[./images/switch.png]]|[[./images/t41.png]]|
 
 ** IEEE 1588 Precision Time Protocol
+
+#+header: :exports results :results file raw :file "./images/gen/ptpFlow.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{turinFigs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic{ptp};
+\end{tikzpicture}
+#+end_src
+#+attr_org: :width 200
+#+attr_html: :width 500
+#+RESULTS:
+[[file:./images/gen/ptpFlow.png]]
+
+** IEEE 1588 Precision Time Protocol
+
+Once the subscriber has \(t_{1}\), \(t_{2}\), \(t_{3}\) and \(t_{4}\) (and \(t'_{1}\)
+and \(t'_{2}\)) it can begin to compute its drift, delay and offset relative to
+the authority.
+
+#+ATTR_REVEAL: :frag t
+\begin{align}
+\text{Drift} &= 1 - \frac{t'_{2} - t_{2}}{t'_{1} - t_{1}} \\[5pt]
+\text{Delay} &= \frac{(t_{4} - t_{1}) - (t_{3} - t_{2})}{2} \\[5pt]
+\text{Offset} &= t_{2} - t_{1} - \text{Delay}
+\end{align}
+
+#+ATTR_REVEAL: :frag t
+Running these figures through a proportional integral controller, the
+subscriber can derive sensible values by which it should adjust its
+ethernet timer to maintain parity with the authority.
 
 ** The time authority
 
@@ -212,7 +487,31 @@ Improve code block appearance.
 - Depending on OS, may entail configuring network settings to allow
   reading on /privileged/ network ports, i.e. those below 1024.
 
+** The time authority
+
+#+header: :exports results :results file raw :file "./images/gen/systemOverview.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{turinFigs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic{systemOverview};
+  \matrix [draw] at (3.75, 0) {
+    \draw [ctrlArrow] (0,0) -- (.5,0); & \node [legend] {Control data (UDP)}; \\
+    \draw [audio] (0,0) -- (.5,0); & \node [legend] {Audio (UDP)}; \\
+    \draw [-{Triangle[open]}, usbColour] (0,0) -- (.5,0); & \node [legend] {USB audio}; \\
+    \draw [-{Triangle}] (0,0) -- (.5,0); & \node [legend] {PTP}; \\
+  };
+\end{tikzpicture}
+#+end_src
+#+attr_org: :width 250
+#+attr_html: :width 1000
+#+RESULTS:
+[[file:./images/gen/systemOverview.png]]
+
 * Distributed spatial audio
+:PROPERTIES:
+:reveal_background: #141414
+:END:
 
 ** Distributed wave field synthesis
 
@@ -230,6 +529,20 @@ Improve code block appearance.
 - Sound field dimensions limited by the amount of memory available on
   each module.
 
+** Distributed wave field synthesis
+
+#+header: :exports results :results file raw :file "./images/gen/wfs.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{turinFigs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic{wfs};
+\end{tikzpicture}
+#+end_src
+#+attr_org: :width 300
+#+RESULTS:
+[[file:./images/gen/wfs.png]]
+
 ** Distributed higher order ambisonics
 
 - Requires that the server knows the number of modules and speaker
@@ -244,6 +557,22 @@ Improve code block appearance.
   packet without fragmentation.
 
 * A new networked audio protocol
+:PROPERTIES:
+:reveal_background: #141414
+:END:
+
+** A new networked audio protocol
+
+- /Why?/ What about JackTrip, AOO (SonoBus), Dante...?
+- These systems are either proprietary or weren't created with
+  time-sensitive, distributed applications in mind.
+- Introducing: the /Ananas/ protocol (/"Ananas necessitates another
+  networked audio system"/).
+- UDP-based, describes audio and control data transmission, device
+  discovery and synchronisation.
+- Control data sent as OSC messages over multicast (virtual source
+  positions for WFS) and unicast (secondary source positions for WFS,
+  decoder co-efficients for HOA).
 
 * Thank you for your time
 
