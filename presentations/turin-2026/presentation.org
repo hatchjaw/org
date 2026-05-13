@@ -125,7 +125,7 @@ body {
 But not in code blocks
 
 #+begin_src css
-.reveal pre {
+.reveal pre, code {
     font-variant-numeric: normal;
 }
 #+end_src
@@ -175,9 +175,10 @@ Provide the package, use tikz, and setup typography.
 
 #+begin_src latex
 \ProvidesPackage{csid3figs}
-\usepackage{tikz}
-\usetikzlibrary{shapes, positioning, arrows.meta}
-\usepackage{fontspec}
+\RequirePackage{tikz}
+\usetikzlibrary{positioning, arrows.meta}
+\RequirePackage{bytefield}
+\RequirePackage{fontspec}
 \setmainfont[
   Mapping={tex-text}, 
   Numbers={OldStyle},
@@ -315,21 +316,30 @@ Define some colours and some node and line styles.
     \draw[rotate = 45] (-#1,0) -- (#1,0);
     \draw[rotate = 45] (0,-#1) -- (0, #1);
   },
-  mcu/.pic = {
-    \node [device, inner xsep=1.5mm] {MCU};
+  wfsModule/.pic = {
+    \node [module] {dWFS};
   },
   speaker/.pic = {
     \draw (-.11, 0) rectangle (.11, .06);
     \draw (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
   },
+  wavefronts/.pic={
+    \foreach \pos/\rad in {0/.18, 1/.615, 2/1.03, 3/1.42, 4/1.78, 5/2.07, 6/2.295, 7/2.42} {
+      \draw [black!25] (-\wfsX+.25+.5*\pos, 2) circle (\rad);
+    }
+  },
   wfs/.pic={
+    % Virtual sound field
     \draw (-\wfsX, -.5) rectangle (\wfsX, 2);
     
     \begin{scope}
       \clip (-\wfsX, -.5) rectangle (\wfsX, 2);
+
+      % Virtual sound source
       \node [circle, draw=audioColour, fill=audioColour!50, thick]
       (primary) at (0, 0) {};
 
+      % Virtual wavefronts
       \foreach \i [
         evaluate=\i as \rad using \i*\wfsWaveSpace
       ] in {1,...,\wfsNumWaves} {
@@ -337,6 +347,7 @@ Define some colours and some node and line styles.
         arc [radius=\rad, start angle=180, end angle=0];
       }
 
+      % Labels
       \node [
         black!50, fill=white, align=center,
         font={\footnotesize\itshape}
@@ -353,24 +364,220 @@ Define some colours and some node and line styles.
         \node (\secondary) at (\secondary, 2) {};
       }
 
+      % Virtual source co-ordinates and ctrl line
       \draw [ctrl] node [above right=.1mm, font=\tiny]
             {\((x, y)\)} (primary) -- (0, 2);
     \end{scope}
 
+    % Infrastructure
     \begin{scope}[yshift=2cm]
       \node (server) [device, inner xsep=7.5mm] at (0, .75) {Server};
-      \node (auth) [authority, above=4mm of server] {Time\\authority};
-      \node (switch) [device, inner xsep=7.5mm, above=4mm of auth] {Switch};
+      \node (authority) [authority, above=4mm of server]
+            {Time\\authority};
+      \node (switch) [device, inner xsep=7.5mm, above=4mm of authority]
+            {Switch};
 
       % USB arrow
+      \draw [usb] ([xshift=-5mm] authority.south) --
+      ([xshift=-5mm] server.north)
 
       % PTP arrows
+      \draw [ptp] (authority.north) -- (switch.south);
+      \draw [-{Triangle}] ([xshift=5mm] authority.south) --
+      ([xshift=5mm] server.north);
 
       % Audio arrow
+      \draw [audio] ([xshift=-10mm] server.north) --
+      ([xshift=-10mm] switch.south);
 
       % Control arrow
+      \draw [ctrlArrow] ([xshift=10mm] server.north) --
+      ([xshift=10mm] switch.south);
+
+      % Modules
+      \foreach \i [
+        evaluate=\i as \xpos using -\wfsX+.5+(\i-1)*(2*\wfsX/\wfsNumMCU)
+      ] in {1,...,\wfsNumMCU} {
+        \pic at (\xpos, 4.225) {wfsModule};
+        
+        \draw [audio] (\xpos-.2, 3.625) -- (\xpos-.2, 4.0);
+        \draw [ctrlArrow] (\xpos, 3.625) -- (\xpos, 4.0);
+        
+        \ifnum\i=1
+          \draw [-{Triangle}] (switch.north) +(0, .325) --
+          (\xpos-.2, 3.625) (\xpos+.2, 3.625) -| (\xpos+.2, 4.0);
+        \else
+          \ifnum\i=\wfsNumMCU
+            \draw [ptp] (switch.north) -- +(0, .325) -| (\xpos+.2, 4.0);
+          \else
+            \draw [-{Triangle}] (\xpos+.2, 3.625) -- (\xpos+.2, 4.0);
+          \fi
+        \fi
+      }
+
+      % Secondary sources
+      \foreach \i [
+        evaluate=\i as \secondary using
+        -\wfsX+.25+(\i-1)*(2*\wfsX/\wfsNumSecondary)
+      ] in {1,...,\wfsNumSecondary} {
+        \pic at (\secondary, 0) {cross=2pt};
+        
+        \ifnum\i=1
+          \draw [ctrl] (\secondary,0) -- +(0, .2) -|
+          ([yshift=-3mm] server.south);
+        \else
+          \ifnum\i=\wfsNumSecondary
+            \draw [ctrlArrow] (\secondary,0) --
+            +(0, .2) -| (server.south);
+          \else
+            \draw [ctrl] (\secondary,0) -- +(0, .2);
+          \fi
+        \fi
+
+        \pic at (\secondary, 4.445) {speaker};
+      }
+
+      \draw [ctrl] (0, 0) -- (0, .2);
+    \end{scope}
+
+    % Synthesised soundfield
+    \begin{scope}[yshift=4.655cm]
+      \clip (-\wfsX, 2) rectangle (\wfsX, 4.6);
+
+      \foreach \i [evaluate=\i as \rad using \i*\wfsWaveSpace] in {1,...,\wfsNumWaves} {
+        \draw [thick, audioColour] (-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
+      }
+
+      \pic {wavefronts};
+      \pic [xscale=-1] {wavefronts};
+
+      \node [black!50, align=center, font={\footnotesize\itshape}] at (-3.15, 4) {Synthesised\\soundfield};
     \end{scope}
   };
+}
+#+end_src
+
+** HOA
+
+#+begin_src latex
+\tikzset{
+  selector/.pic={
+    \draw[rotate=45, very thick, ctrlColour] (-#1,0) -- (#1,0);
+    \draw[rotate=45, very thick, ctrlColour] (0,-#1) -- (0, #1);
+  },
+  speakerHOA/.pic = {
+    \draw (-.11, 0) rectangle (.11, .06);
+    \draw (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
+    \node (-body) at (0, 0) {};   % invisible anchor node
+  },
+  moduleN/.pic = {
+    \node [module] (-body) {dHOA};
+    \draw [ptp] (0, .6) -- (-body.north);
+    \draw [bformat] (-.25, .6) -- ([xshift=-.25cm]-body.north);
+    \draw [ctrl] (.25, .6) -- ([xshift=.25cm]-body.north);
+  },
+  moduleS/.pic = {
+    \node [module] (-body) {dHOA};
+    \draw [ptp] (0, -.6) -- (-body.south);
+    \draw [bformat] (-.25, -.6) -- ([xshift=-.25cm]-body.south);
+    \draw [ctrl] (.25, -.6) -- ([xshift=.25cm]-body.south);
+  },
+  hoa/.pic={
+    \begin{scope}[yshift=11cm]
+      % Synthesised soundfield
+      \draw [thick] (-4, -4) rectangle (4, 4);
+      % Azymuthal rings
+      \draw [dashed, black!30] (0, 0) circle (3.5);
+      \draw [dashed, black!30] (0, 0) circle (2.8);
+      \draw [dashed, black!30] (0, 0) circle (1.9);
+      \draw [dashed, black!30] (0, 0) circle (.8);
+      % Speakers, ring 0
+      \pic [rotate=180] (speaker0) at (0, 3.7) {speakerHOA};
+      \pic [rotate=90] (speaker1) at (3.7, 0) {speakerHOA};
+      \pic (speaker2) at (0, -3.7) {speakerHOA};
+      \pic [rotate=-90] (speaker3) at (-3.7, 0) {speakerHOA};
+      % Speakers, ring 1
+      \pic [rotate=225] (speaker4) at (-2.1, 2.1) {speakerHOA};
+      \pic [rotate=135] (speaker5) at (2.1, 2.1) {speakerHOA};
+      \pic [rotate=45] (speaker6) at (2.1, -2.1) {speakerHOA};
+      \pic [rotate=-45] (speaker7) at (-2.1, -2.1) {speakerHOA};
+      % Speakers, ring 2
+      \pic [rotate=180] (speaker8) at (0, 2.1) {speakerHOA};
+      \pic [rotate=90] (speaker9) at (2.1, 0) {speakerHOA};
+      \pic (speaker10) at (0, -2.1) {speakerHOA};
+      \pic [rotate=-90] (speaker11) at (-2.1, 0) {speakerHOA};
+      % Speakers, ring 3
+      \pic [rotate=225] (speaker12) at (-.7, .7) {speakerHOA};
+      \pic [rotate=135] (speaker13) at (.7, .7) {speakerHOA};
+      \pic [rotate=45] (speaker14) at (.7, -.7) {speakerHOA};
+      \pic [rotate=-45] (speaker15) at (-.7, -.7) {speakerHOA};
+      % Modules
+      \pic [rotate=-45] (module0) at (2.7, 2.7) {moduleN};
+      \pic [rotate=-45] (module1) at (-2.7, -2.7) {moduleS};
+      \pic (module2) at (0, 3.1) {moduleS};
+      \pic (module3) at (0, -3.1) {moduleN};
+      \pic (module4) [rotate=-45] at (1.55, 1.55) {moduleS};
+      \pic (module5) [rotate=-45] at (-1.55, -1.55) {moduleN};
+      \pic (module6) at (0, 1.1) {moduleN};
+      \pic (module7) at (0, -1.1) {moduleS};
+      % Audio
+      \draw [audio] (module0-body.west) -- (speaker0-body.east);
+      \draw [audio] (module0-body.east) -- ([yshift=.125cm, xshift=.1cm]speaker1-body.west);
+      \draw [audio] (module1-body.east) -- (speaker2-body.west);
+      \draw [audio] (module1-body.west) -- ([yshift=-.125cm, xshift=-.1cm]speaker3-body.east);
+      \draw [audio] (module2-body.west) -- ([yshift=.05cm]speaker4-body.east);
+      \draw [audio] (module2-body.east) -- ([yshift=.05cm]speaker5-body.west);
+      \draw [audio] (module3-body.east) -- ([yshift=-.05cm]speaker6-body.west);
+      \draw [audio] (module3-body.west) -- ([yshift=-.05cm]speaker7-body.east);
+      \draw [audio] (module4-body.west) -- (speaker8-body.east);
+      \draw [audio] (module4-body.east) -- ([yshift=.125cm, xshift=.1cm]speaker9-body.west);
+      \draw [audio] (module5-body.east) -- (speaker10-body.west);
+      \draw [audio] (module5-body.west) -- ([yshift=-.125cm, xshift=-.1cm]speaker11-body.east);
+      \draw [audio] (module6-body.west) -- (speaker12-body.east);
+      \draw [audio] (module6-body.east) -- (speaker13-body.west);
+      \draw [audio] (module7-body.east) -- (speaker14-body.west);
+      \draw [audio] (module7-body.west) -- (speaker15-body.east);
+    \end{scope}
+    \begin{scope}[yshift=5.5cm]
+      % Switch
+      \node[device, inner xsep=8mm, inner ysep=2.5mm](switch) at (0, .7) {Switch};
+      % Time authority
+      \node[authority, align=center](authority) at (0, -.6) {Time\\authority};
+      % PTP
+      \draw [{Triangle}-] (.5, -1.5) -- ([xshift=5mm] authority.south);
+      \draw [ptp] (authority.north) -- (switch.south);
+      \draw [ptp] (switch.north) -- (0, 1.5);
+      % USB
+      \draw [usb] (-.5, -1.5) -- ([xshift=-5mm] authority.south);
+      % ACN-format
+      \draw [acn] (-1, -1.5) -- ([xshift=-1cm] switch.south);
+      \draw [acn] ([xshift=-1cm] switch.north) -- (-1, 1.5);
+      % Coordinates
+      \draw [ctrl] (1, -1.5) -- ([xshift=1cm] switch.south);
+      \draw [-{Triangle[open]}, ctrl] ([xshift=1cm] switch.north) -- (1, 1.5);
+    \end{scope}
+    \begin{scope}
+      % DAW
+      \draw [thick] (-4, -4) rectangle (4, 4);
+      \node [] at (-3.25, 3.5) {DAW};
+      % Virtual soundfield
+      \draw [thick] (0, 0) circle (3.5);
+      \node [black!75, align=center, font={\itshape}] at (-2.5, 0) {Virtual\\soundfield};
+      % Azymuthal rings
+      \draw [dotted, black!50] (0, 0) circle (2.8);
+      \draw [dotted, black!50] (0, 0) circle (1.9);
+      \draw [dotted, black!50] (0, 0) circle (.8);
+      % Module selectors
+      \pic at (2.475, 2.475) {selector=5pt};
+      \pic at (-2.475, -2.475) {selector=5pt};
+      \pic at (0, 2.8) {selector=5pt};
+      \pic at (0, -2.8) {selector=5pt};
+      \pic at (1.35, 1.35) {selector=5pt};
+      \pic at (-1.35, -1.35) {selector=5pt};
+      \pic at (0, .8) {selector=5pt};
+      \pic at (0, -.8) {selector=5pt};
+    \end{scope}
+  }
 }
 #+end_src
 
@@ -540,6 +747,7 @@ ethernet timer to maintain parity with the authority.
 \end{tikzpicture}
 #+end_src
 #+attr_org: :width 300
+#+attr_html: :width 650
 #+RESULTS:
 [[file:./images/gen/wfs.png]]
 
@@ -555,6 +763,22 @@ ethernet timer to maintain parity with the authority.
 - Ambisonics order limited by the MTU of the network, i.e. at 16
   frames per packet, fifth order --- 36 channels --- will fit in a UDP
   packet without fragmentation.
+
+
+** Distributed higher order ambisonics
+
+#+header: :exports results :results file raw :file "./images/gen/hoa.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{turinFigs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic{hoa};
+\end{tikzpicture}
+#+end_src
+#+attr_org: :width 200
+#+attr_html: :width 400
+#+RESULTS:
+[[file:./images/gen/hoa.png]]
 
 * A new networked audio protocol
 :PROPERTIES:
@@ -573,6 +797,83 @@ ethernet timer to maintain parity with the authority.
 - Control data sent as OSC messages over multicast (virtual source
   positions for WFS) and unicast (secondary source positions for WFS,
   decoder co-efficients for HOA).
+
+
+** A new networked audio protocol
+
+Ananas Audio Protocol
+
+Address: =224.4.224.4:49152=
+
+#+header: :exports results :results file raw :file "./images/gen/audioPacket.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{turinFigs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \node (packet) at (0,0) {
+    \begin{bytefield}[bitwidth=1cm,bitheight=1cm]{16}
+      \bitheader{0-15} \\
+      \bitbox{2}{Seq. num.} & \bitbox{8}{Timestamp} & \bitbox{1}{\scriptsize{Num. channels}} & \bitbox{2}{Num. frames} & \bitbox[lrt]{3}{} \\
+      \wordbox[lr]{1}{Audio} \\
+      \skippedwords \\
+      \wordbox[lrb]{1}{} \\
+    \end{bytefield}%
+  };
+\end{tikzpicture}
+#+end_src
+
+#+RESULTS:
+[[file:./images/gen/audioPacket.png]]
+
+
+** A new networked audio protocol
+
+Ananas Client Description Protocol
+
+Address: =224.4.224.6:49172=
+
+#+header: :exports results :results file raw :file "./images/gen/clientAnnouncePacket.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{turinFigs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \node (packet) at (0, 0) {
+    \begin{bytefield}[bitwidth=1cm, bitheight=1cm]{16}
+      \bitheader{0-15} \\
+      \bitbox{4}{Serial number} & \bitbox{1}{\footnotesize{Firmw. type}} & \bitbox{3}{Version number} & \bitbox{4}{Sampling rate} & \bitbox{4}{Percent CPU} \\
+      \bitbox{4}{Presentation offset frames} & \bitbox{8}{Presentation offset ns} & \bitbox{4}{Audio-PTP offset ns} \\
+      \bitbox{1}{Buffer fill \%} & \bitbox{1}{PTP lock} & \bitbox[ltb]{14}{Secondary source co-ordinates} \\
+      \bitbox[rtb]{2}{}
+    \end{bytefield}
+  };
+\end{tikzpicture}
+#+end_src
+
+#+RESULTS:
+[[file:./images/gen/clientAnnouncePacket.png]]
+
+** A new networked audio protocol
+
+Ananas Authority Description Protocol
+
+Address: =224.4.224.6:49173=
+
+#+header: :exports results :results file raw :file "./images/gen/authorityAnnouncePacket.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{turinFigs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \node (packet) at (0, 0) {
+    \begin{bytefield}[bitwidth=1cm, bitheight=1cm]{16}
+      \bitheader{0-15} \\
+      \bitbox{4}{Serial number} & \bitbox{4}{USB feedback accumulator} & \bitbox{4}{Num. underruns} & \bitbox{4}{Num. overflows} \\
+    \end{bytefield}
+  };
+\end{tikzpicture}
+#+end_src
+
+#+RESULTS:
+[[file:./images/gen/authorityAnnouncePacket.png]]
 
 * Thank you for your time
 
