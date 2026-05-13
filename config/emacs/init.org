@@ -760,7 +760,7 @@ Loop gifs by default.
 
 * Window-switching
 
-As an alternative to the less-than-idea =C-x o=, let's try the
+As an alternative to the less-than-ideal =C-x o=, let's try the
 =ace-window= package.
 
 #+begin_src emacs-lisp

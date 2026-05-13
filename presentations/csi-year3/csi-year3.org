@@ -2,7 +2,7 @@
 #+subtitle: Thesis Committee --- Year 3
 #+author: Thomas Rushton
 
-#+options: num:t toc:nil
+#+options: num:nil toc:nil
 #+options: reveal_width:1500 reveal_height:1000 reveal_slide_number:c/t
 #+export_file_name: index
 #+property: header-args:css :results none :exports none :tangle ./style.css

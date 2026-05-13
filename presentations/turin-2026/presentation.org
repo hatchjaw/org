@@ -1,7 +1,7 @@
 #+title: Accessible Spatial Audio Installations on a Network of Distributed Signal Processors
 #+author: Thomas Rushton
 
-#+options: num:t toc:nil
+#+options: num:nil toc:nil
 #+options: reveal_width:1500 reveal_height:1000 reveal_slide_number:c/t
 #+export_file_name: index
 #+property: header-args:css :results none :exports none :tangle ./style.css
@@ -473,14 +473,14 @@ Define some colours and some node and line styles.
   moduleN/.pic = {
     \node [module] (-body) {dHOA};
     \draw [ptp] (0, .6) -- (-body.north);
-    \draw [bformat] (-.25, .6) -- ([xshift=-.25cm]-body.north);
-    \draw [ctrl] (.25, .6) -- ([xshift=.25cm]-body.north);
+    \draw [acn] (-.25, .6) -- ([xshift=-.25cm]-body.north);
+    \draw [ctrlArrow] (.25, .6) -- ([xshift=.25cm]-body.north);
   },
   moduleS/.pic = {
     \node [module] (-body) {dHOA};
     \draw [ptp] (0, -.6) -- (-body.south);
-    \draw [bformat] (-.25, -.6) -- ([xshift=-.25cm]-body.south);
-    \draw [ctrl] (.25, -.6) -- ([xshift=.25cm]-body.south);
+    \draw [acn] (-.25, -.6) -- ([xshift=-.25cm]-body.south);
+    \draw [ctrlArrow] (.25, -.6) -- ([xshift=.25cm]-body.south);
   },
   hoa/.pic={
     \begin{scope}[yshift=11cm]
@@ -553,8 +553,8 @@ Define some colours and some node and line styles.
       \draw [acn] (-1, -1.5) -- ([xshift=-1cm] switch.south);
       \draw [acn] ([xshift=-1cm] switch.north) -- (-1, 1.5);
       % Coordinates
-      \draw [ctrl] (1, -1.5) -- ([xshift=1cm] switch.south);
-      \draw [-{Triangle[open]}, ctrl] ([xshift=1cm] switch.north) -- (1, 1.5);
+      \draw [ctrlArrow] (1, -1.5) -- ([xshift=1cm] switch.south);
+      \draw [ctrlArrow] ([xshift=1cm] switch.north) -- (1, 1.5);
     \end{scope}
     \begin{scope}
       % DAW
@@ -586,7 +586,7 @@ Define some colours and some node and line styles.
 #+ATTR_REVEAL: :frag (appear)
 - Motivation: /why distribute spatial audio?/
 - Choice of hardware platform
-- Time exchange
+- Time exchange and synchronicity
 - Distributing spatial audio algorithms
 - The development of a new networked audio protocol
 
@@ -597,6 +597,7 @@ Define some colours and some node and line styles.
 
 ** Motivation
 
+#+ATTR_REVEAL: :frag (appear)
 - Access to state-of-the-art spatial audio systems is limited by cost
   and complexity.
 - Installing a spatial audio system represents a significant
@@ -609,6 +610,7 @@ Define some colours and some node and line styles.
 
 ** Requirements
 
+#+ATTR_REVEAL: :frag (appear)
 - A low-cost hardware platform (MCU or SOC) that's powerful, has a
   decent amount of memory, and supports audio and ethernet.
 - A way to synchronise distributed signal processors.
@@ -637,6 +639,9 @@ Define some colours and some node and line styles.
 :reveal_background: #141414
 :END:
 ** IEEE 1588 Precision Time Protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 #+ATTR_REVEAL: :frag (appear)
 - Sub-microsecond synchronisation possible for compliant devices with
@@ -651,6 +656,9 @@ Define some colours and some node and line styles.
 |[[./images/switch.png]]|[[./images/t41.png]]|
 
 ** IEEE 1588 Precision Time Protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 #+header: :exports results :results file raw :file "./images/gen/ptpFlow.png"
 #+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
@@ -666,6 +674,9 @@ Define some colours and some node and line styles.
 [[file:./images/gen/ptpFlow.png]]
 
 ** IEEE 1588 Precision Time Protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 Once the subscriber has \(t_{1}\), \(t_{2}\), \(t_{3}\) and \(t_{4}\) (and \(t'_{1}\)
 and \(t'_{2}\)) it can begin to compute its drift, delay and offset relative to
@@ -678,13 +689,73 @@ the authority.
 \text{Offset} &= t_{2} - t_{1} - \text{Delay}
 \end{align}
 
-#+ATTR_REVEAL: :frag t
+** Media clock recovery
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
 Running these figures through a proportional integral controller, the
 subscriber can derive sensible values by which it should adjust its
 ethernet timer to maintain parity with the authority.
 
-** The time authority
+#+ATTR_REVEAL: :frag t
+The nanoseconds-per-second adjustment, \(a\), is found as
 
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+a = \text{Drift} - K_{P}\text{Offset} + K_{I}\sum\text{Offset}
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+To recover the media clock, i.e. find a sampling rate \(\hat{f}_{s}\) that "matches"
+that of the time authority, using the nominal sampling rate \(f_{s}\),
+e.g. 48 kHz
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+\hat{f}_{s} = f_{s}(1 + a)
+\end{equation}
+
+** Media clock recovery
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+For example for \(a = -1750 \text{ns}\)
+
+#+ATTR_REVEAL: :frag t
+\begin{align}
+\hat{f}_{s} &= 48\,000(1 - 1750 \times 10^{-9}) \\
+  &= 48\,000 \times 0.999\,998\,925 \\
+  &= 47\,999.916 \text{Hz}
+\end{align}
+
+#+ATTR_REVEAL: :frag t
+In practice, this doesn't quite work, and some residual drift
+remains. To compensate for that, take a reference nanoseconds figure
+on audio system startup, \(t_{S}\), and compare it with the nanosecond
+part of PTP time, \(t_{\text{PTP}}\), once per second (only works if the buffer
+size is an integer divisor of the sampling rate)
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+O_{AP} = t_{\text{PTP}} - t_{S}
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+Finally apply another PI controller
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+\hat{f}_{s} = f_{s}(1 + a + K_{P}O_{AP} + K_{I}\sum{}O_{AP})
+\end{equation}
+
+** The time authority
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+ATTR_REVEAL: :frag (appear)
 - One Teensy acts both as a PTP time authority /and/ as a USB audio
   device.
 - Thus governs both audio timing on the /server/ machine, and PTP time
@@ -695,6 +766,9 @@ ethernet timer to maintain parity with the authority.
   reading on /privileged/ network ports, i.e. those below 1024.
 
 ** The time authority
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 #+header: :exports results :results file raw :file "./images/gen/systemOverview.png"
 #+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
@@ -721,7 +795,11 @@ ethernet timer to maintain parity with the authority.
 :END:
 
 ** Distributed wave field synthesis
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
+#+ATTR_REVEAL: :frag (appear)
 - For now, let's assume a linear speaker array.
 - Requires that the server knows the number of modules and the speaker
   spacing.
@@ -737,6 +815,9 @@ ethernet timer to maintain parity with the authority.
   each module.
 
 ** Distributed wave field synthesis
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 #+header: :exports results :results file raw :file "./images/gen/wfs.png"
 #+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
@@ -752,7 +833,11 @@ ethernet timer to maintain parity with the authority.
 [[file:./images/gen/wfs.png]]
 
 ** Distributed higher order ambisonics
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
+#+ATTR_REVEAL: :frag (appear)
 - Requires that the server knows the number of modules and speaker
   co-ordinates.
 - The server computes the HOA decoding matrix.
@@ -764,8 +849,10 @@ ethernet timer to maintain parity with the authority.
   frames per packet, fifth order --- 36 channels --- will fit in a UDP
   packet without fragmentation.
 
-
 ** Distributed higher order ambisonics
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 #+header: :exports results :results file raw :file "./images/gen/hoa.png"
 #+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
@@ -786,7 +873,11 @@ ethernet timer to maintain parity with the authority.
 :END:
 
 ** A new networked audio protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
+#+ATTR_REVEAL: :frag (appear)
 - /Why?/ What about JackTrip, AOO (SonoBus), Dante...?
 - These systems are either proprietary or weren't created with
   time-sensitive, distributed applications in mind.
@@ -796,10 +887,12 @@ ethernet timer to maintain parity with the authority.
   discovery and synchronisation.
 - Control data sent as OSC messages over multicast (virtual source
   positions for WFS) and unicast (secondary source positions for WFS,
-  decoder co-efficients for HOA).
-
+  decoder co-efficients for HOA) UDP.
 
 ** A new networked audio protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 Ananas Audio Protocol
 
@@ -827,6 +920,9 @@ Address: =224.4.224.4:49152=
 
 
 ** A new networked audio protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 Ananas Client Description Protocol
 
@@ -853,6 +949,9 @@ Address: =224.4.224.6:49172=
 [[file:./images/gen/clientAnnouncePacket.png]]
 
 ** A new networked audio protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
 
 Ananas Authority Description Protocol
 
@@ -874,6 +973,29 @@ Address: =224.4.224.6:49173=
 
 #+RESULTS:
 [[file:./images/gen/authorityAnnouncePacket.png]]
+
+** /Ananas/ supporting software
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_org: :width 200
+#+attr_html: :width 1000
+[[./images/network-overview.png]]
+
+** /Ananas/ supporting software
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_org: :width 200
+#+attr_html: :width 1000
+[[./images/wfs-control.png]]
+
+** /Ananas/ in action
+
+#+attr_org: :width 200
+[[./images/59F8F47C-F6AD-4A9F-93E0-6F680A943D7E.jpg]]
 
 * Thank you for your time
 
