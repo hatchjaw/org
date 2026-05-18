@@ -230,23 +230,23 @@ Define some colours and some node and line styles.
     
     \node (t1) [below left=2mm and -8mm of auth] {\(t_{1}\)};
     
-    \draw [-{Stealth}] ([yshift=-5.5mm]auth.south) -- ([yshift=-13.5mm]sub.south) node [authorityMsg] {\ultratiny{Sync}};
-    \draw [-{Stealth}] ([yshift=-10.5mm]auth.south) -- ([yshift=-18.5mm]sub.south) node [authorityMsg] {\ultratiny{FollowUp [\(t_{1}\)]}};
+    \draw [-{Stealth}] ([yshift=-5.5mm]auth.south) -- ([yshift=-13.5mm]sub.south) node [authorityMsg] {\scriptsize{Sync}};
+    \draw [-{Stealth}] ([yshift=-10.5mm]auth.south) -- ([yshift=-18.5mm]sub.south) node [authorityMsg] {\scriptsize{FollowUp [\(t_{1}\)]}};
 
     \node (t2) [below right=11mm and -8mm of sub] {\(t_{2}\)};
 
     \node (t3) [below right=21.5mm and -8mm of sub] {\(t_{3}\)};
 
-    \draw [-{Stealth}] ([yshift=-24mm]sub.south) -- ([yshift=-32mm]auth.south) node [subscriberMsg] {\ultratiny{DelayReq}};
+    \draw [-{Stealth}] ([yshift=-24mm]sub.south) -- ([yshift=-32mm]auth.south) node [subscriberMsg] {\scriptsize{DelayReq}};
 
     \node (t4) [below left=29mm and -8mm of auth] {\(t_{4}\)};
 
-    \draw [-{Stealth}] ([yshift=-36mm]auth.south) -- ([yshift=-44mm]sub.south) node [authorityMsg] {\ultratiny{DelayResp [\(t_{4}\)]}};
+    \draw [-{Stealth}] ([yshift=-36mm]auth.south) -- ([yshift=-44mm]sub.south) node [authorityMsg] {\scriptsize{DelayResp [\(t_{4}\)]}};
 
     \node (t11) [below left=43mm and -8mm of auth] {\(t'_{1}\)};
     
-    \draw [-{Stealth}] ([yshift=-47mm]auth.south) -- ([yshift=-55mm]sub.south) node [authorityMsg] {\ultratiny{Sync}};
-    \draw [-{Stealth}] ([yshift=-52mm]auth.south) -- ([yshift=-60mm]sub.south) node [authorityMsg] {\ultratiny{FollowUp [\(t'_{1}\)]}};
+    \draw [-{Stealth}] ([yshift=-47mm]auth.south) -- ([yshift=-55mm]sub.south) node [authorityMsg] {\scriptsize{Sync}};
+    \draw [-{Stealth}] ([yshift=-52mm]auth.south) -- ([yshift=-60mm]sub.south) node [authorityMsg] {\scriptsize{FollowUp [\(t'_{1}\)]}};
 
     \node (t21) [below right=52mm and -8mm of sub] {\(t'_{2}\)};
   }
@@ -453,7 +453,7 @@ Define some colours and some node and line styles.
 
       \node [black!50, align=center, font={\footnotesize\itshape}] at (-3.15, 4) {Synthesised\\soundfield};
     \end{scope}
-  };
+  }
 }
 #+end_src
 
@@ -596,6 +596,59 @@ Define some colours and some node and line styles.
 :END:
 
 ** Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+begin_src css :exports none
+.ircam {
+    display: flex;
+    justify-content: space-around;
+}
+#+end_src
+
+#+begin_export html
+<div class="ircam">
+#+end_export
+
+#+attr_html: :height 400
+[[./images/ircam1.png]]
+
+#+attr_html: :height 400
+[[./images/ircam2.png]]
+
+#+begin_export html
+</div>
+#+end_export
+
+/Espace de Projection/, IRCAM, Paris; 339 loudspeakers
+
+** Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_org: :width 400
+#+attr_html: :width 1200
+[[./images/tu-berlin.webp]]
+
+WellenFeld H 104, 2700 loudspeakers
+
+** Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+[[./images/sphere1.jpg]]
+[[./images/sphere2.jpg]]
+
+"The Sphere", Las Vegas, U.S.A; 167,000 loudspeakers
+
+** Motivation
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
 
 #+ATTR_REVEAL: :frag (appear)
 - Access to state-of-the-art spatial audio systems is limited by cost
@@ -634,10 +687,19 @@ Define some colours and some node and line styles.
 - Programmable in Faust
 - Costs less than € 50 with add-ons
 
-* Time exchange
+* Time exchange and synchronicity
 :PROPERTIES:
 :reveal_background: #141414
 :END:
+
+** Asynchronicity and clock drift
+
+#+ATTR_REVEAL: :frag (appear)
+- If our hardware modules aren't synchronised, any spatial audio
+  effect we attempt will be ruined.
+- No two digital systems run at the same rate.
+- We need some mechanism for time exchange.
+
 ** IEEE 1588 Precision Time Protocol
 :PROPERTIES:
 :reveal_extra_attr: data-auto-animate
@@ -679,14 +741,14 @@ Define some colours and some node and line styles.
 :END:
 
 Once the subscriber has \(t_{1}\), \(t_{2}\), \(t_{3}\) and \(t_{4}\) (and \(t'_{1}\)
-and \(t'_{2}\)) it can begin to compute its drift, delay and offset relative to
-the authority.
+and \(t'_{2}\)) it can begin to compute its drift, \(\alpha\), delay, \(\delta\),
+and offset, \(\theta\), relative to the authority.
 
 #+ATTR_REVEAL: :frag t
 \begin{align}
-\text{Drift} &= 1 - \frac{t'_{2} - t_{2}}{t'_{1} - t_{1}} \\[5pt]
-\text{Delay} &= \frac{(t_{4} - t_{1}) - (t_{3} - t_{2})}{2} \\[5pt]
-\text{Offset} &= t_{2} - t_{1} - \text{Delay}
+\alpha &= 1 - \frac{t'_{2} - t_{2}}{t'_{1} - t_{1}} \\[5pt]
+\delta &= \frac{(t_{4} - t_{1}) - (t_{3} - t_{2})}{2} \\[5pt]
+\theta &= t_{2} - t_{1} - \delta
 \end{align}
 
 ** Media clock recovery
@@ -699,21 +761,22 @@ subscriber can derive sensible values by which it should adjust its
 ethernet timer to maintain parity with the authority.
 
 #+ATTR_REVEAL: :frag t
-The nanoseconds-per-second adjustment, \(a\), is found as
+The nanoseconds-per-second adjustment at second \(n\), \(a_{n}\), is
+found as
 
 #+ATTR_REVEAL: :frag t
 \begin{equation}
-a = \text{Drift} - K_{P}\text{Offset} + K_{I}\sum\text{Offset}
+a_{n} = \alpha - K_{P}\theta_{n} + K_{I}\sum_{t=0}^{n}\theta
 \end{equation}
 
 #+ATTR_REVEAL: :frag t
-To recover the media clock, i.e. find a sampling rate \(\hat{f}_{s}\) that "matches"
+To recover the media clock, i.e. find a sampling rate \(\hat{f}_{s,n}\) that "matches"
 that of the time authority, using the nominal sampling rate \(f_{s}\),
 e.g. 48 kHz
 
 #+ATTR_REVEAL: :frag t
 \begin{equation}
-\hat{f}_{s} = f_{s}(1 + a)
+\hat{f}_{s,n} = f_{s}(1 + a_{n})
 \end{equation}
 
 ** Media clock recovery
@@ -721,12 +784,12 @@ e.g. 48 kHz
 :reveal_extra_attr: data-auto-animate
 :END:
 
-For example for \(a = -1750 \text{ns}\)
+For example for \(a_{n} = -1750 \text{ns}\)
 
 #+ATTR_REVEAL: :frag t
 \begin{align}
-\hat{f}_{s} &= 48\,000(1 - 1750 \times 10^{-9}) \\
-  &= 48\,000 \times 0.999\,998\,925 \\
+\hat{f}_{s,n} &= 48\,000(1 - 1750 \times 10^{-9}) \\
+  &= 48\,000 \times 0.999\,998\,25 \\
   &= 47\,999.916 \text{Hz}
 \end{align}
 
@@ -739,7 +802,7 @@ size is an integer divisor of the sampling rate)
 
 #+ATTR_REVEAL: :frag t
 \begin{equation}
-O_{AP} = t_{\text{PTP}} - t_{S}
+\Delta_{n} = t_{\text{PTP}} - t_{S}
 \end{equation}
 
 #+ATTR_REVEAL: :frag t
@@ -747,7 +810,7 @@ Finally apply another PI controller
 
 #+ATTR_REVEAL: :frag t
 \begin{equation}
-\hat{f}_{s} = f_{s}(1 + a + K_{P}O_{AP} + K_{I}\sum{}O_{AP})
+\hat{f}_{s,n} = f_{s}\left(1 + a_{n} + K_{P_{\Delta}}\Delta_{n} + K_{I_{\Delta}}\sum{}_{t=0}^{n}\Delta\right)
 \end{equation}
 
 ** The time authority

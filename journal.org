@@ -11501,3 +11501,14 @@ presented at a number of conferences across Europe over the past few
 years.
 
 Entered on [2026-05-10 dim. 11:46]
+*** 2026-05-18 lundi
+**** PTP symbols                                             :WRITING:PTP:
+I never particularly enjoyed using, e.g. \(\text{Offset}\) as the name
+of a variable. Particularly when bringing the audio-PTP offset into
+the picture things are going to get messy. Consulting with Claude, it
+turns out that Mills, in his paper on NTP v3\nbsp[cite:@millsImproved1994]
+uses \(\theta\) for offset, \(\delta\) for delay, and Claude suggested \(\alpha\) for
+drift. I intend to use \(\Delta\) for the audio-PTP offset (it's a /delta/ of
+some kind).
+
+Entered on [2026-05-18 lun. 13:30]

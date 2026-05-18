@@ -159,44 +159,65 @@ Fancy characters (typically) at the beginning of chapters.
 }
 #+end_src
 
-* Export hooks                                                     :noexport:
+*** Figures
 
-** Lettrine at the start of each chapter
+#+begin_src latex
+\RequirePackage{tikz}
+\usetikzlibrary{positioning, arrows.meta}
+#+end_src
 
-Maybe just do this as LaTeX markup... at this stage I can't see it
-being useful to export to formats besides LaTeX...
+*** Automatically include tof in contents
 
-# #+bind: org-export-before-parsing-functions (tar/lettrine-after-h1)
-# #+begin_src emacs-lisp :results none
-# (defun tar/lettrine-after-h1 (backend)
-#   "Add lettrine to first paragraph after each level-1 headline."
-#   (when (org-export-derived-backend-p backend 'latex)
-#     (org-element-map (org-element-parse-buffer) 'headline
-#       (lambda (headline)
-#         (when (and (eq (org-element-property :level headline) 1)
-#                    (not (org-element-property :UNNUMBERED headline)))
-#           (let ((target-para
-#                  (cl-loop for child in (org-element-contents
-#                                         (car (org-element-contents headline)))
-#                           when (eq (org-element-type child) 'paragraph)
-#                           return child)))
-#             (when target-para
-#               (let* ((begin (org-element-property :contents-begin target-para))
-#                      (end (org-element-property :contents-end target-para))
-#                      (text (buffer-substring begin end))
-#                      (first-char (substring text 0 1))
-#                      (rest-of-word
-#                       (and (string-match "^.\\([a-zA-Z]*\\)" text)
-#                            (match-string 1 text)))
-#                      (remainder
-#                       (substring text (+ 1 (length rest-of-word)))))
-#                 (goto-char begin)
-#                 (delete-region begin end)
-#                 (insert (format "@@latex:\\lettrine{%s}{%s}@@%s"
-#                                 first-char
-#                                 rest-of-word
-#                                 remainder))))))))))
-# #+end_src
+#+begin_src latex
+\RequirePackage{tocbibind}
+#+end_src
+
+*** Algorithms
+
+#+begin_src latex
+\RequirePackage[ruled, vlined, linesnumbered]{algorithm2e}
+#+end_src
+
+** Figures
+
+*** PTP
+
+#+begin_src latex
+\tikzset{
+  role/.style={align=center, draw, inner sep=1mm, minimum height=1cm, rounded corners=.5mm},
+  authorityMsg/.style={midway, above=-1mm, rotate=-13},
+  subscriberMsg/.style={midway, above=-1mm, rotate=13},
+  ptp/.pic={
+    \node (auth) [role] at (0, 0) {Clock\\authority};
+    \draw [-{Stealth}] (auth.south) -- +(0, -6.5);
+    \node (sub) [role, right = 2cm of auth] {Clock\\subscriber};
+    \draw [-{Stealth}] (sub.south) -- +(0, -6.5);
+    
+    \node (t1) [below left=2mm and -8mm of auth] {\(t_{1}\)};
+    
+    \draw [-{Stealth}] ([yshift=-5.5mm]auth.south) -- ([yshift=-13.5mm]sub.south) node [authorityMsg] {\scriptsize{Sync}};
+    \draw [-{Stealth}] ([yshift=-10.5mm]auth.south) -- ([yshift=-18.5mm]sub.south) node [authorityMsg] {\scriptsize{FollowUp [\(t_{1}\)]}};
+
+    \node (t2) [below right=11mm and -8mm of sub] {\(t_{2}\)};
+
+    \node (t3) [below right=21.5mm and -8mm of sub] {\(t_{3}\)};
+
+    \draw [-{Stealth}] ([yshift=-24mm]sub.south) -- ([yshift=-32mm]auth.south) node [subscriberMsg] {\scriptsize{DelayReq}};
+
+    \node (t4) [below left=29mm and -8mm of auth] {\(t_{4}\)};
+
+    \draw [-{Stealth}] ([yshift=-36mm]auth.south) -- ([yshift=-44mm]sub.south) node [authorityMsg] {\scriptsize{DelayResp [\(t_{4}\)]}};
+
+    \node (t11) [below left=43mm and -8mm of auth] {\(t'_{1}\)};
+    
+    \draw [-{Stealth}] ([yshift=-47mm]auth.south) -- ([yshift=-55mm]sub.south) node [authorityMsg] {\scriptsize{Sync}};
+    \draw [-{Stealth}] ([yshift=-52mm]auth.south) -- ([yshift=-60mm]sub.south) node [authorityMsg] {\scriptsize{FollowUp [\(t'_{1}\)]}};
+
+    \node (t21) [below right=52mm and -8mm of sub] {\(t'_{2}\)};
+  }
+}
+#+end_src
+
 
 * Acknowledgements
 :PROPERTIES:
@@ -226,15 +247,15 @@ freedom to explore my ideas, including some entirely adjacent to my
 main area of research. My Emeraude teammates, past and present: Pierre
 Cochard, Maxime Popoff, Orégane Desrentes, Yann Orlarey, Stéphane
 Letz, Romain Bouarah, Romain Fontaine, Bastien Barbe, Florian
-Rascoursier, Louis Ledoux, Benjamin Quiédeville, Anastasia Volkova,
+Rascoussier, Louis Ledoux, Benjamin Quiédeville, Anastasia Volkova,
 Florent de Dinechin, Théo Cantaloube, Clemens Wegener. Other doctoral
 students from other teams (/on est tous en la même galère/): Alix
-Jeannerot, Guillaume, Aurélien Delarge, Mehdi, Khiem Huynh, Antoine Bonneau,
-Julien. Linda Soumari, Cecilia Navarro and Anouchka Ronceray for
-tolerating my slowly-improving French. Djurdjura Mehrad, Élise
-Denoyelle, Stéphanie Wolska and Morgane Le Prince. Frédéric Le Mouël,
-Leonardo Cardoso and Jens Ahrens; Cristoff Ressi, Shawn Silverman, and
-Jean-Michel Friedt.
+Jeannerot, Guillaume Marthe, Aurélien Delarge, Makhloud Mohamed El
+Mehdi, Khiem Huynh, Antoine Bonneau, Julien. Linda Soumari, Cecilia
+Navarro and Anouchka Ronceray for tolerating my slowly-improving
+French. Djurdjura Mehrad, Élise Denoyelle, Stéphanie Wolska and
+Morgane Le Prince. Frédéric Le Mouël, Leonardo Cardoso and Jens
+Ahrens; Cristoff Ressi, Shawn Silverman, and Jean-Michel Friedt.
 
 Others, beyond the confines of the lab: Kimberly Hoole, Irène Hontang,
 Myriam Boussaboua, Cristina Rottondi, Tomas Poloniecki, Julie Darnat
@@ -274,9 +295,13 @@ become the /de facto/ standard for a variety of applications over the
 past three decades. Replacing the previous generation of cumbersome,
 point-to-point installations, it was digital telephony and
 videoconferencing that first embraced audio (and video) over the
-internet protocol (IP) suite\nbsp[cite:@turlettiINRIA1994] and the
-broadcast industry that pioneered audio over
-ethernet\nbsp[cite:@bakkerIntroduction2014].
+internet protocol (IP) suite\nbsp[cite:@hardmanReliable1995;
+@turlettiINRIA1994] and the broadcast industry that pioneered audio
+over ethernet\nbsp[cite:@bakkerIntroduction2014].
+
+Academic research on networked audio began with the SoundWIRE
+project\nbsp[cite:@chafeSimplified2000] from which eventually emerged the
+JackTrip protocol\nbsp[cite:@caceresJackTrip2010; @caceresJackTrip2009c].
 
 ** Computer Networking
 
@@ -408,19 +433,236 @@ If, to the (audio) engineer's eye, those figures suddenly don't look
 so reliable after all, that is entirely understandable. What of the
 purity, the /truth/ of the audio sampling rate? Indeed, an audio system
 governed by a 10 ppm XO, running at a nominal sampling frequency of
-\qty{48}{\kilo\hertz} may run as slow as \(f_{s_{1}} =
-\)\qty{47999.52}{\hertz} or as fast as \(f_{s_{2}} =
-\)\qty{48000.48}{\hertz}. Is this sort of difference perceptible? By
-way of context, that difference is analogous to having two A_{4} tuning
+\qty{48}{\kilo\hertz} may run as slow as \(f_{s_{1}} = \)
+\qty{47999.52}{\hertz} or as fast as \(f_{s_{2}} = \)
+\qty{48000.48}{\hertz}. Is this sort of difference perceptible? By way
+of context, that difference is analogous to having two A_{4} tuning
 forks, one producing a frequency of \qty{439.9956}{\hertz} and another
 at \qty{440.0044}{\hertz}, so a difference of less than one hundredth
-of a cycle per second; this falls far, far below the /just noticeable
-difference/ threshold for human pitch perception. The audio engineer
-notes, however, that the devices running at \(f_{s_{1}}\) and \(f_{s_{2}}\)
-will, after one second, be out of sync by almost the duration of one
-full audio sample (\sim\qty{21}{\micro\second} at \qty{48}{\kilo\hertz}); the
-DSP engineer notes that the sum two audio signals, \(x_{1}[n]\) and
-\(x_{2}[n]\), where \(x_{2}[n] = x_{1}[n-1]\) is a one-zero low-pass filter.
+of a cycle per second (one twentieth of a cent); this falls far, far
+below the /just noticeable difference/ threshold for human pitch
+perception. The audio engineer notes, however, that the devices
+running at \(f_{s_{1}}\) and \(f_{s_{2}}\) will, after one second, be out of
+sync by almost the duration of one full audio sample
+(\sim\qty{21}{\micro\second} at \qty{48}{\kilo\hertz}); the DSP engineer notes
+that the sum two audio signals, \(x_{1}[n]\) and \(x_{2}[n]\), where \(x_{2}[n]
+= x_{1}[n-1]\) is a one-zero low-pass filter.
+
+This manner of /clock drift/ is inevitable in digital systems. To ensure
+a sample-synchronous platform for spatial audio, it is necessary to
+find a means to correct for it.
+
+** Configuring the iMXRT1062 MCU
+
+Before proceeding to a discussion of /time exchange/ mechanisms, it is
+important to deal with how audio timing is configured on our target
+hardware platform, the Teensy 4.1 and its NXP iMXRT1062 MCU.
+
+The iMXRT1062 features a dedicated audio phase locked loop (PLL),
+PLL4, and a /synchronous audio interface/, SAI1, the latter providing
+I^{2}S output. By convention, the output frequency produced by SAI1,
+~SAI1_CLK_ROOT~, \(f_{R}\), must be 256 times oversampled with respect
+to the target audio sampling rate, \(f_{s}\):
+
+#+NAME: eq:sai1-1
+\begin{equation}
+f_{R} = 2^{8}f_{s}\;.
+\end{equation}
+
+The NXP MCUXpresso Config Tools software\nbsp[cite:@MCUXpresso2018]
+indicates that \(f_{R}\) must be lower than or equal to
+\qty{66}{\MHz}, therefore
+
+#+begin_src emacs-lisp :exports none
+(format "Fs <= %f Hz" (/ 66e6 (lsh 1 8)))
+#+end_src
+
+#+RESULTS:
+: Fs <= 257812.500000 Hz
+
+#+NAME: eq:max-fs
+\begin{equation}
+f_{s} \leq 257\,812.5\;\text{Hz}\;.
+\end{equation}
+\(f_{R}\) is found by dividing the frequency of ~PLL4_MAIN_CLK~,
+\(f_{M}\), by the ~SAI1_CLK_PRED~, \(D_{I_{1}}\), and ~SAI1_CLK_PODF~,
+\(D_{I_{2}}\) fields of the ~CCM_CS1CDR~ register:
+
+#+NAME: eq:sai1-2
+\begin{equation}
+f_{R} = \frac{f_{M}}{D_{I_{1}}D_{I_{2}}}\;.
+\end{equation}
+\(f_{M}\) is found by dividing \(f_{P}\), the frequency of PLL4, by
+the ~POST_DIV_SELECT~, \(D_{p}\), and ~AUDIO_DIV~, \(D_{A}\) registers:
+
+#+NAME: eq:pll4-main
+\begin{equation}
+f_{M} = \frac{f_{P}}{D_{p}D_{A}}\;.
+\end{equation}
+\(f_{P}\) is the result of multiplying the iMXRT1062's \qty{24}{\MHz}
+clock source, \(f_{XO}\), by the PLL4 divider, \(D_{P}\):
+
+#+NAME: eq:pll4
+\begin{equation}
+f_{P} = f_{XO}D_{P}\;,
+\end{equation}
+and \(D_{P}\) is, in turn, the sum of the /PLL loop divider/, the
+~DIV_SELECT~ field of the ~CCM_ANALOG_PLL~ ~_AUDIO~ register, \(D_{S}\), with
+the quotient of ~CCM_ANALOG_PLL_AUDIO_NUM~, \(D_{N}\), the /PLL
+fractional loop divider/ numerator register and
+~CCM_ANALOG_PLL_AUDIO_DENOM~, \(D_{D}\), the denominator register:
+
+#+NAME: eq:pll4-divider
+\begin{equation}
+D_{P} = D_{S} + \frac{D_{N}}{D_{D}}\;.
+\end{equation}
+
+The ~DIV_SELECT~ field has a valid range of \(27 \leq D_{S} \leq 54\),
+and \(|D_{N}| < D_{D}\), so \(D_{P}\) describes (in theory) a number in the
+following range:
+
+#+NAME: eq:
+\begin{equation}
+\left(26 + \frac{1}{D_{D}}\right) \leq D_{P} \leq \left(54 + \frac{D_{D}-1}{D_{D}}\right)\;,
+\end{equation}
+with \(1 \leq D_{D} \leq 2^{30}\); effectively, \(26 < D_{P} <
+55\). MCUXpresso Config Tools, and the iMXRT1062 reference
+manual\nbsp[cite:@nxpsemiconductorsIMX2021] (see §13.3.2.2 and
+§14.6.1.3.4), indicate, however, that the output frequency range for
+PLL4 is:
+
+#+NAME: eq:pll4-range
+\begin{equation}
+650\,\text{MHz} \leq f_{P} \leq 1\,300\,\text{MHz}\;,
+\end{equation}
+plus Config Tools contradicts the reference manual and states that
+\(D_{N}\) must be a /positive/ 30 bit integer, so:
+
+#+begin_src emacs-lisp :exports none
+(let ((DpMin (/ 650e6 24e6))
+      (DpMax (/ 1300e6 24e6)))
+  (format "%f <= PLL4 divider <= %f" DpMin DpMax))
+#+end_src
+
+#+RESULTS:
+: 27.083333 <= PLL4 divider <= 54.166667
+
+#+NAME: eq:
+\begin{equation}
+\left(27 + \frac{1}{12}\right) \leq D_{P} \leq \left(54 + \frac{1}{6}\right).
+\end{equation}
+Setting extreme (but valid) values for the divisors, we can find the
+minimal valid \(f_{s}\):
+
+#+begin_src emacs-lisp :exports none
+(let* ((postDivSelect 4)
+       (audioDiv 4)
+       (pll4Div (* postDivSelect audioDiv))
+       (sai1ClkPred 8)
+       (sai1ClkPodf 64)
+       (sai1Div (* sai1ClkPred sai1ClkPodf))
+       (DpMin (/ 650e6 24e6))
+       (fsMin (/ (* 24e6 DpMin) (* pll4Div sai1Div (lsh 1 8))))
+       (fsMax (/ 66e6 (lsh 1 8))))
+  (format "%f Hz <= Fs <= %f Hz" fsMin fsMax))
+#+end_src
+
+#+RESULTS:
+: 309.944153 Hz <= Fs <= 257812.500000 Hz
+
+#+NAME: eq:fs-range
+\begin{equation}
+309.9\;\text{Hz} \leq f_{s} \leq 257\,812.5\;\text{Hz}\;.
+\end{equation}
+
+*** A General Expression for the Sampling Rate
+
+Bringing all of the above together, the general expression for
+achieving a target sampling rate \(\hat{f}_{s}\) is
+
+#+NAME: eq:general-fs
+\begin{align}
+\hat{f}_{s} &= \frac{f_{R}}{2^{8}} \nonumber \\
+  &= \frac{f_{M}}{2^{8}D_{I_{1}}D_{I_{2}}} \nonumber \\
+  &= \frac{f_{XO}D_{P}}{2^{8}D_{p}D_{A}D_{I_{1}}D_{I_{2}}} \nonumber \\
+  &= \frac{24\times10^{6}}{2^{8}}\frac{D_{S}+\frac{D_{N}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}\;.
+\end{align}
+
+This reckoning alone does not take into account certain constraints on
+the system, however, such as cref:eq:pll4-range and the frequency at
+the input of \(D_{I_{2}}\) being less than \qty{300}{\MHz}. There are
+too many free variables to solve for any one of them, so an iterative
+approach to finding appropriate register and field values is
+necessary.
+
+*** Setting the Sampling Rate
+
+#+name: alg:sampling-rate
+#+caption: Algorithm for finding ideal divider register values for a
+#+caption: given sampling rate.
+\begin{algorithm}
+  \tcc{Order of magnitude by which to scale calculations.}
+  \(O_{m}= 1 \times 10^{6}\)
+
+  \For{\(D_{S} \leftarrow 27\) \KwTo \(54\)}{
+    \(D_{N} = 0\)
+
+    \(D_{D} = O_{m}\)
+
+    \(D_{I_{1}} = 1\)
+
+    \(D_{I_{2}} = 1\)
+
+    \(d_{e} = -1\) \tcc{Initial exact divider}
+    \While{\(f_{I_{2}} \leq 300\;\text{MHz}\) and \(D_{I_{1}} < D_{I_{1},MAX}\)}{
+      \(+\!+D_{I_{1}}\)
+    }
+    \While{\(d_{e}/O_{m} \neq D_{S}\)}{
+      \(+\!+D_{I_{2}}\)
+
+      \If{\(\hat{f}_{s} > f_{s,MAX}\) and \(D_{I_{1}} < D_{I_{1},MAX}\)}{
+        \(+\!+D_{I_{1}}\)
+
+        \(D_{I_{2}} = 1\)
+
+        continue
+      }
+      \(d_{e} = \hat{f}_{s}2^{8}D_{I_{1}}D_{I_{2}}/24\)
+
+      \If{\(d_{e}/O_{m} \neq D_{S}\)}{
+        \If{\(D_{I_{1}} < D_{I_{1},MAX}\)}{
+          \(+\!+D_{I_{1}}\)
+
+          \(D_{I_{2}} = 1\)
+
+          continue
+        } \Else {break}
+      }
+
+      \(D_{N} = d_{e} - O_{m}D_{S}\)
+
+      \While{\(D_{N} \times 10 < D_{N,MAX}\) and \(D_{D} \times 10 < D_{D,MAX}\)}{
+        \(D_{N}\;\ast\!= 10\)
+
+        \(D_{D}\;\ast\!= 10\)
+      }
+
+      \If{\(f_{P}\) is valid and \(D_{D} = 1 \times 10^{9}\)}{
+        \Return
+      } \Else {break}
+    }
+  }
+\end{algorithm}
+
+Say we wish to set a sampling rate of \(f_{s} = 48\;\text{kHz}\); our
+target \(f_{R}\), \(\hat{f}_{R}\) equals, as per cref:eq:sai1-1
+
+#+NAME: eq:sai1-clk-root
+\begin{equation}
+\hat{f}_{R} = 48\,000 \times 2^{8} = 12\,288\,000\;\text{Hz}\;.
+\end{equation}
+Strategically leaving \(D_{p}\) and \(D_{A}\) set to their default
+values of 1, 
 
 ** Network Protocols for Time Exchange
 
@@ -428,7 +670,109 @@ DSP engineer notes that the sum two audio signals, \(x_{1}[n]\) and
 
 *** Precision Time Protocol
 
+#+name: fig:ptp
+#+caption: PTP packet flow.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+  \pic{ptp};
+\end{tikzpicture}
+\end{figure}
+
+IEEE 1588 Precision Time Protocol (PTP) is a time exchange mechanism
+consisting of the exchange of multicast network packets between a
+clock authority and a clock subscriber\nbsp[cite:@leeProceedings2005;
+@schleusnerSubMicrosecond2024]. PTP packet flow is illustrated in
+cref:fig:ptp. Flow begins with the clock authority sending a /sync/
+packet; the subscriber notes the time, \(t_{2}\), at which this packet
+arrives. The authority then sends a /follow-up/ packet which is
+timestamped, \(t_{1}\), with the time of transmission. With \(t_{1}\) and
+\(t_{2}\) in hand, the subscriber sends a /delay request/ packet and notes
+the time, \(t_{3}\) of transmission; the authority notes the time, \(t_{4}\)
+of reception of this packet and sends it to the subscriber in a final
+/delay response/ packet. The above process then repeats for the next
+time period, typically a second, beginning with the receipt time
+\(t'_{2}\)of the following sync packet and the receipt of the next
+follow-up packet contanining timestamp \(t'_{1}\). Once the subscriber
+has the above timestamp information it can begin to compute its drift,
+\(\alpha\), delay, \(\delta\), and offset, \(\theta\) relative to the authority:
+
+#+NAME: eq:ptp1
+\begin{align}
+\alpha &= 1 - \frac{t'_{2} - t_{2}}{t'_{1} - t_{1}}\;, \\
+\delta &= \frac{(t_{4} - t_{1}) - (t_{3} - t_{2})}{2}\;, \\
+\theta &= t_{2} - t_{1} - \delta\;.
+\end{align}
+
+Armed with the above figures, the subscriber can feed them into a
+proportional integral (PI) controller to yield a number of nanoseconds
+for second \(n\) by which it should adjust its internal clock,
+
+#+NAME: eq:ptp-pi
+\begin{equation}
+a_{n} = \alpha - K_{P}\theta_{n} + K_{I}\sum_{t=0}^{n}\theta\;,
+\end{equation}
+where \(K_{P}\) and \(K_{I}\) are co-efficients to be applied to the
+proportional and integral terms respectively; small co-efficients,
+typically \(K_{I} < K_{P} < 1\). The adjustment value \(a_{n}\) can be used to
+set, for example, the per-cycle increment of a hardware ethernet timer
+register.
+
 ** Media Clock Recovery
+
+Time exchange at the level of the ethernet subsystems of distributed
+modules does not directly help us achieve audio sampling rate
+parity. The time exchange information derived from PTP must be used to
+condition the audio clocks of the modules such that sampling rate
+parity is achieved; this is a process referred to as /media clock
+recovery/\nbsp[cite:@crankshawMedia2021].
+
+In the case of the iMXRT1062 MCU this process is achieved by using the
+nanoseconds-per-second PTP-derived adjustment value at second \(n\),
+\(a_{n}\), to adjust the sampling rate. For a nominal sampling rate
+\(f_{s}\) (e.g. \qty{48}{\kHz}), the sampling rate, \(\hat{f}_{s,n}\) that
+"matches" that of the time authority is found simply as
+
+#+NAME: eq:sampling-rate-recovery-1
+\begin{equation}
+\hat{f}_{s,n} = f_{s}(1 + a_{n})\;.
+\end{equation}
+For example, if \(a_{n} = -1750\;\text{ns}\), we have
+
+#+begin_src emacs-lisp :exports none
+(let* ((fs 48000)
+       (a -1750e-9)
+       (proportion (+ 1 a))
+       (fhats (* fs proportion)))
+  (format "%.9f %f" proportion fhats))
+#+end_src
+
+#+RESULTS:
+: 0.999998250 47999.916000
+
+#+NAME: eq:
+\begin{align*}
+\hat{f}_{s,n} &= f_{s}(1 - 1750 \times 10^{-9}) \\
+  &= 48\,000 \times 0.999\,998\,25 \\
+  &= 47\,999.916\;\text{Hz}\;.
+\end{align*}
+Inserting this value into the expression for the audio sampling rate
+of the iMXRT1062 yields
+
+#+NAME: eq:
+\begin{equation}
+47\,999.916 = \frac{24 \times 10^{6}}{2^{8}}\frac{D_{S} + \frac{D_{N,n}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}\;,
+\end{equation}
+and rearranging to find the appropriate value for the PLL4 numerator
+register
+
+#+NAME: eq:
+\begin{equation}
+D_{N,n} = D_{D}\left(\frac{2^{8} \times 47\,999.916 \times D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24 \times 10^{6}} - D_{S}\right)
+\end{equation}
+
+In practice cref:eq:sampling-rate-recovery-1 does not suffice,
+however, and some residual parts per billion drift remains (see cref:fig:drift).
 
 ** Presentation Time Recovery
 
@@ -498,7 +842,16 @@ DSP engineer notes that the sum two audio signals, \(x_{1}[n]\) and
 #+latex: \minitoc
 #+latex: \newpage
 
+This is my conclusion
+
+#+include: "backmatter.tex" src latex
+
 #+print_bibliography:
+
+* Footnotes
+
+[fn:1] Emphasis added because a one part-per-trillion clock will lose
+one second on the order of once every thirty-two thousand years.
 
 * Local Variables                                                  :noexport:
 
@@ -506,24 +859,22 @@ DSP engineer notes that the sum two audio signals, \(x_{1}[n]\) and
 - Don't output the title; that's handled by =frontmatter.tex=.
 - Add some export headline filters (see =.dir-locals.el=). 
 
-* Footnotes
+#+begin_example
+Local Variables:
+org-latex-classes: (("thesis" "\\documentclass[a4paper, 12pt, table,
+twoside]{book}
+[NO-DEFAULT-PACKAGES]"
+("\\chapter{%s}" . "\\chapter*{%s}")
+("\\section{%s}" . "\\section*{%s}")
+("\\subsection{%s}" . "\\subsection*{%s}")
+("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+("\\paragraph{%s}" . "\\paragraph*{%s}")
+("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+org-latex-title-command: nil
+org-export-filter-headline-functions: (tar/acks-as-section
+tar/abstract-as-section tar/intro-in-toc)
+End:
 
-[fn:1] Emphasis added because a one part-per-trillion clock will lose
-one second on the order of once every thirty-two thousand years.
+LocalWords: transduced periphony ambisonics microcontroller datagram
+#+end_example
 
-# Local Variables:
-# org-latex-classes: (("thesis" "\\documentclass[a4paper, 12pt, table,
-# twoside]{book}
-# [NO-DEFAULT-PACKAGES]"
-# ("\\chapter{%s}" . "\\chapter*{%s}")
-# ("\\section{%s}" . "\\section*{%s}")
-# ("\\subsection{%s}" . "\\subsection*{%s}")
-# ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-# ("\\paragraph{%s}" . "\\paragraph*{%s}")
-# ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-# org-latex-title-command: nil
-# org-export-filter-headline-functions: (tar/acks-as-section
-# tar/abstract-as-section tar/intro-in-toc)
-# End:
-
-# LocalWords: transduced periphony ambisonics microcontroller datagram

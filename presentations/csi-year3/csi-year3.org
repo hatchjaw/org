@@ -189,9 +189,10 @@ Let's re-use some figures from last year's SMC presentation.
 
 #+begin_src latex
 \ProvidesPackage{csid3figs}
-\usepackage{tikz}
-\usetikzlibrary{shapes, positioning, arrows.meta}
-\usepackage{fontspec}
+\RequirePackage{tikz}
+\usetikzlibrary{positioning, arrows.meta}
+\RequirePackage{bytefield}
+\RequirePackage{fontspec}
 \setmainfont[
   Mapping={tex-text}, 
   Numbers={OldStyle},
@@ -210,15 +211,69 @@ Let's re-use some figures from last year's SMC presentation.
 #+begin_src latex
 \definecolor{ctrlColour}{HTML}{479955}
 \definecolor{audioColour}{HTML}{4077D6}
+\definecolor{usbColour}{HTML}{D63E3E}
 
 \tikzset{
-  device/.style={draw, fill=black!10, rounded corners=1mm, inner xsep=1.5mm},
-  ctrl/.style={-{Triangle[open]}, densely dotted, ctrlColour, line width=.2mm},
+  device/.style={draw, fill=black!10, rounded corners=1mm, inner xsep=1.5mm, align=center},
+  ctrl/.style={densely dotted, ctrlColour, line width=.2mm},
+  ctrlArrow/.style={ctrl, -{Triangle[open]}},
   acn/.style={-{Stealth}, audioColour, densely dashdotted},
   audio/.style={-{Stealth}, audioColour},
   ptp/.style={{Triangle}-{Triangle}},
+  usb/.style={{Triangle[open]}-{Triangle[open]}, usbColour},
   legend/.style={font=\tiny\itshape},
   module/.style={device, fill=ctrlColour!35, font={\scriptsize}, transform shape},
+  authority/.style={device, fill=usbColour!35}
+}
+#+end_src
+
+** System overview
+
+#+begin_src latex
+\tikzset{
+  systemOverview/.pic={
+    \node (auth) [authority] at (0, 0) {Time\\authority};
+    \node (switch) [device, above=5mm of auth, inner xsep=10mm] {Switch};
+    \node (server) [device, below=5mm of auth, inner xsep=10mm] {Server};
+    \node (module0) [module, above left=5mm and -7mm of switch] {T41};
+    \node (moduleN) [module, above right=5mm and -7mm of switch] {T41};
+    \node [above=5mm of switch] {\(\cdots\)};
+
+    % PTP between authority and switch
+    \draw [ptp] (auth.north) -- (switch.south);
+
+    % PTP between switch and modules
+    \draw [ptp] ([xshift=-13.3mm]switch.north) --
+    ([xshift=-2mm]module0.south);
+    \draw [ptp] ([xshift=9.3mm]switch.north) --
+    ([xshift=-2mm]moduleN.south);
+
+    % USB audio
+    \draw [usb] ([xshift=-4mm]auth.south) --
+    ([xshift=-4mm]server.north);
+
+    % PTP follow-up from authority to server
+    \draw [-{Triangle}] ([xshift=4mm]auth.south) --
+    ([xshift=4mm]server.north);
+
+    % Audio from server to switch
+    \draw [audio] ([xshift=-12.5mm]server.north) --
+    ([xshift=-12.5mm]switch.south);
+
+    % Ctrl from server to switch
+    \draw [ctrlArrow] ([xshift=12.5mm]server.north) --
+    ([xshift=12.5mm]switch.south);
+
+    % Audio from switch to modules
+    \draw [audio] ([xshift=-11.3mm]switch.north) -- (module0.south);
+    \draw [audio] ([xshift=11.3mm]switch.north) -- (moduleN.south);
+
+    % Ctrl from switch to modules
+    \draw [ctrlArrow] ([xshift=-9.3mm]switch.north) --
+    ([xshift=2mm]module0.south);
+    \draw [ctrlArrow] ([xshift=13.3mm]switch.north) --
+    ([xshift=2mm]moduleN.south);
+  }
 }
 #+end_src
 
@@ -281,7 +336,7 @@ Bits with which to draw WFS diagrams.
     \node [module] (-body) {dWFS};
     \draw [ptp] (0, -.6) -- (-body.south);
     \draw [audio] (-.25, -.6) -- ([xshift=-.25cm]-body.south);
-    \draw [ctrl] (.25, -.6) -- ([xshift=.25cm]-body.south);
+    \draw [ctrlArrow] (.25, -.6) -- ([xshift=.25cm]-body.south);
   },
   mcus/.pic = {
     \foreach \i [
@@ -337,13 +392,13 @@ Bits with which to draw HOA diagrams.
     \node [module] (-body) {dHOA};
     \draw [ptp] (0, .6) -- (-body.north);
     \draw [acn] (-.25, .6) -- ([xshift=-.25cm]-body.north);
-    \draw [ctrl] (.25, .6) -- ([xshift=.25cm]-body.north);
+    \draw [ctrlArrow] (.25, .6) -- ([xshift=.25cm]-body.north);
   },
   moduleS/.pic = {
     \node [module] (-body) {dHOA};
     \draw [ptp] (0, -.6) -- (-body.south);
     \draw [acn] (-.25, -.6) -- ([xshift=-.25cm]-body.south);
-    \draw [ctrl] (.25, -.6) -- ([xshift=.25cm]-body.south);
+    \draw [ctrlArrow] (.25, -.6) -- ([xshift=.25cm]-body.south);
   },
   hoa/.pic={
     % Azymuthal rings
@@ -678,6 +733,50 @@ If devices are not synchronised, the synthesised soundfield will be destroyed.
 :reveal_extra_attr: data-auto-animate
 :END:
 
+Once the subscriber has \(t_{1}\), \(t_{2}\), \(t_{3}\) and \(t_{4}\) (and \(t'_{1}\)
+and \(t'_{2}\)) it can begin to compute its drift, delay and offset relative to
+the authority.
+
+#+ATTR_REVEAL: :frag t
+\begin{align}
+\text{Drift} &= 1 - \frac{t'_{2} - t_{2}}{t'_{1} - t_{1}} \\[5pt]
+\text{Delay} &= \frac{(t_{4} - t_{1}) - (t_{3} - t_{2})}{2} \\[5pt]
+\text{Offset} &= t_{2} - t_{1} - \text{Delay}
+\end{align}
+
+** IEEE 1588 Precision Time Protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+Running these figures through a proportional integral controller, the
+subscriber can derive sensible values by which it should adjust its
+ethernet timer to maintain parity with the authority.
+
+#+ATTR_REVEAL: :frag t
+The nanoseconds-per-second adjustment, \(a\), is found as
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+a = \text{Drift} - K_{P}\text{Offset} + K_{I}\sum\text{Offset}
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+To recover the media clock, i.e. find a sampling rate \(\hat{f}_{s}\) that "matches"
+that of the time authority, using the nominal sampling rate \(f_{s}\),
+e.g. 48 kHz
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+\hat{f}_{s} = f_{s}(1 + a)
+\end{equation}
+
+
+** IEEE 1588 Precision Time Protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
 #+ATTR_REVEAL: :frag (appear)
 - For best accuracy, requires physical-layer timestamping
 - Devices with such support tend to be expensive
@@ -700,6 +799,44 @@ If devices are not synchronised, the synthesised soundfield will be destroyed.
 - Less than € 50 with audio and ethernet add-ons
 - Programmable in Faust
 
+
+** The time authority
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+ATTR_REVEAL: :frag (appear)
+- One Teensy acts both as a PTP time authority /and/ as a USB audio
+  device.
+- Thus governs both audio timing on the /server/ machine, and PTP time
+  for all capable devices on the network.
+- The server reads its PTP /follow-up/ packets for timestamps to add to
+  out-going audio packets.
+- Depending on OS, may entail configuring network settings to allow
+  reading on /privileged/ network ports, i.e. those below 1024.
+
+** The time authority
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+header: :exports results :results file raw :file "./images/gen/systemOverview.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{csid3figs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic{systemOverview};
+  \matrix [draw] at (3.75, 0) {
+    \draw [ctrlArrow] (0,0) -- (.5,0); & \node [legend] {Control data (UDP)}; \\
+    \draw [audio] (0,0) -- (.5,0); & \node [legend] {Audio (UDP)}; \\
+    \draw [-{Triangle[open]}, usbColour] (0,0) -- (.5,0); & \node [legend] {USB audio}; \\
+    \draw [-{Triangle}] (0,0) -- (.5,0); & \node [legend] {PTP}; \\
+  };
+\end{tikzpicture}
+#+end_src
+
+#+RESULTS:
+[[file:./images/gen/systemOverview.png]]
 
 ** Elimination of clock drift
 :PROPERTIES:
@@ -781,9 +918,23 @@ plotDrift("ptp", "images/gen/withptp.png")
 - Observing this apparent inverse proportionality, I tried to correct
   for it.
 - My attempts were unsuccessful.
-- Solution: take a reference /nanoseconds/ figure on audio subsystem
-  startup and compare with it once per second, computing an additional
-  correction to apply alongside PTP-derived correction.
+- Solution: take a reference nanoseconds figure on audio system
+  startup, \(t_{S}\), and compare it with the nanosecond part of PTP
+  time, \(t_{\text{PTP}}\), once per second (only works if the buffer
+  size is an integer divisor of the sampling rate)
+  
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+O_{AP} = t_{\text{PTP}} - t_{S}
+\end{equation}
+
+#+ATTR_REVEAL: :frag t
+Finally apply another PI controller
+
+#+ATTR_REVEAL: :frag t
+\begin{equation}
+\hat{f}_{s} = f_{s}(1 + a + K_{P}O_{AP} + K_{I}\sum{}O_{AP})
+\end{equation}
 
 
 ** Elimination of clock drift
@@ -895,6 +1046,35 @@ Clients synchronised for an hour to within 100 ns on average.
 - Also a system of supporting software: audio plugins and
   microcontroller firmware
 
+
+** The /Ananas/ protocol
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+Ananas Audio Protocol
+
+Address: =224.4.224.4:49152=
+
+#+header: :exports results :results file raw :file "./images/gen/audioPacket.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{csid3Figs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \node (packet) at (0,0) {
+    \begin{bytefield}[bitwidth=1cm,bitheight=1cm]{16}
+      \bitheader{0-15} \\
+      \bitbox{2}{Seq. num.} & \bitbox{8}{Timestamp} & \bitbox{1}{\scriptsize{Num. channels}} & \bitbox{2}{Num. frames} & \bitbox[lrt]{3}{} \\
+      \wordbox[lr]{1}{Audio} \\
+      \skippedwords \\
+      \wordbox[lrb]{1}{} \\
+    \end{bytefield}%
+  };
+\end{tikzpicture}
+#+end_src
+
+#+RESULTS:
+[[file:./images/gen/audioPacket.png]]
 
 ** The /Ananas/ protocol
 :PROPERTIES:

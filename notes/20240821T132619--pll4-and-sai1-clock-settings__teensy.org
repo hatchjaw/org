@@ -191,8 +191,8 @@ F_{I} = \frac{F_{M}}{D_{I_{1}}D_{I_{2}}}
 F_{M} = \frac{F_{P}}{D_{p}D_{A}}
 \end{equation}
 
-\(F_{P}\) is the result of the multiplying the 24 MHz clock source
-(\(F_{X}\)) by the PLL4 divider, \(D_{P}\):
+\(F_{P}\) is the result of multiplying the 24 MHz clock source (\(F_{X}\))
+by the PLL4 divider, \(D_{P}\):
 
 #+NAME: eq:pll4-freq
 \begin{equation}
