@@ -456,6 +456,29 @@ find a means to correct for it.
 
 ** Configuring the iMXRT1062 MCU
 
+#+name: fig:imxrt1062-clock
+#+caption: iMXRT1062 audio PLL and SAI1 clock divider registers.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+  \node [draw] (osc) {OSC 24M};
+  \node [draw] (pll4) [right=.75cm of osc] {\(\times \left(D_{S} + \frac{D_{N}}{D_{D}}\right)\)};
+  \node (pll4label) [above=0cm of pll4] {\small{PLL4}};
+  \node [draw] (dp) [right=.75cm of pll4] {\(D_{p}\)};
+  \node [draw] (dA) [right=.5cm of dp] {\(D_{A}\)};
+  \node [draw] (dI1) [right=.75cm of dA] {\(D_{I_{1}}\)};
+  \node [draw] (dI2) [right=2cm of dI1] {\(D_{I_{2}}\)};
+  \node (fR) [right=1.5cm of dI2] {\(f_{R}\)};
+
+  \draw [-{Triangle}] (osc.east) -- (pll4.west) node [above, midway] {\scriptsize{\(f_{XO}\)}};
+  \draw [-{Triangle}] (pll4.east) -- (dp.west) node [above, midway] {\scriptsize{\(f_{P}\)}};
+  \draw [-{Triangle}] (dp.east) -- (dA.west);
+  \draw [-{Triangle}] (dA.east) -- (dI1.west) node [above, midway] {\scriptsize{\(f_{M}\)}};
+  \draw [-{Triangle}] (dI1.east) -- (dI2.west) node [above, midway] {\scriptsize{\(\leq 300 \text{MHz}\)}};
+  \draw [-{Triangle}] (dI2.east) -- (fR.west) node [above, midway] {\scriptsize{\(\leq 66 \text{MHz}\)}};
+\end{tikzpicture}
+\end{figure}
+
 Before proceeding to a discussion of /time exchange/ mechanisms, it is
 important to deal with how audio timing is configured on our target
 hardware platform, the Teensy 4.1 and its NXP iMXRT1062 MCU.
@@ -518,6 +541,9 @@ fractional loop divider/ numerator register and
 \begin{equation}
 D_{P} = D_{S} + \frac{D_{N}}{D_{D}}\;.
 \end{equation}
+See cref:fig:imxrt1062-clock for a diagrammatic representation of the
+effect of the audio PLL and clock divider registers on the
+\qty{24}{\MHz} clock source.
 
 The ~DIV_SELECT~ field has a valid range of \(27 \leq D_{S} \leq 54\),
 and \(|D_{N}| < D_{D}\), so \(D_{P}\) describes (in theory) a number in the
@@ -590,10 +616,10 @@ achieving a target sampling rate \(\hat{f}_{s}\) is
 \end{align}
 This reckoning alone does not take into account certain constraints on
 the system, however, such as cref:eq:pll4-range and the frequency at
-the input of \(D_{I_{2}}\) being less than \qty{300}{\MHz}. There are
-too many free variables to solve for any one of them, so an iterative
-approach to finding appropriate register and field values is
-necessary.
+the input of \(D_{I_{2}}\) being less than \qty{300}{\MHz} (see
+cref:fig:imxrt1062-clock). There are too many free variables to solve
+for any one of them, so an iterative approach to finding appropriate
+register and field values is necessary.
 
 *** Setting the Sampling Rate
 :PROPERTIES:
@@ -941,7 +967,29 @@ which can be used as a new value for the ~CCM_ANALOG_PLL_AUDIO_NUM~
 register of the iMXRT1062 MCU.
 
 In practice cref:eq:sampling-rate-recovery-1 does not suffice,
-however, and some residual parts per billion drift remains (see cref:fig:drift).
+however, and some residual parts per billion drift remains (see
+cref:fig:drift). The proposed solution is as follows: first, observing
+that at a nominal sampling rate of \qty{48}{\kHz} for power of two
+audio buffer sizes less than or equal to 128 there will be an integer
+number, \(I\), of audio interrupts per second, take a representative
+nanoseconds figure, \(t_{S}\), on audio system startup; second, every
+\(I\) interrupts, reading the system's PTP timer, taking the
+nanoseconds part, \(t_{\text{PTP}}\) and comparing with \(t_{S}\):
+
+#+NAME: eq:audio-ptp-offset
+\begin{equation}
+\Delta_{n} = t_{\text{PTP}} - t_{S}\;;
+\end{equation}
+finally, applying another PI controller:
+
+#+NAME: eq:sampling-rate-recovery-2
+\begin{equation}
+\hat{f}_{s,n} = f_{s}\left(
+  1 + a_{n} + K_{P_{\Delta}}\Delta_{n} + K_{I_{\Delta}}\sum_{t=0}^{n}\Delta
+\right)\;.
+\end{equation}
+These additional correction factors ensure reliable media clock
+recovery indefinitely.
 
 ** Presentation Time Recovery
 
