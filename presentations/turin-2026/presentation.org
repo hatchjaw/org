@@ -863,7 +863,7 @@ Finally apply another PI controller
 :END:
 
 #+ATTR_REVEAL: :frag (appear)
-- For now, let's assume a linear speaker array.
+- Assume a linear speaker array.
 - Requires that the server knows the number of modules and the speaker
   spacing.
 - From these, the server can compute co-ordinates for the pairs of

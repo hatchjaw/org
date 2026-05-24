@@ -145,7 +145,6 @@ Fancy characters (typically) at the beginning of chapters.
 *** References
 
 #+begin_src latex
-\RequirePackage[noabbrev,capitalise]{cleveref}
 \RequirePackage{hyperref}
 \hypersetup{
   unicode,
@@ -157,6 +156,7 @@ Fancy characters (typically) at the beginning of chapters.
   bookmarksnumbered,
   pdfstartview=XYZ
 }
+\RequirePackage[noabbrev]{cleveref}
 #+end_src
 
 *** Figures
@@ -169,13 +169,15 @@ Fancy characters (typically) at the beginning of chapters.
 *** Automatically include tof in contents
 
 #+begin_src latex
-\RequirePackage{tocbibind}
+%% \RequirePackage{tocbibind}
 #+end_src
 
 *** Algorithms
 
 #+begin_src latex
 \RequirePackage[ruled, vlined, linesnumbered]{algorithm2e}
+\crefname{algocf}{algorithm}{algorithms}
+\Crefname{algocf}{Algorithm}{Algorithms}
 #+end_src
 
 ** Figures
@@ -493,7 +495,7 @@ f_{s} \leq 257\,812.5\;\text{Hz}\;.
 f_{R} = \frac{f_{M}}{D_{I_{1}}D_{I_{2}}}\;.
 \end{equation}
 \(f_{M}\) is found by dividing \(f_{P}\), the frequency of PLL4, by
-the ~POST_DIV_SELECT~, \(D_{p}\), and ~AUDIO_DIV~, \(D_{A}\) registers:
+the ~POST_DIV_SELECT~, \(D_{p}\), and ~AUDIO _DIV~, \(D_{A}\), registers:
 
 #+NAME: eq:pll4-main
 \begin{equation}
@@ -527,9 +529,8 @@ following range:
 \end{equation}
 with \(1 \leq D_{D} \leq 2^{30}\); effectively, \(26 < D_{P} <
 55\). MCUXpresso Config Tools, and the iMXRT1062 reference
-manual\nbsp[cite:@nxpsemiconductorsIMX2021] (see §13.3.2.2 and
-§14.6.1.3.4), indicate, however, that the output frequency range for
-PLL4 is:
+manual\nbsp[cite:@nxpsemiconductorsIMX2021 §13.3.2.2], indicate,
+however, that the output frequency range for PLL4 is:
 
 #+NAME: eq:pll4-range
 \begin{equation}
@@ -587,7 +588,6 @@ achieving a target sampling rate \(\hat{f}_{s}\) is
   &= \frac{f_{XO}D_{P}}{2^{8}D_{p}D_{A}D_{I_{1}}D_{I_{2}}} \nonumber \\
   &= \frac{24\times10^{6}}{2^{8}}\frac{D_{S}+\frac{D_{N}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}\;.
 \end{align}
-
 This reckoning alone does not take into account certain constraints on
 the system, however, such as cref:eq:pll4-range and the frequency at
 the input of \(D_{I_{2}}\) being less than \qty{300}{\MHz}. There are
@@ -596,6 +596,9 @@ approach to finding appropriate register and field values is
 necessary.
 
 *** Setting the Sampling Rate
+:PROPERTIES:
+:CUSTOM_ID: sec:setting-the-sampling-rate
+:END:
 
 #+name: alg:sampling-rate
 #+caption: Algorithm for finding ideal divider register values for a
@@ -627,9 +630,9 @@ necessary.
 
         continue
       }
-      \(d_{e} = \hat{f}_{s}2^{8}D_{I_{1}}D_{I_{2}}/24\)
+      \(d_{e} = 2^{8}\hat{f}_{s}D_{I_{1}}D_{I_{2}}/24\)
 
-      \If{\(d_{e}/O_{m} \neq D_{S}\)}{
+      \If{\(\lfloor{}d_{e}/O_{m}\rfloor \neq D_{S}\)}{
         \If{\(D_{I_{1}} < D_{I_{1},MAX}\)}{
           \(+\!+D_{I_{1}}\)
 
@@ -662,7 +665,157 @@ target \(f_{R}\), \(\hat{f}_{R}\) equals, as per cref:eq:sai1-1
 \hat{f}_{R} = 48\,000 \times 2^{8} = 12\,288\,000\;\text{Hz}\;.
 \end{equation}
 Strategically leaving \(D_{p}\) and \(D_{A}\) set to their default
-values of 1, 
+values of 1, cref:alg:sampling-rate can be used to find values for
+\(D_{S}\), \(D_{N}\), \(D_{D}\), \(D_{I_{1}}\) and \(D_{I_{2}}\).
+
+#+begin_src julia :results output :eval never-export :exports results
+using Printf, Format
+
+let
+    # This will simplify some of the calculations, and should help
+    # with getting accurate results, particularly in C++.
+    MHz = 1e6
+    oscMHz = 24;
+    oscHz = oscMHz * MHz
+    oversamplingRatio = 1 << 8
+    Fs = 48000
+    fR = Fs * oversamplingRatio
+    # Adjustment to all figures so we can compare integer targets...
+    cyclesPerOversample = oscHz/oversamplingRatio
+    # Frequency limitaitions
+    pll4Min = 650 * MHz
+    pll4Max = 1300 * MHz
+    sai1PostMaxInputFreq = 300 * MHz
+    numMax = (1 << 29) - 1
+    denomMax = (1 << 30) - 1
+
+    @printf "Target sample rate:   %s Hz\n" cfmt("%'d", Fs)
+    @printf "Target SAI1_CLK_ROOT: %s Hz\n\n" cfmt("%'d", fR)
+
+    @printf "fXO * (DS + DN / DD)/(DA * Dp * DI1 * DI2) = %f Hz\n" fR
+
+    for div in 27:54
+        num = 0            # Initial numerator
+        denom = 1e6        # Start with millionths
+        sai1Pre = 1        # Initial SAI1 pre-divider
+        sai1Post = 1       # and post-divider
+        divExact = -1.0        
+
+        pllFreq = oscHz * (div + num / denom)
+
+        # Adjust first sai1 divider to get a valid input to the second
+        # divider
+        while pllFreq / sai1Pre > sai1PostMaxInputFreq && sai1Pre < 8
+            sai1Pre += 1
+        end
+
+        while floor(divExact / MHz) != div
+            # Adjust second sai1 divider to get a value below the target
+            while cyclesPerOversample * div / (sai1Pre * sai1Post) > Fs && sai1Post < 64
+                sai1Post += 1
+            end
+
+            # If target Fs is greater than the current achievable Fs,
+            # try another combination of SAI1 dividers.
+            if (Fs > ((div + 1)/(sai1Pre * sai1Post)) * cyclesPerOversample
+                && sai1Pre < 8)
+                sai1Pre += 1
+                sai1Post = 1
+                continue
+            end
+
+            # Divide by the main oscillator's frequency in MHz to get
+            # a better-behaved number with which to calculate.
+            divExact = Fs * oversamplingRatio * sai1Pre * sai1Post / oscMHz
+
+            # If fractional and integer div don't have the same
+            # integer part, something's wrong; try a different SAI1
+            # predivider.
+            if floor(divExact / MHz) != div
+                if sai1Pre < 8
+                    sai1Pre += 1
+                    sai1Post = 1
+                    continue
+                else
+                    break
+                end
+            end
+
+            num = floor(divExact - div * MHz)
+
+            # Scale num and denom to take greatest possible advantage
+            # of the available numerical resolution.
+            while num * 10 < numMax && denom * 10 < denomMax
+                num *= 10;
+                denom *= 10;
+            end
+
+            pll4Freq = oscHz * (div + num/denom)
+            
+            if pll4Freq > pll4Min && pll4Freq < pll4Max && denom == 1e9
+                # Found a match
+                @printf "24 MHz * (%d + %d/%d)" div num denom
+                @printf "/(1 * 1 * %d * %d)" sai1Pre sai1Post
+                @printf " = %f\n" 24e6 * (div + num / denom) / (sai1Pre * sai1Post)
+            else
+                break
+            end
+        end
+    end
+end
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Target sample rate:   48,000 Hz
+Target SAI1_CLK_ROOT: 12,288,000 Hz
+
+fXO * (DS + DN / DD)/(DA * Dp * DI1 * DI2) = 12288000.000000 Hz
+24 MHz * (29 + 184000000/1000000000)/(1 * 1 * 3 * 19) = 12288000.000000
+24 MHz * (32 + 256000000/1000000000)/(1 * 1 * 3 * 21) = 12288000.000000
+24 MHz * (35 + 328000000/1000000000)/(1 * 1 * 3 * 23) = 12288000.000000
+24 MHz * (43 + 8000000/1000000000)/(1 * 1 * 4 * 21) = 12288000.000000
+24 MHz * (45 + 56000000/1000000000)/(1 * 1 * 4 * 22) = 12288000.000000
+24 MHz * (46 + 80000000/1000000000)/(1 * 1 * 5 * 18) = 12288000.000000
+24 MHz * (47 + 104000000/1000000000)/(1 * 1 * 4 * 23) = 12288000.000000
+24 MHz * (49 + 152000000/1000000000)/(1 * 1 * 4 * 24) = 12288000.000000
+24 MHz * (50 + 176000000/1000000000)/(1 * 1 * 7 * 14) = 12288000.000000
+24 MHz * (51 + 200000000/1000000000)/(1 * 1 * 5 * 20) = 12288000.000000
+24 MHz * (52 + 224000000/1000000000)/(1 * 1 * 6 * 17) = 12288000.000000
+#+end_example
+In practice the first such result can be used yielding the following
+values:
+
+- \(D_{S} = 29\)
+- \(D_{N} = 184\,000\,000\)
+- \(D_{D} = 1\,000\,000\,000\)
+- \(D_{I_{1}} = 3\)
+- \(D_{I_{2}} = 19\)
+
+*** Fine-tuning the sampling rate
+
+Say a set of divider register values has been established using
+cref:alg:sampling-rate, and some manner of fine adjustment is desired,
+e.g. to compensate for clock drift. Cref:eq:general-fs can be
+rewritten to find an expression for an unknown \(D_{N}\):
+
+#+NAME: eq:unknown-dn
+\begin{equation}
+D_{N} = D_{D}\left(
+  \frac{2^{8}\hat{f}_{s}D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24 \times 10^{6}} - D_{S}
+\right)\;.
+\end{equation}
+For very large \(D_{D}\) it may be advantageous to divide by the main
+oscillator's frequency in \unit{\MHz} instead of \unit{\Hz}; to do so,
+multiply the contents of the parenthesis in cref:eq:unknown-dn by one
+million and divide the outside by one million to compensate:
+
+#+NAME: eq:unknown-dn-2
+\begin{equation}
+D_{N} = \frac{D_{D}}{1 \times 10^{6}}\left(
+  \frac{2^{8}\hat{f}_{s}D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24} - 1 \times 10^{6}D_{S}
+\right)\;.
+\end{equation}
 
 ** Network Protocols for Time Exchange
 
@@ -686,16 +839,17 @@ clock authority and a clock subscriber\nbsp[cite:@leeProceedings2005;
 cref:fig:ptp. Flow begins with the clock authority sending a /sync/
 packet; the subscriber notes the time, \(t_{2}\), at which this packet
 arrives. The authority then sends a /follow-up/ packet which is
-timestamped, \(t_{1}\), with the time of transmission. With \(t_{1}\) and
-\(t_{2}\) in hand, the subscriber sends a /delay request/ packet and notes
-the time, \(t_{3}\) of transmission; the authority notes the time, \(t_{4}\)
-of reception of this packet and sends it to the subscriber in a final
-/delay response/ packet. The above process then repeats for the next
-time period, typically a second, beginning with the receipt time
-\(t'_{2}\)of the following sync packet and the receipt of the next
-follow-up packet contanining timestamp \(t'_{1}\). Once the subscriber
-has the above timestamp information it can begin to compute its drift,
-\(\alpha\), delay, \(\delta\), and offset, \(\theta\) relative to the authority:
+timestamped, \(t_{1}\), with the time of transmission. With \(t_{1}\)
+and \(t_{2}\) in hand, the subscriber sends a /delay request/ packet
+and notes the time, \(t_{3}\) of transmission; the authority notes the
+time, \(t_{4}\) of reception of this packet and sends it to the
+subscriber in a final /delay response/ packet. The above process then
+repeats for the next time period, typically a second, beginning with
+the receipt time \(t'_{2}\)of the following sync packet and the
+receipt of the next follow-up packet containing timestamp
+\(t'_{1}\). Once the subscriber has the above timestamp information it
+can begin to compute its drift, \(\alpha\), delay, \(\delta\), and
+offset, \(\theta\) relative to the authority:
 
 #+NAME: eq:ptp1
 \begin{align}
@@ -750,26 +904,41 @@ For example, if \(a_{n} = -1750\;\text{ns}\), we have
 #+RESULTS:
 : 0.999998250 47999.916000
 
-#+NAME: eq:
+#+NAME: eq:adjust-example
 \begin{align*}
 \hat{f}_{s,n} &= f_{s}(1 - 1750 \times 10^{-9}) \\
   &= 48\,000 \times 0.999\,998\,25 \\
   &= 47\,999.916\;\text{Hz}\;.
 \end{align*}
-Inserting this value into the expression for the audio sampling rate
-of the iMXRT1062 yields
+Inserting this value into cref:eq:general-fs, the expression for the
+audio sampling rate of the iMXRT1062, yields
 
-#+NAME: eq:
+#+NAME: eq:adjusted-fs
 \begin{equation}
 47\,999.916 = \frac{24 \times 10^{6}}{2^{8}}\frac{D_{S} + \frac{D_{N,n}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}\;,
 \end{equation}
-and rearranging to find the appropriate value for the PLL4 numerator
-register
+and rearranging, using cref:eq:unknown-dn-2 to find the appropriate
+value for the PLL4 numerator register
 
-#+NAME: eq:
+#+NAME: eq:adjusted-dn
 \begin{equation}
-D_{N,n} = D_{D}\left(\frac{2^{8} \times 47\,999.916 \times D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24 \times 10^{6}} - D_{S}\right)
+D_{N,n} = \frac{D_{D}}{1 \times 10^{6}}\left(
+  \frac{2^{8} \times 47\,999.916 \times D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24} -
+  1 \times 10^{6} D_{S}
+\right)\;.
 \end{equation}
+Using the values derived in cref:sec:setting-the-sampling-rate yields
+
+#+NAME: eq:adjusted-dn-2
+\begin{align*}
+D_{N,n} &= 1 \times 10^{3}\left(
+  \frac{2^{8} \times 47\,999.916 \times 3 \times 19}{24} -
+  29 \times 10^{6}
+\right) \\
+  &= 183\,948\,928\;,
+\end{align*}
+which can be used as a new value for the ~CCM_ANALOG_PLL_AUDIO_NUM~
+register of the iMXRT1062 MCU.
 
 In practice cref:eq:sampling-rate-recovery-1 does not suffice,
 however, and some residual parts per billion drift remains (see cref:fig:drift).

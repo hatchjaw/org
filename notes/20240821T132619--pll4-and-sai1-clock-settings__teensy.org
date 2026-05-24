@@ -306,9 +306,9 @@ let
     MHz = 1e6
     oscMHz = 24;
     oscHz = oscMHz * MHz
-    wordsize = 1 << 8
+    oversamplingRatio = 1 << 8
     # Adjustment to all figures so we can compare integer targets...
-    cyclesPerWord = oscHz/wordsize
+    cyclesPerOversample = oscHz/oversamplingRatio
     # Frequency limitaitions
     pll4Min = 650 * MHz
     pll4Max = 1300 * MHz
@@ -336,13 +336,13 @@ let
 
         while floor(divExact / MHz) != div
             # Adjust second sai1 divider to get a value below the target
-            while cyclesPerWord * div / (sai1Pre * sai1Post) > Fs && sai1Post < 64
+            while cyclesPerOversample * div / (sai1Pre * sai1Post) > Fs && sai1Post < 64
                 sai1Post += 1
             end
 
             # If target Fs is greater than the current achievable Fs,
             # try another combination of SAI1 dividers.
-            if (Fs > ((div + 1)/(sai1Pre * sai1Post)) * cyclesPerWord
+            if (Fs > ((div + 1)/(sai1Pre * sai1Post)) * cyclesPerOversample
                 && sai1Pre < 8)
                 sai1Pre += 1
                 sai1Post = 1
@@ -351,7 +351,7 @@ let
 
             # Divide by the main oscillator's frequency in MHz to get
             # a better-behaved number with which to calculate.
-            divExact = Fs * wordsize * sai1Pre * sai1Post / oscMHz
+            divExact = Fs * oversamplingRatio * sai1Pre * sai1Post / oscMHz
 
             # If fractional and integer div don't have the same
             # integer part, something's wrong; try a different SAI1
@@ -377,7 +377,7 @@ let
 
             pll4Freq = oscHz * (div + num/denom)
             
-            if pll4Freq > pll4Min && pll4Freq < pll4Max
+            if pll4Freq > pll4Min && pll4Freq < pll4Max && denom == 1e9
                 # Found a match
                 @printf "24 MHz * (%d + %d/%d)" div num denom
                 @printf "/(1 * 1 * %d * %d)" sai1Pre sai1Post
@@ -395,28 +395,17 @@ end
 Target sample rate:   48,000 Hz
 Target SAI1_CLK_ROOT: 12,288,000 Hz
 
-24 MHz * (27 + 64800000/100000000)/(1 * 1 * 3 * 18) = 12288000.000000
-24 MHz * (28 + 67200000/100000000)/(1 * 1 * 4 * 14) = 12288000.000000
 24 MHz * (29 + 184000000/1000000000)/(1 * 1 * 3 * 19) = 12288000.000000
-24 MHz * (30 + 72000000/100000000)/(1 * 1 * 3 * 20) = 12288000.000000
 24 MHz * (32 + 256000000/1000000000)/(1 * 1 * 3 * 21) = 12288000.000000
-24 MHz * (33 + 79200000/100000000)/(1 * 1 * 3 * 22) = 12288000.000000
-24 MHz * (34 + 81600000/100000000)/(1 * 1 * 4 * 17) = 12288000.000000
 24 MHz * (35 + 328000000/1000000000)/(1 * 1 * 3 * 23) = 12288000.000000
-24 MHz * (36 + 86400000/100000000)/(1 * 1 * 3 * 24) = 12288000.000000
-24 MHz * (38 + 91200000/100000000)/(1 * 1 * 4 * 19) = 12288000.000000
-24 MHz * (39 + 93600000/100000000)/(1 * 1 * 6 * 13) = 12288000.000000
-24 MHz * (40 + 96000000/100000000)/(1 * 1 * 4 * 20) = 12288000.000000
 24 MHz * (43 + 8000000/1000000000)/(1 * 1 * 4 * 21) = 12288000.000000
 24 MHz * (45 + 56000000/1000000000)/(1 * 1 * 4 * 22) = 12288000.000000
 24 MHz * (46 + 80000000/1000000000)/(1 * 1 * 5 * 18) = 12288000.000000
 24 MHz * (47 + 104000000/1000000000)/(1 * 1 * 4 * 23) = 12288000.000000
-24 MHz * (48 + 64000000/100000000)/(1 * 1 * 5 * 19) = 12288000.000000
 24 MHz * (49 + 152000000/1000000000)/(1 * 1 * 4 * 24) = 12288000.000000
 24 MHz * (50 + 176000000/1000000000)/(1 * 1 * 7 * 14) = 12288000.000000
 24 MHz * (51 + 200000000/1000000000)/(1 * 1 * 5 * 20) = 12288000.000000
 24 MHz * (52 + 224000000/1000000000)/(1 * 1 * 6 * 17) = 12288000.000000
-24 MHz * (53 + 76000000/100000000)/(1 * 1 * 5 * 21) = 12288000.000000
 #+end_example
 
 That's a lot of options, without even using \(D_{P}\) and \(D_{A}\). Some of
@@ -459,20 +448,20 @@ For example:
 #+begin_src julia :results output :eval never-export :exports both
 MHz = 1e6
 oscMHz = 24
-div = 43
+div = 29
 denom = 1e9
-wordsize = 1 << 8
-sai1Pre = 4
-sai1Post = 21
+oversamplingRatio = 1 << 8
+sai1Pre = 3
+sai1Post = 19
 Fs = 48000 + 1/17
 
-num = (denom / MHz) * ((wordsize * Fs * sai1Pre * sai1Post) / oscMHz - div * MHz)
+num = (denom / MHz) * ((oversamplingRatio * Fs * sai1Pre * sai1Post) / oscMHz - div * MHz)
 
 @printf "num = %d\n" num
 #+end_src
 
 #+RESULTS:
-: num = 8052706
+: num = 184035765
 
 * Footnotes
 

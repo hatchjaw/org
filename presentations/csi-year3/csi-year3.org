@@ -124,7 +124,7 @@ body {
 But not in code blocks, and don't use ligatures.
 
 #+begin_src css
-.reveal pre {
+.reveal pre, code {
     font-variant-numeric: normal;
     font-variant-ligatures: none;
 }
@@ -538,23 +538,23 @@ Bits with which to draw HOA diagrams.
     
     \node (t1) [below left=2mm and -8mm of auth] {\(t_{1}\)};
     
-    \draw [-{Stealth}] ([yshift=-5.5mm]auth.south) -- ([yshift=-13.5mm]sub.south) node [authorityMsg] {\ultratiny{Sync}};
-    \draw [-{Stealth}] ([yshift=-10.5mm]auth.south) -- ([yshift=-18.5mm]sub.south) node [authorityMsg] {\ultratiny{FollowUp [\(t_{1}\)]}};
+    \draw [-{Stealth}] ([yshift=-5.5mm]auth.south) -- ([yshift=-13.5mm]sub.south) node [authorityMsg] {\scriptsize{Sync}};
+    \draw [-{Stealth}] ([yshift=-10.5mm]auth.south) -- ([yshift=-18.5mm]sub.south) node [authorityMsg] {\scriptsize{FollowUp [\(t_{1}\)]}};
 
     \node (t2) [below right=11mm and -8mm of sub] {\(t_{2}\)};
 
     \node (t3) [below right=21.5mm and -8mm of sub] {\(t_{3}\)};
 
-    \draw [-{Stealth}] ([yshift=-24mm]sub.south) -- ([yshift=-32mm]auth.south) node [subscriberMsg] {\ultratiny{DelayReq}};
+    \draw [-{Stealth}] ([yshift=-24mm]sub.south) -- ([yshift=-32mm]auth.south) node [subscriberMsg] {\scriptsize{DelayReq}};
 
     \node (t4) [below left=29mm and -8mm of auth] {\(t_{4}\)};
 
-    \draw [-{Stealth}] ([yshift=-36mm]auth.south) -- ([yshift=-44mm]sub.south) node [authorityMsg] {\ultratiny{DelayResp [\(t_{4}\)]}};
+    \draw [-{Stealth}] ([yshift=-36mm]auth.south) -- ([yshift=-44mm]sub.south) node [authorityMsg] {\scriptsize{DelayResp [\(t_{4}\)]}};
 
     \node (t11) [below left=43mm and -8mm of auth] {\(t'_{1}\)};
     
-    \draw [-{Stealth}] ([yshift=-47mm]auth.south) -- ([yshift=-55mm]sub.south) node [authorityMsg] {\ultratiny{Sync}};
-    \draw [-{Stealth}] ([yshift=-52mm]auth.south) -- ([yshift=-60mm]sub.south) node [authorityMsg] {\ultratiny{FollowUp [\(t'_{1}\)]}};
+    \draw [-{Stealth}] ([yshift=-47mm]auth.south) -- ([yshift=-55mm]sub.south) node [authorityMsg] {\scriptsize{Sync}};
+    \draw [-{Stealth}] ([yshift=-52mm]auth.south) -- ([yshift=-60mm]sub.south) node [authorityMsg] {\scriptsize{FollowUp [\(t'_{1}\)]}};
 
     \node (t21) [below right=52mm and -8mm of sub] {\(t'_{2}\)};
   }
@@ -734,14 +734,14 @@ If devices are not synchronised, the synthesised soundfield will be destroyed.
 :END:
 
 Once the subscriber has \(t_{1}\), \(t_{2}\), \(t_{3}\) and \(t_{4}\) (and \(t'_{1}\)
-and \(t'_{2}\)) it can begin to compute its drift, delay and offset relative to
-the authority.
+and \(t'_{2}\)) it can begin to compute its drift, \(\alpha\), delay, \(\delta\),
+and offset, \(\theta\), relative to the authority.
 
 #+ATTR_REVEAL: :frag t
 \begin{align}
-\text{Drift} &= 1 - \frac{t'_{2} - t_{2}}{t'_{1} - t_{1}} \\[5pt]
-\text{Delay} &= \frac{(t_{4} - t_{1}) - (t_{3} - t_{2})}{2} \\[5pt]
-\text{Offset} &= t_{2} - t_{1} - \text{Delay}
+\alpha &= 1 - \frac{t'_{2} - t_{2}}{t'_{1} - t_{1}} \\[5pt]
+\delta &= \frac{(t_{4} - t_{1}) - (t_{3} - t_{2})}{2} \\[5pt]
+\theta &= t_{2} - t_{1} - \delta
 \end{align}
 
 ** IEEE 1588 Precision Time Protocol
@@ -754,11 +754,11 @@ subscriber can derive sensible values by which it should adjust its
 ethernet timer to maintain parity with the authority.
 
 #+ATTR_REVEAL: :frag t
-The nanoseconds-per-second adjustment, \(a\), is found as
+The nanoseconds-per-second adjustment, \(a_{n}\), is found as
 
 #+ATTR_REVEAL: :frag t
 \begin{equation}
-a = \text{Drift} - K_{P}\text{Offset} + K_{I}\sum\text{Offset}
+a_{n} = \alpha - K_{P}\theta_{n} + K_{I}\sum_{t=0}^{n}\theta
 \end{equation}
 
 #+ATTR_REVEAL: :frag t
@@ -768,7 +768,7 @@ e.g. 48 kHz
 
 #+ATTR_REVEAL: :frag t
 \begin{equation}
-\hat{f}_{s} = f_{s}(1 + a)
+\hat{f}_{s,n} = f_{s}(1 + a_{n})
 \end{equation}
 
 
@@ -805,6 +805,8 @@ e.g. 48 kHz
 :reveal_extra_attr: data-auto-animate
 :END:
 
+[[./images/t41.png]]
+
 #+ATTR_REVEAL: :frag (appear)
 - One Teensy acts both as a PTP time authority /and/ as a USB audio
   device.
@@ -834,7 +836,7 @@ e.g. 48 kHz
   };
 \end{tikzpicture}
 #+end_src
-
+#+attr_html: :width 1000
 #+RESULTS:
 [[file:./images/gen/systemOverview.png]]
 
@@ -925,7 +927,7 @@ plotDrift("ptp", "images/gen/withptp.png")
   
 #+ATTR_REVEAL: :frag t
 \begin{equation}
-O_{AP} = t_{\text{PTP}} - t_{S}
+\Delta = t_{\text{PTP}} - t_{S}
 \end{equation}
 
 #+ATTR_REVEAL: :frag t
@@ -933,33 +935,8 @@ Finally apply another PI controller
 
 #+ATTR_REVEAL: :frag t
 \begin{equation}
-\hat{f}_{s} = f_{s}(1 + a + K_{P}O_{AP} + K_{I}\sum{}O_{AP})
+\hat{f}_{s,n} = f_{s}(1 + a_{n} + K_{P_{\Delta}}\Delta_{n} + K_{I_{\Delta}}\sum_{t=0}^{n}\Delta)
 \end{equation}
-
-
-** Elimination of clock drift
-:PROPERTIES:
-:reveal_extra_attr: data-auto-animate
-:END:
-
-#+begin_src c++
-void AudioSystemManager::audioISR() {
-  if (++numInterrupts >= interruptsPerSecond) {
-    numInterrupts = 0;
-    timespec ts{};
-    EthernetIEEE1588.readTimer(ts);
-
-    // Get a reference nanosecond figure to use for comparison.
-    if (firstInterruptNS == 0) {
-      firstInterruptNS = ts.tv_nsec;
-    }
-    
-    audioPTPOffset = ts.tv_nsec - firstInterruptNS;
-  }
-
-  //... process audio, etc.
-}
-#+end_src
 
 ** Elimination of clock drift
 :PROPERTIES:
