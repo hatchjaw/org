@@ -1,0 +1,136 @@
+#+title: Ananas: A Networked Audio System for Distributed Spatial Audio Applications
+
+#+export_file_name: out/is2-2026
+#+options: toc:nil num:3 date:nil author:nil
+#+latex_class: is2-2026
+#+cite_export: bibtex IEEETran
+#+latex_header_extra: \RequirePackage[]{./out/is2-2026}
+
+#+begin_abstract
+Spatial audio has an accessibility problem. Large-scale spatial and
+immersive audio installations remain costly and exclusive, with high
+barriers to entry. We propose "Ananas", a networked audio system
+consisting of network protocols, control software and microcontroller
+firmware, with the aim of rendering spatial audio applications
+accessible to a broad cohort of potential users. Based on a network of
+low-cost microcontroller development boards programmed in the Faust
+programming language, synchronised via IEEE 1588 Precision Time
+Protocol, and controlled by approachable, digital audio
+workstation-based tooling, Ananas represents an opportunity to disrupt
+and democratise the spatial audio landscape. In this paper we
+demonastrate Ananas's protocols for audio and control data
+transmission and device discovery, its methods for media clock and
+presentation time recovery, and its applications to wave field
+synthesis and higher order ambisonics in a modular, scalable form.
+#+end_abstract
+
+* About                                                            :noexport:
+
+Org file describing a paper for submission to the 2026 Internet of
+Sounds Symposium. Submit on [[https://easychair.org/conferences2/submission?a=36910236&submission=7699371][EasyChair]] by June 30th 2026.
+
+* LaTeX Setup                                                      :noexport:
+:PROPERTIES:
+:header-args: :tangle out/is2-2026.sty :results silent :noeval
+:END:
+
+** Provide the package
+
+#+begin_src latex
+\ProvidesPackage{is2-2026}
+#+end_src
+
+** Packages
+
+#+begin_src latex
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{inconsolata}
+#+end_src
+
+*** References
+
+#+begin_src latex
+\usepackage{hyperref}
+\hypersetup{
+  unicode,
+  colorlinks,
+  citecolor=black,
+  filecolor=black,
+  linkcolor=black,
+  urlcolor=black,
+  bookmarksnumbered,
+  pdfstartview=XYZ
+}
+\usepackage[noabbrev]{cleveref}
+#+end_src
+
+** BibTeX stuff
+
+#+begin_src latex
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+#+end_src
+
+** Authors
+
+#+begin_src latex
+\author{\IEEEauthorblockN{Thomas Rushton}
+  \IEEEauthorblockA{\textit{Inria, INSA Lyon} \\
+    \textit{CITI, EA3720} \\
+    69621 Villeurbanne, France \\
+    \texttt{thomas.rushton@inria.fr}}
+  \and
+  \IEEEauthorblockN{Romain Michon}
+  \IEEEauthorblockA{\textit{Inria, INSA Lyon} \\
+    \textit{CITI, EA3720} \\
+    69621 Villeurbanne, France \\
+    \texttt{romain.michon@inria.fr}}
+  \and
+  \IEEEauthorblockN{Tanguy Risset}
+  \IEEEauthorblockA{\textit{Inria, INSA Lyon} \\
+    \textit{CITI, EA3720} \\
+    69621 Villeurbanne, France \\
+    \texttt{tanguy.risset@insa-lyon.fr}}
+}
+#+end_src
+
+* Introduction
+
+Despite significant interest in the research and commercial spheres,
+access to large-scale spatial audio systems remains stubbornly out of
+reach for many interested parties. Highly multichannel audio
+interfaces are prohibitively expensive for all but the institutions
+with the deepest pockets; implementing a spatial audio system
+represents an investment in terms of money and expertise that places
+the endeavour beyond the reach of many artists, researchers and other
+potential users. In this paper we present Ananas --- /"Ananas
+necessitates another networked audio system"/ --- a networked audio
+system which, being based on a low-cost microcontroller development
+board, open source software, and familiar digital audio workstation
+(DAW) tools, seeks to lower the barrier to entry to spatial audio
+techniques such as wave field synthesis (WFS) and higher order
+ambisonics (HOA).
+
+Here's a bibliographical reference\nbsp[cite:@rushtonAll2025].
+
+#+print_bibliography:
+
+* Local Variables                                                  :noexport:
+
+#+begin_example
+Local Variables:
+org-latex-classes: (("is2-2026" "\\documentclass[conference]{IEEEtran}
+  [NO-DEFAULT-PACKAGES]"
+  ("\\section{%s}" . "\\section*{%s}")
+  ("\\subsection{%s}" . "\\subsection*{%s}")
+  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+  ("\\paragraph{%s}" . "\\paragraph*{%s}")
+  ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+End:
+#+end_example

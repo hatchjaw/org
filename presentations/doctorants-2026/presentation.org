@@ -20,8 +20,8 @@
 
 * About This Presentation                                          :noexport:
 
-This =org= file describes my slides for a presentation at Politecnico
-di Torino.
+This =org= file describes my presentation for the /doctorants/ day in
+May 2026.
 
 ** Dependencies
 
@@ -35,7 +35,7 @@ Tangle, then, from the reveal.js directory (=../reveal.js=), run:
 npm start -- --root=../
 #+end_src
 
-Then navigate to [[http://localhost:8000/turin-2026/]].
+Then navigate to [[http://localhost:8000/doctorants-2026/]].
 
 * CSS                                                              :noexport:
 
@@ -166,7 +166,7 @@ Improve code block appearance.
 
 * Figures                                                          :noexport:
 :PROPERTIES:
-:header-args: :tangle turinFigs.sty :results silent :noeval
+:header-args: :tangle figs.sty :results silent :noeval
 :END:
 
 ** Setup
@@ -632,7 +632,7 @@ Define some colours and some node and line styles.
 #+attr_html: :width 1200
 [[./images/tu-berlin.webp]]
 
-WellenFeld H 104, 2700 loudspeakers
+WellenFeld H 104, TU Berlin, 2700 loudspeakers
 
 ** Motivation
 :PROPERTIES:
@@ -651,24 +651,14 @@ WellenFeld H 104, 2700 loudspeakers
 
 
 #+ATTR_REVEAL: :frag (appear)
-- Access to state-of-the-art spatial audio systems is limited by cost
-  and complexity.
-- Installing a spatial audio system represents a significant
-  investment in money, time and expertise.
+- Spatial audio has an accessibility problem.
+- Installation represents a significant investment in money, time and
+  expertise.
 - State-of-the-art systems are centralised, scale poorly; highly
   multichannel audio interfaces are expensive.
 - We're interested in lowering the barrier to entry.
 - To do this, we offer an alternative that's decentralised, modular,
   scalable.
-
-** Requirements
-
-#+ATTR_REVEAL: :frag (appear)
-- A low-cost hardware platform (MCU or SOC) that's powerful, has a
-  decent amount of memory, and supports audio and ethernet.
-- A way to synchronise distributed signal processors.
-- A way to parallelise spatial audio algorithms.
-- Supporting software (DAW plugins) and module firmware.
 
 * The hardware platform
 :PROPERTIES:
@@ -700,133 +690,18 @@ WellenFeld H 104, 2700 loudspeakers
 - No two digital systems run at the same rate.
 - We need some mechanism for time exchange.
 
-** IEEE 1588 Precision Time Protocol
-:PROPERTIES:
-:reveal_extra_attr: data-auto-animate
-:END:
-
-#+ATTR_REVEAL: :frag (appear)
-- Sub-microsecond synchronisation possible for compliant devices with
-  support for hardware timestamping.
-- Gold-standard in networked audio settings --- used by AVB, AES67,
-  Dante...
-- Typically only high-end networking equipment supports hardware
-  timestamping; low-cost exceptions do exist.
-- Teensy 4.1 (or rather its NXP IMXRT1062 MCU) features a PTP timer.
-
-#+ATTR_REVEAL: :frag (appear)
-|[[./images/switch.png]]|[[./images/t41.png]]|
-
-** IEEE 1588 Precision Time Protocol
-:PROPERTIES:
-:reveal_extra_attr: data-auto-animate
-:END:
-
-#+header: :exports results :results file raw :file "./images/gen/ptpFlow.png"
-#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
-#+header: :headers '("\\usepackage{turinFigs}")
-#+begin_src latex :eval no-export
-\begin{tikzpicture}
-  \pic{ptp};
-\end{tikzpicture}
-#+end_src
-#+attr_org: :width 200
-#+attr_html: :width 500
-#+RESULTS:
-[[file:./images/gen/ptpFlow.png]]
-
-** IEEE 1588 Precision Time Protocol
-:PROPERTIES:
-:reveal_extra_attr: data-auto-animate
-:END:
-
-Once the subscriber has \(t_{1}\), \(t_{2}\), \(t_{3}\) and \(t_{4}\) (and \(t'_{1}\)
-and \(t'_{2}\)) it can begin to compute its drift, \(\alpha\), delay, \(\delta\),
-and offset, \(\theta\), relative to the authority.
-
-#+ATTR_REVEAL: :frag t
-\begin{align}
-\alpha &= 1 - \frac{t'_{2} - t_{2}}{t'_{1} - t_{1}} \\[5pt]
-\delta &= \frac{(t_{4} - t_{1}) - (t_{3} - t_{2})}{2} \\[5pt]
-\theta &= t_{2} - t_{1} - \delta
-\end{align}
-
-** Media clock recovery
-:PROPERTIES:
-:reveal_extra_attr: data-auto-animate
-:END:
-
-Running these figures through a proportional integral controller, the
-subscriber can derive sensible values by which it should adjust its
-ethernet timer to maintain parity with the authority.
-
-#+ATTR_REVEAL: :frag t
-The nanoseconds-per-second adjustment at second \(n\), \(a_{n}\), is
-found as
-
-#+ATTR_REVEAL: :frag t
-\begin{equation}
-a_{n} = \alpha - K_{P}\theta_{n} + K_{I}\sum_{t=0}^{n}\theta
-\end{equation}
-
-#+ATTR_REVEAL: :frag t
-To recover the media clock, i.e. find a sampling rate \(\hat{f}_{s,n}\) that "matches"
-that of the time authority, using the nominal sampling rate \(f_{s}\),
-e.g. 48 kHz
-
-#+ATTR_REVEAL: :frag t
-\begin{equation}
-\hat{f}_{s,n} = f_{s}(1 + a_{n})
-\end{equation}
-
-** Media clock recovery
-:PROPERTIES:
-:reveal_extra_attr: data-auto-animate
-:END:
-
-For example for \(a_{n} = -1750 \text{ns}\)
-
-#+ATTR_REVEAL: :frag t
-\begin{align}
-\hat{f}_{s,n} &= 48\,000(1 - 1750 \times 10^{-9}) \\
-  &= 48\,000 \times 0.999\,998\,25 \\
-  &= 47\,999.916 \text{Hz}
-\end{align}
-
-#+ATTR_REVEAL: :frag t
-In practice, this doesn't quite work, and some residual drift
-remains. To compensate for that, take a reference nanoseconds figure
-on audio system startup, \(t_{S}\), and compare it with the nanosecond
-part of PTP time, \(t_{\text{PTP}}\), once per second (only works if the buffer
-size is an integer divisor of the sampling rate)
-
-#+ATTR_REVEAL: :frag t
-\begin{equation}
-\Delta_{n} = t_{\text{PTP}} - t_{S}
-\end{equation}
-
-#+ATTR_REVEAL: :frag t
-Finally apply another PI controller
-
-#+ATTR_REVEAL: :frag t
-\begin{equation}
-\hat{f}_{s,n} = f_{s}\left(1 + a_{n} + K_{P_{\Delta}}\Delta_{n} + K_{I_{\Delta}}\sum{}_{t=0}^{n}\Delta\right)
-\end{equation}
-
 ** The time authority
 :PROPERTIES:
 :reveal_extra_attr: data-auto-animate
 :END:
 
 #+ATTR_REVEAL: :frag (appear)
-- One Teensy acts both as a PTP time authority /and/ as a USB audio
-  device.
+- One Teensy acts both as a Precision Time Protocol (PTP) time
+  authority /and/ as a USB audio device.
 - Thus governs both audio timing on the /server/ machine, and PTP time
   for all capable devices on the network.
 - The server reads its PTP /follow-up/ packets for timestamps to add to
   out-going audio packets.
-- Depending on OS, may entail configuring network settings to allow
-  reading on /privileged/ network ports, i.e. those below 1024.
 
 ** The time authority
 :PROPERTIES:
@@ -835,7 +710,7 @@ Finally apply another PI controller
 
 #+header: :exports results :results file raw :file "./images/gen/systemOverview.png"
 #+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
-#+header: :headers '("\\usepackage{turinFigs}")
+#+header: :headers '("\\usepackage{figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
   \pic{systemOverview};
@@ -884,7 +759,7 @@ Finally apply another PI controller
 
 #+header: :exports results :results file raw :file "./images/gen/wfs.png"
 #+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
-#+header: :headers '("\\usepackage{turinFigs}")
+#+header: :headers '("\\usepackage{figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
   \pic{wfs};
@@ -919,7 +794,7 @@ Finally apply another PI controller
 
 #+header: :exports results :results file raw :file "./images/gen/hoa.png"
 #+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
-#+header: :headers '("\\usepackage{turinFigs}")
+#+header: :headers '("\\usepackage{figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
   \pic{hoa};
@@ -963,7 +838,7 @@ Address: =224.4.224.4:49152=
 
 #+header: :exports results :results file raw :file "./images/gen/audioPacket.png"
 #+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
-#+header: :headers '("\\usepackage{turinFigs}")
+#+header: :headers '("\\usepackage{figs}")
 #+begin_src latex :eval no-export
 \begin{tikzpicture}
   \node (packet) at (0,0) {
@@ -980,62 +855,6 @@ Address: =224.4.224.4:49152=
 
 #+RESULTS:
 [[file:./images/gen/audioPacket.png]]
-
-
-** A new networked audio protocol
-:PROPERTIES:
-:reveal_extra_attr: data-auto-animate
-:END:
-
-Ananas Client Description Protocol
-
-Address: =224.4.224.6:49172=
-
-#+header: :exports results :results file raw :file "./images/gen/clientAnnouncePacket.png"
-#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
-#+header: :headers '("\\usepackage{turinFigs}")
-#+begin_src latex :eval no-export
-\begin{tikzpicture}
-  \node (packet) at (0, 0) {
-    \begin{bytefield}[bitwidth=1cm, bitheight=1cm]{16}
-      \bitheader{0-15} \\
-      \bitbox{4}{Serial number} & \bitbox{1}{\footnotesize{Firmw. type}} & \bitbox{3}{Version number} & \bitbox{4}{Sampling rate} & \bitbox{4}{Percent CPU} \\
-      \bitbox{4}{Presentation offset frames} & \bitbox{8}{Presentation offset ns} & \bitbox{4}{Audio-PTP offset ns} \\
-      \bitbox{1}{Buffer fill \%} & \bitbox{1}{PTP lock} & \bitbox[ltb]{14}{Secondary source co-ordinates} \\
-      \bitbox[rtb]{2}{}
-    \end{bytefield}
-  };
-\end{tikzpicture}
-#+end_src
-
-#+RESULTS:
-[[file:./images/gen/clientAnnouncePacket.png]]
-
-** A new networked audio protocol
-:PROPERTIES:
-:reveal_extra_attr: data-auto-animate
-:END:
-
-Ananas Authority Description Protocol
-
-Address: =224.4.224.6:49173=
-
-#+header: :exports results :results file raw :file "./images/gen/authorityAnnouncePacket.png"
-#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
-#+header: :headers '("\\usepackage{turinFigs}")
-#+begin_src latex :eval no-export
-\begin{tikzpicture}
-  \node (packet) at (0, 0) {
-    \begin{bytefield}[bitwidth=1cm, bitheight=1cm]{16}
-      \bitheader{0-15} \\
-      \bitbox{4}{Serial number} & \bitbox{4}{USB feedback accumulator} & \bitbox{4}{Num. underruns} & \bitbox{4}{Num. overflows} \\
-    \end{bytefield}
-  };
-\end{tikzpicture}
-#+end_src
-
-#+RESULTS:
-[[file:./images/gen/authorityAnnouncePacket.png]]
 
 ** /Ananas/ supporting software
 :PROPERTIES:

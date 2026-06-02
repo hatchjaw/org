@@ -292,27 +292,35 @@ Hi there; let's go.
 #+latex: \minitoc
 #+latex: \newpage
 
-\lettrine{A}{udio transmission} over packet-switched networks has
-become the /de facto/ standard for a variety of applications over the
-past three decades. Replacing the previous generation of cumbersome,
+The transmission of audio data over computer networks has been a topic
+of research interest since the earliest days of computer networking as
+it is recognised today
+
+Audio transmission over packet-switched networks has become the /de
+facto/ standard for a variety of applications over the past three
+decades. Replacing the previous generation of cumbersome,
 point-to-point installations, it was digital telephony and
 videoconferencing that first embraced audio (and video) over the
-internet protocol (IP) suite\nbsp[cite:@hardmanReliable1995;
+internet protocol (IP)
+suite\nbsp[cite:@hardmanReliable1995;@hardmanSuccessful1998;
 @turlettiINRIA1994] and the broadcast industry that pioneered audio
 over ethernet\nbsp[cite:@bakkerIntroduction2014].
 
 Academic research on networked audio began with the SoundWIRE
 project\nbsp[cite:@chafeSimplified2000] from which eventually emerged the
-JackTrip protocol\nbsp[cite:@caceresJackTrip2010; @caceresJackTrip2009c].
+JackTrip protocol\nbsp[cite:@caceresJackTrip2010;
+@caceresJackTrip2009c]. These efforts focused on the transmission of
+high-fidelity audio, without compression, with networked musical
+performance (NMP) aims in mind. /Not true; sonifying QoS figured
+prominently in it early on./
 
 ** Computer Networking
 
 
 
 *** Ethernet
-Ethernet is a thing\nbsp[cite:@metcalfeEthernet1976]
 
-*** WiFi
+Ethernet is a thing\nbsp[cite:@metcalfeEthernet1976]
 
 ** The Internet Protocol Suite and the OSI Model
 
@@ -382,10 +390,6 @@ Ethernet is a thing\nbsp[cite:@metcalfeEthernet1976]
 Time is an illusion; lunchtime doubly so.
 \end{chapquote}
 
-#+begin_chapquote :by "Douglas Adams" :from "The Hitchhiker's Guide to the Galaxy"
-Time is an illusion; lunchtime doubly so.
-#+end_chapquote
-
 #+latex: \minitoc
 #+latex: \newpage
 
@@ -395,10 +399,11 @@ reliable is this frequency when all is said and done? Frequency, given
 in \unit{\hertz}, can be said to describe the number of times a given
 event occurs in one second. And how is a second defined? In terms of
 the duration required for a caesium atom to vibrate a certain number
-of times. So, frequency is defined in terms of time, and time in terms
-of frequency; it appears that we have a tautology on our
-hands. Indeed, this is an inescapable reality by which we are faced
-when we wrestle intimately with time, that most illusory of concepts.
+of times\nbsp[cite:@markowitzDefinition1961]. So, frequency is defined in
+terms of time, and time in terms of frequency; it appears that we have
+a tautology on our hands. Indeed, this is an inescapable reality by
+which we are faced when we wrestle intimately with time, that most
+illusory of concepts.
 
 Returning to our tuning fork, each time it is struck, the steel from
 which it is manufactured will deform ever so slightly. Some of the
@@ -409,9 +414,10 @@ than on a hot day. And that is not even to mention the device against
 which it was calibrated on the day it was manufactured. In short, a
 tuning fork designed to produce a reliable \qty{440}{\hertz} frequency
 /does not/, /has never/, and /will never/ produce precisely that
-frequency. Indeed, given that atomic clocks are /only/ accurate to parts
-per trillion,[fn:1] the very idea of the quantity \qty{440}{\hertz} is far
-from perfectly-defined.
+frequency. Indeed, given that atomic clocks are /only/ accurate to
+parts per trillion [cite:@gillWhen2011;
+@markowitzDefinition1961],[fn:1] the very idea of the quantity
+\qty{440}{\hertz} is far from perfectly-defined.
 
 Time in computer systems is, of course, subject to the same
 vagaries. It is in fact something like a tuning fork that describes
@@ -433,9 +439,9 @@ vibrate at \qty{1}{\mega\hertz} my be expected to produce a frequency,
 \end{equation}
 If, to the (audio) engineer's eye, those figures suddenly don't look
 so reliable after all, that is entirely understandable. What of the
-purity, the /truth/ of the audio sampling rate? Indeed, an audio system
-governed by a 10 ppm XO, running at a nominal sampling frequency of
-\qty{48}{\kilo\hertz} may run as slow as \(f_{s_{1}} = \)
+purity, the /truth/ of the audio sampling rate? Indeed, an audio
+system governed by a 10 ppm XO, running at a nominal sampling
+frequency of \qty{48}{\kilo\hertz} may run as slow as \(f_{s_{1}} = \)
 \qty{47999.52}{\hertz} or as fast as \(f_{s_{2}} = \)
 \qty{48000.48}{\hertz}. Is this sort of difference perceptible? By way
 of context, that difference is analogous to having two A_{4} tuning
@@ -443,12 +449,16 @@ forks, one producing a frequency of \qty{439.9956}{\hertz} and another
 at \qty{440.0044}{\hertz}, so a difference of less than one hundredth
 of a cycle per second (one twentieth of a cent); this falls far, far
 below the /just noticeable difference/ threshold for human pitch
-perception. The audio engineer notes, however, that the devices
-running at \(f_{s_{1}}\) and \(f_{s_{2}}\) will, after one second, be out of
-sync by almost the duration of one full audio sample
-(\sim\qty{21}{\micro\second} at \qty{48}{\kilo\hertz}); the DSP engineer notes
-that the sum two audio signals, \(x_{1}[n]\) and \(x_{2}[n]\), where \(x_{2}[n]
-= x_{1}[n-1]\) is a one-zero low-pass filter.
+perception\nbsp[cite:@zwickerPsychoacoustics2010]. The audio engineer
+notes, however, that the devices running at \(f_{s_{1}}\) and \(f_{s_{2}}\)
+will, after one second, be out of sync by almost the duration of one
+full audio sample (\sim\qty{21}{\micro\second} at \qty{48}{\kilo\hertz}); the
+DSP engineer notes that the sum two audio signals, \(x_{1}[n]\) and
+\(x_{2}[n]\), where \(x_{2}[n] = x_{1}[n-1]\) is a one-zero low-pass
+filter\nbsp[cite:@mcclellanSignal2003].
+
+# So the footnote stays on the same page...
+#+latex: \enlargethispage{\baselineskip}
 
 This manner of /clock drift/ is inevitable in digital systems. To ensure
 a sample-synchronous platform for spatial audio, it is necessary to
@@ -818,7 +828,7 @@ values:
 - \(D_{I_{1}} = 3\)
 - \(D_{I_{2}} = 19\)
 
-*** Fine-tuning the sampling rate
+*** Fine-Tuning the Sampling Rate
 
 Say a set of divider register values has been established using
 cref:alg:sampling-rate, and some manner of fine adjustment is desired,
@@ -992,6 +1002,16 @@ These additional correction factors ensure reliable media clock
 recovery indefinitely.
 
 ** Presentation Time Recovery
+
+If media clock recovery is a question of parity of rate of
+reproduction then presentation time recovery is one of simultaneity of
+reproduction. If media clocks are synchronised but audio interrupts
+are not, clients will reproduce audio at the same rate but with some
+constant temporal offset. Once again, the solution to this problem
+lies in judicious selection of sampling rate, \(f_{s}\), and audio buffer
+size, \(N\), plus co-ordination via PTP.
+
+
 
 * Sound Field Synthesis
 #+latex: \minitoc
