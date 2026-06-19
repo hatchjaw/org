@@ -69,6 +69,7 @@ Number minitoc sections as deep as ~\subsubsection~
 \definecolor{tabED}{rgb}{0.90, 0.87, 0.93}
 \definecolor{txtED}{rgb}{0.60, 0.28, 0.02}
 \definecolor{siteED}{rgb}{0.04, 0.27, 0.47}
+\definecolor{codeBG}{rgb}{.9, .9, .9}
 #+end_src
 
 *** Typography
@@ -164,6 +165,7 @@ Fancy characters (typically) at the beginning of chapters.
 #+begin_src latex
 \RequirePackage{tikz}
 \usetikzlibrary{positioning, arrows.meta}
+\RequirePackage{bytefield}
 #+end_src
 
 *** Automatically include tof in contents
@@ -178,6 +180,22 @@ Fancy characters (typically) at the beginning of chapters.
 \RequirePackage[ruled, vlined, linesnumbered]{algorithm2e}
 \crefname{algocf}{algorithm}{algorithms}
 \Crefname{algocf}{Algorithm}{Algorithms}
+#+end_src
+
+*** Code listings
+
+#+begin_src latex
+\RequirePackage{minted}
+\setminted{
+  fontsize=\footnotesize,
+  linenos=true,
+  breaklines=true,
+  bgcolor=codeBG,
+  frame=lines,
+  framesep=1mm,
+  framerule=1pt,
+  rulecolor=\color{gray!50}
+}
 #+end_src
 
 ** Figures
@@ -233,7 +251,7 @@ a conference publication on the topic already under my belt. For this
 I have my thesis co-director, Romain Michon, to thank, as well as
 Stefania Serafin, who also co-supervised my master's thesis, for
 inviting Romain to Aalborg University, Copenhagen twice a year to give
-workshops on Faust, digitial musical instrument development, and
+workshops on Faust, digital musical instrument development, and
 physical modelling.
 
 For welcoming me as an intern and later as a /doctorant/, I must thank
@@ -253,11 +271,11 @@ Rascoussier, Louis Ledoux, Benjamin Quiédeville, Anastasia Volkova,
 Florent de Dinechin, Théo Cantaloube, Clemens Wegener. Other doctoral
 students from other teams (/on est tous en la même galère/): Alix
 Jeannerot, Guillaume Marthe, Aurélien Delarge, Makhloud Mohamed El
-Mehdi, Khiem Huynh, Antoine Bonneau, Julien. Linda Soumari, Cecilia
-Navarro and Anouchka Ronceray for tolerating my slowly-improving
-French. Djurdjura Mehrad, Élise Denoyelle, Stéphanie Wolska and
-Morgane Le Prince. Frédéric Le Mouël, Leonardo Cardoso and Jens
-Ahrens; Cristoff Ressi, Shawn Silverman, and Jean-Michel Friedt.
+Mehdi, Khiem Huynh, Antoine Bonneau, Julien Caposiena. Linda Soumari,
+Cecilia Navarro and Anouchka Ronceray for tolerating my
+slowly-improving French. Djurdjura Mehrad, Élise Denoyelle, Stéphanie
+Wolska and Morgane Le Prince. Frédéric Le Mouël, Leonardo Cardoso and
+Jens Ahrens; Cristoff Ressi, Shawn Silverman, and Jean-Michel Friedt.
 
 Others, beyond the confines of the lab: Kimberly Hoole, Irène Hontang,
 Myriam Boussaboua, Cristina Rottondi, Tomas Poloniecki, Julie Darnat
@@ -280,6 +298,8 @@ Tommy
 This is what my work is about
 #+end_abstract
 
+#+latex: \mainmatter
+
 * Introduction
 :PROPERTIES:
 :UNNUMBERED: t
@@ -288,39 +308,72 @@ This is what my work is about
 
 Hi there; let's go.
 
-* Networked Audio
+* Background and State of the Art
 #+latex: \minitoc
 #+latex: \newpage
 
-The transmission of audio data over computer networks has been a topic
-of research interest since the earliest days of computer networking as
-it is recognised today
-
-Audio transmission over packet-switched networks has become the /de
-facto/ standard for a variety of applications over the past three
-decades. Replacing the previous generation of cumbersome,
+\lettrine{A}{udio transmission} over packet-switched networks has
+become the /de facto/ standard for a variety of applications over the
+past three decades. Replacing the previous generation of cumbersome,
 point-to-point installations, it was digital telephony and
 videoconferencing that first embraced audio (and video) over the
 internet protocol (IP)
 suite\nbsp[cite:@hardmanReliable1995;@hardmanSuccessful1998;
 @turlettiINRIA1994] and the broadcast industry that pioneered audio
-over ethernet\nbsp[cite:@bakkerIntroduction2014].
-
-Academic research on networked audio began with the SoundWIRE
-project\nbsp[cite:@chafeSimplified2000] from which eventually emerged the
-JackTrip protocol\nbsp[cite:@caceresJackTrip2010;
-@caceresJackTrip2009c]. These efforts focused on the transmission of
-high-fidelity audio, without compression, with networked musical
-performance (NMP) aims in mind. /Not true; sonifying QoS figured
-prominently in it early on./
+over ethernet\nbsp[cite:@bakkerIntroduction2014]. Before embarking upon a
+discussion of networked audio, however, it is worthwhile to review
+some fundamental aspects of computer networking.
 
 ** Computer Networking
 
+Computer networking is the discipline concerned with the
+interconnection of computing systems to enable the exchange of data
+and the sharing of resources. With its genesis in the
+1960s\nbsp[cite:@bonaventureComputer2011] computer networking addresses
+three fundamental concerns: how information is physically or logically
+transmitted between nodes; how that transmission is organised and
+managed reliably; and how applications address and locate one another
+across potentially vast and heterogenous infrastructure.
 
+The field rests on a layered architectural principle --- most famously
+codified in the Open Systems Interconnection (OSI) reference model and
+its more pragmatic counterpart, the TCP/IP
+stack\nbsp[cite:@russellRough2006] --- whereby each layer provides
+well-defined services to the layer above while abstracting the
+complexity below. This separation of concerns allows physical media
+(copper, fibre, radio), data-link protocols (ethernet, wi-fi),
+network-layer routing (IP), transport-layer protocols (TCP, UDP),
+and application-layer semantics to evolve largely independently.
+
+From an engineering standpoint, networking is fundamentally about
+managing contention, latency and failure. The shift from
+circuit-switched to packet-switched paradigms was a defining
+architectural choice; rather than dedicating a physical path for the
+duration of a communication session, packet switching multiplexes
+variable-length datagrams across shared infrastructure, trading
+determinism for efficiency. This trade-off resurfaces throughout the
+field --- in QoS mechanisms, congestion control algorithms, and real
+time protocols such as IEEE 1588 Precision Time Protocol (PTP) where
+bounded, deterministic delivery is a hard requirement.
 
 *** Ethernet
 
-Ethernet is a thing\nbsp[cite:@metcalfeEthernet1976]
+Ethernet, first described in the mid 1970s and named for the
+/luminiferous ether/ through which historically electromagnetic
+radiation was said to propagate\nbsp[cite:@metcalfeEthernet1976], is the
+dominant wired local area network technology, standardised under IEEE
+802.3\nbsp[cite:@IEEE2018] and comprises the data-link layer foundation of
+practically all modern LAN infrastructure. The defining abstraction of
+ethernet is the /frame/, a variable-length packet containing source
+and destination MAC addresses, an EtherType field indicating the
+payload protocol, the payload itself, and a 32-bit cyclic redundancy
+checksum for integrity checking.
+
+Originally, ethernet operated over shared
+media\nbsp[cite:@metcalfeEthernet1976], coaxial cable, and nodes would
+listen before transmitting and back off randomly upon collision
+detection. A later transition to switched, full-duplex ethernet
+rendered the collision detection algorithm obsolete.
 
 ** The Internet Protocol Suite and the OSI Model
 
@@ -328,9 +381,120 @@ Ethernet is a thing\nbsp[cite:@metcalfeEthernet1976]
 
 *** User Datagram Protocol
 
-*** Internet Group Management Protocol
-
 ** Audio Over Computer Networks
+
+The transmission of audio data over computer networks has
+been a topic of research interest since the earliest days of computer
+networking as it is recognised today, i.e. over packet-switched
+networks, whereby data to be transmitted is grouped into packets ---
+or "datagrams" --- each consisting of a header and a payload. Voice
+transmission over ARPANET was being conducted as early as
+1974\nbsp[cite:@schulzrinneVoice1992] and the first standard for vocoded
+voice communication over packet-switched networks --- the Network
+Voice Protocol (NVP) --- was released in
+1977\nbsp[cite:@cohenSpecifications1977].
+
+The NVP standard, with control messages for 'calling' and 'ringing',
+was clearly intended for digital telephony, and communication was the
+primary focus of networked audio research well into the 1990s. Efforts
+on supporting real-time voice communication over wide area networks
+(WAN) centred on quality of service (QoS), particularly with regard to
+the perennial issues of latency, packet loss, and jitter ---
+inconsistencies on the rate of packet
+transmission\nbsp[cite:@hardmanSuccessful1998; @hardmanReliable1995]. Work
+at this time dealt with streams of compressed audio data, and speech
+coding algorithms to overcome the deleterious effects of dropped
+packets over unreliable network paths and low-bandwidth connections.
+
+Whereas the priority for digital telephony, and later voice over IP
+(VoIP) systems, is intelligibility, for musical purposes fidelity is
+of greater concern. The late 1990s, with the increasing availability
+of high-speed internet connections, saw the beginning of research into
+transmitting uncompressed audio data over the
+internet\nbsp[cite:@xuRealTime2000; @chafeSimplified2000]. Work of this
+sort was spearheaded by the /SoundWIRE/ project, developed by
+researchers at McGill University and Stanford University, and took the
+form of a wide variety of experiments with high quality audio
+transmission over both WAN and local area networks (LAN). These
+experiments included LAN-based real-time musical
+performances\nbsp[cite:@chafeSimplified2000], concert streaming over
+WAN\nbsp[cite:@chafeSimplified2000; @xuRealTime2000], and sonification of
+QoS via a distributed digital waveguide dubbed the /Network
+Harp/\nbsp[cite:@chafePhysical2002; @chafeSimplified2000].
+
+** Protocols and Systems
+
+VoIP research in the 1990s focused on audio codecs and data
+compression\nbsp[cite:@hardmanSuccessful1998; @turlettiINRIA1994], seeking
+a compromise with the /best-effort/ nature of internet service. The
+SoundWIRE project, in search of high audio quality, turned its
+attention directly to the basic transport layer protocols of the
+Internet Protocol suite: Transmission Control Protocol (TCP) and User
+Datagram Protocol (UDP). Chafe et al. characterised their
+compression-free system as taking a "simplified approach" to networked
+audio\nbsp[cite:@chafeSimplified2000], emphasising the importance of
+delivering multichannel audio of at least CD quality (16-bit,
+\qty{44.1}{\kHz}) with as little latency as possible.
+
+SoundWIRE experiments included TCP-based concert streaming. TCP's
+/connection-oriented/, one-to-one design enables packet flow control
+mechanisms that guarantee packet ordering and protect against packet
+loss\nbsp[cite:@al-dhiefPerformance2018; @schiavoniAlternatives2013]; at
+the expense of increased latency, these mechanisms safeguard quality
+of service, and thus audio fidelity; ideal for a remote concert
+scenario. UDP by comparison provides no such safeguards, but equally
+none of the associated computational or temporal overhead. Further,
+due to its /connectionless/ model, /many-to-many/ (multicast) and
+/one-to-many/ (broadcast) modes of transmission are possible via address
+spaces reserved as part of the internet protocol
+standard\nbsp[cite:@meyerIANA2010]. Via UDP, SoundWIRE was able to run as
+a distributed digital waveguide over a WAN spanning around
+\qty{4500}{\km}\nbsp[cite:@chafeSimplified2000].
+
+From the SoundWIRE project emerged
+/JackTrip/\nbsp[cite:@caceresJackTrip2010; @caceresJackTrip2010a], a hybrid
+system that couples a TCP handshake with audio transmission over UDP,
+thus sidestepping the overhead of TCP packet flow control. Rather than
+relying on TCP's built-in mechanisms for stream integrity, JackTrip
+supplements UDP with a selection of optional buffering strategies that
+aim to optimise its operation in various network conditions. In this
+sense it is more flexible than TCP, but in effect JackTrip moulds UDP
+transmission into something akin to the connection-oriented model of
+TCP, and, in its 'hub server' mode, into a kind of /multiple one-to-one/
+design --- multicast transmission is not possible.
+
+UDP has emerged as the protocol of choice for platforms enabling
+remote musical collaboration, serving as the basis for
+NetJACK\nbsp[cite:@carotNetjack2009], part of the JACK Audio Connection
+Kit (a cross-platform audio host), the audiovisual performance
+streaming platform LOLA\nbsp[cite:@drioliNetworked2013],
+Jamulus\nbsp[cite:@fischerCase2015a],
+Soundjack\nbsp[cite:@renaudNetworked2007], and other jamming-focused
+platforms, plus more recent entrants, the closed-source but ultimately
+UDP-based networking component of Elk Audio OS\nbsp[cite:@turchetElk2021],
+for instance. UDP also plays a fundamental role in networked media
+streaming, being the typical transport-layer protocol behind the
+Real-time Transport Protocol (RTP), and it features in proprietary
+networked audio systems such as Dante (Digital Audio Network Through Ethernet)\nbsp[cite:@danteWhat2022].
+
+** AoE in the Audio Industry
+
+In parallel with work being carried out in academia on SoundWIRE,
+JackTrip and NetJACK, audio industry bodies --- the IEEE (Institute of
+Electrical and Electronics Engineers) and AES (Audio Engineering
+Society) standards groups, and companies like Audinate, the creators
+of Dante --- were taking an interest in networked audio. Traditional
+large-scale audio systems such as those used in broadcast, concert
+venues and recording studios rely on the installation of unwieldy
+combinations of analogue hardware and cabling, with many potential
+points of failure. Seeking literally to lighten the load posed by
+"hundreds of kilograms"\nbsp[cite:@bakkerIntroduction2014] of cabling in
+analogue audio installations, in the 2000s audio companies were
+looking to high speed ethernet as a means to simplify the provision of
+high-quality, multichannel audio in industry settings.
+
+Key to these efforts was the release, in 2002, of the IEEE 1588
+standard for the Precision Time Protocol
 
 *** JackTrip
 
@@ -464,6 +628,207 @@ This manner of /clock drift/ is inevitable in digital systems. To ensure
 a sample-synchronous platform for spatial audio, it is necessary to
 find a means to correct for it.
 
+** Network Protocols for Time Exchange
+
+*** Network Time Protocol
+
+*** Precision Time Protocol
+
+#+name: fig:ptp
+#+caption: PTP packet flow.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+  \pic{ptp};
+\end{tikzpicture}
+\end{figure}
+
+IEEE 1588 Precision Time Protocol (PTP) is a time exchange mechanism
+consisting of the exchange of multicast network packets between a
+clock authority and a clock subscriber\nbsp[cite:@leeProceedings2005;
+@schleusnerSubMicrosecond2024]. PTP packet flow is illustrated in
+cref:fig:ptp. Flow begins with the clock authority sending a /sync/
+packet; the subscriber notes the time, \(t_{2}\), at which this packet
+arrives. The authority then sends a /follow-up/ packet which is
+timestamped, \(t_{1}\), with the time of transmission. With \(t_{1}\)
+and \(t_{2}\) in hand, the subscriber sends a /delay request/ packet
+and notes the time, \(t_{3}\) of transmission; the authority notes the
+time, \(t_{4}\) of reception of this packet and sends it to the
+subscriber in a final /delay response/ packet. The above process then
+repeats for the next time period, typically a second, beginning with
+the receipt time \(t'_{2}\)of the following sync packet and the
+receipt of the next follow-up packet containing timestamp
+\(t'_{1}\). Once the subscriber has the above timestamp information it
+can begin to compute its drift, \(\alpha\), delay, \(\delta\), and
+offset, \(\theta\) relative to the authority:
+
+#+NAME: eq:ptp1
+\begin{align}
+\alpha &= 1 - \frac{t'_{2} - t_{2}}{t'_{1} - t_{1}}\;, \\
+\delta &= \frac{(t_{4} - t_{1}) - (t_{3} - t_{2})}{2}\;, \\
+\theta &= t_{2} - t_{1} - \delta\;.
+\end{align}
+
+Armed with the above figures, the subscriber can feed them into a
+proportional integral (PI) controller to yield a number of nanoseconds
+for second \(n\) by which it should adjust its internal clock,
+
+#+NAME: eq:ptp-pi
+\begin{equation}
+a_{n} = \alpha - K_{P}\theta_{n} + K_{I}\sum_{t=0}^{n}\theta\;,
+\end{equation}
+where \(K_{P}\) and \(K_{I}\) are co-efficients to be applied to the
+proportional and integral terms respectively; small co-efficients,
+typically \(K_{I} < K_{P} < 1\). The adjustment value \(a_{n}\) can be used to
+set, for example, the per-cycle increment of a hardware ethernet timer
+register.
+
+** Media Clock Recovery
+
+Time exchange at the level of the ethernet subsystems of distributed
+modules does not directly help us achieve audio sampling rate
+parity. The time exchange information derived from PTP must be used to
+condition the audio clocks of the modules such that sampling rate
+parity is achieved; this is a process referred to as /media clock
+recovery/\nbsp[cite:@crankshawMedia2021].
+
+In the case of the iMXRT1062 MCU this process is achieved by using the
+nanoseconds-per-second PTP-derived adjustment value at second \(n\),
+\(a_{n}\), to adjust the sampling rate. For a nominal sampling rate
+\(f_{s}\) (e.g. \qty{48}{\kHz}), the sampling rate, \(\hat{f}_{s,n}\) that
+"matches" that of the time authority is found simply as
+
+#+NAME: eq:sampling-rate-recovery-1
+\begin{equation}
+\hat{f}_{s,n} = f_{s}(1 + a_{n})\;.
+\end{equation}
+For example, if \(a_{n} = -1750\;\text{ns}\), we have
+
+#+begin_src emacs-lisp :exports none
+(let* ((fs 48000)
+       (a -1750e-9)
+       (proportion (+ 1 a))
+       (fhats (* fs proportion)))
+  (format "%.9f %f" proportion fhats))
+#+end_src
+
+#+RESULTS:
+: 0.999998250 47999.916000
+
+#+NAME: eq:adjust-example
+\begin{align*}
+\hat{f}_{s,n} &= f_{s}(1 - 1750 \times 10^{-9}) \\
+  &= 48\,000 \times 0.999\,998\,25 \\
+  &= 47\,999.916\;\text{Hz}\;.
+\end{align*}
+Inserting this value into cref:eq:general-fs, the expression for the
+audio sampling rate of the iMXRT1062, yields
+
+#+NAME: eq:adjusted-fs
+\begin{equation}
+47\,999.916 = \frac{24 \times 10^{6}}{2^{8}}\frac{D_{S} + \frac{D_{N,n}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}\;,
+\end{equation}
+and rearranging, using cref:eq:unknown-dn-2 to find the appropriate
+value for the PLL4 numerator register
+
+#+NAME: eq:adjusted-dn
+\begin{equation}
+D_{N,n} = \frac{D_{D}}{1 \times 10^{6}}\left(
+  \frac{2^{8} \times 47\,999.916 \times D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24} -
+  1 \times 10^{6} D_{S}
+\right)\;.
+\end{equation}
+Using the values derived in cref:sec:setting-the-sampling-rate yields
+
+#+NAME: eq:adjusted-dn-2
+\begin{align*}
+D_{N,n} &= 1 \times 10^{3}\left(
+  \frac{2^{8} \times 47\,999.916 \times 3 \times 19}{24} -
+  29 \times 10^{6}
+\right) \\
+  &= 183\,948\,928\;,
+\end{align*}
+which can be used as a new value for the ~CCM_ANALOG_PLL_AUDIO_NUM~
+register of the iMXRT1062 MCU.
+
+In practice cref:eq:sampling-rate-recovery-1 does not suffice,
+however, and some residual parts per billion drift remains (see
+cref:fig:drift). The proposed solution is as follows: first, observing
+that at a nominal sampling rate of \qty{48}{\kHz} for power of two
+audio buffer sizes less than or equal to 128 there will be an integer
+number, \(I\), of audio interrupts per second, take a representative
+nanoseconds figure, \(t_{S}\), on audio system startup; second, every
+\(I\) interrupts, reading the system's PTP timer, taking the
+nanoseconds part, \(t_{\text{PTP}}\) and comparing with \(t_{S}\):
+
+#+NAME: eq:audio-ptp-offset
+\begin{equation}
+\Delta_{n} = t_{\text{PTP}} - t_{S}\;;
+\end{equation}
+finally, applying another PI controller:
+
+#+NAME: eq:sampling-rate-recovery-2
+\begin{equation}
+\hat{f}_{s,n} = f_{s}\left(
+  1 + a_{n} + K_{P_{\Delta}}\Delta_{n} + K_{I_{\Delta}}\sum_{t=0}^{n}\Delta
+\right)\;.
+\end{equation}
+These additional correction factors ensure reliable media clock
+recovery indefinitely.
+
+** Presentation Time Recovery
+
+If media clock recovery is a question of parity of rate of
+reproduction then presentation time recovery is one of simultaneity of
+reproduction. If media clocks are synchronised but audio interrupts
+are not, clients will reproduce audio at the same rate but with some
+constant temporal offset. Once again, the solution to this problem
+lies in judicious selection of sampling rate, \(f_{s}\), and audio buffer
+size, \(N\), plus co-ordination via PTP.
+
+Due to the way that DMA is configured, the iMXRT1062 generates two
+interrupts per audio buffer, 
+
+* Sound Field Synthesis
+#+latex: \minitoc
+#+latex: \newpage
+
+** Psychoacoustics and Sound Localisation
+
+*** Interaural Level Difference
+
+*** Interaural Time Difference
+
+** General Principles of Sound Field Synthesis
+
+** Periphony
+
+*** Stereo
+
+*** Surround Sound
+
+*** Binaural Reproduction
+
+** Wave Field Synthesis
+
+*** Virtual Sound Sources
+
+*** Focused Sound Sources
+
+*** Plane Waves
+
+** Ambisonics
+
+*** Higher Order Ambisonics
+
+*** Spherical Microphone Arrays
+
+*** Ambisonics Encoding and Decoding
+** State of the Art
+
+*** Economic and Financial Considerations
+
+* A Synchronous, Distributed Audio System
 ** Configuring the iMXRT1062 MCU
 
 #+name: fig:imxrt1062-clock
@@ -559,7 +924,7 @@ The ~DIV_SELECT~ field has a valid range of \(27 \leq D_{S} \leq 54\),
 and \(|D_{N}| < D_{D}\), so \(D_{P}\) describes (in theory) a number in the
 following range:
 
-#+NAME: eq:
+#+NAME: eq:divider-range
 \begin{equation}
 \left(26 + \frac{1}{D_{D}}\right) \leq D_{P} \leq \left(54 + \frac{D_{D}-1}{D_{D}}\right)\;,
 \end{equation}
@@ -584,7 +949,7 @@ plus Config Tools contradicts the reference manual and states that
 #+RESULTS:
 : 27.083333 <= PLL4 divider <= 54.166667
 
-#+NAME: eq:
+#+NAME: eq:true-divider-range
 \begin{equation}
 \left(27 + \frac{1}{12}\right) \leq D_{P} \leq \left(54 + \frac{1}{6}\right).
 \end{equation}
@@ -853,224 +1218,117 @@ D_{N} = \frac{D_{D}}{1 \times 10^{6}}\left(
 \right)\;.
 \end{equation}
 
-** Network Protocols for Time Exchange
 
-*** Network Time Protocol
+* Distributed Spatial Audio Algorithms
 
-*** Precision Time Protocol
+*** Distributed Wave Field Synthesis
+*** Distributed Higher Order Ambisonics
+* Protocol and Software Systems
 
-#+name: fig:ptp
-#+caption: PTP packet flow.
-\begin{figure}[t]
-\centering
-\begin{tikzpicture}
-  \pic{ptp};
-\end{tikzpicture}
-\end{figure}
+The heart of the system is /Ananas/, a networked audio system for
+time-sensitive applications. Ananas, the French word for "pineapple",
+is a recursive acronym: /"Ananas necessitates another networked audio
+system"/. It consists of a networked audio server, protocols for audio
+and control data transmission and device discovery, media clock and
+presentation time recovery, plus microcontroller firmware and software
+plugins for sound field synthesis control.
 
-IEEE 1588 Precision Time Protocol (PTP) is a time exchange mechanism
-consisting of the exchange of multicast network packets between a
-clock authority and a clock subscriber\nbsp[cite:@leeProceedings2005;
-@schleusnerSubMicrosecond2024]. PTP packet flow is illustrated in
-cref:fig:ptp. Flow begins with the clock authority sending a /sync/
-packet; the subscriber notes the time, \(t_{2}\), at which this packet
-arrives. The authority then sends a /follow-up/ packet which is
-timestamped, \(t_{1}\), with the time of transmission. With \(t_{1}\)
-and \(t_{2}\) in hand, the subscriber sends a /delay request/ packet
-and notes the time, \(t_{3}\) of transmission; the authority notes the
-time, \(t_{4}\) of reception of this packet and sends it to the
-subscriber in a final /delay response/ packet. The above process then
-repeats for the next time period, typically a second, beginning with
-the receipt time \(t'_{2}\)of the following sync packet and the
-receipt of the next follow-up packet containing timestamp
-\(t'_{1}\). Once the subscriber has the above timestamp information it
-can begin to compute its drift, \(\alpha\), delay, \(\delta\), and
-offset, \(\theta\) relative to the authority:
+** The Audio Server
 
-#+NAME: eq:ptp1
-\begin{align}
-\alpha &= 1 - \frac{t'_{2} - t_{2}}{t'_{1} - t_{1}}\;, \\
-\delta &= \frac{(t_{4} - t_{1}) - (t_{3} - t_{2})}{2}\;, \\
-\theta &= t_{2} - t_{1} - \delta\;.
-\end{align}
+The Ananas audio server is a C++ library, written using the JUCE
+framework, containing a class, ~ananas::Server::Server~, that inherits
+from ~juce::AudioSource~ and encapsulates a collection (a
+~juce::OwnedArray~) of threads. Each thread is responsible for a given
+server task, be it sending audio data to the network, listening for
+PTP timestamps, listening for client and time authority announcement
+packets, sending client reboot instructions, or inspecting connected
+switches.
 
-Armed with the above figures, the subscriber can feed them into a
-proportional integral (PI) controller to yield a number of nanoseconds
-for second \(n\) by which it should adjust its internal clock,
-
-#+NAME: eq:ptp-pi
-\begin{equation}
-a_{n} = \alpha - K_{P}\theta_{n} + K_{I}\sum_{t=0}^{n}\theta\;,
-\end{equation}
-where \(K_{P}\) and \(K_{I}\) are co-efficients to be applied to the
-proportional and integral terms respectively; small co-efficients,
-typically \(K_{I} < K_{P} < 1\). The adjustment value \(a_{n}\) can be used to
-set, for example, the per-cycle increment of a hardware ethernet timer
-register.
-
-** Media Clock Recovery
-
-Time exchange at the level of the ethernet subsystems of distributed
-modules does not directly help us achieve audio sampling rate
-parity. The time exchange information derived from PTP must be used to
-condition the audio clocks of the modules such that sampling rate
-parity is achieved; this is a process referred to as /media clock
-recovery/\nbsp[cite:@crankshawMedia2021].
-
-In the case of the iMXRT1062 MCU this process is achieved by using the
-nanoseconds-per-second PTP-derived adjustment value at second \(n\),
-\(a_{n}\), to adjust the sampling rate. For a nominal sampling rate
-\(f_{s}\) (e.g. \qty{48}{\kHz}), the sampling rate, \(\hat{f}_{s,n}\) that
-"matches" that of the time authority is found simply as
-
-#+NAME: eq:sampling-rate-recovery-1
-\begin{equation}
-\hat{f}_{s,n} = f_{s}(1 + a_{n})\;.
-\end{equation}
-For example, if \(a_{n} = -1750\;\text{ns}\), we have
-
-#+begin_src emacs-lisp :exports none
-(let* ((fs 48000)
-       (a -1750e-9)
-       (proportion (+ 1 a))
-       (fhats (* fs proportion)))
-  (format "%.9f %f" proportion fhats))
+#+name: lst:server-constructor
+#+caption: Constructor of the ~ananas::Server::Server~ class.
+#+begin_src c++
+Server::Server(const uint numChannelsToSend) :
+  numChannels(numChannelsToSend),
+  fifo(numChannelsToSend)
+{
+  // Add all the threads.
+  threads.add(new AudioSender(Sockets::AudioSenderSocketParams, fifo));
+  threads.add(new TimestampListener(Sockets::TimestampListenerSocketParams));
+  threads.add(new ClientListener(Sockets::ClientListenerSocketParams,
+                                 clients, modules));
+  threads.add(new AuthorityListener(Sockets::AuthorityListenerSocketParams,
+                                    authority));
+  threads.add(new RebootSender(Sockets::RebootSenderSocketParams,
+                               clients));
+  threads.add(new SwitchInspector(Threads::SwitchInspectorThreadParams,
+                                  switches));
+  
+  // The server should listen for change messages sent by all threads.
+  for (const auto &t: threads) {
+    t->addChangeListener(this);
+  }
+}
 #+end_src
 
-#+RESULTS:
-: 0.999998250 47999.916000
+Inheriting from ~juce::AudioSource~, the server implements the method
+~getNextAudio Block~, which it uses as an opportunity to write samples to
+an intermediate first-in-first-out (FIFO) buffer in preparation for
+transmission to the network, and to check whether the outgoing packet
+timestamp should be updated.
 
-#+NAME: eq:adjust-example
-\begin{align*}
-\hat{f}_{s,n} &= f_{s}(1 - 1750 \times 10^{-9}) \\
-  &= 48\,000 \times 0.999\,998\,25 \\
-  &= 47\,999.916\;\text{Hz}\;.
-\end{align*}
-Inserting this value into cref:eq:general-fs, the expression for the
-audio sampling rate of the iMXRT1062, yields
+#+name: lst:get-next-audio-block
+#+caption: The Ananas server's ~getNextAudioBlock~ method.
+#+begin_src c++
+void Server::getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferToFill)
+{
+    // These checks are kind of overkill, since the order in which threads
+    // were added to the OwnedArray is known, but as a sanity check...
+    if (auto *s = dynamic_cast<AudioSender *>(threads[0])) {
+        if (auto *t = dynamic_cast<TimestampListener *>(threads[1])) {
+            // If a new timestamp is available, send it to the audio sender
+            // to see whether the packet timestamp needs to be updated.
+            if (t->isNewTimestampAvailable()) {
+                s->setPacketTime(t->getTimestamp());
+            }
+        }
+    }
 
-#+NAME: eq:adjusted-fs
-\begin{equation}
-47\,999.916 = \frac{24 \times 10^{6}}{2^{8}}\frac{D_{S} + \frac{D_{N,n}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}\;,
-\end{equation}
-and rearranging, using cref:eq:unknown-dn-2 to find the appropriate
-value for the PLL4 numerator register
-
-#+NAME: eq:adjusted-dn
-\begin{equation}
-D_{N,n} = \frac{D_{D}}{1 \times 10^{6}}\left(
-  \frac{2^{8} \times 47\,999.916 \times D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24} -
-  1 \times 10^{6} D_{S}
-\right)\;.
-\end{equation}
-Using the values derived in cref:sec:setting-the-sampling-rate yields
-
-#+NAME: eq:adjusted-dn-2
-\begin{align*}
-D_{N,n} &= 1 \times 10^{3}\left(
-  \frac{2^{8} \times 47\,999.916 \times 3 \times 19}{24} -
-  29 \times 10^{6}
-\right) \\
-  &= 183\,948\,928\;,
-\end{align*}
-which can be used as a new value for the ~CCM_ANALOG_PLL_AUDIO_NUM~
-register of the iMXRT1062 MCU.
-
-In practice cref:eq:sampling-rate-recovery-1 does not suffice,
-however, and some residual parts per billion drift remains (see
-cref:fig:drift). The proposed solution is as follows: first, observing
-that at a nominal sampling rate of \qty{48}{\kHz} for power of two
-audio buffer sizes less than or equal to 128 there will be an integer
-number, \(I\), of audio interrupts per second, take a representative
-nanoseconds figure, \(t_{S}\), on audio system startup; second, every
-\(I\) interrupts, reading the system's PTP timer, taking the
-nanoseconds part, \(t_{\text{PTP}}\) and comparing with \(t_{S}\):
-
-#+NAME: eq:audio-ptp-offset
-\begin{equation}
-\Delta_{n} = t_{\text{PTP}} - t_{S}\;;
-\end{equation}
-finally, applying another PI controller:
-
-#+NAME: eq:sampling-rate-recovery-2
-\begin{equation}
-\hat{f}_{s,n} = f_{s}\left(
-  1 + a_{n} + K_{P_{\Delta}}\Delta_{n} + K_{I_{\Delta}}\sum_{t=0}^{n}\Delta
-\right)\;.
-\end{equation}
-These additional correction factors ensure reliable media clock
-recovery indefinitely.
-
-** Presentation Time Recovery
-
-If media clock recovery is a question of parity of rate of
-reproduction then presentation time recovery is one of simultaneity of
-reproduction. If media clocks are synchronised but audio interrupts
-are not, clients will reproduce audio at the same rate but with some
-constant temporal offset. Once again, the solution to this problem
-lies in judicious selection of sampling rate, \(f_{s}\), and audio buffer
-size, \(N\), plus co-ordination via PTP.
+    fifo.write(bufferToFill.buffer);
+}
+#+end_src
 
 
 
-* Sound Field Synthesis
-#+latex: \minitoc
-#+latex: \newpage
-
-** Psychoacoustics and Sound Localisation
-
-*** Interaural Level Difference
-
-*** Interaural Time Difference
-
-** General Principles of Sound Field Synthesis
-
-** Periphony
-
-*** Stereo
-
-*** Surround Sound
-
-*** Binaural Reproduction
-
-** Wave Field Synthesis
-
-*** Virtual Sound Sources
-
-*** Focused Sound Sources
-
-*** Plane Waves
-
-** Ambisonics
-
-*** Higher Order Ambisonics
-
-*** Spherical Microphone Arrays
-
-*** Ambisonics Encoding and Decoding
-** State of the Art
-
-*** Economic and Financial Considerations
-
-* Contribution 1: A Synchronous, Distributed Audio System
-#+latex: \minitoc
-#+latex: \newpage
-
-** ???
-
-* Contribution 2: Distributed Spatial Audio Algorithms
-#+latex: \minitoc
-#+latex: \newpage
-** Distributed Wave Field Synthesis
-** Distributed Higher Order Ambisonics
-* Contribution 3: Protocol and Software Systems
-#+latex: \minitoc
-#+latex: \newpage
-** The Ananas Protocol
+** the Ananas Protocol
 *** The Ananas Audio Protocol
+
+#+name: fig:audio-packet
+#+caption: Structure of an Ananas audio packet.
+\begin{figure}[t]
+\centering
+\begin{bytefield}[bitwidth=.9cm,bitheight=.9cm]{16}
+  \bitheader{0-15} \\
+  \bitbox{2}{\footnotesize{Seq. num.}} & \bitbox{8}{Timestamp} & \bitbox{1}{\tiny{Num. channels}} & \bitbox{2}{\scriptsize{Num. frames}} & \bitbox[lrt]{3}{} \\
+  \wordbox[lr]{1}{Audio} \\
+  \skippedwords \\
+  \wordbox[lrb]{1}{} \\
+\end{bytefield}
+\end{figure}
+
 *** The Ananas Authority Description Protocol
 *** The Ananas Client Description Protocol
 ** Audio Plugins
+
+#+name: fig:network-overview
+#+caption: The network overview pane of the WFS plugin.
+#+attr_org: :width 300
+[[./images/network-overview.png]]
+
+#+name: fig:wfs-control
+#+caption: The WFS plugin control interface.
+#+attr_org: :width 300
+[[./images/wfs-control.png]]
+
 * Evaluation
 #+latex: \minitoc
 #+latex: \newpage
@@ -1094,7 +1352,8 @@ one second on the order of once every thirty-two thousand years.
 
 - Add the /thesis/ document class.
 - Don't output the title; that's handled by =frontmatter.tex=.
-- Add some export headline filters (see =.dir-locals.el=). 
+- Add some export headline filters (see =.dir-locals.el=).
+- Use =minted= for code listings.
 
 #+begin_example
 Local Variables:
@@ -1110,8 +1369,13 @@ twoside]{book}
 org-latex-title-command: nil
 org-export-filter-headline-functions: (tar/acks-as-section
 tar/abstract-as-section tar/intro-in-toc)
+org-latex-src-block-backend: minted
+org-latex-pdf-process: ("latexmk -f -pdf -%latex \
+  -interaction=nonstopmode -shell-escape -output-directory=%o %f")
 End:
 
 LocalWords: transduced periphony ambisonics microcontroller datagram
+LocalWords: CITI Inria INSA Emeraude DMA datagrams sonification
+LocalWords: waveguide ethernet Ananas
 #+end_example
 

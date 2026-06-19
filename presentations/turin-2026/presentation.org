@@ -973,7 +973,7 @@ Address: =224.4.224.4:49152=
       \wordbox[lr]{1}{Audio} \\
       \skippedwords \\
       \wordbox[lrb]{1}{} \\
-    \end{bytefield}%
+    \end{bytefield}
   };
 \end{tikzpicture}
 #+end_src

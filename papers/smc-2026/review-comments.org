@@ -1,0 +1,15 @@
+#+title: Ambisonics: Introducing an Accessible, Distributed Approach: Response to review comments
+#+author: Thomas Rushton
+
+#+options: toc:nil
+#+export_file_name: out/review-comments
+
+- §1: clarified that any parallelisable spatial audio algorithm could
+  be implemented on our system.
+- §1: clarified that the contribution of the paper is a distributed
+  higher order ambisonics system.
+- §2.2: observed that while multichannel audio interfaces are
+  available at a cost of \sim€ 150, using multiple such interfaces for
+  highly multichannel implementations it would not be possible to
+  synchronise the devices.
+- §2.3, paragraph 1: fixed quotation marks.

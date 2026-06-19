@@ -27,7 +27,7 @@ synthesis and higher order ambisonics in a modular, scalable form.
 * About                                                            :noexport:
 
 Org file describing a paper for submission to the 2026 Internet of
-Sounds Symposium. Submit on [[https://easychair.org/conferences2/submission?a=36910236&submission=7699371][EasyChair]] by June 30th 2026.
+Sounds Symposium. Submit on [[https://easychair.org/conferences2/submission?a=36910236&submission=7699371][EasyChair]] by +June 30th+ July 7th 2026.
 
 * LaTeX Setup                                                      :noexport:
 :PROPERTIES:
@@ -44,19 +44,25 @@ Sounds Symposium. Submit on [[https://easychair.org/conferences2/submission?a=36
 
 #+begin_src latex
 \IEEEoverridecommandlockouts
-\usepackage{cite}
-\usepackage{amsmath,amssymb,amsfonts}
-\usepackage{algorithmic}
-\usepackage{graphicx}
-\usepackage{textcomp}
-\usepackage{xcolor}
-\usepackage{inconsolata}
+\RequirePackage{cite}
+\RequirePackage{amsmath,amssymb,amsfonts}
+\RequirePackage{algorithmic}
+\RequirePackage{graphicx}
+\RequirePackage{textcomp}
+\RequirePackage{xcolor}
+\RequirePackage{inconsolata}
+#+end_src
+
+*** Packet diagrams
+
+#+begin_src latex
+\RequirePackage{bytefield}
 #+end_src
 
 *** References
 
 #+begin_src latex
-\usepackage{hyperref}
+\RequirePackage{hyperref}
 \hypersetup{
   unicode,
   colorlinks,
@@ -67,7 +73,7 @@ Sounds Symposium. Submit on [[https://easychair.org/conferences2/submission?a=36
   bookmarksnumbered,
   pdfstartview=XYZ
 }
-\usepackage[noabbrev]{cleveref}
+\RequirePackage[noabbrev]{cleveref}
 #+end_src
 
 ** BibTeX stuff
@@ -117,7 +123,32 @@ board, open source software, and familiar digital audio workstation
 techniques such as wave field synthesis (WFS) and higher order
 ambisonics (HOA).
 
+The Ananas protocol suite describes a system of protocols for audio
+and control data transmission, device discovery and
+synchronisation. Taking advantage of multicast user datagram protocol
+(UDP) groups for audio transmission and certain elements of control
+data, Ananas minimises bandwidth, and, being based on IEEE 1588
+Precision Time Protocol (PTP), ensures synchronisation amongst
+distributed hardware modules.
+
+* Background
+
+
+
 Here's a bibliographical reference\nbsp[cite:@rushtonAll2025].
+
+#+name: fig:audio-packet
+#+caption: Structure of an Ananas audio packet.
+\begin{figure}
+\centering
+\begin{bytefield}[bitwidth=.6cm,bitheight=.6cm]{16}
+  \bitheader{0-15} \\
+  \bitbox{2}{\footnotesize{Seq. num.}} & \bitbox{8}{Timestamp} & \bitbox{1}{\tiny{Num. channels}} & \bitbox{2}{\footnotesize{Num. frames}} & \bitbox[lrt]{3}{} \\
+  \wordbox[lr]{1}{Audio} \\
+  \skippedwords \\
+  \wordbox[lrb]{1}{} \\
+\end{bytefield}
+\end{figure}
 
 #+print_bibliography:
 

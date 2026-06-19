@@ -695,7 +695,7 @@ propagation discrepancy of over 30 cm.
 
 #+typst: ]])
 
-** A humble microcontroller development board
+** A humble microcontroller development board                      :noexport:
 
 #+header: :exports results :results file raw :file "./images/gen/t41.png"
 #+header: :imagemagick t :iminoptions -density 300 :imoutoptions -geometry 400 -flatten :fit t
