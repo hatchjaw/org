@@ -13,3 +13,5 @@
   highly multichannel implementations it would not be possible to
   synchronise the devices.
 - §2.3, paragraph 1: fixed quotation marks.
+- §3.3: added figure illustrating the structure of the distributed HOA
+  decoder.

@@ -277,13 +277,13 @@ slowly-improving French. Djurdjura Mehrad, Élise Denoyelle, Stéphanie
 Wolska and Morgane Le Prince. Frédéric Le Mouël, Leonardo Cardoso and
 Jens Ahrens; Cristoff Ressi, Shawn Silverman, and Jean-Michel Friedt.
 
-Others, beyond the confines of the lab: Kimberly Hoole, Irène Hontang,
-Myriam Boussaboua, Cristina Rottondi, Tomas Poloniecki, Julie Darnat
-and Ghis, Alice Aniello, Matti Gardner, Kate Fox, Anna Percy, Judy
-Knowles, Matt Rushton, Sally Rushton, Sally Catmull, Ani Cammack, Dave
-Rushton, Andreas Friberg, Louise Smith, Greg Chick, Anca Diana Axinia,
-Francesco Ganis, Razvan Paisa, Scott Naylor, Mike Croft, Alex Calgaro,
-Laura Armstrong and Mahmoud Nadda.
+Others, beyond the confines of the lab: Kimberly Hoole, Peggy
+Domingeon, Irène Hontang, Myriam Boussaboua, Cristina Rottondi, Tomas
+Poloniecki, Julie Darnat and Ghis Mirat, Alice Aniello, Matti Gardner,
+Kate Fox, Anna Percy, Judy Knowles, Matt Rushton, Sally Rushton, Sally
+Catmull, Ani Cammack, Dave Rushton, Andreas Friberg, Louise Smith,
+Greg Chick, Anca Diana Axinia, Francesco Ganis, Razvan Paisa, Scott
+Naylor, Mike Croft, Alex Calgaro, Laura Armstrong and Mahmoud Nadda.
 
 I owe you all an enormous debt of gratitude.
 
@@ -494,7 +494,19 @@ looking to high speed ethernet as a means to simplify the provision of
 high-quality, multichannel audio in industry settings.
 
 Key to these efforts was the release, in 2002, of the IEEE 1588
-standard for the Precision Time Protocol
+standard for the Precision Time Protocol, a means by which networked
+computer systems can achieve clock
+synchronicity\nbsp[cite:@edisonIEEE15882002]. PTP (another protocol that
+typically uses UDP for transport) superseded the lower-resolution
+Network Time Protocol (NTP), and, under ideal conditionns, can achieve
+sychronisation accuracy of sub-microsecond
+order\nbsp[cite:@tongzhouResearch2022]. Synchronisation is achieved via
+the exchange of timestamped packets, coupled with precise estimates
+for send and receive times. Precision is best when timestamps can be
+calculated at the /physical layer/ --- layer 1 of the OSI model, of
+which the aforementioned transport layer (layer 3) is a component ---
+i.e. by dedicated timers at the level of the physical network
+interface. 
 
 *** JackTrip
 

@@ -51,12 +51,19 @@ Sounds Symposium. Submit on [[https://easychair.org/conferences2/submission?a=36
 \RequirePackage{textcomp}
 \RequirePackage{xcolor}
 \RequirePackage{inconsolata}
+\RequirePackage{siunitx}
 #+end_src
 
 *** Packet diagrams
 
 #+begin_src latex
 \RequirePackage{bytefield}
+#+end_src
+
+*** Maths typesetting
+
+#+begin_src latex
+\RequirePackage{newtxtext, newtxmath}
 #+end_src
 
 *** References
@@ -106,6 +113,83 @@ Sounds Symposium. Submit on [[https://easychair.org/conferences2/submission?a=36
 }
 #+end_src
 
+** Figures
+
+#+begin_src latex
+\RequirePackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, fit, backgrounds}
+#+end_src
+
+*** Audio Server
+
+#+begin_src latex
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
+\tikzset{
+  rounded/.style={draw, rounded corners=1mm},
+  server/.pic={
+    % Place procloop at origin
+    \node (procloop) [draw, align=center, fill=white] at (0,0)
+          {Processing\\Loop};
+    \node (write) [draw, above right=2mm and 2.3cm of procloop, fill=green!20]
+          {Write};
+    \node (notify) [draw, below=3mm of write, fill=white] {Notify};
+    \begin{pgfonlayer}{foreground}
+      \node (convert) [draw, below=8mm of notify, fill=white] {Convert};
+    \end{pgfonlayer}
+    \node (pad1) [inner sep=0pt] at ([yshift=.3cm] convert.north) {};
+    \node (read) [draw, fit=(convert)(pad1), fill=blue!20] {};
+    \node [anchor=north, inner sep=1mm] at (read.north) {Read};
+    \node (packet) [draw, above right=0cm and 2.3cm of notify, fill=white] {Packet};
+    \begin{pgfonlayer}{foreground}
+      \node (write2) [draw, below=8mm of packet, fill=red!20] {Write};
+    \end{pgfonlayer}
+    \node (pad2) [inner sep=0mm] at ([yshift=.3cm] write2.north) {};
+    \node (socket) [draw, fit=(write2)(pad2), inner xsep=7mm, fill=white] {};
+    \node [anchor=north, inner sep=1mm] at (socket.north)
+          {Multicast socket};
+
+    % Fit processor around procloop
+    \begin{pgfonlayer}{background}
+      \node (processor) [rounded, fit=(procloop), inner xsep=5mm, inner ysep=12mm, fill=green!20] {};
+      \node [anchor=north, inner sep=1mm] at (processor.north)
+            {Audio Processor};
+      \node (fifo) [rounded, fit=(write)(notify)(read), inner xsep=5mm, inner ysep=5mm, fill=orange!20]
+            {};
+      \node [anchor=north, inner sep=1mm] at (fifo.north) {FIFO Buffer};
+      \node (sender) [rounded, fit=(packet)(socket), inner ysep=8mm, fill=blue!20] {};
+      \node [anchor=north, inner sep=1mm] at (sender.north)
+            {Sender Thread};
+    \end{pgfonlayer}
+
+    % Outer fit
+    \node (server) [fit=(processor)(fifo)(sender), draw, inner sep=5mm]
+          {};
+    \node [anchor=north west, inner sep=1mm] at (server.north west)
+          {Audio Server};
+    \node (sources) [above left=-2.875cm and .5cm of server, align=center]
+          {WFS sources\\or\\ACN encoded audio};
+    \node (udp) [above right=-3.35cm and 1cm of server, align=center]
+          {UDP packet to\\multicast group};
+
+    \draw [-{Triangle}] (sources.east) -- (processor.west);
+    \draw [-{Triangle}] (procloop.east) -| (1.9, 0) |- (write.west);
+    \draw [-{Triangle}] (write.south) -- (notify.north);
+    \draw [-{Triangle}] (notify.south) -- (read.north);
+    \draw [-{Triangle}] (read.east) -| (5.4, 0) |- (packet.west);
+    \draw [-{Triangle}] (packet.south) -- (socket.north);
+    \draw [-{Triangle}] (write2.east) -- (udp.west);
+
+    \draw [-{Stealth}] ([yshift=12mm] sender.west) --
+    ([yshift=13.35mm] fifo.east) node [midway, above=0mm] {\scriptsize{Await}};
+    \draw [-{Stealth}, dashed] ([yshift=13.35mm] fifo.east) -- (notify.east);
+  }
+}
+#+end_src
+
+*** System overview
+
 * Introduction
 
 Despite significant interest in the research and commercial spheres,
@@ -120,8 +204,9 @@ necessitates another networked audio system"/ --- a networked audio
 system which, being based on a low-cost microcontroller development
 board, open source software, and familiar digital audio workstation
 (DAW) tools, seeks to lower the barrier to entry to spatial audio
-techniques such as wave field synthesis (WFS) and higher order
-ambisonics (HOA).
+techniques such as wave field synthesis
+(WFS)\nbsp[cite:@berkhoutAcoustic1993] and higher order ambisonics
+(HOA)\nbsp[cite:@zotterAmbisonics2019].
 
 The Ananas protocol suite describes a system of protocols for audio
 and control data transmission, device discovery and
@@ -133,15 +218,90 @@ distributed hardware modules.
 
 * Background
 
+A wide array of networked audio protocols exist; why, then, create a
+new one? The answer to this question lies in the time-sensitive nature
+of spatial audio reproduction. In a distributed setting,
+synchronisation of hardware nodes is critical, and existing protocols
+are either proprietary, or do not cater to time-sensitive
+applications.
 
+Chief amongst proprietary systems is Dante\nbsp[cite:@danteWhat2022]
+(Digital Audio Network Through Ethernet), which uses PTP as its
+time-exchange mechanism. Dante-enabled hardware is typically very
+expensive, and, being a closed-source initiative, it is not suitable
+for further scholarly enquiry. Another closed-source platform can be
+found in the shape of the networking component of Elk Audio OS\nbsp[cite:@turchetElk2021].
 
-Here's a bibliographical reference\nbsp[cite:@rushtonAll2025].
+A variety of open source protocols and systems are available, such as
+JackTrip\nbsp[cite:@caceresJackTrip2010a; @caceresJackTrip2010],
+NetJack\nbsp[cite:@carotNetjack2009], part of the JACK audio connection
+kit, message-based systems such as Audio Over
+OSC\nbsp[cite:@ritschMessage2014] (the audio engine behind the audio
+streaming application Sonobus[fn:2]), jamming-focused platforms such
+as Jamulus\nbsp[cite:@fischerCase2015a] and
+Soundjack\nbsp[cite:@renaudNetworked2007], and the audiovisual performance
+streaming platform LOLA\nbsp[cite:@drioliNetworked2013]. What these
+systems have in common, however, is a focus on networked music
+performance and concert streaming, applications where low latency, and
+not synchronicity, is of greatest concern. For time-sensitive
+applications, this points to the need for a new networked audio
+system, one that ensures synchronicity between distributed signal
+processing modules.
+
+* The Ananas Networked Audio System
+
+** The Audio Server
+
+#+name: fig:server
+#+caption: Structural overview of the Ananas audio server.
+\begin{figure*}
+\centering
+\begin{tikzpicture}
+\pic{server};
+\end{tikzpicture}
+\end{figure*}
+
+The Ananas audio server is a C++ library written using the JUCE
+framework.[fn:1] On startup, the library initialises a series of
+threads for handling audio transmission, reading PTP timestamps and
+listening for connected clients, amongst other tasks. The audio
+transmission part of the server is illustrated in cref:fig:server. The
+server receives a collection of input channels, either monophonic WFS
+sources or ambisonics channel numbering (ACN) encoded audio channels,
+and writes these to an intermediate first-in-first-out (FIFO)
+buffer. When the FIFO contains enough samples to fill an outgoing
+audio packet, the sender thread is notified and reads from the FIFO to
+fill a packet for transmission. The sender thread delivers the packet
+to a UDP multicast socket and transmits it to the network.
+
+** The Ananas Audio Protocol
+
+Being first and foremost concerned with the transmission of audio
+data, at the heart of the Ananas system is the Ananas Audio Protocol
+(AAP). A UDP multicast-based protocol, using address =224.4.224.4=, AAP
+consists of a stream of sequence numbered, timestamped packets. The
+structure of an AAP packet is given in cref:fig:audio-packet. It was
+found that, particularly under high-bandwidth conditions, packets
+sporadically arrive out of order, hence the inclusion of the sequence
+number, which is used at the receiving side to ensure the integrity of
+the packet stream. For timestamping, the server reads a PTP follow-up
+packet, adds a small reproduction offset (for packets of 16 frames it
+was found that an offset of \(1/70\) s was most appropriate) and
+writes the timestamp to the outgoing packet; successive packets are
+then updated with the expected inter-packet interval, e.g. for 16
+frames at \qty{48}{\kHz} this is \(333\,333\frac{1}{3}\) ns.
+
+Completing the packet header are the number of channels and number of
+frames in the packet, used at the receiving side for decoding the
+byte-encoded audio data that follows. At 16 frames per packet it is
+possible to transmit up to 44 channels of 16-bit audio while
+respecting ethernet's 1500 byte /maximum transmissible unit/.
 
 #+name: fig:audio-packet
 #+caption: Structure of an Ananas audio packet.
 \begin{figure}
 \centering
-\begin{bytefield}[bitwidth=.6cm,bitheight=.6cm]{16}
+\begin{bytefield}[bitwidth=.55cm,bitheight=.55cm]{16}
   \bitheader{0-15} \\
   \bitbox{2}{\footnotesize{Seq. num.}} & \bitbox{8}{Timestamp} & \bitbox{1}{\tiny{Num. channels}} & \bitbox{2}{\footnotesize{Num. frames}} & \bitbox[lrt]{3}{} \\
   \wordbox[lr]{1}{Audio} \\
@@ -165,3 +325,8 @@ org-latex-classes: (("is2-2026" "\\documentclass[conference]{IEEEtran}
   ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 End:
 #+end_example
+
+* Footnotes
+[fn:2] \url{https://sonobus.net}
+
+[fn:1] JUCE v8.0.6 \url{https://juce.com}. 

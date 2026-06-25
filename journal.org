@@ -11512,3 +11512,14 @@ drift. I intend to use \(\Delta\) for the audio-PTP offset (it's a /delta/ of
 some kind).
 
 Entered on [2026-05-18 lun. 13:30]
+** 2026-06 juin
+*** 2026-06-25 jeudi
+**** Meeting: Tanguy & Romain                         :MEETING:SOUTENANCE:
+- State of the art should include sound field synthesis.
+- Developing digital audio systems should be chapter 2. Talk about
+  Faust.
+- Could have a chapter on autodiff in Faust as chapter 3.
+- Spatial audio sync and time exchange.
+- Ananas
+
+Entered on [2026-06-25 jeu. 11:01]
