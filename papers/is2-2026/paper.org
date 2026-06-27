@@ -248,7 +248,240 @@ applications, this points to the need for a new networked audio
 system, one that ensures synchronicity between distributed signal
 processing modules.
 
+** The Hardware Platform
+
+#+name: fig:imxrt1062-clock
+#+caption: iMXRT1062 audio PLL and SAI1 clock divider registers.
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}
+  \node [draw] (osc) {OSC 24M};
+  \node [draw] (pll4) [right=.75cm of osc] {\(\times \left(D_{S} + \frac{D_{N}}{D_{D}}\right)\)};
+  \node (pll4label) [above=0cm of pll4] {\small{PLL4}};
+  \node [draw] (dp) [right=.75cm of pll4] {\(D_{p}\)};
+  \node [draw] (dA) [right=.5cm of dp] {\(D_{A}\)};
+  \node [draw] (dI1) [right=.75cm of dA] {\(D_{I_{1}}\)};
+  \node [draw] (dI2) [right=2cm of dI1] {\(D_{I_{2}}\)};
+  \node (fR) [right=1.5cm of dI2] {\(f_{R}\)};
+
+  \draw [-{Triangle}] (osc.east) -- (pll4.west) node [above, midway] {\scriptsize{\(f_{XO}\)}};
+  \draw [-{Triangle}] (pll4.east) -- (dp.west) node [above, midway] {\scriptsize{\(f_{P}\)}};
+  \draw [-{Triangle}] (dp.east) -- (dA.west);
+  \draw [-{Triangle}] (dA.east) -- (dI1.west) node [above, midway] {\scriptsize{\(f_{M}\)}};
+  \draw [-{Triangle}] (dI1.east) -- (dI2.west) node [above, midway] {\scriptsize{\(\leq 300 \text{MHz}\)}};
+  \draw [-{Triangle}] (dI2.east) -- (fR.west) node [above, midway] {\scriptsize{\(\leq 66 \text{MHz}\)}};
+\end{tikzpicture}
+\end{figure*}
+
+Effective deployment of a distribtued spatial audio system is
+dependent on the identification of a suitable hardware platform for
+the distributed nodes. Such a platform should be low-cost and
+powerful, with support for audio and ethernet. The Teensy 4.1
+microcontroller development board\nbsp[cite:@michonReal2019] was
+identified as satisfying these requirements, costing less than € 50
+with its audio and ethernet add-ons, and sporting a \qty{600}{\MHz}
+ARM Core M7 CPU. Unlike other comparable devices, such as the
+Raspberry Pi, it's microcontroller, an NXP iMXRT1062 MCU, features a
+dedicated audio subsystem, with high-resolution clock divider
+registers for its audio phase locked loop (PLL); 30 bits are available
+for the PLL's numerator and denominator registers, meaning that
+nanosecond-order modifications of the audio sampling rate are
+possible\nbsp[cite:@nxpsemiconductorsIMX2021].
+
+By convention, the output frequency produced by the iMXRT1062's
+synchronous audio interface ~SAI1_CLK_ROOT~, \(f_{R}\), must be 256 times oversampled with respect
+to the target audio sampling rate, \(f_{s}\):
+
+#+NAME: eq:sai1-1
+\begin{equation}
+f_{R} = 2^{8}f_{s}\;.
+\end{equation}
+
+The NXP MCUXpresso Config Tools software\nbsp[cite:@MCUXpresso2018]
+indicates that \(f_{R}\) must be lower than or equal to
+\qty{66}{\MHz}, therefore
+
+#+begin_src emacs-lisp :exports none
+(format "Fs <= %f Hz" (/ 66e6 (lsh 1 8)))
+#+end_src
+
+#+RESULTS:
+: Fs <= 257812.500000 Hz
+
+#+NAME: eq:max-fs
+\begin{equation}
+f_{s} \leq 257\,812.5\;\text{Hz}\;.
+\end{equation}
+\(f_{R}\) is found by dividing the frequency of ~PLL4_MAIN_CLK~,
+\(f_{M}\), by the ~SAI1_CLK_PRED~, \(D_{I_{1}}\), and ~SAI1_CLK_PODF~,
+\(D_{I_{2}}\) fields of the ~CCM_CS1CDR~ register:
+
+#+NAME: eq:sai1-2
+\begin{equation}
+f_{R} = \frac{f_{M}}{D_{I_{1}}D_{I_{2}}}\;.
+\end{equation}
+\(f_{M}\) is found by dividing \(f_{P}\), the frequency of PLL4, by
+the ~POST_DIV_SELECT~, \(D_{p}\), and ~AUDIO _DIV~, \(D_{A}\), registers:
+
+#+NAME: eq:pll4-main
+\begin{equation}
+f_{M} = \frac{f_{P}}{D_{p}D_{A}}\;.
+\end{equation}
+\(f_{P}\) is the result of multiplying the iMXRT1062's \qty{24}{\MHz}
+clock source, \(f_{XO}\), by the PLL4 divider, \(D_{P}\):
+
+#+NAME: eq:pll4
+\begin{equation}
+f_{P} = f_{XO}D_{P}\;,
+\end{equation}
+and \(D_{P}\) is, in turn, the sum of the /PLL loop divider/, the
+~DIV_SELECT~ field of the ~CCM_ANALOG_PLL_AUDIO~ register, \(D_{S}\), with
+the quotient of ~CCM_ANALOG_PLL_AUDIO_NUM~, \(D_{N}\), the /PLL
+fractional loop divider/ numerator register and
+~CCM_ANALOG_PLL_AUDIO_DENOM~, \(D_{D}\), the denominator register:
+
+#+NAME: eq:pll4-divider
+\begin{equation}
+D_{P} = D_{S} + \frac{D_{N}}{D_{D}}\;.
+\end{equation}
+See cref:fig:imxrt1062-clock for a diagrammatic representation of the
+effect of the audio PLL and clock divider registers on the
+\qty{24}{\MHz} clock source.
+
+The ~DIV_SELECT~ field has a valid range of \(27 \leq D_{S} \leq 54\),
+and \(|D_{N}| < D_{D}\), so \(D_{P}\) describes (in theory) a number in the
+following range:
+
+#+NAME: eq:divider-range
+\begin{equation}
+\left(26 + \frac{1}{D_{D}}\right) \leq D_{P} \leq \left(54 + \frac{D_{D}-1}{D_{D}}\right)\;,
+\end{equation}
+with \(1 \leq D_{D} \leq 2^{30}\); effectively, \(26 < D_{P} <
+55\). MCUXpresso Config Tools, and the iMXRT1062 reference
+manual\nbsp[cite:@nxpsemiconductorsIMX2021 §13.3.2.2], indicate,
+however, that the output frequency range for PLL4 is:
+
+#+NAME: eq:pll4-range
+\begin{equation}
+650\,\text{MHz} \leq f_{P} \leq 1\,300\,\text{MHz}\;,
+\end{equation}
+plus Config Tools contradicts the reference manual and states that
+\(D_{N}\) must be a /positive/ 30 bit integer, so:
+
+#+begin_src emacs-lisp :exports none
+(let ((DpMin (/ 650e6 24e6))
+      (DpMax (/ 1300e6 24e6)))
+  (format "%f <= PLL4 divider <= %f" DpMin DpMax))
+#+end_src
+
+#+RESULTS:
+: 27.083333 <= PLL4 divider <= 54.166667
+
+#+NAME: eq:true-divider-range
+\begin{equation}
+\left(27 + \frac{1}{12}\right) \leq D_{P} \leq \left(54 + \frac{1}{6}\right).
+\end{equation}
+Setting extreme (but valid) values for the divisors, we can find the
+minimal valid \(f_{s}\):
+
+#+begin_src emacs-lisp :exports none
+(let* ((postDivSelect 4)
+       (audioDiv 4)
+       (pll4Div (* postDivSelect audioDiv))
+       (sai1ClkPred 8)
+       (sai1ClkPodf 64)
+       (sai1Div (* sai1ClkPred sai1ClkPodf))
+       (DpMin (/ 650e6 24e6))
+       (fsMin (/ (* 24e6 DpMin) (* pll4Div sai1Div (lsh 1 8))))
+       (fsMax (/ 66e6 (lsh 1 8))))
+  (format "%f Hz <= Fs <= %f Hz" fsMin fsMax))
+#+end_src
+
+#+RESULTS:
+: 309.944153 Hz <= Fs <= 257812.500000 Hz
+
+#+NAME: eq:fs-range
+\begin{equation}
+309.9\;\text{Hz} \leq f_{s} \leq 257\,812.5\;\text{Hz}\;.
+\end{equation}
+
+*** A General Expression for the Sampling Rate
+
+Bringing all of the above together, the general expression for
+achieving a target sampling rate \(\hat{f}_{s}\) is
+
+#+NAME: eq:general-fs
+\begin{align}
+\hat{f}_{s} &= \frac{f_{R}}{2^{8}} \nonumber \\
+  &= \frac{f_{M}}{2^{8}D_{I_{1}}D_{I_{2}}} \nonumber \\
+  &= \frac{f_{XO}D_{P}}{2^{8}D_{p}D_{A}D_{I_{1}}D_{I_{2}}} \nonumber \\
+  &= \frac{24\times10^{6}}{2^{8}}\frac{D_{S}+\frac{D_{N}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}\;.
+\end{align}
+This reckoning alone does not take into account certain constraints on
+the system, however, such as cref:eq:pll4-range and the frequency at
+the input of \(D_{I_{2}}\) being less than \qty{300}{\MHz} (see
+cref:fig:imxrt1062-clock). There are too many free variables to solve
+for any one of them, so an iterative approach to finding appropriate
+register and field values is necessary.
+
+*** Setting the Sampling Rate
+:PROPERTIES:
+:CUSTOM_ID: sec:setting-the-sampling-rate
+:END:
+
+Say we wish to set a sampling rate of \(f_{s} = 48\;\text{kHz}\); our
+target \(f_{R}\), \(\hat{f}_{R}\) equals, as per cref:eq:sai1-1
+
+#+NAME: eq:sai1-clk-root
+\begin{equation}
+\hat{f}_{R} = 48\,000 \times 2^{8} = 12\,288\,000\;\text{Hz}\;.
+\end{equation}
+Strategically leaving \(D_{p}\) and \(D_{A}\) set to their default values of
+1, values for \(D_{S}\), \(D_{N}\), \(D_{D}\), \(D_{I_{1}}\) and \(D_{I_{2}}\) can be
+found:
+
+- \(D_{S} = 29\)
+- \(D_{N} = 184\,000\,000\)
+- \(D_{D} = 1\,000\,000\,000\)
+- \(D_{I_{1}} = 3\)
+- \(D_{I_{2}} = 19\)
+
+*** Fine-Tuning the Sampling Rate
+
+Say a set of divider register values has been established and some
+manner of fine adjustment is desired, e.g. to compensate for clock
+drift. Cref:eq:general-fs can be rewritten to find an expression for
+an unknown \(D_{N}\):
+
+#+NAME: eq:unknown-dn
+\begin{equation}
+D_{N} = D_{D}\left(
+  \frac{2^{8}\hat{f}_{s}D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24 \times 10^{6}} - D_{S}
+\right)\;.
+\end{equation}
+For very large \(D_{D}\) it may be advantageous to divide by the main
+oscillator's frequency in \unit{\MHz} instead of \unit{\Hz}; to do so,
+multiply the contents of the parenthesis in cref:eq:unknown-dn by one
+million and divide the outside by one million to compensate:
+
+#+NAME: eq:unknown-dn-2
+\begin{equation}
+D_{N} = \frac{D_{D}}{1 \times 10^{6}}\left(
+  \frac{2^{8}\hat{f}_{s}D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24} - 1 \times 10^{6}D_{S}
+\right)\;.
+\end{equation}
+
+*** Media Clock Recovery
+
+The Teensy's NXP iMXRT1062 MCU also features a dedicated hardware PTP
+timer\nbsp[cite:@schleusnerSubMicrosecond2024] thus allowing for effective
+media clock recovery via an appropriate algorithm.
+
 * The Ananas Networked Audio System
+
+Ananas is a system for time-sensitive networked audio for supporting
+distributed approaches to sound field synthesis. In the sections that
+follow we describe the various components of the Ananas system.
 
 ** The Audio Server
 
@@ -299,7 +532,7 @@ respecting ethernet's 1500 byte /maximum transmissible unit/.
 
 #+name: fig:audio-packet
 #+caption: Structure of an Ananas audio packet.
-\begin{figure}
+\begin{figure}[t]
 \centering
 \begin{bytefield}[bitwidth=.55cm,bitheight=.55cm]{16}
   \bitheader{0-15} \\

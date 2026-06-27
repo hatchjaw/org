@@ -1233,8 +1233,8 @@ D_{N} = \frac{D_{D}}{1 \times 10^{6}}\left(
 
 * Distributed Spatial Audio Algorithms
 
-*** Distributed Wave Field Synthesis
-*** Distributed Higher Order Ambisonics
+** Distributed Wave Field Synthesis
+** Distributed Higher Order Ambisonics
 * Protocol and Software Systems
 
 The heart of the system is /Ananas/, a networked audio system for
