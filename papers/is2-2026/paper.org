@@ -120,6 +120,29 @@ Sounds Symposium. Submit on [[https://easychair.org/conferences2/submission?a=36
 \usetikzlibrary{positioning, arrows.meta, fit, backgrounds}
 #+end_src
 
+*** Common stuff
+
+Define some colours and some node and line styles.
+
+#+begin_src latex
+\definecolor{ctrlColour}{HTML}{479955}
+\definecolor{audioColour}{HTML}{4077D6}
+\definecolor{usbColour}{HTML}{D63E3E}
+
+\tikzset{
+  device/.style={draw, fill=black!10, rounded corners=1mm, inner xsep=1.5mm, align=center},
+  ctrl/.style={densely dotted, ctrlColour, line width=.2mm},
+  ctrlArrow/.style={ctrl, -{Triangle[open]}},
+  acn/.style={-{Stealth}, audioColour, densely dashdotted},
+  audio/.style={-{Stealth}, audioColour},
+  ptp/.style={{Triangle}-{Triangle}},
+  usb/.style={{Triangle[open]}-{Triangle[open]}, usbColour},
+  legend/.style={font=\tiny\itshape},
+  module/.style={device, fill=ctrlColour!35, font={\scriptsize}, transform shape},
+  authority/.style={device, fill=usbColour!35}
+}
+#+end_src
+
 *** Audio Server
 
 #+begin_src latex
@@ -190,6 +213,91 @@ Sounds Symposium. Submit on [[https://easychair.org/conferences2/submission?a=36
 
 *** System overview
 
+#+begin_src latex
+\tikzset{
+  systemOverview/.pic={
+    \node (auth) [authority] at (0, 0) {Time\\authority};
+    \node (switch) [device, above=5mm of auth, inner xsep=10mm] {Switch};
+    \node (server) [device, below=5mm of auth, inner xsep=10mm] {Server};
+    \node (module0) [module, above left=5mm and -7mm of switch] {T41};
+    \node (moduleN) [module, above right=5mm and -7mm of switch] {T41};
+    \node [above=5mm of switch] {\(\cdots\)};
+
+    % PTP between authority and switch
+    \draw [ptp] (auth.north) -- (switch.south);
+
+    % PTP between switch and modules
+    \draw [ptp] ([xshift=-13.3mm]switch.north) --
+    ([xshift=-2mm]module0.south);
+    \draw [ptp] ([xshift=9.3mm]switch.north) --
+    ([xshift=-2mm]moduleN.south);
+
+    % USB audio
+    \draw [usb] ([xshift=-4mm]auth.south) --
+    ([xshift=-4mm]server.north);
+
+    % PTP follow-up from authority to server
+    \draw [-{Triangle}] ([xshift=4mm]auth.south) --
+    ([xshift=4mm]server.north);
+
+    % Audio from server to switch
+    \draw [audio] ([xshift=-12.5mm]server.north) --
+    ([xshift=-12.5mm]switch.south);
+
+    % Ctrl from server to switch
+    \draw [ctrlArrow] ([xshift=12.5mm]server.north) --
+    ([xshift=12.5mm]switch.south);
+
+    % Audio from switch to modules
+    \draw [audio] ([xshift=-11.3mm]switch.north) -- (module0.south);
+    \draw [audio] ([xshift=11.3mm]switch.north) -- (moduleN.south);
+
+    % Ctrl from switch to modules
+    \draw [ctrlArrow] ([xshift=-9.3mm]switch.north) --
+    ([xshift=2mm]module0.south);
+    \draw [ctrlArrow] ([xshift=13.3mm]switch.north) --
+    ([xshift=2mm]moduleN.south);
+  }
+}
+#+end_src
+
+*** PTP
+
+#+begin_src latex
+\tikzset{
+  role/.style={align=center, draw, inner sep=1mm, minimum height=1cm, rounded corners=.5mm},
+  authorityMsg/.style={midway, above=-1mm, rotate=-13},
+  subscriberMsg/.style={midway, above=-1mm, rotate=13},
+  ptp/.pic={
+    \node (auth) [role] at (0, 0) {Clock\\authority};
+    \draw [-{Stealth}] (auth.south) -- +(0, -6.5);
+    \node (sub) [role, right = 2cm of auth] {Clock\\subscriber};
+    \draw [-{Stealth}] (sub.south) -- +(0, -6.5);
+    
+    \node (t1) [below left=2mm and -8mm of auth] {\(t_{1}\)};
+    
+    \draw [-{Stealth}] ([yshift=-5.5mm]auth.south) -- ([yshift=-13.5mm]sub.south) node [authorityMsg] {\scriptsize{Sync}};
+    \draw [-{Stealth}] ([yshift=-10.5mm]auth.south) -- ([yshift=-18.5mm]sub.south) node [authorityMsg] {\scriptsize{FollowUp [\(t_{1}\)]}};
+
+    \node (t2) [below right=11mm and -8mm of sub] {\(t_{2}\)};
+
+    \node (t3) [below right=21.5mm and -8mm of sub] {\(t_{3}\)};
+
+    \draw [-{Stealth}] ([yshift=-24mm]sub.south) -- ([yshift=-32mm]auth.south) node [subscriberMsg] {\scriptsize{DelayReq}};
+
+    \node (t4) [below left=29mm and -8mm of auth] {\(t_{4}\)};
+
+    \draw [-{Stealth}] ([yshift=-36mm]auth.south) -- ([yshift=-44mm]sub.south) node [authorityMsg] {\scriptsize{DelayResp [\(t_{4}\)]}};
+
+    \node (t11) [below left=43mm and -8mm of auth] {\(t'_{1}\)};
+    
+    \draw [-{Stealth}] ([yshift=-47mm]auth.south) -- ([yshift=-55mm]sub.south) node [authorityMsg] {\scriptsize{Sync}};
+    \draw [-{Stealth}] ([yshift=-52mm]auth.south) -- ([yshift=-60mm]sub.south) node [authorityMsg] {\scriptsize{FollowUp [\(t'_{1}\)]}};
+
+    \node (t21) [below right=52mm and -8mm of sub] {\(t'_{2}\)};
+  }
+}
+#+end_src
 * Introduction
 
 Despite significant interest in the research and commercial spheres,
@@ -252,7 +360,7 @@ processing modules.
 
 #+name: fig:imxrt1062-clock
 #+caption: iMXRT1062 audio PLL and SAI1 clock divider registers.
-\begin{figure*}[t]
+\begin{figure*}
 \centering
 \begin{tikzpicture}
   \node [draw] (osc) {OSC 24M};
@@ -288,9 +396,11 @@ for the PLL's numerator and denominator registers, meaning that
 nanosecond-order modifications of the audio sampling rate are
 possible\nbsp[cite:@nxpsemiconductorsIMX2021].
 
+* Implementation
+
 By convention, the output frequency produced by the iMXRT1062's
-synchronous audio interface ~SAI1_CLK_ROOT~, \(f_{R}\), must be 256 times oversampled with respect
-to the target audio sampling rate, \(f_{s}\):
+synchronous audio interface ~SAI1_CLK_ROOT~, \(f_{R}\), must be 256 times
+oversampled with respect to the target audio sampling rate, \(f_{s}\):
 
 #+NAME: eq:sai1-1
 \begin{equation}
@@ -473,17 +583,152 @@ D_{N} = \frac{D_{D}}{1 \times 10^{6}}\left(
 
 *** Media Clock Recovery
 
+#+name: fig:ptp
+#+caption: PTP packet flow.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+  \pic{ptp};
+\end{tikzpicture}
+\end{figure}
+
 The Teensy's NXP iMXRT1062 MCU also features a dedicated hardware PTP
 timer\nbsp[cite:@schleusnerSubMicrosecond2024] thus allowing for effective
 media clock recovery via an appropriate algorithm.
 
+PTP is a time exchange mechanism
+consisting of the exchange of multicast network packets between a
+clock authority and a clock subscriber\nbsp[cite:@leeProceedings2005;
+@schleusnerSubMicrosecond2024]. PTP packet flow is illustrated in
+cref:fig:ptp. Flow begins with the clock authority sending a /sync/
+packet; the subscriber notes the time, \(t_{2}\), at which this packet
+arrives. The authority then sends a /follow-up/ packet which is
+timestamped, \(t_{1}\), with the time of transmission. With \(t_{1}\)
+and \(t_{2}\) in hand, the subscriber sends a /delay request/ packet
+and notes the time, \(t_{3}\) of transmission; the authority notes the
+time, \(t_{4}\) of reception of this packet and sends it to the
+subscriber in a final /delay response/ packet. The above process then
+repeats for the next time period, typically a second, beginning with
+the receipt time \(t'_{2}\)of the following sync packet and the
+receipt of the next follow-up packet containing timestamp
+\(t'_{1}\). Once the subscriber has the above timestamp information it
+can begin to compute its drift, \(\alpha\), delay, \(\delta\), and
+offset, \(\theta\) relative to the authority:
+
+#+NAME: eq:ptp1
+\begin{align}
+\alpha &= 1 - \frac{t'_{2} - t_{2}}{t'_{1} - t_{1}}\;, \\
+\delta &= \frac{(t_{4} - t_{1}) - (t_{3} - t_{2})}{2}\;, \\
+\theta &= t_{2} - t_{1} - \delta\;.
+\end{align}
+
+Armed with the above figures, the subscriber can feed them into a
+proportional integral (PI) controller to yield a number of nanoseconds
+for second \(n\) by which it should adjust its internal clock,
+
+#+NAME: eq:ptp-pi
+\begin{equation}
+a_{n} = \alpha - K_{P}\theta_{n} + K_{I}\sum_{t=0}^{n}\theta\;,
+\end{equation}
+where \(K_{P}\) and \(K_{I}\) are co-efficients to be applied to the
+proportional and integral terms respectively; small co-efficients,
+typically \(K_{I} < K_{P} < 1\). The adjustment value \(a_{n}\) can be used to
+set, for example, the per-cycle increment of a hardware ethernet timer
+register.
+
+Time exchange at the level of the ethernet subsystems of distributed
+modules does not directly help us achieve audio sampling rate
+parity. The time exchange information derived from PTP must be used to
+condition the audio clocks of the modules such that sampling rate
+parity is achieved; this is a process referred to as /media clock
+recovery/\nbsp[cite:@crankshawMedia2021].
+
+In the case of the iMXRT1062 MCU this process is achieved by using the
+nanoseconds-per-second PTP-derived adjustment value at second \(n\),
+\(a_{n}\), to adjust the sampling rate. For a nominal sampling rate
+\(f_{s}\) (e.g. \qty{48}{\kHz}), the sampling rate, \(\hat{f}_{s,n}\) that
+"matches" that of the time authority is found simply as
+
+#+NAME: eq:sampling-rate-recovery-1
+\begin{equation}
+\hat{f}_{s,n} = f_{s}(1 + a_{n})\;.
+\end{equation}
+For example, if \(a_{n} = -1750\;\text{ns}\), we have
+
+#+begin_src emacs-lisp :exports none
+(let* ((fs 48000)
+       (a -1750e-9)
+       (proportion (+ 1 a))
+       (fhats (* fs proportion)))
+  (format "%.9f %f" proportion fhats))
+#+end_src
+
+#+RESULTS:
+: 0.999998250 47999.916000
+
+#+NAME: eq:adjust-example
+\begin{align*}
+\hat{f}_{s,n} &= f_{s}(1 - 1750 \times 10^{-9}) \\
+  &= 48\,000 \times 0.999\,998\,25 \\
+  &= 47\,999.916\;\text{Hz}\;.
+\end{align*}
+Inserting this value into cref:eq:general-fs, the expression for the
+audio sampling rate of the iMXRT1062, yields
+
+#+NAME: eq:adjusted-fs
+\begin{equation}
+47\,999.916 = \frac{24 \times 10^{6}}{2^{8}}\frac{D_{S} + \frac{D_{N,n}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}\;,
+\end{equation}
+and rearranging, using cref:eq:unknown-dn-2 to find the appropriate
+value for the PLL4 numerator register
+
+#+NAME: eq:adjusted-dn
+\begin{equation}
+D_{N,n} = \frac{D_{D}}{1 \times 10^{6}}\left(
+  \frac{2^{8} \times 47\,999.916 \times D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24} -
+  1 \times 10^{6} D_{S}
+\right)\;.
+\end{equation}
+Using the values derived in cref:sec:setting-the-sampling-rate yields
+
+#+NAME: eq:adjusted-dn-2
+\begin{align*}
+D_{N,n} &= 1 \times 10^{3}\left(
+  \frac{2^{8} \times 47\,999.916 \times 3 \times 19}{24} -
+  29 \times 10^{6}
+\right) \\
+  &= 183\,948\,928\;,
+\end{align*}
+which can be used as a new value for the ~CCM_ANALOG_PLL_AUDIO_NUM~
+register of the iMXRT1062 MCU.
+
+In practice cref:eq:sampling-rate-recovery-1 does not suffice,
+however, and some residual parts per billion drift remains. The
+proposed solution is as follows: first, observing that at a nominal
+sampling rate of \qty{48}{\kHz} for power of two audio buffer sizes
+less than or equal to 128 there will be an integer number, \(I\), of
+audio interrupts per second, take a representative nanoseconds figure,
+\(t_{S}\), on audio system startup; second, every \(I\) interrupts,
+reading the system's PTP timer, taking the nanoseconds part,
+\(t_{\text{PTP}}\) and comparing with \(t_{S}\):
+
+#+NAME: eq:audio-ptp-offset
+\begin{equation}
+\Delta_{n} = t_{\text{PTP}} - t_{S}\;;
+\end{equation}
+finally, applying another PI controller:
+
+#+NAME: eq:sampling-rate-recovery-2
+\begin{equation}
+\hat{f}_{s,n} = f_{s}\left(
+  1 + a_{n} + K_{P_{\Delta}}\Delta_{n} + K_{I_{\Delta}}\sum_{t=0}^{n}\Delta
+\right)\;.
+\end{equation}
+These additional correction factors ensure reliable media clock
+recovery indefinitely.
+
+
 * The Ananas Networked Audio System
-
-Ananas is a system for time-sensitive networked audio for supporting
-distributed approaches to sound field synthesis. In the sections that
-follow we describe the various components of the Ananas system.
-
-** The Audio Server
 
 #+name: fig:server
 #+caption: Structural overview of the Ananas audio server.
@@ -493,6 +738,12 @@ follow we describe the various components of the Ananas system.
 \pic{server};
 \end{tikzpicture}
 \end{figure*}
+
+Ananas is a system for time-sensitive networked audio for supporting
+distributed approaches to sound field synthesis. In the sections that
+follow we describe the various components of the Ananas system.
+
+** The Audio Server
 
 The Ananas audio server is a C++ library written using the JUCE
 framework.[fn:1] On startup, the library initialises a series of
@@ -542,6 +793,67 @@ respecting ethernet's 1500 byte /maximum transmissible unit/.
   \wordbox[lrb]{1}{} \\
 \end{bytefield}
 \end{figure}
+
+** The Ananas Client Description Protocol
+
+#+name: fig:client-packet
+#+caption: Structure of an Ananas Client Description packet.
+\begin{figure}
+\centering
+\begin{bytefield}[bitwidth=.55cm, bitheight=.55cm]{16}
+      \bitheader{0-15} \\
+      \bitbox{4}{Serial number} & \bitbox{1}{\tiny{Firmw. type}} & \bitbox{3}{\scriptsize{Version number}} & \bitbox{4}{Sampling rate} & \bitbox{4}{Percent CPU} \\
+      \bitbox[lr]{4}{\scriptsize{Presentation offset frames}} & \bitbox[lr]{8}{Presentation offset ns} & \bitbox[lr]{4}{\scriptsize{Audio-PTP offset ns}} \\
+      \bitbox[lrtb]{1}{\tiny{Buffer fill \%}} & \bitbox[lrtb]{1}{\tiny{PTP lock}} & \bitbox[ltb]{14}{Secondary source co-ordinates} \\
+      \bitbox[rb]{2}{}
+    \end{bytefield}
+\end{figure}
+
+Clients announce their presence on the network with periodic UDP
+multicast packets on address =224.4.224.6=. A client is deemed to be
+connected if the server has received an Ananas Client Description
+Protocol (ACDP) packet within the last second. Each packet contains a
+variety of information about a given client, such as its serial
+number, firmware type and version, reported sampling rate, buffer fill
+percentage and PTP lock status, etc., information which can be
+displayed in a digital audio workstation plugin interface. The
+structure of an ACDP packet is given in cref:fig:client-packet.
+
+** The Time Authority
+
+One Teensy 4.1 is designated as an /authoritative source of time/ for
+the entire system. It is used as a USB audio device for the server
+machine, a general purpose laptop computer, and as a PTP clock
+authority for all other devices on the network. Since PTP time and USB
+audio timing on the time authority are governed by the same crystal
+oscillator, in serving this hybrid role the time authority ensures
+synchronicity between the server machine, the ethernet switch, which
+acts as a PTP boundary clock, and, by extension, all other Teensy
+4.1-based modules in the system
+
+** System Overview
+
+#+name: fig:system-overview
+#+caption: Overview of the Ananas networked audio system.
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\pic{systemOverview}
+ \matrix [draw] at (3.75, 0) {
+    \draw [ctrlArrow] (0,0) -- (.5,0); & \node [legend] {Control data (UDP)}; \\
+    \draw [audio] (0,0) -- (.5,0); & \node [legend] {Audio (UDP)}; \\
+    \draw [-{Triangle[open]}, usbColour] (0,0) -- (.5,0); & \node [legend] {USB audio}; \\
+    \draw [-{Triangle}] (0,0) -- (.5,0); & \node [legend] {PTP}; \\
+  };
+\end{tikzpicture}
+\end{figure}
+
+An overview of the Ananas networked audio system is given in
+cref:fig:system-overview. The time authority governs USB audio timing
+on the server machine and PTP time for the switch and other connected
+modules. The server sends audio and control data to the switch, which
+forwards this data on to the conncted modules, which perform their
+part of a distributed spatial audio algorithm.
 
 #+print_bibliography:
 

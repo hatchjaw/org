@@ -508,21 +508,17 @@ which the aforementioned transport layer (layer 3) is a component ---
 i.e. by dedicated timers at the level of the physical network
 interface. 
 
-*** JackTrip
-
-*** NetJack
-
-*** Audio Over OSC
-
-*** Audio Video Bridging
-
-*** AES67
-
-*** Dante
-
-*** NetJUCE
-
 ** The Need for a New Protocol
+
+** Sound Field Synthesis
+
+*** Psychoacoustics and Sound Localisation
+
+*** Periphony
+
+*** Wave Field Synthesis
+
+*** Ambisonics
 
 * Developing Digital Audio Systems
 #+latex: \minitoc
@@ -559,6 +555,10 @@ interface.
 *** Jules's Utility Class Extensions
 
 *** The Clever Audio Plugin Format
+
+* Differentiable DSP In Faust
+#+latex: \minitoc
+#+latex: \newpage 
 
 * Time Exchange
 
@@ -801,47 +801,9 @@ size, \(N\), plus co-ordination via PTP.
 Due to the way that DMA is configured, the iMXRT1062 generates two
 interrupts per audio buffer, 
 
-* Sound Field Synthesis
-#+latex: \minitoc
-#+latex: \newpage
 
-** Psychoacoustics and Sound Localisation
-
-*** Interaural Level Difference
-
-*** Interaural Time Difference
-
-** General Principles of Sound Field Synthesis
-
-** Periphony
-
-*** Stereo
-
-*** Surround Sound
-
-*** Binaural Reproduction
-
-** Wave Field Synthesis
-
-*** Virtual Sound Sources
-
-*** Focused Sound Sources
-
-*** Plane Waves
-
-** Ambisonics
-
-*** Higher Order Ambisonics
-
-*** Spherical Microphone Arrays
-
-*** Ambisonics Encoding and Decoding
-** State of the Art
-
-*** Economic and Financial Considerations
-
-* A Synchronous, Distributed Audio System
-** Configuring the iMXRT1062 MCU
+** A Synchronous, Distributed Audio System
+*** Configuring the iMXRT1062 MCU
 
 #+name: fig:imxrt1062-clock
 #+caption: iMXRT1062 audio PLL and SAI1 clock divider registers.
@@ -989,7 +951,7 @@ minimal valid \(f_{s}\):
 309.9\;\text{Hz} \leq f_{s} \leq 257\,812.5\;\text{Hz}\;.
 \end{equation}
 
-*** A General Expression for the Sampling Rate
+**** A General Expression for the Sampling Rate
 
 Bringing all of the above together, the general expression for
 achieving a target sampling rate \(\hat{f}_{s}\) is
@@ -1008,7 +970,7 @@ cref:fig:imxrt1062-clock). There are too many free variables to solve
 for any one of them, so an iterative approach to finding appropriate
 register and field values is necessary.
 
-*** Setting the Sampling Rate
+**** Setting the Sampling Rate
 :PROPERTIES:
 :CUSTOM_ID: sec:setting-the-sampling-rate
 :END:
@@ -1205,7 +1167,7 @@ values:
 - \(D_{I_{1}} = 3\)
 - \(D_{I_{2}} = 19\)
 
-*** Fine-Tuning the Sampling Rate
+**** Fine-Tuning the Sampling Rate
 
 Say a set of divider register values has been established using
 cref:alg:sampling-rate, and some manner of fine adjustment is desired,
@@ -1231,10 +1193,10 @@ D_{N} = \frac{D_{D}}{1 \times 10^{6}}\left(
 \end{equation}
 
 
-* Distributed Spatial Audio Algorithms
+** Distributed Spatial Audio Algorithms
 
-** Distributed Wave Field Synthesis
-** Distributed Higher Order Ambisonics
+*** Distributed Wave Field Synthesis
+*** Distributed Higher Order Ambisonics
 * Protocol and Software Systems
 
 The heart of the system is /Ananas/, a networked audio system for
