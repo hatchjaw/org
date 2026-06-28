@@ -4,6 +4,7 @@
 #+options: toc:nil num:3 date:nil author:nil
 #+latex_class: is2-2026
 #+cite_export: bibtex IEEETran
+#+bibliography: IS22026.bib
 #+latex_header_extra: \RequirePackage[]{./out/is2-2026}
 
 #+begin_abstract
@@ -592,6 +593,15 @@ D_{N} = \frac{D_{D}}{1 \times 10^{6}}\left(
 \end{tikzpicture}
 \end{figure}
 
+#+name: fig:server
+#+caption: Structural overview of the Ananas audio server.
+\begin{figure*}
+\centering
+\begin{tikzpicture}
+\pic{server};
+\end{tikzpicture}
+\end{figure*}
+
 The Teensy's NXP iMXRT1062 MCU also features a dedicated hardware PTP
 timer\nbsp[cite:@schleusnerSubMicrosecond2024] thus allowing for effective
 media clock recovery via an appropriate algorithm.
@@ -730,15 +740,6 @@ recovery indefinitely.
 
 * The Ananas Networked Audio System
 
-#+name: fig:server
-#+caption: Structural overview of the Ananas audio server.
-\begin{figure*}
-\centering
-\begin{tikzpicture}
-\pic{server};
-\end{tikzpicture}
-\end{figure*}
-
 Ananas is a system for time-sensitive networked audio for supporting
 distributed approaches to sound field synthesis. In the sections that
 follow we describe the various components of the Ananas system.
@@ -868,6 +869,7 @@ org-latex-classes: (("is2-2026" "\\documentclass[conference]{IEEEtran}
   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
   ("\\paragraph{%s}" . "\\paragraph*{%s}")
   ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+org-cite-global-bibliography: nil
 End:
 #+end_example
 
