@@ -804,8 +804,8 @@ respecting ethernet's 1500 byte /maximum transmissible unit/.
 \begin{bytefield}[bitwidth=.55cm, bitheight=.55cm]{16}
       \bitheader{0-15} \\
       \bitbox{4}{Serial number} & \bitbox{1}{\tiny{Firmw. type}} & \bitbox{3}{\scriptsize{Version number}} & \bitbox{4}{Sampling rate} & \bitbox{4}{Percent CPU} \\
-      \bitbox[lr]{4}{\scriptsize{Presentation offset frames}} & \bitbox[lr]{8}{Presentation offset ns} & \bitbox[lr]{4}{\scriptsize{Audio-PTP offset ns}} \\
-      \bitbox[lrtb]{1}{\tiny{Buffer fill \%}} & \bitbox[lrtb]{1}{\tiny{PTP lock}} & \bitbox[ltb]{14}{Secondary source co-ordinates} \\
+      \bitbox[lrb]{4}{\scriptsize{Presentation offset frames}} & \bitbox[lrb]{8}{Presentation offset ns} & \bitbox[lrb]{4}{\scriptsize{Audio-PTP offset ns}} \\
+      \bitbox[lrb]{1}{\tiny{Buffer fill \%}} & \bitbox[lrb]{1}{\tiny{PTP lock}} & \bitbox[lb]{14}{Secondary source co-ordinates} \\
       \bitbox[rb]{2}{}
     \end{bytefield}
 \end{figure}

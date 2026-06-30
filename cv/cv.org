@@ -257,6 +257,11 @@ Music/Drama Technician, Parrs Wood High School, Manchester, UK,
 
 * Publications
 
+T. A. Rushton, R. Michon, T. Risset, C. Wegener, P. Lecompte, 2026,
+Ambisonics: Introducing an Accessible, Distribted Approach,
+/Proceedings of the 23^{rd} Sound and Music Computing Conference/
+(accepted following review, to be published October 2026).
+
 T. A. Rushton, Y. Orlarey, R. Michon, T. Risset, S. Letz, 2025, [[https://aes.org/publications/elibrary-page/?id=23017][Faust
 Autodiff: Towards Audio Domain-Specific Machine Learning]], /Proceedings
 of the 2025 AES International Conference on Artifical Intelligence and
@@ -289,6 +294,11 @@ Conference, SMC 2022/.
 G. V. K. Gustafsson, M. Timossi, T. A. Rushton, 2022, [[https://vbn.aau.dk/en/publications/kuplen-a-hands-on-physical-model][Kuplen: A
 Hands-On Physical Model]], /Proceedings of the 19th Sound and Music
 Computing Conference, SMC 2022/.
+
+* Presentations
+
+All Together Now: A Synchronous Platform for Distributed Spatial
+Audio, /Journées de l'Informatique Musicale 2026/, Lille, France.
 
 * Emacs setup                                                      :noexport:
 
