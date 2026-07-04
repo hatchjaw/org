@@ -15,8 +15,8 @@ consisting of network protocols, control software and microcontroller
 firmware, with the aim of rendering spatial audio applications
 accessible to a broad cohort of potential users. Based on a network of
 low-cost microcontroller development boards programmed in the Faust
-programming language, synchronised via IEEE 1588 Precision Time
-Protocol, and controlled by approachable, digital audio
+programming language, synchronised to nanosecond order via IEEE 1588
+Precision Time Protocol, and controlled by approachable, digital audio
 workstation-based tooling, Ananas represents an opportunity to disrupt
 and democratise the spatial audio landscape. In this paper we
 demonastrate Ananas's protocols for audio and control data
@@ -323,7 +323,10 @@ synchronisation. Taking advantage of multicast user datagram protocol
 (UDP) groups for audio transmission and certain elements of control
 data, Ananas minimises bandwidth, and, being based on IEEE 1588
 Precision Time Protocol (PTP), ensures synchronisation amongst
-distributed hardware modules.
+distributed hardware modules. To our knowledge, Ananas is the first
+open source system providing nanosecond order inter-module
+synchronisation, following millisecond order synchronised systems such
+as by Belloch et al.\nbsp[cite:@bellochPerformance2021].
 
 * Background
 
@@ -356,6 +359,10 @@ not synchronicity, is of greatest concern. For time-sensitive
 applications, this points to the need for a new networked audio
 system, one that ensures synchronicity between distributed signal
 processing modules.
+
+We opted not to use Audio Video Bridging (AVB) or AES67 due to the
+high complexity associated with implementing these protocols in a
+microcontroller context.
 
 ** The Hardware Platform
 
@@ -408,9 +415,9 @@ oversampled with respect to the target audio sampling rate, \(f_{s}\):
 f_{R} = 2^{8}f_{s}\;.
 \end{equation}
 
-The NXP MCUXpresso Config Tools software\nbsp[cite:@MCUXpresso2018]
-indicates that \(f_{R}\) must be lower than or equal to
-\qty{66}{\MHz}, therefore
+The NXP MCUXpresso Config Tools
+software\nbsp[cite:@nxpsemiconductorsMCUXpresso2018] indicates that \(f_{R}\)
+must be lower than or equal to \qty{66}{\MHz}, therefore
 
 #+begin_src emacs-lisp :exports none
 (format "Fs <= %f Hz" (/ 66e6 (lsh 1 8)))
@@ -432,7 +439,7 @@ f_{s} \leq 257\,812.5\;\text{Hz}\;.
 f_{R} = \frac{f_{M}}{D_{I_{1}}D_{I_{2}}}\;.
 \end{equation}
 \(f_{M}\) is found by dividing \(f_{P}\), the frequency of PLL4, by
-the ~POST_DIV_SELECT~, \(D_{p}\), and ~AUDIO _DIV~, \(D_{A}\), registers:
+the ~POST_DIV_SELECT~, \(D_{p}\), and ~AUDIO_DIV~, \(D_{A}\), registers:
 
 #+NAME: eq:pll4-main
 \begin{equation}
@@ -560,7 +567,7 @@ found:
 *** Fine-Tuning the Sampling Rate
 
 Say a set of divider register values has been established and some
-manner of fine adjustment is desired, e.g. to compensate for clock
+manner of fine adjustment is desired, e.g., to compensate for clock
 drift. Cref:eq:general-fs can be rewritten to find an expression for
 an unknown \(D_{N}\):
 
@@ -583,6 +590,9 @@ D_{N} = \frac{D_{D}}{1 \times 10^{6}}\left(
 \end{equation}
 
 *** Media Clock Recovery
+:PROPERTIES:
+:CUSTOM_ID: sec:media-clock
+:END:
 
 #+name: fig:ptp
 #+caption: PTP packet flow.
@@ -656,7 +666,7 @@ recovery/\nbsp[cite:@crankshawMedia2021].
 In the case of the iMXRT1062 MCU this process is achieved by using the
 nanoseconds-per-second PTP-derived adjustment value at second \(n\),
 \(a_{n}\), to adjust the sampling rate. For a nominal sampling rate
-\(f_{s}\) (e.g. \qty{48}{\kHz}), the sampling rate, \(\hat{f}_{s,n}\) that
+\(f_{s}\) (e.g., \qty{48}{\kHz}), the sampling rate, \(\hat{f}_{s,n}\) that
 "matches" that of the time authority is found simply as
 
 #+NAME: eq:sampling-rate-recovery-1
@@ -763,18 +773,20 @@ to a UDP multicast socket and transmits it to the network.
 
 Being first and foremost concerned with the transmission of audio
 data, at the heart of the Ananas system is the Ananas Audio Protocol
-(AAP). A UDP multicast-based protocol, using address =224.4.224.4=, AAP
-consists of a stream of sequence numbered, timestamped packets. The
-structure of an AAP packet is given in cref:fig:audio-packet. It was
-found that, particularly under high-bandwidth conditions, packets
-sporadically arrive out of order, hence the inclusion of the sequence
-number, which is used at the receiving side to ensure the integrity of
-the packet stream. For timestamping, the server reads a PTP follow-up
-packet, adds a small reproduction offset (for packets of 16 frames it
-was found that an offset of \(1/70\) s was most appropriate) and
-writes the timestamp to the outgoing packet; successive packets are
-then updated with the expected inter-packet interval, e.g. for 16
-frames at \qty{48}{\kHz} this is \(333\,333\frac{1}{3}\) ns.
+(AAP). A UDP multicast-based protocol, using address =224.4.224.4=,
+taken from the second ad-hoc block of IANA's multicast address
+space\nbsp[cite:@meyerIANA2010], AAP consists of a stream of sequence
+numbered, timestamped packets. The structure of an AAP packet is given
+in cref:fig:audio-packet. It was found that, particularly under
+high-bandwidth conditions, packets sporadically arrive out of order,
+hence the inclusion of the sequence number, which is used at the
+receiving side to ensure the integrity of the packet stream. For
+timestamping, the server reads a PTP follow-up packet, adds a small
+reproduction offset (for packets of 16 frames it was found that an
+offset of \(1/70\) s was most appropriate) and writes the timestamp to
+the outgoing packet; successive packets are then updated with the
+expected inter-packet interval, e.g., for 16 frames at \qty{48}{\kHz}
+this is \(333\,333\frac{1}{3}\) ns.
 
 Completing the packet header are the number of channels and number of
 frames in the packet, used at the receiving side for decoding the
@@ -821,6 +833,10 @@ displayed in a digital audio workstation plugin interface. The
 structure of an ACDP packet is given in cref:fig:client-packet.
 
 ** The Time Authority
+:PROPERTIES:
+:CUSTOM_ID: sec:time-authority
+:END:
+
 
 One Teensy 4.1 is designated as an /authoritative source of time/ for
 the entire system. It is used as a USB audio device for the server
@@ -830,7 +846,25 @@ audio timing on the time authority are governed by the same crystal
 oscillator, in serving this hybrid role the time authority ensures
 synchronicity between the server machine, the ethernet switch, which
 acts as a PTP boundary clock, and, by extension, all other Teensy
-4.1-based modules in the system
+4.1-based modules in the system.
+
+** Control Systems
+
+Control data is sent as OSC messages over UDP. For WFS, hardware
+modules are assigned their positions in the speaker array, i.e. given
+their secondary source (loudspeaker) positions over unicast
+UDP. E.g., a given module may receive its secondary source x-position
+via an OSC message of the form =/ss/0/x 1.5=, indicating that its first
+secondary source is at x-coordinate \qty{1.5}{\m}. WFS virtual sound
+source positions are delivered as multicast OSC messages on address
+=224.4.224.5= and are of the form =/vs/0/y -0.5=, indicating that the
+first virtual sound source's y-coordinate should be \qty{-0.5}{\m}.
+
+For ambisonics, modules instead receive their decoder coefficients
+over unicast UDP, again as OSC messages. A module may for example
+receive a message of the form =/dm/0/0 0.2385=, indicating that it
+should use a coefficient of 0.2385 for the first element in the first
+row of the decoder matrix.
 
 ** System Overview
 
@@ -851,12 +885,56 @@ acts as a PTP boundary clock, and, by extension, all other Teensy
 
 An overview of the Ananas networked audio system is given in
 cref:fig:system-overview. The time authority governs USB audio timing
-on the server machine and PTP time for the switch and other connected
-modules. The server sends audio and control data to the switch, which
-forwards this data on to the conncted modules, which perform their
-part of a distributed spatial audio algorithm.
+on the server machine and PTP time for the switch, a MikroTik
+CRS326-24G-2S+IN[fn:3] chosen for its high port count, PTP support and
+low cost (\sim€ 200), and other connected modules. The server sends audio
+and control data to the switch, which forwards this data on to the
+conncted modules, which perform their part of a distributed spatial
+audio algorithm.
+
+* Deployment
+
+#+name: fig:ananas-wfs
+#+caption: Ananas driving a 16-channel WFS system.
+#+attr_org: :width 200
+[[./images/ananas-wfs.jpeg]]
+
+Deployed as per cref:fig:system-overview, Ananas can operate either as
+a WFS or a HOA system. DSP, programmed in the Faust language, is
+distributed amongst the hardware modules; for WFS, modules need only
+know the spatial coordinates of their loudspeakers and the
+cooridinates of the virtual sound sources to produce their part of the
+synthesised sound field; for HOA, modules are provided with the rows
+of the decoder matrix for which they are responsible and delivered
+ACN-encoded audio streams.
+
+An example WFS setup is pictured in cref:fig:ananas-wfs. Timing in the
+system is governed by the time authority Teensy described in
+cref:sec:time-authority. The server machine, a general purpose laptop
+computer, runs the Reaper[fn:4] digital audio workstation with a WFS
+control plugin assigned to a 16-channel track and sends monophonic
+audio streams to a UDP multicast group managed by a single switch,
+which forwards the data on to the hardware modules. Eight modules are
+used in this setup for a total of sixteen output channels. Thanks to
+the media clock recovery algorithm described in cref:sec:media-clock,
+modules remain synchronised to within \qty{200}{\nano\second} at all
+times.
+
+* Conclusion
+
+In this paper we have presented /Ananas/, a new networked audio system
+for time-sensitive applications. 
 
 #+print_bibliography:
+
+* Footnotes
+[fn:4] \url{https://reaper.fm} 
+
+[fn:3] \url{https://mikrotik.com/product/crs326_24g_2s_in}
+
+[fn:2] \url{https://sonobus.net}
+
+[fn:1] JUCE v8.0.6 \url{https://juce.com}. 
 
 * Local Variables                                                  :noexport:
 
@@ -873,7 +951,3 @@ org-cite-global-bibliography: nil
 End:
 #+end_example
 
-* Footnotes
-[fn:2] \url{https://sonobus.net}
-
-[fn:1] JUCE v8.0.6 \url{https://juce.com}. 

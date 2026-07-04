@@ -257,7 +257,7 @@ Music/Drama Technician, Parrs Wood High School, Manchester, UK,
 
 * Publications
 
-T. A. Rushton, R. Michon, T. Risset, C. Wegener, P. Lecompte, 2026,
+T. A. Rushton, R. Michon, T. Risset, C. Wegener, P. Lecomte, 2026,
 Ambisonics: Introducing an Accessible, Distribted Approach,
 /Proceedings of the 23^{rd} Sound and Music Computing Conference/
 (accepted following review, to be published October 2026).
