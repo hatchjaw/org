@@ -10,7 +10,7 @@
 #+begin_abstract
 Spatial audio has an accessibility problem. Large-scale spatial and
 immersive audio installations remain costly and exclusive, with high
-barriers to entry. We propose "Ananas", a networked audio system
+barriers to entry. We propose "Ananas," a networked audio system
 consisting of network protocols, control software and microcontroller
 firmware, with the aim of rendering spatial audio applications
 accessible to a broad cohort of potential users. Based on a network of
@@ -19,7 +19,7 @@ programming language, synchronised to nanosecond order via IEEE 1588
 Precision Time Protocol, and controlled by approachable, digital audio
 workstation-based tooling, Ananas represents an opportunity to disrupt
 and democratise the spatial audio landscape. In this paper we
-demonastrate Ananas's protocols for audio and control data
+demonstrate Ananas's protocols for audio and control data
 transmission and device discovery, its methods for media clock and
 presentation time recovery, and its applications to wave field
 synthesis and higher order ambisonics in a modular, scalable form.
@@ -390,7 +390,7 @@ with implementing these protocols in a microcontroller context.
 \end{tikzpicture}
 \end{figure*}
 
-Effective deployment of a distribtued spatial audio system is
+Effective deployment of a distributed spatial audio system is
 dependent on the identification of a suitable hardware platform for
 the distributed nodes. Such a platform should be low-cost and
 powerful, with support for audio and ethernet. The Teensy 4.1
@@ -890,7 +890,7 @@ on the server machine and PTP time for the switch, a MikroTik
 CRS326-24G-2S+IN[fn:3] chosen for its high port count, PTP support and
 low cost (\sim€ 200), and other connected modules. The server sends audio
 and control data to the switch, which forwards this data on to the
-conncted modules, which perform their part of a distributed spatial
+connected modules, which perform their part of a distributed spatial
 audio algorithm.
 
 * Deployment
@@ -957,7 +957,7 @@ hline!([meanAsync],
 savefig("./images/gen/synchro.png")
 #+end_src
 #+name: fig:synchro
-#+caption: Synchronisation measurements for a group of four Teensy modules reproducing a pulse-per-second audio signal.
+#+caption: Synchronisation measurements for a group of four Teensy modules reproducing a pulse-per-second audio signal. Group asynchronicity represents the instantaneous range of offsets for all four modules.
 #+attr_latex: :float multicolumn
 #+RESULTS:
 [[file:./images/gen/synchro.png]]
@@ -966,7 +966,7 @@ Deployed as per cref:fig:system-overview, Ananas can operate either as
 a WFS or a HOA system. DSP, programmed in the Faust language, is
 distributed amongst the hardware modules; for WFS, modules need only
 know the spatial coordinates of their loudspeakers and the
-cooridinates of the virtual sound sources to produce their part of the
+coordinates of the virtual sound sources to produce their part of the
 synthesised sound field; for HOA, modules are provided with the rows
 of the decoder matrix for which they are responsible and delivered
 ACN-encoded audio streams.
@@ -981,18 +981,41 @@ which forwards the data on to the hardware modules. Eight modules are
 used in this setup for a total of sixteen output channels. Thanks to
 the media clock recovery algorithm described in cref:sec:media-clock,
 modules remain synchronised to within around \qty{200}{\nano\second}
-at all times (see cref:fig:synchro).
+at all times. Cref:fig:synchro shows an hour's worth of synchronicity
+measurements for a group of four hardware modules. The modules were
+connected to a Digilent Analog Discovery 2 logic analyser and their
+I^{2}S output measured in Digilent Waveforms software. The server
+delivered a pulse-per-second audio signal and offsets were measured at
+the rising edge of the pulse. The mean asynchronicity of
+\sim\qty{80}{\nano\second} falls well within the AES guideline for
+time-sensitive applications of 5% of the reference frame
+(\sim\qty{1}{\micro\second} at \qty{48}{\kilo\hertz}) and corresponds with a
+propagation discrepancy in air of roughly \qty{27.4}{\micro\meter}.
+
+#+begin_src emacs-lisp :exports none
+(let ((async 80e-9)
+      (celerity 343))
+  (* async celerity))
+#+end_src
+
+#+RESULTS:
+: 2.744e-05
 
 * Conclusion
 
 In this paper we have presented /Ananas/, a new networked audio system
 for time-sensitive applications. With its low-cost,
 microcontroller-based hardware platform, it is modular and scalable
-and familiar digitial audio workstatiton tools make it approachable to
+and familiar digital audio workstation tools make it approachable to
 non-technical users. Modules are synchronised to extremely high
 precision thanks to media clock and presentation time recovery
 algorithms. Ananas represents an opportunity to democratise spatial
 audio, rendering WFS and HOA accessible to a broad potential userbase.
+
+In terms of future work, we aim to increase the channel count
+available on each hardware module via time domain multiplexing,
+further reducing the cost per output channel associated with the
+Ananas system.
 
 #+print_bibliography:
 
