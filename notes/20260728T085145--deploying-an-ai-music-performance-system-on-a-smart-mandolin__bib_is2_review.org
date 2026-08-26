@@ -1,0 +1,26 @@
+#+title:      Deploying an AI Music Performance System on a Smart Mandolin
+#+date:       [2026-07-28 mar. 08:51]
+#+filetags:   :bib:is2:review:
+#+identifier: 20260728T085145
+#+reference:  giudiciDeploying2026
+
+* Summary
+
+This paper presents MandaLOERIC, a smart musical instrument consisting
+of a mandolin with an embedded Raspberry Pi, designed to be used in
+the context of Irish traditional music. LOERIC is itself a rule-based
+artificial intelligence system for live performance of Irish
+traditional music.
+
+The poper does not offer a comprehensive description of LOERIC
+(presumbaly this is to be found in references [1] and [2], which are
+not freely accessible at the time of writinng), so the purpose of
+MandaLOERIC is not entirly clear, and the instrument does not feature
+in the supplementary video linked from footnote 1. It remains unclear
+whether it in an automatic accompanist and what benefits are accorded
+by embedding it in a "smart" mandolin.
+
+It is a well-written paper, but since it does not adequately describe
+the purpose of the instrument, nor explain how it benefits from the
+inclusion of an artificial intelligence component, I cannot recommend
+it for inclusion.

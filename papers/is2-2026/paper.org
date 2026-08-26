@@ -398,7 +398,7 @@ microcontroller development board\nbsp[cite:@michonReal2019] was
 identified as satisfying these requirements, costing less than € 50
 with its audio and ethernet add-ons, and sporting a \qty{600}{\MHz}
 ARM Core M7 CPU. Unlike other comparable devices, such as the
-Raspberry Pi, it's microcontroller, an NXP iMXRT1062 MCU, features a
+Raspberry Pi, its microcontroller, an NXP iMXRT1062 MCU, features a
 dedicated audio subsystem, with high-resolution clock divider
 registers for its audio phase locked loop (PLL); 30 bits are available
 for the PLL's numerator and denominator registers, meaning that
@@ -705,10 +705,12 @@ value for the PLL4 numerator register
 
 #+NAME: eq:adjusted-dn
 \begin{equation}
-D_{N,n} = \frac{D_{D}}{1 \times 10^{6}}\left(
-  \frac{2^{8} \times 47\,999.916 \times D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24} -
-  1 \times 10^{6} D_{S}
+\begin{split}
+D_{N,n} = \frac{D_{D}}{1 \times 10^{6}}&\left(
+  \frac{2^{8} \times 47\,999.916 \times D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24} - \right.\\
+  &\left.1 \times 10^{6} D_{S}
 \right)\;.
+\end{split}
 \end{equation}
 Using the values derived in cref:sec:setting-the-sampling-rate yields
 
@@ -794,6 +796,8 @@ frames in the packet, used at the receiving side for decoding the
 byte-encoded audio data that follows. At 16 frames per packet it is
 possible to transmit up to 44 channels of 16-bit audio while
 respecting ethernet's 1500 byte /maximum transmissible unit/.
+# Force the footnote in /The Audio Server/ to appear on the same page
+#+latex: \newpage
 
 #+name: fig:audio-packet
 #+caption: Structure of an Ananas audio packet.

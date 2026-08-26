@@ -61,6 +61,9 @@ Number minitoc sections as deep as ~\subsubsection~
 #+begin_src latex
 \RequirePackage[dvipsnames]{xcolor}
 \RequirePackage{graphicx}
+\RequirePackage[inkscapelatex=false]{svg}
+\RequirePackage{subcaption}
+\RequirePackage{mdframed}
 #+end_src
 
 *** Colours
@@ -78,7 +81,9 @@ The main serif typeface.
 
 #+begin_src latex
 \RequirePackage[cmintegrals,cmbraces]{newtxmath}
+\let\partialOrig\partial
 \RequirePackage{ebgaramond-maths}
+\let\partial\partialOrig
 \RequirePackage[T1]{fontenc}
 #+end_src
 
@@ -131,6 +136,7 @@ Fancy characters (typically) at the beginning of chapters.
 \RequirePackage{amsmath}
 \RequirePackage{amssymb}
 \RequirePackage{amsfonts}
+\RequirePackage{stmaryrd}
 #+end_src
 
 *** Units
@@ -164,7 +170,7 @@ Fancy characters (typically) at the beginning of chapters.
 
 #+begin_src latex
 \RequirePackage{tikz}
-\usetikzlibrary{positioning, arrows.meta}
+\usetikzlibrary{positioning, arrows.meta, calc, fit, backgrounds}
 \RequirePackage{bytefield}
 #+end_src
 
@@ -199,6 +205,29 @@ Fancy characters (typically) at the beginning of chapters.
 #+end_src
 
 ** Figures
+
+*** Common stuff
+
+Define some colours and some node and line styles.
+
+#+begin_src latex
+\definecolor{ctrlColour}{HTML}{479955}
+\definecolor{audioColour}{HTML}{4077D6}
+\definecolor{usbColour}{HTML}{D63E3E}
+
+\tikzset{
+  device/.style={draw, fill=black!10, rounded corners=1mm, inner xsep=1.5mm, align=center},
+  ctrl/.style={densely dotted, ctrlColour, line width=.2mm},
+  ctrlArrow/.style={ctrl, -{Triangle[open]}},
+  acn/.style={-{Stealth}, audioColour, densely dashdotted},
+  audio/.style={-{Stealth}, audioColour},
+  ptp/.style={{Triangle}-{Triangle}},
+  usb/.style={{Triangle[open]}-{Triangle[open]}, usbColour},
+  legend/.style={font=\tiny\itshape},
+  module/.style={device, fill=ctrlColour!35, font={\scriptsize}, transform shape},
+  authority/.style={device, fill=usbColour!35}
+}
+#+end_src
 
 *** PTP
 
@@ -238,11 +267,131 @@ Fancy characters (typically) at the beginning of chapters.
 }
 #+end_src
 
+*** Audio Server
+
+#+begin_src latex
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
+\tikzset{
+  rounded/.style={draw, rounded corners=1mm},
+  server/.pic={
+    % Place procloop at origin
+    \node (procloop) [draw, align=center, fill=white] at (0,0)
+          {Processing\\Loop};
+    \node (write) [draw, above right=5mm and 3cm of procloop, fill=green!20]
+          {Write};
+    \node (notify) [draw, below=3mm of write, fill=white] {Notify};
+    \begin{pgfonlayer}{foreground}
+      \node (convert) [draw, below=8mm of notify, fill=white] {Convert};
+    \end{pgfonlayer}
+    \node (pad1) [inner sep=0pt] at ([yshift=.3cm] convert.north) {};
+    \node (read) [draw, fit=(convert)(pad1), fill=blue!20] {};
+    \node [anchor=north, inner sep=1mm] at (read.north) {Read};
+    \node (packet) [draw, above right=0cm and 3.2cm of notify, fill=white] {Packet};
+    \begin{pgfonlayer}{foreground}
+      \node (write2) [draw, below=8mm of packet, fill=red!20] {Write};
+    \end{pgfonlayer}
+    \node (pad2) [inner sep=0mm] at ([yshift=.3cm] write2.north) {};
+    \node (socket) [draw, fit=(write2)(pad2), inner xsep=7mm, fill=white] {};
+    \node [anchor=north, inner sep=1mm] at (socket.north)
+          {\footnotesize{Multicast socket}};
+
+    % Fit processor around procloop
+    \begin{pgfonlayer}{background}
+      \node (processor) [rounded, fit=(procloop), inner xsep=5mm, inner ysep=12mm, fill=green!20] {};
+      \node [anchor=north, inner sep=1mm] at (processor.north)
+            {Audio Processor};
+      \node (fifo) [rounded, fit=(write)(notify)(read), inner xsep=5mm, inner ysep=5mm, fill=orange!20]
+            {};
+      \node [anchor=north, inner sep=1mm] at (fifo.north) {FIFO Buffer};
+      \node (sender) [rounded, fit=(packet)(socket), inner ysep=8mm, fill=blue!20] {};
+      \node [anchor=north, inner sep=1mm] at (sender.north)
+            {Sender Thread};
+    \end{pgfonlayer}
+
+    % Outer fit
+    \node (server) [fit=(processor)(fifo)(sender), draw, inner sep=5mm]
+          {};
+    \node [anchor=north west, inner sep=1mm] at (server.north west)
+          {Audio Server};
+    \node (sources) [above left=-4.175cm and .5cm of server, align=center]
+          {WFS sources\\or\\ACN encoded audio};
+    \node (udp) [above right=-4.25cm and 1cm of server, align=center]
+          {UDP packet to\\multicast group};
+
+    \draw [-{Triangle}] (sources.east) -- (processor.west);
+    \draw [-{Triangle}] (procloop.east) -| (2.2, 0) |- (write.west);
+    \draw [-{Triangle}] (write.south) -- (notify.north);
+    \draw [-{Triangle}] (notify.south) -- (read.north);
+    \draw [-{Triangle}] (read.east) -| (6.8, 0) |- (packet.west);
+    \draw [-{Triangle}] (packet.south) -- (socket.north);
+    \draw [-{Triangle}] (write2.east) -- (udp.west);
+
+    \draw [-{Stealth}] ([yshift=11mm] sender.west) --
+    ([yshift=13.35mm] fifo.east) node [midway, above=0mm] {\scriptsize{Await}};
+    \draw [-{Stealth}, dashed] ([yshift=13.35mm] fifo.east) -- (notify.east);
+  }
+}
+#+end_src
+
+*** System overview
+
+#+begin_src latex
+\tikzset{
+  systemOverview/.pic={
+    \node (auth) [authority] at (0, 0) {Time\\authority};
+    \node (switch) [device, above=5mm of auth, inner xsep=10mm] {Switch};
+    \node (server) [device, below=5mm of auth, inner xsep=10mm] {Server};
+    \node (module0) [module, above left=5mm and -7mm of switch] {T41};
+    \node (moduleN) [module, above right=5mm and -7mm of switch] {T41};
+    \node [above=5mm of switch] {\(\cdots\)};
+
+    % PTP between authority and switch
+    \draw [ptp] (auth.north) -- (switch.south);
+
+    % PTP between switch and modules
+    \draw [ptp] ([xshift=-13.3mm]switch.north) --
+    ([xshift=-2mm]module0.south);
+    \draw [ptp] ([xshift=9.3mm]switch.north) --
+    ([xshift=-2mm]moduleN.south);
+
+    % USB audio
+    \draw [usb] ([xshift=-4mm]auth.south) --
+    ([xshift=-4mm]server.north);
+
+    % PTP follow-up from authority to server
+    \draw [-{Triangle}] ([xshift=4mm]auth.south) --
+    ([xshift=4mm]server.north);
+
+    % Audio from server to switch
+    \draw [audio] ([xshift=-12.5mm]server.north) --
+    ([xshift=-12.5mm]switch.south);
+
+    % Ctrl from server to switch
+    \draw [ctrlArrow] ([xshift=12.5mm]server.north) --
+    ([xshift=12.5mm]switch.south);
+
+    % Audio from switch to modules
+    \draw [audio] ([xshift=-11.3mm]switch.north) -- (module0.south);
+    \draw [audio] ([xshift=11.3mm]switch.north) -- (moduleN.south);
+
+    % Ctrl from switch to modules
+    \draw [ctrlArrow] ([xshift=-9.3mm]switch.north) --
+    ([xshift=2mm]module0.south);
+    \draw [ctrlArrow] ([xshift=13.3mm]switch.north) --
+    ([xshift=2mm]moduleN.south);
+  }
+}
+#+end_src
+
 
 * Acknowledgements
 :PROPERTIES:
 :UNNUMBERED: notoc
 :END:
+
+#+latex: \fancyhead[RE,LO]{Acknowledgements}
 
 Unlike many of my doctoral peers, I have had the privilege of being
 able to develop the work presented in this thesis for a full four
@@ -294,8 +443,21 @@ Tommy
 :UNNUMBERED: notoc
 :END:
 
+#+latex: \fancyhead[RE,LO]{Abstract}
+
 #+begin_abstract
-This is what my work is about
+Access to large-scale spatial audio systems remains a challenge
+despite significant interest in the research and commercial spheres.
+The cost of highly-multichannel audio interfaces renders such systems
+inaccessible to all but the institutions with the deepest
+pockets. Described in this thesis is a modular, scalable system for
+distributed spatial audio taking advantage of one of a raft of
+low-cost embedded audio platforms to have been released over the past
+decade or so. Via IEEE 1588 Precision Time Protocol, hardware modules
+remain synchronised to within around
+\qty{200}{\nano\second}. Supporting the system is an audio server and
+protocols designed for time-sensitive networked audio, control data
+and device discovery.
 #+end_abstract
 
 #+latex: \mainmatter
@@ -306,11 +468,22 @@ This is what my work is about
 :CUSTOM_ID: sec:intro
 :END:
 
-Hi there; let's go.
+#+latex: \fancyhead[RE,LO]{Introduction}
+
+Spatial audio has an accessibility problem. Large-scale spatial and
+immersive audio installations remain costly and exclusive, with high
+barriers to entry. This thesis describes an attempt to democratise
+access to spatial audio systems by taking a distributed approach to
+the computation of sound field synthesis algorithms.
 
 * Background and State of the Art
 #+latex: \minitoc
 #+latex: \newpage
+
+#+latex: \pagestyle{fancy}
+#+latex: \fancyhead[LE,RO]{\thepage}
+#+latex: \fancyhead[RE]{\leftmark}
+#+latex: \fancyhead[LO]{\rightmark}
 
 \lettrine{A}{udio transmission} over packet-switched networks has
 become the /de facto/ standard for a variety of applications over the
@@ -498,33 +671,340 @@ standard for the Precision Time Protocol, a means by which networked
 computer systems can achieve clock
 synchronicity\nbsp[cite:@edisonIEEE15882002]. PTP (another protocol that
 typically uses UDP for transport) superseded the lower-resolution
-Network Time Protocol (NTP), and, under ideal conditionns, can achieve
-sychronisation accuracy of sub-microsecond
-order\nbsp[cite:@tongzhouResearch2022]. Synchronisation is achieved via
-the exchange of timestamped packets, coupled with precise estimates
-for send and receive times. Precision is best when timestamps can be
-calculated at the /physical layer/ --- layer 1 of the OSI model, of
-which the aforementioned transport layer (layer 3) is a component ---
-i.e. by dedicated timers at the level of the physical network
-interface. 
+Network Time Protocol (NTP)\nbsp[cite:@millsImproved1994], and, under
+ideal conditionns, can achieve sychronisation accuracy of
+sub-microsecond order\nbsp[cite:@tongzhouResearch2022]. Synchronisation is
+achieved via the exchange of timestamped packets, coupled with precise
+estimates for send and receive times. Precision is best when
+timestamps can be calculated at the /physical layer/ --- layer 1 of the
+OSI model, of which the aforementioned transport layer (layer 3) is a
+component --- i.e. by dedicated timers at the level of the physical
+network interface.
 
 ** The Need for a New Protocol
 
-** Sound Field Synthesis
 
-*** Psychoacoustics and Sound Localisation
 
-*** Periphony
+** Audio Spatialisation
 
-*** Wave Field Synthesis
+Audio spatialisation is, plainly put, the practice of distributing
+sound in space. The spatialisation of /primary sound sources/, e.g.,
+sound captured by microphones, stored as digital audio files, or
+synthesised in real-time, can be achieved simply by delivering those
+primary sources to /secondary sound sources/, i.e., loudspeakers or
+headphones. Exploiting auditory cues, and the nature of the
+propagation of sound, it is possible to suggesnt the presence of
+primary sources at arbitrary locations, independent of the secondary
+source distribution. The motivation behind audio spatialisation, then,
+is to create (or indeed /recreate/) sonic environments for creative and
+immersive purposes, such as for virtual reality experiences, in
+cinematic settings, for music production or art installations, to give
+but a handful of examples.
 
-*** Ambisonics
+A number of techniques exisnt for what is termed /sound field
+synthesis/\nbsp[cite:@nicolSound2017; @ahrensAnalytic2012], all of which
+essentially take the form of applying some manner of /driving function/
+to an input audio signal to generate an appropriate driving signal to
+be delivered to a secondary sound source in the listening
+environment\nbsp[cite:@ahrensAnalytic2012]. For a loudspeaker at position
+\(\mathbf{x} = \begin{bmatrix}x & y & z\end{bmatrix}^{T}\), the
+time-domain driving signal \(\hat{d}(\mathbf{x}, t)\) can be expressed
+as a convolution of the input signal \(\hat{s}_{\text{in}}(t)\) and the
+driving function \(d(\mathbf{x},t)\):
+
+#+NAME: eq:driving-signal
+\begin{equation}
+\hat{d}(\mathbf{x}, t) = \hat{s}_{\text{in}}(t) \ast d(\mathbf{x}, t)\;,
+\end{equation}
+where \(t\) denotes time.
+
+Commonly-employed approaches to sound fdield creation can be grouped
+into two broad categories: amplitude- and time-based panning
+techniques, and physical sound field recreation approaches.
+
+*** Periphony and Binaural Reproduction
+
+The former, /periphonic/, types encompass stereophony and surround-sound
+systems, consisting of secondary sources in a planar arrangement
+equidistant from the listening position. The techniques exploit the
+interaural level difference (ILD) cue, i.e., the difference in
+perceived amplitude relative to the listener's
+ears\nbsp[cite:@ziemerWave2020; @verheijenSound1998; @pulkkiVirtual1997],
+te encourage the listener to localise sound to a position on the
+circumference of an arc or circle around the listening position. For
+systems of this sort, the driving function is a constant scalar value,
+or, for a moving phantom source, a time-varying function that returns
+a scalar value. Such periphonic approaches can extend to three
+dimensions in the case of vector base amplitude panning
+(VBAP)\nbsp[cite:@pulkkiVirtual1997], which uses trios of speakers to
+position phantom sources on the surface of a sphere with the listening
+position at its origin.
+
+Time-based panning effects, by contrast, make use of the interaural
+time difference (ITD) cue to give the impression of a phantom sounce
+located toward the loudspeaker producing the singal at the earliest
+time\nbsp[cite:@verheijenSound1998; @pulkkiVirtual1997]. Thus the driving
+function for a time-based panning system is a delay of the form
+
+#+NAME: eq:time-based-driving-function
+\begin{equation}
+d(\mathbf{x}, t) = \delta(t - \tau)\;,
+\end{equation}
+where \(\tau\) is the duration of the delay.
+
+The effects of ILD and ITD cues transfer to headphone-based listening,
+in which case, rather than periphonic, they form a sort of /in-head/
+localisation\nbsp[cite:@ahrensAnalytic2012]. For a significantly more
+naturalistic auditory outcome, ILD and ITD cues, when combined with
+filters describing the dispersive and absorptive effects of the head,
+torso and outer ears, constitute a Head-Related Transfer Function
+(HRTF), the key component in what is termed /binaural
+reproduction/. Binaural recordings are taken either with a dummy head
+or ear-mounted microphones, and thus the signal for each ear is
+coloured by the head used during recording, or HRTF measurements can
+be taken and used to describe filters to be applied to arbitrary
+signals at playback. Binaural sound is suited to headphone-based
+listening but ma,y be achieved with loudspeakers if suitable
+cross-talk cancellation is applied\nbsp[cite:@kaiserTransaural2011].
+
+Periphonic approaches are subject to the phenomenon of an ideal
+listening position, or /sweet-spot/\nbsp[cite:@nicolSound2017], that is a
+listening position away from which the spatialisation effect is
+significantly degraded. Binaural reproduction, if not coupled with
+head motion tracking, is similarly afflicted by an ideal position and
+orientation\nbsp[cite:@verheijenSound1998]; further, for faithful
+reproduction, HRTFs should be
+individualised\nbsp[cite:@depoliPhysically1998]. As such, these techniques
+are not suited to collective and immersive auditory experiences
+whereby multiple participants may move freely about their environment.
+
+*** Physically-inspired Techniques
+
+Physical approaches fall into two main types: wave field synthesis
+(WFS)\nbsp[cite:@berkhoutAcoustic1993] and ambisonics (and higher-order
+ambisonics --- HOA)\nbsp[cite:@zotterAmbisonics2019]. Rather than directly
+manipulating sound localisation cues, these types seek to trigger
+those cues indirectly by synthesising a sound field as if it had been
+created by "true" acoustic sources.
+
+In the case of ambisonics, first described in the early 1970s by
+Michael Gerzon\nbsp[cite:@ahrensAnalytic2012], the sound field is
+decomposed into /spherical harmonics/, spatial functions described by
+linear sums of directional components of increasing
+order\nbsp[cite:@nicolSound2017]. Like periphonic approaches, ambisonics
+suffers from a sweet-spot effect which worsens with attempts to
+reproduce sounds of higher frequency, but can be mitigated by
+reproducing higher-order modes and increasing the density of the
+distribution of secondary sources.
+
+WFS is based upon Huygens' principle, originating in the field of
+optics, which states that a propagating wavefront can be recreated by
+a distribution of secondary point
+sources\nbsp[cite:@bellochPerformance2021; @berkhoutAcoustic1993;
+@muellerAcoustic1971] (see cref:fig:holophony). WFS is variously
+termed a form of /acoustic holography/ or
+/holophony/\nbsp[cite:@berkhoutHolographic1988;
+@ahrensAnalytic2012]. Effectively, by timing the reporudction of an
+input signal at an array of secondary sources, a wavefront associated
+with a virtual sound source can be synthesised. To simulate auditory
+cues related to perceived distance, a filter can be applied to model
+losses to the virtual medium of acoustic propagation. The principle
+assumes a continuous array of secondary sources but of course in
+practice it is necessary to use a discrete array of loudspeakers,
+which, much as is the case for HOA, has consequences for spatial
+resolution; to mitigate the issue of spatial aliasing, whereby sounds
+of higher frequency cannot be recreated
+unambiguously\nbsp[cite:@winterGeometric2018], secondary sources should be
+placed very close together. Consequently, to serve a large listening
+area, many speakers, and thus many audio channels, are required.
+
+Via appropriate timing of the delivery of a primary sound source to
+the secondary source array, it is possible to synthesise virtual sound
+sources, plane waves, and /focused/ sound sources, corresponding with
+concave, flat, and convex synthesised wavefronts respectively; the
+latter, dependent on the location of the listener, appear to emanate
+from within the real sound field, rather than its virtual counterpart.
+
+Focusing on the former kind, however, for \(m\) virtual sources, the
+time-domain driving signal, \(\hat{d}\) for the secondary source at
+\(\mathbf{x}\) may be expressed as a sum of input-signal
+driving-function convolutions (see cref:eq:driving-signal):
+
+#+NAME: eq:wfs-driving-signal
+\begin{equation}
+\hat{d}(\mathbf{x}, t) = \sum_{k=0}^{m-1}\hat{s}_{\text{in},k} \ast d_{k}(\mathbf{x}, t)\;,
+\end{equation}
+where the driving function \(d_{k}\) is\nbsp[cite:@ahrensAnalytic2012]:
+
+#+NAME: eq:wfs-driving-function
+\begin{equation}
+d_{k}(\mathbf{x}, t) = \frac{y_{k}}{r_{k}}f(t) \ast \delta\left(t - \frac{r_{k}}{c}\right)\;.
+\end{equation}
+This is, in effect, a physically-informed extension of
+cref:eq:time-based-driving-function. The /WFS prefilter/, \(f(t)\), is a
+function that simulates the absorption of energy into the simulated
+medium of acoustic propagation. The delta function \(\delta\) has the
+effect of delaying the prefilter, and thus \(s_{\text{in},k}\), by the
+time of propagation for a medium of with propagation speed \(c\)
+(typically modelled as \qty{343}{\meter\per\second} for sound in
+air). The components of the driving function are depicted in
+cref:fig:driving-function.
+
+*** State of the Art Spatial Audio Installations
+:PROPERTIES:
+:CUSTOM_ID: sec:sota-spatial-audio
+:END:
+
+As described, for optimal spatial resolution, systems implementing HOA
+and WFS require many output channels; in effect, the more channels,
+and the greater the loudspeaker-density, the better.
+
+The Multisensory Experience Lab at Aalborg University (AAU),
+Copenhagen, hosts a 64-channel, square-array WFS system covering an
+area of 4m \times 4m\nbsp[cite:@graniGestural2016]. It is driven by a Mac Pro
+desktop computer, connected, via a USB MADI (Multichannel Audio
+Digital Interface) interface, to two 32-channel MADI to analogue
+converters. Though this system's WFS engine is provided by open-source
+/WFSCollider/ software,[fn:3] being a centralised system, the computer
+that co-ordinates its operation is powerful --- 12-core CPU, 64 GB RAM
+--- and was costly at the time of purchase; likely on the order of
+several thousand Euros. With further regard to cost, the current
+equivalent MADI to analogue converter models are priced at roughly
+€5,000 apiece. Excluding the cost of loudspeakers (and the gantry upon
+which they are mounted) one may reasonably place an estimate of €250
+per output channel on this system.
+
+The world's largest dedicated WFS system, at TU Berlin, features over
+800 output channels served by a distributed cluster of fifteen
+computers acting as audio nodes and two additional control
+computers\nbsp[cite:@baalmanRenewed2007].[fn:8] The fifteen audio nodes of
+the TU Berlin system are each equipped with a MADI audio interface,
+connected to a MADI to ADAT bridge; these can, at the time of writing,
+be purchased for around €1,400 and €4,500 each, respectively, for a
+total of €88,500. Imagining €2,000 per computer, a conservative
+estimate of €150/channel may be reached, however the expense
+associated with this system is difficult to assess as it is tied to
+the concert hall space in which it resides. indeed, one thing besides
+expense that unites the systems at AAU and TU Berlin, plus the
+339-speaker hybrid WFS/HOA system at IRCAM (Paris)[fn:9], the
+512-channel WFS system at the Rensslaer Polytecnic Institute (NY,
+United States)[fn:10], and the behemoth installation at /The Sphere/
+(Las Vegas, United States)[fn:11] is their /in-situ/ nature; these are
+site-specific systems with, at best, limited flexibility.
+
+What one is afforded by WFS installations of this scale and expense,
+however, is high quality audio reproduction with tantamount to perfect
+output synchronicity; the integrity of the holophonic effect of WFS
+is, unavoidable matters of spatial aliasing aside, guaranteed.
+
+** Distributed Audio Systems
+
+As alluded to earlier in this chapter, our aim is to distribute the
+problem of audio spatialisation, and it is worthwhile to revisit why
+this is the case. In the broadest terms, a distributed system is /"a
+collection of independent entities that cooperate to solve a problem
+that cannot be individually
+solved"/\nbsp[cite:@kshemkalyaniDistributed2011]. An ideal distributed
+system is characterised by: /modularity/, being comprised of separate,
+interchangeable entities; /scalability/, being extensible without
+incurring a performance penalty to the system as a whole, and;
+/improved performance/cost ratio/, since it can be constructed to meet
+the proportion that circumstances require, with the minimum degree of
+redundancy. Additionally, for algorithms that can be effectively
+/parallelised/, a distributed system may provide more aggregate
+computational power than its centralised counterpart.
+
+Where a distributed system may suffer, by contrast, is in terms of
+reliability. Nodes in a distributed computational system must be
+served with power and access to the data they require in order to
+operate, which entails a proliferation of potential points of
+failure. The other side to the coin of modularity is a concern
+regarding the programmability of such a system; ensuring that all
+entities possess up-to-date instructions for operation may not be
+trivial. Further, some algorithms may be better suited to
+parallelisation than others; efficient use of increased computational
+resources is not guaranteed.
+
+Distributed audio processing is by no means a matter without
+precedent. (Indeed, the WFS installation at TU Berlin described in
+cref:sec:sota-spatial-audio is of course a distributed system, albeit
+not an especially accessible one.) A selection of prior work in
+distributed DSP and audio spatialisation, plus systems incorporating
+microcontrollers and single-board computers is detailed below.
+
+*** State of the Art Distributed Audio Systems
+
+Applications of SoundWIRE to what its creators termed /Internet
+Acoustics/\nbsp[cite:@chafePhysical2002] clearly stand as examples of
+distributed audio processing. These include a network
+reverberator\nbsp[cite:@chafeAm2018], or /"transcontinental echo chamber"/
+[cite:@chafeSimplified2000], plus the aforementioned /Network
+Harp/. Experiments of this sort were intended initially as
+sonifications of QoS --- a characteristic of network systems that is
+difficult to represent in real time in graphical or textual form due
+to the ephemeral nature of the phenomena of jitter and packet loss ---
+but stand as fascinating applications in their own right of digital
+audio in the age of computer networking. Subsequent work on JackTrip
+has focused on optimising networked audio less as a creative tool in
+itself, and more in the service of the social and communal aspects of
+music participation and appreciation in a networked world, topics that
+came to the fore in computer music research during the COVID-19
+pandemic\nbsp[cite:@bosiExperiencing2021;
+@sacchettoJackTripWebRTC2021]. That being said, more recent work on
+Internet Acoustics in a embedded context has yielded a port of
+JackTrip to the Raspberry Pi\nbsp[cite:@chafeJacktrip2019].
+
+Examples of distributed music production systems include the work of
+Lago and Kon\nbsp[cite:@lagoMiddleware2003; @lagoDistributed2004], whose
+UDP-based system featured clients that acted as delegates for audio
+processing, and Gabrielli et al.\nbsp[cite:@gabrielliNetworked2012], who
+demonstrated a wireless relay of audio and control-data
+processors. Latency was an important metric for the latter system, and
+the authors measured latency via transmission round-trip times using a
+low frequency sawtooth wave as a timer.
+
+Distributed approaches to audio spatialisation include Lopez-Lezcano's
+"network sound card"\nbsp[cite:@lopez-lezcanoJack2012], and embedded
+implementations as described by Devonport and
+Foss\nbsp[cite:@devonportDistribution2019] and Belloch et
+al.\nbsp[cite:@bellochPerformance2021]. The latter two address aims
+closely aligned with the work described here, but are based on costly
+computing platforms. Devonport and Foss used AVB and costly
+networking equipment to provide PTP support for synchronisation;
+Belloch et al. employed a GPU-based hardware platform, reporting
+client synchronisation to the millisecond range --- likely not
+sufficient for timing-critical audio spatialisation effects.
+
+Also of interest is the OTTOsonics
+project\nbsp[cite:@mitterhuberOttosonics2022; @weschLOTTO2025]; its
+emphasis on a fully-costed, flexible, do-it-yourself alternative to
+conventional spatial audio systems is pertinent to this work, though
+it diverges in its use of AVB, and associated hardware for audio
+transmission. A full 24-channel OTTOsonics system, including speakers
+and audio interface, is costed at around €2,600 (€108.33/channel),
+however, which certainly places it favourably when compared with
+state-of-the-art spatialisation systems.
 
 * Developing Digital Audio Systems
 #+latex: \minitoc
 #+latex: \newpage
 
+Developing audio systems in a distributed context requires software
+development for a variety of different purposes and on a variety of
+different platforms, from embedded systems to audio plugins. In this
+chapter an overview will be given of the various concerns faced by
+this manner of endeavour.
+
 ** Embedded Audio Systems
+
+The past decade or so has witnessed the emergence of a number of
+embedded systems suitable for audio programming and posessing
+networking capabilities. These fall into two broad categories:
+embedded Linux systems (ELS) and microcontroller (MCU) development
+boards. Identifying a suitable embedded hardware platform is key to
+implementing spatial audio algorithms in a distributed context;
+principal concerns are cost, available memory, and computational
+power.
 
 *** Embedded Linux Systems
 
@@ -550,15 +1030,1056 @@ interface.
 
 ** The Faust Programming Language
 
+Faust is a high-level domain-specific language for audio
+programming. For much more detail about Faust, see
+cref:sec:faust-autodiff.
+
 ** Audio Plugins
 
 *** Jules's Utility Class Extensions
 
+Developing audio software is fraught with difficulty in terms of
+ensurirng cross-platform compatibility. Simplifying matters
+considerably is the existence of Jules's Utility Class Extensions
+(JUCE). The JUCE C++ framework permits audio developers to create
+audio standalone software and plugins that work across a variety of
+platforms and respect a variety of plugin SDKs, and has become the de
+facto standard in audio software development.
+
 *** The Clever Audio Plugin Format
 
+
+
 * Differentiable DSP In Faust
+:PROPERTIES:
+:CUSTOM_ID: sec:faust-autodiff
+:END:
+
+The content of this chaper was originally published
+in\nbsp[cite:@rushtonFaust2025a].
+
 #+latex: \minitoc
-#+latex: \newpage 
+#+latex: \newpage
+
+Differentiable programming via automatic differentiation (AD) is the
+foundation for gradient-based optimisation techniques, and forms the
+basis for many current approaches to machine learning. Though well
+catered-for in general-purpose programming languages, the availability
+of AD in a domain-specific language (DSL) could offer novel
+perspectives on optimisation problems in the field of audio. In this
+chapter a general scheme is presented for differentiable programming
+in the Faust programming language, a high-performance DSL tailored to
+audio synthesis and signal processing. Faust's rich ecosystem, coupled
+with a comprehensive AD implementation, can provide support for audio
+optimisation and machine learning applications on a multitude of
+platforms, from FPGAs to the web.
+
+** Introduction
+
+Gradient-based methods are ubiquitous in tackling a wide variety of
+mathematical optimisation and machine learning problems, and the
+availability of such methods hinges on the possibility of computing
+the derivatives of computer programs. In the field of machine learning
+in particular, automatic differentiation
+(AD)\nbsp[cite:@baydinAutomatic2018] has emerged as the dominant
+differentiable programming paradigm. In AD, the primitive operations
+of a programming language are defined differentiably, thus programs
+composed from those operations are in turn differentiable end-to-end
+with respect to their input variables. In a gradient-based
+optimisation scenario, the partial derivatives of an algorithm
+terminating in a loss function constitute a gradient vector, which can
+be backpropagated, causing the algorithm's input variables, weights in
+a neural network perhaps, to approach optimal values. Techniques of
+this sort employed in the audio domain are referred to as
+/differentiable digital signal processing/
+(DDSP)\nbsp[cite:@hayesReview2024], and find applications from least mean
+squares (LMS) filtering\nbsp[cite:@alexandreExperimental2023] to
+differentiable audio synthesis\nbsp[cite:@engelDifferentiable2020].
+
+Building on previous work on AD in the Faust programming
+language\nbsp[cite:@rushtonDifferentiable2024], here Faust's pattern
+matching abstraction is exploited to extend to a more general AD
+syntax, demonstrating that arbitrary compositions of signal processing
+blocks can be differentiated, and to higher order if desired. With AD
+in Faust, it is possible to create differentiable infinite impulse
+response (IIR) filters and neural network building blocks. This work
+provides the basis for an audio-focused ecosystem for the development
+of solutions to problems based on machine learning.
+
+*** The Faust Programming Language
+
+#+begin_src faust :results file svg :file images/seq.svg :exports none
+A = _ <: par(n, 20, -) :> _;
+B = _ <: par(n, 20, +) :> _;
+process = A : B;
+#+end_src
+
+#+RESULTS:
+[[file:images/seq.svg]]
+
+#+begin_src faust :results file svg :file images/par.svg :exports none
+A = _ <: par(i, 20, +) :> _;
+B = _ <: par(i, 20, -) :> _;
+process = A,B;
+#+end_src
+
+#+RESULTS:
+[[file:images/par.svg]]
+
+#+begin_src faust :results file svg :file images/rec.svg :exports none
+A = _,_ <: par(i, 20, +) :> _;
+B = _ <: par(i, 20, -) :> _;
+process = A ~ B;
+#+end_src
+
+#+RESULTS:
+[[file:images/rec.svg]]
+
+#+begin_src faust :results file svg :file images/split.svg :exports none
+A = _ <: par(i, 20, +) :> _,_;
+B = _,_,_,_ <: par(i, 20, -) :> _;
+process = A <: B;
+#+end_src
+
+#+RESULTS:
+[[file:images/split.svg]]
+
+#+begin_src faust :results file svg :file images/merge.svg :exports none
+A = _ <: par(i, 20, +) :> _,_,_,_;
+B = _,_ <: par(i, 20, -) :> _;
+process = A :> B;
+#+end_src
+
+#+RESULTS:
+[[file:images/merge.svg]]
+
+#+name: fig:compositions
+#+caption: Example compositions of Faust blocks.
+\begin{figure*}[t]
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*18/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/par}
+    \subcaption{\scriptsize{Parallel, \(A,B\).}}
+    \label{fig:par}
+  \end{minipage}
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*20/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/seq}
+    \subcaption{\scriptsize{Sequential, \(A:B\).}}
+    \label{fig:seq}
+  \end{minipage}
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*22/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/split}
+    \subcaption{\scriptsize{Split, \(A<:B\).}}
+    \label{fig:split}
+  \end{minipage}
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*20/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/rec}
+    \subcaption{\scriptsize{Recursive, \(A\sim{}B\).}}
+    \label{fig:rec}
+  \end{minipage}
+  \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*22/100\relax}
+    \centering
+    \includesvg[width=\textwidth]{images/merge}
+    \subcaption{\scriptsize{Merge, \(A:>B\).}}
+    \label{fig:merge}
+  \end{minipage}
+\end{figure*}
+
+Faust is a functional paradigm, domain specific language for audio
+digital signal processing\nbsp[cite:@orlareyFAUST2009]. It is built atop a
+domain-agnostic /block diagram
+algebra/\nbsp[cite:@orlareyAlgebra2002;@orlareySyntactical2004] that
+describes primitive operations connected into graphs via a selection
+of /composition operators/ (see cref:fig:compositions). A textual
+language, Faust can, for example, define a diagram consisting of two
+blocks, \(A\) and \(B\), composed in sequence, with code of the form
+#+name: lst:seq
+#+caption: Sequential composition of two Faust blocks.
+#+begin_src faust :noeval
+process = A : B;
+#+end_src
+
+Conceptually, a given block diagram, \(D\), may undergo semantic
+transformation, notated \(\llbracket \cdot \rrbracket\), into a signal
+processor\nbsp[cite:@orlareySyntactical2004]:[fn:7]
+#+NAME: eq:semanticTransformation
+\begin{equation}
+  \begin{split}
+    \llbracket D \rrbracket &\;:\; \mathbb{S}^{n} \to \mathbb{S}^{m} \\
+    \llbracket D \rrbracket(s_{1},\dots,s_{n}) &\to (y_{1},\dots,y_{m}) \\
+    \mathbf{y}(t) &= f(\mathbf{s}(t))\;,
+  \end{split}
+\end{equation}
+where \(\mathbb{S}\) is the set of all signals, \(f\) is a
+mathematical function analogous to the primitive operations and
+compositions of \(D\), and \(t\) is time. The signal processor
+receives a vector of input signals, \(\mathbf{s}\), and produces a
+vector of output signals, \(\mathbf{y}\).
+
+*** The Faust Ecosystem
+
+Faust is a highly optimised, compiled language\nbsp[cite:@orlareyNew2020],
+with C++ as its default compilation target. One of the great strengths
+of the Faust ecosystem is its /write once, run anywhere/ model; a
+variety of additional backends are supported, including
+LLVM\nbsp[cite:@letzOverview2018], WebAssembly\nbsp[cite:@letzCompiling2017],
+and Rust\nbsp[cite:@gasterAudio2020], plus numerous software and hardware
+platforms. Faust code can be compiled for use in VST
+plugins\nbsp[cite:@albouyFaust2017], for embedded
+systems\nbsp[cite:@michonEmbedded2020] and
+\mbox{FPGAs}\nbsp[cite:@cochardProgramming2024]; it is used by artists and
+digital
+luthiers\nbsp[cite:@michonFaust2020a;@carenKeyWI2020;@hansenWeather2018],
+and features sophisticated libraries for wave digital filter
+modelling\nbsp[cite:@roosenburgWave2021] and physical modelling
+synthesis\nbsp[cite:@russoIntroducing2021;@michonFaust2018], amongst
+others.
+
+*** Differentiable Programming in Faust
+:PROPERTIES:
+:CUSTOM_ID: sec:diffprog
+:END:
+
+In light of Faust's versatility, efficiency, and strengths as a DSL in
+tackling audio problems it may come as little surprise that it has
+been turned to machine learning problems in the audio domain, via
+/DawDreamer/\nbsp[cite:@braunDawDreamer2021], which uses a Python backend
+to transpile Faust code for gradient-based optimisation with the JAX
+Python library. JAX, and other well-known machine learning frameworks,
+such as TensorFlow and PyTorch, enable gradient-based optimisation
+approaches by way of /automatic differentiation/, a technique for
+computing the numerical outputs of both a mathematical expression (or,
+more commonly, a computer program) and its derivatives in
+parallel\nbsp[cite:@rallArithmetic1986;@baydinAutomatic2018;@harrisonBrief2021].
+
+Differentiable programming\nbsp[cite:@wangDemystifying2019] is, broadly
+speaking, the creation of computer programs using primitive operations
+which are themselves differentiable; a computer program consisting of
+differentiable primitives may be differentiated automatically,
+producing the desired /primal/ and /gradient/ numerical outputs for
+use in a gradient-based optimisation algorithm. In this vein, a
+Faust-based LMS algorithm has been used for real-time acoustic
+control\nbsp[cite:@alexandreExperimental2023], though the DDSP aspect of
+this work was limited to the particular application. The feasibility
+of a more general approach to DDSP in the Faust language has been
+demonstrated via the implementation of forward-mode AD
+primitives\nbsp[cite:@rushtonDifferentiable2024].
+
+One way of framing forward-mode AD is as an arithmetic of dual
+numbers\nbsp[cite:@rallArithmetic1986;@yuDNAD2013] of the form \(\langle{}u,\nabla{}u\rangle\),
+where \(u\) is the aforementioned primal, and \(\nabla{}u
+= \begin{bmatrix}\frac{\partial{}u}{\partial{}x_{1}} & \cdots & \frac{\partial{}u}{\partial{}x_{N}}\end{bmatrix}^{T}\),
+the gradient of \(u\), its partial derivatives with respect to a
+vector of \(N\) input variables, \(\mathbf{x}\). A dual number can be
+passed into a forward-mode differentiable primitive, \(f\), yielding
+an output dual number, \(\langle{}f(u),\nabla{}uf'(u)\rangle\). Faust is a language of
+/signals/ and signal processors; consequently we will refer to the
+/dual signal/, \(\langle{}s,\nabla{}s\rangle \in \mathbb{S}_{d}\), where \(\mathbb{S}_{d} =
+\mathbb{S}^{N+1}\). The signal processor based on the differentiated
+block diagram \(D\) has the following semantic scheme:
+#+NAME: eq:diffSemantic
+\begin{equation}
+\begin{split}
+\Delta_{N}\llbracket D \rrbracket &\;:\; \mathbb{S}_{d}^{M} \to \mathbb{S}_{d}^{P} \\
+\Delta_{N}\llbracket D \rrbracket(\langle{}s_{1},\nabla{}s_{1}\rangle,&\dots,\langle{}s_{M},\nabla{}s_{M}\rangle) \\
+&\to (\langle{}y_{1},\nabla{}y_{1}\rangle,\dots,\langle{}y_{P},\nabla{}y_{P}\rangle) \\
+\langle\mathbf{y}(t), \;\mathbf{J}_{\mathbf{y}}(t)\rangle &= \langle{}f(\mathbf{s}(t)), \;\mathbf{J}_{f}(t)\mathbf{J}_{{\mathbf{s}}}(t)\rangle\;,
+\end{split}
+\end{equation}
+where \(\Delta_{N}\llbracket \cdot \rrbracket\) indicates derivative
+transformation with respect to \(N\) input variables, and
+\(\mathbf{J}_{\mathbf{y}}\), \(\mathbf{J}_{f} = \nabla{}f(\mathbf{s})\), and
+\(\mathbf{J}_{\mathbf{s}} = \nabla\mathbf{s}\) are, respectively, \(P\times{}N\),
+\(P\times{}M\) and \(M\times{}N\) Jacobian matrices.
+
+AD primitives have been demonstrated in Faust using the language's
+pattern matching
+abstraction\nbsp[cite:@rushtonDifferentiable2024]. Pattern matching is a
+source code transformation mechanism, and exploits the fact that a
+Faust function may receive, as a parameter, a programmatic
+expression. For example, a differentiable addition primitive, acting
+on dual signals \(\langle{}s_{1}, \nabla{}s_{1}\rangle,\langle{}s_{2}, \nabla{}s_{2}\rangle\), may be created by defining a
+function that accepts the addition operator as a parameter, and
+produces, in parallel, the addition primitive's primal output,
+\(s_{1}+s_{2}\), and its gradients, \(\nabla{}s_{1}+\nabla{}s_{2}\).
+#+name: lst:diffAdd
+#+caption: Definition of a differentiable addition primitive in the
+#+caption: Faust language.
+#+attr_latex: :float t
+#+begin_src faust :noeval
+env(vars) = environment {
+  // ...
+  diff(+) = interleave(vars.N + 1, 2)
+    : +,par(i, vars.N, +);
+  // ...
+};
+#+end_src
+A dual-signal addition operator implementation is given in
+cref:lst:diffAdd; the operator is defined within a /differentiable
+environment/, which receives and enumerates a vector of input
+variables, ensuring that all derivative transformations produce the
+appropriate number of partial derivatives; the function ~interleave~
+delivers the primal signals and their respective partial derivatives
+to the addition operations in the appropriate order: \(s_{1}, s_{2},
+\frac{\partial{}s_{1}}{\partial{}x_{1}}, \frac{\partial{}s_{2}}{\partial{}x_{1}},\dots,\frac{\partial{}s_{1}}{\partial{}x_{N}}, \frac{\partial{}s_{2}}{\partial{}x_{N}}\),
+as illustrated in cref:fig:diffadd. One addition primitive is created
+for the primal operation, and a further \(N\) additions in parallel,
+which we can notate \(\big\|_{l=1}^{N} +\), for computing partial
+derivatives.
+
+#+begin_src faust :results file svg :file images/diffadd.svg :exports none
+N = 2;
+distribute(0, q, 0) = par(i, q, _);
+distribute(p, q, 0) = par(i, p, !),par(j, q, _);
+distribute(0, q, r) = par(i, q, _),par(j, r, !);
+distribute(p, q, r) = par(i, p, !),par(j, q, _),par(k, r, !);
+interleave(R, C) = par(i, R * C, _) <: par(r, R, par(c, C, distribute(r, 1, R - r - 1)));
+diff(+) = interleave(N + 1, 2) : +,par(i, N, +);
+process = diff(+);
+#+end_src
+
+#+RESULTS:
+[[file:images/diffadd.svg]]
+
+#+begin_src emacs-lisp :results file :file images/diffaddannotated.svg :exports results
+(let* ((file "./images/diffadd.svg")
+       (svg (xml-parse-file file)))
+  (svg-text svg "s1" :x "4" :y "49" :font-size "5")
+  (svg-path svg '((moveto ((2 . 61.5)))
+                  (lineto ((.5 . 58) (3.5 . 58)))
+                  (lineto ((2 . 61.5)) :relative nil))
+            :fill "none"
+            :stroke "black"
+            :stroke-linecap "square"
+            :stroke-width ".35")
+  (svg-text svg "s1{" :x "3.5" :y "61.5" :font-size "5")
+  (svg-text svg "s2" :x "4" :y "73.5" :font-size "5")
+  (svg-path svg '((moveto ((2 . 85.25)))
+                  (lineto ((.5 . 81.75) (3.5 . 81.75)))
+                  (lineto ((2 . 85.25)) :relative nil))
+            :fill "none"
+            :stroke "black"
+            :stroke-linecap "square"
+            :stroke-width ".35")
+  (svg-text svg "s2{" :x "3.5" :y "85.5" :font-size "5")
+  (with-temp-buffer
+    (xml-print svg)
+    (buffer-string)))
+#+end_src
+#+attr_latex: :width .75\linewidth :float t
+#+attr_org: :width 300
+#+name: fig:diffadd
+#+caption: Differentiable addition primitive applied to dual signals
+#+caption: \(\langle{}s_{1}, \nabla{}s_{1}\rangle,\langle{}s_{2}, \nabla{}s_{2}\rangle\); implicit input variable
+#+caption: vector \(\mathbf{x}\) of length \(N = 2\).
+#+RESULTS:
+[[file:images/diffaddannotated.svg]]
+
+*** Motivation
+
+Considering the plethora of existing approaches to
+DDSP\nbsp[cite:@hayesReview2024], why pursue an implementation in Faust?
+The availability of the Faust-to-JAX transpiler would appear to
+obviate such an initiative, but for the fact that the AD
+transformations facilitated by JAX lie the wrong side of the
+transpilation step. A comprehensive differentiable programming
+framework in the Faust language itself would allow DDSP algorithms to
+be written once, and run anywhere. A domain-specific approach to
+audio-oriented machine learning is not without precedent; indeed, a
+suite of ML-centric tools, with an emphasis on human computer
+interaction, exists for the ChucK programming
+language\nbsp[cite:@liChAI2024]. Faust, however, with its functional
+approach, and cross-platform capabilities, offers a unique point of
+vantage.
+
+The observation has been made that the relative structures of neural
+networks and digital filters bear striking
+similarities\nbsp[cite:@kuznetsovDifferentiable2020]. There is a very real
+sense in which machine learning problems, and gradient-based
+optimisation problems in general, are signal processing problems. The
+possibility of turning a signal processing DSL to problems of this
+sort paves the way to novel approaches and fresh perspectives on this
+dynamic field of research.
+
+** A General Scheme for Differentiating Faust Programs
+
+#+name: fig:diffRules
+#+caption: Automatic differentiation rules for Faust's composition operators,
+#+caption: plus supporting primitive operators and routing expressions. Use of
+#+caption: \(\Delta_{N}\llbracket \texttt{mem} \rrbracket\) is implicit in the
+#+caption: definition of \(\Delta_{N}\llbracket A \sim B\rrbracket\). \(N\) is the
+#+caption: number of input variables with respect to which partial derivatives are
+#+caption: calculated.
+\begin{figure*}[t]
+  \begin{mdframed}
+    \begin{minipage}[c]{\dimexpr\linewidth*18/40\relax}
+      \footnotesize
+      \begin{gather}
+        \Delta_{N}\llbracket A,B \rrbracket =
+          \Delta_{N}\llbracket A \rrbracket,\Delta_{N}\llbracket B \rrbracket \\
+        \Delta_{N}\llbracket A : B \rrbracket =
+          \Delta_{N}\llbracket A \rrbracket : \Delta_{N}\llbracket B \rrbracket \\
+        \Delta_{N}\llbracket A <: B \rrbracket =
+          \Delta_{N}\llbracket A \rrbracket <: \Delta_{N}\llbracket B \rrbracket \\
+        \Delta_{N}\llbracket A \sim B \rrbracket =
+          \Delta_{N}\llbracket A \rrbracket \sim \Delta_{N}\llbracket B \rrbracket \\
+        \Delta_{N}\llbracket A :> B \rrbracket =
+          \Delta_{N}\left\llbracket A : \chi(i_{B},k)\right\rrbracket : F : \Delta_{N}\llbracket B \rrbracket
+          \label{eq:diffmerge} \\
+        F = \big\|_{l=1}^{i_{B}}\left(
+          \big\|_{l=1}^{k}\Delta_{N}\llbracket\_\rrbracket \;:>\; \Delta_{N}\llbracket\_\rrbracket
+        \right) \nonumber \\
+        k = \frac{o_{A}}{i_{B}} \nonumber
+      \end{gather}
+    \end{minipage}
+    \begin{minipage}[c]{\dimexpr\linewidth*22/40\relax}
+      \footnotesize
+      \begin{gather}
+        \textrm{Parallel iteration, }\texttt{par(l, L, D)}\textrm{:} \nonumber \\
+        \big\|_{l=1}^{L}D_{l} = D_{1},\dots,D_{L} \\
+        \textrm{Signal interleaving function: }\nonumber \\
+        \chi(r,c) = \big\|_{l=1}^{r\times{}c}\_ <: \big\|_{m=0}^{r-1}
+          \big\|_{n=1}^{c}\left(
+            \big\|_{p=1}^{m}!,\_,\big\|_{q=1}^{r-m-1}!
+          \right) \label{eq:interleave} \\
+        \Delta_{N}\llbracket \_ \rrbracket = \big\|_{l=1}^{N+1}\_ \\
+          \Delta_{N}\llbracket ! \rrbracket = \big\|_{l=1}^{N+1}! \\
+        \Delta_{N}\llbracket\texttt{mem}\rrbracket = \big\|_{l=1}^{N+1}\texttt{mem}
+      \end{gather}
+    \end{minipage}
+  \end{mdframed}
+\end{figure*}
+
+In Faust's block diagram algebra, a given block diagram, \(D\), is
+comprised of a primitive block, \(P\), or the composition of two block
+diagrams via a composition operator according to the syntactic
+rule
+#+NAME: eq:syntax
+\begin{equation}
+D = P \;|\; (D_{1} \diamond D_{2})\;,
+\end{equation}
+where \(\diamond\) is one of the sequential (:), parallel (,), split (<:),
+merge (:>), or recursive (\(\sim\)) composition operators. The creation
+of differentiable Faust programs has been shown to be possible by
+/undifferentiated/ composition of differentiated primitive
+blocks\nbsp[cite:@rushtonDifferentiable2024], the syntactic rule being
+#+NAME: eq:badDiffSyntax
+\begin{equation}
+\Delta_{N}\llbracket D \rrbracket = \Delta_{N}\llbracket P_{1} \rrbracket \diamond \Delta_{N}\llbracket P_{2} \rrbracket \diamond \dots \diamond \Delta_{N}\llbracket P_{n} \rrbracket\;.
+\end{equation}
+While effective in facilitating differentiable programming, this
+syntax imposed an undesirable verbosity. Our preferred syntactic rule
+should be a direct transformation of cref:eq:syntax:
+#+NAME: eq:idealDiffSyntax
+\begin{equation}
+\Delta_{N}\llbracket D \rrbracket
+  = \Delta_{N}\llbracket P \rrbracket \;|\; \Delta_{N}\llbracket D_{1} \diamond D_{2} \rrbracket \;.
+\end{equation}
+The ideal outcome is to permit the programmer to subject an entire
+Faust program to automatic differentiation in a single expression,
+minimising the amount of re-writing required to ready their code for
+transformation. This would render a great proportion of existing Faust
+code differentiable, and, in doing so, prepare that wealth of material
+for prospective use in optimisation problems, and machine learning
+applications. In order to achieve such an outcome, it is necessary to
+provide differentiation rules for the five composition operators,
+taking into account their arithmetical significance, if any, in a
+block diagram to which they contribute.
+
+*** Differentiable Block-Diagram Compositions
+
+To define syntactic rules for the derivatives of Faust's composition
+operators entails analysing them as if they were themselves primitive
+blocks. To do this, we must consider them in tandem with rules for
+some of Faust's fundamental primitive operators; these will assist us
+in achieving differentiable compositions.
+
+**** Identity Primitive
+
+Faust's identity function, notated \(\_\), describes a connection
+between two blocks. Treated as a signal processor, it adheres to the
+following semantic scheme\nbsp[cite:@orlareySyntactical2004]:
+#+NAME: eq:identity
+\begin{equation}
+  \begin{split}
+    \llbracket \_ \rrbracket &\;:\; \mathbb{S} \to \mathbb{S} \\
+    \llbracket \_ \rrbracket(s) &\to (s)\;.
+  \end{split}
+\end{equation}
+It receives one signal and returns that same signal unchanged,
+analogous to multiplying it by a constant signal of value
+\(1\). In dual signal arithmetic, this is
+#+NAME: eq:dualIdentity
+\begin{align}
+\langle{}s,\nabla{}s\rangle\langle{}1,\nabla1\rangle
+  = \langle{}1s, 1\nabla{}s + s\nabla{}1 \rangle
+  = \langle{}s,\nabla{}s\rangle\;,
+\end{align}
+and the semantic rule for the derivative of the identity function is
+thus
+#+NAME: eq:diffidentity
+\begin{equation}
+  \begin{split}
+    \Delta_{N}\llbracket \_ \rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\
+    \Delta_{N}\llbracket \_ \rrbracket(\langle{}s, \nabla{}s\rangle) &\to (\langle{}s, \nabla{}s\rangle)\;.
+  \end{split}
+\end{equation}
+The dual signal \(\langle{}s,\nabla{}s\rangle\) being composed of one
+primal signal and \(N\) gradient signals, we can further state that
+#+NAME: eq:diffidentity2
+\begin{equation}
+  \Delta_{N}\llbracket \_ \rrbracket = \big\|_{l=1}^{N+1}\;\_\;.
+\end{equation}
+
+**** Parallel Composition
+
+Blocks composed in parallel (see cref:fig:par) do not influence
+one-another, arithmetically-speaking. The outputs of the program
+\(A,B\), \(y_{1},\dots,y_{o_{A}}\) and \(y_{o_{A}+1},\dots,y_{o_{A}+o_{B}}\), are
+essentially the outputs of separate block diagrams; thus
+\(\Delta_{N}\llbracket A,B \rrbracket = \Delta_{N}\llbracket A \rrbracket,\Delta_{N}\llbracket
+B \rrbracket\), and, more generally
+#+NAME: eq:diffpar
+\begin{equation}
+\Delta_{N}\left\llbracket\big\|_{l=1}^{L}D_{l}\right\rrbracket =
+  \big\|_{l=1}^{L}\Delta_{N}\llbracket D_{l} \rrbracket \;.
+\end{equation}
+
+**** Sequential Composition
+
+#+begin_src latex
+\pgfkeys{
+  /diffop/.cd,
+  faust/.initial=,
+  math/.initial=,
+}
+\newcommand\diffop[1]{
+  \pgfkeys{/diffop/.cd,#1}
+  \begin{scope}[
+    faustnode/.style={rectangle, thick, draw=black, minimum size=7mm}
+  ]
+    \draw[] (0,0) rectangle (3.5,2.8);
+    
+    \node[faustnode](mul) at (2.7,.7) {\(\times\)};
+    \node[faustnode](dop)[above left=-2mm and 6mm of mul]{\(\nabla\pgfkeysvalueof{/diffop/math}\)};
+    \node[faustnode](op)[above=2mm of dop]{\(\pgfkeysvalueof{/diffop/math}\)};
+    \node(label)[above right=3mm and -5mm of op]{\(\Delta_{N}\llbracket \pgfkeysvalueof{/diffop/faust} \rrbracket\)};
+
+    \draw[thick, ->] let \p{opw}=(op.west) in (0,\y{opw}) -- (op.west);
+    \draw[thick, ->] let \p{opw}=(op.west), \p{dopw}=(dop.west) in (0,\y{opw}) -| (.5,\y{dopw}) |- (dop.west);
+    \draw[thick, ->] let \p{ope}=(op.east) in (op.east) -- (3.5,\y{ope});
+    \draw[thick, ->] let \p{mulw}=(mul.west) in (dop.east) --+ (.3,0) |- (\x{mulw},.9);
+    \draw[thick, ->] let \p{mulw}=(mul.west) in (0,\y{mulw}) --+ (.5,0) --+ (.5,-.15) |-+ (\x{mulw},-.15);
+    \draw[thick, ->] let \p{mule}=(mul.east) in (mul.east) -- (3.5,\y{mule});
+  \end{scope}
+}
+#+end_src
+
+#+RESULTS:
+#+begin_export latex
+\pgfkeys{
+  /diffop/.cd,
+  faust/.initial=,
+  math/.initial=,
+}
+\newcommand\diffop[1]{
+  \pgfkeys{/diffop/.cd,#1}
+  \begin{scope}[
+    faustnode/.style={rectangle, thick, draw=black, minimum size=7mm}
+  ]
+    \draw[] (0,0) rectangle (3.5,2.8);
+    
+    \node[faustnode](mul) at (2.7,.7) {\(\times\)};
+    \node[faustnode](dop)[above left=-2mm and 6mm of mul]{\(\nabla\pgfkeysvalueof{/diffop/math}\)};
+    \node[faustnode](op)[above=2mm of dop]{\(\pgfkeysvalueof{/diffop/math}\)};
+    \node(label)[above right=3mm and -5mm of op]{\(\Delta_{N}\llbracket \pgfkeysvalueof{/diffop/faust} \rrbracket\)};
+
+    \draw[thick, ->] let \p{opw}=(op.west) in (0,\y{opw}) -- (op.west);
+    \draw[thick, ->] let \p{opw}=(op.west), \p{dopw}=(dop.west) in (0,\y{opw}) -| (.5,\y{dopw}) |- (dop.west);
+    \draw[thick, ->] let \p{ope}=(op.east) in (op.east) -- (3.5,\y{ope});
+    \draw[thick, ->] let \p{mulw}=(mul.west) in (dop.east) --+ (.3,0) |- (\x{mulw},.9);
+    \draw[thick, ->] let \p{mulw}=(mul.west) in (0,\y{mulw}) --+ (.5,0) --+ (.5,-.15) |-+ (\x{mulw},-.15);
+    \draw[thick, ->] let \p{mule}=(mul.east) in (mul.east) -- (3.5,\y{mule});
+  \end{scope}
+}
+#+end_export
+
+#+name: fig:dualSec
+#+caption: Derivative transformation of the sequential composition of two
+#+caption: Faust blocks, \(\Delta_{N}\llbracket A : B \rrbracket\),
+#+caption: is analogous to composition of two mathematical functions of a vector of
+#+caption: dual signals, \(f(g(\langle\mathbf{s},\,\mathbf{J}_{\mathbf{s}}\rangle))\), and
+#+caption: is thus equivalent to the sequential composition of the blocks following
+#+caption: separate derivative transformation.
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}
+ \begin{scope}[xshift=-5cm]
+    \node (primal) at (4, 2.155) {\(\mathbf{s}\)};
+    \node (jacobian) at (4, .7) {\(\mathbf{J}_{\mathbf{s}}\)};
+    \draw[thick, ->] (primal.east)--(5, 2.155);
+    \draw[thick, ->] (jacobian.east)--(5, .7);
+  \end{scope}
+  
+  \diffop{faust=A,math=g}
+  \node (primal) at (4.8, 2.155) {\(\mathbf{z} = g(\mathbf{s})\)};
+  \node (jacobian) at (4.8, .7) {\(\mathbf{J}_{\mathbf{z}} = \mathbf{J}_{g}\mathbf{J}_{\mathbf{s}}\)};
+  \draw[thick] (3.5, 2.155)--(primal.west);
+  \draw[thick] (3.5, .7)--(jacobian.west);
+  \draw[thick, ->] (primal.east)--(6.2, 2.155);
+  \draw[thick, ->] (jacobian.east)--(6.2, .7);
+  
+  \begin{scope}[xshift=6.2cm]
+    \diffop{faust=B,math=f}
+    \node (primal) at (5, 2.155) {\(\mathbf{y} = f(g(\mathbf{s}))\)};
+    \node (jacobian) at (5,.7) {\(\mathbf{J}_{\mathbf{y}} = \mathbf{J}_{f}\mathbf{J}_{g}\mathbf{J}_{\mathbf{s}}\)};
+    \draw[thick] (3.5, 2.155)--(primal.west);
+    \draw[thick] (3.5, .7)--(jacobian.west);
+  \end{scope}
+\end{tikzpicture}
+\end{figure*}
+
+Implicit in cref:eq:semanticTransformation,eq:diffSemantic are the
+input and output signals of the Faust block diagram, \(D\), and the
+following equivalence applies:
+\begin{align}
+D &= \big\|_{l=1}^{i_{D}}\,\_ \;:\; D\label{eq:diffSeqIn} \\
+D &= D \;:\; \big\|_{l=1}^{o_{D}}\,\_ \;,
+\end{align}
+where \(i_{D}\) and \(o_{D}\) are, respectively, the number of input and
+output signals of \(D\). Applying derivative transformation to
+cref:eq:diffSeqIn, and bringing cref:eq:diffpar,eq:diffidentity2 to
+bear,
+#+NAME: eq:diffImplicitIn
+\begin{align}
+\Delta_{N}\llbracket D \rrbracket &= \Delta_{N}\llbracket \big\|_{l=1}^{i_{D}}\,\_ \;:\; D \rrbracket \nonumber \\
+  &= \big\|_{l=1}^{i_{D}}\big\|_{m=1}^{N+1}\,\_ \;:\; \Delta_{N}\llbracket D \rrbracket \nonumber \\
+  &= \big\|_{l=1}^{i_{D}}\Delta_{N}\llbracket \_ \rrbracket \;:\; \Delta_{N}\llbracket D \rrbracket\;.
+\end{align}
+The arithmetical transparency of sequential composition holds in the
+general case; expanding on the semantic scheme in cref:eq:diffSemantic,
+\(\Delta_{N}\llbracket A : B \rrbracket\) is analogous to composing two
+functions, \(g\) and \(f\):
+#+NAME: eq:diffSeqSemantic
+\begin{equation}
+\begin{split}
+\Delta_{N}\llbracket A : B \rrbracket(\langle{}\mathbf{s}, &\;\mathbf{J}_{\mathbf{s}}\rangle)
+  \to (\langle{}\mathbf{y}, \;\mathbf{J}_{\mathbf{y}}\rangle) \\[5pt]
+\langle{}\mathbf{y}(t), \;\mathbf{J}_{\mathbf{y}}(t)\rangle
+  &= f(g(\langle\mathbf{s}(t), \;\mathbf{J}_{\mathbf{s}}(t)\rangle)) \\
+  &= \big\langle{}f(g(\mathbf{s}(t))), \;\mathbf{J}_{f}(t)\mathbf{J}_{g}(t)\mathbf{J}_{\mathbf{s}}(t)\big\rangle\;.
+\end{split}
+\end{equation}
+As illustrated in cref:fig:dualSec, the composition of functions of dual
+signals has the effect of primal function composition on the one hand,
+and application of the chain rule of differentiation on the other, and
+works so long as \(o_{A} = i_{B}\),[fn:2] thus
+#+NAME: eq:diffSeq
+\begin{equation}
+\Delta_{N}\llbracket A : B \rrbracket = \Delta_{N}\llbracket A \rrbracket : \Delta_{N}\llbracket B \rrbracket\;.
+\end{equation}
+
+**** Split Composition
+
+Composing \(A\) and \(B\), \(i_{B} = ko_{A}\), with the split
+composition operator (see cref:fig:split) duplicates the output
+signals of \(A\), \(k\) times, passing each group of duplicates to
+\(B\), in order:
+#+NAME: eq:split
+\begin{equation}
+A <: B = A \;:\; \big\|_{l=1}^{o_{A}}\,\_ \;<:\; \big\|_{m=1}^{k}\big\|_{l=1}^{o_{A}}\,\_ \;:\; B\;.
+\end{equation}
+Signal order is maintained within each group of duplicates, so,
+applying derivative transformation to both sides of cref:eq:split, and
+recalling cref:eq:diffImplicitIn,
+#+NAME: eq:diffsplit
+\begin{align}
+&\quad\;\Delta_{N}\llbracket A <: B \rrbracket \nonumber\\
+  &= \Delta_{N}\llbracket A \rrbracket :
+    \big\|_{l=1}^{o_{A}}\Delta_{N}\llbracket \_ \rrbracket <:
+    \big\|_{m=1}^{k}\big\|_{l=1}^{o_{A}}\Delta_{N}\llbracket \_ \rrbracket :
+    \Delta_{N}\llbracket B \rrbracket \nonumber \\
+  &= \Delta_{N}\llbracket A \rrbracket <: \Delta_{N}\llbracket B \rrbracket \;.
+\end{align}
+
+**** Cut Primitive
+:PROPERTIES:
+:CUSTOM_ID: sec:cut
+:END:
+
+The cut primitive, notated !, terminates a signal, and combinations of
+the cut and identity functions can be used to create complex signal
+routings.  For instance, to interleave two groups of two signals, such
+that \(s_{1,1},s_{1,2},s_{2,1},s_{2,2}\) becomes \(s_{1,1},s_{2,1},s_{1,2},s_{2,2}\), one may
+write
+#+NAME: eq:interleave22
+\begin{equation}
+\_,\_,\_,\_ \;<:\; \_,!,\_,!,!,\_,!,\_\;.
+\end{equation}
+To differentiate an expression of this kind, the appropriate
+accompaniment to cref:eq:diffidentity2,eq:diffsplit for the derivative
+of the cut primitive is
+#+NAME: eq:cut
+\begin{equation}
+  \begin{split}
+    \Delta_{N}\llbracket ! \rrbracket &= \big\|_{l=1}^{N+1}!\;.
+  \end{split}
+\end{equation}
+A general interleaving function, as used in cref:lst:diffAdd, can be
+written using the cut and identity primitives, plus parallel and split
+composition (see cref:lst:interleave). Comprising only differentiable
+elements, it too is differentiable.
+#+name: lst:interleave
+#+caption: A Faust function, \(\chi(r,c)\) (see cref:eq:interleave for its
+#+caption: mathematical definition), that interleaves \(c\) groups of \(r\)
+#+caption: signals into \(r\) groups of \(c\) signals.
+#+attr_latex: :options float=ht
+#+begin_src faust :noeval
+interleave(r, c) = par(l, r * c, _)
+  <: par(m, r,
+       par(n, c, cutpq(m, r - m - 1)))
+with {
+  cutpq(0, q) = _,par(l, q, !);
+  cutpq(p, 0) = par(l, p, !),_;
+  cutpq(p, q) =
+    par(l, p, !),cutpq(0, q);
+};
+#+end_src
+
+**** Delay Primitive
+:PROPERTIES:
+:CUSTOM_ID: sec:delay
+:END:
+
+Faust provides two primitives for delaying signals; here we will focus
+on the ~mem~ primitive, which, when composed in sequence with a
+signal, applies a one-sample delay.  In general, a fixed delay can be
+represented as the convolution of a signal, \(s(x,t)\), with a
+time-shifted impulse [cite:@mcclellanSignal2003],
+#+NAME: eq:delayAsConv
+\begin{equation}
+s(x, t-\tau) = s(x, t) \ast h(t)\;,\quad h(t) = \delta(t - \tau)\;.
+\end{equation}
+Taking the temporal-parametric Fourier transform of the derivative of
+the convolution with respect to \(x\), then using the convolution and
+differentiation properties of the
+transform\nbsp[cite:@mcclellanSignal2003], yields
+#+NAME: eq:timeinvariantdiff
+\begin{align}
+&\quad\;\mathcal{F}\left[\frac{\partial{}}{\partial{}x}\left(s(x,t) \ast h(t)\right)\right] \nonumber\\
+  &= j\omega_{x}S(j\omega_{x},j\omega_{t})H(j\omega_{t}) \\
+  &= \mathcal{F}\left[\frac{\partial{}}{\partial{}x}s(x,t)\right]\cdot\mathcal{F}\left[h(t)\right]\;,
+\end{align}
+which demonstrates that differentiation is time-invariant, and allows
+us to deduce the convolution rule of differentiation --- to
+differentiate a convolution we need only differentiate one of the
+functions being convolved. Applied to dual numbers,
+#+NAME: eq:
+\begin{equation}
+\langle{}s,\nabla{}s\rangle\ast\langle{}h,\nabla{}h\rangle = \langle{}s\ast{}h, \nabla{}s\ast{}h\rangle\;,
+\end{equation}
+giving us the following semantic scheme:
+#+NAME: eq:diffmem
+\begin{equation}
+  \begin{split}
+    \Delta_{N}\llbracket\texttt{mem}\rrbracket &\;:\; \mathbb{S}_{d} \to \mathbb{S}_{d} \\
+    \Delta_{N}\llbracket\texttt{mem}\rrbracket(\langle{}s, \nabla{}s\rangle) &\to (\langle{}y, \nabla{}y\rangle) \\
+    \langle{}y(t),\nabla{}y(t)\rangle &= \langle{}s(t-1),\nabla{}s(t-1)\rangle\;.
+  \end{split}
+\end{equation}
+
+**** Recursive Composition
+
+The differentiability of recursive filters is
+well-established\nbsp[cite:@shynkAdaptive1989] --- in short, the
+derivative of a recursive expression is itself recursive. In the
+specific case of Faust's recursive composition operator (see
+cref:fig:rec), to establish a rule for derivative transformation we
+can take a similar approach to cref:eq:diffSeqSemantic, making \(g\)
+an inner function that acts upon a vector of past output signals:
+#+NAME: eq:dualrec
+\begin{equation}
+\begin{split}
+&\langle{}\mathbf{y}(t),\,\mathbf{J}_{\mathbf{y}}(t)\rangle = \bigg\langle{}f(\mathbf{s}(t),g(\mathbf{y}(t-1))), \\
+  &\frac{\partial{}f}{\partial{}\mathbf{s}(t)}\mathbf{J}_{\mathbf{s}}(t) +
+  \frac{\partial{}f}{\partial{}g(\mathbf{y}(t-1))}\mathbf{J}_{g}(t-1)\mathbf{J}_{\mathbf{y}}(t-1)\bigg\rangle\;.
+\end{split}
+\end{equation}
+In the absence of a feedforward component (notwithstanding the fact
+that such a system would produce constant output signals of value
+zero), the result simplifies to
+#+NAME: eq:all-pole
+\begin{equation}
+\langle{}f(g(\mathbf{y}(t-1))),\; \mathbf{J}_{f}(t-1)\mathbf{J}_{g}(t-1)\mathbf{J}_{\mathbf{y}}(t-1)\rangle\;,
+\end{equation}
+which, comparing with cref:eq:diffSeqSemantic, tells us that recursive
+composition is simply /sequential composition through time/, and
+points to the implicit, and trivially-differentiable, one-sample delay
+introduced by Faust's recursive composition operator. We may conclude
+that
+#+NAME: eq:diffrec
+\begin{equation}
+\Delta_{N}\llbracket A \sim B \rrbracket = \Delta_{N}\llbracket A \rrbracket \sim \Delta_{N}\llbracket B \rrbracket\;.
+\end{equation}
+
+**** Merge Composition
+
+Merge composition (cref:fig:merge) entails
+summation\nbsp[cite:@orlareySyntactical2004], thus the addition rule of
+differentiation must be obeyed when merging dual signals. A merge \(A
+:> B\), can be viewed as an interleaving of the outputs of \(A\) into
+\(i_{B}\) groups of \(k=o_{A}/i_{B}\) signals, followed by a merging of each
+group into one signal path:
+#+NAME: eq:expandedMerge
+\begin{equation}
+A :> B = A \,:\, \chi(i_{B},k) \,:\, \big\|_{l=1}^{i_{B}}\left(
+  \big\|_{m=1}^{k}\,\_ \;:>\; \_
+\right) : B\;.
+\end{equation}
+Clearly \(\Delta_{N}\llbracket A:>B \rrbracket\) cannot be defined
+recursively, however. Note that for \(i_{B}=1\) the right hand side of
+cref:eq:expandedMerge reduces to \(A:>\_\), which is essentially the
+term in parenthesis, and can be handled thanks to the definitions in
+cref:eq:diffidentity2,eq:diffpar,
+#+NAME: eq:mergeOntoOne
+\begin{equation}
+\Delta_{N}\llbracket \big\|_{m=1}^{k}\,\_ \;:>\; \_ \rrbracket
+  = \big\|_{m=1}^{k}\Delta_{N}\llbracket \_ \rrbracket \;:>\; \Delta_{N}\llbracket \_ \rrbracket\;.
+\end{equation}
+The order of signals is maintained, so the resulting dual signal is
+guaranteed to be of the desired form
+\(\left\langle{}\sum_{m=1}^{k}s_{m},\sum_{l=m}^{k}\nabla{}s_{m}\right\rangle\).  For the full
+expression for differentiable merge composition, see
+cref:eq:diffmerge.
+
+** Discussion
+:PROPERTIES:
+:CUSTOM_ID: sec:discussion
+:END:
+
+#+attr_latex: :options float=t, numbers=left, xleftmargin=12pt, framexleftmargin=12pt
+#+name: lst:neuron
+#+caption: Excerpt from a differentiable artificial neuron
+#+caption: implementation. See cref:sec:discussion for
+#+caption: detail.
+#+begin_src faust :noeval
+// diff.lib
+neuron(NINPUTS, activationFunction) =
+  WX + b : activationFunction
+with {
+  WX = linalg.dot(NINPUTS);
+  b = _;
+};
+
+activations = environment {
+  sigmoid = *(-1) : 1 / (1 + exp);
+}
+
+linalg = environment {
+  dot(N) = interleave(N, 2)
+    : par(i, N, *) :> _;
+};
+
+// neuron.dsp
+NW = 3; // Number of weights.
+
+// Send inputs, and weights/biases,
+// to the differentiated neuron.
+process = par(i, NW, _),
+  par(i, NW + 1, wb.var(i + 1))
+  : d.diffInN(neuron, NW)
+with {
+  wb = weightsAndBiases((1, NW));
+  d = df.env(wb);
+  neuron = d.neuron(NW,
+    d.activations.sigmoid);
+};
+#+end_src
+
+The rules for differentiating Faust's composition operators are
+collected in cref:fig:diffRules. With the implementation of these
+rules via pattern matching, Faust programs can be recursively
+decomposed according to their composition operators, and re-composed
+in differentiable fashion, satisfying the syntactic rule in
+cref:eq:idealDiffSyntax. For example:
+#+NAME: eq:diffComposition
+\begin{equation}
+\begin{split}
+\Delta_{N}\llbracket (A,C):B \rrbracket
+  &= \Delta_{N}\llbracket A,C \rrbracket \;:\; \Delta_{N}\llbracket B \rrbracket \\
+  &= \Delta_{N}\llbracket A \rrbracket , \Delta_{N}\llbracket C \rrbracket \;:\; \Delta_{N}\llbracket B \rrbracket\;.
+\end{split}
+\end{equation}
+An artificial neuron of the form \(y = \sigma(\mathbf{wx}+b)\), such as
+could be used in a binary classification problem, can be created as
+per cref:lst:neuron. The code describes a neuron and sigmoid
+activation function in primal form, in a library file, =diff.lib=; the
+~dot~ function (line 14) makes use of the familiar ~interleave~ function
+to compute the dot product, \(\mathbf{wx}\); in =neuron.dsp=,
+differentiable weights and biases, ~wb~, are created according to a network
+layer specification (line 27) --- one pair of signals indicating
+one layer containing one neuron with ~NW~ weights; weights and biases
+are used to create a differentiable environment (~d~, line 28; described
+in cref:sec:diffprog,lst:diffAdd); the wrapper-function ~diffInN~
+(line 25) enacts the recursive derivative transformation; its first ~NW~
+inputs are considered input signals, \(\mathbf{s}\), the rest as input
+variables, \(\mathbf{x}\).
+
+Worthy of reflection is that algorithms of this sort, consisting of
+differentiable primitives, plus our now-differentiable composition
+operators, can be automatically differentiated to arbitrary order,
+\(\Delta_{N}\llbracket{\scriptstyle\Delta_{N}\llbracket
+\cdots}{\scriptscriptstyle\Delta_{N}\llbracket \cdot \rrbracket}{\scriptstyle \cdots
+\rrbracket}\rrbracket\).
+
+** Limitations
+:PROPERTIES:
+:CUSTOM_ID: sec:limitations
+:END:
+
+Although the scheme presented here renders a great deal of existing
+Faust code differentiable, certain primitives and language constructs
+cannot, at present, be subjected to AD.
+
+Faust's ~route~ primitive cannot be pattern-matched, which precludes the
+derivative transformation of arbitrary signal routing expressions
+based on that primitive, such as those in the =routes.lib=
+library.[fn:4] As described in cref:sec:cut, however, such expressions
+can be recreated with the identity and cut primitives; common routing
+tasks like interleaving can be achieved differentiably with code such
+as in cref:lst:interleave.
+
+User interface primitives (sliders and buttons, for example) are
+matchable in principle, but in practice, ~hslider("x1", 0, -1, 1,
+.01)~, whose parameters are a string identifier, initial value,
+minimum, maximum and step, must be matched verbatim; clearly, in the
+general case, this is not practical. The obvious derivative
+transformation of a user interface element is to an input variable,
+i.e. a parameter for optimisation such as a weight in a neural
+network. Input variables must be identifiable so as to create the
+appropriate corresponding dual signal,
+\(\big\langle{}x_{i},\begin{bmatrix}0 & \cdots & \frac{\partial{}x_{i}}{\partial{}x_{i}} & \cdots &
+0\end{bmatrix}^{T}\big\rangle\). The approach proposed is to move input
+variables out of the general AD transformation; a wrapper function is
+used to indicate the number of input signals (whose gradients are zero
+vectors) and input variables received by the main body of the
+differentiated block diagram (see cref:lst:neuron,lst:iir). Though
+imposing a certain coding convention, we consider this comparable with
+the particular requirements imposed by PyTorch, TensorFlow, and JAX,
+with their respective dedicated datatypes for learnable parameters.
+
+Though not a frequently-employed feature of the language, unapplied
+lambda abstractions appear in some key definitions, the ~iir~ function
+in =filters.lib=, for example. Implemented in
+transposed-direct-form\nbsp[cite:@smithIntroduction2008], ~iir~ is defined
+with the abstraction ~ma.sub~, which accepts two arguments, ~x~ and ~y~, and
+returns the result ~y-x~. Attempting \(\Delta_{N}\llbracket \texttt{sub}
+\rrbracket\), the abstraction is essentially treated as a numerical
+constant, and given a vector of zeros as its gradient. Fortunately,
+constructions of this kind --- in this case reversing signal order
+before applying some primitive operation --- are effectively matters
+of signal-routing and, as described in cref:sec:cut, can be recreated
+using differentiable primitives.
+
+** Applications & Outlook
+
+#+attr_latex: :options float=t, numbers=left, xleftmargin=12pt, framexleftmargin=12pt
+#+name: lst:iir
+#+caption: Excerpt from a differentiable IIR filter implementation.
+#+begin_src faust :noeval
+N = 2; // filter order.
+
+// ...Set up AD vars & environment...
+
+// Differentiable TDF IIR filter.
+iir = ((sub,par(l, N, _))
+  ~ (fir(N))),par(l, N + 1, _)
+  : _,par(l, N, !),par(l, N + 1, _)
+  : fir(N + 1)
+with { 
+  sub = _,_ <: !,_,_,! : -;
+  fir(n) =
+    (_ <: par(l, n, seq(m, l, mem))),
+      par(l, n, _) 
+    : linalg.dot(n);
+};
+
+// Send a signal input, and coeffs,
+// to the differentiated filter.
+process = _,coeffs : d.diffInN(iir, 1)
+with {
+    coeffs = par(i, 2 * N + 1,
+                 vars.var(i + 1));
+};
+#+end_src
+
+Despite the above limitations, and beyond the example given in
+cref:lst:neuron, the AD system described here can be put to practical
+use. A differentiable transposed-direct-form IIR filter implementation
+is given in cref:lst:iir; though reliant on some careful signal
+routing, particularly for directing coefficients to the feedback
+(~fir(N)~, line 7) and feedforward (~fir(N + 1)~, line 9) portions of
+the filter, it overcomes the obstacles to differentiability posed by
+its counterpart in =filters.lib=. Structurally, it is similar to the
+neuron implementation in cref:lst:neuron; parameters, in this case
+learnable filter coefficients, are defined outside of the
+differentiable environment, and passed, along with an input signal, to
+the wrapper function ~diffInN~. An expanded version of this example
+(plus that given in cref:lst:neuron) is available online[fn:5] and can
+be run in Faust's web IDE.[fn:6] Comparing, via a differentiable loss
+function, the output of the filter against that of an equivalent
+filter with fixed, /hidden/ parameters, and backpropagating the
+resulting gradients, learnable parameters can be optimised in real
+time. This generalises to filters of higher order and those described
+by metaparameters such as cutoff frequency, and the length of multiple
+hidden delay lines can be found by optimisation against a
+differentiable FIR filterbank; these examples point the way to a
+variety of real-time adaptive processing applications.
+
+Though demonstrated with /known/ algorithms, in principle the above can
+be extended to optimisation against a target /black box/ filter, granted
+that both target and estimate receive the same input signal. This
+hints, however, at another limitation of the current approach ---
+Faust is primarily concerned with time-domain operations, thus loss is
+computed in the time domain on a per-sample basis (albeit with the
+possibility of taking a running-average of recent sample values, for
+example). For phase-invariant and perceptually-informed optimisation
+scenarios, frequency-domain loss computation is required; the recent
+introduction of multi-rate processing to the Faust language promises
+to enable spectral signal analysis. Developments of this sort will
+improve the feasibility of taking on larger-scale, typically
+deferred-time problems such neural audio synthesis. These call for
+generalisation to a corpus of training data (rather than optimisation
+to a small number of input variables); with that end in mind, the
+example in cref:lst:neuron should be extended to a general neural
+network structure, and a supporting infrastructure created for
+delivering training data and capturing weights and biases for
+real-time inference.
+
+** Conclusion
+
+In this chapter a general scheme for differentiating Faust programs
+has been described, moving an important step toward providing the
+means with which to tackle audio optimisation and machine learning
+problems with the domain-specific and cross-platform benefits of the
+Faust language. A variety of time-domain, gradient-based optimisation
+problems can be tackled in Faust, with results produced in real-time.
+
+Many challenges and opportunities remain as impetus for further
+development of the work presented here. Having only been put to
+informal use to-date, the proposed AD approach should be assessed for
+its efficacy and efficiency. Beyond the correctness of the semantic
+scheme, being based on forward-mode AD, which, on paper, compares
+unfavourably with reverse-mode in terms of computational expense, its
+combination with the optimisations of the Faust compiler should be
+explored. At the level of the Faust compiler, changes that would
+facilitate the transformation of elements of the language that
+currently elude pattern matching would be of benefit here, as would
+further development of Faust's adaptability to frequency domain
+processing.
 
 * Time Exchange
 
@@ -799,7 +2320,12 @@ lies in judicious selection of sampling rate, \(f_{s}\), and audio buffer
 size, \(N\), plus co-ordination via PTP.
 
 Due to the way that DMA is configured, the iMXRT1062 generates two
-interrupts per audio buffer, 
+interrupts per audio buffer. At a sampling rate of
+\qty{48}{\kilo\hertz} and buffer size of 256 or below this means that
+an integer number of interrupts are generated each second. On system
+startup, waiting for a PTP lock to be achieved, it is possible to
+ensure that the audio subsystem starts up on a given PTP second and
+thus that audio subsystems on the entire network are synchronised.
 
 
 ** A Synchronous, Distributed Audio System
@@ -1141,23 +2667,10 @@ end
 #+end_src
 
 #+RESULTS:
-#+begin_example
-Target sample rate:   48,000 Hz
-Target SAI1_CLK_ROOT: 12,288,000 Hz
-
-fXO * (DS + DN / DD)/(DA * Dp * DI1 * DI2) = 12288000.000000 Hz
-24 MHz * (29 + 184000000/1000000000)/(1 * 1 * 3 * 19) = 12288000.000000
-24 MHz * (32 + 256000000/1000000000)/(1 * 1 * 3 * 21) = 12288000.000000
-24 MHz * (35 + 328000000/1000000000)/(1 * 1 * 3 * 23) = 12288000.000000
-24 MHz * (43 + 8000000/1000000000)/(1 * 1 * 4 * 21) = 12288000.000000
-24 MHz * (45 + 56000000/1000000000)/(1 * 1 * 4 * 22) = 12288000.000000
-24 MHz * (46 + 80000000/1000000000)/(1 * 1 * 5 * 18) = 12288000.000000
-24 MHz * (47 + 104000000/1000000000)/(1 * 1 * 4 * 23) = 12288000.000000
-24 MHz * (49 + 152000000/1000000000)/(1 * 1 * 4 * 24) = 12288000.000000
-24 MHz * (50 + 176000000/1000000000)/(1 * 1 * 7 * 14) = 12288000.000000
-24 MHz * (51 + 200000000/1000000000)/(1 * 1 * 5 * 20) = 12288000.000000
-24 MHz * (52 + 224000000/1000000000)/(1 * 1 * 6 * 17) = 12288000.000000
-#+end_example
+: LoadError: UndefVarError: `@printf` not defined in `Main`
+: Suggestion: check for spelling errors or missing imports.
+: in expression starting at /tmp/babel-7IyhJv/julia-vterm-src-qaYSks:22
+: in expression starting at /tmp/babel-7IyhJv/julia-vterm-src-qaYSks:1
 In practice the first such result can be used yielding the following
 values:
 
@@ -1216,65 +2729,49 @@ from ~juce::AudioSource~ and encapsulates a collection (a
 server task, be it sending audio data to the network, listening for
 PTP timestamps, listening for client and time authority announcement
 packets, sending client reboot instructions, or inspecting connected
-switches.
+switches. The audio transmission part of the server is illustrated in
+cref:fig:server. The server receives a collection of input channels,
+either monophonic WFS sources or ACN encoded audio channels, and
+writes these to an intermediate first-in-first-out (FIFO) buffer. When
+the FIFO contains enough samples to fill an outgoing audio packet, the
+sender thread is notified and reads from the FIFO to fill a packet for
+transmission. The sender thread delivers the packet to a UDP multicast
+socket and transmits it to the network.
 
-#+name: lst:server-constructor
-#+caption: Constructor of the ~ananas::Server::Server~ class.
-#+begin_src c++
-Server::Server(const uint numChannelsToSend) :
-  numChannels(numChannelsToSend),
-  fifo(numChannelsToSend)
-{
-  // Add all the threads.
-  threads.add(new AudioSender(Sockets::AudioSenderSocketParams, fifo));
-  threads.add(new TimestampListener(Sockets::TimestampListenerSocketParams));
-  threads.add(new ClientListener(Sockets::ClientListenerSocketParams,
-                                 clients, modules));
-  threads.add(new AuthorityListener(Sockets::AuthorityListenerSocketParams,
-                                    authority));
-  threads.add(new RebootSender(Sockets::RebootSenderSocketParams,
-                               clients));
-  threads.add(new SwitchInspector(Threads::SwitchInspectorThreadParams,
-                                  switches));
-  
-  // The server should listen for change messages sent by all threads.
-  for (const auto &t: threads) {
-    t->addChangeListener(this);
-  }
-}
-#+end_src
+#+name: fig:server
+#+caption: Structural overview of the Ananas audio server.
+\begin{figure*}
+\centering
+\begin{tikzpicture}
+\pic[scale=0.66, transform shape]{server};
+\end{tikzpicture}
+\end{figure*}
 
-Inheriting from ~juce::AudioSource~, the server implements the method
-~getNextAudio Block~, which it uses as an opportunity to write samples to
-an intermediate first-in-first-out (FIFO) buffer in preparation for
-transmission to the network, and to check whether the outgoing packet
-timestamp should be updated.
-
-#+name: lst:get-next-audio-block
-#+caption: The Ananas server's ~getNextAudioBlock~ method.
-#+begin_src c++
-void Server::getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferToFill)
-{
-    // These checks are kind of overkill, since the order in which threads
-    // were added to the OwnedArray is known, but as a sanity check...
-    if (auto *s = dynamic_cast<AudioSender *>(threads[0])) {
-        if (auto *t = dynamic_cast<TimestampListener *>(threads[1])) {
-            // If a new timestamp is available, send it to the audio sender
-            // to see whether the packet timestamp needs to be updated.
-            if (t->isNewTimestampAvailable()) {
-                s->setPacketTime(t->getTimestamp());
-            }
-        }
-    }
-
-    fifo.write(bufferToFill.buffer);
-}
-#+end_src
-
-
-
-** the Ananas Protocol
+** The Ananas Protocol
 *** The Ananas Audio Protocol
+
+Being first and foremost concerned with the transmission of audio
+data, at the heart of the Ananas system is the Ananas Audio Protocol
+(AAP). A UDP multicast-based protocol, using address =224.4.224.4=,
+taken from the second ad-hoc block of the Internet Assigned Numbers
+Authority's multicast address space\nbsp[cite:@meyerIANA2010], AAP
+consists of a stream of sequence-numbered, timestamped packets. The
+structure of an AAP packet is given in cref:fig:audio-packet. It was
+found that, particularly under high-bandwidth conditions, packets
+sporadically arrive out of order, hence the inclusion of the sequence
+number, which is used at the receiving side to ensure the integrity of
+the packet stream. For timestamping, the server reads a PTP follow-up
+packet, adds a small reproduction offset (for packets of 16 frames it
+was found that an offset of \(1/70\) s was most appropriate) and
+writes the timestamp to the outgoing packet; successive packets are
+then updated with the expected inter-packet interval, e.g., for 16
+frames at \qty{48}{\kilo\hertz} this is \(333\,333\frac{1}{3}\) ns.
+
+Completing the packet header are the number of channels and number of
+frames in the packet, used at the receving side for decoding the
+byte-encoded audio data that follows. At 16 frames per packet it is
+possible to transmit up to 44 channels of 16-bit audio while
+respecting ethernet's 1500 byte maximum transmissible unit.
 
 #+name: fig:audio-packet
 #+caption: Structure of an Ananas audio packet.
@@ -1290,8 +2787,58 @@ void Server::getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferToFill)
 \end{figure}
 
 *** The Ananas Authority Description Protocol
+
+The time authority announces its presence on the network with UDP
+multicast packets on address =224.4.224.6= port 49173. It sends packets
+containing its hardware-derived serial number plus the value of its
+current USB audio feedback accumulator for consumption by the server;
+the server is aware of the default value of the feedback accumulator
+and can thus calculate the USB audio sampling rate that the time
+authority is currently requesting. This is useful primarily for
+debugging purposes; the expectation is that as client audio buffers
+fill up the feedback accumulator value will fall and vice versa. The
+structure of an Ananas Authority Description Protocol packet is given
+in cref:fig:authority-packet.
+
+#+name: fig:authority-packet
+#+caption: Structure of an Ananas Authority Description packet.
+\begin{figure}
+\centering
+  \begin{bytefield}[bitwidth=.9cm, bitheight=.9cm]{16}
+    \bitheader{0-15} \\
+    \bitbox{4}{Serial number} & \bitbox{4}{USB feedback accumulator} & \bitbox{4}{Num. underruns} & \bitbox{4}{Num. overflows} \\
+  \end{bytefield}
+\end{figure}
+
 *** The Ananas Client Description Protocol
+
+#+name: fig:client-packet
+#+caption: Structure of an Ananas Client Description packet.
+\begin{figure}
+\centering
+\begin{bytefield}[bitwidth=.9cm, bitheight=.9cm]{16}
+      \bitheader{0-15} \\
+      \bitbox{4}{Serial number} & \bitbox{1}{\tiny{Firmw. type}} & \bitbox{3}{\scriptsize{Version number}} & \bitbox{4}{Sampling rate} & \bitbox{4}{Percent CPU} \\
+      \bitbox[lrb]{4}{\scriptsize{Presentation offset frames}} & \bitbox[lrb]{8}{Presentation offset ns} & \bitbox[lrb]{4}{\scriptsize{Audio-PTP offset ns}} \\
+      \bitbox[lrb]{1}{\tiny{Buffer fill \%}} & \bitbox[lrb]{1}{\tiny{PTP lock}} & \bitbox[lb]{14}{Secondary source co-ordinates} \\
+      \bitbox[rb]{2}{}
+    \end{bytefield}
+\end{figure}
+
+Clients announce their presence on the network with periodic UDP
+multicast packets on address =224.4.224.6= port 49172. A client is
+deemed to be connected if the server has received an Ananas Client
+Description Protocol (ACDP) packet within the last second. Each packet
+contains a variety of information about a given client, such as its
+serial number, firmware type and version, reported sampling rate,
+buffer fill percentage and PTP lock status, etc., information which
+can be displayed in a digital audio workstation plugin interface. The
+structure of an ACDP packet is given in cref:fig:client-packet.
+
 ** Audio Plugins
+
+Encapsulating the audio server are CLAP format audio plugins for WFS
+and HOA control.
 
 #+name: fig:network-overview
 #+caption: The network overview pane of the WFS plugin.
@@ -1303,10 +2850,6 @@ void Server::getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferToFill)
 #+attr_org: :width 300
 [[./images/wfs-control.png]]
 
-* Evaluation
-#+latex: \minitoc
-#+latex: \newpage
-** Case Studies
 * Conclusion
 #+latex: \minitoc
 #+latex: \newpage
@@ -1318,6 +2861,34 @@ This is my conclusion
 #+print_bibliography:
 
 * Footnotes
+
+[fn:11] \url{https://www.holoplot.com/case-studies/msg-sphere-case-study}
+
+[fn:10] \url{https://empac.rpi.edu/about/building/venues}
+
+[fn:9] \url{https://www.ircam.fr/en/ircam/spaces/espace-de-projection}
+
+[fn:8] See also
+\url{https://tu.berlin/en/ak/research/projects/wellenfeldsynthese-fuer-einen-grossen-hoersaal}
+and WFS speaker module produced by Four Audio for installation at TU \url{https://four-audio.com/en/products/wfs/}.
+
+[fn:3] \url{https://github.com/GameOfLife/WFSCollider}
+
+[fn:7] The colon symbol on the first line of
+cref:eq:semanticTransformation introduces the /type/ of the signal
+processor \(\llbracket D \rrbracket\) and is not to be confused with
+Faust's sequential composition operator.
+
+[fn:4] \url{https://github.com/grame-cncm/faustlibraries/blob/65594336a3476d9a82a4df71e88c92f3e4b94821/routes.lib}
+
+[fn:5] \url{https://codeberg.org/hatchjaw/aes-faust-ddsp}
+
+[fn:6] \url{https://faustide.grame.fr/}
+
+[fn:2] Though not the case in Faust's early
+days\nbsp[cite:@orlareySyntactical2004], the equality of \(o_{A}\) and \(i_{B}\)
+is long-established as an absolute condition of sequential
+composability.
 
 [fn:1] Emphasis added because a one part-per-trillion clock will lose
 one second on the order of once every thirty-two thousand years.
