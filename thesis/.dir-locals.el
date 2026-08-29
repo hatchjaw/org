@@ -22,11 +22,15 @@
                            "\\1\n\\\\addcontentsline{toc}{chapter}{\\\\nameref{sec:intro}}"
                            headline))))
 
-              ;; (eval . (defun tar/display-minitoc (headline backend info)
-              ;;           "Add minitoc to the start of each chapter."
-              ;;           (when (org-export-derived-backend-p backend 'latex)
-              ;;             (replace-regexp-in-string
-              ;;              "\\(\\\\chapter{.+}\n\\\\label{.+}\\)"
-              ;;              "\\1\n\\\\minitoc\n\\\\newpage"
-              ;;              headline))))
+              (eval . (progn
+                        (defun tar/org-latex-src-block-wrap-tcolorbox (text backend info)
+                          "Wrap minted environments in a tcolorbox codeblock"
+                          (when (org-export-derived-backend-p backend 'latex)
+                            (replace-regexp-in-string
+                             "\\\\begin{minted}\\(\\[.*?\\]\\)?{\\([a-zA-Z0-9+-]+\\)}"
+                             "\\\\begin{codeblock}{\\2}"
+                             (replace-regexp-in-string "\\\\end{minted}" "\\\\end{codeblock}" text))))
+
+                        (add-to-list 'org-export-filter-src-block-functions
+                                     'tar/org-latex-src-block-wrap-tcolorbox)))
               )))

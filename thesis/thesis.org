@@ -192,6 +192,8 @@ Fancy characters (typically) at the beginning of chapters.
 
 #+begin_src latex
 \RequirePackage{minted}
+\RequirePackage[most]{tcolorbox}
+\tcbuselibrary{skins, breakable}
 \setminted{
   fontsize=\footnotesize,
   linenos=true,
@@ -201,6 +203,28 @@ Fancy characters (typically) at the beginning of chapters.
   framesep=1mm,
   framerule=1pt,
   rulecolor=\color{gray!50}
+}
+\newtcblisting[auto counter, number within=chapter]{codeblock}[2][]{
+  listing only,
+  listing engine=minted,
+  minted style=friendly,
+  minted language=#2,
+  minted options={
+    fontsize=\footnotesize,
+    breaklines,
+    linenos,
+    numbersep=3mm
+  },
+  colback=gray!5,
+  colframe=gray!40,
+  sharp corners,
+  bottomrule=1pt,
+  toprule=2pt,
+  leftrule=0pt,
+  rightrule=0pt,
+  fonttitle=\bfseries,
+  title={\thetcbcounter\ #1},
+  #1
 }
 #+end_src
 
@@ -385,6 +409,107 @@ Define some colours and some node and line styles.
 }
 #+end_src
 
+*** WFS
+
+#+begin_src latex
+\definecolor{wfsWaveColour}{HTML}{4077D6}
+\newcommand*{\wfsWaveSpace}{.89}
+\newcommand*{\wfsWidth}{8}
+\newcommand*{\wfsNumWaves}{5}
+\newcommand*{\wfsNumSecondary}{16}
+\newcommand*{\wfsNumMCU}{8}
+
+\tikzset{
+  halfSecondaryWavefronts/.pic={
+    \foreach \pos/\rad in {0/.18, 1/.615, 2/1.03, 3/1.42, 4/1.78, 5/2.07, 6/2.295, 7/2.42}
+    \draw [black!40, thick] (.25+.5*\pos, 0) circle (\rad);
+  },
+  secondaryWavefronts/.pic={
+    \clip (0, 0) rectangle (\wfsWidth, 2.5);
+    \pic {halfSecondaryWavefronts};
+    \pic [xscale=-1] at (\wfsWidth, 0) {halfSecondaryWavefronts};
+  },
+  secondaryWavefrontsAsync/.pic={
+    \clip (0, 0) rectangle (\wfsWidth, 2.5);
+    \foreach \pos/\rad in {0/.18, 1/.615,
+      2/0.83, 3/1.22,
+      4/1.88, 5/2.17,
+      6/1.295, 7/1.42,
+      8/1.72, 9/1.595,
+      10/0.41, 11/0.12,
+      12/1.42, 13/1.03,
+      14/0, 15/0}
+    \draw [black!40, thick] (.25+.5*\pos, 0) circle (\rad);
+  },
+  realWavefronts/.pic={
+    \clip (0, 0) rectangle (\wfsWidth, 2.5);
+    \foreach \i [evaluate=\i as \rad using \i*\wfsWaveSpace] in {1,...,\wfsNumWaves}
+    \draw [thick, wfsWaveColour] (\wfsWidth/2-\rad, -2) arc [radius=\rad, start angle=180, end angle=0];
+  },
+  virtualWavefronts/.pic={
+    \clip (-1, 0) rectangle (2*\wfsWaveSpace*\wfsNumWaves, 2);
+    \foreach \i [evaluate=\i as \rad using \i*\wfsWaveSpace] in {1,...,\wfsNumWaves}
+    \draw [thick, dashed, wfsWaveColour] (\wfsWidth/2-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
+  },
+  speaker/.pic={
+    \path [draw=black, fill=white] (-.11, 0) rectangle (.11, .06);
+    \path [draw=black, fill=white] (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
+  },
+  speakers/.pic={
+    \foreach \i [
+      evaluate=\i as \secondary using
+      .25+(\i-1)*(\wfsWidth/\wfsNumSecondary)
+    ] in {1,...,\wfsNumSecondary} {
+      \pic at (\secondary, 0) {speaker};
+    }
+  },
+  mcu/.pic = {
+    \node [draw, fill=black!10, font={\scriptsize}, rounded corners=1mm, inner xsep=1.5mm] {dWFS};
+  },
+  mcus/.pic = {
+    \foreach \i [
+      evaluate=\i as \xpos using .5+(\i-1)
+    ] in {1,...,\wfsNumMCU}
+    \pic at (\xpos, 0) {mcu};
+  },
+  wfs/.pic = {
+    \node [minimum width=\wfsWidth{}cm, draw, fill=black!10, rounded corners=1mm] at (\wfsWidth/2, -.44) {WFS};
+  },
+  primary/.pic = {
+    \node [circle, draw=wfsWaveColour, fill=wfsWaveColour!50, thick] (primary) at (\wfsWidth/2, -2) {};
+  },
+  holophony/.pic = {
+    \pic {secondaryWavefronts};
+    \pic at (0, -2) {virtualWavefronts};
+    \pic {primary};
+    \pic {realWavefronts};
+    \pic at (0, -.21) {speakers};
+  },
+  centralised/.pic = {
+    \pic {secondaryWavefronts};
+    \pic at (0, -2) {virtualWavefronts};
+    \pic {primary};
+    \pic {realWavefronts};
+    \pic at (0, -.21) {speakers};
+    \pic {wfs};
+  },
+  distributed/.pic = {
+    \pic {secondaryWavefronts};
+    \pic at (0, -2) {virtualWavefronts};
+    \pic {primary}
+    \pic {realWavefronts};
+    \pic at (0, -.21) {speakers};
+    \pic at (0, -.42) {mcus};
+  },
+  async/.pic = {
+    \pic {secondaryWavefrontsAsync};
+    \pic at (0, -2) {virtualWavefronts};
+    \pic {primary};
+    \pic at (0, -.21) {speakers};
+    \pic at (0, -.42) {mcus};
+  }
+}
+#+end_src
 
 * Acknowledgements
 :PROPERTIES:
@@ -495,7 +620,177 @@ suite\nbsp[cite:@hardmanReliable1995;@hardmanSuccessful1998;
 @turlettiINRIA1994] and the broadcast industry that pioneered audio
 over ethernet\nbsp[cite:@bakkerIntroduction2014]. Before embarking upon a
 discussion of networked audio, however, it is worthwhile to review
-some fundamental aspects of computer networking.
+some fundamental aspects of digita audio and computer networking.
+
+** Digital Audio Signals
+
+In a digital audio system with sampling rate \(f_{s}\), an audio signal
+\(y\) is composed of samples \(y[n]\), each representing the amplitude
+of the signal at a given point in time \(t\), where \(t = n/f_{s}\). For
+arithmetical convenience, sample amplitudes are typically considered
+to be floating point numbers, constrained to the range \(y \in [-1,1]\)
+(see cref:fig:audio-signal). It is in this form that samples are
+typically handled during the processing stage of a DSP algorithm, but
+the true underlying representation is concealed, and matters such as
+numerical resolution and precision abstracted away.
+
+#+begin_src julia :results file graphics :file audio-signal.png :output-dir ./images/gen :exports results
+using Plots, LaTeXStrings
+
+fs = 48000
+f0 = 1000
+T = 1/f0
+
+t = range(0, T, Int(round(T * fs)))
+y = sin.(2 * π * f0 * t)
+
+default(legend=false)
+
+p = plot(layout=(1, 2),
+         fontfamily="EBGaramond-VariableFont_wght",
+         size=(1000, 400),
+         left_margin=6Plots.mm,
+         bottom_margin=6Plots.mm,
+         legend=false)
+plot!(p[1], t, y,
+      title="(a)",
+      xlabel=L"t\;\;\textrm{(seconds)}",
+      ylabel=L"y(t)")
+hline!(p[1], [0], color="grey")
+sticks!(p[2], y, marker=:circle,
+        title="(b)",
+        xlabel=L"n",
+        ylabel=L"y[n]")
+hline!(p[2], [0], color="grey")
+
+savefig("./images/gen/audio-signal.png")
+#+end_src
+#+name: fig:audio-signal
+#+caption: An audio signal (\qty{1}{\kilo\hertz} sine wave); (a) in
+#+caption: continuous time; (b) sampled at intervals of \(1/f_{s}\)
+#+caption: seconds, with \(f_{s} = 48\,000\) Hz.
+#+RESULTS:
+[[file:./images/gen/audio-signal.png]]
+
+Samples undergo format conversion at various stages during processing,
+such as from an integer pulse code modulation (PCM) filetype to a
+stream of floating point audio samples in a digital audio workstation
+(DAW), or from a floating point audio stream in an audio device driver
+to an integer stream to be handled by a hardware codec. For the most
+part a user, and even a developer of audio software, need not concern
+themselves with the rudiments of sample representation and conversion;
+as shall be shown, however, under certain circumstances these digital
+fundamentals must be dealt with directly.
+
+*** Numerical Representation
+
+#+begin_src julia :results file graphics :file audio-signal-detail.png :output-dir ./images/gen :exports results
+using Plots, LaTeXStrings
+
+fs = 48000
+f0 = 1000
+T = 1/f0
+
+t = range(0, T, Int(round(T * fs)))
+y = sin.(2 * π * f0 * t)
+y2 = Int.(floor.(((y .+ 1) ./ 2) .* (1 << 16)))
+
+default(legend=false)
+
+p = plot(layout=(1, 1),
+         fontfamily="Inconsolata-Regular",
+         # size=(1000, 400),
+         left_margin=6Plots.mm,
+         bottom_margin=6Plots.mm,
+         legend=false)
+sticks!(p[1], y2, marker=:circle,
+        xlabel=L"n",
+        ylabel=L"y[n]",
+        xlim=(5.8, 11.9),
+        ylim=(50000, 65536),
+        yformatter=y -> "0x" * string(Int(round(y)), base=16))
+for i in range(6, 12)
+    hex_str = "0x" * string(y2[i], base=16)
+    annotate!(i + .3, y2[i] + 100, text(hex_str, 8, :black, :bottom))
+end
+
+savefig("./images/gen/audio-signal-detail.png")
+#+end_src
+#+name: fig:audio-signal-detail
+#+caption: Detail of cref:fig:audio-signal (b). Sample amplitudes
+#+caption: converted to 16 bit hexadecimal values.
+#+RESULTS:
+[[file:./images/gen/audio-signal-detail.png]]
+
+Commonly-encountered sample formats include 16 and 24 bit integer, and
+32 bit floating point. Broadly speaking, more bits afford greater
+resolution in terms of sample amplitudes that can be represented, with
+ramifications for dynamic range and signal-to-noise ratio, as well as
+for storage and throughput. Integer formats offer comparatively poor
+resolution at low amplitudes due to the mismatch between the linear
+distribution of their values versus the logarithmic nature of sound
+intensity. Floating point formats address this by having a logarithmic
+distribution of avaliable values; the IEEE standard for single
+precision (i.e. 32 bit) floating point numbers\nbsp[cite:@IEEE2019]
+dictates that precision is greatest around zero, with around half the
+available numbers lying in \([-1, 1]\).[fn:12] For brevity's sake, and
+for its pertinence later in the text, consider the 16 bit case, and a
+single 16 bit integer audio sample:
+
+#+name: lst:bin-sample
+#+caption: A 16 bit audio sample, binary representation
+#+begin_src bin
+11011100 00000010
+#+end_src
+
+Separating the bits into two groups of eight is reflective of the fact
+that the eight-bit /byte/ is typically the unit of transmission in
+computer systems. Grouping the bits in this way points to their
+expression in hexadecimal format, transforming the bytes into more
+easily-digestible morsels of two digits:
+
+#+name: lst:hex-sample
+#+caption: A 16 bit audio sample, hexadecimal representation
+#+begin_src hex
+dc 02
+#+end_src
+
+A number of this kind may also be represented (in C and C++ code for
+example) as =0xdc02= with '=0x=' indicating that the number to follow is
+in base sixteen. Sixteen bits grant access to \(2^{16} = 65\,536\)
+distinct amplitude values for each sample; what cref:lst:hex-sample
+tells us is that, in decimal terms, this sample should take the 56
+322^{nd} amplitude value.[fn:13] See cref:fig:audio-signal-detail (and
+the sample at \(n = 7\)) for an illustration of this.
+
+*** Storage and Transmission
+
+Cref:lst:bin-sample and cref:lst:hex-sample hint at the property of
+/endianness/, which is to say the order in wwhich a number's component
+bits and bytes appear\nbsp[cite:@cohenHoly1981]. The above representations
+mirror the left-to-right nature of western written language and
+numbers, being /big endian/ at the levels of both bit and byte, with the
+most significant bit (and most significant byte, both abbreviated /MSB/)
+appearing first.
+
+Paraphrasing Cohen\nbsp[cite:@cohenHoly1981], if digital audio signals
+could be transmitted in their entirety, i.e. the unit of transmission
+was /an audio signal/, then endianness would not matter. Practically
+speaking, however, in order to be handled by software or hardware, or
+transmitted over a network, audio signals must be broken down into
+temporally-distributed blocks, those blocks into samples, samples into
+bytes, and bytes into bits; correct endianness must be observed with
+respect to different computer architectures, file formats, and
+transmission protocols.
+
+The PCM WAV file format, for example, di8ctates that the least
+significant byte of each sample is stored first --- little endian ---
+but that bit order should be big endian\nbsp[cite:@Multimedia1991]; thus
+the audio sampling rate in cref:lst:hex-sample should be stored in a
+=.wav= file as =0x02dc=. The ethernet standard for communication over
+local area computer networks\nbsp[cite:@ieeeIEEE2018] calls for something
+akin to the opposite: octets (bytes) are sent /"top to bottom"/, but
+each octet is ttransmitted with its least significant bit first.
 
 ** Computer Networking
 
@@ -679,10 +974,37 @@ estimates for send and receive times. Precision is best when
 timestamps can be calculated at the /physical layer/ --- layer 1 of the
 OSI model, of which the aforementioned transport layer (layer 3) is a
 component --- i.e. by dedicated timers at the level of the physical
-network interface.
+network interface. Legacy and low-cost networking equipment do not
+typically possess support for hardware timestamping,
+however\nbsp[cite:@correllDesign2005], and devices that do offer such
+support are often markedly more expensive, though notable exceptions
+do exist. PTP can be deployed as a software-only
+implementation\nbsp[cite:@correllDesign2005], albeit with impaired
+accuracy and a protracted clock-convergence period.
+
+Dante, with its promise of low-latency, highly-multichannel audio over
+wired LAN, and device synchronisation via hardware PTP, has become the
+/de facto/ industry standard in networked
+audio\nbsp[cite:@bakkerIntroduction2014]. Bakker et al. refer to Dante as
+an "open" system, which is true, perhaps, in the sense that companies
+can incorporate the Dante system into their products under licence
+from Audinate; from the perspective of the academic community,
+however, Dante is very much a closed-source initiative and not a
+suitable platform for research.
+
+In 2011, IEEE released the Audio Video Bridging (AVB, IEEE 802.1)
+standard\nbsp[cite:@ieeeIEEE2011], and AES67 followed in
+2013\nbsp[cite:@hildebrandAES6720132014]. These technical standards
+describe /suites/ of protocols for tasks such as media transmission,
+device discovery and synchronisation, ind interoperability with other
+systems. Both use PTP fo device synchronisation; AES67 uses RTP for
+media transmission whereas AVB uses the data-link layer (layer 2)
+Audio Video Transport Protocol. Open implementations of AVB and AES67
+exist, but, being complex standards featuring many components, such
+implementations may not be complete, and support for embedded
+platforms is limited.[fn:9]
 
 ** The Need for a New Protocol
-
 
 
 
@@ -798,6 +1120,15 @@ reproduce sounds of higher frequency, but can be mitigated by
 reproducing higher-order modes and increasing the density of the
 distribution of secondary sources.
 
+#+name: fig:holophony
+#+caption: The holophonic effect of wave field synthesis.
+\begin{figure*}
+\centering
+\begin{tikzpicture}
+\pic{holophony};
+\end{tikzpicture}
+\end{figure*}
+
 WFS is based upon Huygens' principle, originating in the field of
 optics, which states that a propagating wavefront can be recreated by
 a distribution of secondary point
@@ -887,11 +1218,12 @@ estimate of €150/channel may be reached, however the expense
 associated with this system is difficult to assess as it is tied to
 the concert hall space in which it resides. indeed, one thing besides
 expense that unites the systems at AAU and TU Berlin, plus the
-339-speaker hybrid WFS/HOA system at IRCAM (Paris)[fn:9], the
-512-channel WFS system at the Rensslaer Polytecnic Institute (NY,
-United States)[fn:10], and the behemoth installation at /The Sphere/
-(Las Vegas, United States)[fn:11] is their /in-situ/ nature; these are
-site-specific systems with, at best, limited flexibility.
+345-speaker hybrid WFS/HOA system at IRCAM
+(Paris)\nbsp[cite:@noisternigDispositif2012], the 512-channel WFS system
+at the Rensslaer Polytecnic Institute (NY, United States)[fn:10], and
+the behemoth installation at /The Sphere/ (Las Vegas, United
+States)[fn:11] is their /in-situ/ nature; these are site-specific
+systems with, at best, limited flexibility.
 
 What one is afforded by WFS installations of this scale and expense,
 however, is high quality audio reproduction with tantamount to perfect
@@ -993,8 +1325,9 @@ state-of-the-art spatialisation systems.
 Developing audio systems in a distributed context requires software
 development for a variety of different purposes and on a variety of
 different platforms, from embedded systems to audio plugins. In this
-chapter an overview will be given of the various concerns faced by
-this manner of endeavour.
+chapter an overview will be given of the various concerns faced by the
+development of audio software for a range of different but related
+purposes.
 
 ** Embedded Audio Systems
 
@@ -1009,11 +1342,9 @@ power.
 
 *** Embedded Linux Systems
 
-**** Raspberry Pi
-
-**** Bela
-
-**** Elk
+Perhaps best known amongst ELS devices is the Raspberry Pi, which uses
+a Broadcom system on chip (SoC) for computation. It supports audio and
+features an ethernet interface 
 
 *** Microcontroller Development Boards
 
@@ -2862,12 +3193,20 @@ This is my conclusion
 #+print_bibliography:
 
 * Footnotes
+[fn:13] For convenience and explicitness elsewhere in the text,
+decimal equivalents to hexadecimal numbers will be indicated with
+subscript 10, e.g. 56 322_{10}.
+
+[fn:12] Actually, given available negative exponents from -126 to -1,
+and a fraction of 23 bits for each exponent, around 49.2 %. The
+remainder consists of numbers in \(\pm[1, 3.4 \times 10^{38}]\), plus space
+reserved for representing infinity and /non-numbers/.
+
+[fn:9] See, for example, \url{https://github.com/tschiemer/aes67} and \url{https://github.com/adiknoth/Open-AVB}
 
 [fn:11] \url{https://www.holoplot.com/case-studies/msg-sphere-case-study}
 
 [fn:10] \url{https://empac.rpi.edu/about/building/venues}
-
-[fn:9] \url{https://www.ircam.fr/en/ircam/spaces/espace-de-projection}
 
 [fn:8] See also
 \url{https://tu.berlin/en/ak/research/projects/wellenfeldsynthese-fuer-einen-grossen-hoersaal}

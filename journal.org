@@ -11098,7 +11098,7 @@ Entered on [2026-03-13 ven. 20:09]
   as the time authority.
 - /Sound Field Synthesis/ should obviously describe WFS and HOA, but
   also how we got there I suppose. Ambisonics is surprisingly old
-  (30's?). Driving functions? I feel like taking Jens's approach,
+  (70's?). Driving functions? I feel like taking Jens's approach,
   which does a lot of assuming continuous secondary arrays, is too
   theoretical for my work, but I'll have to look into it further.
 
