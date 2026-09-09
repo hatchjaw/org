@@ -1308,15 +1308,60 @@ Belloch et al. employed a GPU-based hardware platform, reporting
 client synchronisation to the millisecond range --- likely not
 sufficient for timing-critical audio spatialisation effects.
 
-Also of interest is the OTTOsonics
-project\nbsp[cite:@mitterhuberOttosonics2022; @weschLOTTO2025]; its
-emphasis on a fully-costed, flexible, do-it-yourself alternative to
-conventional spatial audio systems is pertinent to this work, though
-it diverges in its use of AVB, and associated hardware for audio
-transmission. A full 24-channel OTTOsonics system, including speakers
-and audio interface, is costed at around €2,600 (€108.33/channel),
-however, which certainly places it favourably when compared with
-state-of-the-art spatialisation systems.
+** Frugal Approaches to Spatial Audio
+
+#+name: tab:platforms
+#+caption: Selected embedded computing platforms listed with their
+#+caption: corresponding microcontroller (MCU) or system on chip (SoC), availability of
+#+caption: networking functionality, and approximate cost per unit (rounded
+#+caption: to the nearest euro) as of March 2025.
+#+attr_latex: :float multicolumn :align lllllr :booktabs t
+| Platform         | MCU/SoC          | Memory       | Ethernet | PTP | Unit Cost |
+|------------------+------------------+--------------+----------+-----+-----------|
+| Raspberry Pi CM5 | Broadcom BCM2712 | 2 GB SDRAM   | Yes      | Yes | € 89      |
+| Bela             | TI Sitara AM3358 | 512 MB SDRAM | Yes      | Yes | € 190     |
+| ESP32-LyraT      | ESP32-WROVER-B   | 4 MB PSRAM   | Yes      | No  | € 21      |
+| Teensy 4.1       | NXP iMXRT1062    | 1024 KB SRAM | Yes      | Yes | € 48      |
+| Daisy Seed       | STM32H750IB      | 65 MB SDRAM  | No       | Yes | € 25      |
+
+Progress in embedded computing, devices of the /internet of things/
+variety, and initiatives in the DIY and maker communities, have
+encouraged alternative approaches to spatial audio. The past decade or
+so has seen the emergence of a raft of low-cost, embedded hardware
+platforms (a selection of which are gathered in cref:tab:platforms),
+either providing audio support, or having audio as a key part of their
+/raison d'être/. Amongst these platforms are a selection based on
+Embedded Linux Systems (ELS) such as /Bela/\nbsp[cite:@mcphersonBela2017]
+and /Elk/\nbsp[cite:@turchetElk2021], companion boards for the BeagleBone
+Black[fn:14] and Raspberri Pi[fn:15] respectively. These examples
+profit from the power of the underlying ELS, with a system-on-chip
+(SoC) providing a multicore CPU and peripherals such as memory and
+connectivity via, e.g., USB and ethernet. A separate subset exist
+based on microcontroller (MCU) systems, prominent amongst these being
+the /Teensy/\nbsp[cite:@murrayCharacterisation2025; @michonReal2019] (with
+an MCU from manufacturer NXP[fn:16]) /Daisy/\nbsp[cite:@gasterAudio2020]
+(STMicroelectronics[fn:17]), and various /ESP32/\nbsp[cite:@michonFaust2020]
+development boards. Beyond matters of economy, connectivity, and
+modest power requirements, the attraction of such devices lies in the
+relative ease with which they can be programmed, each providing either
+an SDK, a selection of utility classes, or, in the case of ELS,
+compatibility with existing audio applications and
+plugins. Furthermore, it may be possible to produce compatible code
+in a higher level audio language such as Faust, in which case signal
+processing or audio synthesis code can be written once and compiled to
+run on a variety of platforms\nbsp[cite:@michonEmbedded2020].
+
+With frugality in mind, a modular, FPGA-based WFS system has been
+demonstrated, programmed in Faust and using high-quality, low-cost
+audio codecs\nbsp[cite:@michonMaking2023;@quiedevilleSpace2025]. Also of
+interest is the OTTOsonics project\nbsp[cite:@mitterhuberOttosonics2022;
+@weschLOTTO2025]; its emphasis on a fully-costed, flexible,
+do-it-yourself alternative to conventional spatial audio systems is
+pertinent to this work, though it diverges in its use of AVB, and
+associated hardware for audio transmission. A full 24-channel
+OTTOsonics system, including speakers and audio interface, is costed
+at around €2,600 (€108.33/channel), however, which certainly places it
+favourably when compared with state-of-the-art spatialisation systems.
 
 * Developing Digital Audio Systems
 #+latex: \minitoc
@@ -1440,81 +1485,81 @@ of solutions to problems based on machine learning.
 
 *** The Faust Programming Language
 
-#+begin_src faust :results file svg :file images/seq.svg :exports none
+#+begin_src faust :results file svg :file images/gen/seq.svg :exports none
 A = _ <: par(n, 20, -) :> _;
 B = _ <: par(n, 20, +) :> _;
 process = A : B;
 #+end_src
 
 #+RESULTS:
-[[file:images/seq.svg]]
+[[file:images/gen/seq.svg]]
 
-#+begin_src faust :results file svg :file images/par.svg :exports none
+#+begin_src faust :results file svg :file images/gen/par.svg :exports none
 A = _ <: par(i, 20, +) :> _;
 B = _ <: par(i, 20, -) :> _;
 process = A,B;
 #+end_src
 
 #+RESULTS:
-[[file:images/par.svg]]
+[[file:images/gen/par.svg]]
 
-#+begin_src faust :results file svg :file images/rec.svg :exports none
+#+begin_src faust :results file svg :file images/gen/rec.svg :exports none
 A = _,_ <: par(i, 20, +) :> _;
 B = _ <: par(i, 20, -) :> _;
 process = A ~ B;
 #+end_src
 
 #+RESULTS:
-[[file:images/rec.svg]]
+[[file:images/gen/rec.svg]]
 
-#+begin_src faust :results file svg :file images/split.svg :exports none
+#+begin_src faust :results file svg :file images/gen/split.svg :exports none
 A = _ <: par(i, 20, +) :> _,_;
 B = _,_,_,_ <: par(i, 20, -) :> _;
 process = A <: B;
 #+end_src
 
 #+RESULTS:
-[[file:images/split.svg]]
+[[file:images/gen/split.svg]]
 
-#+begin_src faust :results file svg :file images/merge.svg :exports none
+#+begin_src faust :results file svg :file images/gen/merge.svg :exports none
 A = _ <: par(i, 20, +) :> _,_,_,_;
 B = _,_ <: par(i, 20, -) :> _;
 process = A :> B;
 #+end_src
 
 #+RESULTS:
-[[file:images/merge.svg]]
+[[file:images/gen/merge.svg]]
 
 #+name: fig:compositions
 #+caption: Example compositions of Faust blocks.
 \begin{figure*}[t]
   \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*18/100\relax}
     \centering
-    \includesvg[width=\textwidth]{images/par}
+    \includesvg[width=\textwidth]{images/gen/par}
     \subcaption{\scriptsize{Parallel, \(A,B\).}}
     \label{fig:par}
   \end{minipage}
   \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*20/100\relax}
     \centering
-    \includesvg[width=\textwidth]{images/seq}
+    \includesvg[width=\textwidth]{images/gen/seq}
     \subcaption{\scriptsize{Sequential, \(A:B\).}}
     \label{fig:seq}
   \end{minipage}
   \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*22/100\relax}
     \centering
-    \includesvg[width=\textwidth]{images/split}
+    \includesvg[width=\textwidth]{images/gen/split}
     \subcaption{\scriptsize{Split, \(A<:B\).}}
     \label{fig:split}
   \end{minipage}
   \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*20/100\relax}
     \centering
-    \includesvg[width=\textwidth]{images/rec}
+    \includesvg[width=\textwidth]{images/gen/rec}
     \subcaption{\scriptsize{Recursive, \(A\sim{}B\).}}
     \label{fig:rec}
   \end{minipage}
   \begin{minipage}[b]{\dimexpr(\linewidth-\leftmargin)*22/100\relax}
     \centering
-    \includesvg[width=\textwidth]{images/merge}
+    \includesvg[width=\textwidth]{images/gen/merge}
     \subcaption{\scriptsize{Merge, \(A:>B\).}}
     \label{fig:merge}
   \end{minipage}
@@ -1662,7 +1707,7 @@ for the primal operation, and a further \(N\) additions in parallel,
 which we can notate \(\big\|_{l=1}^{N} +\), for computing partial
 derivatives.
 
-#+begin_src faust :results file svg :file images/diffadd.svg :exports none
+#+begin_src faust :results file svg :file images/gen/diffadd.svg :exports none
 N = 2;
 distribute(0, q, 0) = par(i, q, _);
 distribute(p, q, 0) = par(i, p, !),par(j, q, _);
@@ -1674,10 +1719,10 @@ process = diff(+);
 #+end_src
 
 #+RESULTS:
-[[file:images/diffadd.svg]]
+[[file:images/gen/diffadd.svg]]
 
-#+begin_src emacs-lisp :results file :file images/diffaddannotated.svg :exports results
-(let* ((file "./images/diffadd.svg")
+#+begin_src emacs-lisp :results file :file images/gen/diffaddannotated.svg :exports results
+(let* ((file "./images/gen/diffadd.svg")
        (svg (xml-parse-file file)))
   (svg-text svg "s1" :x "4" :y "49" :font-size "5")
   (svg-path svg '((moveto ((2 . 61.5)))
@@ -1708,7 +1753,7 @@ process = diff(+);
 #+caption: \(\langle{}s_{1}, \nabla{}s_{1}\rangle,\langle{}s_{2}, \nabla{}s_{2}\rangle\); implicit input variable
 #+caption: vector \(\mathbf{x}\) of length \(N = 2\).
 #+RESULTS:
-[[file:images/diffaddannotated.svg]]
+[[file:images/gen/diffaddannotated.svg]]
 
 *** Motivation
 
@@ -2999,10 +3044,23 @@ end
 #+end_src
 
 #+RESULTS:
-: LoadError: UndefVarError: `@printf` not defined in `Main`
-: Suggestion: check for spelling errors or missing imports.
-: in expression starting at /tmp/babel-7IyhJv/julia-vterm-src-qaYSks:22
-: in expression starting at /tmp/babel-7IyhJv/julia-vterm-src-qaYSks:1
+#+begin_example
+Target sample rate:   48,000 Hz
+Target SAI1_CLK_ROOT: 12,288,000 Hz
+
+fXO * (DS + DN / DD)/(DA * Dp * DI1 * DI2) = 12288000.000000 Hz
+24 MHz * (29 + 184000000/1000000000)/(1 * 1 * 3 * 19) = 12288000.000000
+24 MHz * (32 + 256000000/1000000000)/(1 * 1 * 3 * 21) = 12288000.000000
+24 MHz * (35 + 328000000/1000000000)/(1 * 1 * 3 * 23) = 12288000.000000
+24 MHz * (43 + 8000000/1000000000)/(1 * 1 * 4 * 21) = 12288000.000000
+24 MHz * (45 + 56000000/1000000000)/(1 * 1 * 4 * 22) = 12288000.000000
+24 MHz * (46 + 80000000/1000000000)/(1 * 1 * 5 * 18) = 12288000.000000
+24 MHz * (47 + 104000000/1000000000)/(1 * 1 * 4 * 23) = 12288000.000000
+24 MHz * (49 + 152000000/1000000000)/(1 * 1 * 4 * 24) = 12288000.000000
+24 MHz * (50 + 176000000/1000000000)/(1 * 1 * 7 * 14) = 12288000.000000
+24 MHz * (51 + 200000000/1000000000)/(1 * 1 * 5 * 20) = 12288000.000000
+24 MHz * (52 + 224000000/1000000000)/(1 * 1 * 6 * 17) = 12288000.000000
+#+end_example
 In practice the first such result can be used yielding the following
 values:
 
@@ -3193,6 +3251,14 @@ This is my conclusion
 #+print_bibliography:
 
 * Footnotes
+[fn:17] [[https://www.st.com/]] 
+
+[fn:16] [[https://www.nxp.com/]]
+
+[fn:15] [[https://raspberrypi.com/]] 
+
+[fn:14] [[https://www.beagleboard.org/boards/beaglebone-black]]
+
 [fn:13] For convenience and explicitness elsewhere in the text,
 decimal equivalents to hexadecimal numbers will be indicated with
 subscript 10, e.g. 56 322_{10}.
@@ -3202,28 +3268,28 @@ and a fraction of 23 bits for each exponent, around 49.2 %. The
 remainder consists of numbers in \(\pm[1, 3.4 \times 10^{38}]\), plus space
 reserved for representing infinity and /non-numbers/.
 
-[fn:9] See, for example, \url{https://github.com/tschiemer/aes67} and \url{https://github.com/adiknoth/Open-AVB}
+[fn:9] See, for example, [[https://github.com/tschiemer/aes67]] and [[https://github.com/adiknoth/Open-AVB]]
 
-[fn:11] \url{https://www.holoplot.com/case-studies/msg-sphere-case-study}
+[fn:11] [[https://www.holoplot.com/case-studies/msg-sphere-case-study]]
 
-[fn:10] \url{https://empac.rpi.edu/about/building/venues}
+[fn:10] [[https://empac.rpi.edu/about/building/venues]]
 
 [fn:8] See also
-\url{https://tu.berlin/en/ak/research/projects/wellenfeldsynthese-fuer-einen-grossen-hoersaal}
-and WFS speaker module produced by Four Audio for installation at TU \url{https://four-audio.com/en/products/wfs/}.
+[[https://tu.berlin/en/ak/research/projects/wellenfeldsynthese-fuer-einen-grossen-hoersaal]]
+and WFS speaker module produced by Four Audio for installation at TU [[https://four-audio.com/en/products/wfs/]].
 
-[fn:3] \url{https://github.com/GameOfLife/WFSCollider}
+[fn:3] [[https://github.com/GameOfLife/WFSCollider]]
 
 [fn:7] The colon symbol on the first line of
 cref:eq:semanticTransformation introduces the /type/ of the signal
 processor \(\llbracket D \rrbracket\) and is not to be confused with
 Faust's sequential composition operator.
 
-[fn:4] \url{https://github.com/grame-cncm/faustlibraries/blob/65594336a3476d9a82a4df71e88c92f3e4b94821/routes.lib}
+[fn:4] [[https://github.com/grame-cncm/faustlibraries/blob/65594336a3476d9a82a4df71e88c92f3e4b94821/routes.lib]]
 
-[fn:5] \url{https://codeberg.org/hatchjaw/aes-faust-ddsp}
+[fn:5] [[https://codeberg.org/hatchjaw/aes-faust-ddsp]]
 
-[fn:6] \url{https://faustide.grame.fr/}
+[fn:6] [[https://faustide.grame.fr/]]
 
 [fn:2] Though not the case in Faust's early
 days\nbsp[cite:@orlareySyntactical2004], the equality of \(o_{A}\) and \(i_{B}\)
