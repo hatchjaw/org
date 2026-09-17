@@ -23,14 +23,16 @@
                            headline))))
 
               (eval . (progn
-                        (defun tar/org-latex-src-block-wrap-tcolorbox (text backend info)
-                          "Wrap minted environments in a tcolorbox codeblock"
-                          (when (org-export-derived-backend-p backend 'latex)
-                            (replace-regexp-in-string
-                             "\\\\begin{minted}\\(\\[.*?\\]\\)?{\\([a-zA-Z0-9+-]+\\)}"
-                             "\\\\begin{codeblock}{\\2}"
-                             (replace-regexp-in-string "\\\\end{minted}" "\\\\end{codeblock}" text))))
+                        (defun tar/org-latex-src-block (src-block _contents info)
+                          "Export SRC-BLOCK as a tcolorbox `codeblock', folding any Org
+caption into the box's title and #+name: into the box's label= key."
+                          (let* ((lang (or (org-element-property :language src-block) "text"))
+                                 (code (org-export-format-code-default src-block info))
+                                 (caption (org-export-get-caption src-block))
+                                 (caption-str (if caption (org-export-data caption info) ""))
+                                 (label (or (org-latex--label src-block info nil nil) "")))
+                            (format "\\begin{codeblock}[%s]{%s}{%s}\n%s\\end{codeblock}\n"
+                                    caption-str lang label code)))
 
-                        (add-to-list 'org-export-filter-src-block-functions
-                                     'tar/org-latex-src-block-wrap-tcolorbox)))
+                        (advice-add 'org-latex-src-block :override #'tar/org-latex-src-block)))
               )))

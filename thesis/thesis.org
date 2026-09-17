@@ -31,11 +31,19 @@ Org file describing my PhD thesis.
 #+begin_src latex
 \RequirePackage[
   a4paper,
-  left=3cm,
-  right=3cm,
+  left=2.75cm,
+  right=2.75cm,
   top=3cm,
   bottom=3cm
 ]{geometry}
+#+end_src
+
+*** Line spacing
+
+To be combined with ~\setstretch{}~ in =frontmatter.tex=.
+
+#+begin_src latex
+\RequirePackage{setspace}
 #+end_src
 
 *** Headers/footers
@@ -193,20 +201,11 @@ Fancy characters (typically) at the beginning of chapters.
 #+begin_src latex
 \RequirePackage{minted}
 \RequirePackage[most]{tcolorbox}
-\tcbuselibrary{skins, breakable}
-\setminted{
-  fontsize=\footnotesize,
-  linenos=true,
-  breaklines=true,
-  bgcolor=codeBG,
-  frame=lines,
-  framesep=1mm,
-  framerule=1pt,
-  rulecolor=\color{gray!50}
-}
-\newtcblisting[auto counter, number within=chapter]{codeblock}[2][]{
+\tcbuselibrary{skins, breakable, minted, listings}
+\newtcblisting[auto counter, number within=chapter]{codeblock}[3][]{
   listing only,
   listing engine=minted,
+  label type=listing,
   minted style=friendly,
   minted language=#2,
   minted options={
@@ -223,9 +222,11 @@ Fancy characters (typically) at the beginning of chapters.
   leftrule=0pt,
   rightrule=0pt,
   fonttitle=\bfseries,
-  title={\thetcbcounter\ #1},
-  #1
+  title={Listing \thetcbcounter\ #1},
+  label={#3}
 }
+\crefname{listing}{listing}{listings}
+\Crefname{listing}{Listing}{Listings}
 #+end_src
 
 ** Figures
@@ -367,8 +368,8 @@ Define some colours and some node and line styles.
     \node (auth) [authority] at (0, 0) {Time\\authority};
     \node (switch) [device, above=5mm of auth, inner xsep=10mm] {Switch};
     \node (server) [device, below=5mm of auth, inner xsep=10mm] {Server};
-    \node (module0) [module, above left=5mm and -7mm of switch] {T41};
-    \node (moduleN) [module, above right=5mm and -7mm of switch] {T41};
+    \node (module0) [module, above left=5mm and -8mm of switch] {T41};
+    \node (moduleN) [module, above right=5mm and -8mm of switch] {T41};
     \node [above=5mm of switch] {\(\cdots\)};
 
     % PTP between authority and switch
@@ -413,6 +414,7 @@ Define some colours and some node and line styles.
 
 #+begin_src latex
 \definecolor{wfsWaveColour}{HTML}{4077D6}
+\newcommand*{\wfsX}{4}
 \newcommand*{\wfsWaveSpace}{.89}
 \newcommand*{\wfsWidth}{8}
 \newcommand*{\wfsNumWaves}{5}
@@ -420,6 +422,18 @@ Define some colours and some node and line styles.
 \newcommand*{\wfsNumMCU}{8}
 
 \tikzset{
+  cross/.pic = {
+    \draw[rotate = 45] (-#1,0) -- (#1,0);
+    \draw[rotate = 45] (0,-#1) -- (0, #1);
+  },
+  wfsModule/.pic = {
+    \node [module] {dWFS};
+  },
+  wavefronts/.pic={
+    \foreach \pos/\rad in {0/.18, 1/.615, 2/1.03, 3/1.42, 4/1.78, 5/2.07, 6/2.295, 7/2.42} {
+      \draw [black!25] (-\wfsX+.25+.5*\pos, 2) circle (\rad);
+    }
+  },
   halfSecondaryWavefronts/.pic={
     \foreach \pos/\rad in {0/.18, 1/.615, 2/1.03, 3/1.42, 4/1.78, 5/2.07, 6/2.295, 7/2.42}
     \draw [black!40, thick] (.25+.5*\pos, 0) circle (\rad);
@@ -507,6 +521,132 @@ Define some colours and some node and line styles.
     \pic {primary};
     \pic at (0, -.21) {speakers};
     \pic at (0, -.42) {mcus};
+  },
+  wfs/.pic={
+    % Virtual sound field
+    \draw (-\wfsX, -.5) rectangle (\wfsX, 2);
+    
+    \begin{scope}
+      \clip (-\wfsX, -.5) rectangle (\wfsX, 2);
+
+      % Virtual sound source
+      \node [circle, draw=audioColour, fill=audioColour!50, thick]
+      (primary) at (0, 0) {};
+
+      % Virtual wavefronts
+      \foreach \i [
+        evaluate=\i as \rad using \i*\wfsWaveSpace
+      ] in {1,...,\wfsNumWaves} {
+        \draw [thick, dashed, audioColour] (-\rad, 0)
+        arc [radius=\rad, start angle=180, end angle=0];
+      }
+
+      % Labels
+      \node [
+        black!50, fill=white, align=center,
+        font={\footnotesize\itshape}
+      ] at (-3.15, .1) {Virtual\\soundfield};
+      \node [
+        below right=-1mm and -1mm of primary,
+        font={\footnotesize\itshape}
+      ] {Virtual sound source};
+
+      \foreach \i [
+        evaluate=\i as \secondary using
+        -\wfsX+.25+(\i-1)*(2*\wfsX/\wfsNumSecondary)
+      ] in {1,...,\wfsNumSecondary} {
+        \node (\secondary) at (\secondary, 2) {};
+      }
+
+      % Virtual source co-ordinates and ctrl line
+      \draw [ctrl] node [above right=.1mm, font=\tiny]
+            {\((x, y)\)} (primary) -- (0, 2);
+    \end{scope}
+
+    % Infrastructure
+    \begin{scope}[yshift=2cm]
+      \node (server) [device, inner xsep=7.5mm] at (0, .75) {Server};
+      \node (authority) [authority, above=4mm of server]
+            {Time\\authority};
+      \node (switch) [device, inner xsep=7.5mm, above=4mm of authority]
+            {Switch};
+
+      % USB arrow
+      \draw [usb] ([xshift=-5mm] authority.south) --
+      ([xshift=-5mm] server.north)
+
+      % PTP arrows
+      \draw [ptp] (authority.north) -- (switch.south);
+      \draw [-{Triangle}] ([xshift=5mm] authority.south) --
+      ([xshift=5mm] server.north);
+
+      % Audio arrow
+      \draw [audio] ([xshift=-10mm] server.north) --
+      ([xshift=-10mm] switch.south);
+
+      % Control arrow
+      \draw [ctrlArrow] ([xshift=10mm] server.north) --
+      ([xshift=10mm] switch.south);
+
+      % Modules
+      \foreach \i [
+        evaluate=\i as \xpos using -\wfsX+.5+(\i-1)*(2*\wfsX/\wfsNumMCU)
+      ] in {1,...,\wfsNumMCU} {
+        \pic at (\xpos, 4.6) {wfsModule};
+        
+        \draw [audio] (\xpos-.2, 4.0) -- (\xpos-.2, 4.375);
+        \draw [ctrlArrow] (\xpos, 4.0) -- (\xpos, 4.375);
+        
+        \ifnum\i=1
+          \draw [-{Triangle}] (switch.north) +(0, .325) --
+          (\xpos-.2, 4.0) (\xpos+.2, 4.0) -| (\xpos+.2, 4.375);
+        \else
+          \ifnum\i=\wfsNumMCU
+            \draw [ptp] (switch.north) -- +(0, .325) -| (\xpos+.2, 4.375);
+          \else
+            \draw [-{Triangle}] (\xpos+.2, 4.0) -- (\xpos+.2, 4.375);
+          \fi
+        \fi
+      }
+
+      % Secondary sources
+      \foreach \i [
+        evaluate=\i as \secondary using
+        -\wfsX+.25+(\i-1)*(2*\wfsX/\wfsNumSecondary)
+      ] in {1,...,\wfsNumSecondary} {
+        \pic at (\secondary, 0) {cross=2pt};
+        
+        \ifnum\i=1
+          \draw [ctrl] (\secondary,0) -- +(0, .2) -|
+          ([yshift=-3mm] server.south);
+        \else
+          \ifnum\i=\wfsNumSecondary
+            \draw [ctrlArrow] (\secondary,0) --
+            +(0, .2) -| (server.south);
+          \else
+            \draw [ctrl] (\secondary,0) -- +(0, .2);
+          \fi
+        \fi
+
+        \pic at (\secondary, 4.845) {speaker};
+      }
+
+      \draw [ctrl] (0, 0) -- (0, .2);
+    \end{scope}
+
+    % Synthesised soundfield
+    \begin{scope}[yshift=5.055cm]
+      \clip (-\wfsX, 2) rectangle (\wfsX, 4.6);
+
+      \foreach \i [evaluate=\i as \rad using \i*\wfsWaveSpace] in {1,...,\wfsNumWaves} {
+        \draw [thick, audioColour] (-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
+      }
+
+      \pic {wavefronts};
+      \pic [xscale=-1] {wavefronts};
+
+      \node [black!50, align=center, font={\footnotesize\itshape}] at (-3.15, 4) {Synthesised\\soundfield};
+    \end{scope}
   }
 }
 #+end_src
@@ -747,7 +887,7 @@ Separating the bits into two groups of eight is reflective of the fact
 that the eight-bit /byte/ is typically the unit of transmission in
 computer systems. Grouping the bits in this way points to their
 expression in hexadecimal format, transforming the bytes into more
-easily-digestible morsels of two digits:
+easily-digestible morsels of two digits (see cref:lst:hex-sample).
 
 #+name: lst:hex-sample
 #+caption: A 16 bit audio sample, hexadecimal representation
@@ -756,7 +896,7 @@ dc 02
 #+end_src
 
 A number of this kind may also be represented (in C and C++ code for
-example) as =0xdc02= with '=0x=' indicating that the number to follow is
+example) as =0xdc02= with =0x= indicating that the number to follow is
 in base sixteen. Sixteen bits grant access to \(2^{16} = 65\,536\)
 distinct amplitude values for each sample; what cref:lst:hex-sample
 tells us is that, in decimal terms, this sample should take the 56
@@ -2116,13 +2256,11 @@ elements, it too is differentiable.
 #+attr_latex: :options float=ht
 #+begin_src faust :noeval
 interleave(r, c) = par(l, r * c, _)
-  <: par(m, r,
-       par(n, c, cutpq(m, r - m - 1)))
+  <: par(m, r, par(n, c, cutpq(m, r - m - 1)))
 with {
   cutpq(0, q) = _,par(l, q, !);
   cutpq(p, 0) = par(l, p, !),_;
-  cutpq(p, q) =
-    par(l, p, !),cutpq(0, q);
+  cutpq(p, q) = par(l, p, !),cutpq(0, q);
 };
 #+end_src
 
@@ -2244,8 +2382,7 @@ cref:eq:diffmerge.
 #+caption: detail.
 #+begin_src faust :noeval
 // diff.lib
-neuron(NINPUTS, activationFunction) =
-  WX + b : activationFunction
+neuron(NINPUTS, activationFunction) = WX + b : activationFunction
 with {
   WX = linalg.dot(NINPUTS);
   b = _;
@@ -2256,23 +2393,18 @@ activations = environment {
 }
 
 linalg = environment {
-  dot(N) = interleave(N, 2)
-    : par(i, N, *) :> _;
+  dot(N) = interleave(N, 2) : par(i, N, *) :> _;
 };
 
 // neuron.dsp
 NW = 3; // Number of weights.
 
-// Send inputs, and weights/biases,
-// to the differentiated neuron.
-process = par(i, NW, _),
-  par(i, NW + 1, wb.var(i + 1))
-  : d.diffInN(neuron, NW)
+// Send inputs, and weights/biases, to the differentiated neuron.
+process = par(i, NW, _),par(i, NW + 1, wb.var(i + 1)) : d.diffInN(neuron, NW)
 with {
   wb = weightsAndBiases((1, NW));
   d = df.env(wb);
-  neuron = d.neuron(NW,
-    d.activations.sigmoid);
+  neuron = d.neuron(NW, d.activations.sigmoid);
 };
 #+end_src
 
@@ -2372,24 +2504,19 @@ N = 2; // filter order.
 // ...Set up AD vars & environment...
 
 // Differentiable TDF IIR filter.
-iir = ((sub,par(l, N, _))
-  ~ (fir(N))),par(l, N + 1, _)
+iir = ((sub,par(l, N, _)) ~ (fir(N))),par(l, N + 1, _)
   : _,par(l, N, !),par(l, N + 1, _)
   : fir(N + 1)
 with { 
   sub = _,_ <: !,_,_,! : -;
-  fir(n) =
-    (_ <: par(l, n, seq(m, l, mem))),
-      par(l, n, _) 
-    : linalg.dot(n);
+  fir(n) = (_ <: par(l, n, seq(m, l, mem))),par(l, n, _) : linalg.dot(n);
 };
 
 // Send a signal input, and coeffs,
 // to the differentiated filter.
 process = _,coeffs : d.diffInN(iir, 1)
 with {
-    coeffs = par(i, 2 * N + 1,
-                 vars.var(i + 1));
+    coeffs = par(i, 2 * N + 1, vars.var(i + 1));
 };
 #+end_src
 
@@ -3099,6 +3226,17 @@ D_{N} = \frac{D_{D}}{1 \times 10^{6}}\left(
 ** Distributed Spatial Audio Algorithms
 
 *** Distributed Wave Field Synthesis
+
+#+name: fig:wfs
+#+caption: Distributed Wave Field Synthesis.
+\begin{figure*}
+\centering
+\begin{tikzpicture}
+\pic{wfs};
+\end{tikzpicture}
+\end{figure*}
+
+
 *** Distributed Higher Order Ambisonics
 * Protocol and Software Systems
 
@@ -3136,6 +3274,21 @@ socket and transmits it to the network.
 \pic[scale=0.66, transform shape]{server};
 \end{tikzpicture}
 \end{figure*}
+
+#+name: fig:system-overview
+#+caption: Overview of the Ananas networked audio system.
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\pic{systemOverview}
+ \matrix [draw] at (3.75, 0) {
+    \draw [ctrlArrow] (0,0) -- (.5,0); & \node [legend] {Control data (UDP)}; \\
+    \draw [audio] (0,0) -- (.5,0); & \node [legend] {Audio (UDP)}; \\
+    \draw [-{Triangle[open]}, usbColour] (0,0) -- (.5,0); & \node [legend] {USB audio}; \\
+    \draw [-{Triangle}] (0,0) -- (.5,0); & \node [legend] {PTP}; \\
+  };
+\end{tikzpicture}
+\end{figure}
 
 ** The Ananas Protocol
 *** The Ananas Audio Protocol
@@ -3251,6 +3404,7 @@ This is my conclusion
 #+print_bibliography:
 
 * Footnotes
+
 [fn:17] [[https://www.st.com/]] 
 
 [fn:16] [[https://www.nxp.com/]]
@@ -3264,7 +3418,7 @@ decimal equivalents to hexadecimal numbers will be indicated with
 subscript 10, e.g. 56 322_{10}.
 
 [fn:12] Actually, given available negative exponents from -126 to -1,
-and a fraction of 23 bits for each exponent, around 49.2 %. The
+and a fraction of 23 bits for each exponent, around 49.2\nbsp%. The
 remainder consists of numbers in \(\pm[1, 3.4 \times 10^{38}]\), plus space
 reserved for representing infinity and /non-numbers/.
 

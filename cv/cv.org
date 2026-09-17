@@ -297,6 +297,9 @@ Computing Conference, SMC 2022/.
 
 * Presentations
 
+An Introduction to the Faust Programming Language, Centre for Computer
+Research in Music and Acoustics (CCRMA), Stanford University, 2024.
+
 All Together Now: A Synchronous Platform for Distributed Spatial
 Audio, /Journées de l'Informatique Musicale 2026/, Lille, France.
 
