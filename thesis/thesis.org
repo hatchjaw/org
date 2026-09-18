@@ -216,11 +216,13 @@ Fancy characters (typically) at the beginning of chapters.
   },
   colback=gray!5,
   colframe=gray!40,
+  coltitle=black,
   sharp corners,
   bottomrule=1pt,
-  toprule=2pt,
+  toprule=1pt,
   leftrule=0pt,
   rightrule=0pt,
+  breakable,
   fonttitle=\bfseries,
   title={Listing \thetcbcounter\ #1},
   label={#3}
@@ -1346,24 +1348,34 @@ equivalent MADI to analogue converter models are priced at roughly
 which they are mounted) one may reasonably place an estimate of €250
 per output channel on this system.
 
+#+name: fig:tu-berlin
+#+caption: The WellenFeld H 104 auditorium at TU Berlin, hosting the
+#+caption: world's largest WFS system. Image taken from
+#+caption: [[https://www.tu.berlin/en/ak/research/projects/wellenfeldsynthese-fuer-einen-grossen-hoersaal]]
+[[./images/tuberlin.png]]
+
 The world's largest dedicated WFS system, at TU Berlin, features over
 800 output channels served by a distributed cluster of fifteen
 computers acting as audio nodes and two additional control
-computers\nbsp[cite:@baalmanRenewed2007].[fn:8] The fifteen audio nodes of
-the TU Berlin system are each equipped with a MADI audio interface,
-connected to a MADI to ADAT bridge; these can, at the time of writing,
-be purchased for around €1,400 and €4,500 each, respectively, for a
-total of €88,500. Imagining €2,000 per computer, a conservative
-estimate of €150/channel may be reached, however the expense
-associated with this system is difficult to assess as it is tied to
-the concert hall space in which it resides. indeed, one thing besides
-expense that unites the systems at AAU and TU Berlin, plus the
-345-speaker hybrid WFS/HOA system at IRCAM
+computers\nbsp[cite:@baalmanRenewed2007] (see cref:fig:tu-berlin).[fn:8]
+The fifteen audio nodes of the TU Berlin system are each equipped with
+a MADI audio interface, connected to a MADI to ADAT bridge; these can,
+at the time of writing, be purchased for around €1,400 and €4,500
+each, respectively, for a total of €88,500. Imagining €2,000 per
+computer, a conservative estimate of €150/channel may be reached,
+however the expense associated with this system is difficult to assess
+as it is tied to the concert hall space in which it resides. indeed,
+one thing besides expense that unites the systems at AAU and TU
+Berlin, plus the 345-speaker hybrid WFS/HOA system at IRCAM
 (Paris)\nbsp[cite:@noisternigDispositif2012], the 512-channel WFS system
 at the Rensslaer Polytecnic Institute (NY, United States)[fn:10], and
-the behemoth installation at /The Sphere/ (Las Vegas, United
-States)[fn:11] is their /in-situ/ nature; these are site-specific
-systems with, at best, limited flexibility.
+the behemoth installation at /The Sphere/ (Las Vegas, United States, see
+figure cref:fig:sphere)[fn:11] is their /in-situ/ nature; these are
+site-specific systems with, at best, limited flexibility.
+
+#+name: fig:sphere
+#+caption: Diagram of the spatial audio array at /The Sphere/, Las Vegas. Image taken from [[https://www.holoplot.com/case-studies/msg-sphere-case-study]]
+[[./images/sphere.png]]
 
 What one is afforded by WFS installations of this scale and expense,
 however, is high quality audio reproduction with tantamount to perfect
@@ -1464,6 +1476,18 @@ sufficient for timing-critical audio spatialisation effects.
 | Teensy 4.1       | NXP iMXRT1062    | 1024 KB SRAM | Yes      | Yes | € 48      |
 | Daisy Seed       | STM32H750IB      | 65 MB SDRAM  | No       | Yes | € 25      |
 
+#+name: fig:teensy
+#+caption: Teensy 4.1 microcontroller development board equipped with ethernet and audio add-ons.
+[[./images/module.jpeg]]
+
+#+name: fig:bela
+#+caption: Bela companion board for the BeagleBone Black.
+[[./images/bela.png]]
+
+#+name: fig:daisy
+#+caption: Daisy Seed3 microcontroller development board.
+[[./images/daisy.png]]
+
 Progress in embedded computing, devices of the /internet of things/
 variety, and initiatives in the DIY and maker communities, have
 encouraged alternative approaches to spatial audio. The past decade or
@@ -1472,30 +1496,43 @@ platforms (a selection of which are gathered in cref:tab:platforms),
 either providing audio support, or having audio as a key part of their
 /raison d'être/. Amongst these platforms are a selection based on
 Embedded Linux Systems (ELS) such as /Bela/\nbsp[cite:@mcphersonBela2017]
-and /Elk/\nbsp[cite:@turchetElk2021], companion boards for the BeagleBone
-Black[fn:14] and Raspberri Pi[fn:15] respectively. These examples
-profit from the power of the underlying ELS, with a system-on-chip
-(SoC) providing a multicore CPU and peripherals such as memory and
-connectivity via, e.g., USB and ethernet. A separate subset exist
-based on microcontroller (MCU) systems, prominent amongst these being
-the /Teensy/\nbsp[cite:@murrayCharacterisation2025; @michonReal2019] (with
-an MCU from manufacturer NXP[fn:16]) /Daisy/\nbsp[cite:@gasterAudio2020]
-(STMicroelectronics[fn:17]), and various /ESP32/\nbsp[cite:@michonFaust2020]
-development boards. Beyond matters of economy, connectivity, and
-modest power requirements, the attraction of such devices lies in the
-relative ease with which they can be programmed, each providing either
-an SDK, a selection of utility classes, or, in the case of ELS,
-compatibility with existing audio applications and
-plugins. Furthermore, it may be possible to produce compatible code
-in a higher level audio language such as Faust, in which case signal
-processing or audio synthesis code can be written once and compiled to
-run on a variety of platforms\nbsp[cite:@michonEmbedded2020].
+(see cref:fig:bela) and /Elk/\nbsp[cite:@turchetElk2021], companion boards
+for the BeagleBone Black[fn:14] and Raspberri Pi[fn:15]
+respectively. These examples profit from the power of the underlying
+ELS, with a system-on-chip (SoC) providing a multicore CPU and
+peripherals such as memory and connectivity via, e.g., USB and
+ethernet. A separate subset exist based on microcontroller (MCU)
+systems, prominent amongst these being the
+/Teensy/\nbsp[cite:@murrayCharacterisation2025; @michonReal2019] (with an
+MCU from manufacturer NXP[fn:16], see figure cref:fig:teensy)
+/Daisy/\nbsp[cite:@gasterAudio2020] (STMicroelectronics[fn:17], see figure
+cref:fig:daisy), and various /ESP32/\nbsp[cite:@michonFaust2020] development
+boards. Beyond matters of economy, connectivity, and modest power
+requirements, the attraction of such devices lies in the relative ease
+with which they can be programmed, each providing either an SDK, a
+selection of utility classes, or, in the case of ELS, compatibility
+with existing audio applications and plugins. Furthermore, it may be
+possible to produce compatible code in a higher level audio language
+such as Faust, in which case signal processing or audio synthesis code
+can be written once and compiled to run on a variety of
+platforms\nbsp[cite:@michonEmbedded2020].
+
+#+name: fig:spacebar
+#+caption: FPGA-based WFS system, the Space Bar.
+[[./images/spacebar.jpg]]
+
+#+name: fig:ottosonics
+#+caption: The OTTOsonics DIY spatial audio system.
+#+caption: Image taken from [[https://tamlab.kunstuni-linz.at/projects/ottosonics/]]
+#+attr_org: :width 200
+[[./images/ottosonics.jpg]]
 
 With frugality in mind, a modular, FPGA-based WFS system has been
 demonstrated, programmed in Faust and using high-quality, low-cost
-audio codecs\nbsp[cite:@michonMaking2023;@quiedevilleSpace2025]. Also of
-interest is the OTTOsonics project\nbsp[cite:@mitterhuberOttosonics2022;
-@weschLOTTO2025]; its emphasis on a fully-costed, flexible,
+audio codecs\nbsp[cite:@michonMaking2023;@quiedevilleSpace2025] (see
+cref:fig:spacebar). Also of interest is the OTTOsonics
+project\nbsp[cite:@mitterhuberOttosonics2022; @weschLOTTO2025] (see
+cref:fig:ottosonics); its emphasis on a fully-costed, flexible,
 do-it-yourself alternative to conventional spatial audio systems is
 pertinent to this work, though it diverges in its use of AVB, and
 associated hardware for audio transmission. A full 24-channel
@@ -1829,8 +1866,7 @@ produces, in parallel, the addition primitive's primal output,
 #+begin_src faust :noeval
 env(vars) = environment {
   // ...
-  diff(+) = interleave(vars.N + 1, 2)
-    : +,par(i, vars.N, +);
+  diff(+) = interleave(vars.N + 1, 2) : +,par(i, vars.N, +);
   // ...
 };
 #+end_src
@@ -3428,9 +3464,8 @@ reserved for representing infinity and /non-numbers/.
 
 [fn:10] [[https://empac.rpi.edu/about/building/venues]]
 
-[fn:8] See also
-[[https://tu.berlin/en/ak/research/projects/wellenfeldsynthese-fuer-einen-grossen-hoersaal]]
-and WFS speaker module produced by Four Audio for installation at TU [[https://four-audio.com/en/products/wfs/]].
+[fn:8] See also WFS speaker module produced by Four Audio for
+installation at TU Berlin [[https://four-audio.com/en/products/wfs/]].
 
 [fn:3] [[https://github.com/GameOfLife/WFSCollider]]
 
