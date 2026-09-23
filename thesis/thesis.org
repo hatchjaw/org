@@ -242,6 +242,12 @@ Define some colours and some node and line styles.
 \definecolor{audioColour}{HTML}{4077D6}
 \definecolor{usbColour}{HTML}{D63E3E}
 
+\pgfdeclarelayer{superbackground}
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfdeclarelayer{superforeground}
+\pgfsetlayers{superbackground,background,main,foreground,superforeground}
+
 \tikzset{
   device/.style={draw, fill=black!10, rounded corners=1mm, inner xsep=1.5mm, align=center},
   ctrl/.style={densely dotted, ctrlColour, line width=.2mm},
@@ -253,6 +259,64 @@ Define some colours and some node and line styles.
   legend/.style={font=\tiny\itshape},
   module/.style={device, fill=ctrlColour!35, font={\scriptsize}, transform shape},
   authority/.style={device, fill=usbColour!35}
+}
+#+end_src
+
+*** Anatomy of a Datagram
+
+#+begin_src latex
+\tikzset{
+  field/.style={draw, minimum height=8mm, inner sep=1pt, align=center,
+                  outer sep=0pt, font=\footnotesize},
+  lbl/.style={anchor=south west, inner sep=1pt, font=\scriptsize\bfseries},
+  grp/.style={draw, inner sep=5pt},
+  anatomy/.pic={
+    % --- Ethernet header row
+    \node[field, fill=white, minimum width=32mm] (src) at (0,0) {Src MAC\\[-1pt]{\tiny 6 B}};
+    \node[field, fill=white, minimum width=32mm, left=0pt of src]  (dst) {Dst MAC\\[-1pt]{\tiny 6 B}};
+    \node[field, fill=white, minimum width=32mm, right=0pt of src] (typ) {EtherType\\[-1pt]{\tiny 2 B}};
+    
+    % --- IPv4 header
+    \begin{pgfonlayer}{superforeground}
+      \node[field, fill=white, minimum width=80mm, below=22pt of src] (iph)
+         {IPv4 header\\[-1pt]{\tiny 20 B}};
+    \end{pgfonlayer}
+         
+     % --- UDP header row (4 x 18 mm, centred under the IPv4 header)
+    \begin{pgfonlayer}{superforeground}
+      \node[field, fill=white, minimum width=18mm, anchor=north west]
+      (sp) at ([xshift=-36mm, yshift=-22pt]iph.south) {Src port\\[-1pt]{\tiny 2 B}};
+      \node[field, fill=white, minimum width=18mm, right=0pt of sp]  (dp)  {Dst port\\[-1pt]{\tiny 2 B}};
+      \node[field, fill=white, minimum width=18mm, right=0pt of dp]  (len) {Length\\[-1pt]{\tiny 2 B}};
+      \node[field, fill=white, minimum width=18mm, right=0pt of len] (cks) {Checksum\\[-1pt]{\tiny 2 B}};
+         
+     % --- UDP payload, same width as the UDP header row
+      \node[field, fill=white, minimum width=72mm, anchor=north] (data) at (dp.south east){UDP payload};
+    \end{pgfonlayer}
+              
+     % --- Ethernet FCS
+     %\node[field, fill=white, minimum width=96mm, below=18pt of data] (fcs) {FCS\\[-1pt]{\tiny 4 B}};
+              
+     % --- labels, at the top-left of the first field of each level
+     \node[lbl] (ethlbl) at (dst.north west) {Ethernet frame (data link layer)};
+     \begin{pgfonlayer}{superforeground}
+       \node[lbl] (iplbl)  at (iph.north west) {IPv4 packet (network layer)};
+     \end{pgfonlayer}
+     \begin{pgfonlayer}{superforeground}
+       \node[lbl] (udplbl) at (sp.north west)  {UDP datagram (transport layer)};
+     \end{pgfonlayer}
+              
+     % --- groups, innermost first
+     \begin{pgfonlayer}{foreground}
+       \node[grp, draw=red!40, fill=red!10, fit=(sp)(dp)(len)(cks)(data)(udplbl)] (udp) {};
+     \end{pgfonlayer}
+     \begin{pgfonlayer}{main}
+       \node[grp, draw=blue!40, fill=blue!10, fit=(iph)(udp)(iplbl)] (ip) {};
+     \end{pgfonlayer}
+     \begin{pgfonlayer}{background}
+       \node[grp, draw=black!40, fill=black!10, fit=(dst)(src)(typ)(ip)(fcs)(ethlbl)] (eth) {};
+     \end{pgfonlayer}
+  }
 }
 #+end_src
 
@@ -297,9 +361,6 @@ Define some colours and some node and line styles.
 *** Audio Server
 
 #+begin_src latex
-\pgfdeclarelayer{background}
-\pgfdeclarelayer{foreground}
-\pgfsetlayers{background,main,foreground}
 \tikzset{
   rounded/.style={draw, rounded corners=1mm},
   server/.pic={
@@ -987,9 +1048,23 @@ rendered the collision detection algorithm obsolete.
 
 ** The Internet Protocol Suite and the OSI Model
 
-** Network Protocols
+** Anatomy of a Datagram
 
-*** User Datagram Protocol
+#+name: fig:datagram
+#+caption: Structure of an ethernet frame containing a UDP packet.
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+  \pic{anatomy};
+\end{tikzpicture}
+\end{figure}
+
+A UDP packet consists of data encoded in 8-bit integer format. Being a
+transport layer protocol, a UDP packet is in fact preceded in an
+ethernet frame by information relating to lower layers in the
+hierarchy of network topology: the network layer and the data link
+layer. The structure of a UDP packet (within an ethernet frame) is
+shown in cref:fig:datagram.
 
 ** Audio Over Computer Networks
 
@@ -2756,6 +2831,20 @@ typically \(K_{I} < K_{P} < 1\). The adjustment value \(a_{n}\) can be used to
 set, for example, the per-cycle increment of a hardware ethernet timer
 register.
 
+To support PTP across a network of devices, it is necessary to
+identify an ethernet switch that offers PTP support. Typically such
+devices are very expensive --- on the order of several hundred euros
+for a very low port count.[fn:19] Rare exceptions do exist, however;
+for instance the CRS326-24G-2S+IN switch from manufacturer MikroTik
+(see cref:fig:switch). This switch offers 24 ports, all PTP-capable,
+for the comparatively reasonable sum of €200. In the interests of
+accessibility, therefore, it is this switch that serves as the basis
+for the implementation described in this work.
+
+#+name: fig:switch
+#+caption: The CRS326-24G-2S+IN ethernet switch from Latvian manufacturer, MikroTik.
+[[./images/switch.png]]
+
 ** Media Clock Recovery
 
 Time exchange at the level of the ethernet subsystems of distributed
@@ -2831,8 +2920,85 @@ that at a nominal sampling rate of \qty{48}{\kHz} for power of two
 audio buffer sizes less than or equal to 128 there will be an integer
 number, \(I\), of audio interrupts per second, take a representative
 nanoseconds figure, \(t_{S}\), on audio system startup; second, every
-\(I\) interrupts, reading the system's PTP timer, taking the
-nanoseconds part, \(t_{\text{PTP}}\) and comparing with \(t_{S}\):
+\(I\) interrupts, read the system's PTP timer, taking the nanoseconds
+part, \(t_{\text{PTP}}\) and comparing with \(t_{S}\):
+
+#+begin_src julia :results none :session :exports none
+using CSV, DataFrames, Plots, LaTeXStrings
+
+function plotDrift(dataCategory)
+    scalefontsizes(2)
+    t41lastBytes = [191, 203, 234]
+    maxOffset = 0
+    yMax = 0
+    plot(fontfamily="EBGaramond-VariableFont_wght",
+         size=(900, 600),
+         margin=6Plots.mm,
+         xlabel="Time (s)",
+         xtickfontfamily="Computer Modern",
+         ytickfontfamily="Computer Modern",
+         legendtitle="IP address",
+         legendfontsize=14,
+         legendfont="Inconsolata-Regular",
+         legendtitlefontsize=17,
+         gridlinewidth=2);
+    for b in t41lastBytes
+        local data = CSV.read("../papers/smc-2025/data/$b-$dataCategory.csv", DataFrame; header=["offset"], limit=600)
+        data.offset .= data.offset .- data.offset[1]
+        # Prevent `noptp` data for client 191 from wrapping.
+        if b == 191 && dataCategory == "noptp"
+            data.offset[391:end] .= data.offset[391:end] .+ (data.offset[390] - data.offset[391])
+        end
+        plot!(data.offset, label="x.x.48.$b", linewidth=3)
+
+        # Get order-of-magnitude info
+        max = maximum(abs.(data.offset))
+        if max > maxOffset
+            maxOffset = max
+        end
+        max = maximum(data.offset)
+        if max > yMax
+            yMax = max
+        end
+    end
+
+    ordOfMag = floor(Int, log10(maxOffset))
+    ordOffset = 7.5e-8
+    if dataCategory == "noptp"
+        ordOffset = 3.0e-4
+        plot!(ylabel="Offset (s)")
+    end
+    annotate!(6, yMax + ordOffset, (latexstring("\$\\times10^{$(ordOfMag)}\$"), 18))
+    plot!(yformatter=y -> string(y / 10.0^ordOfMag))
+
+    savefig("./images/gen/$dataCategory.png")
+    scalefontsizes()
+end
+#+end_src
+
+#+begin_src julia :results file graphics :file noptp.png :output-dir ./images/gen :session :exports none
+plotDrift("noptp")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:./images/gen/noptp.png]]
+
+#+begin_src julia :results file graphics :file ptp.png :output-dir ./images/gen :session :exports none
+plotDrift("ptp")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:./images/gen/ptp.png]]
+
+#+name: fig:drift
+#+caption: Audio reproduction offsets for three MCU audio clients with respect to an MCU audio server.
+#+caption: Server and clients reproducing a \qty{1}{\Hz} impulse train.
+#+caption: Measurements triggered at the onset of the impulse produced by the server MCU,
+#+caption: i.e. once per second for a total of ten minutes.
+\begin{figure*}[t]
+    \subfloat[Without sampling frequency correction.]{\includegraphics[width=0.5\textwidth]{images/gen/noptp}\label{fig:noptp}}
+    \subfloat[With PTP-derived sampling frequency correction.]{\includegraphics[width=0.5\textwidth]{images/gen/ptp}\label{fig:ptp}}
+\end{figure*}
 
 #+NAME: eq:audio-ptp-offset
 \begin{equation}
@@ -2871,29 +3037,6 @@ thus that audio subsystems on the entire network are synchronised.
 ** A Synchronous, Distributed Audio System
 *** Configuring the iMXRT1062 MCU
 
-#+name: fig:imxrt1062-clock
-#+caption: iMXRT1062 audio PLL and SAI1 clock divider registers.
-\begin{figure}[t]
-\centering
-\begin{tikzpicture}
-  \node [draw] (osc) {OSC 24M};
-  \node [draw] (pll4) [right=.75cm of osc] {\(\times \left(D_{S} + \frac{D_{N}}{D_{D}}\right)\)};
-  \node (pll4label) [above=0cm of pll4] {\small{PLL4}};
-  \node [draw] (dp) [right=.75cm of pll4] {\(D_{p}\)};
-  \node [draw] (dA) [right=.5cm of dp] {\(D_{A}\)};
-  \node [draw] (dI1) [right=.75cm of dA] {\(D_{I_{1}}\)};
-  \node [draw] (dI2) [right=2cm of dI1] {\(D_{I_{2}}\)};
-  \node (fR) [right=1.5cm of dI2] {\(f_{R}\)};
-
-  \draw [-{Triangle}] (osc.east) -- (pll4.west) node [above, midway] {\scriptsize{\(f_{XO}\)}};
-  \draw [-{Triangle}] (pll4.east) -- (dp.west) node [above, midway] {\scriptsize{\(f_{P}\)}};
-  \draw [-{Triangle}] (dp.east) -- (dA.west);
-  \draw [-{Triangle}] (dA.east) -- (dI1.west) node [above, midway] {\scriptsize{\(f_{M}\)}};
-  \draw [-{Triangle}] (dI1.east) -- (dI2.west) node [above, midway] {\scriptsize{\(\leq 300 \text{MHz}\)}};
-  \draw [-{Triangle}] (dI2.east) -- (fR.west) node [above, midway] {\scriptsize{\(\leq 66 \text{MHz}\)}};
-\end{tikzpicture}
-\end{figure}
-
 Before proceeding to a discussion of /time exchange/ mechanisms, it is
 important to deal with how audio timing is configured on our target
 hardware platform, the Teensy 4.1 and its NXP iMXRT1062 MCU.
@@ -2909,7 +3052,7 @@ to the target audio sampling rate, \(f_{s}\):
 f_{R} = 2^{8}f_{s}\;.
 \end{equation}
 
-The NXP MCUXpresso Config Tools software\nbsp[cite:@MCUXpresso2018]
+The NXP MCUXpresso Config Tools software\nbsp[cite:@nxpsemiconductorsMCUXpresso2018]
 indicates that \(f_{R}\) must be lower than or equal to
 \qty{66}{\MHz}, therefore
 
@@ -2959,6 +3102,29 @@ D_{P} = D_{S} + \frac{D_{N}}{D_{D}}\;.
 See cref:fig:imxrt1062-clock for a diagrammatic representation of the
 effect of the audio PLL and clock divider registers on the
 \qty{24}{\MHz} clock source.
+
+#+name: fig:imxrt1062-clock
+#+caption: iMXRT1062 audio PLL and SAI1 clock divider registers.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+  \node [draw] (osc) {OSC 24M};
+  \node [draw] (pll4) [right=.75cm of osc] {\(\times \left(D_{S} + \frac{D_{N}}{D_{D}}\right)\)};
+  \node (pll4label) [above=0cm of pll4] {\small{PLL4}};
+  \node [draw] (dp) [right=.75cm of pll4] {\(D_{p}\)};
+  \node [draw] (dA) [right=.5cm of dp] {\(D_{A}\)};
+  \node [draw] (dI1) [right=.75cm of dA] {\(D_{I_{1}}\)};
+  \node [draw] (dI2) [right=2cm of dI1] {\(D_{I_{2}}\)};
+  \node (fR) [right=1.5cm of dI2] {\(f_{R}\)};
+
+  \draw [-{Triangle}] (osc.east) -- (pll4.west) node [above, midway] {\scriptsize{\(f_{XO}\)}};
+  \draw [-{Triangle}] (pll4.east) -- (dp.west) node [above, midway] {\scriptsize{\(f_{P}\)}};
+  \draw [-{Triangle}] (dp.east) -- (dA.west);
+  \draw [-{Triangle}] (dA.east) -- (dI1.west) node [above, midway] {\scriptsize{\(f_{M}\)}};
+  \draw [-{Triangle}] (dI1.east) -- (dI2.west) node [above, midway] {\scriptsize{\(\leq 300 \text{MHz}\)}};
+  \draw [-{Triangle}] (dI2.east) -- (fR.west) node [above, midway] {\scriptsize{\(\leq 66 \text{MHz}\)}};
+\end{tikzpicture}
+\end{figure}
 
 The ~DIV_SELECT~ field has a valid range of \(27 \leq D_{S} \leq 54\),
 and \(|D_{N}| < D_{D}\), so \(D_{P}\) describes (in theory) a number in the
@@ -3417,17 +3583,278 @@ structure of an ACDP packet is given in cref:fig:client-packet.
 ** Audio Plugins
 
 Encapsulating the audio server are CLAP format audio plugins for WFS
-and HOA control.
+and HOA control. CLAP was chosen over VST3 due to its more permissive
+nature as regards channel formats; given that the audio server permits
+an arbitrary channel count for WFS (up to the 44-channel limit) it
+defies VST3's more restrictive channel formats, such as stereo,
+quadraphonic and various ambisonics formats.
+
+The network overview pane of each plugin displays information on
+connected switches, specifically the behaviour of their PTP algorithm,
+which is gathered via periodic curl requests. There are scenarios in
+which a switch does not achieve a PTP lock so the plugin provides a
+utility for restarting the PTP algorithm. In principle, multiple
+switches can be supported by daisy chaining, however since the
+CRS326-24G-2S+IN can only act as a PTP boundary clock, running
+multiple switches incurs an additional delay of around
+\qty{100}{\nano\second} for switches lying further along the daisy
+chain.
+
+Additionally, the network overview pane displays the aforementioned
+information about the time authority, most critically its requested
+sampling rate. As previously stated, this was introduced as a
+debugging measure, and isn't critical for operation of the Ananas
+system, but acts as a sanity check against client buffer fill
+levels. To that end, the final component of the network overview pane
+is a list of connected clients derived from ACDP packets; clients'
+serial numbers, firmware type, reported sampling rate,
+etc. Additionally, the approximate group asynchronicity is reported
+above the list of clients, giving an indication of the effectiveness
+of the synchronisation algorithm.
 
 #+name: fig:network-overview
 #+caption: The network overview pane of the WFS plugin.
 #+attr_org: :width 300
 [[./images/network-overview.png]]
 
+The WFS control interface presents a variable number client module
+selectors, each of which displays a list of client IP addresses when
+clicked. A checkbox controls the visibility of module
+selectors. Speaker icons indicate the position of the speaker array. A
+grid indicates the dimensions of the soundfield for virtual and
+focused WFS sources. Finally, a series of coloured nodes indicate the
+positions of WFS sources; as previously stated, both virtual and
+focused sources are supported, by moving a given sound source behind
+or in front of the speaker array. Sources can be dragged with the
+mouse to change their positions, or DAW automation can be used to
+alter the \(x\) and \(y\) co-ordinates for a given source. The DAW of
+choice during development has been Reaper[fn:18], configured with a
+network bus channel with a number of channels corresponding to the
+number of WFS sources; monophonic channels can be added and set up as
+sends to the network bus.
+
 #+name: fig:wfs-control
 #+caption: The WFS plugin control interface.
 #+attr_org: :width 300
 [[./images/wfs-control.png]]
+
+Quality of life features include a small selection of keyboard
+shortcuts. The square bracket keys can be used to navigate between the
+control interface and the network overview pane; for the WFS plugin,
+the m key can be used to show or hide module selectors, and the number
+keys allow quick access to module lists associated with each client.
+
+** Microcontroller Firmware
+
+Also supporting the implementation is a suite of firmware for the
+Teensy 4.1 MCU, written using PlatformIO,[fn:20] a tool for writing
+and running microcontroller firmware. In the sections that follow this
+firmware is described.
+
+*** The Time Authority
+
+In order to support the presentation time recovery strategy it is
+necessary for all MCUs to run at a sampling rate of
+\qty{48}{\kilo\hertz}. This of course includes the time authority,
+which runs as a USB audio device. Programming a Teensy as a USB audio
+device using PlatformIO is a simple case of passing the compiler flag
+=-DUSB_AUDIO=, however by default such a device runs at a sampling rate
+of \qty{44.1}[\kilo\hertz}. To circumvent this limitation it was
+necessary to create a bespoke version of the ArduinoTeensy framework
+and modify the code, increasing the =AUDIO_TX_SIZE= and =AUDIO_RX_SIZE=
+definitions to account for the increased throughput called for by
+running at \qty{48}{\kilo\hertz}. Additionally the device was renamed
+from "Teensy Audio" to "Teensy Ananas" so that it would be easily
+recognisable in DAW audio device settings. Furthermore, the device's
+USB audio feedback accumulator was converted to 12.13 fixed point
+packed into 16.16 fixed point format for a more predictable approach
+to decoding the sampling rate at the receiving side, =0x6.0000= being
+equal to \qty{48}{\kilo\hertz}.
+
+*** The Audio Client
+
+Firmware for WFS and HOA is based upon a wholesale replacement for
+Teensy's audio library, the =AudioSystemManager= class. The rationale
+behind this was the need to be able to understand and accurately
+control the PLL4 and SAI1 subsystems of the IMXRT1062 MCU, plus the
+SGTL5000 audio codec. A hardware abstraction layer was written to
+support this, turning the Teensy audio library's default
+preprocessor-based instructions into a selection of predictable
+classes, all inheriting from base register classes. See
+cref:lst:start-clock for an example of this approach; when starting
+the audio subsystem clock, a selection of methods are called that
+power up, unbypass and enable the audio PLL, call a variety of methods
+to control the SAI1 subsystem, configure direct memory access, and
+enable the SGTL5000 =audioShield=.
+
+#+name: lst:start-clock
+#+caption: The =startClock()= method of the AudioSystemManager class.
+#+begin_src c++
+void AudioSystemManager::startClock()
+{
+    numInterrupts = -1;
+    firstInterruptNS = 0;
+    audioPTPOffset = 0;
+
+    if (!analogAudioPllControlRegister.setPowerDown(false) ||
+        !analogAudioPllControlRegister.setBypass(false) ||
+        !analogAudioPllControlRegister.setEnable(true) ||
+        !sai1TransmitControlRegister.setBitClockEnable(true) ||
+        !sai1TransmitControlRegister.setFIFORequestDMAEnable(true) ||
+        !sai1TransmitControlRegister.setTransmitterEnable(true) ||
+        !sai1ReceiveControlRegister.setBitClockEnable(true) ||
+        !sai1ReceiveControlRegister.setReceiverEnable(true)) {
+        Serial.println("Failed to start audio subsystem. Rebooting.");
+        SystemUtils::reboot();
+    }
+
+    setupDMA();
+
+    audioShield.enable();
+    audioShield.volume(config.volume);
+}
+#+end_src
+
+Additionally, in order to compute initial clock divider registers as
+per cref:alg:sampling-rate a class =AudioSystemManager::ClockDividers=
+was created. This makes it possible to ensure that frequencies
+throughout the PLL4 and SAI1 subsystems are valid as per
+cref:fig:imxrt1062-clock. This class also supports calculating
+clock-drift compensation PLL4 numerator register values in accordance
+with cref:eq:unknown-dn-2.
+
+** Synchronisation Results
+
+#+begin_src julia :results file graphics :file synchro.png :output-dir ./images/gen :exports results
+using CSV, DataFrames, Plots, LaTeXStrings, Statistics
+
+# The number of datapoints, i.e. seconds, to plot
+numData = 3600
+
+# Read the data. Limit to 3600 data points, i.e. 1 hour's worth.
+data = CSV.read(
+"../notes/20260303T221301--ananas-synchronicity-measurements-data__ananas_data_teensy.csv",
+    DataFrame,
+    limit=numData + 1
+)
+
+# Remove the initial offset (using I2S3 as the reference)
+data = data .- data[1, 3]
+# Calculate the range of offsets, i.e. the group asynchronicity, for
+# each point in time.
+groupAsync = maximum(Matrix(data), dims=2) - minimum(Matrix(data), dims=2)
+meanAsync = mean(groupAsync)
+
+# Create a vector of x values to plot against, i.e. seconds
+x = 0:numData
+plot(
+    # Data
+    x,
+    Matrix(data),
+    # Size
+    size=(1800, 600),
+    # Labels
+    xlabel="Time (s)",
+    ylabel="Offset (ns)",
+    label=permutedims(names(data)),
+    # Styling
+    fontfamily="EBGaramond-VariableFont_wght",
+    margin=10Plots.mm,
+    gridlinewidth=2,
+    linewidth=1.5,
+    guidefontsize=18,
+    tickfontsize=12,
+    legendfontsize=11,
+    xlims=(-numData * .005, numData * 1.005),
+    # Y formatter
+    yformatter=y -> string(Int(round(y / 10.0^-9)))
+)
+
+# Plot the mean offset too
+plot!(x, groupAsync, label="Group asynchronicity", linewidth=2, c=:red)
+
+hline!([meanAsync],
+       label="Mean asynchronicity",
+       linewidth=3,
+       linestyle=:dot,
+       c=:black)
+
+savefig("./images/gen/synchro.png")
+#+end_src
+#+name: fig:synchro
+#+caption: Synchronisation measurements for a group of four Teensy modules reproducing a pulse-per-second audio signal. Group asynchronicity represents the instantaneous range of offsets for all four modules.
+#+RESULTS:
+[[file:./images/gen/synchro.png]]
+
+#+begin_src julia :results none :session :exports none
+using CSV, DataFrames, Plots, LaTeXStrings, Statistics
+
+function plotHistogram(index, ip)
+    # The number of datapoints, i.e. seconds, to plot
+    numData = 3600
+
+    # Read the data. Limit to 3600 data points, i.e. 1 hour's worth.
+    data = CSV.read(
+        "../notes/20260303T221301--ananas-synchronicity-measurements-data__ananas_data_teensy.csv",
+        DataFrame,
+        limit=numData + 1
+    )
+
+    # Make the unit nanoseconds
+    data = data .* 1e9
+    # Remove the initial offset (using I2S3 as the reference)
+    data = data .- data[1, 3]
+
+    histogram(Matrix(data)[:, index], bins=30,
+              fontfamily="EBGaramond-VariableFont_wght",
+              xlabel="Offset (ns)",
+              ylabel="Frequency",
+              label="$ip")
+
+    savefig("./images/gen/histo$index.png")
+end
+#+end_src
+
+One hour of synchronisation measurements were taken for four clients,
+one of which was used as a reference time for the other three. Clients
+each reproduced a pulse-per-second signal received from the Ananas
+server. As can be seen in cref:fig:synchro, clients remain
+synchronised to within just over \qty{200}{\nano\second}, falling well
+within the AES guideline for time-sensitive audio of 5% of the
+reference frame (around \qty{1}{\micro\second} at \qty{48}{\kilo\hertz}),
+and to around \qty{80}{\nano\second} on average. Histograms of
+synchronicity results (see cref:fig:histos) reveal asymmetries,
+particularly for client =192.168.198.18=, but nothing to threaten the
+AES guideline.
+
+#+begin_src julia :results file graphics :file histo1.png :output-dir ./images/gen :session :exports none
+plotHistogram(1, "192.168.198.18")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:./images/gen/histo1.png]]
+
+#+begin_src julia :results file graphics :file histo2.png :output-dir ./images/gen :session :exports none
+plotHistogram(2, "192.168.48.236")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:./images/gen/histo2.png]]
+
+#+begin_src julia :results file graphics :file histo4.png :output-dir ./images/gen :session :exports none
+plotHistogram(4, "192.168.48.191")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:./images/gen/histo4.png]]
+
+#+caption: Histograms of synchronicity measurements for three clients from cref:fig:synchro (the fourth client was used as reference).
+#+name: fig:histos
+\begin{figure*}[t]
+                                        \subfloat{\includegraphics[width=0.33\textwidth]{images/gen/histo1}\label{fig:histo1}}
+    \subfloat{\includegraphics[width=0.33\textwidth]{images/gen/histo2}\label{fig:histo2}}
+    \subfloat{\includegraphics[width=0.33\textwidth]{images/gen/histo4}\label{fig:histo4}}
+\end{figure*}
 
 * Conclusion
 #+latex: \minitoc
@@ -3440,6 +3867,13 @@ This is my conclusion
 #+print_bibliography:
 
 * Footnotes
+
+[fn:20] [[https://platformio.org/]]
+
+[fn:19] See, for example, the EDS-405A-PTP switch from manufacturer
+Moxa.
+
+[fn:18] [[https://reaper.fm]] 
 
 [fn:17] [[https://www.st.com/]] 
 
