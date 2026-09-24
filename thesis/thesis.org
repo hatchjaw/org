@@ -476,7 +476,6 @@ Define some colours and some node and line styles.
 *** WFS
 
 #+begin_src latex
-\definecolor{wfsWaveColour}{HTML}{4077D6}
 \newcommand*{\wfsX}{4}
 \newcommand*{\wfsWaveSpace}{.89}
 \newcommand*{\wfsWidth}{8}
@@ -521,12 +520,12 @@ Define some colours and some node and line styles.
   realWavefronts/.pic={
     \clip (0, 0) rectangle (\wfsWidth, 2.5);
     \foreach \i [evaluate=\i as \rad using \i*\wfsWaveSpace] in {1,...,\wfsNumWaves}
-    \draw [thick, wfsWaveColour] (\wfsWidth/2-\rad, -2) arc [radius=\rad, start angle=180, end angle=0];
+    \draw [thick, audioColour] (\wfsWidth/2-\rad, -2) arc [radius=\rad, start angle=180, end angle=0];
   },
   virtualWavefronts/.pic={
     \clip (-1, 0) rectangle (2*\wfsWaveSpace*\wfsNumWaves, 2);
     \foreach \i [evaluate=\i as \rad using \i*\wfsWaveSpace] in {1,...,\wfsNumWaves}
-    \draw [thick, dashed, wfsWaveColour] (\wfsWidth/2-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
+    \draw [thick, dashed, audioColour] (\wfsWidth/2-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
   },
   speaker/.pic={
     \path [draw=black, fill=white] (-.11, 0) rectangle (.11, .06);
@@ -553,7 +552,7 @@ Define some colours and some node and line styles.
     \node [minimum width=\wfsWidth{}cm, draw, fill=black!10, rounded corners=1mm] at (\wfsWidth/2, -.44) {WFS};
   },
   primary/.pic = {
-    \node [circle, draw=wfsWaveColour, fill=wfsWaveColour!50, thick] (primary) at (\wfsWidth/2, -2) {};
+    \node [circle, draw=audioColour, fill=audioColour!50, thick] (primary) at (\wfsWidth/2, -2) {};
   },
   holophony/.pic = {
     \pic {secondaryWavefronts};
@@ -644,12 +643,12 @@ Define some colours and some node and line styles.
       ([xshift=5mm] server.north);
 
       % Audio arrow
-      \draw [audio] ([xshift=-10mm] server.north) --
-      ([xshift=-10mm] switch.south);
+      \draw [audio] ([xshift=-11mm] server.north) --
+      ([xshift=-11mm] switch.south);
 
       % Control arrow
-      \draw [ctrlArrow] ([xshift=10mm] server.north) --
-      ([xshift=10mm] switch.south);
+      \draw [ctrlArrow] ([xshift=11mm] server.north) --
+      ([xshift=11mm] switch.south);
 
       % Modules
       \foreach \i [
@@ -709,6 +708,163 @@ Define some colours and some node and line styles.
       \pic [xscale=-1] {wavefronts};
 
       \node [black!50, align=center, font={\footnotesize\itshape}] at (-3.15, 4) {Synthesised\\soundfield};
+    \end{scope}
+  }
+}
+#+end_src
+
+*** Driving Function
+
+#+begin_src latex
+\tikzset{
+  secsrc/.pic = {
+    \draw[thick, black!50, rotate = 45] (-#1,0) -- (#1,0);
+    \draw[thick, black!50, rotate = 45] (0,-#1) -- (0, #1);
+  },
+  intersectingSecsrc/.pic = {
+    \draw[thick, rotate = 45] (-#1,0) -- (#1,0);
+    \draw[thick, rotate = 45] (0,-#1) -- (0, #1);
+  },
+  drivingFunction/.pic={
+    % Virtual sound source
+    \node [circle, draw=audioColour, fill=audioColour!50, thick]
+    (primary) at (0, 0) {};
+
+    \node [below right=-1mm and -1mm of primary] {\(\hat{s}_{\text{in}, k}\)};
+
+    \draw (-4, 3.5) -- (4, 3.5);
+
+    \draw [thick, audioColour, dashed] (-4, 0) arc [radius=4, start angle=180, end angle=0];
+
+    \draw [dotted] (0, 0) -- (0, 3.5) node [midway, right=1mm] {\(y_{k}\)};
+    \draw [dotted, red] (0, 0) -- (-1.95, 3.5) node [midway, left=1mm] {\(r_{k}\)};
+
+    \pic at (-1.95, 3.5) {intersectingSecsrc=5pt};
+    \node at (-2.1, 3.8) {\(\mathbf{x}\)};
+
+    \pic at (-3, 3.5) {secsrc=5pt};
+    \pic at (-0.9, 3.5) {secsrc=5pt};
+    \pic at (.15, 3.5) {secsrc=5pt};
+    \pic at (1.2, 3.5) {secsrc=5pt};
+    \pic at (2.25, 3.5) {secsrc=5pt};
+    \pic at (3.3, 3.5) {secsrc=5pt};
+  }
+}
+#+end_src
+
+*** HOA
+
+#+begin_src latex
+\tikzset{
+  selector/.pic={
+    \draw[rotate=45, very thick, ctrlColour] (-#1,0) -- (#1,0);
+    \draw[rotate=45, very thick, ctrlColour] (0,-#1) -- (0, #1);
+  },
+  speakerHOA/.pic = {
+    \draw (-.11, 0) rectangle (.11, .06);
+    \draw (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
+    \node (-body) at (0, 0) {};   % invisible anchor node
+  },
+  moduleN/.pic = {
+    \node [module] (-body) {dHOA};
+    \draw [ptp] (0, .6) -- (-body.north);
+    \draw [acn] (-.25, .6) -- ([xshift=-.25cm]-body.north);
+    \draw [ctrlArrow] (.25, .6) -- ([xshift=.25cm]-body.north);
+  },
+  moduleS/.pic = {
+    \node [module] (-body) {dHOA};
+    \draw [ptp] (0, -.6) -- (-body.south);
+    \draw [acn] (-.25, -.6) -- ([xshift=-.25cm]-body.south);
+    \draw [ctrlArrow] (.25, -.6) -- ([xshift=.25cm]-body.south);
+  },
+  hoa/.pic={
+    \begin{scope}[yshift=11.5cm]
+      % Synthesised soundfield
+      \draw [thick] (-4, -4) rectangle (4, 4);
+      % Azymuthal rings
+      \draw [dashed, black!30] (0, 0) circle (3.5);
+      \draw [dashed, black!30] (0, 0) circle (1.9);
+      % Speakers, ring 0
+      \pic [rotate=180] (speaker0) at (0, 3.7) {speakerHOA};
+      \pic [rotate=135] (speaker1) at (2.625, 2.625) {speakerHOA};
+      \pic [rotate=90] (speaker2) at (3.7, 0) {speakerHOA};
+      \pic [rotate=45] (speaker3) at (2.625, -2.625) {speakerHOA};
+      \pic (speaker4) at (0, -3.7) {speakerHOA};
+      \pic [rotate=-45] (speaker5) at (-2.625, -2.625) {speakerHOA};
+      \pic [rotate=-90] (speaker6) at (-3.7, 0) {speakerHOA};
+      \pic [rotate=-135] (speaker7) at (-2.625, 2.625) {speakerHOA};
+      % Speakers, ring 1
+      \pic [rotate=157.5] (speaker8) at (.8, 1.925) {speakerHOA};
+      \pic [rotate=112.5] (speaker9) at (1.925, .8) {speakerHOA};
+      \pic [rotate=67.5] (speaker10) at (1.925, -.8) {speakerHOA};
+      \pic [rotate=22.5] (speaker11) at (.8, -1.925) {speakerHOA};
+      \pic [rotate=-22.5] (speaker12) at (-.8, -1.925) {speakerHOA};
+      \pic [rotate=-67.5] (speaker13) at (-1.925, -.8) {speakerHOA};
+      \pic [rotate=-112.5] (speaker14) at (-1.925, .8) {speakerHOA};
+      \pic [rotate=-157.5] (speaker15) at (-.8, 1.925) {speakerHOA};
+      % Modules
+      \pic [rotate=-22.5] (module0) at (1.5, 3.5) {moduleS};
+      %% \pic [rotate=-45] (module1) at (-2.7, -2.7) {moduleS};
+      %% \pic (module2) at (0, 3.1) {moduleS};
+      %% \pic (module3) at (0, -3.1) {moduleN};
+      %% \pic (module4) [rotate=-45] at (1.55, 1.55) {moduleS};
+      %% \pic (module5) [rotate=-45] at (-1.55, -1.55) {moduleN};
+      %% \pic (module6) at (0, 1.1) {moduleN};
+      %% \pic (module7) at (0, -1.1) {moduleS};
+      % Audio
+      \draw [audio] (module0-body.west) -- ([xshift=-.05cm]speaker0-body.east);
+      \draw [audio] (module0-body.east) -- ([yshift=.05cm, xshift=.1cm]speaker1-body.west);
+      %% \draw [audio] (module1-body.east) -- (speaker2-body.west);
+      %% \draw [audio] (module1-body.west) -- ([yshift=-.125cm, xshift=-.1cm]speaker3-body.east);
+      %% \draw [audio] (module2-body.west) -- ([yshift=.05cm]speaker4-body.east);
+      %% \draw [audio] (module2-body.east) -- ([yshift=.05cm]speaker5-body.west);
+      %% \draw [audio] (module3-body.east) -- ([yshift=-.05cm]speaker6-body.west);
+      %% \draw [audio] (module3-body.west) -- ([yshift=-.05cm]speaker7-body.east);
+      %% \draw [audio] (module4-body.west) -- (speaker8-body.east);
+      %% \draw [audio] (module4-body.east) -- ([yshift=.125cm, xshift=.1cm]speaker9-body.west);
+      %% \draw [audio] (module5-body.east) -- (speaker10-body.west);
+      %% \draw [audio] (module5-body.west) -- ([yshift=-.125cm, xshift=-.1cm]speaker11-body.east);
+      %% \draw [audio] (module6-body.west) -- (speaker12-body.east);
+      %% \draw [audio] (module6-body.east) -- (speaker13-body.west);
+      %% \draw [audio] (module7-body.east) -- (speaker14-body.west);
+      %% \draw [audio] (module7-body.west) -- (speaker15-body.east);
+    \end{scope}
+    \begin{scope}[yshift=5.5cm]
+      % Switch
+      \node[device, inner xsep=8mm, inner ysep=2.5mm](switch) at (0, 1) {Switch};
+      % Time authority
+      \node[authority, align=center](authority) at (0, -.5) {Time\\authority};
+      % PTP
+      \draw [{Triangle}-] (.5, -1.5) -- ([xshift=5mm] authority.south);
+      \draw [ptp] (authority.north) -- (switch.south);
+      \draw [ptp] (switch.north) -- (0, 2);
+      % USB
+      \draw [usb] (-.5, -1.5) -- ([xshift=-5mm] authority.south);
+      % ACN-format
+      \draw [acn] (-1.1, -1.5) -- ([xshift=-1.1cm] switch.south);
+      \draw [acn] ([xshift=-1.1cm] switch.north) -- (-1.1, 2);
+      % Coordinates
+      \draw [ctrlArrow] (1.1, -1.5) -- ([xshift=1.1cm] switch.south);
+      \draw [ctrlArrow] ([xshift=1.1cm] switch.north) -- (1.1, 2);
+    \end{scope}
+    \begin{scope}
+      % DAW
+      \draw [thick] (-4, -4) rectangle (4, 4);
+      \node [] at (-3.25, 3.5) {DAW};
+      % Virtual soundfield
+      \draw [thick] (0, 0) circle (3.5);
+      \node [black!75, align=center, font={\itshape}] at (0, 0) {Virtual\\soundfield};
+      % Azymuthal rings
+      \draw [dotted, black!50] (0, 0) circle (1.9);
+      % Module selectors
+      \pic at (1.2, 3.275) {selector=5pt};
+      \pic at (3.275, -1.2) {selector=5pt};
+      \pic at (-1.2, -3.275) {selector=5pt};
+      \pic at (-3.275, 1.2) {selector=5pt};
+      \pic at (0, 1.9) {selector=5pt};
+      \pic at (1.9, 0) {selector=5pt};
+      \pic at (0, -1.9) {selector=5pt};
+      \pic at (-1.9, 0) {selector=5pt};
     \end{scope}
   }
 }
@@ -823,7 +979,7 @@ suite\nbsp[cite:@hardmanReliable1995;@hardmanSuccessful1998;
 @turlettiINRIA1994] and the broadcast industry that pioneered audio
 over ethernet\nbsp[cite:@bakkerIntroduction2014]. Before embarking upon a
 discussion of networked audio, however, it is worthwhile to review
-some fundamental aspects of digita audio and computer networking.
+some fundamental aspects of digital audio and computer networking.
 
 ** Digital Audio Signals
 
@@ -1046,8 +1202,6 @@ listen before transmitting and back off randomly upon collision
 detection. A later transition to switched, full-duplex ethernet
 rendered the collision detection algorithm obsolete.
 
-** The Internet Protocol Suite and the OSI Model
-
 ** Anatomy of a Datagram
 
 #+name: fig:datagram
@@ -1065,6 +1219,64 @@ ethernet frame by information relating to lower layers in the
 hierarchy of network topology: the network layer and the data link
 layer. The structure of a UDP packet (within an ethernet frame) is
 shown in cref:fig:datagram.
+
+#+name: lst:packet-hello-world
+#+caption: Network capture: ethernet frame containing a UDP packet.
+#+begin_src packet
+       00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f
+
+0000   00 00 0c 9f f5 16 d8 80  83 80 8c b7 08 00 45 00   ..............E.
+0010   00 2a 83 ba 40 00 40 11  0a 09 ac 1e fe df 01 01   .*..@.@.........
+0020   01 01 ed 3f 22 b8 00 16  01 74 48 65 6c 6c 6f 2c   ...?"....tHello,
+0030   20 77 6f 72 6c 64 21 0a                             world!.
+#+end_src
+
+The ethernet frame in cref:lst:packet-hello-world was generated using
+the Netcat (=nc=) command line utility,[fn:21] and captured with
+Wireshark network traffic analysis software.[fn:22] Four-digit numbers
+to the left indicate the hexadecimal number of the byte at the
+beginning of the corresponding line. The central block of two-digit
+hexadecimal numbers are a representation of the bytes in the ethernet
+frame, labelled above by byte position. The block of characters to the
+right are the same data represented with ASCII encoding.
+
+Bytes =0x0000= to =0x000d= make up the ethernet header, consisting of the
+media access control (MAC) addresses of the destination and source;
+the final two bytes of the ethernet header, with value =0x0800=,
+indicate the ethertype, namely that this is an /internet protocol
+version 4/ frame. Bytes =0x000e= to =0x0021= are the IPv4 header; this
+contains information about the internet protocol part of the packet,
+such as its length in bytes --- =0x002a= (42_{10}) --- and the source and
+destination IP addresses, encoded as groups of four bytes. The sourcre
+IP address, for example, is =0xac1efedf=, a 32-bit encoding of the more
+familiar-looking =172.30.254.223=.
+
+Beginning at byte =0x0022= is the UDP header. This contains the source
+port (=0xed3f=, 60735_{10}), destination port (=0x22b8=, 8888_{10}), the length
+of the UDP part of the frame (=0x0016=, 22_{10} bytes) aand ends with a
+checksum, which can be used to verify the integrity of the
+packet.[fn:23] The packet payload begins at byte =0x002a=, and consists
+of bytes corresponding with the ASCII characters =Hello, world!=, plus
+=0x0a=, the line feed (LF) character, captured and sent by Netcat when
+the user hit the return key.
+
+Netcat takes data supplied to a computer's standard input stream, in
+this case characters entered in a terminal emulator, and uses this
+data as the payload for the packet to be transmitted. The payload of a
+UDP packet can of course consist of any data which can be
+appropriately byte-encoded, such as a stream of audio samples, or
+audio control data such as MIDI or OSC messages.
+
+Ethernet frames, and UDP datagrams by extension, are subject to size
+limitations. The maximum transmissible unit (MTU) of a transport
+medium as the limit on the size of a packet that can be sent without
+fragmentation, i.e., being split into multiple subpackets. The
+theoretical limit on datagram size is 65535
+bytes\nbsp[cite:@schiavoniAlternatives2013] --- this is the largest number
+representable by the two bytes allocated to the 'Total Length' field
+of the IPv4 header --- however in practice the data link layer imposes
+a basic limit of 1500 bytes on the payload of an ethernet
+frame\nbsp[cite:@IEEE2018].
 
 ** Audio Over Computer Networks
 
@@ -1374,6 +1586,21 @@ concave, flat, and convex synthesised wavefronts respectively; the
 latter, dependent on the location of the listener, appear to emanate
 from within the real sound field, rather than its virtual counterpart.
 
+#+name: fig:driving-function
+#+caption: The driving signal for the WFS secondary source at position
+#+caption: \(\mathbf{x}\), for virtual primary source
+#+caption: \(\hat{s}_{\text{in}, k}\), is dependent on the distance \(r_{k}\)
+#+caption: of the primary source from the secondary source.
+#+caption: This corresponds with a delay via the simulated
+#+caption: medium of propagation, coupled with a filter describing
+#+caption: losses to that medium.
+\begin{figure}
+\centering
+\begin{tikzpicture}
+  \pic{drivingFunction}
+\end{tikzpicture}
+\end{figure}
+
 Focusing on the former kind, however, for \(m\) virtual sources, the
 time-domain driving signal, \(\hat{d}\) for the secondary source at
 \(\mathbf{x}\) may be expressed as a sum of input-signal
@@ -1393,7 +1620,7 @@ This is, in effect, a physically-informed extension of
 cref:eq:time-based-driving-function. The /WFS prefilter/, \(f(t)\), is a
 function that simulates the absorption of energy into the simulated
 medium of acoustic propagation. The delta function \(\delta\) has the
-effect of delaying the prefilter, and thus \(s_{\text{in},k}\), by the
+effect of delaying the prefilter, and thus \(\hat{s}_{\text{in},k}\), by the
 time of propagation for a medium of with propagation speed \(c\)
 (typically modelled as \qty{343}{\meter\per\second} for sound in
 air). The components of the driving function are depicted in
@@ -3033,13 +3260,12 @@ startup, waiting for a PTP lock to be achieved, it is possible to
 ensure that the audio subsystem starts up on a given PTP second and
 thus that audio subsystems on the entire network are synchronised.
 
-
 ** A Synchronous, Distributed Audio System
 *** Configuring the iMXRT1062 MCU
 
-Before proceeding to a discussion of /time exchange/ mechanisms, it is
-important to deal with how audio timing is configured on our target
-hardware platform, the Teensy 4.1 and its NXP iMXRT1062 MCU.
+Having discussed /time exchange/ mechanisms, it is important now to deal
+with how audio timing is configured on our target hardware platform,
+the Teensy 4.1 and its NXP iMXRT1062 MCU.
 
 The iMXRT1062 features a dedicated audio phase locked loop (PLL),
 PLL4, and a /synchronous audio interface/, SAI1, the latter providing
@@ -3440,6 +3666,16 @@ D_{N} = \frac{D_{D}}{1 \times 10^{6}}\left(
 
 
 *** Distributed Higher Order Ambisonics
+
+#+name: fig:wfs
+#+caption: Distributed Higher Order Ambisonics.
+\begin{figure*}
+\centering
+\begin{tikzpicture}
+\pic{hoa};
+\end{tikzpicture}
+\end{figure*}
+
 * Protocol and Software Systems
 
 The heart of the system is /Ananas/, a networked audio system for
@@ -3688,7 +3924,7 @@ to control the SAI1 subsystem, configure direct memory access, and
 enable the SGTL5000 =audioShield=.
 
 #+name: lst:start-clock
-#+caption: The =startClock()= method of the AudioSystemManager class.
+#+caption: The =startClock()= method of the =AudioSystemManager= class.
 #+begin_src c++
 void AudioSystemManager::startClock()
 {
@@ -3722,6 +3958,14 @@ throughout the PLL4 and SAI1 subsystems are valid as per
 cref:fig:imxrt1062-clock. This class also supports calculating
 clock-drift compensation PLL4 numerator register values in accordance
 with cref:eq:unknown-dn-2.
+
+** Deployment
+
+For deployment, the time authority is connected to a general purpose
+laptop computer over USB, and to the switch via ethernet. Each client
+is powered via a USB hub, has an ethernet connection to the switch,
+and is connected to two loudspeakers via a stereo minijack to
+quarter-inch mono jack cable.
 
 ** Synchronisation Results
 
@@ -3857,8 +4101,6 @@ plotHistogram(4, "192.168.48.191")
 \end{figure*}
 
 * Conclusion
-#+latex: \minitoc
-#+latex: \newpage
 
 This is my conclusion
 
@@ -3867,6 +4109,14 @@ This is my conclusion
 #+print_bibliography:
 
 * Footnotes
+
+[fn:23] In the remainder of this work it is assumed that transmission
+over LAN is unlikely to result in packet corruption. The UDP checksum
+is not used, nor discussed any further.
+
+[fn:22] [[https://www.wireshark.org/]] 
+
+[fn:21] [[https://nc110.sourceforge.io/]]
 
 [fn:20] [[https://platformio.org/]]
 
