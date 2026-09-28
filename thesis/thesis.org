@@ -225,7 +225,8 @@ Fancy characters (typically) at the beginning of chapters.
   breakable,
   fonttitle=\bfseries,
   title={Listing \thetcbcounter\ #1},
-  label={#3}
+  label={#3},
+  before upper={\addcontentsline{lol}{listing}{\protect\numberline{\thetcbcounter}{#1}}}
 }
 \crefname{listing}{listing}{listings}
 \Crefname{listing}{Listing}{Listings}
@@ -794,40 +795,40 @@ Define some colours and some node and line styles.
       \pic [rotate=-90] (speaker6) at (-3.7, 0) {speakerHOA};
       \pic [rotate=-135] (speaker7) at (-2.625, 2.625) {speakerHOA};
       % Speakers, ring 1
-      \pic [rotate=157.5] (speaker8) at (.8, 1.925) {speakerHOA};
-      \pic [rotate=112.5] (speaker9) at (1.925, .8) {speakerHOA};
-      \pic [rotate=67.5] (speaker10) at (1.925, -.8) {speakerHOA};
-      \pic [rotate=22.5] (speaker11) at (.8, -1.925) {speakerHOA};
-      \pic [rotate=-22.5] (speaker12) at (-.8, -1.925) {speakerHOA};
-      \pic [rotate=-67.5] (speaker13) at (-1.925, -.8) {speakerHOA};
-      \pic [rotate=-112.5] (speaker14) at (-1.925, .8) {speakerHOA};
-      \pic [rotate=-157.5] (speaker15) at (-.8, 1.925) {speakerHOA};
+      \pic [rotate=202.5] (speaker8) at (-.8, 1.925) {speakerHOA};
+      \pic [rotate=157.5] (speaker9) at (.8, 1.925) {speakerHOA};
+      \pic [rotate=112.5] (speaker10) at (1.925, .8) {speakerHOA};
+      \pic [rotate=67.5] (speaker11) at (1.925, -.8) {speakerHOA};
+      \pic [rotate=22.5] (speaker12) at (.8, -1.925) {speakerHOA};
+      \pic [rotate=-22.5] (speaker13) at (-.8, -1.925) {speakerHOA};
+      \pic [rotate=-67.5] (speaker14) at (-1.925, -.8) {speakerHOA};
+      \pic [rotate=-112.5] (speaker15) at (-1.925, .8) {speakerHOA};
       % Modules
       \pic [rotate=-22.5] (module0) at (1.5, 3.5) {moduleS};
-      %% \pic [rotate=-45] (module1) at (-2.7, -2.7) {moduleS};
-      %% \pic (module2) at (0, 3.1) {moduleS};
-      %% \pic (module3) at (0, -3.1) {moduleN};
-      %% \pic (module4) [rotate=-45] at (1.55, 1.55) {moduleS};
-      %% \pic (module5) [rotate=-45] at (-1.55, -1.55) {moduleN};
-      %% \pic (module6) at (0, 1.1) {moduleN};
-      %% \pic (module7) at (0, -1.1) {moduleS};
+      \pic [rotate=67.5] (module1) at (3.5, -1.5) {moduleN};
+      \pic [rotate=-22.5] (module2) at (-1.5, -3.5) {moduleN};
+      \pic [rotate=67.5] (module3) at (-3.5, 1.5) {moduleS};
+      \pic (module4) at (0, 2.25) {moduleN};
+      \pic (module5) [rotate=90] at (2.25, 0) {moduleS};
+      \pic (module6) at (0, -2.25) {moduleS};
+      \pic [rotate=-90] (module7) at (-2.25, 0) {moduleS};
       % Audio
       \draw [audio] (module0-body.west) -- ([xshift=-.05cm]speaker0-body.east);
       \draw [audio] (module0-body.east) -- ([yshift=.05cm, xshift=.1cm]speaker1-body.west);
-      %% \draw [audio] (module1-body.east) -- (speaker2-body.west);
-      %% \draw [audio] (module1-body.west) -- ([yshift=-.125cm, xshift=-.1cm]speaker3-body.east);
-      %% \draw [audio] (module2-body.west) -- ([yshift=.05cm]speaker4-body.east);
-      %% \draw [audio] (module2-body.east) -- ([yshift=.05cm]speaker5-body.west);
-      %% \draw [audio] (module3-body.east) -- ([yshift=-.05cm]speaker6-body.west);
-      %% \draw [audio] (module3-body.west) -- ([yshift=-.05cm]speaker7-body.east);
-      %% \draw [audio] (module4-body.west) -- (speaker8-body.east);
-      %% \draw [audio] (module4-body.east) -- ([yshift=.125cm, xshift=.1cm]speaker9-body.west);
-      %% \draw [audio] (module5-body.east) -- (speaker10-body.west);
-      %% \draw [audio] (module5-body.west) -- ([yshift=-.125cm, xshift=-.1cm]speaker11-body.east);
-      %% \draw [audio] (module6-body.west) -- (speaker12-body.east);
-      %% \draw [audio] (module6-body.east) -- (speaker13-body.west);
-      %% \draw [audio] (module7-body.east) -- (speaker14-body.west);
-      %% \draw [audio] (module7-body.west) -- (speaker15-body.east);
+      \draw [audio] (module1-body.east) -- ([yshift=-.1cm, xshift=.1cm]speaker2-body.west);
+      \draw [audio] (module1-body.west) -- ([yshift=.05cm, xshift=-.1cm]speaker3-body.east);
+      \draw [audio] (module2-body.east) -- ([yshift=.05cm, xshift=.05cm]speaker4-body.west);
+      \draw [audio] (module2-body.west) -- ([yshift=-.05cm]speaker5-body.east);
+      \draw [audio] (module3-body.west) -- ([yshift=.1cm, xshift=-.1cm]speaker6-body.east);
+      \draw [audio] (module3-body.east) -- ([yshift=-.05cm, xshift=.1cm]speaker7-body.west);
+      \draw [audio] (module4-body.west) -- ([yshift=.125cm]speaker8-body.south);
+      \draw [audio] (module4-body.east) -- ([yshift=.125cm]speaker9-body.south);
+      \draw [audio] (module5-body.east) -- ([yshift=.125cm]speaker10-body.south);
+      \draw [audio] (module5-body.west) -- ([yshift=.1cm]speaker11-body.south);
+      \draw [audio] (module6-body.east) -- ([yshift=.125cm]speaker12-body.south);
+      \draw [audio] (module6-body.west) -- ([yshift=.125cm]speaker13-body.south);
+      \draw [audio] (module7-body.east) -- ([yshift=.1cm]speaker14-body.south);
+      \draw [audio] (module7-body.west) -- ([yshift=.125cm]speaker15-body.south);
     \end{scope}
     \begin{scope}[yshift=5.5cm]
       % Switch
@@ -1396,7 +1397,7 @@ computer systems can achieve clock
 synchronicity\nbsp[cite:@edisonIEEE15882002]. PTP (another protocol that
 typically uses UDP for transport) superseded the lower-resolution
 Network Time Protocol (NTP)\nbsp[cite:@millsImproved1994], and, under
-ideal conditionns, can achieve sychronisation accuracy of
+ideal conditions, can achieve sychronisation accuracy of
 sub-microsecond order\nbsp[cite:@tongzhouResearch2022]. Synchronisation is
 achieved via the exchange of timestamped packets, coupled with precise
 estimates for send and receive times. Precision is best when
@@ -1433,9 +1434,19 @@ exist, but, being complex standards featuring many components, such
 implementations may not be complete, and support for embedded
 platforms is limited.[fn:9]
 
-** The Need for a New Protocol
+*** The Need for a New Protocol
 
 
+
+Given this lack of provision for embedded systems, the proprietary
+nature of Dante, and the focus of many open source protocols and
+systems on networked music performance over other applications, the
+need for a new protocol becomes apparent. To serve the needs of an
+accessible, distributed approach to spatial audio we need a networked
+audio system that is tailored, as we will see particularly in the case
+of wave field synthesis, to time-sensitive applications. Additionally,
+for efficiency in terms of bandwidth and throughput, it should support
+multicast audio transmission, unlike the venerable JackTrip.
 
 ** Audio Spatialisation
 
@@ -1539,15 +1550,69 @@ manipulating sound localisation cues, these types seek to trigger
 those cues indirectly by synthesising a sound field as if it had been
 created by "true" acoustic sources.
 
+#+name: fig:spherical-harmonics
+#+caption: Spherical harmonics indexed by Ambisonic channel number \(a = m^{2} + m + n\). Figure taken from Zotter and Frank [cite:@zotterAmbisonics2019].
+[[./images/spherical-harmonics.png]] 
+
 In the case of ambisonics, first described in the early 1970s by
 Michael Gerzon\nbsp[cite:@ahrensAnalytic2012], the sound field is
-decomposed into /spherical harmonics/, spatial functions described by
-linear sums of directional components of increasing
-order\nbsp[cite:@nicolSound2017]. Like periphonic approaches, ambisonics
-suffers from a sweet-spot effect which worsens with attempts to
-reproduce sounds of higher frequency, but can be mitigated by
-reproducing higher-order modes and increasing the density of the
-distribution of secondary sources.
+decomposed into a truncated basis of /spherical harmonics/, spatial
+functions described by linear sums of directional components of
+increasing order\nbsp[cite:@nicolSound2017] (see
+cref:fig:spherical-harmonics). For sound field reconstruction the
+number of loudspeakers required is \(N \ge (M + 1)^{2}\). Estimation of the
+ambisonic components of a sound pressure field is possible via
+recording with spherical microphone arrays\nbsp[cite:@moreau3D2006];
+alternatively, monophonic sound sources can be spatialised via
+/encoding/ to ambisonic format\nbsp[cite:@lecomteAmbitools2018], which, by
+convention uses /ambisonics channel numbering/ (ACN) to designate
+channels.
+
+ACN channels are indexed by the degree \(m\) and order \(n\) of the
+Legendre polynomials by which they are
+described:\nbsp[cite:@lecomteAmbitools2018]
+
+#+NAME: eq:acn
+\begin{equation}
+a = m^{2} + m + n\;.
+\end{equation}
+For a single monophonic source \(x(t)\) at azimuth \(\theta\) and elevation
+\(\varphi\), the encoded signal \(b_{a}\) for a given ACN-format channel is
+
+#+NAME: eq:acn-encoded
+\begin{equation}
+b_{a}(t) = x(t) \cdot Y_{m,n}(\theta, \varphi)\;,
+\end{equation}
+where \(Y_{m,n}\) is the real valued spherical
+harmonic\nbsp[cite:@lecomteAmbitools2018]
+
+#+NAME: eq:spherical-harmonic
+\begin{equation}
+Y_{m, n}(\theta, \varphi) = N_{m, n}P_{m, |n|}\sin(\varphi) \begin{cases}
+  \cos(|n|\theta), \; n \ge 0 \\ \sin(|n|\theta), \; n < 0
+\end{cases}.
+\end{equation}
+Here \(N_{m,n}\) is a normalisation factor and \(P_{m,|n|}\) are the
+associated Legendre polynomials. Ambisonics is not without its
+terminological ambiguities\nbsp[cite:@nachbarAmbiX2011]; it is the /degree/
+of the polynomial that corresponds with the ambisonics /order/.
+
+Considering the case of a third order ambisonics system with the
+bare-minimum \((3 + 1)^{2} = 16\) loudspeakers at positions \(\theta_{i},\varphi_{i}\),
+the spherical harmonics make up the 16x16 mode matrix
+\(\mathbf{Y}_{m,n}(\theta,\varphi)\). In this case the decoding matrix
+\(\mathbf{D}\) is simply the inverse, \(\mathbf{D} = \mathbf{Y}^{-1}\),
+the rows of which are the decoding co-efficients for each loudspeaker;
+for a greater number of loudspeakers it would be necessary to take the
+pseudoinverse, \(\mathbf{D} = (\mathbf{Y}^{T}\mathbf{Y})^{-1}\mathbf{Y}^{T}\).
+
+Like periphonic approaches, ambisonics suffers from a sweet-spot
+effect. Its size is such that \(\lceil kr \rceil = M\), where \(r\) is the
+radius of the zone of accurate reconstruction, \(k = 2\pi f/c\) is the
+wave number, \(f\) is frequency, and \(c\) the speed of sound. This
+phenomenon worsens with attempts to reproduce sounds of higher
+frequency, but can be mitigated by reproducing higher-order modes and
+increasing the density of the distribution of secondary sources.
 
 #+name: fig:holophony
 #+caption: The holophonic effect of wave field synthesis.
@@ -1917,18 +1982,19 @@ in\nbsp[cite:@rushtonFaust2025a].
 #+latex: \minitoc
 #+latex: \newpage
 
-Differentiable programming via automatic differentiation (AD) is the
-foundation for gradient-based optimisation techniques, and forms the
-basis for many current approaches to machine learning. Though well
-catered-for in general-purpose programming languages, the availability
-of AD in a domain-specific language (DSL) could offer novel
-perspectives on optimisation problems in the field of audio. In this
-chapter a general scheme is presented for differentiable programming
-in the Faust programming language, a high-performance DSL tailored to
-audio synthesis and signal processing. Faust's rich ecosystem, coupled
-with a comprehensive AD implementation, can provide support for audio
-optimisation and machine learning applications on a multitude of
-platforms, from FPGAs to the web.
+\lettrine{D}{ifferentiable programming} via automatic differentiation
+(AD) is the foundation for gradient-based optimisation techniques, and
+forms the basis for many current approaches to machine
+learning. Though well catered-for in general-purpose programming
+languages, the availability of AD in a domain-specific language (DSL)
+could offer novel perspectives on optimisation problems in the field
+of audio. In this chapter a general scheme is presented for
+differentiable programming in the Faust programming language, a
+high-performance DSL tailored to audio synthesis and signal
+processing. Faust's rich ecosystem, coupled with a comprehensive AD
+implementation, can provide support for audio optimisation and machine
+learning applications on a multitude of platforms, from FPGAs to the
+web.
 
 ** Introduction
 
@@ -2713,7 +2779,6 @@ cref:eq:diffmerge.
 :CUSTOM_ID: sec:discussion
 :END:
 
-#+attr_latex: :options float=t, numbers=left, xleftmargin=12pt, framexleftmargin=12pt
 #+name: lst:neuron
 #+caption: Excerpt from a differentiable artificial neuron
 #+caption: implementation. See cref:sec:discussion for
@@ -2833,7 +2898,6 @@ using differentiable primitives.
 
 ** Applications & Outlook
 
-#+attr_latex: :options float=t, numbers=left, xleftmargin=12pt, framexleftmargin=12pt
 #+name: lst:iir
 #+caption: Excerpt from a differentiable IIR filter implementation.
 #+begin_src faust :noeval
@@ -2900,6 +2964,10 @@ example in cref:lst:neuron should be extended to a general neural
 network structure, and a supporting infrastructure created for
 delivering training data and capturing weights and biases for
 real-time inference.
+
+Finally, of broader pertinence to the work under discussion in this
+thesis, differentible DSP in Faust could be used to find ideal
+parameters for distributed spatial audio algorithms.
 
 ** Conclusion
 
@@ -3003,11 +3071,7 @@ This manner of /clock drift/ is inevitable in digital systems. To ensure
 a sample-synchronous platform for spatial audio, it is necessary to
 find a means to correct for it.
 
-** Network Protocols for Time Exchange
-
-*** Network Time Protocol
-
-*** Precision Time Protocol
+** Precision Time Protocol
 
 #+name: fig:ptp
 #+caption: PTP packet flow.
@@ -3661,6 +3725,13 @@ D_{N} = \frac{D_{D}}{1 \times 10^{6}}\left(
 \centering
 \begin{tikzpicture}
 \pic{wfs};
+% Legend
+\matrix [draw] at (-2.75, 4) {
+  \draw [ctrlArrow] (0,0) -- (.5,0); & \node [legend] {Control data}; \\
+  \draw [audio] (0,0) -- (.5,0); & \node [legend] {Audio}; \\
+  \draw [-{Triangle}] (0,0) -- (.5,0); & \node [legend] {PTP}; \\
+  \draw [usb] (0,0) -- (.5,0); & \node [legend] {USB}; \\
+};
 \end{tikzpicture}
 \end{figure*}
 
@@ -3673,6 +3744,15 @@ D_{N} = \frac{D_{D}}{1 \times 10^{6}}\left(
 \centering
 \begin{tikzpicture}
 \pic{hoa};
+% Legend
+\matrix [draw] at (-2.75, 5.75) {
+  \draw [ctrlArrow] (0,0) -- (.5,0); & \node [legend] {Decoder coeff's}; \\
+  \draw [acn] (0,0) -- (.5,0); & \node [legend] {ACN-format}; \\
+  \draw [audio] (0,0) -- (.5,0); & \node [legend] {Audio}; \\
+  \draw [-{Triangle}] (0,0) -- (.5,0); & \node [legend] {PTP}; \\
+  \draw [usb] (0,0) -- (.5,0); & \node [legend] {USB}; \\
+  \pic at (.25, 0) {selector=5pt}; & \node [legend] {Module selector}; \\
+};
 \end{tikzpicture}
 \end{figure*}
 
@@ -3853,21 +3933,31 @@ of the synchronisation algorithm.
 #+attr_org: :width 300
 [[./images/network-overview.png]]
 
-The WFS control interface presents a variable number client module
+The WFS control interface presents a variable number of client module
 selectors, each of which displays a list of client IP addresses when
-clicked. A checkbox controls the visibility of module
-selectors. Speaker icons indicate the position of the speaker array. A
-grid indicates the dimensions of the soundfield for virtual and
-focused WFS sources. Finally, a series of coloured nodes indicate the
-positions of WFS sources; as previously stated, both virtual and
-focused sources are supported, by moving a given sound source behind
-or in front of the speaker array. Sources can be dragged with the
-mouse to change their positions, or DAW automation can be used to
-alter the \(x\) and \(y\) co-ordinates for a given source. The DAW of
-choice during development has been Reaper[fn:18], configured with a
-network bus channel with a number of channels corresponding to the
-number of WFS sources; monophonic channels can be added and set up as
-sends to the network bus.
+clicked; selecting a client triggers the transmission of an OSC
+message indicating the secondary source co-ordinates for which the
+client is responsible, the message being sent over unicast UDP. A
+checkbox controls the visibility of module selectors. Speaker icons
+indicate the position of the speaker array. A grid indicates the
+dimensions of the soundfield for virtual and focused WFS
+sources. Loudspeaker spacing can be configured via a numerical entry
+box at the top-right of the interface and governs the values of the
+secondary source co-ordinates to be transmitted on client selection.
+
+Finally, a series of coloured nodes indicate the positions of WFS
+sources; as previously stated, both virtual and focused sources are
+supported, by moving a given sound source behind or in front of the
+speaker array. Sources can be dragged with the mouse to change their
+positions, or DAW automation can be used to alter the \(x\) and \(y\)
+co-ordinates for a given source; virtual/focused source position
+changes trigger the transmission of OSC messages over multicast UDP on
+address =224.4.224.5=, port 49162.
+
+The DAW of choice during development has been Reaper[fn:18],
+configured with a network bus channel with a number of channels
+corresponding to the number of WFS sources; monophonic channels can be
+added and set up as sends to the network bus.
 
 #+name: fig:wfs-control
 #+caption: The WFS plugin control interface.
@@ -3955,17 +4045,130 @@ Additionally, in order to compute initial clock divider registers as
 per cref:alg:sampling-rate a class =AudioSystemManager::ClockDividers=
 was created. This makes it possible to ensure that frequencies
 throughout the PLL4 and SAI1 subsystems are valid as per
-cref:fig:imxrt1062-clock. This class also supports calculating
-clock-drift compensation PLL4 numerator register values in accordance
-with cref:eq:unknown-dn-2.
+cref:fig:imxrt1062-clock. See cref:lst:calculate-coarse for the
+implementation of cref:alg:sampling-rate.
+
+#+name: lst:calculate-coarse
+#+caption: C++ implementation of cref:alg:sampling-rate.
+#+begin_src c++
+void AudioSystemManager::ClockDividers::calculateCoarse(const uint32_t targetSamplingRate)
+{
+    constexpr auto orderOfMagnitude{1e6};
+
+    for (pll4Div = ClockConstants::Pll4DivMin; pll4Div <= ClockConstants::Pll4DivMax; ++pll4Div) {
+        pll4Num = 0;
+        pll4Denom = static_cast<uint32_t>(orderOfMagnitude);
+        sai1Pre = 1;
+        sai1Post = 1;
+        auto divExact{-1.};
+
+        while (!isSai1PostFreqValid() && sai1Pre < ClockConstants::Sai1PreMax) {
+            ++sai1Pre;
+        }
+
+        while (static_cast<uint8_t>(floor(divExact / orderOfMagnitude)) != pll4Div) {
+            while (static_cast<uint32_t>(getCurrentSamplingRate()) > targetSamplingRate
+                   && sai1Post < ClockConstants::Sai1PostMax) {
+                ++sai1Post;
+            }
+
+            if (targetSamplingRate > getCurrentMaxPossibleSamplingRate() && sai1Pre < ClockConstants::Sai1PreMax) {
+                ++sai1Pre;
+                sai1Post = 1;
+                continue;
+            }
+
+            divExact = static_cast<double>(targetSamplingRate) * ClockConstants::OversamplingRatio * sai1Pre * sai1Post / ClockConstants::OscMHz;
+
+            if (static_cast<uint8_t>(floor(divExact / orderOfMagnitude)) != pll4Div) {
+                if (sai1Pre < ClockConstants::Sai1PreMax) {
+                    ++sai1Pre;
+                    sai1Post = 1;
+                    continue;
+                } else {
+                    break;
+                }
+            }
+
+            pll4Num = static_cast<int32_t>(floor(divExact - orderOfMagnitude * pll4Div));
+
+            while (pll4Num * 10 < ClockConstants::Pll4NumMax && pll4Denom * 10 < ClockConstants::Pll4DenomMax) {
+                pll4Num *= 10;
+                pll4Denom *= 10;
+            }
+
+            if (isPll4FreqValid() && pll4Denom == 1'000'000'000) {
+                return;
+            } else {
+                break;
+            }
+        }
+    }
+}
+#+end_src
+
+This class also supports calculating clock-drift compensation PLL4
+numerator register values in accordance with cref:eq:unknown-dn-2. See
+cref:lst:calculate-fine for the implementation of this algorithm.
+
+#+name: lst:calculate-fine
+#+caption: C++ algorithm for calculating a PLL4 numerator to compensate for clock drift.
+#+begin_src c++
+bool AudioSystemManager::ClockDividers::calculateFine(const double targetSamplingRate)
+{
+    constexpr auto orderOfMagnitude{1e6};
+
+    const auto sai1WordOsc{static_cast<double>(ClockConstants::OversamplingRatio) * sai1Pre * sai1Post / ClockConstants::OscMHz};
+    const auto num{targetSamplingRate * sai1WordOsc - orderOfMagnitude * pll4Div};
+    const auto numInt{static_cast<int32_t>(round(num * (pll4Denom / orderOfMagnitude)))};
+
+    if (numInt < 0 || static_cast<uint32_t>(numInt) > pll4Denom) {
+        Serial.printf("Invalid PLL4 numerator %" PRId32 " "
+                      "for target sample rate %f "
+                      "and denominator %" PRIu32 "\n",
+                      numInt, targetSamplingRate, pll4Denom);
+        return false;
+    }
+
+    pll4Num = numInt;
+    return true;
+}
+#+end_src
+
+*** The Distributed WFS Module
+
+The distributed WFS algorithm is written in Faust and compiled to C++
+for compatibility with =AudioSystemManager= via bespoke Faust
+architecture files and an associated command line utility named
+=faust2ananas=. The architecture files produce a class that descends
+from the parent class =AudioProcessor=, an instance of which
+=AudioSystemManager= expects to receive as a parameter via its
+~setAudioProcessor~ method.
+
+The Faust algorithm in turn expects to receive co-ordinates for
+secondary and virtual/focused sources as parameters and uses the
+relative positions of these to compute appropriate per-loudspeaker
+delays for virtual and focused sources, plus the WFS prefilter for
+virtual sources. To avoid resorting to computationally-expensive
+smoothing operations in the Faust code, the \(x\) and \(y\)
+co-ordinates of virtual and focused sources are smoothed /outside/ of
+Faust; clients receive co-ordinates as OSC messages and they are fed
+through a =ControlContext= structure, which contains a map of
+=std::string=-=SmoothedValue= pairs, the latter of which smooths value
+updates with a 1-pole lowpass filter.
 
 ** Deployment
+
+#+name: fig:ananas-wfs
+#+caption: Ananas driving a WFS system with sixteen secondary sources.
+[[./images/ananas-wfs.jpeg]]
 
 For deployment, the time authority is connected to a general purpose
 laptop computer over USB, and to the switch via ethernet. Each client
 is powered via a USB hub, has an ethernet connection to the switch,
 and is connected to two loudspeakers via a stereo minijack to
-quarter-inch mono jack cable.
+quarter-inch mono jack cable. See cref:fig:ananas-wfs for an example
+WFS deployment.
 
 ** Synchronisation Results
 
@@ -4094,8 +4297,8 @@ plotHistogram(4, "192.168.48.191")
 
 #+caption: Histograms of synchronicity measurements for three clients from cref:fig:synchro (the fourth client was used as reference).
 #+name: fig:histos
-\begin{figure*}[t]
-                                        \subfloat{\includegraphics[width=0.33\textwidth]{images/gen/histo1}\label{fig:histo1}}
+\begin{figure*}[h]
+\subfloat{\includegraphics[width=0.33\textwidth]{images/gen/histo1}\label{fig:histo1}}
     \subfloat{\includegraphics[width=0.33\textwidth]{images/gen/histo2}\label{fig:histo2}}
     \subfloat{\includegraphics[width=0.33\textwidth]{images/gen/histo4}\label{fig:histo4}}
 \end{figure*}
