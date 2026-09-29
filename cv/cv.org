@@ -257,6 +257,11 @@ Music/Drama Technician, Parrs Wood High School, Manchester, UK,
 
 * Publications
 
+T. A. Rushton, R. Michon, T. Risset, 2026, Ananas: A Networked Audio
+System for Distributed Spatial Audio Applications, /Proceedings of the
+IEEE International Symposium on the Internet of Sounds (IS2) 2026/
+(accepted following review, to be published November 2026).
+
 T. A. Rushton, R. Michon, T. Risset, C. Wegener, P. Lecomte, 2026,
 Ambisonics: Introducing an Accessible, Distribted Approach,
 /Proceedings of the 23^{rd} Sound and Music Computing Conference/
