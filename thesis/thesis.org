@@ -1855,6 +1855,11 @@ sufficient for timing-critical audio spatialisation effects.
 #+caption: Daisy Seed3 microcontroller development board.
 [[./images/daisy.png]]
 
+#+name: fig:esp32
+#+caption: ESP32 LyraT microcontroller development board.
+#+attr_org: :width 400
+[[./images/esp32.png]]
+
 Progress in embedded computing, devices of the /internet of things/
 variety, and initiatives in the DIY and maker communities, have
 encouraged alternative approaches to spatial audio. The past decade or
@@ -1874,7 +1879,7 @@ systems, prominent amongst these being the
 MCU from manufacturer NXP[fn:16], see figure cref:fig:teensy)
 /Daisy/\nbsp[cite:@gasterAudio2020] (STMicroelectronics[fn:17], see figure
 cref:fig:daisy), and various /ESP32/\nbsp[cite:@michonFaust2020] development
-boards. Beyond matters of economy, connectivity, and modest power
+boards (see cref:fig:esp32). Beyond matters of economy, connectivity, and modest power
 requirements, the attraction of such devices lies in the relative ease
 with which they can be programmed, each providing either an SDK, a
 selection of utility classes, or, in the case of ELS, compatibility
@@ -1907,7 +1912,8 @@ OTTOsonics system, including speakers and audio interface, is costed
 at around €2,600 (€108.33/channel), however, which certainly places it
 favourably when compared with state-of-the-art spatialisation systems.
 
-* Developing Digital Audio Systems
+* Tools and Platforms
+
 #+latex: \minitoc
 #+latex: \newpage
 
@@ -1916,7 +1922,43 @@ development for a variety of different purposes and on a variety of
 different platforms, from embedded systems to audio plugins. In this
 chapter an overview will be given of the various concerns faced by the
 development of audio software for a range of different but related
-purposes.
+purposes, plus the tools and platforms that have been used in this work.
+
+** The Faust Programming Language
+
+Faust is a functional paradigm, high-level domain-specific language
+for audio programming\nbsp[cite:@orlareySyntactical2004;
+@orlareyFAUST2009]. Based on a block-diagram algebra, Faust has a
+history dating back more than twenty years and remains in active
+development. Although C++ is Faust's default compilation target,
+amongst its strengths is support for a proliferation of targets, from
+LLVM to webassembly\nbsp[cite:@letzOverview2018]; further, Faust's
+libraries include facilities for computing finite difference
+schemes\nbsp[cite:@russoIntroducing2021; @sudholtFaust2021], physical
+modelling\nbsp[cite:@michonFaust2018], and wave digital
+filters\nbsp[cite:@roosenburgWave2021] amongst numerous others. Faust has
+been used for active noise
+cancellation\nbsp[cite:@alexandreExperimental2023], for sparse stochastic
+synthesis\nbsp[cite:@hansenWeather2018], for the development of hybrid
+digital musical instruments\nbsp[cite:@michonFaust2020a] and (as we will see in
+cref:sec:faust-autodiff) for differentiable digital signal processing
+[cite:@rushtonDifferentiable2024].
+
+Another of Faust's strengths is its /write once, deploy anywhere/
+model\nbsp[cite:@gasterAudio2020]. Faust code has been compiled to run as
+audio plugins\nbsp[cite:@albouyFaust2017], on
+FPGAs\nbsp[cite:@popoffAudio2023], and on a variety of single board
+computers and microcontrollers\nbsp[cite:@michonReal2019;
+@michonEmbedded2020; @michonFaust2020]. Faust's versatility in this
+regard is facilitated by the =faust2[...]= tools (e.g. =faust2android=)
+and associated architecture files; a Faust architecture consists of
+placeholder code to be populated with compiled Faust code, coupled
+with a shell script for performing the compilation and
+substitution. =faust2teensy=, for example, produces a C++ class
+compatible with the Teensy Audio Library
+
+For more detail about Faust, see cref:sec:faust-autodiff.
+
 
 ** Embedded Audio Systems
 
@@ -1929,11 +1971,30 @@ implementing spatial audio algorithms in a distributed context;
 principal concerns are cost, available memory, and computational
 power.
 
-*** Embedded Linux Systems
+*** The Raspberry Pi
 
-Perhaps best known amongst ELS devices is the Raspberry Pi, which uses
-a Broadcom system on chip (SoC) for computation. It supports audio and
-features an ethernet interface 
+Early work on this thesis featured a flirtation with the Raspberry Pi
+as a prospective hardware platform, the Compute Module 5 version of
+the device supporting PTP and hardware timestamping. Typically run as
+an ELS and programmable via the Faust architectures
+=faust2rpialsaconsole= and =faust2rpinetjackconsole=, the Raspberry Pi can
+also be programmed in /bare-metal/ fashion via the Circle development
+environment.[fn:24] It was established, via work with Circle, that the
+system's audio clock can be adjusted dynamically during runtime ---
+critical for the sort of time-sensitive applications to be described
+later in this work.
+
+It is a general purpose device, however, and its Broadcom system on
+chip (SoC) derives audio timing from a GPIO pin whose clock dividers
+offer only 12 bits of resolution; by way of context, manufacturing
+tolerance aside, the SoC is not capable of producing an audio sampling
+rate of exactly \qty{48}{\kilo\hertz}, and only increments of around
+1/14 \unit{\hertz} at around that frequency, far from the
+nanosecond-order adjustments called for by PTP. Timing can be improved
+by replacing the device's crystal oscillator with a voltage controlled
+oscillator or direct digital synthesiser\nbsp[cite:@friedtNetwork2023],
+but this demands that sentsitive direct hardware modification be made
+to the device, taking matters beyond the realms of accessibility.
 
 *** Microcontroller Development Boards
 
@@ -1948,12 +2009,6 @@ features an ethernet interface
 *** Field Programmable Gate Arrays
 
 **** The SyFaLa Toolchain
-
-** The Faust Programming Language
-
-Faust is a high-level domain-specific language for audio
-programming. For much more detail about Faust, see
-cref:sec:faust-autodiff.
 
 ** Audio Plugins
 
@@ -4312,6 +4367,8 @@ This is my conclusion
 #+print_bibliography:
 
 * Footnotes
+
+[fn:24] [[https://github.com/rsta2/circle]]
 
 [fn:23] In the remainder of this work it is assumed that transmission
 over LAN is unlikely to result in packet corruption. The UDP checksum
