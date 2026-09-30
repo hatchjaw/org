@@ -1912,7 +1912,7 @@ OTTOsonics system, including speakers and audio interface, is costed
 at around €2,600 (€108.33/channel), however, which certainly places it
 favourably when compared with state-of-the-art spatialisation systems.
 
-* Tools and Platforms
+* Tools, Technologies and Platforms
 
 #+latex: \minitoc
 #+latex: \newpage
@@ -1977,12 +1977,13 @@ Early work on this thesis featured a flirtation with the Raspberry Pi
 as a prospective hardware platform, the Compute Module 5 version of
 the device supporting PTP and hardware timestamping. Typically run as
 an ELS and programmable via the Faust architectures
-=faust2rpialsaconsole= and =faust2rpinetjackconsole=, the Raspberry Pi can
-also be programmed in /bare-metal/ fashion via the Circle development
-environment.[fn:24] It was established, via work with Circle, that the
-system's audio clock can be adjusted dynamically during runtime ---
-critical for the sort of time-sensitive applications to be described
-later in this work.
+=faust2rpialsaconsole= and
+=faust2rpinetjackconsole=\nbsp[cite:@michonEmbedded2020], the Raspberry Pi
+can also be programmed in /bare-metal/ fashion via the Circle
+development environment.[fn:24] It was established, via work with
+Circle, that the system's audio clock can be adjusted dynamically
+during runtime --- critical for the sort of time-sensitive
+applications to be described later in this work.
 
 It is a general purpose device, however, and its Broadcom system on
 chip (SoC) derives audio timing from a GPIO pin whose clock dividers
@@ -2025,6 +2026,46 @@ facto standard in audio software development.
 *** The Clever Audio Plugin Format
 
 
+** Distributed Spatial Audio Algorithms
+
+*** Distributed Wave Field Synthesis
+
+#+name: fig:wfs
+#+caption: Distributed Wave Field Synthesis.
+\begin{figure*}
+\centering
+\begin{tikzpicture}
+\pic{wfs};
+% Legend
+\matrix [draw] at (-2.75, 4) {
+  \draw [ctrlArrow] (0,0) -- (.5,0); & \node [legend] {Control data}; \\
+  \draw [audio] (0,0) -- (.5,0); & \node [legend] {Audio}; \\
+  \draw [-{Triangle}] (0,0) -- (.5,0); & \node [legend] {PTP}; \\
+  \draw [usb] (0,0) -- (.5,0); & \node [legend] {USB}; \\
+};
+\end{tikzpicture}
+\end{figure*}
+
+
+*** Distributed Higher Order Ambisonics
+
+#+name: fig:wfs
+#+caption: Distributed Higher Order Ambisonics.
+\begin{figure*}
+\centering
+\begin{tikzpicture}
+\pic{hoa};
+% Legend
+\matrix [draw] at (-2.75, 5.75) {
+  \draw [ctrlArrow] (0,0) -- (.5,0); & \node [legend] {Decoder coeff's}; \\
+  \draw [acn] (0,0) -- (.5,0); & \node [legend] {ACN-format}; \\
+  \draw [audio] (0,0) -- (.5,0); & \node [legend] {Audio}; \\
+  \draw [-{Triangle}] (0,0) -- (.5,0); & \node [legend] {PTP}; \\
+  \draw [usb] (0,0) -- (.5,0); & \node [legend] {USB}; \\
+  \pic at (.25, 0) {selector=5pt}; & \node [legend] {Module selector}; \\
+};
+\end{tikzpicture}
+\end{figure*}
 
 * Differentiable DSP In Faust
 :PROPERTIES:
@@ -3190,201 +3231,12 @@ for the implementation described in this work.
 #+name: fig:switch
 #+caption: The CRS326-24G-2S+IN ethernet switch from Latvian manufacturer, MikroTik.
 [[./images/switch.png]]
-
-** Media Clock Recovery
-
-Time exchange at the level of the ethernet subsystems of distributed
-modules does not directly help us achieve audio sampling rate
-parity. The time exchange information derived from PTP must be used to
-condition the audio clocks of the modules such that sampling rate
-parity is achieved; this is a process referred to as /media clock
-recovery/\nbsp[cite:@crankshawMedia2021].
-
-In the case of the iMXRT1062 MCU this process is achieved by using the
-nanoseconds-per-second PTP-derived adjustment value at second \(n\),
-\(a_{n}\), to adjust the sampling rate. For a nominal sampling rate
-\(f_{s}\) (e.g. \qty{48}{\kHz}), the sampling rate, \(\hat{f}_{s,n}\) that
-"matches" that of the time authority is found simply as
-
-#+NAME: eq:sampling-rate-recovery-1
-\begin{equation}
-\hat{f}_{s,n} = f_{s}(1 + a_{n})\;.
-\end{equation}
-For example, if \(a_{n} = -1750\;\text{ns}\), we have
-
-#+begin_src emacs-lisp :exports none
-(let* ((fs 48000)
-       (a -1750e-9)
-       (proportion (+ 1 a))
-       (fhats (* fs proportion)))
-  (format "%.9f %f" proportion fhats))
-#+end_src
-
-#+RESULTS:
-: 0.999998250 47999.916000
-
-#+NAME: eq:adjust-example
-\begin{align*}
-\hat{f}_{s,n} &= f_{s}(1 - 1750 \times 10^{-9}) \\
-  &= 48\,000 \times 0.999\,998\,25 \\
-  &= 47\,999.916\;\text{Hz}\;.
-\end{align*}
-Inserting this value into cref:eq:general-fs, the expression for the
-audio sampling rate of the iMXRT1062, yields
-
-#+NAME: eq:adjusted-fs
-\begin{equation}
-47\,999.916 = \frac{24 \times 10^{6}}{2^{8}}\frac{D_{S} + \frac{D_{N,n}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}\;,
-\end{equation}
-and rearranging, using cref:eq:unknown-dn-2 to find the appropriate
-value for the PLL4 numerator register
-
-#+NAME: eq:adjusted-dn
-\begin{equation}
-D_{N,n} = \frac{D_{D}}{1 \times 10^{6}}\left(
-  \frac{2^{8} \times 47\,999.916 \times D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24} -
-  1 \times 10^{6} D_{S}
-\right)\;.
-\end{equation}
-Using the values derived in cref:sec:setting-the-sampling-rate yields
-
-#+NAME: eq:adjusted-dn-2
-\begin{align*}
-D_{N,n} &= 1 \times 10^{3}\left(
-  \frac{2^{8} \times 47\,999.916 \times 3 \times 19}{24} -
-  29 \times 10^{6}
-\right) \\
-  &= 183\,948\,928\;,
-\end{align*}
-which can be used as a new value for the ~CCM_ANALOG_PLL_AUDIO_NUM~
-register of the iMXRT1062 MCU.
-
-In practice cref:eq:sampling-rate-recovery-1 does not suffice,
-however, and some residual parts per billion drift remains (see
-cref:fig:drift). The proposed solution is as follows: first, observing
-that at a nominal sampling rate of \qty{48}{\kHz} for power of two
-audio buffer sizes less than or equal to 128 there will be an integer
-number, \(I\), of audio interrupts per second, take a representative
-nanoseconds figure, \(t_{S}\), on audio system startup; second, every
-\(I\) interrupts, read the system's PTP timer, taking the nanoseconds
-part, \(t_{\text{PTP}}\) and comparing with \(t_{S}\):
-
-#+begin_src julia :results none :session :exports none
-using CSV, DataFrames, Plots, LaTeXStrings
-
-function plotDrift(dataCategory)
-    scalefontsizes(2)
-    t41lastBytes = [191, 203, 234]
-    maxOffset = 0
-    yMax = 0
-    plot(fontfamily="EBGaramond-VariableFont_wght",
-         size=(900, 600),
-         margin=6Plots.mm,
-         xlabel="Time (s)",
-         xtickfontfamily="Computer Modern",
-         ytickfontfamily="Computer Modern",
-         legendtitle="IP address",
-         legendfontsize=14,
-         legendfont="Inconsolata-Regular",
-         legendtitlefontsize=17,
-         gridlinewidth=2);
-    for b in t41lastBytes
-        local data = CSV.read("../papers/smc-2025/data/$b-$dataCategory.csv", DataFrame; header=["offset"], limit=600)
-        data.offset .= data.offset .- data.offset[1]
-        # Prevent `noptp` data for client 191 from wrapping.
-        if b == 191 && dataCategory == "noptp"
-            data.offset[391:end] .= data.offset[391:end] .+ (data.offset[390] - data.offset[391])
-        end
-        plot!(data.offset, label="x.x.48.$b", linewidth=3)
-
-        # Get order-of-magnitude info
-        max = maximum(abs.(data.offset))
-        if max > maxOffset
-            maxOffset = max
-        end
-        max = maximum(data.offset)
-        if max > yMax
-            yMax = max
-        end
-    end
-
-    ordOfMag = floor(Int, log10(maxOffset))
-    ordOffset = 7.5e-8
-    if dataCategory == "noptp"
-        ordOffset = 3.0e-4
-        plot!(ylabel="Offset (s)")
-    end
-    annotate!(6, yMax + ordOffset, (latexstring("\$\\times10^{$(ordOfMag)}\$"), 18))
-    plot!(yformatter=y -> string(y / 10.0^ordOfMag))
-
-    savefig("./images/gen/$dataCategory.png")
-    scalefontsizes()
-end
-#+end_src
-
-#+begin_src julia :results file graphics :file noptp.png :output-dir ./images/gen :session :exports none
-plotDrift("noptp")
-#+end_src
-#+attr_org: :width 400
-#+RESULTS:
-[[file:./images/gen/noptp.png]]
-
-#+begin_src julia :results file graphics :file ptp.png :output-dir ./images/gen :session :exports none
-plotDrift("ptp")
-#+end_src
-#+attr_org: :width 400
-#+RESULTS:
-[[file:./images/gen/ptp.png]]
-
-#+name: fig:drift
-#+caption: Audio reproduction offsets for three MCU audio clients with respect to an MCU audio server.
-#+caption: Server and clients reproducing a \qty{1}{\Hz} impulse train.
-#+caption: Measurements triggered at the onset of the impulse produced by the server MCU,
-#+caption: i.e. once per second for a total of ten minutes.
-\begin{figure*}[t]
-    \subfloat[Without sampling frequency correction.]{\includegraphics[width=0.5\textwidth]{images/gen/noptp}\label{fig:noptp}}
-    \subfloat[With PTP-derived sampling frequency correction.]{\includegraphics[width=0.5\textwidth]{images/gen/ptp}\label{fig:ptp}}
-\end{figure*}
-
-#+NAME: eq:audio-ptp-offset
-\begin{equation}
-\Delta_{n} = t_{\text{PTP}} - t_{S}\;;
-\end{equation}
-finally, applying another PI controller:
-
-#+NAME: eq:sampling-rate-recovery-2
-\begin{equation}
-\hat{f}_{s,n} = f_{s}\left(
-  1 + a_{n} + K_{P_{\Delta}}\Delta_{n} + K_{I_{\Delta}}\sum_{t=0}^{n}\Delta
-\right)\;.
-\end{equation}
-These additional correction factors ensure reliable media clock
-recovery indefinitely.
-
-** Presentation Time Recovery
-
-If media clock recovery is a question of parity of rate of
-reproduction then presentation time recovery is one of simultaneity of
-reproduction. If media clocks are synchronised but audio interrupts
-are not, clients will reproduce audio at the same rate but with some
-constant temporal offset. Once again, the solution to this problem
-lies in judicious selection of sampling rate, \(f_{s}\), and audio buffer
-size, \(N\), plus co-ordination via PTP.
-
-Due to the way that DMA is configured, the iMXRT1062 generates two
-interrupts per audio buffer. At a sampling rate of
-\qty{48}{\kilo\hertz} and buffer size of 256 or below this means that
-an integer number of interrupts are generated each second. On system
-startup, waiting for a PTP lock to be achieved, it is possible to
-ensure that the audio subsystem starts up on a given PTP second and
-thus that audio subsystems on the entire network are synchronised.
-
 ** A Synchronous, Distributed Audio System
 *** Configuring the iMXRT1062 MCU
 
-Having discussed /time exchange/ mechanisms, it is important now to deal
-with how audio timing is configured on our target hardware platform,
-the Teensy 4.1 and its NXP iMXRT1062 MCU.
+Having discussed the /time exchange/ mechanism of PTP, it is important
+now to deal with how audio timing is configured on our target hardware
+platform, the Teensy 4.1 and its NXP iMXRT1062 MCU.
 
 The iMXRT1062 features a dedicated audio phase locked loop (PLL),
 PLL4, and a /synchronous audio interface/, SAI1, the latter providing
@@ -3618,7 +3470,8 @@ target \(f_{R}\), \(\hat{f}_{R}\) equals, as per cref:eq:sai1-1
 \end{equation}
 Strategically leaving \(D_{p}\) and \(D_{A}\) set to their default
 values of 1, cref:alg:sampling-rate can be used to find values for
-\(D_{S}\), \(D_{N}\), \(D_{D}\), \(D_{I_{1}}\) and \(D_{I_{2}}\).
+\(D_{S}\), \(D_{N}\), \(D_{D}\), \(D_{I_{1}}\) and \(D_{I_{2}}\), yielding the
+following results:
 
 #+begin_src julia :results output :eval never-export :exports results
 using Printf, Format
@@ -3769,47 +3622,200 @@ D_{N} = \frac{D_{D}}{1 \times 10^{6}}\left(
 \right)\;.
 \end{equation}
 
+An implementation of this equation will be used in the programming of
+the Teensy in order to achieve sampling rate adjustments that combat
+the otherwise inevitable phenomenon of clock drift; see
+cref:lst:calculate-fine on page \pageref{lst:calculate-fine} for its
+implementation.
 
-** Distributed Spatial Audio Algorithms
+** Media Clock Recovery
 
-*** Distributed Wave Field Synthesis
+Time exchange at the level of the ethernet subsystems of distributed
+modules does not directly help us achieve audio sampling rate
+parity. The time exchange information derived from PTP must be used to
+condition the audio clocks of the modules such that sampling rate
+parity is achieved; this is a process referred to as /media clock
+recovery/\nbsp[cite:@crankshawMedia2021].
 
-#+name: fig:wfs
-#+caption: Distributed Wave Field Synthesis.
-\begin{figure*}
-\centering
-\begin{tikzpicture}
-\pic{wfs};
-% Legend
-\matrix [draw] at (-2.75, 4) {
-  \draw [ctrlArrow] (0,0) -- (.5,0); & \node [legend] {Control data}; \\
-  \draw [audio] (0,0) -- (.5,0); & \node [legend] {Audio}; \\
-  \draw [-{Triangle}] (0,0) -- (.5,0); & \node [legend] {PTP}; \\
-  \draw [usb] (0,0) -- (.5,0); & \node [legend] {USB}; \\
-};
-\end{tikzpicture}
+In the case of the iMXRT1062 MCU this process is achieved by using the
+nanoseconds-per-second PTP-derived adjustment value at second \(n\),
+\(a_{n}\), to adjust the sampling rate. For a nominal sampling rate
+\(f_{s}\) (e.g. \qty{48}{\kHz}), the sampling rate, \(\hat{f}_{s,n}\) that
+"matches" that of the time authority is found simply as
+
+#+NAME: eq:sampling-rate-recovery-1
+\begin{equation}
+\hat{f}_{s,n} = f_{s}(1 + a_{n})\;.
+\end{equation}
+For example, if \(a_{n} = -1750\;\text{ns}\), we have
+
+#+begin_src emacs-lisp :exports none
+(let* ((fs 48000)
+       (a -1750e-9)
+       (proportion (+ 1 a))
+       (fhats (* fs proportion)))
+  (format "%.9f %f" proportion fhats))
+#+end_src
+
+#+RESULTS:
+: 0.999998250 47999.916000
+
+#+NAME: eq:adjust-example
+\begin{align*}
+\hat{f}_{s,n} &= f_{s}(1 - 1750 \times 10^{-9}) \\
+  &= 48\,000 \times 0.999\,998\,25 \\
+  &= 47\,999.916\;\text{Hz}\;.
+\end{align*}
+Inserting this value into cref:eq:general-fs, the expression for the
+audio sampling rate of the iMXRT1062, yields
+
+#+NAME: eq:adjusted-fs
+\begin{equation}
+47\,999.916 = \frac{24 \times 10^{6}}{2^{8}}\frac{D_{S} + \frac{D_{N,n}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}\;,
+\end{equation}
+and rearranging, using cref:eq:unknown-dn-2 to find the appropriate
+value for the PLL4 numerator register
+
+#+NAME: eq:adjusted-dn
+\begin{equation}
+D_{N,n} = \frac{D_{D}}{1 \times 10^{6}}\left(
+  \frac{2^{8} \times 47\,999.916 \times D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24} -
+  1 \times 10^{6} D_{S}
+\right)\;.
+\end{equation}
+Using the values derived in cref:sec:setting-the-sampling-rate yields
+
+#+NAME: eq:adjusted-dn-2
+\begin{align*}
+D_{N,n} &= 1 \times 10^{3}\left(
+  \frac{2^{8} \times 47\,999.916 \times 3 \times 19}{24} -
+  29 \times 10^{6}
+\right) \\
+  &= 183\,948\,928\;,
+\end{align*}
+which can be used as a new value for the ~CCM_ANALOG_PLL_AUDIO_NUM~
+register of the iMXRT1062 MCU.
+
+In practice cref:eq:sampling-rate-recovery-1 does not suffice,
+however, and some residual parts per billion drift remains (see
+cref:fig:withptp). The proposed solution is as follows: first, observing
+that at a nominal sampling rate of \qty{48}{\kHz} for power of two
+audio buffer sizes less than or equal to 128 there will be an integer
+number, \(I\), of audio interrupts per second, take a representative
+nanoseconds figure, \(t_{S}\), on audio system startup; second, every
+\(I\) interrupts, read the system's PTP timer, taking the nanoseconds
+part, \(t_{\text{PTP}}\) and comparing with \(t_{S}\):
+
+#+begin_src julia :results none :session :exports none
+using CSV, DataFrames, Plots, LaTeXStrings
+
+function plotDrift(dataCategory)
+    scalefontsizes(2)
+    t41lastBytes = [191, 203, 234]
+    maxOffset = 0
+    yMax = 0
+    plot(fontfamily="EBGaramond-VariableFont_wght",
+         size=(900, 600),
+         margin=6Plots.mm,
+         xlabel="Time (s)",
+         xtickfontfamily="Computer Modern",
+         ytickfontfamily="Computer Modern",
+         legendtitle="IP address",
+         legendfontsize=14,
+         legendfont="Inconsolata-Regular",
+         legendtitlefontsize=17,
+         gridlinewidth=2);
+    for b in t41lastBytes
+        local data = CSV.read("../papers/smc-2025/data/$b-$dataCategory.csv", DataFrame; header=["offset"], limit=600)
+        data.offset .= data.offset .- data.offset[1]
+        # Prevent `noptp` data for client 191 from wrapping.
+        if b == 191 && dataCategory == "noptp"
+            data.offset[391:end] .= data.offset[391:end] .+ (data.offset[390] - data.offset[391])
+        end
+        plot!(data.offset, label="x.x.48.$b", linewidth=3)
+
+        # Get order-of-magnitude info
+        max = maximum(abs.(data.offset))
+        if max > maxOffset
+            maxOffset = max
+        end
+        max = maximum(data.offset)
+        if max > yMax
+            yMax = max
+        end
+    end
+
+    ordOfMag = floor(Int, log10(maxOffset))
+    ordOffset = 7.5e-8
+    if dataCategory == "noptp"
+        ordOffset = 3.0e-4
+        plot!(ylabel="Offset (s)")
+    end
+    annotate!(6, yMax + ordOffset, (latexstring("\$\\times10^{$(ordOfMag)}\$"), 18))
+    plot!(yformatter=y -> string(y / 10.0^ordOfMag))
+
+    savefig("./images/gen/$dataCategory.png")
+    scalefontsizes()
+end
+#+end_src
+
+#+begin_src julia :results file graphics :file noptp.png :output-dir ./images/gen :session :exports none
+plotDrift("noptp")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:./images/gen/noptp.png]]
+
+#+begin_src julia :results file graphics :file ptp.png :output-dir ./images/gen :session :exports none
+plotDrift("ptp")
+#+end_src
+#+attr_org: :width 400
+#+RESULTS:
+[[file:./images/gen/ptp.png]]
+
+#+name: fig:drift
+#+caption: Audio reproduction offsets for three MCU audio clients with respect to an MCU audio server.
+#+caption: Server and clients reproducing a \qty{1}{\Hz} impulse train.
+#+caption: Measurements triggered at the onset of the impulse produced by the server MCU,
+#+caption: i.e. once per second for a total of ten minutes.
+\begin{figure*}[t]
+    \subfloat[Without sampling frequency correction.]{\includegraphics[width=0.5\textwidth]{images/gen/noptp}\label{fig:noptp}}
+    \subfloat[With PTP-derived sampling frequency correction.]{\includegraphics[width=0.5\textwidth]{images/gen/ptp}\label{fig:withptp}}
 \end{figure*}
 
+#+NAME: eq:audio-ptp-offset
+\begin{equation}
+\Delta_{n} = t_{\text{PTP}} - t_{S}\;;
+\end{equation}
+finally, applying another PI controller:
 
-*** Distributed Higher Order Ambisonics
+#+NAME: eq:sampling-rate-recovery-2
+\begin{equation}
+\hat{f}_{s,n} = f_{s}\left(
+  1 + a_{n} + K_{P_{\Delta}}\Delta_{n} + K_{I_{\Delta}}\sum_{t=0}^{n}\Delta
+\right)\;.
+\end{equation}
+These additional correction factors ensure reliable media clock
+recovery indefinitely.
 
-#+name: fig:wfs
-#+caption: Distributed Higher Order Ambisonics.
-\begin{figure*}
-\centering
-\begin{tikzpicture}
-\pic{hoa};
-% Legend
-\matrix [draw] at (-2.75, 5.75) {
-  \draw [ctrlArrow] (0,0) -- (.5,0); & \node [legend] {Decoder coeff's}; \\
-  \draw [acn] (0,0) -- (.5,0); & \node [legend] {ACN-format}; \\
-  \draw [audio] (0,0) -- (.5,0); & \node [legend] {Audio}; \\
-  \draw [-{Triangle}] (0,0) -- (.5,0); & \node [legend] {PTP}; \\
-  \draw [usb] (0,0) -- (.5,0); & \node [legend] {USB}; \\
-  \pic at (.25, 0) {selector=5pt}; & \node [legend] {Module selector}; \\
-};
-\end{tikzpicture}
-\end{figure*}
+** Presentation Time Recovery
+
+If media clock recovery is a question of parity of rate of
+reproduction then presentation time recovery is one of simultaneity of
+reproduction. If media clocks are synchronised but audio interrupts
+are not, clients will reproduce audio at the same rate but with some
+constant temporal offset. Once again, the solution to this problem
+lies in judicious selection of sampling rate, \(f_{s}\), and audio buffer
+size, \(N\), plus co-ordination via PTP.
+
+Due to the way that DMA is configured, the iMXRT1062 generates two
+interrupts per audio buffer. At a sampling rate of
+\qty{48}{\kilo\hertz} and buffer size of 256 or below this means that
+an integer number of interrupts are generated each second. On system
+startup, waiting for a PTP lock to be achieved, it is possible to
+ensure that the audio subsystem starts up on a given PTP second and
+thus that audio subsystems on the entire network are synchronised.
+
 
 * Protocol and Software Systems
 
@@ -3837,7 +3843,8 @@ writes these to an intermediate first-in-first-out (FIFO) buffer. When
 the FIFO contains enough samples to fill an outgoing audio packet, the
 sender thread is notified and reads from the FIFO to fill a packet for
 transmission. The sender thread delivers the packet to a UDP multicast
-socket and transmits it to the network.
+socket and transmits it to the network. Code for the Ananas audio
+server can be found at [[https://github.com/hatchjaw/ananas-server]].
 
 #+name: fig:server
 #+caption: Structural overview of the Ananas audio server.
@@ -3877,7 +3884,7 @@ found that, particularly under high-bandwidth conditions, packets
 sporadically arrive out of order, hence the inclusion of the sequence
 number, which is used at the receiving side to ensure the integrity of
 the packet stream. For timestamping, the server reads a PTP follow-up
-packet, adds a small reproduction offset (for packets of 16 frames it
+packet, adds a small reproduction offset (for packets of 16 frames[fn:25] it
 was found that an offset of \(1/70\) s was most appropriate) and
 writes the timestamp to the outgoing packet; successive packets are
 then updated with the expected inter-packet interval, e.g., for 16
@@ -3901,6 +3908,12 @@ respecting ethernet's 1500 byte maximum transmissible unit.
   \wordbox[lrb]{1}{} \\
 \end{bytefield}
 \end{figure}
+
+#+name: lst:audio-packet
+#+caption: Example network capture of an Ananas Audio Protocol packet.
+#+begin_src packet
+
+#+end_src
 
 *** The Ananas Authority Description Protocol
 
@@ -3978,27 +3991,28 @@ debugging measure, and isn't critical for operation of the Ananas
 system, but acts as a sanity check against client buffer fill
 levels. To that end, the final component of the network overview pane
 is a list of connected clients derived from ACDP packets; clients'
-serial numbers, firmware type, reported sampling rate,
-etc. Additionally, the approximate group asynchronicity is reported
-above the list of clients, giving an indication of the effectiveness
-of the synchronisation algorithm.
+serial numbers, firmware type, reported sampling rate, etc. are
+displayed. Additionally, the approximate group asynchronicity is
+reported above the list of clients, giving an indication of the
+effectiveness of the synchronisation algorithm.
 
 #+name: fig:network-overview
 #+caption: The network overview pane of the WFS plugin.
 #+attr_org: :width 300
 [[./images/network-overview.png]]
 
-The WFS control interface presents a variable number of client module
-selectors, each of which displays a list of client IP addresses when
-clicked; selecting a client triggers the transmission of an OSC
-message indicating the secondary source co-ordinates for which the
-client is responsible, the message being sent over unicast UDP. A
-checkbox controls the visibility of module selectors. Speaker icons
-indicate the position of the speaker array. A grid indicates the
-dimensions of the soundfield for virtual and focused WFS
-sources. Loudspeaker spacing can be configured via a numerical entry
-box at the top-right of the interface and governs the values of the
-secondary source co-ordinates to be transmitted on client selection.
+The WFS control interface (cref:fig:wfs-control) presents a variable
+number of client module selectors, each of which displays a list of
+client IP addresses when clicked; selecting a client triggers the
+transmission of an OSC message indicating the secondary source
+co-ordinates for which the client is responsible, the message being
+sent over unicast UDP. A checkbox controls the visibility of module
+selectors. Speaker icons indicate the position of the speaker array. A
+grid indicates the dimensions of the soundfield for virtual and
+focused WFS sources. Loudspeaker spacing can be configured via a
+numerical entry box at the top-right of the interface and governs the
+values of the secondary source co-ordinates to be transmitted on
+client selection.
 
 Finally, a series of coloured nodes indicate the positions of WFS
 sources; as previously stated, both virtual and focused sources are
@@ -4015,7 +4029,7 @@ corresponding to the number of WFS sources; monophonic channels can be
 added and set up as sends to the network bus.
 
 #+name: fig:wfs-control
-#+caption: The WFS plugin control interface.
+#+caption: The WFS plugin control interface. Numbered nodes represent monophonic WFS sound sources. Dropdown menus displaying IP addresses indicate the assignment of client modules to secondary source co-ordinates. The upper part of the interface represents the virtual sound field, and virtual sources that are /further away/ from the listening area; the lower part, beneath the speaker icons, represents the real sound field and the locations of focused sources.
 #+attr_org: :width 300
 [[./images/wfs-control.png]]
 
@@ -4024,6 +4038,9 @@ shortcuts. The square bracket keys can be used to navigate between the
 control interface and the network overview pane; for the WFS plugin,
 the m key can be used to show or hide module selectors, and the number
 keys allow quick access to module lists associated with each client.
+
+Being bundled with the audio server, code for the audio plugins can
+also be found at [[https://github.com/hatchjaw/ananas-server]].
 
 ** Microcontroller Firmware
 
@@ -4040,7 +4057,7 @@ necessary for all MCUs to run at a sampling rate of
 which runs as a USB audio device. Programming a Teensy as a USB audio
 device using PlatformIO is a simple case of passing the compiler flag
 =-DUSB_AUDIO=, however by default such a device runs at a sampling rate
-of \qty{44.1}[\kilo\hertz}. To circumvent this limitation it was
+of \qty{44.1}{\kilo\hertz}. To circumvent this limitation it was
 necessary to create a bespoke version of the ArduinoTeensy framework
 and modify the code, increasing the =AUDIO_TX_SIZE= and =AUDIO_RX_SIZE=
 definitions to account for the increased throughput called for by
@@ -4097,10 +4114,11 @@ void AudioSystemManager::startClock()
 #+end_src
 
 Additionally, in order to compute initial clock divider registers as
-per cref:alg:sampling-rate a class =AudioSystemManager::ClockDividers=
-was created. This makes it possible to ensure that frequencies
-throughout the PLL4 and SAI1 subsystems are valid as per
-cref:fig:imxrt1062-clock. See cref:lst:calculate-coarse for the
+per cref:alg:sampling-rate (see page \pageref{alg:sampling-rate}) a
+class =AudioSystemManager::ClockDividers= was created. This makes it
+possible to ensure that frequencies throughout the PLL4 and SAI1
+subsystems are valid as per cref:fig:imxrt1062-clock (page
+\pageref{fig:imxrt1062-clock}). See cref:lst:calculate-coarse for the
 implementation of cref:alg:sampling-rate.
 
 #+name: lst:calculate-coarse
@@ -4111,10 +4129,10 @@ void AudioSystemManager::ClockDividers::calculateCoarse(const uint32_t targetSam
     constexpr auto orderOfMagnitude{1e6};
 
     for (pll4Div = ClockConstants::Pll4DivMin; pll4Div <= ClockConstants::Pll4DivMax; ++pll4Div) {
-        pll4Num = 0;
-        pll4Denom = static_cast<uint32_t>(orderOfMagnitude);
-        sai1Pre = 1;
-        sai1Post = 1;
+        pll4Num = 0; // D_N
+        pll4Denom = static_cast<uint32_t>(orderOfMagnitude); // D_D
+        sai1Pre = 1; // D_I1
+        sai1Post = 1; // D_I2
         auto divExact{-1.};
 
         while (!isSai1PostFreqValid() && sai1Pre < ClockConstants::Sai1PreMax) {
@@ -4163,7 +4181,8 @@ void AudioSystemManager::ClockDividers::calculateCoarse(const uint32_t targetSam
 #+end_src
 
 This class also supports calculating clock-drift compensation PLL4
-numerator register values in accordance with cref:eq:unknown-dn-2. See
+numerator register values in accordance with cref:eq:unknown-dn-2
+(defined on page \pageref{eq:unknown-dn-2}). See
 cref:lst:calculate-fine for the implementation of this algorithm.
 
 #+name: lst:calculate-fine
@@ -4211,6 +4230,9 @@ Faust; clients receive co-ordinates as OSC messages and they are fed
 through a =ControlContext= structure, which contains a map of
 =std::string=-=SmoothedValue= pairs, the latter of which smooths value
 updates with a 1-pole lowpass filter.
+
+Code for all microcontroller firmware, including the time authority,
+can be found at [[https://github.com/hatchjaw/ananas-client]].
 
 ** Deployment
 
@@ -4329,6 +4351,13 @@ synchronicity results (see cref:fig:histos) reveal asymmetries,
 particularly for client =192.168.198.18=, but nothing to threaten the
 AES guideline.
 
+Synchronisation results represent a significant improvement over
+prior, best-effort work\nbsp[cite:@rushtonMicrocontrollerbased2023], which
+used a delay-locked loop and resampling in an attempt to overcome
+clock drift and network jitter. To the author's knowledge, these
+results represent the first open-source system to achieve this level
+of precise synchronisation.
+
 #+begin_src julia :results file graphics :file histo1.png :output-dir ./images/gen :session :exports none
 plotHistogram(1, "192.168.198.18")
 #+end_src
@@ -4367,6 +4396,9 @@ This is my conclusion
 #+print_bibliography:
 
 * Footnotes
+
+[fn:25] Here the word /frame/ is used to indicate \(m\) channels of
+\(n\) samples.
 
 [fn:24] [[https://github.com/rsta2/circle]]
 
