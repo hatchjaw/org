@@ -1935,18 +1935,21 @@ favourably when compared with state-of-the-art spatialisation systems.
 #+latex: \minitoc
 #+latex: \newpage
 
-Developing audio systems in a distributed context requires software
-development for a variety of different purposes and on a variety of
-different platforms, from embedded systems to audio plugins. In this
-chapter an overview will be given of the various concerns faced by the
-development of audio software for a range of different but related
-purposes, plus the tools and platforms that have been used in this work.
+\lettrine{D}{eveloping audio systems} in a distributed context
+requires software development for a variety of different purposes and
+on a variety of different platforms, from embedded systems to audio
+plugins. In this chapter an overview will be given of the various
+concerns faced by the development of audio software for a range of
+different but related purposes, plus the tools and platforms that have
+been used in this work. Distributed computation of spatial audio
+algorithms also implies parallelisation of those algorithms; the
+chapter concludes with observations on the parallelisation of WFS and
+HOA.
 
 ** The Faust Programming Language
 :PROPERTIES:
 :CUSTOM_ID: sec:faust
 :END:
-
 
 Faust is a functional paradigm, high-level domain-specific language
 for audio programming\nbsp[cite:@orlareySyntactical2004;
@@ -2192,35 +2195,210 @@ project. The content of an example =platformio.ini= file is given in
 cref:lst:pio-ini. The ~[env]~ section describes configuration that is
 common to all environments described in the file; in this example,
 information about the target board, the Teensy, is provided. Of
-interest from an audio programming point of view is the build flag
-~-DAUDIO_BLOCK_SAMPLES~ which is used here to specify an audio buffer
-size of 32 samples as opposed to the default of 128. Additionally,
-~lib_deps~ describes two third-party libraries to be used by
-environments: a library for handling OSC messages, and QNEthernet, a
-sophisticated replacement for the Teensy's default ethernet stack.
+particular interest from an audio programming point of view is the
+build flag ~-DAUDIO_BLOCK_SAMPLES~ which is used here to specify an
+audio buffer size of 32 samples as opposed to the default
+of 128. Additionally, ~lib_deps~ describes two third-party libraries to
+be used by environments: a library for handling OSC messages, and
+QNEthernet, a sophisticated replacement for the Teensy's default
+ethernet stack.
 
-The ~[env:basic]~ environment inherits the ~DAUDIO_BLOCK_SAMPLES~ build
+The ~[env:basic]~ environment inherits the ~-DAUDIO_BLOCK_SAMPLES~ build
 flag from the top-level environment and specifies that code from a
 directory named =examples/basic= be used as part of its build process. A
 build can be triggered from the command line and firmware uploaded to
 a device via the statement =pio run -e basic -t upload=.
 
+Managing MCU firmware using PlatformIO alone is not ideal in the case
+where one wishes to upload to multiple devices, i.e., satisfying the
+requirement of a distributed system of having all nodes in the system
+possessing up-to-date instructions for operation. Fortunately, in the
+case of the Teensy, there exists a suite of utilities named
+TyTools[fn:29] for managing and communicating with any and all
+connected devices. Amongst these tools is a command line utility,
+=tycmd=, which can be used to enumerate all Teensies connected to the
+host computer via USB and upload compiled firmware to
+them. Cref:lst:upload shows the content of a shell script, =upload.sh=,
+that combines the use of PlatformIO and TyTools to ensure that a group
+of Teensies are running the same firmware. Invoked as =upload.sh
+[environment]=, the script uses PlatformIO to build firmware for the
+specified environment, then =tycmd list= to query all connected Teensy
+devices, and finally =tycmd upload= to iteratively upload the compiled
+file =firmware.hex= to all devices that were found.
+
+#+name: lst:upload
+#+caption: Shell script for compiling Teensy firmware and uploading to multiple devices.
+#+begin_src shell :results none
+#!/bin/bash
+
+# Compiles a pio environment and uploads it to all connected Teensies.
+
+if ! command -v tycmd &>/dev/null; then
+  echo "Error: requires tytools, which were not found https://github.com/Koromix/tytools" >&2
+  echo
+  exit 1
+fi
+
+environment=$1
+if [ -z "$environment" ]; then
+  echo "Expected to receive a platformIO environment. Defaulting to 'teensy41'."
+  environment="teensy41"
+fi
+
+# Build
+cd "$(dirname "$(realpath "$0")")"/.. || exit 1
+# Run
+pio run -e "$environment"
+# Stop if pio exited unhappily
+if [ $? -eq 1 ]; then
+    exit 1
+fi
+
+cd .pio/build/$environment || exit 1
+
+echo -e "\nLooking for Teensies to upload to."
+
+# Query all connected Teensies
+teensies=($(tycmd list | grep -Eo "[0-9]+-Teensy"))
+
+# Upload
+if ((${#teensies[@]} == 0)); then
+  echo "No Teensies found."
+else
+  echo "Teensies found: ${#teensies[@]}"
+  for i in "${!teensies[@]}"; do
+    echo "Uploading to Teensy $((i + 1)) of ${#teensies[@]}."
+    tycmd upload firmware.hex -B "${teensies[$i]}"
+  done
+  echo "Done!"
+fi
+#+end_src
+
 ** Audio Plugins
 
-*** Jules's Utility Class Extensions
+Digital audio workstation software, coupled with audio plugins,
+represents a familiar and flexible means for working on the practical
+side of audio projects. The decision was made to create control
+interfaces for WFS and HOA as audio plugins to take advantage of the
+recognisable tooling provided by DAWs. A number of audio plugin
+formats exist, including Apple's Audio Unit (AU) and Steinberg's VST3
+to name but two, each providing their own software development kit
+(SDK) and development workflow. Targeting multiple plugin formats was
+once an onerous task; fortunately modern audio programming is
+supported by tools for consolidating audio plugin development.
 
-Developing audio software is fraught with difficulty in terms of
-ensurirng cross-platform compatibility. Simplifying matters
+*** JUCE and CLAP
+:PROPERTIES:
+:CUSTOM_ID: sec:juce-clap
+:END:
+
+Simplifying matters of cross-platform and cross-DAW compatibility
 considerably is the existence of Jules's Utility Class Extensions
-(JUCE). The JUCE C++ framework permits audio developers to create
+(JUCE[fn:30]). The JUCE C++ framework permits audio developers to create
 audio standalone software and plugins that work across a variety of
 platforms and respect a variety of plugin SDKs, and has become the de
-facto standard in audio software development.
+facto standard in audio software development. JUCE provides classes
+for describing plugins (~juce::AudioProcessor~), handling audio buffers
+(~juce::AudioBuffer~), creating user interface elements (~juce::Slider~,
+~juce::ComboBox~, etc.) as well as audio-adjacent classes for managing
+operating system threads (~juce::Thread~), and, critically for the work
+described in this thesis, sending and receiving UDP packets
+(~juce::DatagramSocket~). JUCE provides a project configuration tool
+named the /Projucer/ and also offers a Cmake API; an example Cmake
+configuration for an audio plugin is given in cref:lst:juce-cmake.
 
-*** The Clever Audio Plugin Format
+#+name: lst:juce-cmake
+#+caption: Example JUCE Cmake configuration describing an audio plugin.
+#+begin_src cmake
+juce_add_plugin(MyPlugin
+        COMPANY_NAME "${companyName}"
+        IS_SYNTH FALSE
+        NEEDS_MIDI_INPUT FALSE
+        COPY_PLUGIN_AFTER_BUILD TRUE
+        PLUGIN_MANUFACTURER_CODE "${companyCode}"
+        PLUGIN_CODE ${pluginCode}
+        FORMATS AU VST3 Standalone
+        PRODUCT_NAME "MyPlugin"
+)
 
+target_compile_definitions(MyPlugin
+        PRIVATE
+        JUCE_WEB_BROWSER=0
+        JUCE_USE_CURL=0
+        JUCE_VST3_CAN_REPLACE_VST2=0
+)
+
+target_sources(MyPlugin
+        PRIVATE
+        PluginEditor.cpp
+        PluginProcessor.cpp
+)
+
+target_link_libraries(MyPlugin
+        PRIVATE
+        juce::juce_core
+        juce::juce_audio_devices
+        juce::juce_audio_utils
+        PUBLIC
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_lto_flags
+        juce::juce_recommended_warning_flags
+)
+#+end_src
+
+Amongst the various audio plugin formats in existence is the Clever
+Audio Plugin format (CLAP[fn:31]), from developers Bitwig and
+u-he. Unlike formats such as VST3, CLAP takes a permissive approach to
+output channel counts and formats, which is an attractive
+characteristic where WFS, with a potentially arbitrary number of
+output channels, is concerned. JUCE does not generate CLAP format
+plugins by default, but support is provided by the third-party
+framework, /clap-juce-extensions/[fn:32], which integrates with JUCE's
+Cmake API as per cref:lst:juce-clap-cmake.
+
+#+name: lst:juce-clap-cmake
+#+caption: Excerpts from a JUCE Cmake configuration supporting the CLAP plugin format.
+#+begin_src cmake
+juce_add_plugin(MyClapPlugin
+        COMPANY_NAME "${companyName}"
+        IS_SYNTH FALSE
+        NEEDS_MIDI_INPUT FALSE
+        COPY_PLUGIN_AFTER_BUILD TRUE
+        PLUGIN_MANUFACTURER_CODE "${companyCode}"
+        PLUGIN_CODE ${pluginCode}
+        FORMATS Standalone
+        PRODUCT_NAME "MyClapPlugin"
+)
+
+clap_juce_extensions_plugin(
+        TARGET MyClapPlugin
+        CLAP_ID "${bundleID}"
+        CLAP_FEATURES utility
+)
+
+# ...
+
+target_link_libraries(MyClapPlugin
+        PRIVATE
+        juce::juce_core
+        juce::juce_audio_devices
+        juce::juce_audio_utils
+        clap_juce_extensions
+        PUBLIC
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_lto_flags
+        juce::juce_recommended_warning_flags
+)
+#+end_src
 
 ** Distributed Spatial Audio Algorithms
+
+Combining the elements described thus far in this chapter brings us to
+our chief aim, that of distributing spatial audio algorithms. The goal
+is to create parallelised WFS and HOA algorithms in Faust, deploy
+these on an array of embedded audio systems (specifically Teensy
+4.1s), and orchestrate the algorithms via DAW plugins written using
+JUCE and the CLAP format.
 
 *** Distributed Wave Field Synthesis
 
@@ -4231,11 +4409,12 @@ structure of an ACDP packet is given in cref:fig:client-packet.
 ** Audio Plugins
 
 Encapsulating the audio server are CLAP format audio plugins for WFS
-and HOA control. CLAP was chosen over VST3 due to its more permissive
-nature as regards channel formats; given that the audio server permits
-an arbitrary channel count for WFS (up to the 44-channel limit) it
-defies VST3's more restrictive channel formats, such as stereo,
-quadraphonic and various ambisonics formats.
+and HOA control. As stated in cref:sec:juce-clap (page
+\pageref{sec:juce-clap}) CLAP was chosen over VST3 due to its more
+permissive nature as regards channel formats; given that the audio
+server permits an arbitrary channel count for WFS (up to the
+44-channel limit) it defies VST3's more restrictive channel formats,
+such as stereo, quadraphonic and octagonal.
 
 The network overview pane of each plugin displays information on
 connected switches, specifically the behaviour of their PTP algorithm,
@@ -4659,6 +4838,14 @@ This is my conclusion
 #+print_bibliography:
 
 * Footnotes
+
+[fn:32] [[https://github.com/free-audio/clap-juce-extensions]] 
+
+[fn:31] [[https://cleveraudio.org]] 
+
+[fn:30] [[https://juce.com]] 
+
+[fn:29] [[https://koromix.dev/tytools]]
 
 [fn:28] [[https://www.pjrc.com/teensy/teensyduino.html]]
 
