@@ -932,10 +932,11 @@ Jens Ahrens; Cristoff Ressi, Shawn Silverman, and Jean-Michel Friedt.
 Others, beyond the confines of the lab: Kimberly Hoole, Peggy
 Domingeon, Irène Hontang, Myriam Boussaboua, Cristina Rottondi, Tomas
 Poloniecki, Julie Darnat and Ghis Mirat, Alice Aniello, Matti Gardner,
-Kate Fox, Anna Percy, Judy Knowles, Matt Rushton, Sally Rushton, Sally
-Catmull, Ani Cammack, Dave Rushton, Andreas Friberg, Louise Smith,
-Greg Chick, Anca Diana Axinia, Francesco Ganis, Razvan Paisa, Scott
-Naylor, Mike Croft, Alex Calgaro, Laura Armstrong and Mahmoud Nadda.
+Kate Fox, Anna Percy, Sue Knowles, Judy Knowles, Matt Rushton, Sally
+Rushton, Sally Catmull, Ani Cammack, Dave Rushton, Andreas Friberg,
+Louise Smith, Greg Chick, Anca Diana Axinia, Francesco Ganis, Razvan
+Paisa, Scott Naylor, Mike Croft, Alex Calgaro, Laura Armstrong and
+Mahmoud Nadda.
 
 I owe you all an enormous debt of gratitude.
 
@@ -1560,6 +1561,9 @@ are not suited to collective and immersive auditory experiences
 whereby multiple participants may move freely about their environment.
 
 *** Physically-inspired Techniques
+:PROPERTIES:
+:CUSTOM_ID: sec:wfs-hoa
+:END:
 
 Physical approaches fall into two main types: wave field synthesis
 (WFS)\nbsp[cite:@berkhoutAcoustic1993] and ambisonics (and higher-order
@@ -1756,7 +1760,10 @@ Berlin, plus the 345-speaker hybrid WFS/HOA system at IRCAM
 at the Rensslaer Polytecnic Institute (NY, United States)[fn:10], and
 the behemoth installation at /The Sphere/ (Las Vegas, United States, see
 figure cref:fig:sphere)[fn:11] is their /in-situ/ nature; these are
-site-specific systems with, at best, limited flexibility.
+site-specific systems with, at best, limited flexibility. The same can
+be said of other commercial spatial and immersive systems such as
+L-ISA from company L-Acoustics[fn:33], which can offer WFS as a
+component of its front-central speaker array.
 
 #+name: fig:sphere
 #+caption: Diagram of the spatial audio array at /The Sphere/, Las Vegas. Image taken from [[https://www.holoplot.com/case-studies/msg-sphere-case-study]]
@@ -2376,7 +2383,7 @@ clap_juce_extensions_plugin(
         CLAP_FEATURES utility
 )
 
-# ...
+# ... target_compile_definitions and target_sources
 
 target_link_libraries(MyClapPlugin
         PRIVATE
@@ -2402,6 +2409,89 @@ JUCE and the CLAP format.
 
 *** Distributed Wave Field Synthesis
 
+As illustrated in cref:fig:driving-function (page
+\pageref{fig:driving-function}) and cref:eq:wfs-driving-function, the
+WFS driving function for a secondary source at position \(\mathbf{x}\)
+is dependent only on the vertices of the right triangle described by
+the relative positions of \(\mathbf{x}\) and a given virtual or
+focused sound source \(\hat{s}_{\text{in},k}\); in effect, all
+per-loudspeaker delays and virtual source prefilters are independent,
+thus a given distributed module, with two speaker outputs, need only
+compute these for the two loudspeakers for which it is responsible,
+having been provided with the cartesian co-ordinates for each. Faust
+code for the distributed WFS algorithm can be found in
+cref:lst:faust-wfs.
+
+#+name: lst:faust-wfs
+#+caption: Faust code for a distributed WFS module.
+#+begin_src faust
+declare name "Distributed WFS";
+declare description "Basic WFS for a distributed setup consisting of modules that each handle two output channels.";
+import("stdfaust.lib");
+import("wfsParams.lib");
+
+// Take each source...
+process = par(i, N_SOURCES, _ <:
+    // ...and distribute it across the speaker array for this module.
+    speaker(x(i), y(i), ss0x, ss0y), speaker(x(i), y(i), ss1x, ss1y))
+    // Merge onto the output speakers.
+    :> par(i, SPEAKERS_PER_MODULE, _)
+with{
+    // Secondary source co-ordinates.
+    ss0x = hslider("ss/0/x", 0, -MAX_X, MAX_X, .001);
+    ss0y = hslider("ss/0/y", 0, -MAX_X, MAX_X, .001);
+    ss1x = hslider("ss/1/x", 0, -MAX_X, MAX_X, .001);
+    ss1y = hslider("ss/1/y", 0, -MAX_X, MAX_X, .001);
+
+    // Virtual/focused source co-ordinates.
+    x(p) = hslider("vs/%p/x", 0, -MAX_X, MAX_X, 0.001);
+    y(p) = hslider("vs/%p/y", 0, MIN_Y, MAX_Y, 0.001);
+
+    // Output for a given loudspeaker.
+    speaker(vsx, vsy, ssx, ssy) = _ <:
+        _,prefilter(hyp) : select2(vsy > 0) :
+        (fsDelay,vsDelay : select2(vsy > 0)),_ :
+        de.fdelay(maxHyp * samplesPerMeter)
+    with{
+        maxHyp = MIN_Y^2 + (2 * MAX_X)^2 : sqrt;
+
+        // Number of samples it takes sound to travel one meter.
+        samplesPerMeter = ma.SR / CELERITY;
+
+        // Invert x-position for focused sources.
+        cx = ssx,vsx <: +,- : select2(vsy > 0);
+        y = ssy - vsy;
+        hyp = cx^2 + y^2 : sqrt;
+
+        vsDelay = smallDelay
+        with {
+            smallDelay = (hyp - y) * samplesPerMeter;
+        };
+
+        fsDelay = (maxHyp - hyp) * samplesPerMeter;
+
+        // Simulate distance by changing gain and applying a lowpass as a function
+        // of distance
+        prefilter(distance) = *(dGain) : fi.lowpass(2, fc)
+        with{
+            // Inverse square law: A(d) = 1 / d, using a minimum distance of 1 m.
+            dGain = 1 / max(distance^(.5), 1);
+
+            fc = dGain * 15000 + 5000;
+        };
+    };
+};
+#+end_src
+
+The supporting DAW plugin should provide an audio server for
+monophonic WFS sources, plus user interface elements for assigning
+modules to pairs of loudspeakers, thus determining the appropriate
+pairs of secondary source co-ordinates to be transmitted to each
+module. Cref:fig:wfs illustrates the distributed WFS system
+diagrammatically. For an in-depth discussion of the significance of
+the /time authority/, see cref:sec:time-exchange and
+cref:sec:time-authority.
+
 #+name: fig:wfs
 #+caption: Distributed Wave Field Synthesis.
 \begin{figure*}
@@ -2418,10 +2508,86 @@ JUCE and the CLAP format.
 \end{tikzpicture}
 \end{figure*}
 
-
 *** Distributed Higher Order Ambisonics
 
-#+name: fig:wfs
+As established in cref:sec:wfs-hoa (page \pageref{sec:wfs-hoa}), the
+ambisonics decoding matrix \(\mathbf{D}\) is found as the inverse or,
+depending on its dimensions, the pseudoinverse of the mode matrix
+\(\mathbf{Y}\). Each row of \(\mathbf{D}\) contains the decoding
+coefficients for a given loudspeaker. The time-domain output signal
+for the \(i\)^{th} loudspeaker is found as the dot product of the \(i\)^{th}
+row of \(\mathbf{D}\) and the vector of ACN-format channels:
+
+#+NAME: eq:hoa-output
+\begin{equation}
+s_{i}(t) = \mathbf{D}_{i} \cdot \mathbf{b}(t)\;,
+\end{equation}
+and it is clear, then, that the ambisonics decoder is parallelisable
+--- a DSP module producing output for speakers \(i\) and \(j\) need
+only be aware of the coefficients for the corresponding \(i\)^{th} and
+\(j\)^{th} rows of the decoding matrix. See cref:lst:faust-hoa for code
+describing a distributed decoder for a third order HOA system. Note
+the use of the signal interleaving function in the definition of
+~linalg.dot~; the mathematical description of this function can be found
+in cref:eq:interleave (page \pageref{eq:interleave}).
+
+#+name: lst:faust-hoa
+#+caption: Faust code for a distributed HOA decoder.
+#+begin_src faust
+declare name "Distributed HOA";
+declare description "Third order HOA for a distributed setup consisting of modules that each handle two output channels.";
+import("stdfaust.lib");
+
+N = 16;
+coeffsPerRow = 16;
+
+coefficients0 = par(j, coeffsPerRow, hslider("dm/0/%j", 0, -10, 10, 1e-6));
+coefficients1 = par(j, coeffsPerRow, hslider("dm/1/%j", 0, -10, 10, 1e-6));
+
+process = par(i, N, _) <:
+    (par(i, N, _,ba.take(i+1, coefficients0)) : linalg.dot(N)),
+    (par(i, N, _,ba.take(i+1, coefficients1)) : linalg.dot(N));
+
+routes = environment {
+    // Differentiable analog to ro.interleave
+    // interleave(2, 2) Maps input signals 1,2,3,4 to 1,3,2,4
+    //
+    // twotwo = _,_,_,_ <: _,!, _,!, !,_, !,_; // ro.interleave(2,2)
+    // twothree = _,_,_,_,_,_ <: _,!, _,!, _,!, !,_, !,_, !,_; // ro.interleave(2,3)
+    // threetwo = _,_,_,_,_,_ <: _,!,!, _,!,!, !,_,!, !,_,!, !,!,_, !,!,_; // ro.interleave(3,2)
+    // fourtwo = _,_,_,_,_,_,_,_ <: _,!,!,!, _,!,!,!, !,_,!,!, !,_,!,!, !,!,_,!, !,!,_,!, !,!,!,_, !,!,!,_; // 4,2
+    //
+    // In general, R*C groups of R signals.
+    // The rth signal in each of C subgroups passes; the rest are cut.
+    interleave(1, C) = par(i, C, _);
+    interleave(R, C) = par(i, R * C, _) <: par(r, R, par(c, C, distribute(r, 1, R - r - 1)));
+} with {
+    // Helper function for distributing groups of signals.
+    // p: number of signals to cut at the start of the group.
+    // q: number of signals to pass.
+    // r: number of signals to cut at the end of the group.
+    distribute(0, q, 0) = par(i, q, _);
+    distribute(p, q, 0) = par(i, p, !),par(j, q, _);
+    distribute(0, q, r) = par(i, q, _),par(j, r, !);
+    distribute(p, q, r) = par(i, p, !),par(j, q, _),par(k, r, !);
+};
+
+linalg = environment {
+    dot(N) = routes.interleave(N, 2) : par(i, N, *) :> _;
+};
+#+end_src
+
+The HOA plugin should provide a server for ACN-encoded audio channels
+and a control interface that facilitates the assignment of cartesian
+co-ordinates to loudspeaker positions, and the assignment of modules
+to pairs of loudspeakers. Upon assigning a module to a pair of
+loudspeakers, co-ordinates for all loudspeakers should be converted
+from cartesian to spherical, the mode matrix computed, its inverse
+taken, and the appropriate rows of the decoder matrix transmitted to
+the module. A diagram of a distributed third order HOA system is
+depicted in cref:fig:hoa.
+
+#+name: fig:hoa
 #+caption: Distributed Higher Order Ambisonics.
 \begin{figure*}
 \centering
@@ -3460,6 +3626,9 @@ further development of Faust's adaptability to frequency domain
 processing.
 
 * Time Exchange
+:PROPERTIES:
+:CUSTOM_ID: sec:time-exchange
+:END:
 
 \begin{chapquote}{Douglas Adams, \emph{The Hitchhiker's Guide to the Galaxy}}
 Time is an illusion; lunchtime doubly so.
@@ -4492,6 +4661,9 @@ Teensy 4.1 MCU development board, written using PlatformIO. In the
 sections that follow this firmware is described.
 
 *** The Time Authority
+:PROPERTIES:
+:CUSTOM_ID: sec:time-authority
+:END:
 
 In order to support the presentation time recovery strategy it is
 necessary for all MCUs to run at a sampling rate of
@@ -4510,6 +4682,11 @@ USB audio feedback accumulator was converted to 12.13 fixed point
 packed into 16.16 fixed point format for a more predictable approach
 to decoding the sampling rate at the receiving side, =0x6.0000= being
 equal to \qty{48}{\kilo\hertz}.
+
+The time authority performs double duty as a USB audio device and as
+an authoritative source of PTP time, thus dictating audio timing to
+the audio server and, via the switch, PTP time to all connected client
+modules.
 
 *** The Audio Client
 
@@ -4672,6 +4849,8 @@ Faust; clients receive co-ordinates as OSC messages and they are fed
 through a =ControlContext= structure, which contains a map of
 =std::string=-=SmoothedValue= pairs, the latter of which smooths value
 updates with a 1-pole lowpass filter.
+
+*** The Distributed HOA Module
 
 Code for all microcontroller firmware, including the time authority,
 can be found at [[https://github.com/hatchjaw/ananas-client]].
@@ -4838,6 +5017,8 @@ This is my conclusion
 #+print_bibliography:
 
 * Footnotes
+
+[fn:33] [[https://www.l-acoustics.com/products/l-isa-immersive/]] 
 
 [fn:32] [[https://github.com/free-audio/clap-juce-extensions]] 
 
