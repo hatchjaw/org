@@ -1,6 +1,12 @@
 #+title: Emacs Early Init
 #+property: header-args :tangle ~/.emacs.d/early-init.el :noeval
 
+* Lexical binding cookie
+
+#+begin_src emacs-lisp
+;;; -*- lexical-binding: t; -*-
+#+end_src
+
 * Appearance
 
 #+begin_src emacs-lisp

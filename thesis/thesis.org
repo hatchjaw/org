@@ -119,6 +119,12 @@ Fancy characters (typically) at the beginning of chapters.
 \RequirePackage{lettrine}
 #+end_src
 
+For ~\dotuline~ on folio page.
+
+#+begin_src latex
+\RequirePackage[normalem]{ulem}
+#+end_src
+
 **** Quotes
 
 #+begin_src latex
@@ -4645,6 +4651,29 @@ added and set up as sends to the network bus.
 #+attr_org: :width 300
 [[./images/wfs-control.png]]
 
+The HOA control interface (cref:fig:hoa-control) supports third order
+ambisonics and consists of sixteen loudspeaker icons arranged in two
+rings offset by \(\frac{\pi/8}\) radians. Clicking on a loudspeaker icon
+reveals a modal window containing ~juce::Slider~ instances that can be
+used to specify a given loudspeaker's cartesian co-ordinates. Pairs of
+loudspeaker icons are associated with ~juce::ComboBox~ dropdown menus
+populated with the IP addresses of connected client modules. Selecting
+a given module triggers the conversion from cartesian to spherical
+co-ordinates and the computation of spherical harmonics as per
+cref:eq:spherical-harmonic (\pageref{eq:spherical-harmonic}) using
+SN3D normalisation\nbsp[cite:@frankProducing2015], thus constructing the
+mode matrix, \(\mathbf{Y}\). The /Eigen/ C++ library[fn:34] for linear algebra
+computation is used to calculate the inverse of the mode matrix with
+Tikhonov regularisation\nbsp[cite:@fuhryNew2012], yielding the decoder
+matrix, \(\mathbf{D}\). Depending on the dropdown menu for which a
+selection has been made, two rows of the decoder matrix are
+transmitted to the selected client module as OSC messages over unicast UDP.
+
+#+name: fig:hoa-control
+#+caption: The HOA plugin control interface, displaying modal window for specifying secondary source cartesian co-ordinates. Clicking on a speaker icon opens the corresponding modal window. Selecting a client module by its IP address using one of the dropdown menus assigns that module two rows from the decoder matrix.
+#+attr_org: :width 300
+[[./images/hoa-control.png]]
+
 Quality of life features include a small selection of keyboard
 shortcuts. The square bracket keys can be used to navigate between the
 control interface and the network overview pane; for the WFS plugin,
@@ -4677,11 +4706,16 @@ and modify the code, increasing the =AUDIO_TX_SIZE= and =AUDIO_RX_SIZE=
 definitions to account for the increased throughput called for by
 running at \qty{48}{\kilo\hertz}. Additionally the device was renamed
 from "Teensy Audio" to "Teensy Ananas" so that it would be easily
-recognisable in DAW audio device settings. Furthermore, the device's
-USB audio feedback accumulator was converted to 12.13 fixed point
-packed into 16.16 fixed point format for a more predictable approach
-to decoding the sampling rate at the receiving side, =0x6.0000= being
-equal to \qty{48}{\kilo\hertz}.
+recognisable in DAW audio device settings (see
+cref:fig:teensy-ananas). Furthermore, the device's USB audio feedback
+accumulator was converted to 12.13 fixed point packed into 16.16 fixed
+point format for a more predictable approach to decoding the sampling
+rate at the receiving side, =0x6.0000= being equal to
+\qty{48}{\kilo\hertz}.
+
+#+name: fig:teensy-ananas
+#+caption: Audio device settings for the DAW Reaper, showing /Teensy Ananas/, the time authority, as the selected audio device.
+[[./images/teensy-ananas.png]]
 
 The time authority performs double duty as a USB audio device and as
 an authoritative source of PTP time, thus dictating audio timing to
@@ -4852,6 +4886,10 @@ updates with a 1-pole lowpass filter.
 
 *** The Distributed HOA Module
 
+Like the distributed WFS algorithm, the distributed HOA algorithm is
+written in Faust and =faust2ananas= used to generate an =AudioProcessor=
+descendant.
+
 Code for all microcontroller firmware, including the time authority,
 can be found at [[https://github.com/hatchjaw/ananas-client]].
 
@@ -5012,11 +5050,17 @@ plotHistogram(4, "192.168.48.191")
 
 This is my conclusion
 
-#+include: "backmatter.tex" src latex
+#+latex: \listoffigures
+
+#+latex: \listoflistings
 
 #+print_bibliography:
 
+#+include: "backmatter.tex" src latex
+
 * Footnotes
+
+[fn:34] [[https://gitlab.com/libeigen/eigen]]
 
 [fn:33] [[https://www.l-acoustics.com/products/l-isa-immersive/]] 
 

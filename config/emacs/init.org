@@ -26,6 +26,13 @@ for this file at some point (see [[*Inspiration][Inspiration]]).
 - https://zzamboni.org/post/beautifying-org-mode-in-emacs/
 - https://github.com/SophieBosio/.emacs.d
 
+
+* Lexical binding cookie
+
+#+begin_src emacs-lisp
+;; -*- lexical-binding: t; -*-
+#+end_src
+
 * Global modes
 
 ** Visual line mode
