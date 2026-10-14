@@ -1151,7 +1151,7 @@ the sample at \(n = 7\)) for an illustration of this.
 *** Storage and Transmission
 
 Cref:lst:bin-sample and cref:lst:hex-sample hint at the property of
-/endianness/, which is to say the order in wwhich a number's component
+/endianness/, which is to say the order in which a number's component
 bits and bytes appear\nbsp[cite:@cohenHoly1981]. The above representations
 mirror the left-to-right nature of western written language and
 numbers, being /big endian/ at the levels of both bit and byte, with the
@@ -1168,7 +1168,7 @@ bytes, and bytes into bits; correct endianness must be observed with
 respect to different computer architectures, file formats, and
 transmission protocols.
 
-The PCM WAV file format, for example, di8ctates that the least
+The PCM WAV file format, for example, dictates that the least
 significant byte of each sample is stored first --- little endian ---
 but that bit order should be big endian\nbsp[cite:@Multimedia1991]; thus
 the audio sampling rate in cref:lst:hex-sample should be stored in a
@@ -1279,7 +1279,7 @@ familiar-looking =172.30.254.223=.
 
 Beginning at byte =0x0022= is the UDP header. This contains the source
 port (=0xed3f=, 60735_{10}), destination port (=0x22b8=, 8888_{10}), the length
-of the UDP part of the frame (=0x0016=, 22_{10} bytes) aand ends with a
+of the UDP part of the frame (=0x0016=, 22_{10} bytes) and ends with a
 checksum, which can be used to verify the integrity of the
 packet.[fn:23] The packet payload begins at byte =0x002a=, and consists
 of bytes corresponding with the ASCII characters =Hello, world!=, plus
@@ -1481,7 +1481,7 @@ sound captured by microphones, stored as digital audio files, or
 synthesised in real-time, can be achieved simply by delivering those
 primary sources to /secondary sound sources/, i.e., loudspeakers or
 headphones. Exploiting auditory cues, and the nature of the
-propagation of sound, it is possible to suggesnt the presence of
+propagation of sound, it is possible to suggest the presence of
 primary sources at arbitrary locations, independent of the secondary
 source distribution. The motivation behind audio spatialisation, then,
 is to create (or indeed /recreate/) sonic environments for creative and
@@ -1518,7 +1518,7 @@ equidistant from the listening position. The techniques exploit the
 interaural level difference (ILD) cue, i.e., the difference in
 perceived amplitude relative to the listener's
 ears\nbsp[cite:@ziemerWave2020; @verheijenSound1998; @pulkkiVirtual1997],
-te encourage the listener to localise sound to a position on the
+to encourage the listener to localise sound to a position on the
 circumference of an arc or circle around the listening position. For
 systems of this sort, the driving function is a constant scalar value,
 or, for a moving phantom source, a time-varying function that returns
@@ -1552,8 +1552,8 @@ or ear-mounted microphones, and thus the signal for each ear is
 coloured by the head used during recording, or HRTF measurements can
 be taken and used to describe filters to be applied to arbitrary
 signals at playback. Binaural sound is suited to headphone-based
-listening but ma,y be achieved with loudspeakers if suitable
-cross-talk cancellation is applied\nbsp[cite:@kaiserTransaural2011].
+listening but may be achieved with loudspeakers if suitable cross-talk
+cancellation is applied\nbsp[cite:@kaiserTransaural2011].
 
 Periphonic approaches are subject to the phenomenon of an ideal
 listening position, or /sweet-spot/\nbsp[cite:@nicolSound2017], that is a
@@ -1567,7 +1567,7 @@ are not suited to collective and immersive auditory experiences
 whereby multiple participants may move freely about their environment.
 
 *** Physically-inspired Techniques
-:PROPERTIES:
+:properties:
 :CUSTOM_ID: sec:wfs-hoa
 :END:
 
@@ -1588,13 +1588,13 @@ decomposed into a truncated basis of /spherical harmonics/, spatial
 functions described by linear sums of directional components of
 increasing order\nbsp[cite:@nicolSound2017] (see
 cref:fig:spherical-harmonics). For sound field reconstruction the
-number of loudspeakers required is \(N \ge (M + 1)^{2}\). Estimation of the
-ambisonic components of a sound pressure field is possible via
-recording with spherical microphone arrays\nbsp[cite:@moreau3D2006];
-alternatively, monophonic sound sources can be spatialised via
-/encoding/ to ambisonic format\nbsp[cite:@lecomteAmbitools2018], which, by
-convention uses /ambisonics channel numbering/ (ACN) to designate
-channels.
+number of loudspeakers required is \(N \ge (M + 1)^{2}\), where \(M\) is
+the ambisonic order. Estimation of the ambisonic components of a sound
+pressure field is possible via recording with spherical microphone
+arrays\nbsp[cite:@moreau3D2006]; alternatively, monophonic sound sources
+can be spatialised via /encoding/ to ambisonic
+format\nbsp[cite:@lecomteAmbitools2018], which, by convention uses
+/ambisonics channel numbering/ (ACN) to designate channels.
 
 ACN channels are indexed by the degree \(m\) and order \(n\) of the
 Legendre polynomials by which they are
@@ -1627,7 +1627,7 @@ of the polynomial that corresponds with the ambisonics /order/.
 
 Considering the case of a third order ambisonics system with the
 bare-minimum \((3 + 1)^{2} = 16\) loudspeakers at positions \(\theta_{i},\varphi_{i}\),
-the spherical harmonics make up the 16x16 mode matrix
+the spherical harmonics make up the 16\(\times\)16 mode matrix
 \(\mathbf{Y}_{m,n}(\theta,\varphi)\). In this case the decoding matrix
 \(\mathbf{D}\) is simply the inverse, \(\mathbf{D} = \mathbf{Y}^{-1}\),
 the rows of which are the decoding co-efficients for each loudspeaker;
@@ -1658,7 +1658,7 @@ sources\nbsp[cite:@bellochPerformance2021; @berkhoutAcoustic1993;
 @muellerAcoustic1971] (see cref:fig:holophony). WFS is variously
 termed a form of /acoustic holography/ or
 /holophony/\nbsp[cite:@berkhoutHolographic1988;
-@ahrensAnalytic2012]. Effectively, by timing the reporudction of an
+@ahrensAnalytic2012]. Effectively, by timing the reproduction of an
 input signal at an array of secondary sources, a wavefront associated
 with a virtual sound source can be synthesised. To simulate auditory
 cues related to perceived distance, a filter can be applied to model
@@ -1858,6 +1858,9 @@ Belloch et al. employed a GPU-based hardware platform, reporting
 client synchronisation to the millisecond range --- likely not
 sufficient for timing-critical audio spatialisation effects.
 
+A practical discussion of the distribution and parallelisation of WFS
+and HOA can be found in cref:sec:distributed-algorithms.
+
 ** Frugal Approaches to Spatial Audio
 
 #+name: tab:platforms
@@ -1875,20 +1878,24 @@ sufficient for timing-critical audio spatialisation effects.
 | Daisy Seed       | STM32H750IB      | 65 MB SDRAM  | No       | Yes | € 25      |
 
 #+name: fig:teensy
-#+caption: Teensy 4.1 microcontroller development board equipped with ethernet and audio add-ons.
+#+caption: Teensy 4.1 microcontroller development board equipped with ethernet and audio add-ons, labelled with the last two octets of its IP address.
+#+attr_latex: :width .75\linewidth
 [[./images/module.jpeg]]
 
 #+name: fig:bela
 #+caption: Bela companion board for the BeagleBone Black.
+#+attr_latex: :width .75\linewidth
 [[./images/bela.png]]
 
 #+name: fig:daisy
 #+caption: Daisy Seed3 microcontroller development board.
+#+attr_latex: :width .75\linewidth
 [[./images/daisy.png]]
 
 #+name: fig:esp32
 #+caption: ESP32 LyraT microcontroller development board.
 #+attr_org: :width 400
+#+attr_latex: :width .5\linewidth
 [[./images/esp32.png]]
 
 Progress in embedded computing, devices of the /internet of things/
@@ -1922,12 +1929,14 @@ platforms\nbsp[cite:@michonEmbedded2020].
 
 #+name: fig:spacebar
 #+caption: FPGA-based WFS system, the Space Bar.
+#+attr_latex: :width \linewidth
 [[./images/spacebar.jpg]]
 
 #+name: fig:ottosonics
 #+caption: The OTTOsonics DIY spatial audio system.
 #+caption: Image taken from [[https://tamlab.kunstuni-linz.at/projects/ottosonics/]]
 #+attr_org: :width 200
+#+attr_latex: :width .75\linewidth
 [[./images/ottosonics.jpg]]
 
 With frugality in mind, a modular, FPGA-based WFS system has been
@@ -1966,34 +1975,38 @@ HOA.
 
 Faust is a functional paradigm, high-level domain-specific language
 for audio programming\nbsp[cite:@orlareySyntactical2004;
-@orlareyFAUST2009]. Based on a block-diagram algebra, Faust has a
-history dating back more than twenty years and remains in active
-development. Although C++ is Faust's default compilation target,
-amongst its strengths is support for a proliferation of targets, from
-LLVM to webassembly\nbsp[cite:@letzOverview2018]; further, Faust's
-libraries include facilities for computing finite difference
-schemes\nbsp[cite:@russoIntroducing2021; @sudholtFaust2021], physical
-modelling\nbsp[cite:@michonFaust2018], and wave digital
-filters\nbsp[cite:@roosenburgWave2021] amongst numerous others. Faust has
-been used for active noise
-cancellation\nbsp[cite:@alexandreExperimental2023], for sparse stochastic
-synthesis\nbsp[cite:@hansenWeather2018], for the development of hybrid
-digital musical instruments\nbsp[cite:@michonFaust2020a] and (as we will see in
-cref:sec:faust-autodiff) for differentiable digital signal processing
-[cite:@rushtonDifferentiable2024].
-
-Another of Faust's strengths is its /write once, deploy anywhere/
-model\nbsp[cite:@gasterAudio2020]. Faust code has been compiled to run as
-audio plugins\nbsp[cite:@albouyFaust2017], on
-FPGAs\nbsp[cite:@popoffAudio2023], and on a variety of single board
-computers and microcontrollers\nbsp[cite:@michonReal2019;
-@michonEmbedded2020; @michonFaust2020]. Faust's versatility in this
+@orlareyFAUST2009]. It is a highly optimised, compiled
+language\nbsp[cite:@orlareyNew2020], with C++ as its default compilation
+target. One of the great strengths of the Faust ecosystem is its /write
+once, run anywhere/ model\nbsp[cite:@gasterAudio2020]; a proliferation of
+additional backends are supported, including
+LLVM\nbsp[cite:@letzOverview2018], WebAssembly\nbsp[cite:@letzCompiling2017],
+and Rust\nbsp[cite:@gasterAudio2020], plus numerous software and hardware
+platforms. Faust code can be compiled to run as audio
+plugins\nbsp[cite:@albouyFaust2017], for embedded
+systems\nbsp[cite:@michonFaust2020; @michonEmbedded2020; @michonReal2019]
+and FPGAs\nbsp[cite:@popoffAudio2023; @cochardProgramming2024] and it is
+used by a variety of practitioners including artists and digital
+luthiers\nbsp[cite:@hansenWeather2018; @carenKeyWI2020;
+@michonFaust2020a]. Faust's versatility in this
 regard is facilitated by the =faust2[...]= tools (e.g. =faust2android=)
 and associated architecture files; a Faust architecture consists of
 placeholder code to be populated with compiled Faust code, coupled
 with a shell script for performing the compilation and
 substitution. =faust2teensy=, for example, produces a C++ class
 compatible with the Teensy Audio Library.
+
+Furthermore, Faust features sophisticated libraries including
+facilities for computing finite difference
+schemes\nbsp[cite:@russoIntroducing2021; @sudholtFaust2021], physical
+modelling\nbsp[cite:@michonFaust2018], and wave digital
+filters\nbsp[cite:@roosenburgWave2021] amongst numerous others. Faust has
+been used for active noise
+cancellation\nbsp[cite:@alexandreExperimental2023], for sparse stochastic
+synthesis\nbsp[cite:@hansenWeather2018], for the development of hybrid
+digital musical instruments\nbsp[cite:@michonFaust2020a] and (as we will
+see in cref:sec:faust-autodiff) for differentiable digital signal
+processing [cite:@rushtonDifferentiable2024].
 
 Perhaps the simplest Faust program is a mono signal passthrough, as
 illustrated in cref:lst:faust-passthrough.
@@ -2077,8 +2090,19 @@ process = fi.iir(
 );
 #+end_src
 
-For more detail about Faust, see cref:sec:faust-autodiff.
+Faust was chosen for the DSP aspect of the work described in this
+thesis due in part to the optimised nature of its compiler ---
+compiled Faust programs are almost invariably more efficient than
+equivalent hand-written code. A mature language, Faust has a history
+dating back more than twenty years and remains in active development,
+with core development taking place within Inria's /Emeraude/ research
+team,[fn:35] the very team of which the author of this manuscript is a
+member; in tackling the work's DSP needs it was possible to benefit
+from a wealth of expertise and experience.
 
+Cref:sec:faust-autodiff studies the introduction of automatic
+differentiation in the Faust language; for more about the language,
+its syntax and semantics, consult that chapter.
 
 ** Embedded Audio Systems
 
@@ -2116,7 +2140,7 @@ rate of exactly \qty{48}{\kilo\hertz}, and only increments of around
 nanosecond-order adjustments called for by PTP. Timing can be improved
 by replacing the device's crystal oscillator with a voltage controlled
 oscillator or direct digital synthesiser\nbsp[cite:@friedtNetwork2023],
-but this demands that sentsitive direct hardware modification be made
+but this demands that sensitive direct hardware modification be made
 to the device, taking matters beyond the realms of accessibility.
 
 *** Teensy 4.1
@@ -2405,6 +2429,9 @@ target_link_libraries(MyClapPlugin
 #+end_src
 
 ** Distributed Spatial Audio Algorithms
+:PROPERTIES:
+:CUSTOM_ID: sec:distributed-algorithms
+:END:
 
 Combining the elements described thus far in this chapter brings us to
 our chief aim, that of distributing spatial audio algorithms. The goal
@@ -2421,12 +2448,15 @@ WFS driving function for a secondary source at position \(\mathbf{x}\)
 is dependent only on the vertices of the right triangle described by
 the relative positions of \(\mathbf{x}\) and a given virtual or
 focused sound source \(\hat{s}_{\text{in},k}\); in effect, all
-per-loudspeaker delays and virtual source prefilters are independent,
-thus a given distributed module, with two speaker outputs, need only
-compute these for the two loudspeakers for which it is responsible,
-having been provided with the cartesian co-ordinates for each. Faust
-code for the distributed WFS algorithm can be found in
-cref:lst:faust-wfs.
+per-loudspeaker delays and virtual source prefilters are independent
+and parallelisable; a given distributed module, with two speaker
+outputs, need only compute these for the two loudspeakers for which it
+is responsible, having been provided with the cartesian co-ordinates
+for each. Faust code for the distributed WFS algorithm can be found in
+cref:lst:faust-wfs. The program takes ~N_SOURCES~ input streams, each
+corresponding with a WFS source, and distributes these across the two
+speaker outputs for which the algorithm is responsible, with ~hslider~
+instances representing all secondary and virtual source co-ordinates.
 
 #+name: lst:faust-wfs
 #+caption: Faust code for a distributed WFS module.
@@ -2532,37 +2562,32 @@ and it is clear, then, that the ambisonics decoder is parallelisable
 --- a DSP module producing output for speakers \(i\) and \(j\) need
 only be aware of the coefficients for the corresponding \(i\)^{th} and
 \(j\)^{th} rows of the decoding matrix. See cref:lst:faust-hoa for code
-describing a distributed decoder for a third order HOA system. Note
-the use of the signal interleaving function in the definition of
-~linalg.dot~; the mathematical description of this function can be found
-in cref:eq:interleave (page \pageref{eq:interleave}).
+describing a distributed decoder for a third order HOA system, with
+its two rows of decoder coefficients represented as a pair of parallel
+~hslider~ instances. The dot product for each row, as per
+cref:eq:hoa-output, is computed by the function ~linalg.dot~. Note the
+use of the signal interleaving function in the definition of that
+function; its mathematical description can be found in
+cref:eq:interleave (page \pageref{eq:interleave}).
 
 #+name: lst:faust-hoa
 #+caption: Faust code for a distributed HOA decoder.
 #+begin_src faust
 declare name "Distributed HOA";
 declare description "Third order HOA for a distributed setup consisting of modules that each handle two output channels.";
-import("stdfaust.lib");
 
 N = 16;
 coeffsPerRow = 16;
 
-coefficients0 = par(j, coeffsPerRow, hslider("dm/0/%j", 0, -10, 10, 1e-6));
-coefficients1 = par(j, coeffsPerRow, hslider("dm/1/%j", 0, -10, 10, 1e-6));
+coefficients0 = par(j, coeffsPerRow, hslider("dm/0/%j", 0, -10, 10, 1e-8));
+coefficients1 = par(j, coeffsPerRow, hslider("dm/1/%j", 0, -10, 10, 1e-8));
 
 process = par(i, N, _) <:
-    (par(i, N, _,ba.take(i+1, coefficients0)) : linalg.dot(N)),
-    (par(i, N, _,ba.take(i+1, coefficients1)) : linalg.dot(N));
+    (par(i, N, _),coefficients0 : linalg.dot(N)),
+    (par(i, N, _),coefficients1 : linalg.dot(N));
 
 routes = environment {
-    // Differentiable analog to ro.interleave
-    // interleave(2, 2) Maps input signals 1,2,3,4 to 1,3,2,4
-    //
-    // twotwo = _,_,_,_ <: _,!, _,!, !,_, !,_; // ro.interleave(2,2)
-    // twothree = _,_,_,_,_,_ <: _,!, _,!, _,!, !,_, !,_, !,_; // ro.interleave(2,3)
-    // threetwo = _,_,_,_,_,_ <: _,!,!, _,!,!, !,_,!, !,_,!, !,!,_, !,!,_; // ro.interleave(3,2)
-    // fourtwo = _,_,_,_,_,_,_,_ <: _,!,!,!, _,!,!,!, !,_,!,!, !,_,!,!, !,!,_,!, !,!,_,!, !,!,!,_, !,!,!,_; // 4,2
-    //
+    // Signal interleaving function.
     // In general, R*C groups of R signals.
     // The rth signal in each of C subgroups passes; the rest are cut.
     interleave(1, C) = par(i, C, _);
@@ -2780,25 +2805,6 @@ mathematical function analogous to the primitive operations and
 compositions of \(D\), and \(t\) is time. The signal processor
 receives a vector of input signals, \(\mathbf{s}\), and produces a
 vector of output signals, \(\mathbf{y}\).
-
-*** The Faust Ecosystem
-
-Faust is a highly optimised, compiled language\nbsp[cite:@orlareyNew2020],
-with C++ as its default compilation target. One of the great strengths
-of the Faust ecosystem is its /write once, run anywhere/ model; a
-variety of additional backends are supported, including
-LLVM\nbsp[cite:@letzOverview2018], WebAssembly\nbsp[cite:@letzCompiling2017],
-and Rust\nbsp[cite:@gasterAudio2020], plus numerous software and hardware
-platforms. Faust code can be compiled for use in VST
-plugins\nbsp[cite:@albouyFaust2017], for embedded
-systems\nbsp[cite:@michonEmbedded2020] and
-\mbox{FPGAs}\nbsp[cite:@cochardProgramming2024]; it is used by artists and
-digital
-luthiers\nbsp[cite:@michonFaust2020a;@carenKeyWI2020;@hansenWeather2018],
-and features sophisticated libraries for wave digital filter
-modelling\nbsp[cite:@roosenburgWave2021] and physical modelling
-synthesis\nbsp[cite:@russoIntroducing2021;@michonFaust2018], amongst
-others.
 
 *** Differentiable Programming in Faust
 :PROPERTIES:
@@ -4558,8 +4564,8 @@ in cref:fig:authority-packet.
 
 *** The Ananas Client Description Protocol
 
-#+name: fig:client-packet
-#+caption: Structure of an Ananas Client Description packet.
+#+name: fig:client-packet-wfs
+#+caption: Structure of an Ananas Client Description packet, WFS variant.
 \begin{figure}
 \centering
 \begin{bytefield}[bitwidth=.9cm, bitheight=.9cm]{16}
@@ -4571,6 +4577,18 @@ in cref:fig:authority-packet.
     \end{bytefield}
 \end{figure}
 
+#+name: fig:client-packet-hoa
+#+caption: Structure of an Ananas Client Description packet, HOA variant.
+\begin{figure}
+\centering
+\begin{bytefield}[bitwidth=.9cm, bitheight=.9cm]{16}
+      \bitheader{0-15} \\
+      \bitbox{4}{Serial number} & \bitbox{1}{\tiny{Firmw. type}} & \bitbox{3}{\scriptsize{Version number}} & \bitbox{4}{Sampling rate} & \bitbox{4}{Percent CPU} \\
+      \bitbox[lrb]{4}{\scriptsize{Presentation offset frames}} & \bitbox[lrb]{8}{Presentation offset ns} & \bitbox[lrb]{4}{\scriptsize{Audio-PTP offset ns}} \\
+      \bitbox[lrb]{1}{\tiny{Buffer fill \%}} & \bitbox[lrb]{1}{\tiny{PTP lock}} & \bitbox[lbr]{8}{Decoder matrix rows}
+    \end{bytefield}
+\end{figure}
+
 Clients announce their presence on the network with periodic UDP
 multicast packets on address =224.4.224.6= port 49172. A client is
 deemed to be connected if the server has received an Ananas Client
@@ -4578,8 +4596,11 @@ Description Protocol (ACDP) packet within the last second. Each packet
 contains a variety of information about a given client, such as its
 serial number, firmware type and version, reported sampling rate,
 buffer fill percentage and PTP lock status, etc., information which
-can be displayed in a digital audio workstation plugin interface. The
-structure of an ACDP packet is given in cref:fig:client-packet.
+can be displayed in a digital audio workstation plugin interface. ACDP
+packets vary depending on client firmware; a WFS ACDP variant contains
+the module's secondary source \(x,y\) co-ordinates; a HOA variant
+contains the decoder matrix row indices. The structure of ACDP packets
+is given in cref:fig:client-packet-wfs,fig:client-packet-hoa.
 
 ** Audio Plugins
 
@@ -4862,6 +4883,8 @@ bool AudioSystemManager::ClockDividers::calculateFine(const double targetSamplin
 }
 #+end_src
 
+
+
 *** The Distributed WFS Module
 
 The distributed WFS algorithm is written in Faust and compiled to C++
@@ -5059,6 +5082,8 @@ This is my conclusion
 #+include: "backmatter.tex" src latex
 
 * Footnotes
+
+[fn:35] [[https://team.inria.fr/emeraude/]]
 
 [fn:34] [[https://gitlab.com/libeigen/eigen]]
 
