@@ -967,7 +967,8 @@ decade or so. Via IEEE 1588 Precision Time Protocol, hardware modules
 remain synchronised to within around
 \qty{200}{\nano\second}. Supporting the system is an audio server and
 protocols designed for time-sensitive networked audio, control data
-and device discovery.
+and device discovery. Sound field synthesis algorithms in parallelised
+form stand atop this precisely-synchronised foundation.
 #+end_abstract
 
 #+latex: \mainmatter
@@ -980,9 +981,21 @@ and device discovery.
 
 #+latex: \fancyhead[RE,LO]{Introduction}
 
-Spatial audio has an accessibility problem. Large-scale spatial and
-immersive audio installations remain costly and exclusive, with high
-barriers to entry. This thesis describes an attempt to democratise
+\lettrine{S}{patial audio} has an accessibility problem. Interest in
+spatial and immersive audio systems abounds amongst creative
+practitioners, concert venues, museums and virtual and augmented
+reality researchers, and yet large-scale spatial and immersive audio
+installations remain costly and exclusive, with high barriers to
+entry, typically monolithic and centralised, tied to the space they
+inhabit and frequently proprietary in nature. And yet these are not
+inescapable inevitabilities; technologically-speaking, all the
+ingredients exist to democratise access to spatial audio techniques
+such as wave field synthesis and higher order ambisonics, from highly
+capable embedded hardware systems for audio processing to open-source
+control systems, the stage is set for an alternative to the status quo
+to emerge.
+
+This thesis describes an attempt to democratise
 access to spatial audio systems by taking a distributed approach to
 the computation of sound field synthesis algorithms.
 
@@ -4883,7 +4896,36 @@ bool AudioSystemManager::ClockDividers::calculateFine(const double targetSamplin
 }
 #+end_src
 
+The networked audio client itself is called from the Teensy's ~loop()~
+function, which is itself called as often as possible in an infinite
+loop (~loop()~ is best thought of as a best-effort background task). At
+each iteration, the audio client polls a network socket that has
+joined the appropriate multicast group for AAP packets (=224.4.224.4=
+port 49152), attempting to read all queued incoming packets, adding
+them to a packet buffer as they arrive. The effects of network jitter,
+plus interrupt prioritisation (e.g. for audio processing) on the
+client mean that a backlog of packets may arise between calls to
+~AudioClientBase::run~, so it reads greedily; see
+cref:lst:audio-client-run for an excerpt from the ~run~ method.
 
+#+name: lst:audio-client-run
+#+caption: Selected lines from the ~run()~ method of the ~AudioClientBase~ class that polls the network for AAP packets.
+#+begin_src c++
+void AudioClientBase::run()
+{
+    while (true) {
+        if (const auto size{socket.parsePacket()}; size > 0) {
+            nWrite++;
+      
+            socket.read(rxPacket.rawData(), size);
+            packetBuffer.write(rxPacket);
+            //...
+        } else break;
+    }
+    //... maybe send ACDP packet; listen for potential reboot
+    //instruction
+}
+#+end_src
 
 *** The Distributed WFS Module
 
@@ -4903,15 +4945,136 @@ virtual sources. To avoid resorting to computationally-expensive
 smoothing operations in the Faust code, the \(x\) and \(y\)
 co-ordinates of virtual and focused sources are smoothed /outside/ of
 Faust; clients receive co-ordinates as OSC messages and they are fed
-through a =ControlContext= structure, which contains a map of
+through a =ControlContext= structure (see cref:lst:wfs-control-context
+for its definition), which contains a map of
 =std::string=-=SmoothedValue= pairs, the latter of which smooths value
 updates with a 1-pole lowpass filter.
+
+#+name: lst:wfs-control-context
+#+caption: The control-context structure for the distributed WFS algorithm.
+#+begin_src c++
+namespace ananas::WFS
+{
+    using SecondarySourceCoordinatesMap = std::unordered_map<std::string, ListenableParameter<float> >;
+    using VirtualSourceCoordinatesMap = std::unordered_map<std::string, SmoothedValue<float> >;
+
+    struct ControlContext
+    {
+        SecondarySourceCoordinatesMap secondarySourceCoordinates;
+        VirtualSourceCoordinatesMap virtualSourceCoordinates;
+    };
+};
+#+end_src
+
+Both ~SmoothedValue~ and ~ListenableParameter~ expose ~onChange~ callbacks
+that are assigned in the Teensy's ~setup()~ function to update their
+corresponding Faust parameters when changes
+occur. Cref:lst:setup-secondary-sources demonstrates initialisation of
+the secondary source co-ordinate parameters and the response to a
+change in their values.
+
+#+name: lst:setup-secondary-sources
+#+caption: Initialisation and ~onChange~ callback definition for the WFS ~ControlContext~.
+#+begin_src c++
+void setup()
+{
+    //...
+    // Set up secondary source positions.
+    char path[8];
+    for (size_t i{0}; i < 2; ++i) {
+        sprintf(path, "ss/%d/x", i);
+        context.secondarySourceCoordinates.insert(
+            SecondarySourceCoordinatesMap::value_type(
+                path,
+                ananas::ListenableParameter(0.f)
+            )
+        );
+        sprintf(path, "ss/%d/y", i);
+        context.secondarySourceCoordinates.insert(
+            SecondarySourceCoordinatesMap::value_type(
+                path,
+                ananas::ListenableParameter(0.f)
+            )
+        );
+    }
+
+    for (auto &ss: context.secondarySourceCoordinates) {
+        ss.second.onChange = [ss](const float value)
+        {
+            wfs.setParamValue(ss.first, value);
+            ananasClient.setSecondarySourceCoordinates(
+                wfs.getParamValue("ss/0/x"),
+                wfs.getParamValue("ss/0/y"),
+                wfs.getParamValue("ss/1/x"),
+                wfs.getParamValue("ss/1/y")
+            );
+        };
+    }
+    
+    //...
+}
+#+end_src
+
+The full distributed WFS processor is defined as a descendant of the
+~AudioProcessor~ class and contains the audio client, Faust-generated
+WFS algorithm, and control context as members, as per cref:lst:wfs-module.
+
+#+name: lst:wfs-module
+#+caption: Excerpts from the definition of the distributed WFS module, consisting of networked audio client and Faust-generated WFS algorithm.
+#+begin_src c++
+class WFSModule final : public AudioProcessor, public ProgramComponent
+{
+public:
+    WFSModule(AudioProcessor &ananasClient, AudioProcessor &faustWFS, ananas::WFS::ControlContext &controlContext)
+        : client(ananasClient), wfs(faustWFS), context(controlContext)
+    {
+    }
+
+    //...
+
+protected:
+    void processImpl(int16_t **inputBuffer, int16_t **outputBuffer, size_t const numFrames) override
+    {
+        // Advance smoothed parameters, i.e. virtual source positions
+        for (auto &sp: context.virtualSourceCoordinates) {
+            sp.second.getNext();
+        }
+        client.processAudio(inputBuffer, outputBuffer, numFrames);
+        wfs.processAudio(outputBuffer, outputBuffer, numFrames);
+    }
+
+private:
+    AudioProcessor &client;
+    AudioProcessor &wfs;
+    ananas::WFS::ControlContext &context;
+};
+#+end_src
 
 *** The Distributed HOA Module
 
 Like the distributed WFS algorithm, the distributed HOA algorithm is
-written in Faust and =faust2ananas= used to generate an =AudioProcessor=
-descendant.
+written in Faust and =faust2ananas= used to generate an ~AudioProcessor~
+descendant. Like the WFS algorithm, it too is bundled with an
+~AudioClient~ instance to create a combined ~AudioProcessor~ to be
+processed by ~AudioSystemManager~. The ambisonics module's control
+context is similar to that for the WFS module, albeit consisting only
+of ~ListenableParameter~ members (see cref:lst:hoa-control-context).
+
+#+name: lst:hoa-control-context
+#+caption: Control context for the distributed HOA algorithm.
+#+begin_src c++
+namespace ananas::HOA
+{
+    using DecoderCoefficientsMap = std::unordered_map<std::string, ListenableParameter<float> >;
+
+    struct ControlContext
+    {
+        DecoderCoefficientsMap decoderCoefficients;
+        ListenableParameter<int> decoderRow0;
+        ListenableParameter<int> decoderRow1;
+    };
+};
+#+end_src
 
 Code for all microcontroller firmware, including the time authority,
 can be found at [[https://github.com/hatchjaw/ananas-client]].
