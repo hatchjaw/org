@@ -2208,6 +2208,236 @@ AudioConnection patchCord3(faust, 0, out, 0);
 AudioConnection patchCord4(faust, 1, out, 1);
 #+end_src
 
+**** Programming the Teensy
+:PROPERTIES:
+:CUSTOM_ID: sec:programming-teensy
+:END:
+
+The Teensy is programmed in Arduino-like fashion with two main
+functions, ~setup()~ and ~loop()~, which are called from the Teensy
+framework's ~main()~ function as per cref:lst:teensy-main.
+
+#+name: lst:teensy-main
+#+caption: Selected lines from the ~main()~ function of =framework-arduinoteensy=.
+#+begin_src c++
+#include <Arduino.h>
+
+extern "C" int main(void)
+{
+    setup();
+    while (1) {
+ 	loop();
+	yield();
+    }
+}
+#+end_src
+
+Clearly ~setup()~ is called once on startup and is thus the ideal place
+to initialise variables and instances of classes (typically via a
+method named ~begin()~) and call functions that configure the device. On
+the other hand ~loop()~ is called repeatedly, as fast as possible,
+within an infinite ~while~ loop; ~loop()~ is thus suited to performing
+repeated tasks such as polling network sockets for incoming data. The
+~yield()~ function is a collaborative hook that lets background tasks,
+such as USB serial events, run. A very basic Teensy program (referred
+to, again in Arduino-like fashion, as a "sketch") makes the board's
+built-in LED flash, and its code can be found in cref:lst:teensy-blink
+
+#+name: lst:teensy-blink
+#+caption: Code for Teensyduino tutorial 1, that makes the board's built-in LED flash.
+#+begin_src c++
+/* LED Blink, Teensyduino Tutorial #1
+   http://www.pjrc.com/teensy/tutorial.html
+ 
+   This example code is in the public domain.
+*/
+
+const int ledPin = 13;
+
+// the setup() function runs once, when the sketch starts
+
+void setup() {
+  // initialize the digital pin as an output.
+  pinMode(ledPin, OUTPUT);
+}
+
+// the loop() function runs over and over again,
+// as long as the board has power
+
+void loop() {
+  digitalWrite(ledPin, HIGH);   // set the LED on
+  delay(1000);                  // wait for a second
+  digitalWrite(ledPin, LOW);    // set the LED off
+  delay(1000);                  // wait for a second
+}
+#+end_src
+
+This simple example demonstrates the basic pattern of programming for
+the device; irrespective of their complexity, all Teensy programs
+adhere to this essential structure of ~setup()~ and ~loop()~. With that in
+mind, and to encourage a predictable and orderly structure on code
+written for the Teensy, the abstract interface ~ProgramComponent~ is
+proposed, with ~beginImpl()~ and ~run()~ methods to be implemented by
+descendants and called from ~setup()~ and ~loop()~ respectively; see
+cref:lst:program-component for its definition, and note that it
+implements the ~Printable~ interface which can be used to print
+information to USB serial output for debugging purposes.
+
+#+name: lst:program-component
+#+caption: Definition of the ~ProgramComponent~ interface for code to run on the Teensy.
+#+begin_src c++
+#include <Printable.h>
+
+class ProgramComponent : public Printable
+{
+protected:
+    virtual void beginImpl() = 0;
+
+public:
+    virtual void begin() final
+    {
+        if (ready) return;
+        beginImpl();
+        ready = true;
+    }
+
+    virtual void run() = 0;
+
+    virtual size_t printTo(Print &p) const = 0;
+
+private:
+    bool ready{false};
+};
+#+end_src
+We can take things a step further, describing a ~ComponentManager~
+class, itself a descendent of ~ProgramComponent~, that receives a
+collection of ~ProgramComponent~ references and iteratively begins and
+runs them all:
+
+#+name: lst:component-manager
+#+caption: Implementation of the ~ComponentManager~ class that manages a collection of ~ProgramComponent~ instances.
+#+begin_src c++
+ComponentManager::ComponentManager(const std::vector<ProgramComponent *> &components, const SystemUtils::LogLevel logLevel)
+    : programComponents(components),
+      logging(logLevel)
+{
+}
+
+void ComponentManager::beginImpl()
+{
+    for (auto *c: programComponents) {
+        c->begin();
+    }
+}
+
+void ComponentManager::run()
+{
+    for (auto *c: programComponents) {
+        c->run();
+    }
+}
+
+// ...definition of printTo()
+#+end_src
+Now, imagining that we have defined a pair of ~ProgramComponent~
+descendants, which we can call ~ProgramComponent1~ and
+~ProgramComponent2~, our top-level Teensy code is neatly defined as per
+cref:lst:teensy-components-program.
+
+#+name: lst:teensy-components-program
+#+caption: An example Teensy program using the ~ProgramComponent~ interface and ~ComponentManager~ class.
+#+begin_src c++
+ProgramComponent1 p1;
+ProgramComponent2 p2;
+std::vector<ProgramComponent *> programComponents{&p1, &p2};
+ComponentManager componentManager{programComponents, SystemUtils::LogLevel::Medium};
+
+void setup()
+{
+    componentManager.begin();
+}
+
+void loop()
+{
+    componentManager.run();
+}
+#+end_src
+
+#+name: lst:network-processor
+#+caption: Definition of the ~NetworkProcessor~ interface.
+#+begin_src c++
+class NetworkProcessor
+{
+public:
+    virtual ~NetworkProcessor() = default;
+
+    virtual void connect() = 0;
+protected:
+    qindesign::network::EthernetUDP socket{16};
+};
+#+end_src
+
+Since the implementation described later in this work deals heavily
+with networking functionality, also proposed is the ~NetworkProcessor~
+interface (cref:lst:network-processor) and accompanying
+~EthernetManager~ class. Similarly to ~ComponentManager~, ~EthernetManager~
+is a ~ProgramComponent~ descendant that accepts a vector of
+~NetworkProcessor~ references as a parameter. Its ~beginImpl()~ method
+uses the /QNEthernet/ library[fn:37] to initialise ethernet
+functionality and declares QNEthernet's ~onLinkState~ callback function
+as an opportunity to call the ~connect()~ method of all ~NetworkProcessor~
+instances that it has received references to; see cref:lst:ethernet-manager.
+
+#+name: lst:ethernet-manager
+#+caption: Excerpt from the definition of the ~EthernetManager~ class.
+#+begin_src c++
+EthernetManager::EthernetManager(const char *hostName, const std::vector<NetworkProcessor *> &networkProcessors)
+    : networkProcessors(networkProcessors),
+      hostName(hostName)
+{
+}
+
+void EthernetManager::beginImpl()
+{
+    NVIC_SET_PRIORITY(IRQ_ENET, SystemUtils::IrqPriority::Priority48);
+  
+    qindesign::network::Ethernet.setHostname(hostName);
+    qindesign::network::Ethernet.macAddress(mac);
+    staticIP[2] = mac[4];
+    staticIP[3] = mac[5];
+    qindesign::network::Ethernet.begin(staticIP, subnetMask, gateway);
+    qindesign::network::EthernetIEEE1588.begin();
+  
+    qindesign::network::Ethernet.onLinkState([this](const bool state)
+    {
+        Serial.printf("\n[Ethernet] Link %dMbps %s\n", qindesign::network::Ethernet.linkSpeed(), state ? "ON" : "OFF");
+        if (state) {
+            for (auto *np: networkProcessors) {
+                np->connect();
+            }
+        }
+    });
+}
+#+end_src
+Now imagining the Teensy program in cref:lst:teensy-components-program
+extended with network processors ~NetworkProcessor1~ and
+~NetworkProcessor2~, its ~ComponentManager~ can be set up as per
+cref:lst:teensy-network-program and network connections will be
+configured when the top-level ~setup()~ function is called.
+
+#+name: lst:teensy-network-program
+#+caption: Extract from an example Teensy program containing ~NetworkProcessor~ and ~ProgramComponent~ instances.
+#+begin_src c++
+ProgramComponent1 p1;
+ProgramComponent2 p2;
+NetworkProcessor1 n1;
+NetworkProcessor2 n2;
+std::vector<NetworkProcessor *> networkProcessors{&n1, &n2};
+EthernetManager ethernetManager{"teensy41", networkProcessors};
+std::vector<ProgramComponent *> programComponents{&ethernetManager, &p1, &p2};
+ComponentManager componentManager{programComponents, SystemUtils::LogLevel::Medium};
+#+end_src
+
 *** PlatformIO and TyTools
 
 Although Teensyduino is the standard vehicle for programming the
@@ -3747,21 +3977,23 @@ find a means to correct for it.
 IEEE 1588 Precision Time Protocol (PTP) is a time exchange mechanism
 consisting of the exchange of multicast network packets between a
 clock authority and a clock subscriber\nbsp[cite:@leeProceedings2005;
-@schleusnerSubMicrosecond2024]. PTP packet flow is illustrated in
-cref:fig:ptp. Flow begins with the clock authority sending a /sync/
-packet; the subscriber notes the time, \(t_{2}\), at which this packet
-arrives. The authority then sends a /follow-up/ packet which is
-timestamped, \(t_{1}\), with the time of transmission. With \(t_{1}\)
-and \(t_{2}\) in hand, the subscriber sends a /delay request/ packet
-and notes the time, \(t_{3}\) of transmission; the authority notes the
-time, \(t_{4}\) of reception of this packet and sends it to the
-subscriber in a final /delay response/ packet. The above process then
-repeats for the next time period, typically a second, beginning with
-the receipt time \(t'_{2}\)of the following sync packet and the
-receipt of the next follow-up packet containing timestamp
+@schleusnerSubMicrosecond2024]. PTP transport can take place either as
+raw ethernet frames at layer 2, or as UDP packets at layer 3, and two
+delay mechanisms are provided: end-to-end and peer-to-peer. PTP packet
+flow is illustrated in cref:fig:ptp. Flow begins with the clock
+authority sending a /sync/ packet; the subscriber notes the time,
+\(t_{2}\), at which this packet arrives. The authority then sends a
+/follow-up/ packet which is timestamped, \(t_{1}\), with the time of
+transmission. With \(t_{1}\) and \(t_{2}\) in hand, the subscriber sends a
+/delay request/ packet and notes the time, \(t_{3}\) of transmission; the
+authority notes the time, \(t_{4}\) of reception of this packet and sends
+it to the subscriber in a final /delay response/ packet. The above
+process then repeats for the next time period, typically a second,
+beginning with the receipt time \(t'_{2}\) of the following sync packet
+and the receipt of the next follow-up packet containing timestamp
 \(t'_{1}\). Once the subscriber has the above timestamp information it
-can begin to compute its drift, \(\alpha\), delay, \(\delta\), and
-offset, \(\theta\) relative to the authority:
+can begin to compute its drift, \(\alpha\), delay, \(\delta\), and offset, \(\theta\)
+relative to the authority:
 
 #+NAME: eq:ptp1
 \begin{align}
@@ -4382,6 +4614,50 @@ startup, waiting for a PTP lock to be achieved, it is possible to
 ensure that the audio subsystem starts up on a given PTP second and
 thus that audio subsystems on the entire network are synchronised.
 
+** Implementing Time Exchange
+
+The PTP implementation for the Teensy was adapted from the code
+provided by Schleusner et
+al.\nbsp[cite:@schleusnerSubMicrosecond2024],[fn:36] streamlined for the
+target application (end-to-end and network layer only), and heavily
+refactored for clarity and maintainability. Both the clock authority
+and clock subscriber classes are implementations of both the abstract
+~PTPClock~ interface, a descendant of ~ProgramComponent~, and the
+~NetworkProcessor~ interface (see cref:sec:programming-teensy, page
+\pageref{sec:programming-teensy}). The ~PTPClock~ interface begins by
+setting pin 24 of the MCU to pulse high on each interrupt fired by the
+ethernet subsystem's PTP timer (useful for debugging the PTP
+implementation) and assigns a callback function to that interrupt, as
+per cref:lst:ptpclock-begin.
+
+#+name: lst:ptpclock-begin
+#+caption: ~beginImpl()~ method of the ~PTPClock~ interface.
+#+begin_src c++
+void PTPClock::beginImpl()
+{
+    // Set up ENET PPS out on pin 24
+    pin24SwMuxControlRegister.begin();
+    if (!pin24SwMuxControlRegister.setMuxMode(Pin24SwMuxControlRegister::MuxMode::ENET_1588_EVENT1_OUT) ||
+        !EthernetIEEE1588.setChannelCompareValue(1, ananas::Constants::NanosecondsPerSecond) ||
+        !EthernetIEEE1588.setChannelMode(1, EthernetIEEE1588Class::TimerChannelModes::kPulseHighOnCompare) ||
+        !EthernetIEEE1588.setChannelOutputPulseWidth(1, 25) ||
+        !EthernetIEEE1588.setChannelInterruptEnable(1, true)) {
+        Serial.printf("Failed to set up Ethernet IEEE 1588 timer. Restarting.");
+        SystemUtils::reboot();
+    }
+  
+    attachInterruptVector(IRQ_ENET_TIMER, interrupt1588Timer);
+    NVIC_ENABLE_IRQ(IRQ_ENET_TIMER);
+    NVIC_SET_PRIORITY(IRQ_ENET_TIMER, SystemUtils::IrqPriority::Priority64);
+}
+#+end_src
+
+In addition to sending /sync/ and /follow-up/ packets and responding to
+/delay request/ packets with /delay response/ packets, the ~PTPAuthority~
+class is responsible for sending /announce/ packets, to inform the
+network that it exists as a potential PTP authority. The transmission
+of /sync/ and /announce/ packets is governed by a pair of high-resolution
+timers
 
 * Protocol and Software Systems
 
@@ -5245,6 +5521,10 @@ This is my conclusion
 #+include: "backmatter.tex" src latex
 
 * Footnotes
+
+[fn:37] [[https://github.com/ssilverman/QNEthernet]] 
+
+[fn:36] [[https://github.com/IMS-AS-LUH/t41-ptp]]
 
 [fn:35] [[https://team.inria.fr/emeraude/]]
 

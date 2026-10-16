@@ -11470,7 +11470,7 @@ Entered on [2026-05-05 mar. 14:14]
 **** Abstract and bio for Turin presentation                :PRESENTATION:
 ***** Accessible Spatial Audio Installations on a Network of Distributed Signal Processors
 Access to state-of-the-art spatial audio systems is limited by
-techical and economic factors, with highly multichannel audio
+technical and economic factors, with highly multichannel audio
 interfaces and related equipment typically being very costly and
 inflexible. The rise of networked audio, embedded computing, and
 embedded audio in particular, plus the /write once, run anywhere/ model
@@ -11523,3 +11523,28 @@ Entered on [2026-05-18 lun. 13:30]
 - Ananas
 
 Entered on [2026-06-25 jeu. 11:01]
+** 2026-10 octobre
+*** 2026-10-15 jeudi
+**** Brain dump
+***** TODO Finish thesis
+Needs an intro and a conclusion. Maybe a "Programming the Teensy"
+section.
+***** DONE Order parts for audio cables
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-10-16 ven. 11:07]
+:END:
+Either from Mouser, Digikey or Thomann.
+***** DONE Title, astract and bio for Romain
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-10-16 ven. 13:11]
+:END:
+For the invited researchers day at UJM. I can re-use the equivalent
+info from Turin.
+***** TODO Poster for IS^{2}
+Refer back to last year's SMC poster for inspo.
+***** TODO Poster and presentation for SMC
+Last year's SMC equivalents should help here too.
+***** TODO Test updated WFS and new HOA implementations
+Question mark over whether HOA needs a volume control.
+
+Entered on [2026-10-15 jeu. 18:04]
