@@ -11544,7 +11544,10 @@ info from Turin.
 Refer back to last year's SMC poster for inspo.
 ***** TODO Poster and presentation for SMC
 Last year's SMC equivalents should help here too.
-***** TODO Test updated WFS and new HOA implementations
+***** DONE Test updated WFS and new HOA implementations
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-10-17 sam. 16:09]
+:END:
 Question mark over whether HOA needs a volume control.
 
 Entered on [2026-10-15 jeu. 18:04]

@@ -967,8 +967,8 @@ decade or so. Via IEEE 1588 Precision Time Protocol, hardware modules
 remain synchronised to within around
 \qty{200}{\nano\second}. Supporting the system is an audio server and
 protocols designed for time-sensitive networked audio, control data
-and device discovery. Sound field synthesis algorithms in parallelised
-form stand atop this precisely-synchronised foundation.
+and device discovery. Spatial audio algorithms in parallelised form
+stand atop this precisely-synchronised foundation.
 #+end_abstract
 
 #+latex: \mainmatter
@@ -1188,7 +1188,7 @@ the audio sampling rate in cref:lst:hex-sample should be stored in a
 =.wav= file as =0x02dc=. The ethernet standard for communication over
 local area computer networks\nbsp[cite:@ieeeIEEE2018] calls for something
 akin to the opposite: octets (bytes) are sent /"top to bottom"/, but
-each octet is ttransmitted with its least significant bit first.
+each octet is transmitted with its least significant bit first.
 
 ** Computer Networking
 
@@ -1464,8 +1464,8 @@ In 2011, IEEE released the Audio Video Bridging (AVB, IEEE 802.1)
 standard\nbsp[cite:@ieeeIEEE2011], and AES67 followed in
 2013\nbsp[cite:@hildebrandAES6720132014]. These technical standards
 describe /suites/ of protocols for tasks such as media transmission,
-device discovery and synchronisation, ind interoperability with other
-systems. Both use PTP fo device synchronisation; AES67 uses RTP for
+device discovery and synchronisation, and interoperability with other
+systems. Both use PTP for device synchronisation; AES67 uses RTP for
 media transmission whereas AVB uses the data-link layer (layer 2)
 Audio Video Transport Protocol. Open implementations of AVB and AES67
 exist, but, being complex standards featuring many components, such
@@ -1502,7 +1502,7 @@ immersive purposes, such as for virtual reality experiences, in
 cinematic settings, for music production or art installations, to give
 but a handful of examples.
 
-A number of techniques exisnt for what is termed /sound field
+A number of techniques exist for what is termed /sound field
 synthesis/\nbsp[cite:@nicolSound2017; @ahrensAnalytic2012], all of which
 essentially take the form of applying some manner of /driving function/
 to an input audio signal to generate an appropriate driving signal to
@@ -1519,7 +1519,7 @@ driving function \(d(\mathbf{x},t)\):
 \end{equation}
 where \(t\) denotes time.
 
-Commonly-employed approaches to sound fdield creation can be grouped
+Commonly-employed approaches to sound field creation can be grouped
 into two broad categories: amplitude- and time-based panning
 techniques, and physical sound field recreation approaches.
 
@@ -1927,18 +1927,18 @@ peripherals such as memory and connectivity via, e.g., USB and
 ethernet. A separate subset exist based on microcontroller (MCU)
 systems, prominent amongst these being the
 /Teensy/\nbsp[cite:@murrayCharacterisation2025; @michonReal2019] (with an
-MCU from manufacturer NXP[fn:16], see figure cref:fig:teensy)
+MCU from manufacturer NXP[fn:16], see cref:fig:teensy)
 /Daisy/\nbsp[cite:@gasterAudio2020] (STMicroelectronics[fn:17], see figure
 cref:fig:daisy), and various /ESP32/\nbsp[cite:@michonFaust2020] development
-boards (see cref:fig:esp32). Beyond matters of economy, connectivity, and modest power
-requirements, the attraction of such devices lies in the relative ease
-with which they can be programmed, each providing either an SDK, a
-selection of utility classes, or, in the case of ELS, compatibility
-with existing audio applications and plugins. Furthermore, it may be
-possible to produce compatible code in a higher level audio language
-such as Faust, in which case signal processing or audio synthesis code
-can be written once and compiled to run on a variety of
-platforms\nbsp[cite:@michonEmbedded2020].
+boards (see cref:fig:esp32). Beyond matters of economy, connectivity,
+and modest power requirements, the attraction of such devices lies in
+the relative ease with which they can be programmed, each providing
+either an SDK, a selection of utility classes, or, in the case of ELS,
+compatibility with existing audio applications and
+plugins. Furthermore, it may be possible to produce compatible code in
+a higher level audio language such as Faust, in which case signal
+processing or audio synthesis code can be written once and compiled to
+run on a variety of platforms\nbsp[cite:@michonEmbedded2020].
 
 #+name: fig:spacebar
 #+caption: FPGA-based WFS system, the Space Bar.
@@ -2002,7 +2002,7 @@ and FPGAs\nbsp[cite:@popoffAudio2023; @cochardProgramming2024] and it is
 used by a variety of practitioners including artists and digital
 luthiers\nbsp[cite:@hansenWeather2018; @carenKeyWI2020;
 @michonFaust2020a]. Faust's versatility in this
-regard is facilitated by the =faust2[...]= tools (e.g. =faust2android=)
+regard is facilitated by the =faust2[...]= tools (e.g., =faust2android=)
 and associated architecture files; a Faust architecture consists of
 placeholder code to be populated with compiled Faust code, coupled
 with a shell script for performing the compilation and
@@ -2035,7 +2035,7 @@ process = _;
 
 #+name: fig:faust-passthrough
 #+caption: Block diagram generated by the Faust compiler for the code in cref:lst:faust-passthrough.
-#+attr_latex: :width .5\linewidth :float t
+#+attr_latex: :width .25\linewidth :float t
 [[./images/gen/passthrough.svg]]
 
 Here ~process~ is the default entry-point for the program, though this
@@ -2441,10 +2441,10 @@ ComponentManager componentManager{programComponents, SystemUtils::LogLevel::Medi
 *** PlatformIO and TyTools
 
 Although Teensyduino is the standard vehicle for programming the
-Teensy, this can also be achieved with PlatformIO[fn:20], a tool for
+Teensy, this can also be achieved with PlatformIO,[fn:20] a tool for
 writing and running firmware for a wide range of MCUs, including the
 Teensy. The use of PlatformIO permits the programmer fine-grained
-control over build configurations, referred to as "environments", plus
+control over build configurations, referred to as "environments," plus
 the use of more capable software development tools than the Arduino
 IDE.
 
