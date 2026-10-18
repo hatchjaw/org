@@ -27,7 +27,7 @@
 ** Packages
 
 #+begin_src latex
-\usepackage[orientation=portrait,size=a0,scale=1.4,]{beamerposter}
+\usepackage[orientation=portrait,size=a0,scale=1.4]{beamerposter}
 \usepackage[absolute,overlay]{textpos}
 \usepackage[sorting=none]{biblatex}
 \usepackage[export]{adjustbox}
@@ -43,7 +43,8 @@
 \usepackage{ragged2e}
 \usepackage{booktabs}
 \usepackage{tikz}
-\usetikzlibrary{shapes, positioning, arrows.meta}
+\usetikzlibrary{positioning, arrows.meta, fit, calc, shapes}
+\usepackage{bytefield}
 #+end_src
 
 ** Typography
@@ -72,7 +73,7 @@
 ** Bibliography
 
 #+begin_src latex
-\AtBeginBibliograhphy{\small}
+\AtBeginBibliography{\small}
 \AtEveryBibitem{
   \clearfield{pages}
   \clearfield{pagetotal}
@@ -138,7 +139,7 @@
 \mode<presentation>
 #+end_src
 
-Dark red for the header background.
+Dark blue for the header background.
 
 #+begin_src latex
 \definecolor{cHeaderBg}{HTML}{001A31}
@@ -157,7 +158,7 @@ from the title.
 \definecolor{cAuthorFg}{HTML}{DDDDDD}
 #+end_src
 
-Dark red again for block titles.
+Dark blue again for block titles.
 
 #+begin_src latex
 \definecolor{cTitleFg}{HTML}{001A31}
@@ -172,8 +173,8 @@ A lighter colour for block backgrounds.
 Bibliography entry colours
 
 #+begin_src latex
-\definecolor{cBibAuthorFg}{HTML}{600000}
-\definecolor{cBibNoteFg}{HTML}{613737}
+\definecolor{cBibAuthorFg}{HTML}{000060}
+\definecolor{cBibNoteFg}{HTML}{374261}
 #+end_src
 
 ** Header fonts & colours
@@ -389,8 +390,7 @@ Draw a vertical line separating the two columns.
   audio/.style={-{Stealth}, audioColour},
   ptp/.style={{Triangle}-{Triangle}},
   usb/.style={{Triangle[open]}-{Triangle[open]}, usbColour},
-  legend/.style={font=\tiny\itshape},
-  module/.style={device, fill=ctrlColour!35, font={\ultratiny}, transform shape},
+  module/.style={device, fill=ctrlColour!35, transform shape},
   authority/.style={device, fill=usbColour!35}
 }
 #+end_src
@@ -411,7 +411,7 @@ Draw a vertical line separating the two columns.
     \draw[rotate = 45] (0,-#1) -- (0, #1);
   },
   wfsModule/.pic = {
-    \node [module] {dWFS};
+    \node [module, font=\ultratiny] {dWFS};
   },
   wavefronts/.pic={
     \foreach \pos/\rad in {0/.18, 1/.615, 2/1.03, 3/1.42, 4/1.78, 5/2.07, 6/2.295, 7/2.42} {
@@ -424,7 +424,7 @@ Draw a vertical line separating the two columns.
   },
   wfs/.pic={
     % Virtual sound field
-    \draw (-\wfsX, -.5) rectangle (\wfsX, 2);
+    \draw [fill=white] (-\wfsX, -.5) rectangle (\wfsX, 2);
     
     \begin{scope}
       \clip (-\wfsX, -.5) rectangle (\wfsX, 2);
@@ -444,11 +444,11 @@ Draw a vertical line separating the two columns.
       % Labels
       \node [
         black!50, fill=white, align=center,
-        font={\footnotesize\itshape}
+        font={\itshape}
       ] at (-3.15, .1) {Virtual\\soundfield};
       \node [
         below right=-1mm and -1mm of primary,
-        font={\footnotesize\itshape}
+        font={\itshape}
       ] {Virtual sound source};
 
       \foreach \i [
@@ -459,7 +459,7 @@ Draw a vertical line separating the two columns.
       }
 
       % Virtual source co-ordinates and ctrl line
-      \draw [ctrl] node [above right=.1mm, font=\ultratiny]
+      \draw [ctrl] node [above right=.1mm]
             {\((x, y)\)} (primary) -- (0, 2);
     \end{scope}
 
@@ -498,11 +498,11 @@ Draw a vertical line separating the two columns.
         \draw [ctrlArrow] (\xpos, 4.0) -- (\xpos, 4.375);
         
         \ifnum\i=1
-          \draw [-{Triangle}] (switch.north) +(0, .325) --
+          \draw [-{Triangle}] (switch.north) +(0, .7) --
           (\xpos-.2, 4.0) (\xpos+.2, 4.0) -| (\xpos+.2, 4.375);
         \else
           \ifnum\i=\wfsNumMCU
-            \draw [ptp] (switch.north) -- +(0, .325) -| (\xpos+.2, 4.375);
+            \draw [ptp] (switch.north) -- +(0, .7) -| (\xpos+.2, 4.375);
           \else
             \draw [-{Triangle}] (\xpos+.2, 4.0) -- (\xpos+.2, 4.375);
           \fi
@@ -532,11 +532,20 @@ Draw a vertical line separating the two columns.
       }
 
       \draw [ctrl] (0, 0) -- (0, .2);
+
+      % Legend
+      \matrix [ampersand replacement=\&, draw, fill=white, font=\ultratiny] at (-2.75, 2) {
+        \draw [ctrlArrow] (0,0) -- (.5,0); \& \node [legend] {Control data}; \\
+        \draw [audio] (0,0) -- (.5,0); \& \node [legend] {Audio}; \\
+        \draw [-{Triangle}] (0,0) -- (.5,0); \& \node [legend] {PTP}; \\
+        \draw [usb] (0,0) -- (.5,0); \& \node [legend] {USB}; \\
+      };
     \end{scope}
 
     % Synthesised soundfield
     \begin{scope}[yshift=5.055cm]
       \clip (-\wfsX, 2) rectangle (\wfsX, 4.6);
+      \draw [white, fill=white] (-\wfsX, 2) rectangle (\wfsX, 4.6);
 
       \foreach \i [evaluate=\i as \rad using \i*\wfsWaveSpace] in {1,...,\wfsNumWaves} {
         \draw [thick, audioColour] (-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
@@ -545,7 +554,7 @@ Draw a vertical line separating the two columns.
       \pic {wavefronts};
       \pic [xscale=-1] {wavefronts};
 
-      \node [black!50, align=center, font={\ultratiny\itshape}] at (-3.15, 4) {Synthesised\\soundfield};
+      \node [black!50, align=center, font={\itshape}] at (-3.15, 4) {Synthesised\\soundfield};
     \end{scope}
   }
 }
@@ -579,7 +588,7 @@ Draw a vertical line separating the two columns.
   hoa/.pic={
     \begin{scope}[yshift=11.5cm]
       % Synthesised soundfield
-      \draw [thick] (-4, -4) rectangle (4, 4);
+      \draw [thick, fill=white] (-4, -4) rectangle (4, 4);
       % Azymuthal rings
       \draw [dashed, black!30] (0, 0) circle (3.5);
       \draw [dashed, black!30] (0, 0) circle (1.9);
@@ -645,10 +654,20 @@ Draw a vertical line separating the two columns.
       % Coordinates
       \draw [ctrlArrow] (1.1, -1.5) -- ([xshift=1.1cm] switch.south);
       \draw [ctrlArrow] ([xshift=1.1cm] switch.north) -- (1.1, 2);
+
+      % Legend
+      \matrix [draw, fill=white, font=\ultratiny, ampersand replacement=\&] at (-2.75, 0.25) {
+        \draw [ctrlArrow] (0,0) -- (.5,0); \& \node [legend] {Decoder coeff's}; \\
+        \draw [acn] (0,0) -- (.5,0); \& \node [legend] {ACN-format}; \\
+        \draw [audio] (0,0) -- (.5,0); \& \node [legend] {Audio}; \\
+        \draw [-{Triangle}] (0,0) -- (.5,0); \& \node [legend] {PTP}; \\
+        \draw [usb] (0,0) -- (.5,0); \& \node [legend] {USB}; \\
+        \pic at (.25, 0) {selector=5pt}; \& \node [legend] {Module selector}; \\
+      };
     \end{scope}
     \begin{scope}
       % DAW
-      \draw [thick] (-4, -4) rectangle (4, 4);
+      \draw [fill=white, thick] (-4, -4) rectangle (4, 4);
       \node [] at (-3.25, 3.5) {DAW};
       % Virtual soundfield
       \draw [thick] (0, 0) circle (3.5);
@@ -687,6 +706,56 @@ Draw a vertical line separating the two columns.
 }
 #+end_src
 
+** System Overview
+
+#+begin_src latex
+\tikzset{
+  systemOverview/.pic={
+    \node (auth) [authority] at (0, 0) {Time\\authority};
+    \node (switch) [device, above=5mm of auth, inner xsep=10mm] {Switch};
+    \node (server) [device, below=5mm of auth, inner xsep=10mm] {Server};
+    \node (module0) [module, above left=5mm and -7mm of switch] {T41};
+    \node (moduleN) [module, above right=5mm and -7mm of switch] {T41};
+    \node [above=5mm of switch] {\(\cdots\)};
+
+    % PTP between authority and switch
+    \draw [ptp] (auth.north) -- (switch.south);
+
+    % PTP between switch and modules
+    \draw [ptp] ([xshift=-13.3mm]switch.north) --
+    ([xshift=-2mm]module0.south);
+    \draw [ptp] ([xshift=9.3mm]switch.north) --
+    ([xshift=-2mm]moduleN.south);
+
+    % USB audio
+    \draw [usb] ([xshift=-4mm]auth.south) --
+    ([xshift=-4mm]server.north);
+
+    % PTP follow-up from authority to server
+    \draw [-{Triangle}] ([xshift=4mm]auth.south) --
+    ([xshift=4mm]server.north);
+
+    % Audio from server to switch
+    \draw [audio] ([xshift=-12.5mm]server.north) --
+    ([xshift=-12.5mm]switch.south);
+
+    % Ctrl from server to switch
+    \draw [ctrlArrow] ([xshift=12.5mm]server.north) --
+    ([xshift=12.5mm]switch.south);
+
+    % Audio from switch to modules
+    \draw [audio] ([xshift=-11.3mm]switch.north) -- (module0.south);
+    \draw [audio] ([xshift=11.3mm]switch.north) -- (moduleN.south);
+
+    % Ctrl from switch to modules
+    \draw [ctrlArrow] ([xshift=-9.3mm]switch.north) --
+    ([xshift=2mm]module0.south);
+    \draw [ctrlArrow] ([xshift=13.3mm]switch.north) --
+    ([xshift=2mm]moduleN.south);
+  }
+}
+#+end_src
+
 * The Poster
 :PROPERTIES:
 :BEGIN:
@@ -699,7 +768,7 @@ Draw a vertical line separating the two columns.
 
 ** Left column                                                        :BMCOL:
 :PROPERTIES:
-:BEAMER_col: 0.58
+:BEAMER_col: 0.48
 :BEAMER_opt: [t]
 :END:
 *** Motivation                                                      :B_block:
@@ -711,155 +780,262 @@ Draw a vertical line separating the two columns.
 
 Audio over ethernet is the de facto standard in multichannel audio
 transmission, and yet existing networked audio systems are either
-proprietary and expensive (e.g., Dante) or unsuited to timing-critical
-applications such as spatial audio (e.g., JackTrip, AOO). We propose
-/Ananas/, a networked audio system consisting of:
+*proprietary and expensive* (e.g., Dante) or unsuited to
+*timing-critical applications* such as spatial audio (e.g., JackTrip,
+AOO). We propose */Ananas/*, a networked audio system consisting of:
 
-- A protocol suite for audio and control data transmission, device
+- A *protocol suite* for audio and control data transmission, device
   discovery, and synchronisation.
-- Digital audio workstation-based interfaces for spatial audio control.
-- Microcontroller firmware for distributed, parallelised spatial audio
+- Digital audio workstation-based *interfaces* for spatial audio control.
+- Microcontroller firmware for *distributed, parallelised spatial audio*
   algorithms.
 
-Ananas seeks to lower the barrier to entry for the sound field
+Ananas seeks to *lower the barrier to entry* for the sound field
 synthesis techniques of wave field synthesis (WFS) and higher order
 ambisonics (HOA). Typically, systems for WFS and HOA are centralised,
 reliant on costly highly-multichannel audio interfaces and their
-accessibility is thus limited. Representing a distributed alternative,
+accessibility is thus limited. Representing *a distributed alternative*,
 Ananas renders access to such systems more attainable.
 
-**** Left
-:PROPERTIES:
-:BEAMER_col: 0.53
-:BEAMER_opt: [T]
-:END:
+*** System Overview
 
 #+latex: \justifying
 
-Distributing things in this manner requires that our group of signal
-processors is *synchronised*, however, otherwise the resulting
-soundfield will be destroyed.  A 1\nbsp{}ms asynchronicity between two
-distributed audio devices would result in a *propagation discrepancy* of
-over 30\nbsp{}cm.
+In terms of hardware, Ananas is a *general purpose computer* running a
+CLAP format digital audio workstation plugin, an *ethernet switch* with
+IEEE 1588 *Precision Time Protocol* (PTP) capabilities, and a network of
+*microcontroller development boards* one of which acts as an
+*authoritative source of time* and the rest of which perform a
+*parallelised, distributed* spatial audio algorithm. A given Ananas
+plugin encapsulates a UDP multicast *audio server* and an OSC-based
+*control data server*. Chosen for its low cost and high port count, the
+MikroTik *CRS326-246-2S+IN* is our ethernet switch of choice. Likewise
+chosen for its low cost, networking support including *PTP
+functionality*, and dedicated, *highly-configurable* audio subsystem, is
+the *Teensy 4.1* microcontroller development board, which is the
+platform for our *distributed signal processing modules*. DSP is written
+in the Faust programming language and modules are programmable /en
+masse/ via shell scripts.
 
-**** Right
+**** Left                                                             :BMCOL:
 :PROPERTIES:
-:BEAMER_col: 0.43
-:BEAMER_opt: [T]
+:BEAMER_col: 0.333
 :END:
 
-*** Asynchronicity                                                  :B_block:
+#+attr_org: :width 200
+[[./images/ananas-wfs.jpeg]]
+
+**** Center                                                           :BMCOL:
 :PROPERTIES:
-:BEAMER_env: block
+:BEAMER_col: 0.333
 :END:
+
+#+latex: \begin{center}\scalebox{2.3}{
+\begin{tikzpicture}[font=\supertiny]
+  \node [] at (0, 0) {
+    \includegraphics[width=5cm]{./images/switch}
+  };
+  \node [draw=red!50!black, ultra thick, star, star points=10, rotate=15, fill=yellow, inner sep=.1mm] at (1.75, .75) {€ 200};
+\end{tikzpicture}
+#+latex: }\end{center}
+
+**** Right                                                            :BMCOL:
+:PROPERTIES:
+:BEAMER_col: 0.333
+:END:
+
+#+latex: \begin{center}\scalebox{2.3}{
+\begin{tikzpicture}[font=\supertiny]
+  \node [] at (0, 0) {
+    \includegraphics[width=4.75cm]{./images/module}
+  };
+  \node [draw=red!50!black, ultra thick, star, star points=10, rotate=15, fill=yellow, inner sep=.1mm] at (1.75, .75) {€ 48};
+\end{tikzpicture}
+#+latex: }\end{center}
+
+*** The Time Authority
 
 #+latex: \justifying
 
-We can configure a network of audio-capable devices (Teensy 4.1
-microcontroller development boards) to run at a given target sampling
-rate, but if we had a way of measuring /true/ time − and thus true
-frequency − we would find that they're actually running *slightly
-faster* or *slightly slower* than instructed.
+One Teensy acts as an authoritative source of time. It is programmed
+as a USB audio device, so it *governs audio timing* on the machine
+running the audio server. It is also programmed as a PTP clock
+authority, so it *governs PTP time* for the ethernet switch and all the
+Teensy modules that are connected to it. To combat *clock drift*, audio
+time for the DSP modules is inferred from PTP time via *media clock
+recovery* and *presentation time recovery* algorithms. The Teensy 4.1's
+MCU features 30-bit clock divider registers, so *nanosecond order
+timing corrections* are possible. The server reads PTP follow-up
+packets and uses their timing information to timestamp outgoing audio
+packets.
 
-Each device has its own *distinct internal time reference* − a crystal
-oscillator (XO) − and each one of those time references behaves
-slightly differently. XOs are rated to a given tolerance − typically
-reported in /parts per million/ (ppm) − an amount by which they may be
-expected to deviate from their nominal frequency.
-
-*** Time Exchange
-
-**** Left
-:PROPERTIES:
-:BEAMER_col: 0.58
-:BEAMER_opt: [T]
-:END:
-
-#+latex: \justifying
-
-IEEE 1588 *Precision Time Protocol* (PTP) is a nanosecond-order
-time-exchange mechanism. Clock authority and subscriber(s) exchange
-per-second timestamped packets until the subscriber has enough
-information to determine its *drift* and *offset* relative to the
-authority. These values are typically fed to a proportional integral
-controller, and the result used as a /nanoseconds-per-second/
-adjustment value to be applied to a dedicated PTP timer.
-
-Consumer-grade networking equipment does not tend to support PTP, but
-relatively inexpensive exceptions do exist. What's more, our chosen
-microcontroller platform supports it too\nbsp[cite:@schleusnerSubMicrosecond2024].
-
-**** Right
-:PROPERTIES:
-:BEAMER_col: 0.38
-:BEAMER_opt: [T]
-:END:
-
-\begin{gather*}
-\text{Drift} = 1 - \frac{t'_{2}-t_{2}}{t'_{1}-t_{1}}\\[10pt]
-\text{Delay} = \frac{(t_{4} - t_{1}) - (t_{3} - t_{2}) }{2}\\[10pt]
-\text{Offset} = t_{2} - t_{1} - \text{Delay}
-\end{gather*}
-
+#+latex: \begin{center}{\fontsize{10pt}{12pt}\selectfont\scalebox{2.5}{
+\begin{tikzpicture}
+  \pic {systemOverview};
+\matrix [draw, fill=white, ampersand replacement=\&] at (3.75, 0) {
+    \draw [ctrlArrow] (0,0) -- (.5,0); \& \node [legend] {Control data (UDP)}; \\
+    \draw [audio] (0,0) -- (.5,0); \& \node [legend] {Audio (UDP)}; \\
+    \draw [-{Triangle[open]}, usbColour] (0,0) -- (.5,0); \& \node [legend] {USB audio}; \\
+    \draw [-{Triangle}] (0,0) -- (.5,0); \& \node [legend] {PTP}; \\
+  };
+\end{tikzpicture}
+#+latex: }}\end{center}
 
 ** Right column                                       :BMCOL:
 :PROPERTIES:
-:BEAMER_col: 0.38
+:BEAMER_col: 0.48
 :BEAMER_opt: [t]
 :END:
+
+*** Protocol
+
+**** Left                                                             :BMCOL:
+:PROPERTIES:
+:BEAMER_col: .48
+:BEAMER_opt: [t]
+:END:
+
+#+latex: \justifying
+
+#+attr_latex: :width \linewidth
+[[./images/aap.png]]
+
+Ananas client description protocol (ACDP, right) packets are sent
+periodically by connected modules, and provide information such as
+firmware type, sampling rate and PTP status.
+
+#+attr_latex: :width \linewidth
+[[./images/aadp.png]]
+
+**** Right                                                            :BMCOL:
+:PROPERTIES:
+:BEAMER_col: .48
+:BEAMER_opt: [t]
+:END:
+
+#+latex: \justifying
+The Ananas audio procol (AAP, left) consists of a stream of
+sequence-numbered, timestamped packets of audio data, also containing a
+channel count and a number of frames. At 16 frames, up to 44 channels are supported. 
+
+#+attr_latex: :width \linewidth
+[[./images/acdp.png]]
+
+The time authority also sends periodic authority description packets
+(AADP, left) which can be displayed in a plugin for debugging purposes. 
+
 *** Distributed Spatial Audio                                       :B_block:
 :PROPERTIES:
 :BEAMER_env: block
 :END:
 
-#+latex: \justifying
-
-#+latex: \begin{center}\scalebox{2}{
-\begin{tikzpicture}[every node/.style={font=\normalsize}]
-  \pic {hoa};
-\end{tikzpicture}
-#+latex: }\end{center}
-
-*** Presentation Time                                               :B_block:
-:PROPERTIES:
-:BEAMER_env: block
-:END:
-
-#+latex: \justifying
-
-Conditioning the media clock alone is not enough. To guarantee that
-samples will be *presented simultaneously*, we wait until a sub-100 ns
-PTP lock is achieved (takes about ten seconds) to start clock
-subscriber audio subsystems. This entails starting presentation time
-on a given PTP second, so it's easiest when working with a nominal
-sampling rate that's a multiple of the buffer size!
-\begin{equation*}
-\frac{44\,100}{128} = 344.53125 \quad\quad\quad
-\frac{48\,000}{128} = 375
-\end{equation*}
-
-*** Results                                                         :B_block:
-:PROPERTIES:
-:BEAMER_env: block
-:END:
-
-#+latex: \justifying
-
 **** Left
 :PROPERTIES:
-:BEAMER_col: 0.47
+:BEAMER_col: 0.48
 :BEAMER_opt: [T]
 :END:
+
+#+latex: \justifying
+
+Ananas supports *WFS* (below) and *third-order HOA* (right). For WFS,
+modules receive monophonic virtual sound sources via AAP and control
+data consisting of virtual sound source co-ordinates and pairs of
+loudspeaker co-ordinates, and compute the appropriate per-loudspeaker
+delays and prefilters accordingly. For HOA, modules receive
+ACN-encoded audio over AAP and pairs of decoder matrix rows as control
+data and compute the requisite dot products.
+
+#+latex: \begin{center}{\fontsize{10pt}{12pt}\selectfont\scalebox{2}{
+\begin{tikzpicture}
+  \pic {wfs};
+\end{tikzpicture}
+#+latex: }}\end{center}
 
 **** Right
 :PROPERTIES:
-:BEAMER_col: 0.47
+:BEAMER_col: 0.48
 :BEAMER_opt: [T]
 :END:
 
-*** References
+#+latex: \justifying
 
-#+print_bibliography:
+#+latex: \begin{center}{\fontsize{10pt}{12pt}\selectfont\scalebox{2}{
+\begin{tikzpicture}
+  \pic{hoa};
+\end{tikzpicture}
+#+latex: }}\end{center}
+
+*** Synchronisation
+
+Teensy modules remain synchronised to on the order of *\pm200 ns*, well
+within the AES guideline of 5% of the reference frame (1 \micro{}s @ 48
+kHz). As a distributed system, Ananas is more than capable of
+supporting its parallelised spatial audio algorithms.
+
+#+begin_src julia :results none :session :exports none
+using CSV, DataFrames, Plots, LaTeXStrings, Statistics
+
+function plotHistogram(index, ip)
+    # The number of datapoints, i.e. seconds, to plot
+    numData = 3600
+
+    # Read the data. Limit to 3600 data points, i.e. 1 hour's worth.
+    data = CSV.read(
+        "../../notes/20260303T221301--ananas-synchronicity-measurements-data__ananas_data_teensy.csv",
+        DataFrame,
+        limit=numData + 1
+    )
+
+    # Make the unit nanoseconds
+    data = data .* 1e9
+    # Remove the initial offset (using I2S3 as the reference)
+    data = data .- data[1, 3]
+
+    histogram(Matrix(data)[:, index], bins=30,
+              fontfamily="Minion Pro Regular",
+              xlabel="Offset (ns)",
+              ylabel="Frequency",
+              label="$ip")
+
+    savefig("./images/gen/histo$index.png")
+end
+#+end_src
+
+**** Left                                                             :BMCOL:
+:PROPERTIES:
+:BEAMER_col: .333
+:END:
+
+#+begin_src julia :results file graphics :file histo1.png :output-dir ./images/gen :session :exports results
+plotHistogram(1, "192.168.198.18")
+#+end_src
+#+attr_org: :width 300
+#+RESULTS:
+[[file:./images/gen/histo1.png]]
+
+**** Center                                                           :BMCOL:
+:PROPERTIES:
+:BEAMER_col: .333
+:END:
+
+#+begin_src julia :results file graphics :file histo2.png :output-dir ./images/gen :session :exports results
+plotHistogram(2, "192.168.48.236")
+#+end_src
+#+attr_org: :width 300
+#+RESULTS:
+[[file:./images/gen/histo2.png]]
+
+**** Right                                                            :BMCOL:
+:PROPERTIES:
+:BEAMER_col: .333
+:END:
+
+#+begin_src julia :results file graphics :file histo4.png :output-dir ./images/gen :session :exports results
+plotHistogram(4, "192.168.48.191")
+#+end_src
+#+attr_org: :width 300
+#+RESULTS:
+[[file:./images/gen/histo4.png]]
 
 * Local variables                                                  :noexport:
 

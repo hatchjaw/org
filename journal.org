@@ -11528,7 +11528,8 @@ Entered on [2026-06-25 jeu. 11:01]
 **** Brain dump
 ***** TODO Finish thesis
 Needs an intro and a conclusion. Maybe a "Programming the Teensy"
-section.
+section. Remember to talk about network settings, particularly the
+gateway, that has to be =255.255.0.0=.
 ***** DONE Order parts for audio cables
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2026-10-16 ven. 11:07]
