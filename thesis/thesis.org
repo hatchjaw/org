@@ -3978,28 +3978,28 @@ IEEE 1588 Precision Time Protocol (PTP) is a time exchange mechanism
 consisting of the exchange of multicast network packets between a
 clock authority and a clock subscriber\nbsp[cite:@leeProceedings2005;
 @schleusnerSubMicrosecond2024]. PTP transport can take place either as
-raw ethernet frames at layer 2, or as UDP packets at layer 3, and two
-delay mechanisms are provided: end-to-end and peer-to-peer. PTP packet
-flow is illustrated in cref:fig:ptp. Flow begins with the clock
-authority sending a /sync/ packet; the subscriber notes the time,
-\(t_{2}\), at which this packet arrives. The authority then sends a
-/follow-up/ packet which is timestamped, \(t_{1}\), with the time of
-transmission. With \(t_{1}\) and \(t_{2}\) in hand, the subscriber sends a
-/delay request/ packet and notes the time, \(t_{3}\) of transmission; the
-authority notes the time, \(t_{4}\) of reception of this packet and sends
-it to the subscriber in a final /delay response/ packet. The above
-process then repeats for the next time period, typically a second,
-beginning with the receipt time \(t'_{2}\) of the following sync packet
-and the receipt of the next follow-up packet containing timestamp
-\(t'_{1}\). Once the subscriber has the above timestamp information it
-can begin to compute its drift, \(\alpha\), delay, \(\delta\), and offset, \(\theta\)
-relative to the authority:
+raw ethernet frames at layer 2, or as UDP packets at layer 3 on
+multicast address =224.0.1.129=, and two delay mechanisms are provided:
+end-to-end and peer-to-peer. PTP packet flow is illustrated in
+cref:fig:ptp. Flow begins with the clock authority sending a /sync/
+packet; the subscriber notes the time, \(t_{2}\), at which this packet
+arrives. The authority then sends a /follow-up/ packet which is
+timestamped, \(t_{1}\), with the time of transmission. With \(t_{1}\) and
+\(t_{2}\) in hand, the subscriber sends a /delay request/ packet and notes
+the time, \(t_{3}\) of transmission; the authority notes the time, \(t_{4}\)
+of reception of this packet and sends it to the subscriber in a final
+/delay response/ packet. The above process then repeats for the next
+time period, typically a second, beginning with the receipt time
+\(t'_{2}\) of the following sync packet and the receipt of the next
+follow-up packet containing timestamp \(t'_{1}\). Once the subscriber has
+the above timestamp information it can begin to compute its drift,
+\(\alpha\), delay, \(\delta\), and offset, \(\theta\) relative to the authority:
 
 #+NAME: eq:ptp1
 \begin{align}
-\alpha &= 1 - \frac{t'_{2} - t_{2}}{t'_{1} - t_{1}}\;, \\
-\delta &= \frac{(t_{4} - t_{1}) - (t_{3} - t_{2})}{2}\;, \\
-\theta &= t_{2} - t_{1} - \delta\;.
+\alpha &= 1 - \frac{t'_{2} - t_{2}}{t'_{1} - t_{1}}\;, \label{eq:ptp1:alpha} \\
+\delta &= \frac{(t_{4} - t_{1}) - (t_{3} - t_{2})}{2}\;, \label{eq:ptp1:delta} \\
+\theta &= t_{2} - t_{1} - \delta\;. \label{eq:ptp1:theta}
 \end{align}
 
 Armed with the above figures, the subscriber can feed them into a
@@ -4637,7 +4637,8 @@ void PTPClock::beginImpl()
 {
     // Set up ENET PPS out on pin 24
     pin24SwMuxControlRegister.begin();
-    if (!pin24SwMuxControlRegister.setMuxMode(Pin24SwMuxControlRegister::MuxMode::ENET_1588_EVENT1_OUT) ||
+    if (!pin24SwMuxControlRegister.setMuxMode(
+        Pin24SwMuxControlRegister::MuxMode::ENET_1588_EVENT1_OUT) ||
         !EthernetIEEE1588.setChannelCompareValue(1, ananas::Constants::NanosecondsPerSecond) ||
         !EthernetIEEE1588.setChannelMode(1, EthernetIEEE1588Class::TimerChannelModes::kPulseHighOnCompare) ||
         !EthernetIEEE1588.setChannelOutputPulseWidth(1, 25) ||
@@ -4655,19 +4656,126 @@ void PTPClock::beginImpl()
 In addition to sending /sync/ and /follow-up/ packets and responding to
 /delay request/ packets with /delay response/ packets, the ~PTPAuthority~
 class is responsible for sending /announce/ packets, to inform the
-network that it exists as a potential PTP authority. The transmission
-of /sync/ and /announce/ packets is governed by a pair of high-resolution
-timers
+network that it exists as a potential PTP authority. As per
+cref:lst:ptp-authority-run, the timing of the transmission of /sync/,
+/follow-up/ and /announce/ packets is governed by the PTP timer itself,
+with a ~nextSlot~ method employed to find suitable, per-second instants
+at which to transmit the relevant packets.
+
+#+name: lst:ptp-authority-run
+#+caption: The ~run~ method of the ~ananas::network::PTPAuthority~ class, illustrating the timing of the transmission of /announce/, /sync/ and /follow-up/ PTP packets.
+#+begin_src c++
+void PTPAuthority::run()
+{
+    const auto now{Utils::ieee1588TimerToNanoTime()};
+
+    if (now > nextAnnounceNs) {
+        sendAnnounceMessage();
+        nextAnnounceNs = nextSlot(now, Constants::NanosecondsPerSecond, 0);
+    }
+
+    if (now > nextSyncNs) {
+        const auto t1{sendSyncMessage()};
+        sendFollowUpMessage(t1);
+        ++syncSequenceID;
+        nextSyncNs = nextSlot(now, Constants::NanosecondsPerSecond, Constants::NanosecondsPerSecond / 2);
+    }
+
+    // Poll the event socket for delay request packets.
+    pollEventSocket();
+}
+#+end_src
+
+Transport layer PTP traffic is sent on one of two ports: /event/ messages
+on port 319, and /general/ messages on port
+320\nbsp[cite:@vankempenIEEE]. The clock subscriber must thus poll sockets
+connected on both ports for PTP traffic, /sync/ messages on the event
+socket, /follow-up/ and /delay response/ messages on the general socket;
+additionally, it must send /delay request/ messages via the event
+socket.
+
+#+name: lst:time-exchange
+#+caption: The ~TimeExchange~ =struct=, used by the ~PTPSubscriber~ class to manage PTP time exchange events.
+#+begin_src c++
+struct TimeExchange
+{
+    NanoTime t1{-1};
+    NanoTime prevT1{0};
+    NanoTime t2{-1};
+    NanoTime prevT2{0};
+    NanoTime t3{-1};
+    NanoTime t4{-1};
+    elapsedMillis age;
+    uint16_t syncSequenceId{0};
+    uint16_t delaySequenceId{0};
+
+    [[nodiscard]] bool isFollowedUp() const
+    {
+        return t1 > -1 && t2 > -1;
+    }
+
+    [[nodiscard]] bool isComplete() const
+    {
+        return isFollowedUp() && t3 > -1 && t4 > -1;
+    }
+
+    [[nodiscard]] NanoTime getT2Diff() const
+    {
+        return t2 - prevT2;
+    }
+
+    [[nodiscard]] NanoTime getT1Diff() const
+    {
+        return t1 - prevT1;
+    }
+
+    [[nodiscard]] NanoTime getSyncToFollowUpDiff() const
+    {
+        return t2 - t1;
+    }
+
+    [[nodiscard]] NanoTime getDelayReqToRespDiff() const
+    {
+        return t4 - t3;
+    }
+
+    [[nodiscard]] NanoTime getDelay() const
+    {
+        return (t4 - t1 - (t3 - t2)) / 2;
+    }
+
+    [[nodiscard]] NanoTime getOffset() const
+    {
+        return getSyncToFollowUpDiff() - getDelay() + Constants::HardwareOffsetNs;
+    }
+
+    [[nodiscard]] double getDrift() const
+    {
+        return (1. - static_cast<double>(getT2Diff()) / static_cast<double>(getT1Diff())) * Constants::NanosecondsPerSecond;
+    }
+};
+
+// ...
+
+std::map<uint32_t, TimeExchange> pendingExchanges;
+#+end_src
+
+The ~PTPSubscriber~ class manages a collection of PTP time exchange
+events by way of a dedicated =struct= named ~TimeExchange~, the definition
+of which can be found in cref:lst:time-exchange. Once all the timestamps
+for a given time exchange have been established, \(\alpha\), \(\delta\) and
+\(\theta\) can be computed as per cref:eq:ptp1:alpha,eq:ptp1:delta,eq:ptp1:theta.
 
 * Protocol and Software Systems
 
-The heart of the system is /Ananas/, a networked audio system for
-time-sensitive applications. Ananas, the French word for "pineapple",
-is a recursive acronym: /"Ananas necessitates another networked audio
-system"/. It consists of a networked audio server, protocols for audio
-and control data transmission and device discovery, media clock and
-presentation time recovery, plus microcontroller firmware and software
-plugins for sound field synthesis control.
+\lettrine{T}{he heart of the system} is /Ananas/, a networked audio
+system for time-sensitive applications. Ananas, the French word for
+"pineapple", is a recursive acronym: /"Ananas necessitates another
+networked audio system"/. It consists of a networked audio server,
+protocols for audio and control data transmission and device
+discovery, media clock and presentation time recovery, plus
+microcontroller firmware and software plugins for sound field
+synthesis control.
 
 ** The Audio Server
 
@@ -4963,7 +5071,7 @@ added and set up as sends to the network bus.
 
 The HOA control interface (cref:fig:hoa-control) supports third order
 ambisonics and consists of sixteen loudspeaker icons arranged in two
-rings offset by \(\frac{\pi/8}\) radians. Clicking on a loudspeaker icon
+rings offset by \(\frac{\pi}{8}\) radians. Clicking on a loudspeaker icon
 reveals a modal window containing ~juce::Slider~ instances that can be
 used to specify a given loudspeaker's cartesian co-ordinates. Pairs of
 loudspeaker icons are associated with ~juce::ComboBox~ dropdown menus
