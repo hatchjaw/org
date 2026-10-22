@@ -11528,8 +11528,7 @@ Entered on [2026-06-25 jeu. 11:01]
 **** Brain dump
 ***** TODO Finish thesis
 Needs an intro and a conclusion. Maybe a "Programming the Teensy"
-section. Remember to talk about network settings, particularly the
-gateway, that has to be =255.255.0.0=.
+section. 
 ***** DONE Order parts for audio cables
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2026-10-16 ven. 11:07]
@@ -11541,7 +11540,10 @@ Either from Mouser, Digikey or Thomann.
 :END:
 For the invited researchers day at UJM. I can re-use the equivalent
 info from Turin.
-***** TODO Poster for IS^{2}
+***** DONE Poster for IS^{2}
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-10-22 jeu. 11:07]
+:END:
 Refer back to last year's SMC poster for inspo.
 ***** TODO Poster and presentation for SMC
 Last year's SMC equivalents should help here too.
@@ -11552,3 +11554,17 @@ Last year's SMC equivalents should help here too.
 Question mark over whether HOA needs a volume control.
 
 Entered on [2026-10-15 jeu. 18:04]
+*** 2026-10-22 jeudi
+**** Thesis todos
+***** TODO Remember to talk about network settings
+particularly the gateway, that has to be =255.255.0.0=.
+***** TODO Emphasise my contributions
+State contributions at the beginning of each technical chapter and
+their associated papers.
+***** TODO §1.7.3 could be much longer
+That's /State of the Art Spatial Audio Installations/.
+***** TODO Mitigate overlap between §1.9 and §2.2
+That's /Frugal Approaches to Spatial Audio/ and /Embedded Audio Systems/
+respectively.
+
+Entered on [2026-10-22 jeu. 11:12]

@@ -3585,7 +3585,7 @@ which demonstrates that differentiation is time-invariant, and allows
 us to deduce the convolution rule of differentiation --- to
 differentiate a convolution we need only differentiate one of the
 functions being convolved. Applied to dual numbers,
-#+NAME: eq:
+#+NAME: eq:convolution-rule
 \begin{equation}
 \langle{}s,\nabla{}s\rangle\ast\langle{}h,\nabla{}h\rangle = \langle{}s\ast{}h, \nabla{}s\ast{}h\rangle\;,
 \end{equation}
@@ -4739,16 +4739,19 @@ struct TimeExchange
         return t4 - t3;
     }
 
+    // \delta
     [[nodiscard]] NanoTime getDelay() const
     {
         return (t4 - t1 - (t3 - t2)) / 2;
     }
 
+    // \theta
     [[nodiscard]] NanoTime getOffset() const
     {
         return getSyncToFollowUpDiff() - getDelay() + Constants::HardwareOffsetNs;
     }
 
+    // \alpha
     [[nodiscard]] double getDrift() const
     {
         return (1. - static_cast<double>(getT2Diff()) / static_cast<double>(getT1Diff())) * Constants::NanosecondsPerSecond;
@@ -4762,9 +4765,128 @@ std::map<uint32_t, TimeExchange> pendingExchanges;
 
 The ~PTPSubscriber~ class manages a collection of PTP time exchange
 events by way of a dedicated =struct= named ~TimeExchange~, the definition
-of which can be found in cref:lst:time-exchange. Once all the timestamps
-for a given time exchange have been established, \(\alpha\), \(\delta\) and
-\(\theta\) can be computed as per cref:eq:ptp1:alpha,eq:ptp1:delta,eq:ptp1:theta.
+of which can be found in cref:lst:time-exchange. Once all the
+timestamps for a given time exchange have been established, \(\alpha\),
+\(\delta\) and \(\theta\) can be computed as per
+cref:eq:ptp1:alpha,eq:ptp1:delta,eq:ptp1:theta. Note that the addition
+of ~Constants::HardwareOffsetNs~ (which takes a value of 200) to the
+computation of \(\theta\) is necessary because of an asymmetric data delay
+for transmitted and received packets on the physical layer of the
+MCU\nbsp[cite:@schleusnerSubMicrosecond2024].
+
+When the PTP subscriber receives a /delay response/ message, it checks
+the collection of pending time exchanges for those that are completed
+and updates its PTP proportional integral controller accordingly; see
+cref:lst:update-ptp-controller for clock subscriber code that
+implements cref:eq:ptp-pi.
+
+#+name: lst:update-ptp-controller
+#+caption: PTP clock subscriber code for updating the PTP proportional integral controller.
+#+begin_src c++
+void PTPSubscriber::handleDelayRespMessage()
+{
+    // ...
+
+    // Check for complete time exchange(s) and tidy up the list of
+    // pending exchanges.
+    std::vector<uint16_t> toErase{};
+    for (const auto &[id, exchange]: pendingExchanges) {
+        if (exchange.isComplete()) {
+            // For complete exchanges, update the PTP controller.
+            updateController(id);
+            toErase.push_back(id);
+        } else if (exchange.age > 2000) {
+            toErase.push_back(id);
+        }
+    }
+
+    // ... Erase completed and old, incomplete time exchanges.
+}
+
+void PTPSubscriber::updateController(const uint16_t exchangeId)
+{
+    // ...
+
+    const auto currentDrift{pendingExchanges[exchangeId].getDrift()};
+    const auto offset{pendingExchanges[exchangeId].getOffset()};
+    const auto offsetCorrection{-offset};
+
+    // ...
+
+    nspsAccu += offsetCorrection;
+    nspsAdjustC = drift;
+    nspsAdjustP = (static_cast<double>(offsetCorrection) * kP);
+    nspsAdjustI = (static_cast<double>(nspsAccu) * kI);
+    adjust = nspsAdjustC + nspsAdjustP + nspsAdjustI;
+    EthernetIEEE1588.adjustFreq(adjust);
+
+    // ...
+
+    // Call the controller-updated callback. Perfect opportunity to do
+    // useful things like update the audio sampling rate.
+    if (controllerUpdatedCallback != nullptr) {
+        controllerUpdatedCallback(adjust);
+    }
+    
+    // ...
+}
+#+end_src
+
+The ~controllerUpdatedCallback~ allows \(a\), the nanoseconds-per-second
+adjustment, to be passed from the PTP clock subscriber to the
+~AudioSystemManager~ via the Teensy's top-level ~setup()~ function; see cref:lst:pi-controller-callback.
+
+#+name: lst:pi-controller-callback
+#+caption: The callback function triggered when the PTP clock subscriber's proportional integral controller is updated.
+#+begin_src c++
+void setup()
+{
+    // ...
+
+    ptpSubscriber.onControllerUpdated([](const double adjust)
+    {
+        audioSystemManager.adjustClock(adjust);
+    });
+
+    // ...
+}
+#+end_src
+
+Finally, cref:eq:sampling-rate-recovery-2,eq:unknown-dn-2 are computed
+by ~AudioSystemManager~ and the dedicated ~ClockDividers~ struct as per
+cref:lst:adjust-clock. The ~AudioSystemManager::adjustClock~ method
+handles the former and the ~ClockDividers::calculateFine~ method takes
+care of the latter, ensuring media clock recovery.
+
+#+name: lst:adjust-clock
+#+caption: 
+#+begin_src c++
+void AudioSystemManager::adjustClock(const double adjust)
+{
+    // Apply PI controller to audio-PTP offset.
+    accumulatedOffset += audioPTPOffset;
+    // Mitigate "wind-up" by clamping the accumulated offset.
+    accumulatedOffset = ananas::Utils::clamp(accumulatedOffset, -MaxAccumulatedOffset, MaxAccumulatedOffset);
+    const double offsetP{static_cast<double>(audioPTPOffset) * KP};
+    const double offsetI{static_cast<double>(accumulatedOffset) * KI};
+    config.setExactSamplingRate(
+        1. + (adjust + offsetP + offsetI) * ClockConstants::Nanosecond
+    );
+
+    if (!clockDividers.calculateFine(config.getExactSamplingRate())) {
+        if (invalidSamplingRateCallback != nullptr) {
+            invalidSamplingRateCallback();
+        }
+        return;
+    }
+
+    // Set the audio PLL numerator register.
+    if (!audioPllNumeratorRegister.set(clockDividers.pll4Num)) {
+        Serial.println("Failed to set audio PLL numerator. Rebooting.");
+        SystemUtils::reboot();
+    }
+}
+#+end_src
 
 * Protocol and Software Systems
 
@@ -5186,7 +5308,7 @@ void AudioSystemManager::startClock()
 
 Additionally, in order to compute initial clock divider registers as
 per cref:alg:sampling-rate (see page \pageref{alg:sampling-rate}) a
-class =AudioSystemManager::ClockDividers= was created. This makes it
+struct =AudioSystemManager::ClockDividers= was created. This makes it
 possible to ensure that frequencies throughout the PLL4 and SAI1
 subsystems are valid as per cref:fig:imxrt1062-clock (page
 \pageref{fig:imxrt1062-clock}). See cref:lst:calculate-coarse for the
