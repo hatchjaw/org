@@ -986,7 +986,7 @@ spatial and immersive audio systems abounds amongst creative
 practitioners, concert venues, museums and virtual and augmented
 reality researchers, and yet large-scale spatial and immersive audio
 installations remain costly and exclusive, with high barriers to
-entry, typically monolithic and centralised, tied to the space they
+entry, typically monolithic and centralised, tied to the spaces they
 inhabit and frequently proprietary in nature. And yet these are not
 inescapable inevitabilities; technologically-speaking, all the
 ingredients exist to democratise access to spatial audio techniques
@@ -995,11 +995,42 @@ capable embedded hardware systems for audio processing to open-source
 control systems, the stage is set for an alternative to the status quo
 to emerge.
 
-This thesis describes an attempt to democratise
-access to spatial audio systems by taking a distributed approach to
-the computation of sound field synthesis algorithms.
+Indeed, if the auditory aspect of the immersive experience has
+remained relatively underexplored\nbsp[cite:@serafinReflections2020] it is
+at least in part because the technical and financial hurdles to such
+an exploration remain stubbornly obtrusive. Ultimately, the
+comparative complexity and exclusivity of large-scale spatial audio
+systems has a chilling effect on research. It is telling that audio
+companies such as spatial audio's L-Acoustics and networked audio's
+Dante offer training courses and certification for those who wish to
+use their systems. This is reflective of the technical complexity of
+commercial audio systems, and is designed to ensure that users can
+overcome the associated learning curve, and that no-one, be they user
+or audience member, is left underwhelmed or frustrated by an
+experience marred by technical problems. In short, due to the various
+types of /investment/ associated with large-scale audio systems, there's
+a lot riding on their success in practice.
 
-* Background and State of the Art
+An individual or institution wishing to invest in a spatial audio
+system is beset by a variety of uncomfortable questions with regard to
+flexibility, obsolescence and even ownership. /Will I be able to put
+this system to a variety of uses?/ /Will this system still work and be
+supported in ten years' time?/ /To whom does this system truly belong?/
+These questions pose quite a mouthful to the party making the
+investment; how can we make that mouthful easier to digest? There are
+also questions around scalability, approachability, and
+familiarity. How can we design a system that scales easily and doesn't
+cost the earth to do so? How can we create accessible tooling for the
+control of such a system? How can said tooling be incorporated into
+existing audio workflows?
+
+This thesis describes an attempt to democratise access to spatial
+audio systems by taking a distributed approach to the computation of
+sound field synthesis algorithms.
+
+
+
+* Background
 #+latex: \minitoc
 #+latex: \newpage
 
@@ -1016,9 +1047,10 @@ videoconferencing that first embraced audio (and video) over the
 internet protocol (IP)
 suite\nbsp[cite:@hardmanReliable1995;@hardmanSuccessful1998;
 @turlettiINRIA1994] and the broadcast industry that pioneered audio
-over ethernet\nbsp[cite:@bakkerIntroduction2014]. Before embarking upon a
-discussion of networked audio, however, it is worthwhile to review
-some fundamental aspects of digital audio and computer networking.
+over ethernet (AoE)\nbsp[cite:@bakkerIntroduction2014]. Before embarking
+upon a discussion of networked audio, however, it is worthwhile to
+review some fundamental aspects of digital audio and computer
+networking.
 
 ** Digital Audio Signals
 
@@ -1859,17 +1891,17 @@ processors. Latency was an important metric for the latter system, and
 the authors measured latency via transmission round-trip times using a
 low frequency sawtooth wave as a timer.
 
-Distributed approaches to audio spatialisation include Lopez-Lezcano's
+Distributed approaches to spatial audio include Lopez-Lezcano's
 "network sound card"\nbsp[cite:@lopez-lezcanoJack2012], and embedded
 implementations as described by Devonport and
 Foss\nbsp[cite:@devonportDistribution2019] and Belloch et
 al.\nbsp[cite:@bellochPerformance2021]. The latter two address aims
 closely aligned with the work described here, but are based on costly
-computing platforms. Devonport and Foss used AVB and costly
-networking equipment to provide PTP support for synchronisation;
-Belloch et al. employed a GPU-based hardware platform, reporting
-client synchronisation to the millisecond range --- likely not
-sufficient for timing-critical audio spatialisation effects.
+computing platforms. Devonport and Foss used AVB and costly networking
+equipment to provide PTP support for synchronisation; Belloch et
+al. employed a GPU-based hardware platform, reporting client
+synchronisation to the millisecond range --- likely not sufficient for
+timing-critical audio spatialisation effects.
 
 A practical discussion of the distribution and parallelisation of WFS
 and HOA can be found in cref:sec:distributed-algorithms.
@@ -1892,23 +1924,23 @@ and HOA can be found in cref:sec:distributed-algorithms.
 
 #+name: fig:teensy
 #+caption: Teensy 4.1 microcontroller development board equipped with ethernet and audio add-ons, labelled with the last two octets of its IP address.
-#+attr_latex: :width .75\linewidth
+#+attr_latex: :width .4\linewidth
 [[./images/module.jpeg]]
 
 #+name: fig:bela
 #+caption: Bela companion board for the BeagleBone Black.
-#+attr_latex: :width .75\linewidth
+#+attr_latex: :width .4\linewidth
 [[./images/bela.png]]
 
 #+name: fig:daisy
 #+caption: Daisy Seed3 microcontroller development board.
-#+attr_latex: :width .75\linewidth
+#+attr_latex: :width .4\linewidth
 [[./images/daisy.png]]
 
 #+name: fig:esp32
 #+caption: ESP32 LyraT microcontroller development board.
-#+attr_org: :width 400
-#+attr_latex: :width .5\linewidth
+#+attr_org: :width 200
+#+attr_latex: :width .4\linewidth
 [[./images/esp32.png]]
 
 Progress in embedded computing, devices of the /internet of things/
@@ -1920,7 +1952,7 @@ either providing audio support, or having audio as a key part of their
 /raison d'être/. Amongst these platforms are a selection based on
 Embedded Linux Systems (ELS) such as /Bela/\nbsp[cite:@mcphersonBela2017]
 (see cref:fig:bela) and /Elk/\nbsp[cite:@turchetElk2021], companion boards
-for the BeagleBone Black[fn:14] and Raspberri Pi[fn:15]
+for the BeagleBone Black[fn:14] and Raspberry Pi[fn:15]
 respectively. These examples profit from the power of the underlying
 ELS, with a system-on-chip (SoC) providing a multicore CPU and
 peripherals such as memory and connectivity via, e.g., USB and
@@ -1942,14 +1974,14 @@ run on a variety of platforms\nbsp[cite:@michonEmbedded2020].
 
 #+name: fig:spacebar
 #+caption: FPGA-based WFS system, the Space Bar.
-#+attr_latex: :width \linewidth
+#+attr_latex: :width .75\linewidth
 [[./images/spacebar.jpg]]
 
 #+name: fig:ottosonics
 #+caption: The OTTOsonics DIY spatial audio system.
 #+caption: Image taken from [[https://tamlab.kunstuni-linz.at/projects/ottosonics/]]
 #+attr_org: :width 200
-#+attr_latex: :width .75\linewidth
+#+attr_latex: :width .4\linewidth
 [[./images/ottosonics.jpg]]
 
 With frugality in mind, a modular, FPGA-based WFS system has been
@@ -2885,7 +2917,7 @@ depicted in cref:fig:hoa.
 :END:
 
 The content of this chaper was originally published
-in\nbsp[cite:@rushtonFaust2025a].
+as /Faust Autodiff: Towards Audio Domain-Specific Machine Learning/\nbsp[cite:@rushtonFaust2025a].
 
 #+latex: \minitoc
 #+latex: \newpage
@@ -3880,6 +3912,8 @@ currently elude pattern matching would be of benefit here, as would
 further development of Faust's adaptability to frequency domain
 processing.
 
+#+latex: \enlargethispage{\baselineskip}
+
 * Time Exchange
 :PROPERTIES:
 :CUSTOM_ID: sec:time-exchange
@@ -3959,9 +3993,11 @@ filter\nbsp[cite:@mcclellanSignal2003].
 # So the footnote stays on the same page...
 #+latex: \enlargethispage{\baselineskip}
 
-This manner of /clock drift/ is inevitable in digital systems. To ensure
-a sample-synchronous platform for spatial audio, it is necessary to
-find a means to correct for it.
+This manner of /clock drift/ is inevitable in digital systems, and yet,
+for distibuted digital signal processing, precise synchronisation is
+of tantamount importance\nbsp[cite:@lienhartImportance2003]. To ensure a
+sample-synchronous platform for spatial audio, it is necessary to find
+a means to correct for it.
 
 ** Precision Time Protocol
 
@@ -5089,9 +5125,9 @@ in cref:fig:authority-packet.
 \centering
 \begin{bytefield}[bitwidth=.9cm, bitheight=.9cm]{16}
       \bitheader{0-15} \\
-      \bitbox{4}{Serial number} & \bitbox{1}{\tiny{Firmw. type}} & \bitbox{3}{\scriptsize{Version number}} & \bitbox{4}{Sampling rate} & \bitbox{4}{Percent CPU} \\
-      \bitbox[lrb]{4}{\scriptsize{Presentation offset frames}} & \bitbox[lrb]{8}{Presentation offset ns} & \bitbox[lrb]{4}{\scriptsize{Audio-PTP offset ns}} \\
-      \bitbox[lrb]{1}{\tiny{Buffer fill \%}} & \bitbox[lrb]{1}{\tiny{PTP lock}} & \bitbox[lb]{14}{Secondary source co-ordinates} \\
+      \bitbox{4}{Serial number} & \bitbox{1}{\scriptsize{Firmw. type}} & \bitbox{3}{\footnotesize{Version number}} & \bitbox{4}{Sampling rate} & \bitbox{4}{Percent CPU} \\
+      \bitbox[lrb]{4}{\small{Presentation offset frames}} & \bitbox[lrb]{8}{Presentation offset ns} & \bitbox[lrb]{4}{\small{Audio-PTP offset ns}} \\
+      \bitbox[lrb]{1}{\scriptsize{Buffer fill \%}} & \bitbox[lrb]{1}{\scriptsize{PTP lock}} & \bitbox[lb]{14}{Secondary source co-ordinates} \\
       \bitbox[rb]{2}{}
     \end{bytefield}
 \end{figure}
@@ -5102,9 +5138,9 @@ in cref:fig:authority-packet.
 \centering
 \begin{bytefield}[bitwidth=.9cm, bitheight=.9cm]{16}
       \bitheader{0-15} \\
-      \bitbox{4}{Serial number} & \bitbox{1}{\tiny{Firmw. type}} & \bitbox{3}{\scriptsize{Version number}} & \bitbox{4}{Sampling rate} & \bitbox{4}{Percent CPU} \\
-      \bitbox[lrb]{4}{\scriptsize{Presentation offset frames}} & \bitbox[lrb]{8}{Presentation offset ns} & \bitbox[lrb]{4}{\scriptsize{Audio-PTP offset ns}} \\
-      \bitbox[lrb]{1}{\tiny{Buffer fill \%}} & \bitbox[lrb]{1}{\tiny{PTP lock}} & \bitbox[lbr]{8}{Decoder matrix rows}
+      \bitbox{4}{Serial number} & \bitbox{1}{\scriptsize{Firmw. type}} & \bitbox{3}{\footnotesize{Version number}} & \bitbox{4}{Sampling rate} & \bitbox{4}{Percent CPU} \\
+      \bitbox[lrb]{4}{\small{Presentation offset frames}} & \bitbox[lrb]{8}{Presentation offset ns} & \bitbox[lrb]{4}{\small{Audio-PTP offset ns}} \\
+      \bitbox[lrb]{1}{\scriptsize{Buffer fill \%}} & \bitbox[lrb]{1}{\scriptsize{PTP lock}} & \bitbox[lbr]{8}{Decoder matrix rows}
     \end{bytefield}
 \end{figure}
 
@@ -5684,7 +5720,12 @@ function plotHistogram(index, ip)
               fontfamily="EBGaramond-VariableFont_wght",
               xlabel="Offset (ns)",
               ylabel="Frequency",
-              label="$ip")
+              label="$ip",
+              xguidefontsize = 16,
+              yguidefontsize = 16,
+              tickfontsize = 12,
+              legendfontsize = 12,
+              legend=:topleft)
 
     savefig("./images/gen/histo$index.png")
 end

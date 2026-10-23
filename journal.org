@@ -11562,9 +11562,50 @@ particularly the gateway, that has to be =255.255.0.0=.
 State contributions at the beginning of each technical chapter and
 their associated papers.
 ***** TODO §1.7.3 could be much longer
-That's /State of the Art Spatial Audio Installations/.
+That's /State of the Art Spatial Audio Installations/. Romain: "I think this section could be improved. First, I would diffenrtiate what's done in academia from what's done in the industry. L-acoustics systems are quite different from the ones found in academic context. I think it could be interesting to compare them a little bit. How are the speakers placed, why, etc.? What are the underlying tehcniques. I think I remember L-acoustics is based on VBAP because they can't afford to have a sweetspot effect when they install their system in large spaces. Also you don't talk about ambisonics systems in academia. Almost every single big American university has one. Not to mention systems at Ircam, SAT in Montereal, etc. The example you give for AAU is great, but you should emphasize the fact that it is just an example. Anyway, this section could probably be longer and a bit more exhaustive with more pics, etc."
 ***** TODO Mitigate overlap between §1.9 and §2.2
 That's /Frugal Approaches to Spatial Audio/ and /Embedded Audio Systems/
-respectively.
+respectively. Romain: "I feel like there are redundancies between this
+section and 1.9. I think 2.2 should start by clearly stating the specs
+that are needed for what you want to do: good amount of RAM and CPU
+power, Ethernet, PTP, etc. The embedded systems pictures you provide
+in 1.9 should maybe moved here."
+***** TODO Add a section on UDP (and TCP) in chapter 1
+***** TODO Split Physically-inspired techniques into WFS/HOA
+***** TODO Also say what each of WFS and HOA can and can't do
+...before going into technical detail.
+***** TODO Expand §1.8.1 /State of the Art Distributed Audio Systems/ 
+Romain: "I think the end of this section could emphasize a bit more
+the fact that most of these systems did not care too much about
+synchronicity. Also, I think a distinction should be made between
+systems that actually distribute computations and those that use
+distributed systems as audio interfaces."
+***** DONE Reduce the size of figures in chapter 1
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-10-22 jeu. 17:22]
+:END:
+***** TODO Remove line numbers for one-liner code listings
+***** TODO Talk about the aims stated in §2.4 in the introduction
+Me: "Combining the elements described thus far in this chapter brings us to
+our chief aim, that of distributing spatial audio algorithms. The goal
+is to create parallelised WFS and HOA algorithms in Faust, deploy
+these on an array of embedded audio systems (specifically Teensy
+4.1s), and orchestrate the algorithms via DAW plugins written using
+JUCE and the CLAP format."
+***** TODO /Another/ WFS diagram, §2.4.1
+Romain: "Maybe a figure summarizing what you say in this section could
+help get the global picture of how this works. It could show that each
+delay line is ran on independent MCUs for example, etc... That would
+be especially useful for people who don't know Faust :)" --- but I
+think I'm already pointing the reader toward figure 1.6 that
+illustrates this point...
+***** TODO More detail on distributed HOA
+Romain: "If you don't take the "easy" ambitools route as I suggested,
+more details will have to be provided here on how this works (but I'm
+sure you know that already :) )."
+***** TODO Explain why Faust autodiff is there
+Romain: "The general introduction of your thesis will have to explain
+a little bit why you have this chapter of course (saying that this is
+something you worked on during the first year of your PhD)."
 
 Entered on [2026-10-22 jeu. 11:12]
