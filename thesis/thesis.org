@@ -1028,8 +1028,6 @@ This thesis describes an attempt to democratise access to spatial
 audio systems by taking a distributed approach to the computation of
 sound field synthesis algorithms.
 
-
-
 * Background
 #+latex: \minitoc
 #+latex: \newpage
@@ -1161,7 +1159,7 @@ resolution at low amplitudes due to the mismatch between the linear
 distribution of their values versus the logarithmic nature of sound
 intensity. Floating point formats address this by having a logarithmic
 distribution of avaliable values; the IEEE standard for single
-precision (i.e. 32 bit) floating point numbers\nbsp[cite:@IEEE2019]
+precision (i.e., 32 bit) floating point numbers\nbsp[cite:@IEEE2019]
 dictates that precision is greatest around zero, with around half the
 available numbers lying in \([-1, 1]\).[fn:12] For brevity's sake, and
 for its pertinence later in the text, consider the 16 bit case, and a
@@ -1204,7 +1202,7 @@ most significant bit (and most significant byte, both abbreviated /MSB/)
 appearing first.
 
 Paraphrasing Cohen\nbsp[cite:@cohenHoly1981], if digital audio signals
-could be transmitted in their entirety, i.e. the unit of transmission
+could be transmitted in their entirety, i.e., the unit of transmission
 was /an audio signal/, then endianness would not matter. Practically
 speaking, however, in order to be handled by software or hardware, or
 transmitted over a network, audio signals must be broken down into
@@ -1473,7 +1471,7 @@ achieved via the exchange of timestamped packets, coupled with precise
 estimates for send and receive times. Precision is best when
 timestamps can be calculated at the /physical layer/ --- layer 1 of the
 OSI model, of which the aforementioned transport layer (layer 3) is a
-component --- i.e. by dedicated timers at the level of the physical
+component --- i.e., by dedicated timers at the level of the physical
 network interface. Legacy and low-cost networking equipment do not
 typically possess support for hardware timestamping,
 however\nbsp[cite:@correllDesign2005], and devices that do offer such
@@ -3791,7 +3789,7 @@ matchable in principle, but in practice, ~hslider("x1", 0, -1, 1,
 minimum, maximum and step, must be matched verbatim; clearly, in the
 general case, this is not practical. The obvious derivative
 transformation of a user interface element is to an input variable,
-i.e. a parameter for optimisation such as a weight in a neural
+i.e., a parameter for optimisation such as a weight in a neural
 network. Input variables must be identifiable so as to create the
 appropriate corresponding dual signal,
 \(\big\langle{}x_{i},\begin{bmatrix}0 & \cdots & \frac{\partial{}x_{i}}{\partial{}x_{i}} & \cdots &
@@ -4435,7 +4433,7 @@ values:
 
 Say a set of divider register values has been established using
 cref:alg:sampling-rate, and some manner of fine adjustment is desired,
-e.g. to compensate for clock drift. Cref:eq:general-fs can be
+e.g., to compensate for clock drift. Cref:eq:general-fs can be
 rewritten to find an expression for an unknown \(D_{N}\):
 
 #+NAME: eq:unknown-dn
@@ -4611,7 +4609,7 @@ plotDrift("ptp")
 #+caption: Audio reproduction offsets for three MCU audio clients with respect to an MCU audio server.
 #+caption: Server and clients reproducing a \qty{1}{\Hz} impulse train.
 #+caption: Measurements triggered at the onset of the impulse produced by the server MCU,
-#+caption: i.e. once per second for a total of ten minutes.
+#+caption: i.e., once per second for a total of ten minutes.
 \begin{figure*}[t]
     \subfloat[Without sampling frequency correction.]{\includegraphics[width=0.5\textwidth]{images/gen/noptp}\label{fig:noptp}}
     \subfloat[With PTP-derived sampling frequency correction.]{\includegraphics[width=0.5\textwidth]{images/gen/ptp}\label{fig:withptp}}
@@ -5217,7 +5215,7 @@ co-ordinates for a given source; virtual/focused source position
 changes trigger the transmission of OSC messages over multicast UDP on
 address =224.4.224.5=, port 49162.
 
-The DAW of choice during development has been Reaper[fn:18],
+The DAW of choice during development has been Reaper,[fn:18]
 configured with a network bus channel with a number of channels
 corresponding to the number of WFS sources; monophonic channels can be
 added and set up as sends to the network bus.
@@ -5445,7 +5443,7 @@ each iteration, the audio client polls a network socket that has
 joined the appropriate multicast group for AAP packets (=224.4.224.4=
 port 49152), attempting to read all queued incoming packets, adding
 them to a packet buffer as they arrive. The effects of network jitter,
-plus interrupt prioritisation (e.g. for audio processing) on the
+plus interrupt prioritisation (e.g., for audio processing) on the
 client mean that a backlog of packets may arise between calls to
 ~AudioClientBase::run~, so it reads greedily; see
 cref:lst:audio-client-run for an excerpt from the ~run~ method.
@@ -5577,7 +5575,7 @@ public:
 protected:
     void processImpl(int16_t **inputBuffer, int16_t **outputBuffer, size_t const numFrames) override
     {
-        // Advance smoothed parameters, i.e. virtual source positions
+        // Advance smoothed parameters, i.e., virtual source positions
         for (auto &sp: context.virtualSourceCoordinates) {
             sp.second.getNext();
         }
@@ -5847,7 +5845,7 @@ Moxa.
 
 [fn:13] For convenience and explicitness elsewhere in the text,
 decimal equivalents to hexadecimal numbers will be indicated with
-subscript 10, e.g. 56 322_{10}.
+subscript 10, e.g., 56 322_{10}.
 
 [fn:12] Actually, given available negative exponents from -126 to -1,
 and a fraction of 23 bits for each exponent, around 49.2\nbsp%. The
