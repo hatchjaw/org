@@ -464,44 +464,272 @@ include them in LaTeX source blocks here, and in regular markup in
 ]{MinionPro}
 #+end_src
 
-** Teensy
+** Common stuff
 
-Describe a Teensy with a thought bubble, and an optional magnifying glass.
+Define some colours and some node and line styles.
 
 #+begin_src latex
+\definecolor{ctrlColour}{HTML}{479955}
+\definecolor{audioColour}{HTML}{4077D6}
+\definecolor{usbColour}{HTML}{D63E3E}
+
+\pgfdeclarelayer{superbackground}
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfdeclarelayer{superforeground}
+\pgfsetlayers{superbackground,background,main,foreground,superforeground}
+
 \tikzset{
-  bubbleline/.style={line width=.375mm},
-  pics/teensythinks/.style={
-    code={
-      \tikzset{teensythinks/.cd, #1}
-
-      \def\nomFS{\pgfkeysvalueof{/tikz/teensythinks/nominalfs}}
-      \def\actFS{\pgfkeysvalueof{/tikz/teensythinks/actualfs}}
-      
-      \node [] at (0,0) {
-        \includegraphics[width=3.5cm]{./images/t41_orig}
-      };
-      \draw [bubbleline, fill=white] (.275, .9) ellipse (1.8mm and .9mm);
-      \draw [bubbleline, fill=white] (0, 1.2) ellipse (2.75mm and 1.5mm);
-      \node [cloud, cloud ignores aspect, cloud puffs=9, cloud puff arc=96, draw, bubbleline, fill=white, align=center] () at (-.7, 1.95) {\large\nomFS\ kHz!};
-
-      \pgfmathparse{\actFS > 0}
-      \ifnum\pgfmathresult=1
-        \node [magnifying glass, bubbleline, draw, fill=white, fill opacity=0.75, text opacity=1, align=center, inner sep=1.5mm] () at (.5,-.5) {\large\actFS\\\large{}kHz};
-      \fi
-    }
-  },
-  teensythinks/.cd,
-  nominalfs/.initial=48,
-  actualfs/.initial=0
+  device/.style={draw, fill=black!10, rounded corners=1mm, inner xsep=1.5mm, align=center},
+  ctrl/.style={densely dotted, ctrlColour, line width=.2mm},
+  ctrlArrow/.style={ctrl, -{Triangle[open]}},
+  acn/.style={-{Stealth}, audioColour, densely dashdotted},
+  audio/.style={-{Stealth}, audioColour},
+  ptp/.style={{Triangle}-{Triangle}},
+  usb/.style={{Triangle[open]}-{Triangle[open]}, usbColour},
+  legend/.style={font=\tiny\itshape},
+  module/.style={device, fill=ctrlColour!35, transform shape},
+  authority/.style={device, fill=usbColour!35}
 }
 #+end_src
 
+** System overview
 
-* Distributed Spatial Audio
+#+begin_src latex
+\tikzset{
+  systemOverview/.pic={
+    \node (auth) [authority] at (0, 0) {Time\\authority};
+    \node (switch) [device, above=5mm of auth, inner xsep=10mm] {Switch};
+    \node (server) [device, below=5mm of auth, inner xsep=10mm] {Server};
+    \node (module0) [module, above left=5mm and -8mm of switch] {T41};
+    \node (moduleN) [module, above right=5mm and -8mm of switch] {T41};
+    \node [above=5mm of switch] {\(\cdots\)};
+
+    % PTP between authority and switch
+    \draw [ptp] (auth.north) -- (switch.south);
+
+    % PTP between switch and modules
+    \draw [ptp] ([xshift=-13.3mm]switch.north) --
+    ([xshift=-2mm]module0.south);
+    \draw [ptp] ([xshift=9.3mm]switch.north) --
+    ([xshift=-2mm]moduleN.south);
+
+    % USB audio
+    \draw [usb] ([xshift=-4mm]auth.south) --
+    ([xshift=-4mm]server.north);
+
+    % PTP follow-up from authority to server
+    \draw [-{Triangle}] ([xshift=4mm]auth.south) --
+    ([xshift=4mm]server.north);
+
+    % Audio from server to switch
+    \draw [audio] ([xshift=-12.5mm]server.north) --
+    ([xshift=-12.5mm]switch.south);
+
+    % Ctrl from server to switch
+    \draw [ctrlArrow] ([xshift=12.5mm]server.north) --
+    ([xshift=12.5mm]switch.south);
+
+    % Audio from switch to modules
+    \draw [audio] ([xshift=-11.3mm]switch.north) -- (module0.south);
+    \draw [audio] ([xshift=11.3mm]switch.north) -- (moduleN.south);
+
+    % Ctrl from switch to modules
+    \draw [ctrlArrow] ([xshift=-9.3mm]switch.north) --
+    ([xshift=2mm]module0.south);
+    \draw [ctrlArrow] ([xshift=13.3mm]switch.north) --
+    ([xshift=2mm]moduleN.south);
+  }
+}
+#+end_src
+
+** HOA
+
+#+begin_src latex
+\tikzset{
+  selector/.pic={
+    \draw[rotate=45, very thick, ctrlColour] (-#1,0) -- (#1,0);
+    \draw[rotate=45, very thick, ctrlColour] (0,-#1) -- (0, #1);
+  },
+  speakerHOA/.pic = {
+    \draw (-.11, 0) rectangle (.11, .06);
+    \draw (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
+    \node (-body) at (0, 0) {};   % invisible anchor node
+  },
+  moduleN/.pic = {
+    \node [module] (-body) {dHOA};
+    \draw [ptp] (0, .6) -- (-body.north);
+    \draw [acn] (-.25, .6) -- ([xshift=-.25cm]-body.north);
+    \draw [ctrlArrow] (.25, .6) -- ([xshift=.25cm]-body.north);
+  },
+  moduleS/.pic = {
+    \node [module] (-body) {dHOA};
+    \draw [ptp] (0, -.6) -- (-body.south);
+    \draw [acn] (-.25, -.6) -- ([xshift=-.25cm]-body.south);
+    \draw [ctrlArrow] (.25, -.6) -- ([xshift=.25cm]-body.south);
+  },
+  hoa/.pic={
+    \begin{scope}[yshift=11.5cm]
+      % Synthesised soundfield
+      \draw [thick] (-4, -4) rectangle (4, 4);
+      % Azymuthal rings
+      \draw [dashed, black!30] (0, 0) circle (3.5);
+      \draw [dashed, black!30] (0, 0) circle (1.9);
+      % Speakers, ring 0
+      \pic [rotate=180] (speaker0) at (0, 3.7) {speakerHOA};
+      \pic [rotate=135] (speaker1) at (2.625, 2.625) {speakerHOA};
+      \pic [rotate=90] (speaker2) at (3.7, 0) {speakerHOA};
+      \pic [rotate=45] (speaker3) at (2.625, -2.625) {speakerHOA};
+      \pic (speaker4) at (0, -3.7) {speakerHOA};
+      \pic [rotate=-45] (speaker5) at (-2.625, -2.625) {speakerHOA};
+      \pic [rotate=-90] (speaker6) at (-3.7, 0) {speakerHOA};
+      \pic [rotate=-135] (speaker7) at (-2.625, 2.625) {speakerHOA};
+      % Speakers, ring 1
+      \pic [rotate=202.5] (speaker8) at (-.8, 1.925) {speakerHOA};
+      \pic [rotate=157.5] (speaker9) at (.8, 1.925) {speakerHOA};
+      \pic [rotate=112.5] (speaker10) at (1.925, .8) {speakerHOA};
+      \pic [rotate=67.5] (speaker11) at (1.925, -.8) {speakerHOA};
+      \pic [rotate=22.5] (speaker12) at (.8, -1.925) {speakerHOA};
+      \pic [rotate=-22.5] (speaker13) at (-.8, -1.925) {speakerHOA};
+      \pic [rotate=-67.5] (speaker14) at (-1.925, -.8) {speakerHOA};
+      \pic [rotate=-112.5] (speaker15) at (-1.925, .8) {speakerHOA};
+      % Modules
+      \pic [rotate=-22.5] (module0) at (1.5, 3.5) {moduleS};
+      \pic [rotate=67.5] (module1) at (3.5, -1.5) {moduleN};
+      \pic [rotate=-22.5] (module2) at (-1.5, -3.5) {moduleN};
+      \pic [rotate=67.5] (module3) at (-3.5, 1.5) {moduleS};
+      \pic (module4) at (0, 2.25) {moduleN};
+      \pic (module5) [rotate=90] at (2.25, 0) {moduleS};
+      \pic (module6) at (0, -2.25) {moduleS};
+      \pic [rotate=-90] (module7) at (-2.25, 0) {moduleS};
+      % Audio
+      \draw [audio] (module0-body.west) -- ([xshift=-.05cm]speaker0-body.east);
+      \draw [audio] (module0-body.east) -- ([yshift=.05cm, xshift=.1cm]speaker1-body.west);
+      \draw [audio] (module1-body.east) -- ([yshift=-.1cm, xshift=.1cm]speaker2-body.west);
+      \draw [audio] (module1-body.west) -- ([yshift=.05cm, xshift=-.1cm]speaker3-body.east);
+      \draw [audio] (module2-body.east) -- ([yshift=.05cm, xshift=.05cm]speaker4-body.west);
+      \draw [audio] (module2-body.west) -- ([yshift=-.05cm]speaker5-body.east);
+      \draw [audio] (module3-body.west) -- ([yshift=.1cm, xshift=-.1cm]speaker6-body.east);
+      \draw [audio] (module3-body.east) -- ([yshift=-.05cm, xshift=.1cm]speaker7-body.west);
+      \draw [audio] (module4-body.west) -- ([yshift=.125cm]speaker8-body.south);
+      \draw [audio] (module4-body.east) -- ([yshift=.125cm]speaker9-body.south);
+      \draw [audio] (module5-body.east) -- ([yshift=.125cm]speaker10-body.south);
+      \draw [audio] (module5-body.west) -- ([yshift=.1cm]speaker11-body.south);
+      \draw [audio] (module6-body.east) -- ([yshift=.125cm]speaker12-body.south);
+      \draw [audio] (module6-body.west) -- ([yshift=.125cm]speaker13-body.south);
+      \draw [audio] (module7-body.east) -- ([yshift=.1cm]speaker14-body.south);
+      \draw [audio] (module7-body.west) -- ([yshift=.125cm]speaker15-body.south);
+    \end{scope}
+    \begin{scope}[yshift=5.5cm]
+      % Switch
+      \node[device, inner xsep=8mm, inner ysep=2.5mm](switch) at (0, 1) {Switch};
+      % Time authority
+      \node[authority, align=center](authority) at (0, -.5) {Time\\authority};
+      % PTP
+      \draw [{Triangle}-] (.5, -1.5) -- ([xshift=5mm] authority.south);
+      \draw [ptp] (authority.north) -- (switch.south);
+      \draw [ptp] (switch.north) -- (0, 2);
+      % USB
+      \draw [usb] (-.5, -1.5) -- ([xshift=-5mm] authority.south);
+      % ACN-format
+      \draw [acn] (-1.1, -1.5) -- ([xshift=-1.1cm] switch.south);
+      \draw [acn] ([xshift=-1.1cm] switch.north) -- (-1.1, 2);
+      % Coordinates
+      \draw [ctrlArrow] (1.1, -1.5) -- ([xshift=1.1cm] switch.south);
+      \draw [ctrlArrow] ([xshift=1.1cm] switch.north) -- (1.1, 2);
+    \end{scope}
+    \begin{scope}
+      % DAW
+      \draw [thick] (-4, -4) rectangle (4, 4);
+      \node [] at (-3.25, 3.5) {DAW};
+      % Virtual soundfield
+      \draw [thick] (0, 0) circle (3.5);
+      \node [black!75, align=center, font={\itshape}] at (0, 0) {Virtual\\soundfield};
+      % Azymuthal rings
+      \draw [dotted, black!50] (0, 0) circle (1.9);
+      % Module selectors
+      \pic at (1.2, 3.275) {selector=5pt};
+      \pic at (3.275, -1.2) {selector=5pt};
+      \pic at (-1.2, -3.275) {selector=5pt};
+      \pic at (-3.275, 1.2) {selector=5pt};
+      \pic at (0, 1.9) {selector=5pt};
+      \pic at (1.9, 0) {selector=5pt};
+      \pic at (0, -1.9) {selector=5pt};
+      \pic at (-1.9, 0) {selector=5pt};
+      % Speakers, ring 0
+      \pic [rotate=180] (speaker0) at (0, 3.7) {speakerHOA};
+      \pic [rotate=135] (speaker1) at (2.625, 2.625) {speakerHOA};
+      \pic [rotate=90] (speaker2) at (3.7, 0) {speakerHOA};
+      \pic [rotate=45] (speaker3) at (2.625, -2.625) {speakerHOA};
+      \pic (speaker4) at (0, -3.7) {speakerHOA};
+      \pic [rotate=-45] (speaker5) at (-2.625, -2.625) {speakerHOA};
+      \pic [rotate=-90] (speaker6) at (-3.7, 0) {speakerHOA};
+      \pic [rotate=-135] (speaker7) at (-2.625, 2.625) {speakerHOA};
+      % Speakers, ring 1
+      \pic [rotate=202.5] (speaker8) at (-.8, 1.925) {speakerHOA};
+      \pic [rotate=157.5] (speaker9) at (.8, 1.925) {speakerHOA};
+      \pic [rotate=112.5] (speaker10) at (1.925, .8) {speakerHOA};
+      \pic [rotate=67.5] (speaker11) at (1.925, -.8) {speakerHOA};
+      \pic [rotate=22.5] (speaker12) at (.8, -1.925) {speakerHOA};
+      \pic [rotate=-22.5] (speaker13) at (-.8, -1.925) {speakerHOA};
+      \pic [rotate=-67.5] (speaker14) at (-1.925, -.8) {speakerHOA};
+      \pic [rotate=-112.5] (speaker15) at (-1.925, .8) {speakerHOA};
+    \end{scope}
+  }
+}
+#+end_src
+
+* Ambisonics
+
+** Ambisonics
+
+#+typst: #columns(2, [
+
+#+attr_org: :width 200
+#+attr_typst: :height 5.5cm
+[[./images/iem-cube.jpg]]
+
+#+typst: #colbreak()
+
+#+attr_org: :width 200
+[[./images/ircam-dome.jpg]]
+
+#+typst: ])
+
+** Ambisonics
+
+#+typst: #columns(2, [
+
+#+attr_org: :width 200
+#+attr_typst: :height 4.5cm
+[[./images/spherical-harmonics.png]]
+
+#+typst: #colbreak() #align(left)[
+
+- A sound field synthesis technique.
+- Decomposes a sound field onto a truncated basis of spherical
+  harmonics.
+- Abisonic /order/ \(M\) determines the number of spherical harmonics.
+- Number of loudspeakers: \(N \ge (M + 1)^{2}\)
+- The higher the number of loudspeakers, the greater the ambisonic
+  order, the better.
+- Higher order ambisonics (HOA) refers to ambisonics of greater than
+  order 1.
+
+#+typst: ]])
+
+** Ambisonics
+
+Ambisonics systems are typically centralised and very costly.
+
+Highly multichannel audio interfaces alone cost € thousands.
+
+We seek to lower the barrier to entry for sound field synthesis
+techniques by taking a distributed approach.
+
 * The Hardware Platform
 
-** A humble microcontroller development board
+** A Humble Microcontroller Development Board
 
 #+typst: #columns(2, [
 
@@ -521,176 +749,142 @@ Describe a Teensy with a thought bubble, and an optional magnifying glass.
 
 #+typst: ]])
 
-** A humble microcontroller development board                     :noexport:
-
-#+header: :exports results :results file raw :file "./images/gen/t41.png"
-#+header: :imagemagick t :iminoptions -density 300 :imoutoptions -geometry 400 -flatten :fit t
-#+header: :headers '("\\usepackage{smc26figs}")
-#+begin_src latex :eval no-export
-\begin{tikzpicture}
-  \pic at (0, 0) {teensythinks={nominalfs=48, actualfs=48.001}};
-\end{tikzpicture}
-#+end_src
-#+attr_org: :width 200
-#+attr_typst: :width 5cm
-#+RESULTS:
-[[file:./images/gen/t41.png]]
-
-** A collection of humble MCUs
-
-Each can be configured to run at a preferred audio sampling rate
-
-\begin{equation}
-\hat{F}_{s} = \frac{24\times10^{6}}{2^{8}}\frac{D_{S}+\frac{D_{N}}{D_{D}}}{D_{p}D_{A}D_{I_{1}}D_{I_{2}}}
-\end{equation}
-
-Audio PLL numerator/denominator are 30-bit registers, i.e. \(D_{N}, D_{D} \in \{0,1,\dots,1\,073\,741\,823\}\).
-
-** A collection of humble MCUs
-
-Due to imperfections in each device's clock source − a crystal
-oscillator (XO) − this will not be the /true/ sampling frequency
-
-*Tolerance*, given in parts per million (ppm), describes how far the XO
-may diverge from its /nominal/ frequency
-
-** What's a crystal oscillator?                                    :noexport:
+** A PTP-capable Switch
 
 #+typst: #columns(2, [
 
-#+attr_typst: :height 5.5cm
-[[./images/xo_annot.jpg]]
+#+attr_org: :width 200
+[[./images/switch.png]]
 
 #+typst: #colbreak() #align(left)[
 
-- Present in just about any electronic circuit that requires a /source
-  of time/
-- Features a vibrating sliver of quartz or some other piezoelectric
-  material
-- *Tolerance*, in parts per million (ppm), describes how far it can
-  diverge from its /nominal/ frequency
-- Stability can be affected by temperature, voltage, /age/, etc.
+- Most low-cost networking equipment doesn't support PTP.
+- Most PTP-capable networking equipment is expensive.
+- We found a PTP-capable switch that provides 24 PTP-enabled ports for
+  €200.
 
 #+typst: ]])
 
-#+begin_quote
-Image source:
-https://www.righto.com/2021/02/teardown-of-quartz-crystal-oscillator.html
-#+end_quote
+** The Networked Audio System
 
-** What's a part per million between friends?                      :noexport:
+#+typst: #grid(columns: (60%, 40%), [
 
-#+typst: #text(size: 1.25em)[
-*1 ppm*
+#+header: :exports results :results file raw :file "./images/gen/system-overview.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{smc26figs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic{systemOverview};
+   \matrix [draw] at (3, 0) {
+    \draw [ctrlArrow] (0,0) -- (.5,0); & \node [legend] {Control data (UDP)}; \\
+    \draw [audio] (0,0) -- (.5,0); & \node [legend] {Audio (UDP)}; \\
+    \draw [-{Triangle[open]}, usbColour] (0,0) -- (.5,0); & \node [legend] {USB audio}; \\
+    \draw [-{Triangle}] (0,0) -- (.5,0); & \node [legend] {PTP}; \\
+  };
+\end{tikzpicture}
+#+end_src
+#+attr_org: :width 200
+#+RESULTS:
+[[file:./images/gen/system-overview.png]]
 
-\downarrow
+#+typst: ],[
 
-\pm1 \micro{}s per second
+The time authority is a Teensy 4.1 running as a USB audio device /and/ a
+PTP clock authority.
 
-\downarrow
+It governs audio time for the server and PTP time for the network of
+DSP modules.
 
-\pm1 second every million seconds
-#+typst: ]
+The modules run media clock recovery and presentation time recovery
+algorithms.
 
-/1 million seconds \approx 11.6 days/
+The server runs in a HOA-control DAW plugin on a general-purpose
+computer.
 
-** What are a few parts per million between friends?
+#+typst: ])
 
-#+typst: #text(size: 1.25em)[
-*10 ppm*
+* Distributed Ambisonics
 
-\downarrow
+** Distributed Ambisonics
 
-\pm10 \micro{}s per second
+#+typst: #columns(2, [
 
-!
+#+header: :exports results :results file raw :file "./images/gen/hoa.png"
+#+header: :imagemagick t :iminoptions -density 600 :imoutoptions -geometry 2000 -flatten :fit t
+#+header: :headers '("\\usepackage{smc26figs}")
+#+begin_src latex :eval no-export
+\begin{tikzpicture}
+  \pic{hoa};
+  \matrix [draw] at (-2.75, 5.75) {
+    \draw [ctrlArrow] (0,0) -- (.5,0); & \node [legend] {Decoder coeff's}; \\
+    \draw [acn] (0,0) -- (.5,0); & \node [legend] {ACN-format}; \\
+    \draw [audio] (0,0) -- (.5,0); & \node [legend] {Audio}; \\
+    \draw [-{Triangle}] (0,0) -- (.5,0); & \node [legend] {PTP}; \\
+    \draw [usb] (0,0) -- (.5,0); & \node [legend] {USB}; \\
+    \pic at (.25, 0) {selector=5pt}; & \node [legend] {Module selector}; \\
+  };
+\end{tikzpicture}
+#+end_src
+#+attr_org: :width 200
+#+RESULTS:
+[[file:./images/gen/hoa.png]]
 
-Sampling period at 48 kHz \approx 21 \micro{}s
-#+typst: ] #v(.5cm)
+#+typst: #colbreak()
 
-#+begin_quote
-If, after a couple of seconds, two audio devices are out of sync by one sample...
-#+end_quote
+The ambisonics algorithm can be parallelised.
 
-* Time Exchange
+The decoder matrix, \(\mathbf{D}\), is found as the inverse of the
+mode matrix, \(\mathbf{Y}\) (the matrix of spherical harmonics).
 
-** Precision Time Protocol (IEEE 1588)
+Each row of \(\mathbf{D}\) contains the decoding co-efficients for one
+loudspeaker.
 
+Each ambisonics module, handling two channels of output, need only be
+aware of two rows of the decoder matrix.
 
-** Sampling rate conditioning
+#+typst: ])
 
-Otherwise known as /media clock recovery/
+* Deployment
 
-\begin{equation}
-\hat{F}_{s} = F_{s}(1 + \text{Adjust})
-\end{equation}
-where \(\text{Adjust}\) is some very small number, in seconds
+** Deployment
 
-\begin{equation}
-D_{N} = D_{D}\left(\frac{2^{8}\hat{F}_{s}D_{p}D_{A}D_{I_{1}}D_{I_{2}}}{24\times10^{6}} - D_{S}\right)
-\end{equation}
+#+typst: #columns(2, [
 
-# Let \(D_{D}\) take a convenient value of \(1 \times 10^{9}\)
+[[./images/hoa-control.png]]
 
-#+typst: #v(.5cm)
+#+typst: #colbreak()
 
-| \(\hat{F}_{s}\)         | \(D_{N}\)             |
-| \(48\,000\)          | \(184\,000\,000\)  |
-| \(47\,999.994\,048\) | \(\sim183\,996\,381\) |
+The HOA control plugin permits entering loudspeakers' cartesian
+co-ordinates.
 
-** Reproduction simultaneity
+It also has dropdown menus for assigning Teensy modules to pairs of
+loudspeakers.
 
-Problem: a recovered media clock \(\ne\) simultaneous /presentation time/
+On assigning a module to loudspeaker pair, decoder matrix rows are
+transmitted to the module as an OSC bundle.
 
-Solution: start clock subscriber audio subsystem when PTP lock achieved
-
-Takes  \~10 seconds from boot for <100 ns offset
-
-Only feasible for a nominal sampling rate that is a multiple of the
-buffer size!
-
-#+typst: #v(.5cm)
-
-\begin{gather}
-\frac{44\,100}{128} = 344.531\,25 \quad\quad\quad
-\frac{48\,000}{128} = 375
-\end{gather}
-
+#+typst: ])
 
 * Outlook
 
 ** Next steps
 
-Run a regular computer as the audio server...
+Higher ambisonics orders...
 
-#+typst: #text(size: .75em)[
+#+typst: #text(size: .66em)[
 #+begin_quote
-/...but how to make it part of the PTP network without increasing
-costs/complexity?/
+/...up to fifth order possible while respecting ethernet's maximum
+transmissible unit... can we go higher by dropping to eight frames per
+audio packet?../
 #+end_quote
 #+typst: ] #v(.5cm)
 
-Make some cool spatial audio installations!..
+More output channels per module via time division multiplexing...
 
 #+typst: #text(size: .75em)[
 #+begin_quote
-/...To what extent can an ambisonics decoder be parallelised?/
-#+end_quote
-#+typst: ] #v(.5cm)
-
-Address the remaining ppb drift...
-
-#+typst: #text(size: .75em)[
-#+begin_quote
-/...it appears to be inversely proportional to the raw drift/
-#+end_quote
-#+typst: ] #v(.5cm)
-
-Can we do virtual acoustics?
-
-#+typst: #text(size: .75em)[
-#+begin_quote
-/...probably depends upon the performance of the PSRAM/
+/...up to thirty-two channels possible per device --- potentially lower
+cost per output channel.../
 #+end_quote
 #+typst: ] #v(.5cm)
 
