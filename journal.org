@@ -11609,5 +11609,7 @@ a little bit why you have this chapter of course (saying that this is
 something you worked on during the first year of your PhD)."
 ***** TODO Reference Prof. Carôt
 ...when introducing the iMXRT1062.
+***** TODO Reference T. Carpentier
+...distributed sound system, Raspberry Pi, not synchronised.
 
 Entered on [2026-10-22 jeu. 11:12]

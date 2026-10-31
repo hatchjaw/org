@@ -265,8 +265,8 @@ Network Client Towards Distributed Spatial Audio]], /Proceedings of
 the 2023 Sound and Music Computing Conference (SMC-23)/.
 
 T. A. Rushton, P. R. Kantan, 2022, [[https://seafile.zfn.uni-bremen.de/f/94b7758744164b4e9988/][A Real-time Embodied Sonification
-Model to Convey Temporal Asymmetry During Running]], /Proceedings of
-the 7th Interactive Sonification Workshop (ISon)/.
+Model to Convey Temporal Asymmetry During Running]], /Proceedings of the
+7th Interactive Sonification Workshop (ISon)/.
 - Winner: /Best Student Paper/.
 
 * Demos

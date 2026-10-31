@@ -706,26 +706,30 @@ Define some colours and some node and line styles.
 
 #+typst: #colbreak() #align(left)[
 
-- A sound field synthesis technique.
-- Decomposes a sound field onto a truncated basis of spherical
-  harmonics.
+- A *sound field synthesis* technique.
+- Decomposes a sound field onto a truncated basis of *spherical
+  harmonics*.
 - Abisonic /order/ \(M\) determines the number of spherical harmonics.
 - Number of loudspeakers: \(N \ge (M + 1)^{2}\)
 - The higher the number of loudspeakers, the greater the ambisonic
   order, the better.
-- Higher order ambisonics (HOA) refers to ambisonics of greater than
+- Higher order ambisonics (*HOA*) refers to ambisonics of greater than
   order 1.
 
 #+typst: ]])
 
 ** Ambisonics
 
-Ambisonics systems are typically centralised and very costly.
+Ambisonics systems are typically *centralised* and *very costly*.
 
 Highly multichannel audio interfaces alone cost € thousands.
 
-We seek to lower the barrier to entry for sound field synthesis
-techniques by taking a distributed approach.
+We seek to *lower the barrier to entry* for sound field synthesis
+techniques by taking a *distributed approach*.
+
+Our system is based on a network of distributed DSP modules,
+supporting network protocol, DAW-based control systems and MCU
+firmware.
 
 * The Hardware Platform
 
@@ -739,10 +743,11 @@ techniques by taking a distributed approach.
 
 #+typst: #colbreak() #align(left)[
 
-- Teensy 4.1 (~https://pjrc.com~)
+- Teensy 4.1 (=https://pjrc.com=)
 - 600 MHz Arm Core-M7, FPU, DSP, SIMD
 - MCU with dedicated audio subsystem
-- Ethernet subsystem with IEEE 1588 PTP support
+- Ethernet subsystem with IEEE 1588 Precision Time Protocol (PTP)
+  support
 - \~€ 30  + \~€ 15 with ethernet and audio add-ons
 - Well-known to the maker/DIY community
 - Memory-poor — 1024 kB (+ 16 MB PSRAM)
@@ -760,7 +765,7 @@ techniques by taking a distributed approach.
 
 - Most low-cost networking equipment doesn't support PTP.
 - Most PTP-capable networking equipment is expensive.
-- We found a PTP-capable switch that provides 24 PTP-enabled ports for
+- We found a PTP-capable switch that provides *24 PTP-enabled ports* for
   €200.
 
 #+typst: ]])
@@ -789,13 +794,13 @@ techniques by taking a distributed approach.
 
 #+typst: ],[
 
-The time authority is a Teensy 4.1 running as a USB audio device /and/ a
+The *time authority* is a Teensy 4.1 running as a USB audio device /and/ a
 PTP clock authority.
 
-It governs audio time for the server and PTP time for the network of
-DSP modules.
+It governs *audio time* for the server and *PTP time* for the network of
+DSP modules, via the switch.
 
-The modules run media clock recovery and presentation time recovery
+The modules run *media clock recovery* and *presentation time recovery*
 algorithms.
 
 The server runs in a HOA-control DAW plugin on a general-purpose
@@ -831,16 +836,34 @@ computer.
 
 #+typst: #colbreak()
 
-The ambisonics algorithm can be parallelised.
+The ambisonics algorithm can be *parallelised*.
 
-The decoder matrix, \(\mathbf{D}\), is found as the inverse of the
+The *decoder matrix*, \(\mathbf{D}\), is found as the inverse of the
 mode matrix, \(\mathbf{Y}\) (the matrix of spherical harmonics).
 
-Each row of \(\mathbf{D}\) contains the decoding co-efficients for one
+Each row of \(\mathbf{D}\) contains the *decoding co-efficients* for one
 loudspeaker.
 
-Each ambisonics module, handling two channels of output, need only be
-aware of two rows of the decoder matrix.
+#+typst: ])
+
+** Distributed Ambisonics
+
+#+typst: #columns(2, [
+
+#+attr_org: :width 200
+[[./images/gen/hoa.png]]
+
+#+typst: #colbreak()
+
+Each ambisonics module, handling two channels of output, /need only be
+aware of two rows of the decoder matrix/.
+
+Output signal \(s\) for the \(i\)^{th} loudspeaker is
+#+NAME: eq:
+\begin{equation}
+s_{i}(t) = \mathbf{D}_{i} \cdot \mathbf{b}(t)\;,
+\end{equation}
+where \(\mathbf{b}\) is the vector of ACN-encoded audio channels.
 
 #+typst: ])
 
@@ -864,6 +887,9 @@ loudspeakers.
 On assigning a module to loudspeaker pair, decoder matrix rows are
 transmitted to the module as an OSC bundle.
 
+Modules are programmed in Faust and perform the requisite dot
+products.
+
 #+typst: ])
 
 * Outlook
@@ -875,7 +901,7 @@ Higher ambisonics orders...
 #+typst: #text(size: .66em)[
 #+begin_quote
 /...up to fifth order possible while respecting ethernet's maximum
-transmissible unit... can we go higher by dropping to eight frames per
+transmissible unit.../ /can we go higher by dropping to eight frames per
 audio packet?../
 #+end_quote
 #+typst: ] #v(.5cm)
