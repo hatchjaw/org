@@ -11607,5 +11607,7 @@ sure you know that already :) )."
 Romain: "The general introduction of your thesis will have to explain
 a little bit why you have this chapter of course (saying that this is
 something you worked on during the first year of your PhD)."
+***** TODO Reference Prof. Carôt
+...when introducing the iMXRT1062.
 
 Entered on [2026-10-22 jeu. 11:12]

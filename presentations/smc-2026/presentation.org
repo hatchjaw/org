@@ -850,6 +850,7 @@ aware of two rows of the decoder matrix.
 
 #+typst: #columns(2, [
 
+#+attr_org: :width 200
 [[./images/hoa-control.png]]
 
 #+typst: #colbreak()
