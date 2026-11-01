@@ -1008,8 +1008,8 @@ commercial audio systems, and is designed to ensure that users can
 overcome the associated learning curve, and that no-one, be they user
 or audience member, is left underwhelmed or frustrated by an
 experience marred by technical problems. In short, due to the various
-types of /investment/ associated with large-scale audio systems, there's
-a lot riding on their success in practice.
+types of /investment/ associated with large-scale audio systems, there
+is a great deal riding on their success in practice.
 
 An individual or institution wishing to invest in a spatial audio
 system is beset by a variety of uncomfortable questions with regard to
@@ -1026,9 +1026,139 @@ existing audio workflows?
 
 This thesis describes an attempt to democratise access to spatial
 audio systems by taking a distributed approach to the computation of
-sound field synthesis algorithms.
+sound field synthesis algorithms. The broad aim is to render access to
+such techniques more attainable, in a form that is modular, scalable
+and low-cost. The work described here addresses the following research
+questions.
+
+** RQ1
+
+/How can a network of devices be used to create a distributed audio
+system suitable for managing scalable audo spatialisation
+installations?/
+
+This is the primary research question posed by the assignment
+described in this thesis. Recent research in the field has seen the
+development of distributed systems for networked music and audio
+spatialisation applications\nbsp[cite:@gabrielliNetworked2012;
+@devonportDistribution2019; @bellochPerformance2021;
+@carpentierCosteffective2026], and, in prior work, the author has
+established the feasibility of a low-cost implementation of such a
+system using microcontroller-based
+clients\nbsp[cite:@rushtonMicrocontrollerbased2023]. Considerable scope
+remains for exploring this question, incnluding how best to exploit
+the available hardware and software to serve audio spatialisation
+ends, and how established audio spatialisation algorithms can be
+parallelised and distributed. Powerful as modern embedded platforms
+are, a close eye must be kept on the computational complexity of the
+devised DSP algorithms. To the author's knowledge, no comprehensive
+study has been conducted on the viability of a system of this sort for
+timing-critical applications.
+
+** RQ2
+
+/How can such a system be created and configured such that it
+maintains inter-client synchronicity?/
+
+Distributed spatial audio applications such as wave field synthesis
+and higher order ambisonics require, ideally, perfect synchronicity
+between clients; at the time of writing, and prior to the work
+undertaken as part of this thesis, no open protocol exists for
+sample-synchronous networked audio transmission in a distributed
+context. In order to support the aims of RQ1, a protocol (or suite of
+protocols) must be designed to satisfy this
+requirement. Synchronicity, indeed /time/ itself, is a thorny issue in
+the world of computing\nbsp[cite:@marouaniInternal2008;
+@fonsecaLatency2003a], perhaps doubly so in a distributed setting. The
+extent to which independent computer systems can be synchronised must
+be explored; further, whether this entails an external,
+'authoritative' source of time, and whether reliance on such a
+time-source represents an acceptable increase in the complexity of the
+proposed protocol.
+
+** RQ3
+
+/What novel uses can be found for scalable networks fe audio-enabled
+devices? To what ends can the parallelisation of DSP algorithms in
+general be applied?/
+
+A successful implementation of a sample-synchronous distributed
+networked audio system has the potential to be highly disruptive to
+the fields of spatial and immersive audio. Consequently it should be a
+priority to identify the characteristics of such a system that
+distinguish it from centralised equivalents, and explore novel ways to
+exploit those characteristics.
+
+** Contributions
+
+Guided by the above research questions, the contributions of this
+thesis are as follows:
+
+- A suite of network protocols for audio and control data
+  transmission, device discovery and enumeration, and synchronisation.
+- Digital audio workstation-based interfaces for sound field synthesis
+  control.
+- Microcontroller firmware for time-sensitive applications, including
+  media clock and presentation time recovery algorithms.
+- Parallelised sound field synthesis algorithms.
+
+Additionally, this thesis proposes an approach to differentiable
+programming in the Faust language.
+
+The work described in this manuscript has led to the publication of
+one journal article\nbsp[cite:@rushtonNetworked2024] and five conference
+papers\nbsp[cite:@rushtonDifferentiable2024; @rushtonFaust2025a;
+@rushtonAll2025; @rushtonAmbisonics2026; @rushtonAnanas2026].
+
+** General Structure of this Thesis
+
+*Cref:chap:background* details the background to this work, beginning
+with some fundamentals of digital audio signals and computer
+networking. It proceeds with an overview of networked audio including
+existing protocols and systems, followed by a treatment of approaches
+to audio spatialisation. It concludes by detailing the state of the
+art in spatial, distributed and frugal audio systems. 
+
+*Cref:chap:tools* is concerned with the tools and platforms used in the
+development of the practical aspect of this thesis. It includes a
+description of the Faust programming language, a variety of embedded
+audio systems and the identification of the target platform, the
+development of audio plugins, and distributed approaches to the sound
+field synthesis techniques of wave field synthesis and higher order
+ambisonics.
+
+*Cref:chap:faust-autodiff* describes a general schema for differentiable
+programming and differentiable digital signal processing in the Faust
+programming language. This is work that was undertaken during the
+first year of the author's doctoral study and may be considered the
+fruits of a fertile side-project.
+
+*Cref:chap:time-exchange* introduces the concept of time exchange,
+which is fundamental to effective distributed computing for
+time-sensitive applications such as spatial audio. It begins with a
+description of the IEEE 1588 Precision Time Protocol (PTP), continues
+through a detailed look at configuring the target embedded computing
+platform, including ensuring effective media clock and presentation
+time recovery, and concludes with an in-depth treatment of an
+effective implementation of time exchange on that platform.
+
+In *cref:chap:protocol*, the /Ananas/ networked audio system is described,
+beginning with its audio server, proceeding with its suite of network
+protocols, its digital audio workstation plugins, and concluding with
+its accompanying microcontroller firmware. The chapter ends by
+detailing the deployment of Ananas, and discussing its performance in
+synchronising distributed, networked signal processors.
+
+Finally, in *cref:chap:conclusion*, we take a look back on the work
+detailed in the preceding chapters, the characteristics and
+effectiveness of the proposed implementation, and the scope that
+remains for future development of the work described in this
+manuscript.
 
 * Background
+:PROPERTIES:
+:CUSTOM_ID: chap:background
+:END:
 #+latex: \minitoc
 #+latex: \newpage
 
@@ -1249,7 +1379,7 @@ duration of a communication session, packet switching multiplexes
 variable-length datagrams across shared infrastructure, trading
 determinism for efficiency. This trade-off resurfaces throughout the
 field --- in QoS mechanisms, congestion control algorithms, and real
-time protocols such as IEEE 1588 Precision Time Protocol (PTP) where
+time protocols such as IEEE 1588 Precision Time Protocol where
 bounded, deterministic delivery is a hard requirement.
 
 *** Ethernet
@@ -1996,6 +2126,9 @@ at around €2,600 (€108.33/channel), however, which certainly places it
 favourably when compared with state-of-the-art spatialisation systems.
 
 * Tools, Technologies and Platforms
+:PROPERTIES:
+:CUSTOM_ID: chap:tools
+:END:
 
 #+latex: \minitoc
 #+latex: \newpage
@@ -2048,7 +2181,7 @@ been used for active noise
 cancellation\nbsp[cite:@alexandreExperimental2023], for sparse stochastic
 synthesis\nbsp[cite:@hansenWeather2018], for the development of hybrid
 digital musical instruments\nbsp[cite:@michonFaust2020a] and (as we will
-see in cref:sec:faust-autodiff) for differentiable digital signal
+see in cref:chap:faust-autodiff) for differentiable digital signal
 processing [cite:@rushtonDifferentiable2024].
 
 Perhaps the simplest Faust program is a mono signal passthrough, as
@@ -2143,7 +2276,7 @@ team,[fn:35] the very team of which the author of this manuscript is a
 member; in tackling the work's DSP needs it was possible to benefit
 from a wealth of expertise and experience.
 
-Cref:sec:faust-autodiff studies the introduction of automatic
+Cref:chap:faust-autodiff studies the introduction of automatic
 differentiation in the Faust language; for more about the language,
 its syntax and semantics, consult that chapter.
 
@@ -2798,7 +2931,7 @@ modules to pairs of loudspeakers, thus determining the appropriate
 pairs of secondary source co-ordinates to be transmitted to each
 module. Cref:fig:wfs illustrates the distributed WFS system
 diagrammatically. For an in-depth discussion of the significance of
-the /time authority/, see cref:sec:time-exchange and
+the /time authority/, see cref:chap:time-exchange and
 cref:sec:time-authority.
 
 #+name: fig:wfs
@@ -2911,7 +3044,7 @@ depicted in cref:fig:hoa.
 
 * Differentiable DSP In Faust
 :PROPERTIES:
-:CUSTOM_ID: sec:faust-autodiff
+:CUSTOM_ID: chap:faust-autodiff
 :END:
 
 The content of this chaper was originally published
@@ -3914,7 +4047,7 @@ processing.
 
 * Time Exchange
 :PROPERTIES:
-:CUSTOM_ID: sec:time-exchange
+:CUSTOM_ID: chap:time-exchange
 :END:
 
 \begin{chapquote}{Douglas Adams, \emph{The Hitchhiker's Guide to the Galaxy}}
@@ -4008,7 +4141,7 @@ a means to correct for it.
 \end{tikzpicture}
 \end{figure}
 
-IEEE 1588 Precision Time Protocol (PTP) is a time exchange mechanism
+IEEE 1588 Precision Time Protocol is a time exchange mechanism
 consisting of the exchange of multicast network packets between a
 clock authority and a clock subscriber\nbsp[cite:@leeProceedings2005;
 @schleusnerSubMicrosecond2024]. PTP transport can take place either as
@@ -4923,6 +5056,9 @@ void AudioSystemManager::adjustClock(const double adjust)
 #+end_src
 
 * Protocol and Software Systems
+:PROPERTIES:
+:CUSTOM_ID: chap:protocol
+:END:
 
 \lettrine{T}{he heart of the system} is /Ananas/, a networked audio
 system for time-sensitive applications. Ananas, the French word for
@@ -5778,6 +5914,9 @@ plotHistogram(4, "192.168.48.191")
 \end{figure*}
 
 * Conclusion
+:PROPERTIES:
+:CUSTOM_ID: chap:conclusion
+:END:
 
 This is my conclusion
 
