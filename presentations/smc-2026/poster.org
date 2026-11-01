@@ -771,8 +771,20 @@ time for DSP computation.
 
 **** Right                                                            :BMCOL:
 :PROPERTIES:
-:BEAMER_col: 0.5
+:BEAMER_col: 0.45
 :END:
+
+#+latex: \justifying
+
+The DAW plugin supports third order HOA. Its interface contains
+speaker icons, which, when clicked, reveal a window for entering
+loudspeakers' cartesian co-ordinates; it also contains dropdown menus
+for assigning Teensy modules to pairs of loudspeakers. When a module
+is assigned, cartesian loudspeaker co-ordinates are converted to
+spherical, yielding the radius, azimuth and elevation for each; next,
+the mode matrix, \(\mathbf{Y}\), is computed, and from that the
+decoder matrix, \(\mathbf{D}\). Finally, the appropriate rows of
+\(\mathbf{D}\) are transmitted to the selected module.
 
 *** Outlook
 
