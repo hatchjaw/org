@@ -11514,7 +11514,7 @@ some kind).
 Entered on [2026-05-18 lun. 13:30]
 ** 2026-06 juin
 *** 2026-06-25 jeudi
-**** Meeting: Tanguy & Romain                         :MEETING:SOUTENANCE:
+**** Meeting: Tanguy & Romain                        :MEETING:SUPERVISION:
 - State of the art should include sound field synthesis.
 - Developing digital audio systems should be chapter 2. Talk about
   Faust.
@@ -11534,7 +11534,7 @@ section.
 - State "DONE"       from "TODO"       [2026-10-16 ven. 11:07]
 :END:
 Either from Mouser, Digikey or Thomann.
-***** DONE Title, astract and bio for Romain
+***** DONE Title, abstract and bio for Romain
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2026-10-16 ven. 13:11]
 :END:
@@ -11559,7 +11559,10 @@ Question mark over whether HOA needs a volume control.
 Entered on [2026-10-15 jeu. 18:04]
 *** 2026-10-22 jeudi
 **** Thesis todos
-***** TODO Remember to talk about network settings
+***** DONE Remember to talk about network settings
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-11-02 lun. 18:26]
+:END:
 particularly the gateway, that has to be =255.255.0.0=.
 ***** TODO Emphasise my contributions
 State contributions at the beginning of each technical chapter and

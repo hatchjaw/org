@@ -1078,7 +1078,7 @@ proposed protocol.
 
 ** RQ3
 
-/What novel uses can be found for scalable networks fe audio-enabled
+/What novel uses can be found for scalable networks of audio-enabled
 devices? To what ends can the parallelisation of DSP algorithms in
 general be applied?/
 
@@ -5057,6 +5057,9 @@ void AudioSystemManager::adjustClock(const double adjust)
 :CUSTOM_ID: chap:protocol
 :END:
 
+#+latex: \minitoc
+#+latex: \newpage
+
 \lettrine{T}{he heart of the system} is /Ananas/, a networked audio
 system for time-sensitive applications. Ananas, the French word for
 "pineapple", is a recursive acronym: /"Ananas necessitates another
@@ -5298,6 +5301,31 @@ server permits an arbitrary channel count for WFS (up to the
 44-channel limit) it defies VST3's more restrictive channel formats,
 such as stereo, quadraphonic and octagonal.
 
+*** Network Settings
+
+To ensure correct operation of the DAW plugins --- ensuring that they
+are able to read PTP follow-up packets and transmit unicast UDP
+control data packets to the Teensy modules --- the network settings of
+the host machine must be carefully configured. Firstly, certain
+operating systems (Ubuntu Linux for example) consider, by default,
+network ports lower than 1024 as /privileged ports/ and will not permit
+an application to read on such a port; since PTP follow-up messages
+are transmitted on port 320, this can pose a problem. The solution in
+this case is to add =net.ipv4.ip_unprivileged_port_start=0= to a file in
+the =/etc/systemd/= directory. Secondly, since Teensy modules are
+assigned an IP address of the form =192.168.x.x=, in order to
+successfully transmit unicast UDP control data messages to the modules
+it is necessary to set the host machine's subnet mask to =255.255.0.0=
+(otherwise represented as =192.168.0.0/16=) as per cref:fig:ipv4.
+
+#+name: fig:ipv4
+#+caption: Appropriate IPv4 settings for the wired network connection on the host machine for working with the WFS and HOA control plugins.
+#+attr_latex: :width .666\linewidth
+#+attr_org: :width 200
+[[./images/ipv4.png]]
+
+*** The Network Overview Pane
+
 The network overview pane of each plugin displays information on
 connected switches, specifically the behaviour of their PTP algorithm,
 which is gathered via periodic curl requests. There are scenarios in
@@ -5325,6 +5353,8 @@ effectiveness of the synchronisation algorithm.
 #+caption: The network overview pane of the WFS plugin.
 #+attr_org: :width 300
 [[./images/network-overview.png]]
+
+*** The WFS Plugin
 
 The WFS control interface (cref:fig:wfs-control) presents a variable
 number of client module selectors, each of which displays a list of
@@ -5357,6 +5387,8 @@ added and set up as sends to the network bus.
 #+caption: The WFS plugin control interface. Numbered nodes represent monophonic WFS sound sources. Dropdown menus displaying IP addresses indicate the assignment of client modules to secondary source co-ordinates. The upper part of the interface represents the virtual sound field, and virtual sources that are /further away/ from the listening area; the lower part, beneath the speaker icons, represents the real sound field and the locations of focused sources.
 #+attr_org: :width 300
 [[./images/wfs-control.png]]
+
+*** The HOA Plugin
 
 The HOA control interface (cref:fig:hoa-control) supports third order
 ambisonics and consists of sixteen loudspeaker icons arranged in two
