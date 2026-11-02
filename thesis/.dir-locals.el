@@ -25,14 +25,19 @@
               (eval . (progn
                         (defun tar/org-latex-src-block (src-block _contents info)
                           "Export SRC-BLOCK as a tcolorbox `codeblock', folding any Org
-caption into the box's title and #+name: into the box's label= key."
+caption into the box's title and #+name: into the box's label= key.
+Line numbers are on unless the block has `:linenos no'."
                           (let* ((lang (or (org-element-property :language src-block) "text"))
                                  (code (org-export-format-code-default src-block info))
                                  (caption (org-export-get-caption src-block))
                                  (caption-str (if caption (org-export-data caption info) ""))
-                                 (label (or (org-latex--label src-block info nil nil) "")))
-                            (format "\\begin{codeblock}[%s]{%s}{%s}\n%s\\end{codeblock}\n"
-                                    caption-str lang label code)))
+                                 (label (or (org-latex--label src-block info nil nil) ""))
+                                 (params (org-babel-parse-header-arguments
+                                          (or (org-element-property :parameters src-block) "")))
+                                 (linenos (alist-get :linenos params))
+                                 (linenos-str (if (member linenos '("nil" "no" "false")) "false" "true")))
+                            (format "\\begin{codeblock}[%s]{%s}{%s}{%s}\n%s\\end{codeblock}\n"
+                                    caption-str lang label linenos-str code)))
 
                         (advice-add 'org-latex-src-block :override #'tar/org-latex-src-block)))
               )))

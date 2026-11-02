@@ -11545,7 +11545,10 @@ info from Turin.
 - State "DONE"       from "TODO"       [2026-10-22 jeu. 11:07]
 :END:
 Refer back to last year's SMC poster for inspo.
-***** TODO Poster and presentation for SMC
+***** DONE Poster and presentation for SMC
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-11-02 lun. 10:29]
+:END:
 Last year's SMC equivalents should help here too.
 ***** DONE Test updated WFS and new HOA implementations
 :LOGBOOK:
@@ -11584,7 +11587,10 @@ distributed systems as audio interfaces."
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2026-10-22 jeu. 17:22]
 :END:
-***** TODO Remove line numbers for one-liner code listings
+***** DONE Remove line numbers for one-liner code listings
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-11-02 lun. 10:45]
+:END:
 ***** TODO Talk about the aims stated in §2.4 in the introduction
 Me: "Combining the elements described thus far in this chapter brings us to
 our chief aim, that of distributing spatial audio algorithms. The goal
