@@ -11564,7 +11564,10 @@ Entered on [2026-10-15 jeu. 18:04]
 - State "DONE"       from "TODO"       [2026-11-02 lun. 18:26]
 :END:
 particularly the gateway, that has to be =255.255.0.0=.
-***** TODO Emphasise my contributions
+***** DONE Emphasise my contributions
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-11-03 mar. 11:00]
+:END:
 State contributions at the beginning of each technical chapter and
 their associated papers.
 ***** TODO §1.7.3 could be much longer
@@ -11577,7 +11580,10 @@ that are needed for what you want to do: good amount of RAM and CPU
 power, Ethernet, PTP, etc. The embedded systems pictures you provide
 in 1.9 should maybe moved here."
 ***** TODO Add a section on UDP (and TCP) in chapter 1
-***** TODO Split Physically-inspired techniques into WFS/HOA
+***** DONE Split Physically-inspired techniques into WFS/HOA
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-11-03 mar. 09:09]
+:END:
 ***** TODO Also say what each of WFS and HOA can and can't do
 ...before going into technical detail.
 ***** TODO Expand §1.8.1 /State of the Art Distributed Audio Systems/ 
@@ -11594,14 +11600,20 @@ distributed systems as audio interfaces."
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2026-11-02 lun. 10:45]
 :END:
-***** TODO Talk about the aims stated in §2.4 in the introduction
+***** DONE Talk about the aims stated in §2.4 in the introduction
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-11-03 mar. 09:14]
+:END:
 Me: "Combining the elements described thus far in this chapter brings us to
 our chief aim, that of distributing spatial audio algorithms. The goal
 is to create parallelised WFS and HOA algorithms in Faust, deploy
 these on an array of embedded audio systems (specifically Teensy
 4.1s), and orchestrate the algorithms via DAW plugins written using
 JUCE and the CLAP format."
-***** TODO /Another/ WFS diagram, §2.4.1
+***** CANCELLED /Another/ WFS diagram, §2.4.1
+:LOGBOOK:
+- State "CANCELLED"  from "TODO"       [2026-11-03 mar. 09:09]
+:END:
 Romain: "Maybe a figure summarizing what you say in this section could
 help get the global picture of how this works. It could show that each
 delay line is ran on independent MCUs for example, etc... That would
@@ -11612,7 +11624,10 @@ illustrates this point...
 Romain: "If you don't take the "easy" ambitools route as I suggested,
 more details will have to be provided here on how this works (but I'm
 sure you know that already :) )."
-***** TODO Explain why Faust autodiff is there
+***** DONE Explain why Faust autodiff is there
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-11-03 mar. 08:58]
+:END:
 Romain: "The general introduction of your thesis will have to explain
 a little bit why you have this chapter of course (saying that this is
 something you worked on during the first year of your PhD)."

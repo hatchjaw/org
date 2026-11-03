@@ -1751,69 +1751,7 @@ manipulating sound localisation cues, these types seek to trigger
 those cues indirectly by synthesising a sound field as if it had been
 created by "true" acoustic sources.
 
-#+name: fig:spherical-harmonics
-#+caption: Spherical harmonics indexed by Ambisonic channel number \(a = m^{2} + m + n\). Figure taken from Zotter and Frank [cite:@zotterAmbisonics2019].
-[[./images/spherical-harmonics.png]] 
-
-In the case of ambisonics, first described in the early 1970s by
-Michael Gerzon\nbsp[cite:@ahrensAnalytic2012], the sound field is
-decomposed into a truncated basis of /spherical harmonics/, spatial
-functions described by linear sums of directional components of
-increasing order\nbsp[cite:@nicolSound2017] (see
-cref:fig:spherical-harmonics). For sound field reconstruction the
-number of loudspeakers required is \(N \ge (M + 1)^{2}\), where \(M\) is
-the ambisonic order. Estimation of the ambisonic components of a sound
-pressure field is possible via recording with spherical microphone
-arrays\nbsp[cite:@moreau3D2006]; alternatively, monophonic sound sources
-can be spatialised via /encoding/ to ambisonic
-format\nbsp[cite:@lecomteAmbitools2018], which, by convention uses
-/ambisonics channel numbering/ (ACN) to designate channels.
-
-ACN channels are indexed by the degree \(m\) and order \(n\) of the
-Legendre polynomials by which they are
-described:\nbsp[cite:@lecomteAmbitools2018]
-
-#+NAME: eq:acn
-\begin{equation}
-a = m^{2} + m + n\;.
-\end{equation}
-For a single monophonic source \(x(t)\) at azimuth \(\theta\) and elevation
-\(\varphi\), the encoded signal \(b_{a}\) for a given ACN-format channel is
-
-#+NAME: eq:acn-encoded
-\begin{equation}
-b_{a}(t) = x(t) \cdot Y_{m,n}(\theta, \varphi)\;,
-\end{equation}
-where \(Y_{m,n}\) is the real valued spherical
-harmonic\nbsp[cite:@lecomteAmbitools2018]
-
-#+NAME: eq:spherical-harmonic
-\begin{equation}
-Y_{m, n}(\theta, \varphi) = N_{m, n}P_{m, |n|}\sin(\varphi) \begin{cases}
-  \cos(|n|\theta), \; n \ge 0 \\ \sin(|n|\theta), \; n < 0
-\end{cases}.
-\end{equation}
-Here \(N_{m,n}\) is a normalisation factor and \(P_{m,|n|}\) are the
-associated Legendre polynomials. Ambisonics is not without its
-terminological ambiguities\nbsp[cite:@nachbarAmbiX2011]; it is the /degree/
-of the polynomial that corresponds with the ambisonics /order/.
-
-Considering the case of a third order ambisonics system with the
-bare-minimum \((3 + 1)^{2} = 16\) loudspeakers at positions \(\theta_{i},\varphi_{i}\),
-the spherical harmonics make up the 16\(\times\)16 mode matrix
-\(\mathbf{Y}_{m,n}(\theta,\varphi)\). In this case the decoding matrix
-\(\mathbf{D}\) is simply the inverse, \(\mathbf{D} = \mathbf{Y}^{-1}\),
-the rows of which are the decoding co-efficients for each loudspeaker;
-for a greater number of loudspeakers it would be necessary to take the
-pseudoinverse, \(\mathbf{D} = (\mathbf{Y}^{T}\mathbf{Y})^{-1}\mathbf{Y}^{T}\).
-
-Like periphonic approaches, ambisonics suffers from a sweet-spot
-effect. Its size is such that \(\lceil kr \rceil = M\), where \(r\) is the
-radius of the zone of accurate reconstruction, \(k = 2\pi f/c\) is the
-wave number, \(f\) is frequency, and \(c\) the speed of sound. This
-phenomenon worsens with attempts to reproduce sounds of higher
-frequency, but can be mitigated by reproducing higher-order modes and
-increasing the density of the distribution of secondary sources.
+**** Wave Field Synthesis
 
 #+name: fig:holophony
 #+caption: The holophonic effect of wave field synthesis.
@@ -1891,6 +1829,72 @@ time of propagation for a medium of with propagation speed \(c\)
 (typically modelled as \qty{343}{\meter\per\second} for sound in
 air). The components of the driving function are depicted in
 cref:fig:driving-function.
+
+**** Ambisonics
+
+#+name: fig:spherical-harmonics
+#+caption: Spherical harmonics indexed by Ambisonic channel number \(a = m^{2} + m + n\). Figure taken from Zotter and Frank [cite:@zotterAmbisonics2019].
+[[./images/spherical-harmonics.png]] 
+
+In the case of ambisonics, first described in the early 1970s by
+Michael Gerzon\nbsp[cite:@ahrensAnalytic2012], the sound field is
+decomposed into a truncated basis of /spherical harmonics/, spatial
+functions described by linear sums of directional components of
+increasing order\nbsp[cite:@nicolSound2017] (see
+cref:fig:spherical-harmonics). For sound field reconstruction the
+number of loudspeakers required is \(N \ge (M + 1)^{2}\), where \(M\) is
+the ambisonic order. Estimation of the ambisonic components of a sound
+pressure field is possible via recording with spherical microphone
+arrays\nbsp[cite:@moreau3D2006]; alternatively, monophonic sound sources
+can be spatialised via /encoding/ to ambisonic
+format\nbsp[cite:@lecomteAmbitools2018], which, by convention uses
+/ambisonics channel numbering/ (ACN) to designate channels.
+
+ACN channels are indexed by the degree \(m\) and order \(n\) of the
+Legendre polynomials by which they are
+described:\nbsp[cite:@lecomteAmbitools2018]
+
+#+NAME: eq:acn
+\begin{equation}
+a = m^{2} + m + n\;.
+\end{equation}
+For a single monophonic source \(x(t)\) at azimuth \(\theta\) and elevation
+\(\varphi\), the encoded signal \(b_{a}\) for a given ACN-format channel is
+
+#+NAME: eq:acn-encoded
+\begin{equation}
+b_{a}(t) = x(t) \cdot Y_{m,n}(\theta, \varphi)\;,
+\end{equation}
+where \(Y_{m,n}\) is the real valued spherical
+harmonic\nbsp[cite:@lecomteAmbitools2018]
+
+#+NAME: eq:spherical-harmonic
+\begin{equation}
+Y_{m, n}(\theta, \varphi) = N_{m, n}P_{m, |n|}\sin(\varphi) \begin{cases}
+  \cos(|n|\theta), \; n \ge 0 \\ \sin(|n|\theta), \; n < 0
+\end{cases}.
+\end{equation}
+Here \(N_{m,n}\) is a normalisation factor and \(P_{m,|n|}\) are the
+associated Legendre polynomials. Ambisonics is not without its
+terminological ambiguities\nbsp[cite:@nachbarAmbiX2011]; it is the /degree/
+of the polynomial that corresponds with the ambisonics /order/.
+
+Considering the case of a third order ambisonics system with the
+bare-minimum \((3 + 1)^{2} = 16\) loudspeakers at positions \(\theta_{i},\varphi_{i}\),
+the spherical harmonics make up the 16\(\times\)16 mode matrix
+\(\mathbf{Y}_{m,n}(\theta,\varphi)\). In this case the decoding matrix
+\(\mathbf{D}\) is simply the inverse, \(\mathbf{D} = \mathbf{Y}^{-1}\),
+the rows of which are the decoding coefficients for each loudspeaker;
+for a greater number of loudspeakers it would be necessary to take the
+pseudoinverse, \(\mathbf{D} = (\mathbf{Y}^{T}\mathbf{Y})^{-1}\mathbf{Y}^{T}\).
+
+Like periphonic approaches, ambisonics suffers from a sweet-spot
+effect. Its size is such that \(\lceil kr \rceil = M\), where \(r\) is the
+radius of the zone of accurate reconstruction, \(k = 2\pi f/c\) is the
+wave number, \(f\) is frequency, and \(c\) the speed of sound. This
+phenomenon worsens with attempts to reproduce sounds of higher
+frequency, but can be mitigated by reproducing higher-order modes and
+increasing the density of the distribution of secondary sources.
 
 *** State of the Art Spatial Audio Installations
 :PROPERTIES:
@@ -2047,7 +2051,7 @@ and HOA can be found in cref:sec:distributed-algorithms.
 | Raspberry Pi CM5 | Broadcom BCM2712 | 2 GB SDRAM   | Yes      | Yes | € 89      |
 | Bela             | TI Sitara AM3358 | 512 MB SDRAM | Yes      | Yes | € 190     |
 | ESP32-LyraT      | ESP32-WROVER-B   | 4 MB PSRAM   | Yes      | No  | € 21      |
-| Teensy 4.1       | NXP iMXRT1062    | 1024 KB SRAM | Yes      | Yes | € 48      |
+| Teensy 4.1       | NXP i.MXRT1062   | 1024 KB SRAM | Yes      | Yes | € 48      |
 | Daisy Seed       | STM32H750IB      | 65 MB SDRAM  | No       | Yes | € 25      |
 
 #+name: fig:teensy
@@ -2328,13 +2332,13 @@ development board. Despite being memory-poor, sporting only
 ethernet add-ons costs less than
 €50\nbsp[cite:@murrayCharacterisation2025], and memory can be extended by
 up to \qty{16}{\mega\byte} by way of inexpensive surface-mount PSRAM
-chips.[fn:27] Furthermore, its NXP IMXRT1062
+chips.[fn:27] Furthermore, its NXP i.MXRT1062
 MCU\nbsp[cite:@nxpsemiconductorsIMX2021] features an ARM core processor
 clocked at \qty{600}{\mega\hertz}, more powerful than many similar
 MCU-based platforms.
 
 Critically, for purposes of synchronisation in a distributed setting,
-the IMXRT1062 features a PTP timer, hardware timestamping
+the i.MXRT1062 features a PTP timer, hardware timestamping
 functionality, and, unlike the Raspberry Pi, a dedicated audio
 subsystem with extremely high-resolution, 30-bit audio phase locked
 loop numerator and divider registers --- it is possible both to
@@ -2857,7 +2861,7 @@ focused sound source \(\hat{s}_{\text{in},k}\); in effect, all
 per-loudspeaker delays and virtual source prefilters are independent
 and parallelisable; a given distributed module, with two speaker
 outputs, need only compute these for the two loudspeakers for which it
-is responsible, having been provided with the cartesian co-ordinates
+is responsible, having been provided with the Cartesian co-ordinates
 for each. Faust code for the distributed WFS algorithm can be found in
 cref:lst:faust-wfs. The program takes ~N_SOURCES~ input streams, each
 corresponding with a WFS source, and distributes these across the two
@@ -3015,11 +3019,11 @@ linalg = environment {
 #+end_src
 
 The HOA plugin should provide a server for ACN-encoded audio channels
-and a control interface that facilitates the assignment of cartesian
+and a control interface that facilitates the assignment of Cartesian
 co-ordinates to loudspeaker positions, and the assignment of modules
 to pairs of loudspeakers. Upon assigning a module to a pair of
 loudspeakers, co-ordinates for all loudspeakers should be converted
-from cartesian to spherical, the mode matrix computed, its inverse
+from Cartesian to spherical, the mode matrix computed, its inverse
 taken, and the appropriate rows of the decoder matrix transmitted to
 the module. A diagram of a distributed third order HOA system is
 depicted in cref:fig:hoa.
@@ -4052,6 +4056,10 @@ Time is an illusion; lunchtime doubly so.
 \end{chapquote}
 
 #+latex: \minitoc
+The material in this chapter relates to that published in the papers
+/All Together Now: A Synchronous Platform for Distributed Spatial
+Audio/\nbsp[cite:@rushtonAll2025] and /Ananas: A Networked Audio System for
+Distributed Spatial Audio Applications/\nbsp[cite:@rushtonAnanas2026].
 #+latex: \newpage
 
 \lettrine{C}{onsider} a tuning fork, a steel, two-pronged resonator
@@ -4174,8 +4182,8 @@ for second \(n\) by which it should adjust its internal clock,
 \begin{equation}
 a_{n} = \alpha - K_{P}\theta_{n} + K_{I}\sum_{t=0}^{n}\theta\;,
 \end{equation}
-where \(K_{P}\) and \(K_{I}\) are co-efficients to be applied to the
-proportional and integral terms respectively; small co-efficients,
+where \(K_{P}\) and \(K_{I}\) are coefficients to be applied to the
+proportional and integral terms respectively; small coefficients,
 typically \(K_{I} < K_{P} < 1\). The adjustment value \(a_{n}\) can be used to
 set, for example, the per-cycle increment of a hardware ethernet timer
 register.
@@ -4194,17 +4202,17 @@ for the implementation described in this work.
 #+caption: The CRS326-24G-2S+IN ethernet switch from Latvian manufacturer, MikroTik.
 [[./images/switch.png]]
 ** A Synchronous, Distributed Audio System
-*** Configuring the iMXRT1062 MCU
+*** Configuring the i.MXRT1062 MCU
 
 Having discussed the /time exchange/ mechanism of PTP, it is important
 now to deal with how audio timing is configured on our target hardware
-platform, the Teensy 4.1 and its NXP iMXRT1062 MCU.
+platform, the Teensy 4.1 and its NXP i.MXRT1062 MCU.
 
-The iMXRT1062 features a dedicated audio phase locked loop (PLL),
+The i.MXRT1062 features a dedicated audio phase locked loop (PLL),
 PLL4, and a /synchronous audio interface/, SAI1, the latter providing
 I^{2}S output. By convention, the output frequency produced by SAI1,
-~SAI1_CLK_ROOT~, \(f_{R}\), must be 256 times oversampled with respect
-to the target audio sampling rate, \(f_{s}\):
+~SAI1_CLK_ROOT~, \(f_{R}\), must be 256 times oversampled with respect to
+the target audio sampling rate, \(f_{s}\):
 
 #+NAME: eq:sai1-1
 \begin{equation}
@@ -4241,7 +4249,7 @@ the ~POST_DIV_SELECT~, \(D_{p}\), and ~AUDIO _DIV~, \(D_{A}\), registers:
 \begin{equation}
 f_{M} = \frac{f_{P}}{D_{p}D_{A}}\;.
 \end{equation}
-\(f_{P}\) is the result of multiplying the iMXRT1062's \qty{24}{\MHz}
+\(f_{P}\) is the result of multiplying the i.MXRT1062's \qty{24}{\MHz}
 clock source, \(f_{XO}\), by the PLL4 divider, \(D_{P}\):
 
 #+NAME: eq:pll4
@@ -4263,7 +4271,7 @@ effect of the audio PLL and clock divider registers on the
 \qty{24}{\MHz} clock source.
 
 #+name: fig:imxrt1062-clock
-#+caption: iMXRT1062 audio PLL and SAI1 clock divider registers.
+#+caption: i.MXRT1062 audio PLL and SAI1 clock divider registers.
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}
@@ -4294,7 +4302,7 @@ following range:
 \left(26 + \frac{1}{D_{D}}\right) \leq D_{P} \leq \left(54 + \frac{D_{D}-1}{D_{D}}\right)\;,
 \end{equation}
 with \(1 \leq D_{D} \leq 2^{30}\); effectively, \(26 < D_{P} <
-55\). MCUXpresso Config Tools, and the iMXRT1062 reference
+55\). MCUXpresso Config Tools, and the i.MXRT1062 reference
 manual\nbsp[cite:@nxpsemiconductorsIMX2021 §13.3.2.2], indicate,
 however, that the output frequency range for PLL4 is:
 
@@ -4599,7 +4607,7 @@ condition the audio clocks of the modules such that sampling rate
 parity is achieved; this is a process referred to as /media clock
 recovery/\nbsp[cite:@crankshawMedia2021].
 
-In the case of the iMXRT1062 MCU this process is achieved by using the
+In the case of the i.MXRT1062 MCU this process is achieved by using the
 nanoseconds-per-second PTP-derived adjustment value at second \(n\),
 \(a_{n}\), to adjust the sampling rate. For a nominal sampling rate
 \(f_{s}\) (e.g. \qty{48}{\kHz}), the sampling rate, \(\hat{f}_{s,n}\) that
@@ -4629,7 +4637,7 @@ For example, if \(a_{n} = -1750\;\text{ns}\), we have
   &= 47\,999.916\;\text{Hz}\;.
 \end{align*}
 Inserting this value into cref:eq:general-fs, the expression for the
-audio sampling rate of the iMXRT1062, yields
+audio sampling rate of the i.MXRT1062, yields
 
 #+NAME: eq:adjusted-fs
 \begin{equation}
@@ -4656,7 +4664,7 @@ D_{N,n} &= 1 \times 10^{3}\left(
   &= 183\,948\,928\;,
 \end{align*}
 which can be used as a new value for the ~CCM_ANALOG_PLL_AUDIO_NUM~
-register of the iMXRT1062 MCU.
+register of the i.MXRT1062 MCU.
 
 In practice cref:eq:sampling-rate-recovery-1 does not suffice,
 however, and some residual parts per billion drift remains (see
@@ -4770,7 +4778,7 @@ constant temporal offset. Once again, the solution to this problem
 lies in judicious selection of sampling rate, \(f_{s}\), and audio buffer
 size, \(N\), plus co-ordination via PTP.
 
-Due to the way that DMA is configured, the iMXRT1062 generates two
+Due to the way that DMA is configured, the i.MXRT1062 generates two
 interrupts per audio buffer. At a sampling rate of
 \qty{48}{\kilo\hertz} and buffer size of 256 or below this means that
 an integer number of interrupts are generated each second. On system
@@ -5058,6 +5066,10 @@ void AudioSystemManager::adjustClock(const double adjust)
 :END:
 
 #+latex: \minitoc
+The content of this chapter relates to that published in /Ananas: A
+Networked Audio System for Distributed Spatial Audio
+Applications/\nbsp[cite:@rushtonAnanas2026] and /Ambisonics: Introducing
+an Accessible, Distributed Approach/\nbsp[cite:@rushtonAmbisonics2026].
 #+latex: \newpage
 
 \lettrine{T}{he heart of the system} is /Ananas/, a networked audio
@@ -5394,10 +5406,10 @@ The HOA control interface (cref:fig:hoa-control) supports third order
 ambisonics and consists of sixteen loudspeaker icons arranged in two
 rings offset by \(\frac{\pi}{8}\) radians. Clicking on a loudspeaker icon
 reveals a modal window containing ~juce::Slider~ instances that can be
-used to specify a given loudspeaker's cartesian co-ordinates. Pairs of
+used to specify a given loudspeaker's Cartesian co-ordinates. Pairs of
 loudspeaker icons are associated with ~juce::ComboBox~ dropdown menus
 populated with the IP addresses of connected client modules. Selecting
-a given module triggers the conversion from cartesian to spherical
+a given module triggers the conversion from Cartesian to spherical
 co-ordinates and the computation of spherical harmonics as per
 cref:eq:spherical-harmonic (\pageref{eq:spherical-harmonic}) using
 SN3D normalisation\nbsp[cite:@frankProducing2015], thus constructing the
@@ -5409,7 +5421,7 @@ selection has been made, two rows of the decoder matrix are
 transmitted to the selected client module as OSC messages over unicast UDP.
 
 #+name: fig:hoa-control
-#+caption: The HOA plugin control interface, displaying modal window for specifying secondary source cartesian co-ordinates. Clicking on a speaker icon opens the corresponding modal window. Selecting a client module by its IP address using one of the dropdown menus assigns that module two rows from the decoder matrix.
+#+caption: The HOA plugin control interface, displaying modal window for specifying secondary source Cartesian co-ordinates. Clicking on a speaker icon opens the corresponding modal window. Selecting a client module by its IP address using one of the dropdown menus assigns that module two rows from the decoder matrix.
 #+attr_org: :width 300
 [[./images/hoa-control.png]]
 
@@ -5466,7 +5478,7 @@ modules.
 Firmware for WFS and HOA is based upon a wholesale replacement for
 Teensy's audio library, the =AudioSystemManager= class. The rationale
 behind this was the need to be able to understand and accurately
-control the PLL4 and SAI1 subsystems of the IMXRT1062 MCU, plus the
+control the PLL4 and SAI1 subsystems of the i.MXRT1062 MCU, plus the
 SGTL5000 audio codec. A hardware abstraction layer was written to
 support this, turning the Teensy audio library's default
 preprocessor-based instructions into a selection of predictable
@@ -6078,6 +6090,8 @@ End:
 
 LocalWords: transduced periphony ambisonics microcontroller datagram
 LocalWords: CITI Inria INSA Emeraude DMA datagrams sonification
-LocalWords: waveguide ethernet Ananas
+LocalWords: waveguide ethernet Ananas HOA WFS periphonic pseudoinverse
+LocalWords: holophonic PTP MikroTik multicast AAP timestamping UDP
+LocalWords: endian spatialisation parallelisable DSP ACN dropdown
+LocalWords: unicast OSC MCU PLL
 #+end_example
-
