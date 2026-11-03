@@ -1034,7 +1034,7 @@ questions.
 ** RQ1
 
 /How can a network of devices be used to create a distributed audio
-system suitable for managing scalable audo spatialisation
+system suitable for managing scalable audio spatialisation
 installations?/
 
 This is the primary research question posed by the assignment
@@ -1288,7 +1288,7 @@ for storage and throughput. Integer formats offer comparatively poor
 resolution at low amplitudes due to the mismatch between the linear
 distribution of their values versus the logarithmic nature of sound
 intensity. Floating point formats address this by having a logarithmic
-distribution of avaliable values; the IEEE standard for single
+distribution of available values; the IEEE standard for single
 precision (i.e., 32 bit) floating point numbers\nbsp[cite:@IEEE2019]
 dictates that precision is greatest around zero, with around half the
 available numbers lying in \([-1, 1]\).[fn:12] For brevity's sake, and
@@ -1446,7 +1446,7 @@ indicate the ethertype, namely that this is an /internet protocol
 version 4/ frame. Bytes =0x000e= to =0x0021= are the IPv4 header; this
 contains information about the internet protocol part of the packet,
 such as its length in bytes --- =0x002a= (42_{10}) --- and the source and
-destination IP addresses, encoded as groups of four bytes. The sourcre
+destination IP addresses, encoded as groups of four bytes. The source
 IP address, for example, is =0xac1efedf=, a 32-bit encoding of the more
 familiar-looking =172.30.254.223=.
 
@@ -1595,7 +1595,7 @@ computer systems can achieve clock
 synchronicity\nbsp[cite:@edisonIEEE15882002]. PTP (another protocol that
 typically uses UDP for transport) superseded the lower-resolution
 Network Time Protocol (NTP)\nbsp[cite:@millsImproved1994], and, under
-ideal conditions, can achieve sychronisation accuracy of
+ideal conditions, can achieve synchronisation accuracy of
 sub-microsecond order\nbsp[cite:@tongzhouResearch2022]. Synchronisation is
 achieved via the exchange of timestamped packets, coupled with precise
 estimates for send and receive times. Precision is best when
@@ -1702,8 +1702,8 @@ position phantom sources on the surface of a sphere with the listening
 position at its origin.
 
 Time-based panning effects, by contrast, make use of the interaural
-time difference (ITD) cue to give the impression of a phantom sounce
-located toward the loudspeaker producing the singal at the earliest
+time difference (ITD) cue to give the impression of a phantom source
+located toward the loudspeaker producing the signal at the earliest
 time\nbsp[cite:@verheijenSound1998; @pulkkiVirtual1997]. Thus the driving
 function for a time-based panning system is a delay of the form
 
@@ -1940,7 +1940,7 @@ as it is tied to the concert hall space in which it resides. indeed,
 one thing besides expense that unites the systems at AAU and TU
 Berlin, plus the 345-speaker hybrid WFS/HOA system at IRCAM
 (Paris)\nbsp[cite:@noisternigDispositif2012], the 512-channel WFS system
-at the Rensslaer Polytecnic Institute (NY, United States)[fn:10], and
+at the Rensslaer Polytechnic Institute (NY, United States)[fn:10], and
 the behemoth installation at /The Sphere/ (Las Vegas, United States, see
 figure cref:fig:sphere)[fn:11] is their /in-situ/ nature; these are
 site-specific systems with, at best, limited flexibility. The same can
@@ -2287,7 +2287,7 @@ its syntax and semantics, consult that chapter.
 ** Embedded Audio Systems
 
 The past decade or so has witnessed the emergence of a number of
-embedded systems suitable for audio programming and posessing
+embedded systems suitable for audio programming and possessing
 networking capabilities. These fall into two broad categories:
 embedded Linux systems (ELS) and microcontroller (MCU) development
 boards. Identifying a suitable embedded hardware platform is key to
@@ -3051,7 +3051,7 @@ depicted in cref:fig:hoa.
 :CUSTOM_ID: chap:faust-autodiff
 :END:
 
-The content of this chaper was originally published
+The content of this chapter was originally published
 as /Faust Autodiff: Towards Audio Domain-Specific Machine Learning/\nbsp[cite:@rushtonFaust2025a].
 
 #+latex: \minitoc
@@ -4019,7 +4019,7 @@ delivering training data and capturing weights and biases for
 real-time inference.
 
 Finally, of broader pertinence to the work under discussion in this
-thesis, differentible DSP in Faust could be used to find ideal
+thesis, differentiable DSP in Faust could be used to find ideal
 parameters for distributed spatial audio algorithms.
 
 ** Conclusion
@@ -4130,7 +4130,7 @@ filter\nbsp[cite:@mcclellanSignal2003].
 #+latex: \enlargethispage{\baselineskip}
 
 This manner of /clock drift/ is inevitable in digital systems, and yet,
-for distibuted digital signal processing, precise synchronisation is
+for distributed digital signal processing, precise synchronisation is
 of tantamount importance\nbsp[cite:@lienhartImportance2003]. To ensure a
 sample-synchronous platform for spatial audio, it is necessary to find
 a means to correct for it.
@@ -5168,7 +5168,7 @@ then updated with the expected inter-packet interval, e.g., for 16
 frames at \qty{48}{\kilo\hertz} this is \(333\,333\frac{1}{3}\) ns.
 
 Completing the packet header are the number of channels and number of
-frames in the packet, used at the receving side for decoding the
+frames in the packet, used at the receiving side for decoding the
 byte-encoded audio data that follows. At 16 frames per packet it is
 possible to transmit up to 44 channels of 16-bit audio while
 respecting ethernet's 1500 byte maximum transmissible unit.
@@ -5222,7 +5222,7 @@ samples are channel-interleaved, the audio data part of the packet
 consists of per-channel alternating two-byte values. Here, both
 channels contain a test signal, a unit amplitude-increment unipolar
 sawtooth wave, i.e., a signal whose amplitude starts at zero, and
-incrementsn by 1 at each sample until it reaches the maximum value
+increments by 1 at each sample until it reaches the maximum value
 that a signed 16-bit integer may take --- 32767_{10} --- at which point
 it wraps around to zero and repeats. This numerically-predictable
 signal served as a means to inspect the integrity of the audio server
@@ -6093,5 +6093,5 @@ LocalWords: CITI Inria INSA Emeraude DMA datagrams sonification
 LocalWords: waveguide ethernet Ananas HOA WFS periphonic pseudoinverse
 LocalWords: holophonic PTP MikroTik multicast AAP timestamping UDP
 LocalWords: endian spatialisation parallelisable DSP ACN dropdown
-LocalWords: unicast OSC MCU PLL
+LocalWords: unicast OSC MCU PLL subnet JUCE
 #+end_example
