@@ -11572,21 +11572,31 @@ State contributions at the beginning of each technical chapter and
 their associated papers.
 ***** TODO §1.7.3 could be much longer
 That's /State of the Art Spatial Audio Installations/. Romain: "I think this section could be improved. First, I would diffenrtiate what's done in academia from what's done in the industry. L-acoustics systems are quite different from the ones found in academic context. I think it could be interesting to compare them a little bit. How are the speakers placed, why, etc.? What are the underlying tehcniques. I think I remember L-acoustics is based on VBAP because they can't afford to have a sweetspot effect when they install their system in large spaces. Also you don't talk about ambisonics systems in academia. Almost every single big American university has one. Not to mention systems at Ircam, SAT in Montereal, etc. The example you give for AAU is great, but you should emphasize the fact that it is just an example. Anyway, this section could probably be longer and a bit more exhaustive with more pics, etc."
-***** TODO Mitigate overlap between §1.9 and §2.2
+***** DONE Mitigate overlap between §1.9 and §2.2
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-11-09 lun. 17:19]
+:END:
 That's /Frugal Approaches to Spatial Audio/ and /Embedded Audio Systems/
 respectively. Romain: "I feel like there are redundancies between this
 section and 1.9. I think 2.2 should start by clearly stating the specs
 that are needed for what you want to do: good amount of RAM and CPU
 power, Ethernet, PTP, etc. The embedded systems pictures you provide
 in 1.9 should maybe moved here."
-***** TODO Add a section on UDP (and TCP) in chapter 1
+***** CANCELLED Add a section on UDP (and TCP) in chapter 1
+:LOGBOOK:
+- State "CANCELLED"  from "TODO"       [2026-11-09 lun. 16:34]
+:END:
+I already have /Anatomy of a Datagram/.
 ***** DONE Split Physically-inspired techniques into WFS/HOA
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2026-11-03 mar. 09:09]
 :END:
 ***** TODO Also say what each of WFS and HOA can and can't do
-...before going into technical detail.
-***** TODO Expand §1.8.1 /State of the Art Distributed Audio Systems/ 
+...before going into technical detail, §1.7.2.
+***** DONE Expand §1.8.1 /State of the Art Distributed Audio Systems/ 
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-11-09 lun. 16:32]
+:END:
 Romain: "I think the end of this section could emphasize a bit more
 the fact that most of these systems did not care too much about
 synchronicity. Also, I think a distinction should be made between
@@ -11621,9 +11631,9 @@ be especially useful for people who don't know Faust :)" --- but I
 think I'm already pointing the reader toward figure 1.6 that
 illustrates this point...
 ***** TODO More detail on distributed HOA
-Romain: "If you don't take the "easy" ambitools route as I suggested,
-more details will have to be provided here on how this works (but I'm
-sure you know that already :) )."
+§2.4.2. Romain: "If you don't take the "easy" ambitools route as I
+suggested, more details will have to be provided here on how this
+works (but I'm sure you know that already :) )."
 ***** DONE Explain why Faust autodiff is there
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2026-11-03 mar. 08:58]
@@ -11633,7 +11643,12 @@ a little bit why you have this chapter of course (saying that this is
 something you worked on during the first year of your PhD)."
 ***** TODO Reference Prof. Carôt
 ...when introducing the iMXRT1062.
-***** TODO Reference T. Carpentier
+***** DONE Reference T. Carpentier
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-11-09 lun. 18:00]
+:END:
 ...distributed sound system, Raspberry Pi, not synchronised.
+***** TODO Extend chapter intros
+...apart from chapter 4, which is already a healthy page long.
 
 Entered on [2026-10-22 jeu. 11:12]

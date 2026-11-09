@@ -1046,14 +1046,14 @@ spatialisation applications\nbsp[cite:@gabrielliNetworked2012;
 established the feasibility of a low-cost implementation of such a
 system using microcontroller-based
 clients\nbsp[cite:@rushtonMicrocontrollerbased2023]. Considerable scope
-remains for exploring this question, incnluding how best to exploit
-the available hardware and software to serve audio spatialisation
-ends, and how established audio spatialisation algorithms can be
+remains for exploring this question, including how best to exploit the
+available hardware and software to serve audio spatialisation ends,
+and how established audio spatialisation algorithms can be
 parallelised and distributed. Powerful as modern embedded platforms
 are, a close eye must be kept on the computational complexity of the
-devised DSP algorithms. To the author's knowledge, no comprehensive
-study has been conducted on the viability of a system of this sort for
-timing-critical applications.
+devised digital signal processing (DSP) algorithms. To the author's
+knowledge, no comprehensive study has been conducted on the viability
+of a system of this sort for timing-critical applications.
 
 ** RQ2
 
@@ -1108,7 +1108,7 @@ programming in the Faust language.
 The work described in this manuscript has led to the publication of
 one journal article\nbsp[cite:@rushtonNetworked2024] and five conference
 papers\nbsp[cite:@rushtonDifferentiable2024; @rushtonFaust2025a;
-@rushtonAll2025; @rushtonAmbisonics2026; @rushtonAnanas2026].
+@rushtonAll2025; @rushtonAmbisonics2026; @rushtonAnanas2026a].
 
 ** General Structure of this Thesis
 
@@ -1905,20 +1905,26 @@ As described, for optimal spatial resolution, systems implementing HOA
 and WFS require many output channels; in effect, the more channels,
 and the greater the loudspeaker-density, the better.
 
+#+name: fig:me-lab
+#+caption: The WFS array at Aalborg University, Copenhagen.
+#+attr_latex: :width .666\linewidth
+[[./images/me-lab.jpg]]
+
 The Multisensory Experience Lab at Aalborg University (AAU),
 Copenhagen, hosts a 64-channel, square-array WFS system covering an
-area of 4m \times 4m\nbsp[cite:@graniGestural2016]. It is driven by a Mac Pro
-desktop computer, connected, via a USB MADI (Multichannel Audio
-Digital Interface) interface, to two 32-channel MADI to analogue
-converters. Though this system's WFS engine is provided by open-source
-/WFSCollider/ software,[fn:3] being a centralised system, the computer
-that co-ordinates its operation is powerful --- 12-core CPU, 64 GB RAM
---- and was costly at the time of purchase; likely on the order of
-several thousand Euros. With further regard to cost, the current
-equivalent MADI to analogue converter models are priced at roughly
-€5,000 apiece. Excluding the cost of loudspeakers (and the gantry upon
-which they are mounted) one may reasonably place an estimate of €250
-per output channel on this system.
+area of 4m \times 4m\nbsp[cite:@graniGestural2016] (see cref:fig:me-lab). It is
+driven by a Mac Pro desktop computer, connected, via a USB MADI
+(Multichannel Audio Digital Interface) interface, to two 32-channel
+MADI to analogue converters. Though this system's WFS engine is
+provided by open-source /WFSCollider/ software,[fn:3] being a
+centralised system, the computer that co-ordinates its operation is
+powerful --- 12-core CPU, 64 GB RAM --- and was costly at the time of
+purchase; likely on the order of several thousand Euros. With further
+regard to cost, the current equivalent MADI to analogue converter
+models are priced at roughly €5,000 apiece. Excluding the cost of
+loudspeakers (and the gantry upon which they are mounted) one may
+reasonably place an estimate of €250 per output channel on this
+system.
 
 #+name: fig:tu-berlin
 #+caption: The WellenFeld H 104 auditorium at TU Berlin, hosting the
@@ -1936,26 +1942,40 @@ at the time of writing, be purchased for around €1,400 and €4,500
 each, respectively, for a total of €88,500. Imagining €2,000 per
 computer, a conservative estimate of €150/channel may be reached,
 however the expense associated with this system is difficult to assess
-as it is tied to the concert hall space in which it resides. indeed,
-one thing besides expense that unites the systems at AAU and TU
-Berlin, plus the 345-speaker hybrid WFS/HOA system at IRCAM
-(Paris)\nbsp[cite:@noisternigDispositif2012], the 512-channel WFS system
+as it is tied to the concert hall space in which it resides. Indeed,
+one thing besides expense that unites the systems at AAU and TU Berlin
+is their /in-situ/ nature; these are site-specific systems with, at
+best, limited flexibility. The same can be said of other spatial audio
+systems found at academic institutions such as the 345-speaker hybrid
+WFS/HOA system at IRCAM (Paris,
+France)\nbsp[cite:@noisternigDispositif2012], the 512-channel WFS system
 at the Rensslaer Polytechnic Institute (NY, United States)[fn:10], and
-the behemoth installation at /The Sphere/ (Las Vegas, United States, see
-figure cref:fig:sphere)[fn:11] is their /in-situ/ nature; these are
-site-specific systems with, at best, limited flexibility. The same can
-be said of other commercial spatial and immersive systems such as
-L-ISA from company L-Acoustics[fn:33], which can offer WFS as a
-component of its front-central speaker array.
+the HOA array of the IEM Cube at the Institute for Electronic Music
+and Acoustics (Graz, Austria, see cref:fig:iem-cube).
+
+#+name: fig:iem-cube
+#+caption: The IEM Cube HOA system.
+#+attr_org: :width 200
+#+attr_latex: :width .4\linewidth
+[[./images/iem-cube.jpg]]
+
+The situation is similar in the commercial sphere, with products such
+as VBAP-based L-ISA from company L-Acoustics[fn:33], which can offer
+WFS as a component of its front-central speaker array, and the
+behemoth Holoplot installation at /The Sphere/ (Las Vegas, United
+States, see figure cref:fig:sphere)[fn:11].
 
 #+name: fig:sphere
 #+caption: Diagram of the spatial audio array at /The Sphere/, Las Vegas. Image taken from [[https://www.holoplot.com/case-studies/msg-sphere-case-study]]
+#+attr_org: :width 200
+#+attr_latex: :width .4\linewidth
 [[./images/sphere.png]]
 
-What one is afforded by WFS installations of this scale and expense,
-however, is high quality audio reproduction with tantamount to perfect
-output synchronicity; the integrity of the holophonic effect of WFS
-is, unavoidable matters of spatial aliasing aside, guaranteed.
+What one is afforded by WFS and HOA installations of this scale and
+expense, however, is high quality audio reproduction with tantamount
+to perfect output synchronicity; the integrity of the holophonic
+effect of WFS and the spherical harmonics of HOA are, unavoidable
+matters of spatial aliasing and sweet area aside, guaranteed.
 
 ** Distributed Audio Systems
 
@@ -2028,81 +2048,23 @@ Distributed approaches to spatial audio include Lopez-Lezcano's
 implementations as described by Devonport and
 Foss\nbsp[cite:@devonportDistribution2019] and Belloch et
 al.\nbsp[cite:@bellochPerformance2021]. The latter two address aims
-closely aligned with the work described here, but are based on costly
-computing platforms. Devonport and Foss used AVB and costly networking
-equipment to provide PTP support for synchronisation; Belloch et
-al. employed a GPU-based hardware platform, reporting client
-synchronisation to the millisecond range --- likely not sufficient for
-timing-critical audio spatialisation effects.
+closely aligned with the work described here, including distributed
+DSP, but are based on costly computing platforms. Devonport and Foss
+used AVB and expensive networking equipment to provide PTP support for
+synchronisation; Belloch et al. employed a GPU-based hardware
+platform, reporting client synchronisation to the millisecond range
+--- likely not sufficient for timing-critical audio spatialisation
+effects.
 
-A practical discussion of the distribution and parallelisation of WFS
-and HOA can be found in cref:sec:distributed-algorithms.
+Indeed, precise synchronisation is sufficiently difficult to achieve
+that most of the above works did not pursue it as an aim (see also the
+work of Carpentier\nbsp[cite:@carpentierCosteffective2026]). For an
+in-depth treatment of time exchange and synchronicity in a distributed
+context see cref:chap:time-exchange. Furthermore, a practical
+discussion of the distribution and parallelisation of WFS and HOA can
+be found in cref:sec:distributed-algorithms.
 
 ** Frugal Approaches to Spatial Audio
-
-#+name: tab:platforms
-#+caption: Selected embedded computing platforms listed with their
-#+caption: corresponding microcontroller (MCU) or system on chip (SoC), availability of
-#+caption: networking functionality, and approximate cost per unit (rounded
-#+caption: to the nearest euro) as of March 2025.
-#+attr_latex: :float multicolumn :align lllllr :booktabs t
-| Platform         | MCU/SoC          | Memory       | Ethernet | PTP | Unit Cost |
-|------------------+------------------+--------------+----------+-----+-----------|
-| Raspberry Pi CM5 | Broadcom BCM2712 | 2 GB SDRAM   | Yes      | Yes | € 89      |
-| Bela             | TI Sitara AM3358 | 512 MB SDRAM | Yes      | Yes | € 190     |
-| ESP32-LyraT      | ESP32-WROVER-B   | 4 MB PSRAM   | Yes      | No  | € 21      |
-| Teensy 4.1       | NXP i.MXRT1062   | 1024 KB SRAM | Yes      | Yes | € 48      |
-| Daisy Seed       | STM32H750IB      | 65 MB SDRAM  | No       | Yes | € 25      |
-
-#+name: fig:teensy
-#+caption: Teensy 4.1 microcontroller development board equipped with ethernet and audio add-ons, labelled with the last two octets of its IP address.
-#+attr_latex: :width .4\linewidth
-[[./images/module.jpeg]]
-
-#+name: fig:bela
-#+caption: Bela companion board for the BeagleBone Black.
-#+attr_latex: :width .4\linewidth
-[[./images/bela.png]]
-
-#+name: fig:daisy
-#+caption: Daisy Seed3 microcontroller development board.
-#+attr_latex: :width .4\linewidth
-[[./images/daisy.png]]
-
-#+name: fig:esp32
-#+caption: ESP32 LyraT microcontroller development board.
-#+attr_org: :width 200
-#+attr_latex: :width .4\linewidth
-[[./images/esp32.png]]
-
-Progress in embedded computing, devices of the /internet of things/
-variety, and initiatives in the DIY and maker communities, have
-encouraged alternative approaches to spatial audio. The past decade or
-so has seen the emergence of a raft of low-cost, embedded hardware
-platforms (a selection of which are gathered in cref:tab:platforms),
-either providing audio support, or having audio as a key part of their
-/raison d'être/. Amongst these platforms are a selection based on
-Embedded Linux Systems (ELS) such as /Bela/\nbsp[cite:@mcphersonBela2017]
-(see cref:fig:bela) and /Elk/\nbsp[cite:@turchetElk2021], companion boards
-for the BeagleBone Black[fn:14] and Raspberry Pi[fn:15]
-respectively. These examples profit from the power of the underlying
-ELS, with a system-on-chip (SoC) providing a multicore CPU and
-peripherals such as memory and connectivity via, e.g., USB and
-ethernet. A separate subset exist based on microcontroller (MCU)
-systems, prominent amongst these being the
-/Teensy/\nbsp[cite:@murrayCharacterisation2025; @michonReal2019] (with an
-MCU from manufacturer NXP[fn:16], see cref:fig:teensy)
-/Daisy/\nbsp[cite:@gasterAudio2020] (STMicroelectronics[fn:17], see figure
-cref:fig:daisy), and various /ESP32/\nbsp[cite:@michonFaust2020] development
-boards (see cref:fig:esp32). Beyond matters of economy, connectivity,
-and modest power requirements, the attraction of such devices lies in
-the relative ease with which they can be programmed, each providing
-either an SDK, a selection of utility classes, or, in the case of ELS,
-compatibility with existing audio applications and
-plugins. Furthermore, it may be possible to produce compatible code in
-a higher level audio language such as Faust, in which case signal
-processing or audio synthesis code can be written once and compiled to
-run on a variety of platforms\nbsp[cite:@michonEmbedded2020].
 
 #+name: fig:spacebar
 #+caption: FPGA-based WFS system, the Space Bar.
@@ -2116,10 +2078,17 @@ run on a variety of platforms\nbsp[cite:@michonEmbedded2020].
 #+attr_latex: :width .4\linewidth
 [[./images/ottosonics.jpg]]
 
-With frugality in mind, a modular, FPGA-based WFS system has been
-demonstrated, programmed in Faust and using high-quality, low-cost
-audio codecs\nbsp[cite:@michonMaking2023;@quiedevilleSpace2025] (see
-cref:fig:spacebar). Also of interest is the OTTOsonics
+Progress in embedded computing, devices of the /internet of things/
+variety, and initiatives in the DIY and maker communities, have
+encouraged alternative approaches to spatial audio. With frugality in
+mind, a modular, FPGA-based WFS system has been demonstrated,
+programmed in Faust and using high-quality, low-cost audio
+codecs\nbsp[cite:@michonMaking2023;@quiedevilleSpace2025] (see
+cref:fig:spacebar). Carpentier\nbsp[cite:@carpentierCosteffective2026]
+demonstrated a distributed audio system of Raspberry Pi-based modules
+costed at €100 apiece, though this dispenses with any aim at
+synchronicity and accurate sound field reproduction in favour of a
+looser ambition of sound diffusion. Also of interest is the OTTOsonics
 project\nbsp[cite:@mitterhuberOttosonics2022; @weschLOTTO2025] (see
 cref:fig:ottosonics); its emphasis on a fully-costed, flexible,
 do-it-yourself alternative to conventional spatial audio systems is
@@ -2286,22 +2255,82 @@ its syntax and semantics, consult that chapter.
 
 ** Embedded Audio Systems
 
-The past decade or so has witnessed the emergence of a number of
-embedded systems suitable for audio programming and possessing
-networking capabilities. These fall into two broad categories:
-embedded Linux systems (ELS) and microcontroller (MCU) development
-boards. Identifying a suitable embedded hardware platform is key to
-implementing spatial audio algorithms in a distributed context;
-principal concerns are cost, available memory, and computational
-power.
+#+name: tab:platforms
+#+caption: Selected embedded computing platforms listed with their
+#+caption: corresponding microcontroller (MCU) or system on chip (SoC), availability of
+#+caption: networking functionality, and approximate cost per unit (rounded
+#+caption: to the nearest euro) as of March 2025.
+#+attr_latex: :float multicolumn :align lllllr :booktabs t
+| Platform         | MCU/SoC          | Memory       | Ethernet | PTP | Unit Cost |
+|------------------+------------------+--------------+----------+-----+-----------|
+| Raspberry Pi CM5 | Broadcom BCM2712 | 2 GB SDRAM   | Yes      | Yes | € 89      |
+| Bela             | TI Sitara AM3358 | 512 MB SDRAM | Yes      | Yes | € 190     |
+| ESP32-LyraT      | ESP32-WROVER-B   | 4 MB PSRAM   | Yes      | No  | € 21      |
+| Teensy 4.1       | NXP i.MXRT1062   | 1024 KB SRAM | Yes      | Yes | € 48      |
+| Daisy Seed       | STM32H750IB      | 65 MB SDRAM  | No       | Yes | € 25      |
+
+The past decade or so has witnessed the emergence of a raft of
+low-cost, embedded hardware platforms (a selection of which are
+gathered in cref:tab:platforms), either providing audio support, or
+having audio as a key part of their /raison d'être/. Identifying a
+suitable embedded hardware platform is key to implementing spatial
+audio algorithms in a distributed context; principal concerns are
+cost, available memory, computational power, and availability of
+ethernet and audio functionality.
+
+#+name: fig:bela
+#+caption: Bela companion board for the BeagleBone Black.
+#+attr_latex: :width .4\linewidth
+[[./images/bela.png]]
+
+Amongst these platforms are a selection based on Embedded Linux
+Systems (ELS) such as /Bela/\nbsp[cite:@mcphersonBela2017] (see
+cref:fig:bela) and /Elk/\nbsp[cite:@turchetElk2021], companion boards for
+the BeagleBone Black[fn:14] and Raspberry Pi[fn:15]
+respectively. These examples profit from the power of the underlying
+ELS, with a system-on-chip (SoC) providing a multicore CPU and
+peripherals such as memory and connectivity via, e.g., USB and
+ethernet.
+
+#+name: fig:teensy
+#+caption: Teensy 4.1 microcontroller development board equipped with ethernet and audio add-ons, labelled with the last two octets of its IP address.
+#+attr_latex: :width .4\linewidth
+[[./images/module.jpeg]]
+
+#+name: fig:daisy
+#+caption: Daisy Seed3 microcontroller development board.
+#+attr_latex: :width .4\linewidth
+[[./images/daisy.png]]
+
+#+name: fig:esp32
+#+caption: ESP32 LyraT microcontroller development board.
+#+attr_org: :width 200
+#+attr_latex: :width .4\linewidth
+[[./images/esp32.png]]
+
+A separate subset exist based on microcontroller (MCU) systems,
+prominent amongst these being the
+/Teensy/\nbsp[cite:@murrayCharacterisation2025; @michonReal2019] (with an
+MCU from manufacturer NXP[fn:16], see cref:fig:teensy)
+/Daisy/\nbsp[cite:@gasterAudio2020] (STMicroelectronics[fn:17], see figure
+cref:fig:daisy), and various /ESP32/\nbsp[cite:@michonFaust2020] development
+boards (see cref:fig:esp32). Beyond matters of economy, connectivity,
+and modest power requirements, the attraction of such devices lies in
+the relative ease with which they can be programmed, each providing
+either an SDK, a selection of utility classes, or, in the case of ELS,
+compatibility with existing audio applications and
+plugins. Furthermore, it may be possible to produce compatible code in
+a higher level audio language such as Faust, in which case signal
+processing or audio synthesis code can be written once and compiled to
+run on a variety of platforms\nbsp[cite:@michonEmbedded2020].
 
 *** The Raspberry Pi
 
 Early work on this thesis featured a flirtation with the Raspberry Pi
-as a prospective hardware platform, the Compute Module 5 version of
-the device supporting PTP and hardware timestamping, and being
-available with \qty{2}{\giga\byte} of memory in a package costing
-around €89 (see cref:tab:platforms, page
+(see cref:fig:rpi) as a prospective hardware platform, the Compute
+Module 5 version of the device supporting PTP and hardware
+timestamping, and being available with \qty{2}{\giga\byte} of memory
+in a package costing around €89 (see cref:tab:platforms, page
 \pageref{tab:platforms}). Typically run as an ELS and programmable via
 the Faust architectures =faust2rpialsaconsole= and
 =faust2rpinetjackconsole=\nbsp[cite:@michonEmbedded2020], the Raspberry Pi
@@ -2310,6 +2339,11 @@ development environment.[fn:24] It was established, via work with
 Circle, that the system's audio clock can be adjusted dynamically
 during runtime --- critical for the sort of time-sensitive
 applications to be described later in this work.
+
+#+name: fig:rpi
+#+caption: The Raspberry Pi Compute Module 5 single board computer.
+#+attr_latex: :width .4\linewidth
+[[./images/rpi.png]]
 
 It is a general purpose device, however, and its Broadcom system on
 chip (SoC) derives audio timing from a GPIO pin whose clock dividers
@@ -4059,7 +4093,7 @@ Time is an illusion; lunchtime doubly so.
 The material in this chapter relates to that published in the papers
 /All Together Now: A Synchronous Platform for Distributed Spatial
 Audio/\nbsp[cite:@rushtonAll2025] and /Ananas: A Networked Audio System for
-Distributed Spatial Audio Applications/\nbsp[cite:@rushtonAnanas2026].
+Distributed Spatial Audio Applications/\nbsp[cite:@rushtonAnanas2026a].
 #+latex: \newpage
 
 \lettrine{C}{onsider} a tuning fork, a steel, two-pronged resonator
@@ -5068,7 +5102,7 @@ void AudioSystemManager::adjustClock(const double adjust)
 #+latex: \minitoc
 The content of this chapter relates to that published in /Ananas: A
 Networked Audio System for Distributed Spatial Audio
-Applications/\nbsp[cite:@rushtonAnanas2026] and /Ambisonics: Introducing
+Applications/\nbsp[cite:@rushtonAnanas2026a] and /Ambisonics: Introducing
 an Accessible, Distributed Approach/\nbsp[cite:@rushtonAmbisonics2026].
 #+latex: \newpage
 
@@ -6093,5 +6127,5 @@ LocalWords: CITI Inria INSA Emeraude DMA datagrams sonification
 LocalWords: waveguide ethernet Ananas HOA WFS periphonic pseudoinverse
 LocalWords: holophonic PTP MikroTik multicast AAP timestamping UDP
 LocalWords: endian spatialisation parallelisable DSP ACN dropdown
-LocalWords: unicast OSC MCU PLL subnet JUCE
+LocalWords: unicast OSC MCU PLL subnet JUCE spatialised
 #+end_example
