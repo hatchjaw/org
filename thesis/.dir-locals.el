@@ -14,6 +14,14 @@
                            "\\\\newpage\n\\\\section*{\\1}"
                            headline))))
 
+              (eval . (defun tar/resume-as-section (headline backend info)
+                        "Export Résumé heading as \\section instead of \\chapter"
+                        (when (org-export-derived-backend-p backend 'latex)
+                          (replace-regexp-in-string
+                           "\\\\chapter\\*{\\(Résumé\\)}"
+                           "\\\\section*{\\1}"
+                           headline))))
+              
               (eval . (defun tar/intro-in-toc (headline backend info)
                         "Add the Introduction to the table of contents."
                         (when (org-export-derived-backend-p backend 'latex)

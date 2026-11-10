@@ -958,17 +958,67 @@ Tommy
 #+begin_abstract
 Access to large-scale spatial audio systems remains a challenge
 despite significant interest in the research and commercial spheres.
-The cost of highly-multichannel audio interfaces renders such systems
-inaccessible to all but the institutions with the deepest
-pockets. Described in this thesis is a modular, scalable system for
-distributed spatial audio taking advantage of one of a raft of
-low-cost embedded audio platforms to have been released over the past
-decade or so. Via IEEE 1588 Precision Time Protocol, hardware modules
-remain synchronised to within around
-\qty{200}{\nano\second}. Supporting the system is an audio server and
-protocols designed for time-sensitive networked audio, control data
-and device discovery. Spatial audio algorithms in parallelised form
-stand atop this precisely-synchronised foundation.
+The cost of highly-multichannel audio interfaces and powerful digital
+signal processing systems renders such installations inaccessible to
+practically all but the institutions with the deepest pockets. The
+auditory aspect of the immersive experience rests comparatively
+underexplored in sonic art and virtual reality settings due to the
+high barrier to entry to the sound field synthesis techniques of wave
+field synthesis and higher order ambisonics.
+
+Described in this thesis is a modular, scalable system for distributed
+spatial audio taking advantage of one of a raft of low-cost embedded
+audio platforms to have been released over the past decade or so. An
+ethernet network of such devices serves as a coordinated, distributed
+digital signal processor. Via media clock and presentation time
+recovery derived from time exchange based on IEEE 1588 Precision Time
+Protocol, hardware modules remain synchronised to sub-microsecond
+order. Supporting the system is a digital audio workstation-based
+audio server and protocols designed for time-sensitive networked
+audio, control data and device discovery. Spatial audio algorithms in
+parallelised form stand atop this precisely-synchronised foundation.
+
+*Keywords:* spatial audio, network protocols, distributed signal
+processing, embedded systems, time exchange
+#+end_abstract
+
+* Résumé
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
+
+#+begin_abstract
+L'accès aux systèmes audio spatialisés à grande échelle demeure
+difficile, malgré l'intérêt considérable que leur portent la recherche
+comme l'industrie. Le coût des interfaces audio à très grand nombre de
+canaux et des systèmes de traitement numérique du signal puissants
+rend ces installations hors de portée de pratiquement tous les
+acteurs, à l'exception des institutions les mieux dotées. La dimension
+auditive de l'expérience immersive reste ainsi relativement peu
+explorée dans l'art sonore et la réalité virtuelle, en raison du seuil
+d'entrée élevé des techniques de synthèse de champ sonore que sont la
+synthèse de champ d'ondes (WFS) et l'ambisonie d'ordre supérieur
+(HOA).
+
+Cette thèse décrit un système modulaire et extensible de
+spatialisation sonore distribuée, qui tire parti de l'une des
+nombreuses plateformes audio embarquées à bas coût apparues au cours
+de la dernière décennie environ. Un réseau ethernet de tels
+dispositifs fait office de processeur de signal numérique distribué et
+coordonné. Grâce à la récupération de l'horloge média et de l'instant
+de présentation, déduite d'échanges d'informations temporelles fondés
+sur le protocole PTP (Precision Time Protocol) de la norme IEEE 1588,
+les modules matériels restent synchronisés à l'échelle de la
+sub-microseconde. Le système repose en outre sur un serveur audio
+intégré à une station de travail audionumérique, ainsi que sur des
+protocoles conçus pour la transmission en réseau de flux audio, de
+données de contrôle et de la découverte des dispositifs, dans un
+contexte à contraintes temporelles strictes. Des algorithmes de
+spatialisation sonore, sous forme parallélisée, s'appuient sur ce
+socle synchronisé avec précision.
+
+*Mots-clés :* audio spatialisé, protocoles réseau, traitment du signal
+distribué, systèmes embarqués, échange temporel
 #+end_abstract
 
 #+latex: \mainmatter
@@ -1209,7 +1259,10 @@ p = plot(layout=(1, 2),
          size=(1000, 400),
          left_margin=6Plots.mm,
          bottom_margin=6Plots.mm,
-         legend=false)
+         legend=false,
+         xguidefontsize = 16,
+         yguidefontsize = 16,
+         tickfontsize = 12)
 plot!(p[1], t, y,
       title="(a)",
       xlabel=L"t\;\;\textrm{(seconds)}",
@@ -1257,10 +1310,13 @@ default(legend=false)
 
 p = plot(layout=(1, 1),
          fontfamily="Inconsolata-Regular",
-         # size=(1000, 400),
-         left_margin=6Plots.mm,
-         bottom_margin=6Plots.mm,
-         legend=false)
+         size=(600, 400),
+         left_margin=3Plots.mm,
+         bottom_margin=3Plots.mm,
+         legend=false,
+         xguidefontsize = 16,
+         yguidefontsize = 16,
+         tickfontsize = 12)
 sticks!(p[1], y2, marker=:circle,
         xlabel=L"n",
         ylabel=L"y[n]",
@@ -1277,6 +1333,7 @@ savefig("./images/gen/audio-signal-detail.png")
 #+name: fig:audio-signal-detail
 #+caption: Detail of cref:fig:audio-signal (b). Sample amplitudes
 #+caption: converted to 16 bit hexadecimal values.
+#+attr_latex: :width .666\linewidth
 #+RESULTS:
 [[file:./images/gen/audio-signal-detail.png]]
 
@@ -6116,7 +6173,7 @@ twoside]{book}
 ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 org-latex-title-command: nil
 org-export-filter-headline-functions: (tar/acks-as-section
-tar/abstract-as-section tar/intro-in-toc)
+tar/abstract-as-section tar/resume-as-section tar/intro-in-toc)
 org-latex-src-block-backend: minted
 org-latex-pdf-process: ("latexmk -f -pdf -%latex \
   -interaction=nonstopmode -shell-escape -output-directory=%o %f")
