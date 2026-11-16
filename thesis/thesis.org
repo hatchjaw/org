@@ -579,7 +579,7 @@ Define some colours and some node and line styles.
   distributed/.pic = {
     \pic {secondaryWavefronts};
     \pic at (0, -2) {virtualWavefronts};
-    \pic {primary}
+    \pic {primary};
     \pic {realWavefronts};
     \pic at (0, -.21) {speakers};
     \pic at (0, -.42) {mcus};
@@ -1230,6 +1230,22 @@ upon a discussion of networked audio, however, it is worthwhile to
 review some fundamental aspects of digital audio and computer
 networking.
 
+At first glance, the two disciplines might seem like unlikely
+bedfellows. Digital audio is relentless, a constant stream of samples
+that must be reproduced at the rate at which it was recorded or
+synthesised, with no tolerance for hesitation. A user may forgive a
+slow webpage or a sluggish file transfer, but a single missing sample,
+a click, a dropout, is heard immediately. Computer networking, by
+contrast, is largely indifferent to such concerns: data is chopped
+into packets, each of which is sent on its way with no guarantee of
+when, in what order, or indeed /whether/ it will arrive. To transmit
+audio over a network is to ask one of these worlds to accommodate the
+demands of the other.
+
+Consider the audio side first. A digital audio signal is obtained by
+measuring, at regular intervals, the amplitude of a continuous signal
+and representing each measurement with a finite number of bits.
+
 ** Digital Audio Signals
 
 In a digital audio system with sampling rate \(f_{s}\), an audio signal
@@ -1690,8 +1706,9 @@ implementations may not be complete, and support for embedded
 platforms is limited.[fn:9]
 
 *** The Need for a New Protocol
-
-
+:PROPERTIES:
+:CUSTOM_ID: sec:new-protocol
+:END:
 
 Given this lack of provision for embedded systems, the proprietary
 nature of Dante, and the focus of many open source protocols and
@@ -1858,7 +1875,7 @@ from within the real sound field, rather than its virtual counterpart.
 \begin{figure}
 \centering
 \begin{tikzpicture}
-  \pic{drivingFunction}
+  \pic{drivingFunction};
 \end{tikzpicture}
 \end{figure}
 
@@ -5228,7 +5245,7 @@ found at [[https://github.com/hatchjaw/ananas-server]].
 \begin{figure}
 \centering
 \begin{tikzpicture}
-\pic{systemOverview}
+\pic{systemOverview};
  \matrix [draw] at (3.75, 0) {
     \draw [ctrlArrow] (0,0) -- (.5,0); & \node [legend] {Control data (UDP)}; \\
     \draw [audio] (0,0) -- (.5,0); & \node [legend] {Audio (UDP)}; \\
