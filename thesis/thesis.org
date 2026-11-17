@@ -1244,7 +1244,44 @@ demands of the other.
 
 Consider the audio side first. A digital audio signal is obtained by
 measuring, at regular intervals, the amplitude of a continuous signal
-and representing each measurement with a finite number of bits.
+and representing each measurement with a finite number of bits. The
+Nyquist-Shannon sampling theorem dictates that, so long as the signal
+is band-limited and sampled at more than twice its highest frequency,
+nothing is lost in this process\nbsp[cite:@mcclellanSignal2003]. Since
+human hearing extends to roughly \qty{20}{\kilo\hertz}, rates of
+\qty{44.1}{\kilo\hertz} and \qty{48}{\kilo\hertz} became the standards
+of consumer and professional audio respectively. At
+\qty{48}{\kilo\hertz} and \qty{16}{\bit} resolution, a single channel
+produces \qty{96}{\kilo\byte} of data every second, a modest figure in
+the age of gigabit ethernet, but one that must be delivered /on time/,
+every time.
+
+Now consider the network. To be transmitted across a network, a
+digital audio stream must be divided into packets, each carrying a
+short block of samples wrapped in successive layers of headers
+describing how it is to be delivered. Take a packet carrying
+\qty{1}{\milli\second} of stereo audio: 48 samples per channel, at two
+bytes each, amounts to \qty{192}{\byte} of audio. Prefix this with
+\qty{42}{\byte} of ethernet, internet protocol, and user datagram
+protocol headers and the packet has already shed some 18 percent of
+its capacity to bookkeeping, and it must be sent once every
+millisecond to keep up. Make the packets larger and overhead falls,
+but every sample must now wait for its neighbours before departing,
+adding latency. Make them smaller and latency falls, but the network
+is burdened with an ever greater packet rate. Between the two lie
+queuing delay, jitter and packet loss, none of which the audio signal
+has any means of anticipating.
+
+It is this tension, between a stream that is continuous and time-bound
+and a medium that is discrete and best-effort, that animates much of
+the motivation for this thesis, particularly the parts pertaining to
+RQ1. This chapter therefore proceeds in four parts: first, some
+essentials of digital audio; second, the architecture of networks over
+which it may travel; thirdly, some existing systems and protocols that
+have sought to reconcile the two; and finally, since the goal of this
+thesis is to create distributed spatial audio systems upon this
+marriage of digital audio and networking, with a treatment of audio
+spatialisation and distributed audio systems.
 
 ** Digital Audio Signals
 
@@ -1552,11 +1589,11 @@ frame\nbsp[cite:@IEEE2018].
 
 ** Audio Over Computer Networks
 
-The transmission of audio data over computer networks has
-been a topic of research interest since the earliest days of computer
-networking as it is recognised today, i.e. over packet-switched
-networks, whereby data to be transmitted is grouped into packets ---
-or "datagrams" --- each consisting of a header and a payload. Voice
+The transmission of audio data over computer networks has been a topic
+of research interest since the earliest days of computer networking as
+it is recognised today, i.e. over packet-switched networks, whereby
+data to be transmitted is grouped into packets --- the aforementioned
+datagrams --- each consisting of a header and a payload. Voice
 transmission over ARPANET was being conducted as early as
 1974\nbsp[cite:@schulzrinneVoice1992] and the first standard for vocoded
 voice communication over packet-switched networks --- the Network
@@ -2186,7 +2223,12 @@ on a variety of different platforms, from embedded systems to audio
 plugins. In this chapter an overview will be given of the various
 concerns faced by the development of audio software for a range of
 different but related purposes, plus the tools and platforms that have
-been used in this work. Distributed computation of spatial audio
+been used in this work.
+
+The concerns of embedded audio development and audio plugin
+development are in many ways quite distinct
+
+Distributed computation of spatial audio
 algorithms also implies parallelisation of those algorithms; the
 chapter concludes with observations on the parallelisation of WFS and
 HOA.
@@ -4241,7 +4283,8 @@ This manner of /clock drift/ is inevitable in digital systems, and yet,
 for distributed digital signal processing, precise synchronisation is
 of tantamount importance\nbsp[cite:@lienhartImportance2003]. To ensure a
 sample-synchronous platform for spatial audio, it is necessary to find
-a means to correct for it.
+a means to correct for it. The material in this chapter is aligned
+with, and provides answers to, RQ2.
 
 ** Precision Time Protocol
 
