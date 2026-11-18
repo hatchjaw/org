@@ -2225,13 +2225,46 @@ concerns faced by the development of audio software for a range of
 different but related purposes, plus the tools and platforms that have
 been used in this work.
 
-The concerns of embedded audio development and audio plugin
-development are in many ways quite distinct
+Whatever the platform, audio software is bound by one fundamental
+constraint: the deadline. Digital audio is processed not sample by
+sample, but in blocks; at each tick of the audio clock the system is
+handed a buffer of samples and is expected to return a processed
+buffer before the next one is required. At a sampling rate of
+\qty{48}{\kilo\hertz} and a block size of 64 samples, that leaves just
+over \qty{1.3}{\milli\second} in which to complete the requisite
+processing. A late block is not a slow block but a missing one, and
+its absence is audible as a click or a dropout. Real-time audio code
+is therefore written under strict discipline, avoiding any processing
+whose execution time cannot be bounded in advance, such as memory
+allocation or locking operations.
 
-Distributed computation of spatial audio
-algorithms also implies parallelisation of those algorithms; the
-chapter concludes with observations on the parallelisation of WFS and
-HOA.
+The concerns of embedded audio development and audio plugin
+development are in many ways quite distinct. The former kind exposes
+the hardware directly, offering fine control over timing and
+peripherals at the cost of having to supply nearly everything else. An
+audio plugin, by contrast, is a guest in a foreign process; it must
+conform to a given plugin format, negotiate with the host over buffer
+sizes, parameters and state, and behave itself while doing so. One
+thing that unites these differing environments is a plethora of
+different programming languages, toolchains and APIs, and points to
+the utility of tools that abstract these differences away, such as the
+Faust programming language and the JUCE framework, which are given
+treatment in this chapter.
+
+Spatial audio comes with its own set of demands. In the centralised
+case, the weight of signal processing required to drive a loudspeaker
+array grows with the number of sound sources and the number of
+loudspeakers, and it is precisely this growth that distributing the
+computation across a network of nodes is intended to absorb.
+Distributed computation of spatial audio algorithms also implies
+parallelisation of those algorithms, which supposes that they can be
+divided into pieces that may be computed independently.
+
+This chapter begins with the Faust programming language, before
+turning to embedded audio systems and audio plugins, all integral
+components of the practical aspect of the work described in this
+thesis. It concludes with distributed spatial audio algorithms, and
+with observations on the parallelisation of WFS and HOA.
 
 ** The Faust Programming Language
 :PROPERTIES:
@@ -4357,7 +4390,12 @@ for the implementation described in this work.
 
 Having discussed the /time exchange/ mechanism of PTP, it is important
 now to deal with how audio timing is configured on our target hardware
-platform, the Teensy 4.1 and its NXP i.MXRT1062 MCU.
+platform, the Teensy 4.1 and its NXP i.MXRT1062 MCU. Indeed, the
+author is not the first researcher to have identified an i.MX series
+MCU as an ideal platform for PTP-based audio clock recovery, Carôt et
+al. having conducted similar work in the not-too-distant
+past\nbsp[cite:@carotGNSSbased2019]; nevertheless, close attention will be
+paid here as regards configuring the device.
 
 The i.MXRT1062 features a dedicated audio phase locked loop (PLL),
 PLL4, and a /synchronous audio interface/, SAI1, the latter providing
@@ -5231,6 +5269,42 @@ protocols for audio and control data transmission and device
 discovery, media clock and presentation time recovery, plus
 microcontroller firmware and software plugins for sound field
 synthesis control.
+
+The preceding chapters have described the problem of distributed
+spatial audio and the tools and techniques available to address it;
+this chapter presents the proposed solution. The aim of the system is
+simply stated, if less easily achieved: that a number of independent
+devices, connected by nothing more sophisticated than consumer-grade
+ethernet, should reproduce a canonical stream of audio, and perform
+processing on that stream, as though they were one. This of course
+requires that every device agree on a notion of time, the rate at
+which samples are to be reproduced, and the instant at which a given
+sample is to be played. We have seen how, in cref:chap:time-exchange,
+media clock and presentation time recovery can be achieved on the
+target MCU; here, in cref:sec:time-authority, we encounter the
+coordinating authoritative source of time, to which the audio server
+and MCUs all defer.
+
+The various components of Ananas divide the labour as follows. The
+audio server is the source of audio data for the network; it runs in a
+digital audio workstation, receiving audio streams and preparing them
+for transmission to the network. The protocols of the Ananas system
+define how audio, along with the control data that accompanies it, is
+carried between the server and the devices that render it, and how
+those devices are discovered and inspected. Processing endpoints
+themselves take two forms. Microcontroller firmware turns inexpensive
+hardware into a distributed networked audio endpoint, while audio
+plugins allow sound field synthesis algorithms to be controlled from
+within the DAW. No one of these components is novel in isolation; the
+contribution of this chapter lies in their combination into a system
+that is open, synchronous and low-cost.
+
+A system of this kind cannot be judged by its design alone --- it must
+also be shown to work. To this end, its deployment for wave field
+synthesis and higher order ambisonics is described and detailed in
+this chapter. Further, its performance as a sample-synchronous
+distributed audio system is analysed and synchronisation results
+presented.
 
 ** The Audio Server
 
@@ -6244,5 +6318,6 @@ LocalWords: CITI Inria INSA Emeraude DMA datagrams sonification
 LocalWords: waveguide ethernet Ananas HOA WFS periphonic pseudoinverse
 LocalWords: holophonic PTP MikroTik multicast AAP timestamping UDP
 LocalWords: endian spatialisation parallelisable DSP ACN dropdown
-LocalWords: unicast OSC MCU PLL subnet JUCE spatialised
+LocalWords: unicast OSC MCU PLL subnet JUCE spatialised APIs toolchains
+LocalWords: Nyquist oversampled preprocessor unbypass ArduinoTeensy
 #+end_example

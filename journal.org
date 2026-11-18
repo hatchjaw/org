@@ -11641,14 +11641,20 @@ works (but I'm sure you know that already :) )."
 Romain: "The general introduction of your thesis will have to explain
 a little bit why you have this chapter of course (saying that this is
 something you worked on during the first year of your PhD)."
-***** TODO Reference Prof. Carôt
+***** DONE Reference Prof. Carôt
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-11-18 mer. 15:13]
+:END:
 ...when introducing the iMXRT1062.
 ***** DONE Reference T. Carpentier
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2026-11-09 lun. 18:00]
 :END:
 ...distributed sound system, Raspberry Pi, not synchronised.
-***** TODO Extend chapter intros
+***** DONE Extend chapter intros
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2026-11-18 mer. 15:13]
+:END:
 ...apart from chapter 4, which is already a healthy page long.
 
 Entered on [2026-10-22 jeu. 11:12]
