@@ -2014,10 +2014,16 @@ increasing the density of the distribution of secondary sources.
 
 As described, for optimal spatial resolution, systems implementing HOA
 and WFS require many output channels; in effect, the more channels,
-and the greater the loudspeaker-density, the better.
+and the greater the loudspeaker-density, the better. In terms of
+deployments found in the wild, a broad division can be drawn between
+systems in research and academia, where an exploration of the
+capabilities of sound field synthesis is more likely to be the
+priority, and those in the commercial and industrial arenas, where a
+sweet-area is less tolerated and thus one is more likely to find VBAP
+systems, perhaps augmented with WFS for beamforming purposes.
 
 #+name: fig:me-lab
-#+caption: The WFS array at Aalborg University, Copenhagen.
+#+caption: The WFS array at Aalborg University, Copenhagen. Image taken from [[https://www.facebook.com/melabcph/]].
 #+attr_latex: :width .666\linewidth
 [[./images/me-lab.jpg]]
 
@@ -2037,6 +2043,49 @@ loudspeakers (and the gantry upon which they are mounted) one may
 reasonably place an estimate of €250 per output channel on this
 system.
 
+#+name: fig:ccrma-stage
+#+caption: The CCRMA Stage at Stanford University. Image taken from [[https://music.stanford.edu/venues-facilities/venues/ccrma-stage]].
+[[./images/ccrma-stage.png]]
+
+Another 64-channel system, this time an ambisonics installation of 56
+loudspeakers and eight subwoofers, can be found in the form of the
+CCRMA Stage at Stanford University, California, USA
+(cref:fig:ccrma-stage). The system supports up to sixth order HOA via
+SuperCollider-based DSP and is built on an AVB network of Motu 24Ao
+and 16A audio interfaces\nbsp[cite:@lopez-lezcanoBringing2019], the former
+retailing, at the time of writing, for around €1500 apiece, the latter
+€2500.
+
+#+name: fig:virginia-cube
+#+caption: Setup being undertaken on /The Cube/ at Virginia Tech. Image taken from [[https://www.getdante.com/resources/catalog/case-studies/the-cube-drives-immersive-3d-audio-experiences-with-flexible-dante-network/]].
+#+attr_org: :width 300
+#+attr_latex: :width .5\linewidth
+[[./images/virginia-cube.jpg]]
+
+Virginia Polytechnic Institute and State University (Virginia Tech),
+in Blacksburg, Virginia, USA, plays host to a number of high-density
+loudspeaker array systems for VBAP and HOA, including the 58.2 (58
+loudspeaker, two subwoofer) ASPIRe lab and 134.6 /The
+Cube/\nbsp[cite:@upthegroveSpatialization2018] (cref:fig:virginia-cube). A
+Dante-based system,[fn:10] The Cube is driven by numerous
+Dante-enabled Yamaha XMV 82 ADD amplifiers and BSS BLU 806 digital
+signal processors, each of which costing several thousand Euros.
+
+#+name: fig:empac-wfs
+#+caption: The EMPAC high-resolution modular loudspeaker array for wave field synthesis.
+#+caption: Image taken from Goebel\nbsp[cite:@goebelEMPAC2019].
+#+attr_latex: :width .75\linewidth
+[[./images/empac-wfs.png]]
+
+A departure from the systems we have seen thus far in terms of its
+modularity and flexibility is the EMPAC WFS system, a product of the
+Rensselaer Polytechnic Institute (NY, USA) (cref:fig:empac-wfs). Like
+the aforementioned installations at Virginia Tech, this is a
+Dante-based affair, but is nonetheless noteworthy for its high maximum
+deployment of 558.18, and extremely close driver spacing --- as low as
+\qty{2.9}{\centi\meter} --- with commensurately high spatial aliasing
+frequency of \qty{5.9}{\kilo\hertz}\nbsp[cite:@goebelEMPAC2019].
+
 #+name: fig:tu-berlin
 #+caption: The WellenFeld H 104 auditorium at TU Berlin, hosting the
 #+caption: world's largest WFS system. Image taken from
@@ -2054,18 +2103,17 @@ each, respectively, for a total of €88,500. Imagining €2,000 per
 computer, a conservative estimate of €150/channel may be reached,
 however the expense associated with this system is difficult to assess
 as it is tied to the concert hall space in which it resides. Indeed,
-one thing besides expense that unites the systems at AAU and TU Berlin
-is their /in-situ/ nature; these are site-specific systems with, at
-best, limited flexibility. The same can be said of other spatial audio
-systems found at academic institutions such as the 345-speaker hybrid
-WFS/HOA system at IRCAM (Paris,
-France)\nbsp[cite:@noisternigDispositif2012], the 512-channel WFS system
-at the Rensslaer Polytechnic Institute (NY, United States)[fn:10], and
-the HOA array of the IEM Cube at the Institute for Electronic Music
-and Acoustics (Graz, Austria, see cref:fig:iem-cube).
+one thing besides expense that unites all but the EMPAC system is
+these installations' /in-situ/ nature; they are site-specific systems
+with, at best, limited flexibility. The same can be said of other
+spatial audio systems found at academic institutions such as the
+345-speaker hybrid WFS/HOA system at IRCAM (Paris,
+France)\nbsp[cite:@noisternigDispositif2012], and the HOA array of the IEM
+Cube at the Institute for Electronic Music and Acoustics (Graz,
+Austria, see cref:fig:iem-cube).
 
 #+name: fig:iem-cube
-#+caption: The IEM Cube HOA system.
+#+caption: The IEM Cube HOA system. Image taken from [[https://www.kug.ac.at/en/university/campus-and-buildings/iem-institute-17-electronic-music-and-acoustics/]].
 #+attr_org: :width 200
 #+attr_latex: :width .4\linewidth
 [[./images/iem-cube.jpg]]
@@ -2085,8 +2133,9 @@ States, see figure cref:fig:sphere)[fn:11].
 What one is afforded by WFS and HOA installations of this scale and
 expense, however, is high quality audio reproduction with tantamount
 to perfect output synchronicity; the integrity of the holophonic
-effect of WFS and the spherical harmonics of HOA are, unavoidable
-matters of spatial aliasing and sweet area aside, guaranteed.
+effect of WFS and the spherical harmonics of HOA are, respective
+unavoidable matters of spatial aliasing and sweet area aside,
+guaranteed.
 
 ** Distributed Audio Systems
 
@@ -6261,7 +6310,7 @@ reserved for representing infinity and /non-numbers/.
 
 [fn:11] [[https://www.holoplot.com/case-studies/msg-sphere-case-study]]
 
-[fn:10] [[https://empac.rpi.edu/about/building/venues]]
+[fn:10] As attested to by the accompanying Dante case study: [[https://www.getdante.com/resources/catalog/case-studies/the-cube-drives-immersive-3d-audio-experiences-with-flexible-dante-network/]]
 
 [fn:8] See also WFS speaker module produced by Four Audio for
 installation at TU Berlin [[https://four-audio.com/en/products/wfs/]].
@@ -6320,4 +6369,5 @@ LocalWords: holophonic PTP MikroTik multicast AAP timestamping UDP
 LocalWords: endian spatialisation parallelisable DSP ACN dropdown
 LocalWords: unicast OSC MCU PLL subnet JUCE spatialised APIs toolchains
 LocalWords: Nyquist oversampled preprocessor unbypass ArduinoTeensy
+LocalWords: beamforming Multisensory Periphony
 #+end_example
