@@ -6081,7 +6081,9 @@ laptop computer over USB, and to the switch via ethernet. Each client
 is powered via a USB hub, has an ethernet connection to the switch,
 and is connected to two loudspeakers via a stereo minijack to
 quarter-inch mono jack cable. See cref:fig:ananas-wfs for an example
-WFS deployment.
+WFS deployment at INSA Lyon in Villeurbanne, France. Loudspeakers are
+Focal Alpha 50 Evo, giving a driver spacing of
+\qty{22.8}{\centi\meter}.
 
 ** Synchronisation Results
 

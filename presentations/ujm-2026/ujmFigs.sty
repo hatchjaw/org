@@ -1,0 +1,395 @@
+\ProvidesPackage{csid3figs}
+\RequirePackage{tikz}
+\usetikzlibrary{positioning, arrows.meta}
+\RequirePackage{bytefield}
+\RequirePackage{fontspec}
+\setmainfont[
+  Mapping={tex-text}, 
+  Numbers={OldStyle},
+  Ligatures={Common},
+  UprightFont=*-Regular,
+  BoldFont=*-Bold,
+  BoldItalicFont=*-BoldIt,
+  ItalicFont=*-It,
+  FontFace={sb}{n}{*-Semibold},
+  FontFace={sb}{it}{*-SemiboldIt}
+]{MinionPro}
+
+\definecolor{ctrlColour}{HTML}{479955}
+\definecolor{audioColour}{HTML}{4077D6}
+\definecolor{usbColour}{HTML}{D63E3E}
+
+\tikzset{
+  device/.style={draw, fill=black!10, rounded corners=1mm, inner xsep=1.5mm, align=center},
+  ctrl/.style={densely dotted, ctrlColour, line width=.2mm},
+  ctrlArrow/.style={ctrl, -{Triangle[open]}},
+  acn/.style={-{Stealth}, audioColour, densely dashdotted},
+  audio/.style={-{Stealth}, audioColour},
+  ptp/.style={{Triangle}-{Triangle}},
+  usb/.style={{Triangle[open]}-{Triangle[open]}, usbColour},
+  legend/.style={font=\tiny\itshape},
+  module/.style={device, fill=ctrlColour!35, font={\scriptsize}, transform shape},
+  authority/.style={device, fill=usbColour!35}
+}
+
+\tikzset{
+  role/.style={align=center, draw, inner sep=1mm, minimum height=1cm, rounded corners=.5mm},
+  authorityMsg/.style={midway, above=-1mm, rotate=-13},
+  subscriberMsg/.style={midway, above=-1mm, rotate=13},
+  ptp/.pic={
+    \node (auth) [role] at (0, 0) {Clock\\authority};
+    \draw [-{Stealth}] (auth.south) -- +(0, -6.5);
+    \node (sub) [role, right = 2cm of auth] {Clock\\subscriber};
+    \draw [-{Stealth}] (sub.south) -- +(0, -6.5);
+    
+    \node (t1) [below left=2mm and -8mm of auth] {\(t_{1}\)};
+    
+    \draw [-{Stealth}] ([yshift=-5.5mm]auth.south) -- ([yshift=-13.5mm]sub.south) node [authorityMsg] {\scriptsize{Sync}};
+    \draw [-{Stealth}] ([yshift=-10.5mm]auth.south) -- ([yshift=-18.5mm]sub.south) node [authorityMsg] {\scriptsize{FollowUp [\(t_{1}\)]}};
+
+    \node (t2) [below right=11mm and -8mm of sub] {\(t_{2}\)};
+
+    \node (t3) [below right=21.5mm and -8mm of sub] {\(t_{3}\)};
+
+    \draw [-{Stealth}] ([yshift=-24mm]sub.south) -- ([yshift=-32mm]auth.south) node [subscriberMsg] {\scriptsize{DelayReq}};
+
+    \node (t4) [below left=29mm and -8mm of auth] {\(t_{4}\)};
+
+    \draw [-{Stealth}] ([yshift=-36mm]auth.south) -- ([yshift=-44mm]sub.south) node [authorityMsg] {\scriptsize{DelayResp [\(t_{4}\)]}};
+
+    \node (t11) [below left=43mm and -8mm of auth] {\(t'_{1}\)};
+    
+    \draw [-{Stealth}] ([yshift=-47mm]auth.south) -- ([yshift=-55mm]sub.south) node [authorityMsg] {\scriptsize{Sync}};
+    \draw [-{Stealth}] ([yshift=-52mm]auth.south) -- ([yshift=-60mm]sub.south) node [authorityMsg] {\scriptsize{FollowUp [\(t'_{1}\)]}};
+
+    \node (t21) [below right=52mm and -8mm of sub] {\(t'_{2}\)};
+  }
+}
+
+\tikzset{
+  systemOverview/.pic={
+    \node (auth) [authority] at (0, 0) {Time\\authority};
+    \node (switch) [device, above=5mm of auth, inner xsep=10mm] {Switch};
+    \node (server) [device, below=5mm of auth, inner xsep=10mm] {Server};
+    \node (module0) [module, above left=5mm and -7mm of switch] {T41};
+    \node (moduleN) [module, above right=5mm and -7mm of switch] {T41};
+    \node [above=5mm of switch] {\(\cdots\)};
+
+    % PTP between authority and switch
+    \draw [ptp] (auth.north) -- (switch.south);
+
+    % PTP between switch and modules
+    \draw [ptp] ([xshift=-13.3mm]switch.north) --
+    ([xshift=-2mm]module0.south);
+    \draw [ptp] ([xshift=9.3mm]switch.north) --
+    ([xshift=-2mm]moduleN.south);
+
+    % USB audio
+    \draw [usb] ([xshift=-4mm]auth.south) --
+    ([xshift=-4mm]server.north);
+
+    % PTP follow-up from authority to server
+    \draw [-{Triangle}] ([xshift=4mm]auth.south) --
+    ([xshift=4mm]server.north);
+
+    % Audio from server to switch
+    \draw [audio] ([xshift=-12.5mm]server.north) --
+    ([xshift=-12.5mm]switch.south);
+
+    % Ctrl from server to switch
+    \draw [ctrlArrow] ([xshift=12.5mm]server.north) --
+    ([xshift=12.5mm]switch.south);
+
+    % Audio from switch to modules
+    \draw [audio] ([xshift=-11.3mm]switch.north) -- (module0.south);
+    \draw [audio] ([xshift=11.3mm]switch.north) -- (moduleN.south);
+
+    % Ctrl from switch to modules
+    \draw [ctrlArrow] ([xshift=-9.3mm]switch.north) --
+    ([xshift=2mm]module0.south);
+    \draw [ctrlArrow] ([xshift=13.3mm]switch.north) --
+    ([xshift=2mm]moduleN.south);
+  }
+}
+
+\newcommand{\wfsX}{4}
+\newcommand{\wfsNumWaves}{5}
+\newcommand{\wfsWaveSpace}{.89}
+\newcommand{\wfsNumMCU}{8}
+\newcommand{\wfsNumSecondary}{16}
+\tikzset{
+  cross/.pic = {
+    \draw[rotate = 45] (-#1,0) -- (#1,0);
+    \draw[rotate = 45] (0,-#1) -- (0, #1);
+  },
+  wfsModule/.pic = {
+    \node [module] {dWFS};
+  },
+  speaker/.pic = {
+    \draw (-.11, 0) rectangle (.11, .06);
+    \draw (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
+  },
+  wavefronts/.pic={
+    \foreach \pos/\rad in {0/.18, 1/.615, 2/1.03, 3/1.42, 4/1.78, 5/2.07, 6/2.295, 7/2.42} {
+      \draw [black!25] (-\wfsX+.25+.5*\pos, 2) circle (\rad);
+    }
+  },
+  wfs/.pic={
+    % Virtual sound field
+    \draw (-\wfsX, -.5) rectangle (\wfsX, 2);
+    
+    \begin{scope}
+      \clip (-\wfsX, -.5) rectangle (\wfsX, 2);
+
+      % Virtual sound source
+      \node [circle, draw=audioColour, fill=audioColour!50, thick]
+      (primary) at (0, 0) {};
+
+      % Virtual wavefronts
+      \foreach \i [
+        evaluate=\i as \rad using \i*\wfsWaveSpace
+      ] in {1,...,\wfsNumWaves} {
+        \draw [thick, dashed, audioColour] (-\rad, 0)
+        arc [radius=\rad, start angle=180, end angle=0];
+      }
+
+      % Labels
+      \node [
+        black!50, fill=white, align=center,
+        font={\footnotesize\itshape}
+      ] at (-3.15, 0) {Virtual\\soundfield};
+      \node [
+        below right=-1mm and -1mm of primary,
+        font={\footnotesize\itshape}
+      ] {Virtual sound source};
+
+      \foreach \i [
+        evaluate=\i as \secondary using
+        -\wfsX+.25+(\i-1)*(2*\wfsX/\wfsNumSecondary)
+      ] in {1,...,\wfsNumSecondary} {
+        \node (\secondary) at (\secondary, 2) {};
+      }
+
+      % Virtual source co-ordinates and ctrl line
+      \draw [ctrl] node [above right=.1mm, font=\tiny]
+            {\((x, y)\)} (primary) -- (0, 2);
+    \end{scope}
+
+    % Infrastructure
+    \begin{scope}[yshift=2cm]
+      \node (server) [device, inner xsep=7.5mm] at (0, .75) {Server};
+      \node (authority) [authority, above=4mm of server]
+            {Time\\authority};
+      \node (switch) [device, inner xsep=7.5mm, above=4mm of authority]
+            {Switch};
+
+      % USB arrow
+      \draw [usb] ([xshift=-5mm] authority.south) --
+      ([xshift=-5mm] server.north)
+
+      % PTP arrows
+      \draw [ptp] (authority.north) -- (switch.south);
+      \draw [-{Triangle}] ([xshift=5mm] authority.south) --
+      ([xshift=5mm] server.north);
+
+      % Audio arrow
+      \draw [audio] ([xshift=-10mm] server.north) --
+      ([xshift=-10mm] switch.south);
+
+      % Control arrow
+      \draw [ctrlArrow] ([xshift=10mm] server.north) --
+      ([xshift=10mm] switch.south);
+
+      % Modules
+      \foreach \i [
+        evaluate=\i as \xpos using -\wfsX+.5+(\i-1)*(2*\wfsX/\wfsNumMCU)
+      ] in {1,...,\wfsNumMCU} {
+        \pic at (\xpos, 4.225) {wfsModule};
+        
+        \draw [audio] (\xpos-.2, 3.625) -- (\xpos-.2, 4.0);
+        \draw [ctrlArrow] (\xpos, 3.625) -- (\xpos, 4.0);
+        
+        \ifnum\i=1
+          \draw [-{Triangle}] (switch.north) +(0, .325) --
+          (\xpos-.2, 3.625) (\xpos+.2, 3.625) -| (\xpos+.2, 4.0);
+        \else
+          \ifnum\i=\wfsNumMCU
+            \draw [ptp] (switch.north) -- +(0, .325) -| (\xpos+.2, 4.0);
+          \else
+            \draw [-{Triangle}] (\xpos+.2, 3.625) -- (\xpos+.2, 4.0);
+          \fi
+        \fi
+      }
+
+      % Secondary sources
+      \foreach \i [
+        evaluate=\i as \secondary using
+        -\wfsX+.25+(\i-1)*(2*\wfsX/\wfsNumSecondary)
+      ] in {1,...,\wfsNumSecondary} {
+        \pic at (\secondary, 0) {cross=2pt};
+        
+        \ifnum\i=1
+          \draw [ctrl] (\secondary,0) -- +(0, .2) -|
+          ([yshift=-3mm] server.south);
+        \else
+          \ifnum\i=\wfsNumSecondary
+            \draw [ctrlArrow] (\secondary,0) --
+            +(0, .2) -| (server.south);
+          \else
+            \draw [ctrl] (\secondary,0) -- +(0, .2);
+          \fi
+        \fi
+
+        \pic at (\secondary, 4.445) {speaker};
+      }
+
+      \draw [ctrl] (0, 0) -- (0, .2);
+    \end{scope}
+
+    % Synthesised soundfield
+    \begin{scope}[yshift=4.655cm]
+      \clip (-\wfsX, 2) rectangle (\wfsX, 4.6);
+
+      \foreach \i [evaluate=\i as \rad using \i*\wfsWaveSpace] in {1,...,\wfsNumWaves} {
+        \draw [thick, audioColour] (-\rad, 0) arc [radius=\rad, start angle=180, end angle=0];
+      }
+
+      \pic {wavefronts};
+      \pic [xscale=-1] {wavefronts};
+
+      \node [black!50, align=center, font={\footnotesize\itshape}] at (-3.15, 4) {Synthesised\\soundfield};
+    \end{scope}
+  }
+}
+
+\tikzset{
+  selector/.pic={
+    \draw[rotate=45, very thick, ctrlColour] (-#1,0) -- (#1,0);
+    \draw[rotate=45, very thick, ctrlColour] (0,-#1) -- (0, #1);
+  },
+  speakerHOA/.pic = {
+    \draw (-.11, 0) rectangle (.11, .06);
+    \draw (-.11, .06) -- (-.25, .2) -- (.25, .2) -- (.11, .06);
+    \node (-body) at (0, 0) {};   % invisible anchor node
+  },
+  moduleN/.pic = {
+    \node [module] (-body) {dHOA};
+    \draw [ptp] (0, .6) -- (-body.north);
+    \draw [acn] (-.25, .6) -- ([xshift=-.25cm]-body.north);
+    \draw [ctrlArrow] (.25, .6) -- ([xshift=.25cm]-body.north);
+  },
+  moduleS/.pic = {
+    \node [module] (-body) {dHOA};
+    \draw [ptp] (0, -.6) -- (-body.south);
+    \draw [acn] (-.25, -.6) -- ([xshift=-.25cm]-body.south);
+    \draw [ctrlArrow] (.25, -.6) -- ([xshift=.25cm]-body.south);
+  },
+  hoa/.pic={
+    \begin{scope}[yshift=11.5cm]
+      % Synthesised soundfield
+      \draw [thick] (-4, -4) rectangle (4, 4);
+      % Azymuthal rings
+      \draw [dashed, black!30] (0, 0) circle (3.5);
+      \draw [dashed, black!30] (0, 0) circle (1.9);
+      % Speakers, ring 0
+      \pic [rotate=180] (speaker0) at (0, 3.7) {speakerHOA};
+      \pic [rotate=135] (speaker1) at (2.625, 2.625) {speakerHOA};
+      \pic [rotate=90] (speaker2) at (3.7, 0) {speakerHOA};
+      \pic [rotate=45] (speaker3) at (2.625, -2.625) {speakerHOA};
+      \pic (speaker4) at (0, -3.7) {speakerHOA};
+      \pic [rotate=-45] (speaker5) at (-2.625, -2.625) {speakerHOA};
+      \pic [rotate=-90] (speaker6) at (-3.7, 0) {speakerHOA};
+      \pic [rotate=-135] (speaker7) at (-2.625, 2.625) {speakerHOA};
+      % Speakers, ring 1
+      \pic [rotate=202.5] (speaker8) at (-.8, 1.925) {speakerHOA};
+      \pic [rotate=157.5] (speaker9) at (.8, 1.925) {speakerHOA};
+      \pic [rotate=112.5] (speaker10) at (1.925, .8) {speakerHOA};
+      \pic [rotate=67.5] (speaker11) at (1.925, -.8) {speakerHOA};
+      \pic [rotate=22.5] (speaker12) at (.8, -1.925) {speakerHOA};
+      \pic [rotate=-22.5] (speaker13) at (-.8, -1.925) {speakerHOA};
+      \pic [rotate=-67.5] (speaker14) at (-1.925, -.8) {speakerHOA};
+      \pic [rotate=-112.5] (speaker15) at (-1.925, .8) {speakerHOA};
+      % Modules
+      \pic [rotate=-22.5] (module0) at (1.5, 3.5) {moduleS};
+      \pic [rotate=67.5] (module1) at (3.5, -1.5) {moduleN};
+      \pic [rotate=-22.5] (module2) at (-1.5, -3.5) {moduleN};
+      \pic [rotate=67.5] (module3) at (-3.5, 1.5) {moduleS};
+      \pic (module4) at (0, 2.25) {moduleN};
+      \pic (module5) [rotate=90] at (2.25, 0) {moduleS};
+      \pic (module6) at (0, -2.25) {moduleS};
+      \pic [rotate=-90] (module7) at (-2.25, 0) {moduleS};
+      % Audio
+      \draw [audio] (module0-body.west) -- ([xshift=-.05cm]speaker0-body.east);
+      \draw [audio] (module0-body.east) -- ([yshift=.05cm, xshift=.1cm]speaker1-body.west);
+      \draw [audio] (module1-body.east) -- ([yshift=-.1cm, xshift=.1cm]speaker2-body.west);
+      \draw [audio] (module1-body.west) -- ([yshift=.05cm, xshift=-.1cm]speaker3-body.east);
+      \draw [audio] (module2-body.east) -- ([yshift=.05cm, xshift=.05cm]speaker4-body.west);
+      \draw [audio] (module2-body.west) -- ([yshift=-.05cm]speaker5-body.east);
+      \draw [audio] (module3-body.west) -- ([yshift=.1cm, xshift=-.1cm]speaker6-body.east);
+      \draw [audio] (module3-body.east) -- ([yshift=-.05cm, xshift=.1cm]speaker7-body.west);
+      \draw [audio] (module4-body.west) -- ([yshift=.125cm]speaker8-body.south);
+      \draw [audio] (module4-body.east) -- ([yshift=.125cm]speaker9-body.south);
+      \draw [audio] (module5-body.east) -- ([yshift=.125cm]speaker10-body.south);
+      \draw [audio] (module5-body.west) -- ([yshift=.1cm]speaker11-body.south);
+      \draw [audio] (module6-body.east) -- ([yshift=.125cm]speaker12-body.south);
+      \draw [audio] (module6-body.west) -- ([yshift=.125cm]speaker13-body.south);
+      \draw [audio] (module7-body.east) -- ([yshift=.1cm]speaker14-body.south);
+      \draw [audio] (module7-body.west) -- ([yshift=.125cm]speaker15-body.south);
+    \end{scope}
+    \begin{scope}[yshift=5.5cm]
+      % Switch
+      \node[device, inner xsep=8mm, inner ysep=2.5mm](switch) at (0, 1) {Switch};
+      % Time authority
+      \node[authority, align=center](authority) at (0, -.5) {Time\\authority};
+      % PTP
+      \draw [{Triangle}-] (.5, -1.5) -- ([xshift=5mm] authority.south);
+      \draw [ptp] (authority.north) -- (switch.south);
+      \draw [ptp] (switch.north) -- (0, 2);
+      % USB
+      \draw [usb] (-.5, -1.5) -- ([xshift=-5mm] authority.south);
+      % ACN-format
+      \draw [acn] (-1.1, -1.5) -- ([xshift=-1.1cm] switch.south);
+      \draw [acn] ([xshift=-1.1cm] switch.north) -- (-1.1, 2);
+      % Coordinates
+      \draw [ctrlArrow] (1.1, -1.5) -- ([xshift=1.1cm] switch.south);
+      \draw [ctrlArrow] ([xshift=1.1cm] switch.north) -- (1.1, 2);
+    \end{scope}
+    \begin{scope}
+      % DAW
+      \draw [thick] (-4, -4) rectangle (4, 4);
+      \node [] at (-3.25, 3.5) {DAW};
+      % Virtual soundfield
+      \draw [thick] (0, 0) circle (3.5);
+      \node [black!75, align=center, font={\itshape}] at (0, 0) {Virtual\\soundfield};
+      % Azymuthal rings
+      \draw [dotted, black!50] (0, 0) circle (1.9);
+      % Module selectors
+      \pic at (1.2, 3.275) {selector=5pt};
+      \pic at (3.275, -1.2) {selector=5pt};
+      \pic at (-1.2, -3.275) {selector=5pt};
+      \pic at (-3.275, 1.2) {selector=5pt};
+      \pic at (0, 1.9) {selector=5pt};
+      \pic at (1.9, 0) {selector=5pt};
+      \pic at (0, -1.9) {selector=5pt};
+      \pic at (-1.9, 0) {selector=5pt};
+      % Speakers, ring 0
+      \pic [rotate=180] (speaker0) at (0, 3.7) {speakerHOA};
+      \pic [rotate=135] (speaker1) at (2.625, 2.625) {speakerHOA};
+      \pic [rotate=90] (speaker2) at (3.7, 0) {speakerHOA};
+      \pic [rotate=45] (speaker3) at (2.625, -2.625) {speakerHOA};
+      \pic (speaker4) at (0, -3.7) {speakerHOA};
+      \pic [rotate=-45] (speaker5) at (-2.625, -2.625) {speakerHOA};
+      \pic [rotate=-90] (speaker6) at (-3.7, 0) {speakerHOA};
+      \pic [rotate=-135] (speaker7) at (-2.625, 2.625) {speakerHOA};
+      % Speakers, ring 1
+      \pic [rotate=202.5] (speaker8) at (-.8, 1.925) {speakerHOA};
+      \pic [rotate=157.5] (speaker9) at (.8, 1.925) {speakerHOA};
+      \pic [rotate=112.5] (speaker10) at (1.925, .8) {speakerHOA};
+      \pic [rotate=67.5] (speaker11) at (1.925, -.8) {speakerHOA};
+      \pic [rotate=22.5] (speaker12) at (.8, -1.925) {speakerHOA};
+      \pic [rotate=-22.5] (speaker13) at (-.8, -1.925) {speakerHOA};
+      \pic [rotate=-67.5] (speaker14) at (-1.925, -.8) {speakerHOA};
+      \pic [rotate=-112.5] (speaker15) at (-1.925, .8) {speakerHOA};
+    \end{scope}
+  }
+}
