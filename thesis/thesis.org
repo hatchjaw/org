@@ -1092,9 +1092,9 @@ described in this thesis. Recent research in the field has seen the
 development of distributed systems for networked music and audio
 spatialisation applications\nbsp[cite:@gabrielliNetworked2012;
 @devonportDistribution2019; @bellochPerformance2021;
-@carpentierCosteffective2026], and, in prior work, the author has
-established the feasibility of a low-cost implementation of such a
-system using microcontroller-based
+@carpentierCosteffective2026], and the author has established the
+feasibility of a low-cost implementation of such a system using
+microcontroller-based
 clients\nbsp[cite:@rushtonMicrocontrollerbased2023]. Considerable scope
 remains for exploring this question, including how best to exploit the
 available hardware and software to serve audio spatialisation ends,
@@ -1156,9 +1156,10 @@ Additionally, this thesis proposes an approach to differentiable
 programming in the Faust language.
 
 The work described in this manuscript has led to the publication of
-one journal article\nbsp[cite:@rushtonNetworked2024] and five conference
-papers\nbsp[cite:@rushtonDifferentiable2024; @rushtonFaust2025a;
-@rushtonAll2025; @rushtonAmbisonics2026; @rushtonAnanas2026a].
+one journal article\nbsp[cite:@rushtonNetworked2024] and six conference
+papers\nbsp[cite:@rushtonMicrocontrollerbased2023;@rushtonDifferentiable2024;
+@rushtonFaust2025a; @rushtonAll2025; @rushtonAmbisonics2026;
+@rushtonAnanas2026a].
 
 ** General Structure of this Thesis
 
@@ -1742,21 +1743,6 @@ exist, but, being complex standards featuring many components, such
 implementations may not be complete, and support for embedded
 platforms is limited.[fn:9]
 
-*** The Need for a New Protocol
-:PROPERTIES:
-:CUSTOM_ID: sec:new-protocol
-:END:
-
-Given this lack of provision for embedded systems, the proprietary
-nature of Dante, and the focus of many open source protocols and
-systems on networked music performance over other applications, the
-need for a new protocol becomes apparent. To serve the needs of an
-accessible, distributed approach to spatial audio we need a networked
-audio system that is tailored, as we will see particularly in the case
-of wave field synthesis, to time-sensitive applications. Additionally,
-for efficiency in terms of bandwidth and throughput, it should support
-multicast audio transmission, unlike the venerable JackTrip.
-
 ** Audio Spatialisation
 
 Audio spatialisation is, plainly put, the practice of distributing
@@ -2257,6 +2243,22 @@ associated hardware for audio transmission. A full 24-channel
 OTTOsonics system, including speakers and audio interface, is costed
 at around €2,600 (€108.33/channel), however, which certainly places it
 favourably when compared with state-of-the-art spatialisation systems.
+
+** Motivation for the Rest of this Thesis
+
+The aforementioned efforts to produce frugal and distributed spatial
+audio systems suggest that the appetite exists for further such
+alternatives to the exclusive, costly state of the art. In light of
+the lack of provision for embedded systems where AVB and AES67 are
+concerned, the proprietary nature of Dante, and the focus of many open
+source protocols and systems on networked music performance over other
+applications, the need for a new system becomes apparent. To serve the
+needs of an accessible, distributed approach to spatial audio we need
+a networked audio system that is tailored to time-sensitive
+applications. Additionally, for efficiency in terms of bandwidth and
+throughput, it should support multicast transmission, unlike the
+venerable JackTrip, and should lend itself to a variety of
+applications, unlike OTTOsonics with its sole focus on HOA.
 
 * Tools, Technologies and Platforms
 :PROPERTIES:
@@ -6084,6 +6086,10 @@ quarter-inch mono jack cable. See cref:fig:ananas-wfs for an example
 WFS deployment at INSA Lyon in Villeurbanne, France. Loudspeakers are
 Focal Alpha 50 Evo, giving a driver spacing of
 \qty{22.8}{\centi\meter}.
+
+#+name: fig:ananas-hoa
+#+caption: Ananas driving a third order HOA system.
+[[./images/ananas-hoa.jpeg]]
 
 ** Synchronisation Results
 
