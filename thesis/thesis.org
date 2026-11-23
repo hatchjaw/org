@@ -2292,15 +2292,16 @@ allocation or locking operations.
 The concerns of embedded audio development and audio plugin
 development are in many ways quite distinct. The former kind exposes
 the hardware directly, offering fine control over timing and
-peripherals at the cost of having to supply nearly everything else. An
-audio plugin, by contrast, is a guest in a foreign process; it must
-conform to a given plugin format, negotiate with the host over buffer
-sizes, parameters and state, and behave itself while doing so. One
-thing that unites these differing environments is a plethora of
-different programming languages, toolchains and APIs, and points to
-the utility of tools that abstract these differences away, such as the
-Faust programming language and the JUCE framework, which are given
-treatment in this chapter.
+peripherals at the cost of having to implement fundamental
+functionality painstakingly from first principles. An audio plugin, by
+contrast, is a guest in a foreign process; it must conform to a given
+plugin format, negotiate with the host over buffer sizes, parameters
+and state, and behave itself while doing so. One thing that unites
+these differing environments is a plethora of different programming
+languages, toolchains and APIs, and points to the utility of tools
+that abstract these differences away, such as the Faust programming
+language and the JUCE framework, which are given treatment in this
+chapter.
 
 Spatial audio comes with its own set of demands. In the centralised
 case, the weight of signal processing required to drive a loudspeaker
@@ -2314,7 +2315,12 @@ divided into pieces that may be computed independently.
 This chapter begins with the Faust programming language, before
 turning to embedded audio systems and audio plugins, all integral
 components of the practical aspect of the work described in this
-thesis. It concludes with distributed spatial audio algorithms, and
+thesis. Synthesising these elements will bring us to our chief aim,
+that of distributing spatial audio algorithms on a platform that is
+modular, scalable and low-cost; the goal is to create parallelised WFS
+and HOA algorithms in Faust, deploy these on an array of embedded
+audio systems, and orchestrate the algorithms via DAW plugins. The
+chapter thus concludes with distributed spatial audio algorithms, and
 with observations on the parallelisation of WFS and HOA.
 
 ** The Faust Programming Language
@@ -3077,12 +3083,14 @@ target_link_libraries(MyClapPlugin
 :CUSTOM_ID: sec:distributed-algorithms
 :END:
 
-Combining the elements described thus far in this chapter brings us to
-our chief aim, that of distributing spatial audio algorithms. The goal
-is to create parallelised WFS and HOA algorithms in Faust, deploy
-these on an array of embedded audio systems (specifically Teensy
-4.1s), and orchestrate the algorithms via DAW plugins written using
-JUCE and the CLAP format.
+Having discussed the utility of Faust, selected our embedded audio
+system in the form of the Teensy 4.1 and described how it is to be
+programmed, and landed upon JUCE and the CLAP audio plugin format as
+the platform for our distributed system's control interfaces, all that
+remains is to establish how our chosen spatial audio algorithms can be
+effectively parallelised and distributed. Concluding this chapter is a
+treatment of distributing WFS and HOA in Faust and the requirements
+that must be demanded of their accompanying control systems.
 
 *** Distributed Wave Field Synthesis
 
@@ -5312,14 +5320,14 @@ Applications/\nbsp[cite:@rushtonAnanas2026a] and /Ambisonics: Introducing
 an Accessible, Distributed Approach/\nbsp[cite:@rushtonAmbisonics2026].
 #+latex: \newpage
 
-\lettrine{T}{he heart of the system} is /Ananas/, a networked audio
-system for time-sensitive applications. Ananas, the French word for
-"pineapple", is a recursive acronym: /"Ananas necessitates another
-networked audio system"/. It consists of a networked audio server,
-protocols for audio and control data transmission and device
-discovery, media clock and presentation time recovery, plus
-microcontroller firmware and software plugins for sound field
-synthesis control.
+\lettrine{T}{he technical core} of the proposed response to the research
+questions posed by this thesis is /Ananas/, a networked audio system for
+time-sensitive applications. Ananas, the French word for "pineapple",
+is a recursive acronym: /"Ananas necessitates another networked audio
+system"/. It consists of a networked audio server, protocols for audio
+and control data transmission and device discovery, media clock and
+presentation time recovery, plus microcontroller firmware and software
+plugins for sound field synthesis control.
 
 The preceding chapters have described the problem of distributed
 spatial audio and the tools and techniques available to address it;
@@ -5657,7 +5665,7 @@ numerical entry box at the top-right of the interface and governs the
 values of the secondary source co-ordinates to be transmitted on
 client selection.
 
-Finally, a series of coloured nodes indicate the positions of WFS
+Finally, a series of circular nodes indicate the positions of WFS
 sources; as previously stated, both virtual and focused sources are
 supported, by moving a given sound source behind or in front of the
 speaker array. Sources can be dragged with the mouse to change their
