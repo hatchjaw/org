@@ -3089,96 +3089,10 @@ programmed, and landed upon JUCE and the CLAP audio plugin format as
 the platform for our distributed system's control interfaces, all that
 remains is to establish how our chosen spatial audio algorithms can be
 effectively parallelised and distributed. Concluding this chapter is a
-treatment of distributing WFS and HOA in Faust and the requirements
-that must be demanded of their accompanying control systems.
+treatment of distributing WFS and HOA and the requirements that must
+be demanded of their accompanying control systems.
 
 *** Distributed Wave Field Synthesis
-
-As illustrated in cref:fig:driving-function (page
-\pageref{fig:driving-function}) and cref:eq:wfs-driving-function, the
-WFS driving function for a secondary source at position \(\mathbf{x}\)
-is dependent only on the vertices of the right triangle described by
-the relative positions of \(\mathbf{x}\) and a given virtual or
-focused sound source \(\hat{s}_{\text{in},k}\); in effect, all
-per-loudspeaker delays and virtual source prefilters are independent
-and parallelisable; a given distributed module, with two speaker
-outputs, need only compute these for the two loudspeakers for which it
-is responsible, having been provided with the Cartesian co-ordinates
-for each. Faust code for the distributed WFS algorithm can be found in
-cref:lst:faust-wfs. The program takes ~N_SOURCES~ input streams, each
-corresponding with a WFS source, and distributes these across the two
-speaker outputs for which the algorithm is responsible, with ~hslider~
-instances representing all secondary and virtual source co-ordinates.
-
-#+name: lst:faust-wfs
-#+caption: Faust code for a distributed WFS module.
-#+begin_src faust
-declare name "Distributed WFS";
-declare description "Basic WFS for a distributed setup consisting of modules that each handle two output channels.";
-import("stdfaust.lib");
-import("wfsParams.lib");
-
-// Take each source...
-process = par(i, N_SOURCES, _ <:
-    // ...and distribute it across the speaker array for this module.
-    speaker(x(i), y(i), ss0x, ss0y), speaker(x(i), y(i), ss1x, ss1y))
-    // Merge onto the output speakers.
-    :> par(i, SPEAKERS_PER_MODULE, _)
-with{
-    // Secondary source co-ordinates.
-    ss0x = hslider("ss/0/x", 0, -MAX_X, MAX_X, .001);
-    ss0y = hslider("ss/0/y", 0, -MAX_X, MAX_X, .001);
-    ss1x = hslider("ss/1/x", 0, -MAX_X, MAX_X, .001);
-    ss1y = hslider("ss/1/y", 0, -MAX_X, MAX_X, .001);
-
-    // Virtual/focused source co-ordinates.
-    x(p) = hslider("vs/%p/x", 0, -MAX_X, MAX_X, 0.001);
-    y(p) = hslider("vs/%p/y", 0, MIN_Y, MAX_Y, 0.001);
-
-    // Output for a given loudspeaker.
-    speaker(vsx, vsy, ssx, ssy) = _ <:
-        _,prefilter(hyp) : select2(vsy > 0) :
-        (fsDelay,vsDelay : select2(vsy > 0)),_ :
-        de.fdelay(maxHyp * samplesPerMeter)
-    with{
-        maxHyp = MIN_Y^2 + (2 * MAX_X)^2 : sqrt;
-
-        // Number of samples it takes sound to travel one meter.
-        samplesPerMeter = ma.SR / CELERITY;
-
-        // Invert x-position for focused sources.
-        cx = ssx,vsx <: +,- : select2(vsy > 0);
-        y = ssy - vsy;
-        hyp = cx^2 + y^2 : sqrt;
-
-        vsDelay = smallDelay
-        with {
-            smallDelay = (hyp - y) * samplesPerMeter;
-        };
-
-        fsDelay = (maxHyp - hyp) * samplesPerMeter;
-
-        // Simulate distance by changing gain and applying a lowpass as a function
-        // of distance
-        prefilter(distance) = *(dGain) : fi.lowpass(2, fc)
-        with{
-            // Inverse square law: A(d) = 1 / d, using a minimum distance of 1 m.
-            dGain = 1 / max(distance^(.5), 1);
-
-            fc = dGain * 15000 + 5000;
-        };
-    };
-};
-#+end_src
-
-The supporting DAW plugin should provide an audio server for
-monophonic WFS sources, plus user interface elements for assigning
-modules to pairs of loudspeakers, thus determining the appropriate
-pairs of secondary source co-ordinates to be transmitted to each
-module. Cref:fig:wfs illustrates the distributed WFS system
-diagrammatically. For an in-depth discussion of the significance of
-the /time authority/, see cref:chap:time-exchange and
-cref:sec:time-authority.
 
 #+name: fig:wfs
 #+caption: Distributed Wave Field Synthesis.
@@ -3196,79 +3110,33 @@ cref:sec:time-authority.
 \end{tikzpicture}
 \end{figure*}
 
+As illustrated in cref:fig:driving-function (page
+\pageref{fig:driving-function}) and cref:eq:wfs-driving-function, the
+WFS driving function for a secondary source at position \(\mathbf{x}\)
+is dependent only on the vertices of the right triangle described by
+the relative positions of \(\mathbf{x}\) and a given virtual or
+focused sound source \(\hat{s}_{\text{in},k}\); in effect, all
+per-loudspeaker delays and virtual source prefilters are independent
+and parallelisable; a given distributed module, with two speaker
+outputs, need only compute these for the two loudspeakers for which it
+is responsible, having been provided with the Cartesian co-ordinates
+for each. Faust code for the distributed WFS algorithm can be
+consulted in cref:app:distributed-wfs. The program takes a number of
+input streams, each corresponding with a WFS source, and distributes
+these across the two speaker outputs for which the algorithm is
+responsible, with ~hslider~ instances representing all secondary and
+virtual source co-ordinates.
+
+The supporting DAW plugin should provide an audio server for
+monophonic WFS sources, plus user interface elements for assigning
+modules to pairs of loudspeakers, thus determining the appropriate
+pairs of secondary source co-ordinates to be transmitted to each
+module. Cref:fig:wfs illustrates the distributed WFS system
+diagrammatically. For an in-depth discussion of the significance of
+the /time authority/, see cref:chap:time-exchange and
+cref:sec:time-authority.
+
 *** Distributed Higher Order Ambisonics
-
-As established in cref:sec:wfs-hoa (page \pageref{sec:wfs-hoa}), the
-ambisonics decoding matrix \(\mathbf{D}\) is found as the inverse or,
-depending on its dimensions, the pseudoinverse of the mode matrix
-\(\mathbf{Y}\). Each row of \(\mathbf{D}\) contains the decoding
-coefficients for a given loudspeaker. The time-domain output signal
-for the \(i\)^{th} loudspeaker is found as the dot product of the \(i\)^{th}
-row of \(\mathbf{D}\) and the vector of ACN-format channels:
-
-#+NAME: eq:hoa-output
-\begin{equation}
-s_{i}(t) = \mathbf{D}_{i} \cdot \mathbf{b}(t)\;,
-\end{equation}
-and it is clear, then, that the ambisonics decoder is parallelisable
---- a DSP module producing output for speakers \(i\) and \(j\) need
-only be aware of the coefficients for the corresponding \(i\)^{th} and
-\(j\)^{th} rows of the decoding matrix. See cref:lst:faust-hoa for code
-describing a distributed decoder for a third order HOA system, with
-its two rows of decoder coefficients represented as a pair of parallel
-~hslider~ instances. The dot product for each row, as per
-cref:eq:hoa-output, is computed by the function ~linalg.dot~. Note the
-use of the signal interleaving function in the definition of that
-function; its mathematical description can be found in
-cref:eq:interleave (page \pageref{eq:interleave}).
-
-#+name: lst:faust-hoa
-#+caption: Faust code for a distributed HOA decoder.
-#+begin_src faust
-declare name "Distributed HOA";
-declare description "Third order HOA for a distributed setup consisting of modules that each handle two output channels.";
-
-N = 16;
-coeffsPerRow = 16;
-
-coefficients0 = par(j, coeffsPerRow, hslider("dm/0/%j", 0, -10, 10, 1e-8));
-coefficients1 = par(j, coeffsPerRow, hslider("dm/1/%j", 0, -10, 10, 1e-8));
-
-process = par(i, N, _) <:
-    (par(i, N, _),coefficients0 : linalg.dot(N)),
-    (par(i, N, _),coefficients1 : linalg.dot(N));
-
-routes = environment {
-    // Signal interleaving function.
-    // In general, R*C groups of R signals.
-    // The rth signal in each of C subgroups passes; the rest are cut.
-    interleave(1, C) = par(i, C, _);
-    interleave(R, C) = par(i, R * C, _) <: par(r, R, par(c, C, distribute(r, 1, R - r - 1)));
-} with {
-    // Helper function for distributing groups of signals.
-    // p: number of signals to cut at the start of the group.
-    // q: number of signals to pass.
-    // r: number of signals to cut at the end of the group.
-    distribute(0, q, 0) = par(i, q, _);
-    distribute(p, q, 0) = par(i, p, !),par(j, q, _);
-    distribute(0, q, r) = par(i, q, _),par(j, r, !);
-    distribute(p, q, r) = par(i, p, !),par(j, q, _),par(k, r, !);
-};
-
-linalg = environment {
-    dot(N) = routes.interleave(N, 2) : par(i, N, *) :> _;
-};
-#+end_src
-
-The HOA plugin should provide a server for ACN-encoded audio channels
-and a control interface that facilitates the assignment of Cartesian
-co-ordinates to loudspeaker positions, and the assignment of modules
-to pairs of loudspeakers. Upon assigning a module to a pair of
-loudspeakers, co-ordinates for all loudspeakers should be converted
-from Cartesian to spherical, the mode matrix computed, its inverse
-taken, and the appropriate rows of the decoder matrix transmitted to
-the module. A diagram of a distributed third order HOA system is
-depicted in cref:fig:hoa.
 
 #+name: fig:hoa
 #+caption: Distributed Higher Order Ambisonics.
@@ -3287,6 +3155,40 @@ depicted in cref:fig:hoa.
 };
 \end{tikzpicture}
 \end{figure*}
+
+As established in cref:sec:wfs-hoa (page \pageref{sec:wfs-hoa}), the
+ambisonics decoding matrix \(\mathbf{D}\) is found as the inverse or,
+depending on its dimensions, the pseudoinverse of the mode matrix
+\(\mathbf{Y}\). Each row of \(\mathbf{D}\) contains the decoding
+coefficients for a given loudspeaker. The time-domain output signal
+for the \(i\)^{th} loudspeaker is found as the dot product of the \(i\)^{th}
+row of \(\mathbf{D}\) and the vector of ACN-format channels:
+
+#+NAME: eq:hoa-output
+\begin{equation}
+s_{i}(t) = \mathbf{D}_{i} \cdot \mathbf{b}(t)\;,
+\end{equation}
+and it is clear, then, that the ambisonics decoder is parallelisable
+--- a DSP module producing output for speakers \(i\) and \(j\) need
+only be aware of the coefficients for the corresponding \(i\)^{th} and
+\(j\)^{th} rows of the decoding matrix. See cref:app:distributed-hoa for
+code describing a distributed decoder for a third order HOA system,
+with its two rows of decoder coefficients represented as a pair of
+parallel ~hslider~ instances. The dot product for each row, as per
+cref:eq:hoa-output, is computed by the function ~linalg.dot~. Note the
+use of the signal interleaving function in the definition of that
+function; its mathematical description can be found in
+cref:eq:interleave (page \pageref{eq:interleave}).
+
+The HOA plugin should provide a server for ACN-encoded audio channels
+and a control interface that facilitates the assignment of Cartesian
+co-ordinates to loudspeaker positions, and the assignment of modules
+to pairs of loudspeakers. Upon assigning a module to a pair of
+loudspeakers, co-ordinates for all loudspeakers should be converted
+from Cartesian to spherical, the mode matrix computed, its inverse
+taken, and the appropriate rows of the decoder matrix transmitted to
+the module. A diagram of a distributed third order HOA system is
+depicted in cref:fig:hoa.
 
 * Differentiable DSP In Faust
 :PROPERTIES:
@@ -6082,24 +5984,117 @@ can be found at [[https://github.com/hatchjaw/ananas-client]].
 
 ** Deployment
 
+Ananas has been deployed in the service of both WFS and HOA
+installations. In both cases, the time authority was connected to a
+general purpose laptop computer over USB, via a Dell USB-C multiport
+adapter, and to the CRS326-24G-2S+IN switch via CAT5E ethernet
+cable. The general purpose machine, via the USB-C adapter, was also
+connected to the switch, again by CAT5E cable.
+
+*** Wave Field Synthesis
+
 #+name: fig:ananas-wfs
 #+caption: Ananas driving a WFS system with sixteen secondary sources.
 [[./images/ananas-wfs.jpeg]]
 
-For deployment, the time authority is connected to a general purpose
-laptop computer over USB, and to the switch via ethernet. Each client
-is powered via a USB hub, has an ethernet connection to the switch,
-and is connected to two loudspeakers via a stereo minijack to
-quarter-inch mono jack cable. See cref:fig:ananas-wfs for an example
-WFS deployment at INSA Lyon in Villeurbanne, France. Loudspeakers are
-Focal Alpha 50 Evo, giving a driver spacing of
-\qty{22.8}{\centi\meter}.
+See cref:fig:ananas-wfs for an example WFS deployment at INSA Lyon in
+Villeurbanne, France. Loudspeakers were Focal Alpha 50 Evo, giving a
+driver spacing of \qty{22.8}{\centi\meter} and a total array width of
+\qty{3.42}{\meter}. Clients were powered by a fifteen-port Orico USB
+hub. Each had an ethernet connection to the switch over CAT5E cable,
+and was connected to two adjacent loudspeakers via a stereo minijack
+to dual quarter-inch mono jack cable.
+
+The computer ran the Reaper DAW, with a session containing a
+sixteen-channel track --- the network bus --- with the /AnanasWFS/
+plugin assigned; other mono tracks were set up to send to the network
+bus, becoming the virtual/focused sources for the WFS system.
+
+*** Higher Order Ambisonics
 
 #+name: fig:ananas-hoa
 #+caption: Ananas driving a third order HOA system.
 [[./images/ananas-hoa.jpeg]]
 
+An Ananas-based third order ambisonics system was tested at Université
+Jean Monnet, Saint-Étienne, France. The circular array of sixteen
+loudspeakers, of approximately \qty{6}{\meter} diameter, consisted of
+an evenly-spaced ring of eight Focal Alpha 50 Evo speakers at \(z
+=\;\)\qty{0}{\meter}, and another ring of eight Focal Alpha 80 speakers
+at \(z =\;\)\qty{1.3}{\meter} offset from the lower ring by 22.5° (see
+cref:fig:ananas-hoa).
+
+Clients were connected to two loudspeakers each via stereo minijack to
+dual RCA audio cable; four clients for the lower loudspeaker ring,
+another four for the higher ring. Each client was powered by a Pebble
+PZ10 \qty{10000}{\milli\ampere\hour} lithium-ion power bank and
+connected to the switch by CAT5E ethernet cable.
+
+Similar to the WFS installation, the computer ran Reaper and a session
+containing a sixteen-channel network bus with the /AnanasHOA/ plugin
+assigned. Sixteen ACN-encoded audio channels were set up as sends to
+the network bus.
+
 ** Synchronisation Results
+
+To assess the effectiveness of the media clock and presentation time
+recovery algorithms of the Ananas client implementation in ensuring
+inter-client synchronicity, an experiment was conducted.
+
+*** Experimental Procedure
+
+**** Hardware Setup
+
+A general purpose laptop computer, running the Reaper DAW and an
+instance of the /AnanasServer/ plugin, was connected to a Dell USB-C
+multiport adapter. The USB-C adapter was in turn connected to a
+MikroTik CRS326-24G-2S+IN ethernet switch, via CAT5E ethernet cable,
+and to a fifteen-port Orico USB hub over USB-A to USB-B cable. The USB
+hub was connected to a Digilent Analog Discovery 2 logic analyser,
+four Ananas client modules, and one time authority, all over USB
+cable. The Ananas client and time authority modules were connected to
+the switch over CAT5E ethernet cable. The four Ananas client modules
+were connected to the logic analyser via its four sets of I2S probes.
+
+**** Software Setup
+
+Reaper was set up with a track producing a pulse-per-second signal,
+i.e., a single maximal-amplitude 16-bit sample once per second. That
+track was routed as a send to another track running the /AnanasServer/
+plugin. Digilent Waveforms software was run in /Logic/ mode and set up
+to analyse four I2S devices, the four Ananas client modules, and
+configured to trigger a data capture on I2S3 on a sample with value
+=0x7FFE=. Logging in logic mode was configured with the script in
+cref:lst:waveforms-script and set up to capture data on each triggered
+acquisition. Per the script, data was written to a CSV file. I2S3 was
+used as the time reference; all other modules' offsets were recorded
+relative to I2S3 on each per-second pulse.
+
+#+name: lst:waveforms-script
+#+caption: Digilent Waveforms script for logging Ananas client synchronicity measurements.
+#+begin_src javascript
+function findFirstTimestamp(channel, target) {
+    var index = 0;
+    channel.data.forEach(function(element, idx) {
+        if (index == 0 && element == target) {
+            index = idx;
+        }
+    });
+    return channel.eventStamps[index];
+}
+
+var target = "h7ffe";
+var times = [
+    findFirstTimestamp(Logic.Channels.I2S,  target),
+    findFirstTimestamp(Logic.Channels.I2S2, target),
+    findFirstTimestamp(Logic.Channels.I2S3, target),
+    findFirstTimestamp(Logic.Channels.I2S4, target)
+];
+
+FileAppendLine("~/tmp/logic/ananas_x.csv", [times.join(",")]);
+#+end_src
+
+**** Data Analysis
 
 #+begin_src julia :results file graphics :file synchro.png :output-dir ./images/gen :exports results
 using CSV, DataFrames, Plots, LaTeXStrings, Statistics
@@ -6196,17 +6191,16 @@ function plotHistogram(index, ip)
 end
 #+end_src
 
-One hour of synchronisation measurements were taken for four clients,
-one of which was used as a reference time for the other three. Clients
-each reproduced a pulse-per-second signal received from the Ananas
-server. As can be seen in cref:fig:synchro, clients remain
-synchronised to within just over \qty{200}{\nano\second}, falling well
-within the AES guideline for time-sensitive audio of 5% of the
-reference frame (around \qty{1}{\micro\second} at \qty{48}{\kilo\hertz}),
-and to around \qty{80}{\nano\second} on average. Histograms of
-synchronicity results (see cref:fig:histos) reveal asymmetries,
-particularly for client =192.168.198.18=, but nothing to threaten the
-AES guideline.
+One hour of synchronisation measurements were taken for the four
+clients, each reproducing the pulse-per-second signal received from
+the /AnanasServer/ plugin. As can be seen in cref:fig:synchro, clients
+remain synchronised to within just over \qty{200}{\nano\second},
+falling well within the AES guideline for time-sensitive audio of 5%
+of the reference frame (around \qty{1}{\micro\second} at
+\qty{48}{\kilo\hertz}), and to around \qty{80}{\nano\second} on
+average. Histograms of synchronicity results (see cref:fig:histos)
+reveal asymmetries, particularly for client =192.168.198.18=, but
+nothing to threaten the AES guideline.
 
 Synchronisation results represent a significant improvement over
 prior, best-effort work\nbsp[cite:@rushtonMicrocontrollerbased2023], which
@@ -6250,6 +6244,122 @@ plotHistogram(4, "192.168.48.191")
 :END:
 
 This is my conclusion
+
+#+latex: \appendix
+
+* Distributed Spatial Audio Algorithms
+:PROPERTIES:
+:CUSTOM_ID: app:distributed-algos
+:END:
+
+** Wave Field Synthesis
+:PROPERTIES:
+:CUSTOM_ID: app:distributed-wfs
+:END:
+
+#+name: lst:faust-wfs
+#+caption: Faust code for a distributed WFS module.
+#+begin_src faust
+declare name "Distributed WFS";
+declare description "Basic WFS for a distributed setup consisting of modules that each handle two output channels.";
+import("stdfaust.lib");
+import("wfsParams.lib");
+
+// Take each source...
+process = par(i, N_SOURCES, _ <:
+    // ...and distribute it across the speaker array for this module.
+    speaker(x(i), y(i), ss0x, ss0y), speaker(x(i), y(i), ss1x, ss1y))
+    // Merge onto the output speakers.
+    :> par(i, SPEAKERS_PER_MODULE, _)
+with{
+    // Secondary source co-ordinates.
+    ss0x = hslider("ss/0/x", 0, -MAX_X, MAX_X, .001);
+    ss0y = hslider("ss/0/y", 0, -MAX_X, MAX_X, .001);
+    ss1x = hslider("ss/1/x", 0, -MAX_X, MAX_X, .001);
+    ss1y = hslider("ss/1/y", 0, -MAX_X, MAX_X, .001);
+
+    // Virtual/focused source co-ordinates.
+    x(p) = hslider("vs/%p/x", 0, -MAX_X, MAX_X, 0.001);
+    y(p) = hslider("vs/%p/y", 0, MIN_Y, MAX_Y, 0.001);
+
+    // Output for a given loudspeaker.
+    speaker(vsx, vsy, ssx, ssy) = _ <:
+        _,prefilter(hyp) : select2(vsy > 0) :
+        (fsDelay,vsDelay : select2(vsy > 0)),_ :
+        de.fdelay(maxHyp * samplesPerMeter)
+    with{
+        maxHyp = MIN_Y^2 + (2 * MAX_X)^2 : sqrt;
+
+        // Number of samples it takes sound to travel one meter.
+        samplesPerMeter = ma.SR / CELERITY;
+
+        // Invert x-position for focused sources.
+        cx = ssx,vsx <: +,- : select2(vsy > 0);
+        y = ssy - vsy;
+        hyp = cx^2 + y^2 : sqrt;
+
+        vsDelay = smallDelay
+        with {
+            smallDelay = (hyp - y) * samplesPerMeter;
+        };
+
+        fsDelay = (maxHyp - hyp) * samplesPerMeter;
+
+        // Simulate distance by changing gain and applying a lowpass as a function
+        // of distance
+        prefilter(distance) = *(dGain) : fi.lowpass(2, fc)
+        with{
+            // Inverse square law: A(d) = 1 / d, using a minimum distance of 1 m.
+            dGain = 1 / max(distance^(.5), 1);
+
+            fc = dGain * 15000 + 5000;
+        };
+    };
+};
+#+end_src
+
+** Higher Order Ambisonics
+:PROPERTIES:
+:CUSTOM_ID: app:distributed-hoa
+:END:
+
+#+name: lst:faust-hoa
+#+caption: Faust code for a distributed HOA decoder.
+#+begin_src faust
+declare name "Distributed HOA";
+declare description "Third order HOA for a distributed setup consisting of modules that each handle two output channels.";
+
+N = 16;
+coeffsPerRow = 16;
+
+coefficients0 = par(j, coeffsPerRow, hslider("dm/0/%j", 0, -10, 10, 1e-8));
+coefficients1 = par(j, coeffsPerRow, hslider("dm/1/%j", 0, -10, 10, 1e-8));
+
+process = par(i, N, _) <:
+    (par(i, N, _),coefficients0 : linalg.dot(N)),
+    (par(i, N, _),coefficients1 : linalg.dot(N));
+
+routes = environment {
+    // Signal interleaving function.
+    // In general, R*C groups of R signals.
+    // The rth signal in each of C subgroups passes; the rest are cut.
+    interleave(1, C) = par(i, C, _);
+    interleave(R, C) = par(i, R * C, _) <: par(r, R, par(c, C, distribute(r, 1, R - r - 1)));
+} with {
+    // Helper function for distributing groups of signals.
+    // p: number of signals to cut at the start of the group.
+    // q: number of signals to pass.
+    // r: number of signals to cut at the end of the group.
+    distribute(0, q, 0) = par(i, q, _);
+    distribute(p, q, 0) = par(i, p, !),par(j, q, _);
+    distribute(0, q, r) = par(i, q, _),par(j, r, !);
+    distribute(p, q, r) = par(i, p, !),par(j, q, _),par(k, r, !);
+};
+
+linalg = environment {
+    dot(N) = routes.interleave(N, 2) : par(i, N, *) :> _;
+};
+#+end_src
 
 #+latex: \listoffigures
 

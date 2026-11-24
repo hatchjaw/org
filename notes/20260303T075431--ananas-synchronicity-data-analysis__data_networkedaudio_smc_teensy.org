@@ -16,7 +16,7 @@ Romain and Tanguy.
   + MikroTik CRS326-24G-2S+IN ethernet switch, via CAT5E ethernet
     cable.
   + Orico USB hub over USB-A to USB-B cable.
-- USB hub connected to Digilent Analag Discovery 2 logic analyser over USB.
+- USB hub connected to Digilent Analog Discovery 2 logic analyser over USB.
 - USB hub connected to four Teensy Ananas =clock-subscriber= modules
   over USB.
 - USB hub connected to one Teensy Ananas =clock-authority-usb-audio=
@@ -24,10 +24,10 @@ Romain and Tanguy.
 - Switch connected to =clock-authority-usb-audio= and
   =clock-subscriber= modules over CAT5E ethernet.
 - Four =clock-subscriber= modules connected to the logic analyser on:
-  + Ground.
-  + Pin 7, data.
-  + Pin 20, LRCLK.
-  + Pin 21, BCLK.
+  + Ground, black.
+  + Pin 7, data, purple.
+  + Pin 20, LRCLK, pink.
+  + Pin 21, BCLK, green.
 
     
 ** Software setup
