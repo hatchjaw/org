@@ -5278,13 +5278,14 @@ PTP timestamps, listening for client and time authority announcement
 packets, sending client reboot instructions, or inspecting connected
 switches. The audio transmission part of the server is illustrated in
 cref:fig:server. The server receives a collection of input channels,
-either monophonic WFS sources or ACN encoded audio channels, and
-writes these to an intermediate first-in-first-out (FIFO) buffer. When
-the FIFO contains enough samples to fill an outgoing audio packet, the
-sender thread is notified and reads from the FIFO to fill a packet for
-transmission. On reading from the FIFO, the sender thread converts the
-audio samples to 16 bit, interleaved, little-endian format according
-to the format converter in cref:lst:format-converter.
+which, depending on the encapsulating plugin, may be either monophonic
+WFS sources or ACN encoded audio channels, and writes these to an
+intermediate first-in-first-out (FIFO) buffer. When the FIFO contains
+enough samples to fill an outgoing audio packet, the sender thread is
+notified and reads from the FIFO to fill a packet for transmission. On
+reading from the FIFO, the sender thread converts the audio samples to
+16 bit, interleaved, little-endian format according to the format
+converter in cref:lst:format-converter.
 
 #+name: lst:format-converter
 #+caption: JUCE format converter definition for converting audio samples from 32 bit float to 16 bit integer.
@@ -5548,11 +5549,22 @@ reported above the list of clients, giving an indication of the
 effectiveness of the synchronisation algorithm.
 
 #+name: fig:network-overview
-#+caption: The network overview pane of the WFS plugin.
+#+caption: The network overview pane of the /AnanasWFS/ plugin.
 #+attr_org: :width 300
 [[./images/network-overview.png]]
 
-*** The WFS Plugin
+*** /AnanasServer/
+
+Permitting Ananas to run as a distributed network audio interface,
+with no facility for controlling sound field synthesis algorithms, is
+the /AnanasServer/ plugin. It encapsulates the audio server and
+provides a user interface consisting solely of the network overview
+pane. Its purpose is simply to transmit audio to the network and it
+was used for inter-client synchronicity testing --- see
+cref:sec:sync-results for further detail of its deployment to that
+end.
+
+*** /AnanasWFS/
 
 The WFS control interface (cref:fig:wfs-control) presents a variable
 number of client module selectors, each of which displays a list of
@@ -5582,11 +5594,11 @@ corresponding to the number of WFS sources; monophonic channels can be
 added and set up as sends to the network bus.
 
 #+name: fig:wfs-control
-#+caption: The WFS plugin control interface. Numbered nodes represent monophonic WFS sound sources. Dropdown menus displaying IP addresses indicate the assignment of client modules to secondary source co-ordinates. The upper part of the interface represents the virtual sound field, and virtual sources that are /further away/ from the listening area; the lower part, beneath the speaker icons, represents the real sound field and the locations of focused sources.
+#+caption: The /AnanasWFS/ plugin control interface. Numbered nodes represent monophonic WFS sound sources. Dropdown menus displaying IP addresses indicate the assignment of client modules to secondary source co-ordinates. The upper part of the interface represents the virtual sound field, and virtual sources that are /further away/ from the listening area; the lower part, beneath the speaker icons, represents the real sound field and the locations of focused sources.
 #+attr_org: :width 300
 [[./images/wfs-control.png]]
 
-*** The HOA Plugin
+*** /AnanasHOA/
 
 The HOA control interface (cref:fig:hoa-control) supports third order
 ambisonics and consists of sixteen loudspeaker icons arranged in two
@@ -5607,7 +5619,7 @@ selection has been made, two rows of the decoder matrix are
 transmitted to the selected client module as OSC messages over unicast UDP.
 
 #+name: fig:hoa-control
-#+caption: The HOA plugin control interface, displaying modal window for specifying secondary source Cartesian co-ordinates. Clicking on a speaker icon opens the corresponding modal window. Selecting a client module by its IP address using one of the dropdown menus assigns that module two rows from the decoder matrix.
+#+caption: The /AnanasHOA/ plugin control interface, displaying modal window for specifying secondary source Cartesian co-ordinates. Clicking on a speaker icon opens the corresponding modal window. Selecting a client module by its IP address using one of the dropdown menus assigns that module two rows from the decoder matrix.
 #+attr_org: :width 300
 [[./images/hoa-control.png]]
 
@@ -5830,6 +5842,18 @@ void AudioClientBase::run()
 }
 #+end_src
 
+*** The =clock-subscriber= Firmware
+
+Counterpart to the /AnanasServer/ audio plugin is the
+=clock-subscriber= firmware, which allows clients to run as a plain
+distributed network audio interface, running no sound field synthesis
+algorithm. This firmware receives audio data transmitted by the audio
+server and writes the first two channels of that data to the Teensy's
+audio outputs. Besides its utility during development in assessing the
+integrity of client-server interaction without the added complication
+of WFS or HOA, it was used for inter-client synchronicity testing ---
+see cref:sec:sync-results for further detail.
+
 *** The Distributed WFS Module
 
 The distributed WFS algorithm is written in Faust and compiled to C++
@@ -6036,12 +6060,20 @@ assigned. Sixteen ACN-encoded audio channels were set up as sends to
 the network bus.
 
 ** Synchronisation Results
+:PROPERTIES:
+:CUSTOM_ID: sec:sync-results
+:END:
 
 To assess the effectiveness of the media clock and presentation time
 recovery algorithms of the Ananas client implementation in ensuring
 inter-client synchronicity, an experiment was conducted.
 
 *** Experimental Procedure
+
+#+name: fig:ananas-test
+#+caption: Experimental setup for the client synchronisation test.
+#+attr_latex: :width .75\linewidth
+[[./images/ananas-test.jpeg]]
 
 **** Hardware Setup
 
@@ -6053,8 +6085,9 @@ and to a fifteen-port Orico USB hub over USB-A to USB-B cable. The USB
 hub was connected to a Digilent Analog Discovery 2 logic analyser,
 four Ananas client modules, and one time authority, all over USB
 cable. The Ananas client and time authority modules were connected to
-the switch over CAT5E ethernet cable. The four Ananas client modules
-were connected to the logic analyser via its four sets of I2S probes.
+the switch over CAT5E ethernet cable. The four Ananas client modules,
+running the =clock-subscriber= firmware, were connected to the logic
+analyser via its four sets of I2S probes.
 
 **** Software Setup
 
@@ -6230,7 +6263,7 @@ plotHistogram(4, "192.168.48.191")
 #+RESULTS:
 [[file:./images/gen/histo4.png]]
 
-#+caption: Histograms of synchronicity measurements for three clients from cref:fig:synchro (the fourth client was used as reference).
+#+caption: Histograms of synchronicity measurements for three clients from cref:fig:synchro (the fourth client was used as the time reference).
 #+name: fig:histos
 \begin{figure*}[h]
 \subfloat{\includegraphics[width=0.33\textwidth]{images/gen/histo1}\label{fig:histo1}}
@@ -6252,10 +6285,37 @@ This is my conclusion
 :CUSTOM_ID: app:distributed-algos
 :END:
 
+Distributed WFS and HOA algorithms were written in Faust to be
+compiled by the =faust2ananas= tool to ~AudioProcessor~ descendant
+classes. In the sections that follow, the full Faust code for these
+algorithms is presented.
+
 ** Wave Field Synthesis
 :PROPERTIES:
 :CUSTOM_ID: app:distributed-wfs
 :END:
+
+#+name: lst:wfs-params
+#+caption: The =wfsParams= Faust library for use with the distributed WFS algorithm.
+#+begin_src faust
+// Speed of sound (c, m/s)
+CELERITY = 343;
+
+// max Y distance (m) that a virtual source can be behind the speaker array
+MAX_Y = 10;
+
+// max Y position (m) that a focused source can be in front of the array
+MIN_Y = -3;
+
+// Max X co-ordinate (m)
+MAX_X = 2.25;
+
+// Each module (Teensy) controls two speakers.
+SPEAKERS_PER_MODULE = 2;
+
+// Number of sound sources
+N_SOURCES = 16;
+#+end_src
 
 #+name: lst:faust-wfs
 #+caption: Faust code for a distributed WFS module.
@@ -6265,9 +6325,9 @@ declare description "Basic WFS for a distributed setup consisting of modules tha
 import("stdfaust.lib");
 import("wfsParams.lib");
 
-// Take each source...
+// Take each virtual/focused source...
 process = par(i, N_SOURCES, _ <:
-    // ...and distribute it across the speaker array for this module.
+    // ...and compute its contribution to the two speakers for this module.
     speaker(x(i), y(i), ss0x, ss0y), speaker(x(i), y(i), ss1x, ss1y))
     // Merge onto the output speakers.
     :> par(i, SPEAKERS_PER_MODULE, _)
@@ -6282,9 +6342,11 @@ with{
     x(p) = hslider("vs/%p/x", 0, -MAX_X, MAX_X, 0.001);
     y(p) = hslider("vs/%p/y", 0, MIN_Y, MAX_Y, 0.001);
 
-    // Output for a given loudspeaker.
+    // One virtual/focused source for a given loudspeaker.
     speaker(vsx, vsy, ssx, ssy) = _ <:
+        // For y > 0, i.e., virtual source, use the prefilter.
         _,prefilter(hyp) : select2(vsy > 0) :
+        // For y > 0 use the virtual source delay, otherwise use the focused source delay.
         (fsDelay,vsDelay : select2(vsy > 0)),_ :
         de.fdelay(maxHyp * samplesPerMeter)
     with{
@@ -6298,11 +6360,13 @@ with{
         y = ssy - vsy;
         hyp = cx^2 + y^2 : sqrt;
 
+        // Virtual source delay.
         vsDelay = smallDelay
         with {
             smallDelay = (hyp - y) * samplesPerMeter;
         };
 
+        // Focused source delay.
         fsDelay = (maxHyp - hyp) * samplesPerMeter;
 
         // Simulate distance by changing gain and applying a lowpass as a function
