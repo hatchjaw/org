@@ -46,10 +46,27 @@ To be combined with ~\setstretch{}~ in =frontmatter.tex=.
 \RequirePackage{setspace}
 #+end_src
 
+*** Colours
+
+#+begin_src latex
+\RequirePackage[dvipsnames]{xcolor}
+
+\definecolor{tabED}{rgb}{0.90, 0.87, 0.93}
+\definecolor{txtED}{rgb}{0.60, 0.28, 0.02}
+\definecolor{siteED}{rgb}{0.04, 0.27, 0.47}
+\definecolor{codeBG}{rgb}{.9, .9, .9}
+
+\definecolor{chapaccent}{HTML}{B3342E}  % pick your accent colour
+#+end_src
+
 *** Headers/footers
 
 #+begin_src latex
 \RequirePackage{fancyhdr}
+
+% Make marks show "Chapter title" and "1.2 Section title" without forced uppercase
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\enspace #1}}
 #+end_src
 
 *** Per-chapter tables of contents
@@ -67,20 +84,10 @@ Number minitoc sections as deep as ~\subsubsection~
 *** Graphics
 
 #+begin_src latex
-\RequirePackage[dvipsnames]{xcolor}
 \RequirePackage{graphicx}
 \RequirePackage[inkscapelatex=false]{svg}
 \RequirePackage{subcaption}
 \RequirePackage{mdframed}
-#+end_src
-
-*** Colours
-
-#+begin_src latex
-\definecolor{tabED}{rgb}{0.90, 0.87, 0.93}
-\definecolor{txtED}{rgb}{0.60, 0.28, 0.02}
-\definecolor{siteED}{rgb}{0.04, 0.27, 0.47}
-\definecolor{codeBG}{rgb}{.9, .9, .9}
 #+end_src
 
 *** Typography
@@ -142,8 +149,6 @@ For ~\dotuline~ on folio page.
 
 #+begin_src latex
 \RequirePackage{titlesec}
-
-\definecolor{chapaccent}{HTML}{B3342E}  % pick your accent colour
 
 % Numbered chapters
 \titleformat{\chapter}[display]
@@ -990,7 +995,7 @@ Define some colours and some node and line styles.
 :UNNUMBERED: notoc
 :END:
 
-#+latex: \fancyhead[RE,LO]{Acknowledgements}
+#+latex: \fancyhead[RE,LO]{\sffamily\small\textcolor{black!70}{Acknowledgements}}
 
 Unlike many of my doctoral peers, I have had the privilege of being
 able to develop the work presented in this thesis for a full four
@@ -1043,7 +1048,7 @@ Tommy
 :UNNUMBERED: notoc
 :END:
 
-#+latex: \fancyhead[RE,LO]{Abstract}
+#+latex: \fancyhead[RE,LO]{\sffamily\small\textcolor{black!70}{Abstract}}
 
 #+begin_abstract
 Access to large-scale spatial audio systems remains a challenge
@@ -1119,7 +1124,7 @@ distribué, systèmes embarqués, échange temporel
 :CUSTOM_ID: sec:intro
 :END:
 
-#+latex: \fancyhead[RE,LO]{Introduction}
+#+latex: \fancyhead[RE,LO]{\sffamily\small\textcolor{black!70}{Introduction}}
 
 \lettrine{S}{patial audio} has an accessibility problem. Interest in
 spatial and immersive audio systems abounds amongst creative
@@ -1303,10 +1308,10 @@ manuscript.
 #+latex: \minitoc
 #+latex: \newpage
 
-#+latex: \pagestyle{fancy}
-#+latex: \fancyhead[LE,RO]{\thepage}
-#+latex: \fancyhead[RE]{\leftmark}
-#+latex: \fancyhead[LO]{\rightmark}
+#+latex: \fancyhead[LE]{\sffamily\small\color{chapaccent}\bfseries\thepage}
+#+latex: \fancyhead[RE]{\sffamily\small\textcolor{black!70}{\leftmark}}
+#+latex: \fancyhead[LO]{\sffamily\small\textcolor{black!70}{\rightmark}}
+#+latex: \fancyhead[RO]{\sffamily\small\color{chapaccent}\bfseries\thepage}
 
 \lettrine{A}{udio transmission} over packet-switched networks has
 become the /de facto/ standard for a variety of applications over the
