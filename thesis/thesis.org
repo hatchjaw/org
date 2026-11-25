@@ -138,6 +138,31 @@ For ~\dotuline~ on folio page.
 \makeatother
 #+end_src
 
+*** Titles
+
+#+begin_src latex
+\RequirePackage{titlesec}
+
+\definecolor{chapaccent}{HTML}{B3342E}  % pick your accent colour
+
+% Numbered chapters
+\titleformat{\chapter}[display]
+  {\normalfont\sffamily}
+  {\color{chapaccent}\fontsize{80}{80}\selectfont\bfseries\thechapter}
+  {0pt}
+  {\raggedright\Huge\bfseries}
+  [\vspace{1ex}{\color{chapaccent}\titlerule[1.5pt]}]
+
+% Unnumbered chapters (\chapter*, bibliography, etc.)
+\titleformat{name=\chapter,numberless}[block]
+  {\normalfont\sffamily\raggedright}
+  {}{0pt}
+  {\Huge\bfseries}
+  [\vspace{1ex}{\color{chapaccent}\titlerule[1.5pt]}]
+
+\titlespacing*{\chapter}{0pt}{-30pt}{40pt}
+#+end_src
+
 *** Tables
 
 #+begin_src latex
@@ -238,6 +263,74 @@ For ~\dotuline~ on folio page.
 \Crefname{listing}{Listing}{Listings}
 #+end_src
 
+**** Faust lexer for pygments
+
+#+begin_src python :tangle faustlexer.py
+from pygments.lexer import RegexLexer, words
+from pygments.token import *
+
+class FaustLexer(RegexLexer):
+    name = 'Faust'
+    aliases = ['faust']
+    filenames = ['*.dsp']
+
+    tokens = {
+        'root': [
+            (r'\s+', Whitespace),
+            (r'//.*?$', Comment.Single),
+            (r'/\*', Comment.Multiline, 'comment'),
+            (r'"(\\.|[^"\\])*"', String),
+            (words(('declare', 'import', 'with', 'letrec', 'case', 'seq',
+                    'par', 'sum', 'prod', 'component', 'library',
+                    'environment', 'waveform', 'route', 'ffunction',
+                    'fconstant', 'fvariable', 'process'),
+                   suffix=r'\b'), Keyword),
+            (words(('button', 'checkbox', 'vslider', 'hslider', 'nentry',
+                    'vgroup', 'hgroup', 'tgroup', 'vbargraph', 'hbargraph',
+                    'attach', 'rdtable', 'rwtable', 'select2', 'select3',
+                    'int', 'float'), suffix=r'\b'), Name.Builtin),
+            (r'\d+(\.\d*)?([eE][+-]?\d+)?|\.\d+([eE][+-]?\d+)?', Number),
+            (r'[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)*', Name),
+            (r'<:|:>|[:,~@\'_!]', Operator),
+            (r'[-+*/%^<>=&|(){}\[\];.]', Punctuation),
+        ],
+        'comment': [
+            (r'[^*/]+', Comment.Multiline),
+            (r'\*/', Comment.Multiline, '#pop'),
+            (r'[*/]', Comment.Multiline),
+        ],
+    }
+#+end_src
+
+To generate a hash for the above lexer, run this command:
+
+#+begin_src shell :results output replace :tangle no :eval yes
+sha256sum faustlexer.py
+#+end_src
+
+#+RESULTS:
+: c9dd629e396c9c0f00a91a1103e2a71507717c620794a7488df4db4d57797525  faustlexer.py
+
+Copy the result into the value of ~"faustlexer.py"~.
+
+#+begin_src json :tangle .latexminted_config
+{
+  "custom_lexers": {
+    "faustlexer.py": "c9dd629e396c9c0f00a91a1103e2a71507717c620794a7488df4db4d57797525"
+  }
+}
+#+end_src
+
+Also needs this in my home directory as per [[https://pypi.org/project/latexminted/]]
+
+#+begin_src json :tangle ~/.latexminted_config
+{
+  "security": {
+    "enable_cwd_config": true
+  }
+}
+#+end_src
+
 ** Figures
 
 *** Common stuff
@@ -301,9 +394,6 @@ Define some colours and some node and line styles.
       \node[field, fill=white, minimum width=72mm, anchor=north] (data) at (dp.south east){UDP payload};
     \end{pgfonlayer}
               
-     % --- Ethernet FCS
-     %\node[field, fill=white, minimum width=96mm, below=18pt of data] (fcs) {FCS\\[-1pt]{\tiny 4 B}};
-              
      % --- labels, at the top-left of the first field of each level
      \node[lbl] (ethlbl) at (dst.north west) {Ethernet frame (data link layer)};
      \begin{pgfonlayer}{superforeground}
@@ -321,7 +411,7 @@ Define some colours and some node and line styles.
        \node[grp, draw=blue!40, fill=blue!10, fit=(iph)(udp)(iplbl)] (ip) {};
      \end{pgfonlayer}
      \begin{pgfonlayer}{background}
-       \node[grp, draw=black!40, fill=black!10, fit=(dst)(src)(typ)(ip)(fcs)(ethlbl)] (eth) {};
+       \node[grp, draw=black!40, fill=black!10, fit=(dst)(src)(typ)(ip)(ethlbl)] (eth) {};
      \end{pgfonlayer}
   }
 }
@@ -1408,7 +1498,7 @@ single 16 bit integer audio sample:
 
 #+name: lst:bin-sample
 #+caption: A 16 bit audio sample, binary representation
-#+begin_src bin :linenos no
+#+begin_src text :linenos no
 11011100 00000010
 #+end_src
 
@@ -1420,7 +1510,7 @@ easily-digestible morsels of two digits (see cref:lst:hex-sample).
 
 #+name: lst:hex-sample
 #+caption: A 16 bit audio sample, hexadecimal representation
-#+begin_src hex :linenos no
+#+begin_src text :linenos no
 dc 02
 #+end_src
 
@@ -1532,7 +1622,7 @@ shown in cref:fig:datagram.
 
 #+name: lst:packet-hello-world
 #+caption: Network capture: ethernet frame containing a UDP packet.
-#+begin_src packet :linenos no
+#+begin_src text :linenos no
        00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f
 
 0000   00 00 0c 9f f5 16 d8 80  83 80 8c b7 08 00 45 00   ..............E.
@@ -5389,7 +5479,7 @@ fields comes the AAP header, thirteen bytes inserted into the packet by
 
 #+name: lst:audio-packet
 #+caption: Example network capture of an Ananas Audio Protocol packet.
-#+begin_src packet :linenos no
+#+begin_src text :linenos no
        00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f
 
 0000   01 00 5e 04 e0 04 0c 37  96 8b 3a 42 08 00 45 00   ..^....7..:B..E.
@@ -5422,7 +5512,7 @@ samples are transmitted little endian.
 
 #+name: lst:hex-samples
 #+caption: Extract of audio samples from the packet in cref:lst:audio-packet.
-#+begin_src byte :linenos no
+#+begin_src text :linenos no
 31 2d  31 2d  32 2d  32 2d  33 2d  33 2d  34 2d  34 2d
 #+end_src
 
@@ -6044,9 +6134,9 @@ An Ananas-based third order ambisonics system was tested at Université
 Jean Monnet, Saint-Étienne, France. The circular array of sixteen
 loudspeakers, of approximately \qty{6}{\meter} diameter, consisted of
 an evenly-spaced ring of eight Focal Alpha 50 Evo speakers at \(z
-=\;\)\qty{0}{\meter}, and another ring of eight Focal Alpha 80 speakers
-at \(z =\;\)\qty{1.3}{\meter} offset from the lower ring by 22.5° (see
-cref:fig:ananas-hoa).
+=\;\)\qty{0}{\meter}, and another ring of eight Focal Alpha 80
+speakers at \(z =\;\)\qty{1.3}{\meter}, offset from the lower ring by
+22.5° (see cref:fig:ananas-hoa).
 
 Clients were connected to two loudspeakers each via stereo minijack to
 dual RCA audio cable; four clients for the lower loudspeaker ring,
@@ -6071,7 +6161,7 @@ inter-client synchronicity, an experiment was conducted.
 *** Experimental Procedure
 
 #+name: fig:ananas-test
-#+caption: Experimental setup for the client synchronisation test.
+#+caption: Experimental setup for the inter-client synchronisation test.
 #+attr_latex: :width .75\linewidth
 [[./images/ananas-test.jpeg]]
 

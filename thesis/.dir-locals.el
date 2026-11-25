@@ -35,7 +35,8 @@
                           "Export SRC-BLOCK as a tcolorbox `codeblock', folding any Org
 caption into the box's title and #+name: into the box's label= key.
 Line numbers are on unless the block has `:linenos no'."
-                          (let* ((lang (or (org-element-property :language src-block) "text"))
+                          (let* ((org-lang (or (org-element-property :language src-block) "text"))
+                                 (lang (or (cdr (assoc org-lang '(("faust" . "./faustlexer.py:FaustLexer")))) org-lang))
                                  (code (org-export-format-code-default src-block info))
                                  (caption (org-export-get-caption src-block))
                                  (caption-str (if caption (org-export-data caption info) ""))
