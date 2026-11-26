@@ -723,7 +723,7 @@ If devices are not synchronised, the synthesised soundfield will be destroyed.
   \pic{ptp};
 \end{tikzpicture}
 #+end_src
-#+attr_org: :width 300
+#+attr_org: :width 200
 #+attr_html: :width 500
 #+RESULTS:
 [[file:./images/gen/ptpflow.png]]
@@ -836,6 +836,7 @@ e.g. 48 kHz
   };
 \end{tikzpicture}
 #+end_src
+#+attr_org: :width 250
 #+attr_html: :width 1000
 #+RESULTS:
 [[file:./images/gen/systemOverview.png]]

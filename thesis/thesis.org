@@ -132,6 +132,12 @@ For ~\dotuline~ on folio page.
 \RequirePackage[normalem]{ulem}
 #+end_src
 
+A size between ~\footnotesize~ and ~\scriptsize~ for the folio page.
+
+#+begin_src latex
+\newcommand{\midsmall}{\fontsize{9pt}{11pt}\selectfont}
+#+end_src
+
 **** Quotes
 
 #+begin_src latex
@@ -2339,7 +2345,7 @@ OTTOsonics system, including speakers and audio interface, is costed
 at around €2,600 (€108.33/channel), however, which certainly places it
 favourably when compared with state-of-the-art spatialisation systems.
 
-** Motivation for the Rest of this Thesis
+** Motivation for the Remainder of this Thesis
 
 The aforementioned efforts to produce frugal and distributed spatial
 audio systems suggest that the appetite exists for further such
@@ -6519,6 +6525,9 @@ linalg = environment {
     dot(N) = routes.interleave(N, 2) : par(i, N, *) :> _;
 };
 #+end_src
+
+#+latex: \fancyhead[RE]{\sffamily\small\textcolor{black!70}{\nouppercase{\leftmark}}}
+#+latex: \fancyhead[LO]{\sffamily\small\textcolor{black!70}{\nouppercase{\rightmark}}}
 
 #+latex: \listoffigures
 
